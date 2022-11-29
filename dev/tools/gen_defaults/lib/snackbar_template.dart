@@ -66,22 +66,10 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
   EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
 
   @override
-  Icon get icon => Icon(
-    Icons.close,
-    size:  ${tokens["$tokenGroup.icon.size"]},
-    color: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        return ${componentColor("$tokenGroup.icon.pressed.icon")};
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return ${componentColor("$tokenGroup.icon.hover.icon")};
-      }
-      if (states.contains(MaterialState.focused)) {
-        return ${componentColor("$tokenGroup.icon.focus.icon")};
-      }
-      return ${componentColor("$tokenGroup.icon")};
-      }),
-    );
+  bool get showCloseIcon => false;
+
+  @override
+  Color get iconColor => _colors.onInverseSurface;
   }
 
 ''';

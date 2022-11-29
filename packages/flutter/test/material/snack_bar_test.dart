@@ -2027,6 +2027,7 @@ void main() {
     await tester.pump(); // schedule animation
     expect(find.text(snackBarText), findsOneWidget);
     await tester.pump(); // begin animation
+
     expect(find.text(snackBarText), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 750));
     expect(find.text(snackBarText), findsOneWidget);
@@ -2360,7 +2361,7 @@ void main() {
         duration: const Duration(seconds: 2),
         action: SnackBarAction(label: 'ACTION', onPressed: () {}),
         behavior: SnackBarBehavior.floating,
-        icon: const SnackBarIcon(),
+        showCloseIcon: true,
       ),
     );
     await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
@@ -2389,7 +2390,7 @@ void main() {
       content: const Text('Go get a snack'),
       duration: const Duration(seconds: 2),
       action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-      icon: const SnackBarIcon(),
+      showCloseIcon: true,
       behavior: SnackBarBehavior.fixed,
     ));
     await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
@@ -2416,7 +2417,7 @@ void main() {
         content:  Text('I wonder if there are snacks nearby?'),
         duration:  Duration(seconds: 2),
         behavior: SnackBarBehavior.fixed,
-        icon:  SnackBarIcon(),
+        showCloseIcon: true,
       ),
     );
     await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
@@ -2442,7 +2443,7 @@ void main() {
     scaffoldMessengerState.showSnackBar(const SnackBar(
       content: Text('Must go get a snack!'),
       duration: Duration(seconds: 2),
-      icon: SnackBarIcon(),
+      showCloseIcon: true,
       behavior: SnackBarBehavior.floating,
     ));
     await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
@@ -2469,44 +2470,13 @@ void main() {
       content: Text(
           'This is a really long snackbar message. So long, it spans across more than one line!'),
       duration: Duration(seconds: 2),
-      icon: SnackBarIcon(),
+      showCloseIcon: true,
       behavior: SnackBarBehavior.floating,
     ));
     await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
 
     await expectLater(find.byType(MaterialApp),
         matchesGoldenFile('snack_bar.goldenTest.multiLineWithIcon.png'));
-  });
-
-  testWidgets('Tapping on optional icon triggers callback ', (WidgetTester tester) async {
-    int tapCount = 0;
-    final SnackBarIcon snackBarIcon = SnackBarIcon(onPressed: () {
-      ++tapCount;
-    });
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
-        bottomSheet: SizedBox(
-          width: 200,
-          height: 50,
-          child: ColoredBox(
-            color: Colors.pink,
-          ),
-        ),
-      ),
-    ));
-
-    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
-    scaffoldMessengerState.showSnackBar(SnackBar(
-      content: const Text('I am a snack bar.'),
-      icon: snackBarIcon,
-      duration: const Duration(seconds: 5),
-    ));
-    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
-
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pumpAndSettle();
-
-    expect(tapCount, equals(1));
   });
 
   testWidgets(

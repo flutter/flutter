@@ -61,8 +61,9 @@ class SnackBarThemeData with Diagnosticable {
     this.shape,
     this.behavior,
     this.width,
-    this.icon,
     this.insetPadding,
+    this.showCloseIcon,
+    this.iconColor,
   })  : assert(elevation == null || elevation >= 0.0),
         assert(
             width == null ||
@@ -117,16 +118,20 @@ class SnackBarThemeData with Diagnosticable {
   /// [SnackBarBehavior.floating].
   final double? width;
 
-  /// Overrides the default value for [SnackBarIcon.icon].
-  ///
-  /// If null, and an [icon] property is included in the snack bar constructor,
-  /// a default 'Close' icon will display.
-  final Widget? icon;
-
   /// Overrides the default value for [SnackBar.margin].
   ///
   /// This value is only used when [behavior] is [SnackBarBehavior.floating].
   final EdgeInsets? insetPadding;
+
+  /// Overrides the default value for [SnackBar.showCloseIcon].
+  ///
+  /// Whether to show an optional "Close" icon.
+  final bool? showCloseIcon;
+
+  /// Overrides the default value for [SnackBar.iconColor].
+  ///
+  /// This value is only used if [showCloseIcon] is true.
+  final Color? iconColor;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -139,8 +144,9 @@ class SnackBarThemeData with Diagnosticable {
     ShapeBorder? shape,
     SnackBarBehavior? behavior,
     double? width,
-    Icon? icon,
     EdgeInsets? insetPadding,
+    bool? showCloseIcon,
+    Color? iconColor,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -151,8 +157,9 @@ class SnackBarThemeData with Diagnosticable {
       shape: shape ?? this.shape,
       behavior: behavior ?? this.behavior,
       width: width ?? this.width,
-      icon: icon ?? this.icon,
       insetPadding: insetPadding ?? this.insetPadding,
+      showCloseIcon: showCloseIcon ?? this.showCloseIcon,
+      iconColor: iconColor ?? this.iconColor,
     );
   }
 
@@ -173,6 +180,7 @@ class SnackBarThemeData with Diagnosticable {
       behavior: t < 0.5 ? a?.behavior : b?.behavior,
       width: lerpDouble(a?.width, b?.width, t),
       insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
+      iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
     );
   }
 
@@ -186,8 +194,9 @@ class SnackBarThemeData with Diagnosticable {
         shape,
         behavior,
         width,
-        icon,
         insetPadding,
+        showCloseIcon,
+        iconColor,
       );
 
   @override
@@ -207,8 +216,9 @@ class SnackBarThemeData with Diagnosticable {
         && other.shape == shape
         && other.behavior == behavior
         && other.width == width
-        && other.icon == icon
-        && other.insetPadding == insetPadding;
+        && other.insetPadding == insetPadding
+        && other.showCloseIcon == showCloseIcon
+        && other.iconColor == iconColor;
   }
 
   @override
@@ -222,7 +232,8 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showCloseIcon', showCloseIcon, defaultValue: null));
+    properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
   }
 }

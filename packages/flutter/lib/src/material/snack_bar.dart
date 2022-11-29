@@ -140,8 +140,6 @@ class _SnackBarActionState extends State<SnackBarAction> {
         : _SnackbarDefaultsM2(context);
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
-
-
     MaterialStateColor resolveForegroundColor() {
       if (widget.textColor is MaterialStateColor) {
         return widget.textColor! as MaterialStateColor;
@@ -170,75 +168,6 @@ class _SnackBarActionState extends State<SnackBarAction> {
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
-    );
-  }
-}
-
-/// An icon for a [SnackBar].
-///
-/// The snack bar icon is not included by default. To enable it, include the
-/// [icon] parameter in the snack bar.
-///
-/// By default, snack bar icons use the Close icon.
-///
-/// Snack bar icons can only be pressed once. Subsequent presses are ignored.
-/// By default, tapping the icon will close the snackbar.
-///
-/// See also:
-///
-///  * [SnackBar]
-///  * <https://material.io/design/components/snackbars.html>
-class SnackBarIcon extends StatefulWidget {
-  /// Creates an icon for a [SnackBar].
-  const SnackBarIcon({
-    super.key,
-    this.icon,
-    this.onPressed,
-  });
-
-  /// The icon to use.
-  ///
-  /// By default, uses the Close icon.
-  final Icon? icon;
-
-  /// The callback to be called when the icon is pressed. If null,
-  /// the snack bar will be dismissed with no other action.
-  ///
-  /// This callback will be called at most once each time this icon is
-  /// displayed in a [SnackBar].
-  final VoidCallback? onPressed;
-
-  @override
-  State<SnackBarIcon> createState() => _SnackBarIconState();
-}
-
-class _SnackBarIconState extends State<SnackBarIcon> {
-  bool _haveTriggeredIcon = false;
-
-  void _handlePressed() {
-    if (_haveTriggeredIcon) {
-      return;
-    }
-    setState(() {
-      _haveTriggeredIcon = true;
-    });
-    if (widget.onPressed != null) {
-      widget.onPressed!();
-    }
-    ScaffoldMessenger.of(context)
-        .hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final SnackBarThemeData defaults = Theme.of(context).useMaterial3
-        ? _SnackbarDefaultsM3(context)
-        : _SnackbarDefaultsM2(context);
-    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-
-    return IconButton(
-      icon: widget.icon ?? snackBarTheme.icon ?? defaults.icon!,
-      onPressed: _haveTriggeredIcon ? null : _handlePressed,
     );
   }
 }
@@ -306,7 +235,8 @@ class SnackBar extends StatefulWidget {
     this.shape,
     this.behavior,
     this.action,
-    this.icon,
+    this.showCloseIcon,
+    this.iconColor,
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
@@ -349,7 +279,8 @@ class SnackBar extends StatefulWidget {
   /// This property is only used when [behavior] is [SnackBarBehavior.floating].
   /// It can not be used if [width] is specified.
   ///
-  /// If this property is null, then the default is
+  /// If this property is null, then [SnackBarThemeData.insetPadding] of
+  /// [ThemeData.snackBarTheme] is used. If that is also null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
   final EdgeInsetsGeometry? margin;
 
@@ -413,6 +344,9 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [SnackBarThemeData.behavior] of
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// [SnackBarBehavior.fixed].
+  ///
+  /// If this value is [SnackBarBehaviour.floating], the length of the bar
+  /// is defined by either [width] or [margin].
   final SnackBarBehavior? behavior;
 
   /// (optional) An action that the user can take based on the snack bar.
@@ -423,10 +357,23 @@ class SnackBar extends StatefulWidget {
   /// The action should not be "dismiss" or "cancel".
   final SnackBarAction? action;
 
-  /// (optional) An icon that the user can tap.
+  /// (optional) Whether to include a "close" icon widget.
   ///
-  /// If included, by default the icon dismisses the snack bar.
-  final SnackBarIcon? icon;
+  /// Tapping the icon will close the snack bar.
+  final bool? showCloseIcon;
+
+  /// (optional) An optional color for the close icon, if [showCloseIcon] is
+  /// true.
+  ///
+  /// If this property is null, then [SnackBarThemeData.iconColor] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
+  /// inverse surface.
+  ///
+  /// If [iconColor] is a [MaterialStateColor], then the icon color will be
+  /// be resolved against the set of [MaterialState]s that the action text
+  /// is in, thus allowing for different colors for states such as pressed,
+  /// hovered and others.
+  final Color? iconColor;
 
   /// The amount of time the snack bar should be displayed.
   ///
@@ -483,7 +430,8 @@ class SnackBar extends StatefulWidget {
       shape: shape,
       behavior: behavior,
       action: action,
-      icon: icon,
+      showCloseIcon: showCloseIcon,
+      iconColor: iconColor,
       duration: duration,
       animation: newAnimation,
       onVisible: onVisible,
@@ -596,11 +544,16 @@ class _SnackBarState extends State<SnackBar> {
       return true;
     }());
 
+    final bool showCloseIcon =  widget.showCloseIcon ?? snackBarTheme.showCloseIcon ?? defaults.showCloseIcon!;
+
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
     final EdgeInsetsGeometry padding = widget.padding ??
-        EdgeInsetsDirectional.only(start: horizontalPadding,
-            end: widget.action != null || widget.icon != null ? 0 : horizontalPadding);
+        EdgeInsetsDirectional.only(
+            start: horizontalPadding,
+            end: widget.action != null || showCloseIcon
+                ? 0
+                : horizontalPadding);
 
     final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
     final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
@@ -621,6 +574,16 @@ class _SnackBarState extends State<SnackBar> {
       reverseCurve: const Threshold(0.0),
     );
 
+
+    final IconButton? iconButton = showCloseIcon
+        ? IconButton(
+            icon: const Icon(Icons.close),
+            iconSize: 24.0,
+            color: widget.iconColor ?? snackBarTheme.iconColor ?? defaults.iconColor,
+            onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
+          )
+        : null;
+
     // Calculate combined width of Action, Icon, and their padding, if they are present.
     final TextPainter actionTextPainter = TextPainter(
         text: TextSpan(
@@ -632,9 +595,7 @@ class _SnackBarState extends State<SnackBar> {
       ..layout();
     final double actionAndIconWidth = actionTextPainter.size.width +
         (widget.action != null ? actionHorizontalMargin : 0) +
-        (widget.icon != null
-            ? (widget.icon?.icon?.size ?? 0 + iconHorizontalMargin)
-            : 0);
+        (showCloseIcon ? (iconButton?.iconSize ?? 0 + iconHorizontalMargin) : 0);
 
     final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
 
@@ -658,10 +619,10 @@ class _SnackBarState extends State<SnackBar> {
             child: widget.action!,
           ),
         ),
-      if (widget.icon != null)
+      if (showCloseIcon)
         Padding(
           padding: EdgeInsets.symmetric(horizontal: iconHorizontalMargin),
-          child: widget.icon,
+          child: iconButton,
         ),
     ];
 
@@ -854,11 +815,10 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
   EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
 
   @override
-  Icon get icon => Icon(
-        Icons.close,
-        size: 24.0,
-        color: _colors.onSurface,
-      );
+  bool get showCloseIcon => false;
+
+  @override
+  Color get iconColor => _colors.onSurface;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Snackbar
@@ -868,10 +828,10 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_143
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
-  _SnackbarDefaultsM3(this.context);
+    _SnackbarDefaultsM3(this.context);
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
@@ -922,22 +882,10 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
   EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
 
   @override
-  Icon get icon => Icon(
-    Icons.close,
-    size:  24.0,
-    color: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.onInverseSurface;
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.onInverseSurface;
-      }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.onInverseSurface;
-      }
-      return _colors.onInverseSurface;
-      }),
-    );
+  bool get showCloseIcon => false;
+
+  @override
+  Color get iconColor => _colors.onInverseSurface;
   }
 
 

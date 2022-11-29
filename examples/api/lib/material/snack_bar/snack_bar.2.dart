@@ -151,7 +151,6 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             },
           )
         : null;
-    final SnackBarIcon? icon = _withIcon ? const SnackBarIcon() : null;
     final double? width =
         _snackBarBehavior == SnackBarBehavior.floating && _multiLine ? 400.0 : null;
     final String label = _multiLine
@@ -159,7 +158,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
         : 'Single Line Snack Bar';
     return SnackBar(
       content: Text(label),
-      icon: icon,
+      showCloseIcon: _withIcon,
       width: width,
       behavior: _snackBarBehavior,
       action: action,

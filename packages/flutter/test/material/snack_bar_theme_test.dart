@@ -63,8 +63,9 @@ void main() {
           borderRadius: BorderRadius.all(Radius.circular(2.0))),
       behavior: SnackBarBehavior.floating,
       width: 400.0,
-      icon: Icon(Icons.favorite),
       insetPadding: EdgeInsets.all(10.0),
+      showCloseIcon: false,
+      iconColor: Color(0xFF0000AA),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -81,8 +82,9 @@ void main() {
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'behavior: SnackBarBehavior.floating',
       'width: 400.0',
-      'icon: Icon',
       'insetPadding: EdgeInsets.all(10.0)',
+      'showCloseIcon: false',
+      'iconColor: Color(0xFF0000AA)',
     ]);
   });
 
@@ -125,8 +127,7 @@ void main() {
       (WidgetTester tester) async {
     const String text = 'I am a snack bar.';
     const String action = 'ACTION';
-    final SnackBarThemeData snackBarTheme = _snackBarTheme();
-    const SnackBarIcon snackBarIcon = SnackBarIcon(icon: Icon(Icons.favorite));
+    final SnackBarThemeData snackBarTheme = _snackBarTheme(showCloseIcon: true);
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(snackBarTheme: snackBarTheme),
@@ -139,7 +140,6 @@ void main() {
                   content: const Text(text),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: action, onPressed: () {}),
-                  icon: snackBarIcon,
                 ));
               },
               child: const Text('X'),
@@ -157,14 +157,14 @@ void main() {
     final RenderParagraph button =
         _getSnackBarActionTextRenderObject(tester, action);
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
-    final Icon icon = _getSnackBarIcon(tester, const Icon(Icons.favorite));
+    final Icon icon = _getSnackBarIcon(tester);
 
     expect(content.text.style, snackBarTheme.contentTextStyle);
     expect(material.color, snackBarTheme.backgroundColor);
     expect(material.elevation, snackBarTheme.elevation);
     expect(material.shape, snackBarTheme.shape);
     expect(button.text.style!.color, snackBarTheme.actionTextColor);
-    expect(icon.icon, Icons.favorite);
+    expect(icon.icon, Icons.close);
   });
 
   testWidgets('SnackBar widget properties take priority over theme',
@@ -179,7 +179,7 @@ void main() {
     const double snackBarWidth = 400.0;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(snackBarTheme: _snackBarTheme()),
+      theme: ThemeData(snackBarTheme: _snackBarTheme(showCloseIcon: true)),
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
@@ -198,7 +198,7 @@ void main() {
                     label: action,
                     onPressed: () {},
                   ),
-                  icon: const SnackBarIcon(icon: Icon(Icons.file_copy)),
+                  showCloseIcon: false,
                 ));
               },
               child: const Text('X'),
@@ -216,13 +216,12 @@ void main() {
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph button =
         _getSnackBarActionTextRenderObject(tester, action);
-    final Icon icon = _getSnackBarIcon(tester, const Icon(Icons.file_copy));
 
     expect(material.color, backgroundColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
     expect(button.text.style!.color, textColor);
-    expect(icon.icon, Icons.file_copy);
+    expect(_getSnackBarIconFinder(tester), findsNothing);
     // Assert width.
     final Offset snackBarBottomLeft =
         tester.getBottomLeft(materialFinder.first);
@@ -432,14 +431,15 @@ void main() {
   });
 }
 
-SnackBarThemeData _snackBarTheme() {
-  return const SnackBarThemeData(
+SnackBarThemeData _snackBarTheme({bool? showCloseIcon}) {
+  return SnackBarThemeData(
     backgroundColor: Colors.orange,
     actionTextColor: Colors.green,
-    contentTextStyle: TextStyle(color: Colors.blue),
+    contentTextStyle: const TextStyle(color: Colors.blue),
     elevation: 12.0,
-    shape: BeveledRectangleBorder(
+    shape: const BeveledRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12))),
+    showCloseIcon: showCloseIcon,
   );
 }
 
@@ -464,14 +464,14 @@ RenderParagraph _getSnackBarActionTextRenderObject(
   ));
 }
 
-Icon _getSnackBarIcon(WidgetTester tester, Icon icon) {
-  return tester.widget<Icon>(_getSnackBarIconFinder(tester, icon));
+Icon _getSnackBarIcon(WidgetTester tester) {
+  return tester.widget<Icon>(_getSnackBarIconFinder(tester));
 }
 
-Finder _getSnackBarIconFinder(WidgetTester tester, Icon icon) {
+Finder _getSnackBarIconFinder(WidgetTester tester) {
   return find.descendant(
     of: find.byType(SnackBar),
-    matching: find.byIcon(icon.icon!),
+    matching: find.byIcon(Icons.close),
   );
 }
 
