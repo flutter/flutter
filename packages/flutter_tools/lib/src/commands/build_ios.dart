@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -53,6 +55,32 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
+}
+
+/// The key that uniquely identifies an image file in an app icon asset.
+/// It consists of (idiom, size, scale).
+@immutable
+class _AppIconImageFileKey {
+  const _AppIconImageFileKey(this.idiom, this.size, this.scale);
+
+  /// The idiom (iphone or ipad).
+  final String idiom;
+  /// The logical size in point (e.g. 83.5).
+  final double size;
+  /// The scale factor (e.g. 2).
+  final int scale;
+
+  @override
+  int get hashCode => Object.hash(idiom, size, scale);
+
+  @override
+  bool operator ==(Object other) => other is _AppIconImageFileKey
+      && other.idiom == idiom
+      && other.size == size
+      && other.scale == scale;
+
+  /// The pixel size.
+  int get pixelSize => (size * scale).toInt(); // pixel size must be an int.
 }
 
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
@@ -131,18 +159,22 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return super.validateCommand();
   }
 
-  // Parses Contents.json into a map, with the key to be the combination of (idiom, size, scale), and value to be the icon image file name.
-  Map<String, String> _parseIconContentsJson(String contentsJsonDirName) {
+  // Parses Contents.json into a map, with the key to be _AppIconImageFileKey, and value to be the icon image file name.
+  Map<_AppIconImageFileKey, String> _parseIconContentsJson(String contentsJsonDirName) {
     final Directory contentsJsonDirectory = globals.fs.directory(contentsJsonDirName);
     if (!contentsJsonDirectory.existsSync()) {
-      return <String, String>{};
+      return <_AppIconImageFileKey, String>{};
     }
     final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
-    final Map<String, dynamic> content = json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>;
-    final List<dynamic> images = content['images'] as List<dynamic>? ?? <dynamic>[];
+    final Map<String, dynamic> contents = json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>? ?? <String, dynamic>{};
+    final List<dynamic> images = contents['images'] as List<dynamic>? ?? <dynamic>[];
+    final Map<String, dynamic> info = contents['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    if ((info['version'] as int?) != 1) {
+      // Skips validation for unknown format.
+      return <_AppIconImageFileKey, String>{};
+    }
 
-    final Map<String, String> iconInfo = <String, String>{};
-
+    final Map<_AppIconImageFileKey, String> iconInfo = <_AppIconImageFileKey, String>{};
     for (final dynamic image in images) {
       final Map<String, dynamic> imageMap = image as Map<String, dynamic>;
       final String? idiom = imageMap['idiom'] as String?;
@@ -150,9 +182,29 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final String? scale = imageMap['scale'] as String?;
       final String? fileName = imageMap['filename'] as String?;
 
-      if (size != null && idiom != null && scale != null && fileName != null) {
-        iconInfo['$idiom $size $scale'] = fileName;
+      if (size == null || idiom == null || scale == null || fileName == null) {
+        continue;
       }
+
+      // for example, "64x64". Parse the width since it is a square.
+      final Iterable<double> parsedSizes = size.split('x')
+          .map((String element) => double.tryParse(element))
+          .whereType<double>();
+      if (parsedSizes.isEmpty) {
+        continue;
+      }
+      final double parsedSize = parsedSizes.first;
+
+      // for example, "3x".
+      final Iterable<int> parsedScales = scale.split('x')
+          .map((String element) => int.tryParse(element))
+          .whereType<int>();
+      if (parsedScales.isEmpty) {
+        continue;
+      }
+      final int parsedScale = parsedScales.first;
+
+      iconInfo[_AppIconImageFileKey(idiom, parsedSize, parsedScale)] = fileName;
     }
 
     return iconInfo;
@@ -162,28 +214,50 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
     final String templateIconImageDirName = await app.templateAppIconDirNameForImages;
 
-    final Map<String, String> templateIconMap = _parseIconContentsJson(app.templateAppIconDirNameForContentsJson);
-    final Map<String, String> projectIconMap = _parseIconContentsJson(app.projectAppIconDirName);
+    final Map<_AppIconImageFileKey, String> templateIconMap = _parseIconContentsJson(app.templateAppIconDirNameForContentsJson);
+    final Map<_AppIconImageFileKey, String> projectIconMap = _parseIconContentsJson(app.projectAppIconDirName);
 
-    // find if any of the project icons conflict with template icons
-    final bool hasConflict = projectIconMap.entries
-        .where((MapEntry<String, String> entry) {
+    // validate each of the project icon images.
+    final List<String> filesWithTemplateIcon = <String>[];
+    final List<String> filesWithWrongSize = <String>[];
+    for (final MapEntry<_AppIconImageFileKey, String> entry in projectIconMap.entries) {
       final String projectIconFileName = entry.value;
       final String? templateIconFileName = templateIconMap[entry.key];
-      if (templateIconFileName == null) {
-        return false;
+      final File projectIconFile = globals.fs.file(globals.fs.path.join(app.projectAppIconDirName, projectIconFileName));
+      if (!projectIconFile.existsSync()) {
+        continue;
+      }
+      final Uint8List projectIconBytes = projectIconFile.readAsBytesSync();
+
+      // validate conflict with template icon file.
+      if (templateIconFileName != null) {
+        final File templateIconFile = globals.fs.file(globals.fs.path.join(
+            templateIconImageDirName, templateIconFileName));
+        if (templateIconFile.existsSync() && md5.convert(projectIconBytes) ==
+            md5.convert(templateIconFile.readAsBytesSync())) {
+          filesWithTemplateIcon.add(entry.value);
+        }
       }
 
-      final File projectIconFile = globals.fs.file(globals.fs.path.join(app.projectAppIconDirName, projectIconFileName));
-      final File templateIconFile = globals.fs.file(globals.fs.path.join(templateIconImageDirName, templateIconFileName));
-      return projectIconFile.existsSync()
-          && templateIconFile.existsSync()
-          && md5.convert(projectIconFile.readAsBytesSync()) == md5.convert(templateIconFile.readAsBytesSync());
-    })
-    .isNotEmpty;
+      // validate image size is correct.
+      // PNG file's width is at byte [16, 20), and height is at byte [20, 24), in big endian format.
+      // Based on https://en.wikipedia.org/wiki/Portable_Network_Graphics#File_format
+      final ByteData projectIconData = projectIconBytes.buffer.asByteData();
+      if (projectIconData.lengthInBytes < 24) {
+        continue;
+      }
+      final int width = projectIconData.getInt32(16);
+      final int height = projectIconData.getInt32(20);
+      if (width != entry.key.pixelSize || height != entry.key.pixelSize) {
+        filesWithWrongSize.add(entry.value);
+      }
+    }
 
-    if (hasConflict) {
+    if (filesWithTemplateIcon.isNotEmpty) {
       messageBuffer.writeln('\nWarning: App icon is set to the default placeholder icon. Replace with unique icons.');
+    }
+    if (filesWithWrongSize.isNotEmpty) {
+      messageBuffer.writeln('\nWarning: App icon is using the wrong size (e.g. ${filesWithWrongSize.first}).');
     }
   }
 
