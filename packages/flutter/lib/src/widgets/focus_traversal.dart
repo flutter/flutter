@@ -595,10 +595,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   Iterable<FocusNode> _sortAndFilterHorizontally(
     TraversalDirection direction,
     Rect target,
-    FocusNode nearestScope,
+    Iterable<FocusNode> nodes,
   ) {
-    final Iterable<FocusNode> nodes = nearestScope.traversalDescendants;
-    assert(!nodes.contains(nearestScope));
     final Iterable<FocusNode> filtered;
     switch (direction) {
       case TraversalDirection.left:
@@ -796,6 +794,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             eligibleNodes = filteredEligibleNodes;
           }
         }
+        if (direction == TraversalDirection.up) {
+          eligibleNodes = eligibleNodes.toList().reversed;
+        }
         // Find any nodes that intersect the band of the focused child.
         final Rect band = Rect.fromLTRB(focusedChild.rect.left, -double.infinity, focusedChild.rect.right, double.infinity);
         final Iterable<FocusNode> inBand = eligibleNodes.where((FocusNode node) => !node.rect.intersect(band).isEmpty);
@@ -809,7 +810,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         break;
       case TraversalDirection.right:
       case TraversalDirection.left:
-        Iterable<FocusNode> eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope);
+        Iterable<FocusNode> eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope.traversalDescendants);
         if (eligibleNodes.isEmpty) {
           break;
         }
@@ -818,6 +819,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
           }
+        }
+        if (direction == TraversalDirection.left) {
+          eligibleNodes = eligibleNodes.toList().reversed;
         }
         // Find any nodes that intersect the band of the focused child.
         final Rect band = Rect.fromLTRB(-double.infinity, focusedChild.rect.top, double.infinity, focusedChild.rect.bottom);

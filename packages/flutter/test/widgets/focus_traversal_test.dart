@@ -1421,24 +1421,24 @@ void main() {
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[null, true, null, null, false, null], 'stage 2');
+      expectState(<bool?>[null, null, true, null, false, null], 'stage 2');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[true, false, null, null, null, null], 'stage 3');
+      expectState(<bool?>[true, null, false, null, null, null], 'stage 3');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[false, true, null, null, null, null], 'stage 4');
+      expectState(<bool?>[false, null, true, null, null, null], 'stage 4');
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expectState(<bool?>[null, false, null, null, true, null], 'stage 5');
+      expectState(<bool?>[null, null, false, null, true, null], 'stage 5');
       clear();
 
       // Make sure that moving in a different axis clears the history.
