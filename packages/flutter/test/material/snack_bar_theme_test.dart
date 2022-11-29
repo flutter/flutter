@@ -83,7 +83,7 @@ void main() {
       'width: 400.0',
       'insetPadding: EdgeInsets.all(10.0)',
       'showCloseIcon: false',
-      'iconColor: Color(0xFF0000AA)',
+      'iconColor: Color(0xff0000aa)',
     ]);
   });
 
@@ -227,7 +227,7 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.send),
@@ -407,6 +407,7 @@ SnackBarThemeData _snackBarTheme({bool? showCloseIcon}) {
     actionTextColor: Colors.green,
     contentTextStyle: const TextStyle(color: Colors.blue),
     elevation: 12.0,
+    showCloseIcon: showCloseIcon,
     shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
   );
 }
