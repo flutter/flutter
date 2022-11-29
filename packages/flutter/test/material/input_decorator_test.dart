@@ -1102,7 +1102,7 @@ void main() {
     //   16 - bottom padding (empty input text still appears here)
 
     // The label is not floating so it's vertically centered.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 48.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
@@ -1125,7 +1125,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0,  48.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0,  48.0));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 8.0);
@@ -1263,15 +1263,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // isEmpty: false, the label _is_ floating
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 8.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
-    expect(getBorderBottom(tester),  48.0);
+    expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('error')), Offset(12.0, 56.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(788.0, 56.0));
+    expect(tester.getTopLeft(find.text('error')), const Offset(12.0, 56.0));
+    expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
 
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1291,15 +1291,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // isEmpty: false, the label is not floating
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
     expect(getBorderBottom(tester),  48.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('error')), Offset(12.0, 56.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(788.0, 56.0));
+    expect(tester.getTopLeft(find.text('error')), const Offset(12.0, 56.0));
+    expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
   });
 
   testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
@@ -1714,7 +1714,7 @@ void main() {
     //    4 - bottom prefix/suffix padding
     //   12 - bottom padding
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 48.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.byKey(pKey)).height, 24.0);
     expect(tester.getSize(find.text('p')).height, 16.0);
