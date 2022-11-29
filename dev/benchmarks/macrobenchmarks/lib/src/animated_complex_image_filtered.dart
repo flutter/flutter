@@ -2,26 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
-// Various tests to verify that Aniamted opacity layers (i.e. FadeTransition) do not
+// Various tests to verify that Animated image filtered layers do not
 // dirty children even without explicit repaint boundaries. These intentionally use
 // text to ensure we don't measure the opacity peephole case.
-class AnimatedComplexOpacity extends StatefulWidget {
-  const AnimatedComplexOpacity({ super.key });
+class AnimatedComplexImageFiltered extends StatefulWidget {
+  const AnimatedComplexImageFiltered({ super.key });
 
   @override
-  State<AnimatedComplexOpacity> createState() => _AnimatedComplexOpacityState();
+  State<AnimatedComplexImageFiltered> createState() => _AnimatedComplexImageFilteredState();
 }
 
-class _AnimatedComplexOpacityState extends State<AnimatedComplexOpacity> with SingleTickerProviderStateMixin {
+class _AnimatedComplexImageFilteredState extends State<AnimatedComplexImageFiltered> with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 5000));
   late final Animation<double> animation = controller.drive(Tween<double>(begin: 0.0, end: 1.0));
+  ui.ImageFilter imageFilter = ui.ImageFilter.blur();
 
   @override
   void initState() {
     super.initState();
     controller.repeat();
+    animation.addListener(() {
+      setState(() {
+        imageFilter = ui.ImageFilter.blur(sigmaX: animation.value * 5, sigmaY: animation.value * 5);
+      });
+    });
   }
 
   @override
@@ -37,9 +44,12 @@ class _AnimatedComplexOpacityState extends State<AnimatedComplexOpacity> with Si
         body: ListView(
           children: <Widget>[
             for (int i = 0; i < 20; i++)
-            FadeTransition(opacity: animation, child: Center(
-              child: Transform.scale(scale: 1.01, child: const ModeratelyComplexWidget()),
-            )),
+            ImageFiltered(
+              imageFilter: imageFilter,
+              child: Center(
+                child: Transform.scale(scale: 1.01, child: const ModeratelyComplexWidget()),
+              ),
+            ),
           ],
         ),
       ),

@@ -263,7 +263,7 @@ void main() {
         '--input=/shader.glsl',
         '--input-type=frag',
         '--include=/',
-        '--include=./shader_lib',
+        '--include=/./shader_lib',
       ]),
       FakeCommand(command: <String>[
         'codesign',

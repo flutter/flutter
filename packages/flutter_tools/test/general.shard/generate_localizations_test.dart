@@ -1618,8 +1618,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             'message',
             contains('''
 Make sure that the specified placeholder is defined in your arb file.
-Hello {name}
-       ^'''),
+[app_en.arb:helloWorld] Hello {name}
+                               ^'''),
           )),
         );
       });
@@ -1940,13 +1940,10 @@ Hello {name}
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified plural placeholder is defined in your arb file.
-// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-//  ^'''),
-            contains('Cannot find the count placeholder in plural message "helloWorlds".'),
+            contains('''
+Make sure that the specified plural placeholder is defined in your arb file.
+[app_en.arb:helloWorlds] {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
+                          ^'''),
           )),
         );
       });
@@ -1983,13 +1980,10 @@ Hello {name}
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified plural placeholder is defined in your arb file.
-// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-//  ^'''),
-            contains('Cannot find the count placeholder in plural message "helloWorlds".'),
+            contains('''
+Make sure that the specified plural placeholder is defined in your arb file.
+[app_en.arb:helloWorlds] {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
+                          ^'''),
           )),
         );
       });
@@ -2022,13 +2016,10 @@ Hello {name}
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified plural placeholder is defined in your arb file.
-// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-//  ^'''),
-            contains('Resource attribute "@helloWorlds" was not found. Please ensure that plural resources have a corresponding @resource.'),
+            contains('''
+Make sure that the specified plural placeholder is defined in your arb file.
+[app_en.arb:helloWorlds] {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
+                          ^'''),
           )),
         );
       });
@@ -2107,8 +2098,8 @@ Hello {name}
             'message',
             contains('''
 Make sure that the specified select placeholder is defined in your arb file.
-{gender, select, female {She} male {He} other {they} }
- ^'''),
+[app_en.arb:genderSelect] {gender, select, female {She} male {He} other {they} }
+                           ^'''),
           )),
         );
       });
@@ -2147,8 +2138,8 @@ Make sure that the specified select placeholder is defined in your arb file.
             'message',
             contains('''
 Make sure that the specified select placeholder is defined in your arb file.
-{gender, select, female {She} male {He} other {they} }
- ^'''),
+[app_en.arb:genderSelect] {gender, select, female {She} male {He} other {they} }
+                           ^'''),
           )),
         );
       });
@@ -2181,13 +2172,10 @@ Make sure that the specified select placeholder is defined in your arb file.
           throwsA(isA<L10nException>().having(
             (L10nException e) => e.message,
             'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified select placeholder is defined in your arb file.
-// {gender, select, female {She} male {He} other {they} }
-//  ^'''),
-            contains('Resource attribute "@genderSelect" was not found. Please ensure that select resources have a corresponding @resource.'),
+            contains('''
+Make sure that the specified select placeholder is defined in your arb file.
+[app_en.arb:genderSelect] {gender, select, female {She} male {He} other {they} }
+                           ^'''),
           )),
         );
       });
@@ -2994,50 +2982,6 @@ String orderNumber(int number) {
     expect(localizationsFile, containsIgnoringWhitespace(r'''
 AppLocalizations lookupAppLocalizations(Locale locale) {
 '''));
-  });
-
-  // Regression test for https://github.com/flutter/flutter/pull/93228
-  testWithoutContext('should use num type for plural', () {
-    const String arbFile = '''
-{
-  "tryToPollute": "{count, plural, =0{零} =1{一} other{其他}}",
-  "@tryToPollute": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "withoutType": "{count, plural, =0{零} =1{一} other{其他}}",
-  "@withoutType": {
-    "placeholders": {
-      "count": {}
-    }
-  }
-}''';
-
-    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-      ..createSync(recursive: true);
-    l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(arbFile);
-
-    LocalizationsGenerator(
-      fileSystem: fs,
-      inputPathString: defaultL10nPathString,
-      outputPathString: defaultL10nPathString,
-      templateArbFileName: defaultTemplateArbFileName,
-      outputFileString: defaultOutputFileString,
-      classNameString: defaultClassNameString,
-      logger: logger,
-    )
-      ..loadResources()
-      ..writeOutputFiles();
-
-    final String localizationsFile = fs.file(
-      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
-    ).readAsStringSync();
-    expect(localizationsFile, containsIgnoringWhitespace(r'String tryToPollute(num count) {'));
-    expect(localizationsFile, containsIgnoringWhitespace(r'String withoutType(num count) {'));
   });
 
   // TODO(thkim1011): Uncomment when implementing escaping.
