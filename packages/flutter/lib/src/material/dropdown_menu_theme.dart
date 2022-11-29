@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'input_decorator.dart';
 import 'menu_style.dart';
@@ -12,37 +13,37 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Overrides the default values of visual properties for descendant [ComboBox] widgets.
+/// Overrides the default values of visual properties for descendant [DropdownMenu] widgets.
 ///
-/// Descendant widgets obtain the current [ComboBoxThemeData] object with
-/// [ComboBoxTheme.of]. Instances of [ComboBoxTheme] can
-/// be customized with [ComboBoxThemeData.copyWith].
+/// Descendant widgets obtain the current [DropdownMenuThemeData] object with
+/// [DropdownMenuTheme.of]. Instances of [DropdownMenuTheme] can
+/// be customized with [DropdownMenuThemeData.copyWith].
 ///
-/// Typically a [ComboBoxTheme] is specified as part of the overall [Theme] with
-/// [ThemeData.comboBoxTheme].
+/// Typically a [DropdownMenuTheme] is specified as part of the overall [Theme] with
+/// [ThemeData.dropdownMenuTheme].
 ///
-/// All [ComboBoxThemeData] properties are null by default. When null, the [ComboBox]
+/// All [DropdownMenuThemeData] properties are null by default. When null, the [DropdownMenu]
 /// computes its own default values, typically based on the overall
 /// theme's [ThemeData.colorScheme], [ThemeData.textTheme], and [ThemeData.iconTheme].
 @immutable
-class ComboBoxThemeData with Diagnosticable {
-  /// Creates a [ComboBoxThemeData] that can be used to override default properties
-  /// in a [ComboBoxTheme] widget.
-  const ComboBoxThemeData({
+class DropdownMenuThemeData with Diagnosticable {
+  /// Creates a [DropdownMenuThemeData] that can be used to override default properties
+  /// in a [DropdownMenuTheme] widget.
+  const DropdownMenuThemeData({
     this.textStyle,
     this.inputDecorationTheme,
     this.menuStyle,
   });
 
-  /// Overrides the default value for [ComboBox.textStyle].
+  /// Overrides the default value for [DropdownMenu.textStyle].
   final TextStyle? textStyle;
 
-  /// The input decoration theme for the [TextField]s in a [ComboBox].
+  /// The input decoration theme for the [TextField]s in a [DropdownMenu].
   ///
-  /// If this is null, the [ComboBox] provides its own defaults.
+  /// If this is null, the [DropdownMenu] provides its own defaults.
   final InputDecorationTheme? inputDecorationTheme;
 
-  /// Overrides the menu's default style in a [ComboBox].
+  /// Overrides the menu's default style in a [DropdownMenu].
   ///
   /// Any values not set in the [MenuStyle] will use the menu default for that
   /// property.
@@ -50,21 +51,21 @@ class ComboBoxThemeData with Diagnosticable {
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
-  ComboBoxThemeData copyWith({
+  DropdownMenuThemeData copyWith({
     TextStyle? textStyle,
     InputDecorationTheme? inputDecorationTheme,
     MenuStyle? menuStyle,
   }) {
-    return ComboBoxThemeData(
+    return DropdownMenuThemeData(
       textStyle: textStyle ?? this.textStyle,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       menuStyle: menuStyle ?? this.menuStyle,
     );
   }
 
-  /// Linearly interpolates between two combo box themes.
-  static ComboBoxThemeData lerp(ComboBoxThemeData? a, ComboBoxThemeData? b, double t) {
-    return ComboBoxThemeData(
+  /// Linearly interpolates between two dropdown menu themes.
+  static DropdownMenuThemeData lerp(DropdownMenuThemeData? a, DropdownMenuThemeData? b, double t) {
+    return DropdownMenuThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       menuStyle: MenuStyle.lerp(a?.menuStyle, b?.menuStyle, t),
@@ -86,7 +87,7 @@ class ComboBoxThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ComboBoxThemeData
+    return other is DropdownMenuThemeData
         && other.textStyle == textStyle
         && other.inputDecorationTheme == inputDecorationTheme
         && other.menuStyle == menuStyle;
@@ -101,57 +102,57 @@ class ComboBoxThemeData with Diagnosticable {
   }
 }
 
-/// An inherited widget that defines the visual properties for [ComboBox]s in this widget's subtree.
+/// An inherited widget that defines the visual properties for [DropdownMenu]s in this widget's subtree.
 ///
-/// Values specified here are used for [ComboBox] properties that are not
+/// Values specified here are used for [DropdownMenu] properties that are not
 /// given an explicit non-null value.
-class ComboBoxTheme extends InheritedTheme {
-  /// Creates a [ComboBoxTheme] that controls visual parameters for
-  /// descendant [ComboBox]s.
-  const ComboBoxTheme({
+class DropdownMenuTheme extends InheritedTheme {
+  /// Creates a [DropdownMenuTheme] that controls visual parameters for
+  /// descendant [DropdownMenu]s.
+  const DropdownMenuTheme({
     super.key,
     required this.data,
     required super.child,
   }) : assert(data != null);
 
-  /// Specifies the visual properties used by descendant [ComboBox]
+  /// Specifies the visual properties used by descendant [DropdownMenu]
   /// widgets.
-  final ComboBoxThemeData data;
+  final DropdownMenuThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ComboBoxTheme] widget, then
-  /// [ThemeData.comboBoxTheme] is used.
+  /// If there is no enclosing [DropdownMenuTheme] widget, then
+  /// [ThemeData.dropdownMenuTheme] is used.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ComboBoxThemeData theme = ComboBoxTheme.of(context);
+  /// DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
   /// ```
   ///
   /// See also:
   ///
   ///  * [maybeOf], which returns null if it doesn't find a
-  ///    [ComboBoxTheme] ancestor.
-  static ComboBoxThemeData of(BuildContext context) {
-    return maybeOf(context) ?? Theme.of(context).comboBoxTheme;
+  ///    [DropdownMenuTheme] ancestor.
+  static DropdownMenuThemeData of(BuildContext context) {
+    return maybeOf(context) ?? Theme.of(context).dropdownMenuTheme;
   }
 
   /// The data from the closest instance of this class that encloses the given
   /// context, if any.
   ///
   /// Use this function if you want to allow situations where no
-  /// [ComboBoxTheme] is in scope. Prefer using [ComboBoxTheme.of]
-  /// in situations where a [ComboBoxThemeData] is expected to be
+  /// [DropdownMenuTheme] is in scope. Prefer using [DropdownMenuTheme.of]
+  /// in situations where a [DropdownMenuThemeData] is expected to be
   /// non-null.
   ///
-  /// If there is no [ComboBoxTheme] in scope, then this function will
+  /// If there is no [DropdownMenuTheme] in scope, then this function will
   /// return null.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ComboBoxThemeData? theme = ComboBoxTheme.maybeOf(context);
+  /// DropdownMenuThemeData? theme = DropdownMenuTheme.maybeOf(context);
   /// if (theme == null) {
   ///   // Do something else instead.
   /// }
@@ -159,18 +160,18 @@ class ComboBoxTheme extends InheritedTheme {
   ///
   /// See also:
   ///
-  ///  * [of], which will return [ThemeData.comboBoxTheme] if it doesn't
-  ///    find a [ComboBoxTheme] ancestor, instead of returning null.
-  static ComboBoxThemeData? maybeOf(BuildContext context) {
+  ///  * [of], which will return [ThemeData.dropdownMenuTheme] if it doesn't
+  ///    find a [DropdownMenuTheme] ancestor, instead of returning null.
+  static DropdownMenuThemeData? maybeOf(BuildContext context) {
     assert(context != null);
-    return context.dependOnInheritedWidgetOfExactType<ComboBoxTheme>()?.data;
+    return context.dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()?.data;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    return ComboBoxTheme(data: data, child: child);
+    return DropdownMenuTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ComboBoxTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(DropdownMenuTheme oldWidget) => data != oldWidget.data;
 }

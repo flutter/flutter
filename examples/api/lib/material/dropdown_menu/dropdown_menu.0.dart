@@ -2,30 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ComboBox]s. The first combo box has an outlined border
+/// Flutter code sample for [DropdownMenu]s. The first dropdown menu has an outlined border
 /// which is the default configuration, and the second one has a filled input decoration.
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const ComboBoxExample());
+void main() => runApp(const DropdownMenuExample());
 
-class ComboBoxExample extends StatelessWidget {
-  const ComboBoxExample({super.key});
+class DropdownMenuExample extends StatelessWidget {
+  const DropdownMenuExample({super.key});
 
-  List<ComboBoxEntry> getEntryList() {
-    final List<ComboBoxEntry> entries = <ComboBoxEntry>[];
+  List<DropdownMenuEntry> getEntryList() {
+    final List<DropdownMenuEntry> entries = <DropdownMenuEntry>[];
 
     for (int index = 0; index < EntryLabel.values.length; index++) {
       // Disabled item 1, 2 and 6.
       final bool enabled = index != 1 && index != 2 && index != 6;
-      entries.add(ComboBoxEntry(label: EntryLabel.values[index].label, enabled: enabled));
+      entries.add(DropdownMenuEntry(label: EntryLabel.values[index].label, enabled: enabled));
     }
     return entries;
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<ComboBoxEntry> comboBoxEntries = getEntryList();
+    final List<DropdownMenuEntry> dropdownMenuEntries = getEntryList();
 
     return MaterialApp(
       theme: ThemeData(
@@ -39,16 +39,16 @@ class ComboBoxExample extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                ComboBox(
+                DropdownMenu(
                   label: const Text('Label'),
-                  comboBoxEntries: comboBoxEntries,
+                  dropdownMenuEntries: dropdownMenuEntries,
                 ),
                 const SizedBox(width: 20),
-                ComboBox(
+                DropdownMenu(
                   enableFilter: true,
                   leadingIcon: const Icon(Icons.search),
                   label: const Text('Label'),
-                  comboBoxEntries: comboBoxEntries,
+                  dropdownMenuEntries: dropdownMenuEntries,
                   inputDecorationTheme: const InputDecorationTheme(filled: true),
                 )
               ],

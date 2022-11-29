@@ -8,30 +8,30 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final List<ComboBoxEntry> menuChildren = <ComboBoxEntry>[];
+  final List<DropdownMenuEntry> menuChildren = <DropdownMenuEntry>[];
 
   for (final TestMenu value in TestMenu.values) {
-    final ComboBoxEntry entry = ComboBoxEntry(label: value.label);
+    final DropdownMenuEntry entry = DropdownMenuEntry(label: value.label);
     menuChildren.add(entry);
   }
 
-  Widget buildTest(ThemeData themeData, List<ComboBoxEntry> entries,
+  Widget buildTest(ThemeData themeData, List<DropdownMenuEntry> entries,
       {double? width, double? menuHeight, Widget? leadingIcon, Widget? label}) {
     return MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
+        body: DropdownMenu(
           label: label,
           leadingIcon: leadingIcon,
           width: width,
           menuHeight: menuHeight,
-          comboBoxEntries: entries,
+          dropdownMenuEntries: entries,
         ),
       ),
     );
   }
 
-  testWidgets('ComboBox defaults', (WidgetTester tester) async {
+  testWidgets('DropdownMenu defaults', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
@@ -73,16 +73,16 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
   });
 
-  testWidgets('ComboBox can be disabled', (WidgetTester tester) async {
+  testWidgets('DropdownMenu can be disabled', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
         home: Scaffold(
           body: SafeArea(
-            child: ComboBox(
+            child: DropdownMenu(
               enabled: false,
-              comboBoxEntries: menuChildren,
+              dropdownMenuEntries: menuChildren,
             ),
           ),
         ),
@@ -115,8 +115,8 @@ void main() {
         theme: themeData,
         home: Scaffold(
           body: SafeArea(
-            child: ComboBox(
-              comboBoxEntries: menuChildren,
+            child: DropdownMenu(
+              dropdownMenuEntries: menuChildren,
             ),
           ),
         ),
@@ -127,7 +127,7 @@ void main() {
     final Size anchorSize = tester.getSize(textField);
     expect(anchorSize, const Size(180.0, 54.0));
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
 
     final Finder menuMaterial = find.ancestor(
@@ -145,7 +145,7 @@ void main() {
     final Size size = tester.getSize(anchor);
     expect(size, const Size(200.0, 54.0));
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
 
     final Finder updatedMenu = find.ancestor(
@@ -156,21 +156,21 @@ void main() {
     expect(updatedMenuSize, const Size(200.0, 304.0));
   });
 
-  testWidgets('The width property can customize the width of the combo box', (WidgetTester tester) async {
+  testWidgets('The width property can customize the width of the dropdown menu', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
-    final List<ComboBoxEntry> shortMenuItems = <ComboBoxEntry>[];
+    final List<DropdownMenuEntry> shortMenuItems = <DropdownMenuEntry>[];
 
     for (final ShortMenu value in ShortMenu.values) {
-      final ComboBoxEntry entry = ComboBoxEntry(label: value.label);
+      final DropdownMenuEntry entry = DropdownMenuEntry(label: value.label);
       shortMenuItems.add(entry);
     }
 
     const double customBigWidth = 250.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customBigWidth));
-    RenderBox box = tester.firstRenderObject(find.byType(ComboBox));
+    RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu));
     expect(box.size.width, customBigWidth);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(6));
     Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').last);
@@ -180,10 +180,10 @@ void main() {
     await tester.pumpWidget(Container());
     const double customSmallWidth = 100.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customSmallWidth));
-    box = tester.firstRenderObject(find.byType(ComboBox));
+    box = tester.firstRenderObject(find.byType(DropdownMenu));
     expect(box.size.width, customSmallWidth);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(6));
     buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').last);
@@ -195,7 +195,7 @@ void main() {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
 
     final Element firstItem = tester.element(find.widgetWithText(MenuItemButton, 'Item 0').last);
@@ -219,7 +219,7 @@ void main() {
     await tester.pumpWidget(buildTest(themeData, menuChildren, menuHeight: 100));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
 
     final Finder updatedMenu = find.ancestor(
@@ -240,7 +240,7 @@ void main() {
     final Finder label = find.text('label');
     final Offset labelTopLeft = tester.getTopLeft(label);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
     final Finder itemText = find.text('Item 0').last;
     final Offset itemTextTopLeft = tester.getTopLeft(itemText);
@@ -259,7 +259,7 @@ void main() {
     final Finder updatedLabel = find.text('label');
     final Offset updatedLabelTopLeft = tester.getTopLeft(updatedLabel);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
     final Finder updatedItemText = find.text('Item 0').last;
     final Offset updatedItemTextTopLeft = tester.getTopLeft(updatedItemText);
@@ -282,7 +282,7 @@ void main() {
     final Finder updatedLabel1 = find.text('label');
     final Offset updatedLabelTopLeft1 = tester.getTopLeft(updatedLabel1);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
     final Finder updatedItemText1 = find.text('Item 0').last;
     final Offset updatedItemTextTopLeft1 = tester.getTopLeft(updatedItemText1);
@@ -301,9 +301,9 @@ void main() {
       home: Scaffold(
         body: Directionality(
           textDirection: TextDirection.rtl,
-          child: ComboBox(
+          child: DropdownMenu(
             label: const Text('label'),
-            comboBoxEntries: menuChildren,
+            dropdownMenuEntries: menuChildren,
           ),
         ),
       ),
@@ -312,7 +312,7 @@ void main() {
     final Finder label = find.text('label');
     final Offset labelTopRight = tester.getTopRight(label);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
     final Finder itemText = find.text('Item 0').last;
     final Offset itemTextTopRight = tester.getTopRight(itemText);
@@ -326,10 +326,10 @@ void main() {
       home: Scaffold(
         body: Directionality(
           textDirection: TextDirection.rtl,
-          child: ComboBox(
+          child: DropdownMenu(
             leadingIcon: const Icon(Icons.search),
             label: const Text('label'),
-            comboBoxEntries: menuChildren,
+            dropdownMenuEntries: menuChildren,
           ),
         ),
       ),
@@ -338,18 +338,18 @@ void main() {
 
     final Finder leadingIcon = find.widgetWithIcon(Container, Icons.search);
     final double iconWidth = tester.getSize(leadingIcon).width;
-    final Offset comboBoxTopRight = tester.getTopRight(find.byType(ComboBox));
+    final Offset dropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu));
     final Finder updatedLabel = find.text('label');
     final Offset updatedLabelTopRight = tester.getTopRight(updatedLabel);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
     final Finder updatedItemText = find.text('Item 0').last;
     final Offset updatedItemTextTopRight = tester.getTopRight(updatedItemText);
 
 
     expect(updatedLabelTopRight.dx, equals(updatedItemTextTopRight.dx));
-    expect(updatedLabelTopRight.dx, equals(comboBoxTopRight.dx - iconWidth));
+    expect(updatedLabelTopRight.dx, equals(dropdownMenuTopRight.dx - iconWidth));
 
     // Test when then leading icon is a widget with a bigger size.
     await tester.pumpWidget(Container());
@@ -358,10 +358,10 @@ void main() {
       home: Scaffold(
         body: Directionality(
           textDirection: TextDirection.rtl,
-          child: ComboBox(
+          child: DropdownMenu(
             leadingIcon: const SizedBox(width: 75.0, child: Icon(Icons.search)),
             label: const Text('label'),
-            comboBoxEntries: menuChildren,
+            dropdownMenuEntries: menuChildren,
           ),
         ),
       ),
@@ -370,21 +370,21 @@ void main() {
 
     final Finder largeLeadingIcon = find.widgetWithIcon(Container, Icons.search);
     final double largeIconWidth = tester.getSize(largeLeadingIcon).width;
-    final Offset updatedComboBoxTopRight = tester.getTopRight(find.byType(ComboBox));
+    final Offset updatedDropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu));
     final Finder updatedLabel1 = find.text('label');
     final Offset updatedLabelTopRight1 = tester.getTopRight(updatedLabel1);
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
     final Finder updatedItemText1 = find.text('Item 0').last;
     final Offset updatedItemTextTopRight1 = tester.getTopRight(updatedItemText1);
 
 
     expect(updatedLabelTopRight1.dx, equals(updatedItemTextTopRight1.dx));
-    expect(updatedLabelTopRight1.dx, equals(updatedComboBoxTopRight.dx - largeIconWidth));
+    expect(updatedLabelTopRight1.dx, equals(updatedDropdownMenuTopRight.dx - largeIconWidth));
   });
 
-  testWidgets('ComboBox has default trailing icon button', (WidgetTester tester) async {
+  testWidgets('DropdownMenu has default trailing icon button', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren));
     await tester.pump();
@@ -402,14 +402,14 @@ void main() {
     expect(menuMaterial, findsOneWidget);
   });
 
-  testWidgets('ComboBox can customize trailing icon button', (WidgetTester tester) async {
+  testWidgets('DropdownMenu can customize trailing icon button', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
+        body: DropdownMenu(
           trailingIcon: const Icon(Icons.ac_unit),
-          comboBoxEntries: menuChildren,
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
@@ -433,14 +433,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
+        body: DropdownMenu(
           trailingIcon: const Icon(Icons.ac_unit),
-          comboBoxEntries: menuChildren,
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
 
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
@@ -475,13 +475,13 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
-          comboBoxEntries: menuChildren,
+        body: DropdownMenu(
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
 
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
@@ -517,14 +517,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
-          comboBoxEntries: menuChildren,
+        body: DropdownMenu(
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
     // Open the menu
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
 
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
@@ -547,14 +547,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
-          comboBoxEntries: menuChildren,
+        body: DropdownMenu(
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
     // Open the menu
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
 
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
@@ -574,26 +574,26 @@ void main() {
 
   testWidgets('Disabled button will be skipped while pressing up/down key', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
-    final List<ComboBoxEntry> menuWithDisabledItems = <ComboBoxEntry>[
-      const ComboBoxEntry(label: 'Item 0'),
-      const ComboBoxEntry(label: 'Item 1', enabled: false),
-      const ComboBoxEntry(label: 'Item 2', enabled: false),
-      const ComboBoxEntry(label: 'Item 3'),
-      const ComboBoxEntry(label: 'Item 4'),
-      const ComboBoxEntry(label: 'Item 5', enabled: false),
+    final List<DropdownMenuEntry> menuWithDisabledItems = <DropdownMenuEntry>[
+      const DropdownMenuEntry(label: 'Item 0'),
+      const DropdownMenuEntry(label: 'Item 1', enabled: false),
+      const DropdownMenuEntry(label: 'Item 2', enabled: false),
+      const DropdownMenuEntry(label: 'Item 3'),
+      const DropdownMenuEntry(label: 'Item 4'),
+      const DropdownMenuEntry(label: 'Item 5', enabled: false),
     ];
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
-          comboBoxEntries: menuWithDisabledItems,
+        body: DropdownMenu(
+          dropdownMenuEntries: menuWithDisabledItems,
         ),
       ),
     ));
     await tester.pump();
 
     // Open the menu
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pumpAndSettle();
 
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
@@ -621,14 +621,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
-          comboBoxEntries: menuChildren,
+        body: DropdownMenu(
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
     // Open the menu
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
     await tester.enterText(find.byType(TextField).first, 'Menu 1');
     await tester.pumpAndSettle();
@@ -645,14 +645,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
-          comboBoxEntries: menuChildren,
+        body: DropdownMenu(
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
     // Open the menu
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
     await tester.enterText(find.byType(TextField).first, 'Menu 1');
     await tester.pumpAndSettle();
@@ -691,20 +691,20 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
-          comboBoxEntries: menuChildren,
+        body: DropdownMenu(
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
     // Open the menu
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
 
     await tester.enterText(find.byType(TextField).first, 'Menu 1');
     await tester.pumpAndSettle();
     for (final TestMenu menu in TestMenu.values) {
-      // One is layout for the _ComboBoxBody, the other one is the real button item in the menu.
+      // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
       expect(find.widgetWithText(MenuItemButton, menu.label), findsNWidgets(2));
     }
   });
@@ -714,15 +714,15 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: ComboBox(
+        body: DropdownMenu(
           enableFilter: true,
-          comboBoxEntries: menuChildren,
+          dropdownMenuEntries: menuChildren,
         ),
       ),
     ));
 
     // Open the menu
-    await tester.tap(find.byType(ComboBox));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
 
     await tester.enterText(find

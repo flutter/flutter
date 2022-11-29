@@ -7,16 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('ComboBoxThemeData copyWith, ==, hashCode basics', () {
-    expect(const ComboBoxThemeData(), const ComboBoxThemeData().copyWith());
-    expect(const ComboBoxThemeData().hashCode, const ComboBoxThemeData().copyWith().hashCode);
+  test('DropdownMenuThemeData copyWith, ==, hashCode basics', () {
+    expect(const DropdownMenuThemeData(), const DropdownMenuThemeData().copyWith());
+    expect(const DropdownMenuThemeData().hashCode, const DropdownMenuThemeData().copyWith().hashCode);
 
-    const ComboBoxThemeData custom = ComboBoxThemeData(
+    const DropdownMenuThemeData custom = DropdownMenuThemeData(
       menuStyle: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
       inputDecorationTheme: InputDecorationTheme(filled: true),
       textStyle: TextStyle(fontSize: 25.0),
     );
-    final ComboBoxThemeData copy = const ComboBoxThemeData().copyWith(
+    final DropdownMenuThemeData copy = const DropdownMenuThemeData().copyWith(
       menuStyle: custom.menuStyle,
       inputDecorationTheme: custom.inputDecorationTheme,
       textStyle: custom.textStyle,
@@ -24,9 +24,9 @@ void main() {
     expect(copy, custom);
   });
 
-  testWidgets('Default ComboBoxThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const ComboBoxThemeData().debugFillProperties(builder);
+    const DropdownMenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -43,11 +43,11 @@ void main() {
         theme: themeData,
         home: const Scaffold(
           body: Center(
-            child: ComboBox(
-              comboBoxEntries: <ComboBoxEntry>[
-                ComboBoxEntry(label: 'Item 0'),
-                ComboBoxEntry(label: 'Item 1'),
-                ComboBoxEntry(label: 'Item 2'),
+            child: DropdownMenu(
+              dropdownMenuEntries: <DropdownMenuEntry>[
+                DropdownMenuEntry(label: 'Item 0'),
+                DropdownMenuEntry(label: 'Item 1'),
+                DropdownMenuEntry(label: 'Item 2'),
               ],
             ),
           ),
@@ -93,9 +93,9 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
   });
 
-  testWidgets('ThemeData.comboBoxTheme overrides defaults', (WidgetTester tester) async {
+  testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
-      comboBoxTheme: ComboBoxThemeData(
+      dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
           color: Colors.orange,
           backgroundColor: Colors.indigo,
@@ -122,11 +122,11 @@ void main() {
         theme: theme,
         home: const Scaffold(
           body: Center(
-            child: ComboBox(
-              comboBoxEntries: <ComboBoxEntry>[
-                ComboBoxEntry(label: 'Item 0'),
-                ComboBoxEntry(label: 'Item 1'),
-                ComboBoxEntry(label: 'Item 2'),
+            child: DropdownMenu(
+              dropdownMenuEntries: <DropdownMenuEntry>[
+                DropdownMenuEntry(label: 'Item 0'),
+                DropdownMenuEntry(label: 'Item 1'),
+                DropdownMenuEntry(label: 'Item 2'),
               ],
             ),
           ),
@@ -172,8 +172,8 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('ComboBoxTheme overrides ThemeData and defaults', (WidgetTester tester) async {
-    final ComboBoxThemeData global = ComboBoxThemeData(
+  testWidgets('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+    final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
         backgroundColor: Colors.indigo,
@@ -194,7 +194,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
-    final ComboBoxThemeData comboBoxTheme = ComboBoxThemeData(
+    final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.red,
         backgroundColor: Colors.orange,
@@ -215,19 +215,19 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
-    final ThemeData theme = ThemeData(comboBoxTheme: global);
+    final ThemeData theme = ThemeData(dropdownMenuTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: ComboBoxTheme(
-          data: comboBoxTheme,
+        home: DropdownMenuTheme(
+          data: dropdownMenuTheme,
           child: const Scaffold(
             body: Center(
-              child: ComboBox(
-                comboBoxEntries: <ComboBoxEntry>[
-                  ComboBoxEntry(label: 'Item 0'),
-                  ComboBoxEntry(label: 'Item 1'),
-                  ComboBoxEntry(label: 'Item 2'),
+              child: DropdownMenu(
+                dropdownMenuEntries: <DropdownMenuEntry>[
+                  DropdownMenuEntry(label: 'Item 0'),
+                  DropdownMenuEntry(label: 'Item 1'),
+                  DropdownMenuEntry(label: 'Item 2'),
                 ],
               ),
             ),
@@ -275,8 +275,8 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('Widget parameters overrides ComboBoxTheme, ThemeData and defaults', (WidgetTester tester) async {
-    final ComboBoxThemeData global = ComboBoxThemeData(
+  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
+    final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
         backgroundColor: Colors.indigo,
@@ -297,7 +297,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
-    final ComboBoxThemeData comboBoxTheme = ComboBoxThemeData(
+    final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.red,
         backgroundColor: Colors.orange,
@@ -318,15 +318,15 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
-    final ThemeData theme = ThemeData(comboBoxTheme: global);
+    final ThemeData theme = ThemeData(dropdownMenuTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: ComboBoxTheme(
-          data: comboBoxTheme,
+        home: DropdownMenuTheme(
+          data: dropdownMenuTheme,
           child: Scaffold(
             body: Center(
-              child: ComboBox(
+              child: DropdownMenu(
                 textStyle: TextStyle(
                   color: Colors.pink,
                   backgroundColor: Colors.cyan,
@@ -345,10 +345,10 @@ void main() {
                   ),
                 ),
                 inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.deepPurple),
-                comboBoxEntries: const <ComboBoxEntry>[
-                  ComboBoxEntry(label: 'Item 0'),
-                  ComboBoxEntry(label: 'Item 1'),
-                  ComboBoxEntry(label: 'Item 2'),
+                dropdownMenuEntries: const <DropdownMenuEntry>[
+                  DropdownMenuEntry(label: 'Item 0'),
+                  DropdownMenuEntry(label: 'Item 1'),
+                  DropdownMenuEntry(label: 'Item 2'),
                 ],
               ),
             ),

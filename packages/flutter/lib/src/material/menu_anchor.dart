@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -219,7 +220,7 @@ class MenuAnchor extends StatefulWidget {
   ///
   /// Defaults to true as it allows developers to render the menu panel at the
   /// size it should be. When it is set to false, it can be useful when the menu should
-  /// be constrained in both main axis and cross axis, such as a [ComboBox].
+  /// be constrained in both main axis and cross axis, such as a [DropdownMenu].
   final bool crossAxisUnconstrained;
 
   /// A list of children containing the menu items that are the contents of the
@@ -3236,7 +3237,7 @@ class _MenuPanel extends StatefulWidget {
   /// at its "natural" size.
   ///
   /// Defaults to true. When it is set to false, it can be useful when the menu should
-  /// be constrained in both main-axis and cross-axis, such as a [ComboBox].
+  /// be constrained in both main-axis and cross-axis, such as a [DropdownMenu].
   final bool crossAxisUnconstrained;
 
   /// The layout orientation of this panel.

@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
-import 'combo_box_theme.dart';
+import 'dropdown_menu_theme.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'input_border.dart';
@@ -31,16 +31,16 @@ const double _kMinimumWidth = 112.0;
 
 const double _kDefaultHorizontalPadding = 12.0;
 
-/// Defines a [ComboBox] menu button that represents one item view in the menu.
+/// Defines a [DropdownMenu] menu button that represents one item view in the menu.
 ///
 /// See also:
 ///
-/// * [ComboBox]
-class ComboBoxEntry {
-  /// Creates an entry that is used with [ComboBox.comboBoxEntries].
+/// * [DropdownMenu]
+class DropdownMenuEntry {
+  /// Creates an entry that is used with [DropdownMenu.dropdownMenuEntries].
   ///
   /// [label] must be non-null.
-  const ComboBoxEntry({
+  const DropdownMenuEntry({
     required this.label,
     this.leadingIcon,
     this.trailingIcon,
@@ -59,8 +59,8 @@ class ComboBoxEntry {
 
   /// Whether the menu item is enabled or disabled.
   ///
-  /// The default value is true. If true, the [ComboBoxEntry.label] will be filled
-  /// out in the text field of the [ComboBox] when this entry is clicked; otherwise,
+  /// The default value is true. If true, the [DropdownMenuEntry.label] will be filled
+  /// out in the text field of the [DropdownMenu] when this entry is clicked; otherwise,
   /// this entry is disabled.
   final bool enabled;
 
@@ -78,7 +78,7 @@ class ComboBoxEntry {
 /// selected item into the text input field. People can also filter the list based
 /// on the text input or search one item in the menu list.
 ///
-/// The menu is composed of a list of [ComboBoxEntry]s. People can provide information,
+/// The menu is composed of a list of [DropdownMenuEntry]s. People can provide information,
 /// such as: label, leading icon or trailing icon for each entry. The [TextField]
 /// will be updated based on the selection from the menu entries. The text field
 /// will stay empty if the selected entry is disabled.
@@ -90,19 +90,19 @@ class ComboBoxEntry {
 /// The menu can be scrollable if not all items in the list are displayed at once.
 ///
 /// {@tool dartpad}
-/// This sample shows how to display outlined [ComboBox] and filled [ComboBox].
+/// This sample shows how to display outlined [DropdownMenu] and filled [DropdownMenu].
 ///
-/// ** See code in examples/api/lib/material/combo_box/combo_box.0.dart **
+/// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
 /// * [MenuAnchor], which is a widget used to mark the "anchor" for a set of submenus.
-///   The [ComboBox] uses a [TextField] as the "anchor".
+///   The [DropdownMenu] uses a [TextField] as the "anchor".
 /// * [TextField], which is a text input widget that uses an [InputDecoration].
-/// * [ComboBoxEntry], which is used to build the [MenuItemButton] in the [ComboBox] list.
-class ComboBox extends StatefulWidget {
-  /// Creates a const [ComboBox].
+/// * [DropdownMenuEntry], which is used to build the [MenuItemButton] in the [DropdownMenu] list.
+class DropdownMenu extends StatefulWidget {
+  /// Creates a const [DropdownMenu].
   ///
   /// The leading and trailing icons in the text field can be customized by using
   /// [leadingIcon], [trailingIcon] and [selectedTrailingIcon] properties. They are
@@ -111,7 +111,7 @@ class ComboBox extends StatefulWidget {
   ///
   /// Except leading and trailing icons, the text field can be configured by the
   /// [InputDecorationTheme] property. The menu can be configured by the [menuStyle].
-  const ComboBox({
+  const DropdownMenu({
     super.key,
     this.enabled = true,
     this.width,
@@ -126,17 +126,17 @@ class ComboBox extends StatefulWidget {
     this.textStyle,
     this.inputDecorationTheme,
     this.menuStyle,
-    required this.comboBoxEntries,
+    required this.dropdownMenuEntries,
   });
 
-  /// Determine if the [ComboBox] is enabled.
+  /// Determine if the [DropdownMenu] is enabled.
   ///
   /// Defaults to true.
   final bool enabled;
 
-  /// Determine the width of the [ComboBox].
+  /// Determine the width of the [DropdownMenu].
   ///
-  /// If this is null, the width of the [ComboBox] will be the same as the width of the widest
+  /// If this is null, the width of the [DropdownMenu] will be the same as the width of the widest
   /// menu item plus the width of the leading/trailing icon.
   final double? width;
 
@@ -188,10 +188,10 @@ class ComboBox extends StatefulWidget {
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
 
-  /// The text style for the [TextField] of the [ComboBox];
+  /// The text style for the [TextField] of the [DropdownMenu];
   ///
   /// Defaults to the overall theme's [TextTheme.labelLarge]
-  /// if the combo box theme's value is null.
+  /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
 
   /// Defines the default appearance of [InputDecoration] to show around the text field.
@@ -204,25 +204,25 @@ class ComboBox extends StatefulWidget {
   /// The default width of the menu is set to the width of the text field.
   final MenuStyle? menuStyle;
 
-  /// Descriptions of the menu items in the [ComboBox].
+  /// Descriptions of the menu items in the [DropdownMenu].
   ///
-  /// This is a required parameter. It is recommended that at least one [ComboBoxEntry]
+  /// This is a required parameter. It is recommended that at least one [DropdownMenuEntry]
   /// is provided. If this is an empty list, the menu will be empty and only
   /// contain space for padding.
-  final List<ComboBoxEntry> comboBoxEntries;
+  final List<DropdownMenuEntry> dropdownMenuEntries;
 
   @override
-  State<ComboBox> createState() => _ComboBoxState();
+  State<DropdownMenu> createState() => _DropdownMenuState();
 }
 
-class _ComboBoxState extends State<ComboBox> {
+class _DropdownMenuState extends State<DropdownMenu> {
   final MenuController _controller = MenuController();
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   final FocusNode _textFocusNode = FocusNode();
   final TextEditingController _textEditingController = TextEditingController();
   late bool _enableFilter;
-  late List<ComboBoxEntry> filteredEntries;
+  late List<DropdownMenuEntry> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
   double? leadingPadding;
@@ -232,17 +232,17 @@ class _ComboBoxState extends State<ComboBox> {
   void initState() {
     super.initState();
     _enableFilter = widget.enableFilter;
-    filteredEntries = widget.comboBoxEntries;
-    _menuHasEnabledItem = filteredEntries.any((ComboBoxEntry entry) => entry.enabled);
+    filteredEntries = widget.dropdownMenuEntries;
+    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry entry) => entry.enabled);
 
     refreshLeadingPadding();
   }
 
   @override
-  void didUpdateWidget(ComboBox oldWidget) {
+  void didUpdateWidget(DropdownMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.comboBoxEntries != widget.comboBoxEntries) {
-      _menuHasEnabledItem = filteredEntries.any((ComboBoxEntry entry) => entry.enabled);
+    if (oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
+      _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry entry) => entry.enabled);
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
@@ -266,25 +266,25 @@ class _ComboBoxState extends State<ComboBox> {
     return null;
   }
 
-  List<ComboBoxEntry> filter(List<ComboBoxEntry> entries, TextEditingController textEditingController) {
+  List<DropdownMenuEntry> filter(List<DropdownMenuEntry> entries, TextEditingController textEditingController) {
     final String filterText = textEditingController.text.toLowerCase();
     return entries
-      .where((ComboBoxEntry entry) => entry.label.toLowerCase().contains(filterText))
+      .where((DropdownMenuEntry entry) => entry.label.toLowerCase().contains(filterText))
       .toList();
   }
 
-  int? search(List<ComboBoxEntry> entries, TextEditingController textEditingController) {
+  int? search(List<DropdownMenuEntry> entries, TextEditingController textEditingController) {
     final String searchText = textEditingController.value.text.toLowerCase();
     if (searchText.isEmpty) {
       return null;
     }
-    final int index = entries.indexWhere((ComboBoxEntry entry) => entry.label.toLowerCase().contains(searchText));
+    final int index = entries.indexWhere((DropdownMenuEntry entry) => entry.label.toLowerCase().contains(searchText));
 
     return index != -1 ? index : null;
   }
 
   List<Widget> _buildButtons(
-    List<ComboBoxEntry> filteredEntries,
+    List<DropdownMenuEntry> filteredEntries,
     TextEditingController textEditingController,
     TextDirection textDirection,
     { int? focusedIndex }
@@ -306,7 +306,7 @@ class _ComboBoxState extends State<ComboBox> {
     }
 
     for (int i = 0; i < filteredEntries.length; i++) {
-      final ComboBoxEntry entry = filteredEntries[i];
+      final DropdownMenuEntry entry = filteredEntries[i];
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;
@@ -393,12 +393,12 @@ class _ComboBoxState extends State<ComboBox> {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    _initialMenu ??= _buildButtons(widget.comboBoxEntries, _textEditingController, textDirection);
-    final ComboBoxThemeData theme = ComboBoxTheme.of(context);
-    final ComboBoxThemeData defaults = _ComboBoxDefaultsM3(context);
+    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, _textEditingController, textDirection);
+    final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
+    final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
     if (_enableFilter) {
-      filteredEntries = filter(widget.comboBoxEntries, _textEditingController);
+      filteredEntries = filter(widget.dropdownMenuEntries, _textEditingController);
     }
 
     if (widget.enableSearch) {
@@ -463,7 +463,7 @@ class _ComboBoxState extends State<ComboBox> {
               child: widget.leadingIcon ?? const SizedBox()
             );
 
-            return _ComboBoxBody(
+            return _DropdownMenuBody(
               key: _anchorKey,
               width: widget.width,
               children: <Widget>[
@@ -485,7 +485,7 @@ class _ComboBoxState extends State<ComboBox> {
                   onChanged: (_) {
                     controller.open();
                     setState(() {
-                      filteredEntries = widget.comboBoxEntries;
+                      filteredEntries = widget.dropdownMenuEntries;
                       _enableFilter = widget.enableFilter;
                     });
                   },
@@ -520,8 +520,8 @@ class _ArrowDownIntent extends Intent {
   const _ArrowDownIntent();
 }
 
-class _ComboBoxBody extends MultiChildRenderObjectWidget {
-  _ComboBoxBody({
+class _DropdownMenuBody extends MultiChildRenderObjectWidget {
+  _DropdownMenuBody({
     super.key,
     super.children,
     this.width,
@@ -530,20 +530,20 @@ class _ComboBoxBody extends MultiChildRenderObjectWidget {
   final double? width;
 
   @override
-  _RenderComboBoxBody createRenderObject(BuildContext context) {
-    return _RenderComboBoxBody(
+  _RenderDropdownMenuBody createRenderObject(BuildContext context) {
+    return _RenderDropdownMenuBody(
       width: width,
     );
   }
 }
 
-class _ComboBoxBodyParentData extends ContainerBoxParentData<RenderBox> { }
+class _DropdownMenuBodyParentData extends ContainerBoxParentData<RenderBox> { }
 
-class _RenderComboBoxBody extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, _ComboBoxBodyParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, _ComboBoxBodyParentData> {
+class _RenderDropdownMenuBody extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, _DropdownMenuBodyParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _DropdownMenuBodyParentData> {
 
-  _RenderComboBoxBody({
+  _RenderDropdownMenuBody({
     this.width,
   });
 
@@ -551,8 +551,8 @@ class _RenderComboBoxBody extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _ComboBoxBodyParentData) {
-      child.parentData = _ComboBoxBodyParentData();
+    if (child.parentData is! _DropdownMenuBodyParentData) {
+      child.parentData = _DropdownMenuBodyParentData();
     }
   }
 
@@ -571,13 +571,13 @@ class _RenderComboBoxBody extends RenderBox
       if (child == firstChild) {
         child.layout(innerConstraints, parentUsesSize: true);
         maxHeight ??= child.size.height;
-        final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       child.layout(innerConstraints, parentUsesSize: true);
-      final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, child.size.width);
       maxHeight ??= child.size.height;
@@ -594,7 +594,7 @@ class _RenderComboBoxBody extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       context.paintChild(child, offset + childParentData.offset);
     }
   }
@@ -614,13 +614,13 @@ class _RenderComboBoxBody extends RenderBox
       if (child == firstChild) {
         final Size childSize = child.getDryLayout(innerConstraints);
         maxHeight ??= childSize.height;
-        final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       final Size childSize = child.getDryLayout(innerConstraints);
-      final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, childSize.width);
       maxHeight ??= childSize.height;
@@ -639,7 +639,7 @@ class _RenderComboBoxBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -651,7 +651,7 @@ class _RenderComboBoxBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -664,7 +664,7 @@ class _RenderComboBoxBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -678,7 +678,7 @@ class _RenderComboBoxBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -709,7 +709,7 @@ class _RenderComboBoxBody extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _ComboBoxBodyParentData childParentData = child.parentData! as _ComboBoxBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -727,8 +727,8 @@ class _RenderComboBoxBody extends RenderBox
 }
 
 // Hand coded defaults. These will be updated once we have tokens/spec.
-class _ComboBoxDefaultsM3 extends ComboBoxThemeData {
-  _ComboBoxDefaultsM3(this.context);
+class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
+  _DropdownMenuDefaultsM3(this.context);
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
