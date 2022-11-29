@@ -3823,6 +3823,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void performSelector(String selectorName) {
+    print(selectorName);
     final Intent? intent = intentForMacOSSelector(selectorName);
 
     if (intent != null) {
@@ -3978,6 +3979,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextBoundary _characterBoundary() => widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
+  TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
   // TextBoundary _paragraphBoundary(DirectionalTextEditingIntent intent) {
@@ -4225,7 +4227,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
-    ExtendSelectionVerticallyToAdjacentParagraphIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    ExtendSelectionVerticallyToAdjacentParagraphIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionVerticallyToAdjacentParagraphIntent>(this, true, _paragraphBoundary)),
+    // ExtendSelectionVerticallyToAdjacentParagraphIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
@@ -5003,6 +5006,7 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
   // direction of the text, or if there is no line terminator in a given direction
   // then the bound extends to the start/end of the document in that direction.
   TextRange _getParagraphAtOffset(TextPosition textPosition) {
+    //main issue is that caret is being moved to next line, and paragraph is selected based on that info. Caret should be moved to next line break.
     final CharacterRange charIter = state._value.text.characters.iterator;
 
     int graphemeStart = 0;

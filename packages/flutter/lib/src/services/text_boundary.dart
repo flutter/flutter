@@ -4,7 +4,7 @@
 
 import 'dart:math';
 
-import 'package:characters/characters.dart' show CharacterRange;
+import 'package:characters/characters.dart';
 
 import 'text_layout_metrics.dart';
 
@@ -121,6 +121,68 @@ class LineBoundary extends TextBoundary {
 
   @override
   TextRange getTextBoundaryAt(int position) => _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
+}
+
+class ParagraphBoundary extends TextBoundary {
+  const ParagraphBoundary(this._text);
+
+  final String _text;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    return TextPosition(
+      offset: _getParagraphAtOffset(position).start,
+    );
+  }
+
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    return TextPosition(
+      offset: _getParagraphAtOffset(position).end,
+      affinity: TextAffinity.upstream,
+    );
+  }
+
+  @override
+  TextRange getTextBoundaryAt(TextPosition position) {
+    return _getParagraphAtOffset(position);
+  }
+
+  // Returns the [TextRange] representing a paragraph that bounds the given
+  // `position`. The `position` is bounded by either a line terminator in each
+  // direction of the text, or if there is no line terminator in a given direction
+  // then the bound extends to the start/end of the document in that direction.
+  TextRange _getParagraphAtOffset(TextPosition textPosition) {
+    //main issue is that caret is being moved to next line, and paragraph is selected based on that info. Caret should be moved to next line break.
+    final CharacterRange charIter = _text.characters.iterator;
+
+    int graphemeStart = 0;
+    int graphemeEnd = 0;
+
+    int tappedTextOffset = textPosition.offset;
+
+    while(charIter.moveNext()) {
+      graphemeEnd += charIter.current.length;
+      if (charIter.current == '\n') {
+        if (graphemeEnd < tappedTextOffset) {
+          graphemeStart = graphemeEnd;
+        } else if (graphemeEnd == tappedTextOffset) {
+          break;
+        } else {
+          // graphemeEnd = graphemeStart;
+          graphemeEnd = graphemeEnd - 1;
+          // if (textPosition == TextPosition(offset: 0)) {
+          //   graphemeEnd = graphemeStart;
+          // } else {
+          //   graphemeEnd = graphemeEnd - 1;
+          // }
+          break;
+        }
+      }
+    }
+
+    return TextRange(start: graphemeStart, end: graphemeEnd);
+  }
 }
 
 /// A text boundary that uses the entire document as logical boundary.
