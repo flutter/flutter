@@ -32,8 +32,7 @@ web_engine_libraries = [
 group("web_sdk") {
   deps = [
     ":flutter_ddc_modules",
-    ":flutter_legacy_platform_dills",
-    ":flutter_web_platforms",
+    ":flutter_platform_dills",
   ]
 
   if (archive_flutter_web_sdk && !is_fuchsia) {
@@ -277,6 +276,9 @@ template("_compile_platform") {
     } else {
       args += [ "--no-summary-only" ]
     }
+    if (defined(invoker.null_environment) && invoker.null_environment) {
+      args += [ "--null-environment" ]
+    }
     args += [
       "--target",
       "${invoker.kernel_target}",
@@ -314,19 +316,15 @@ template("_compile_platform") {
         "file:///" + rebase_path("$root_out_dir"),
       ]
     }
-
-    if (defined(invoker.extra_args)) {
-      args += invoker.extra_args
-    }
   }
 }
 
 # Compile the unsound DDC SDK's summary.
-_compile_platform("flutter_dartdevc_kernel_sdk_outline") {
+_compile_platform("flutter_dartdevc_kernel_sdk_outline_unsound") {
   sound_null_safety = false
   kernel_target = "ddc"
   summary_only = true
-  output_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
+  output_dill = "$root_out_dir/flutter_web_sdk/kernel/ddc_outline.dill"
 }
 
 # Compile the sound DDC SDK's summary.
@@ -334,92 +332,55 @@ _compile_platform("flutter_dartdevc_kernel_sdk_outline_sound") {
   sound_null_safety = true
   kernel_target = "ddc"
   summary_only = true
+  output_dill = "$root_out_dir/flutter_web_sdk/kernel/ddc_outline_sound.dill"
+}
+
+_compile_platform("flutter_dart2js_kernel_sdk_full_unsound") {
+  sound_null_safety = false
+  kernel_target = "dart2js"
+  summary_only = false
   output_dill =
-      "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk_sound.dill"
+      "$root_out_dir/flutter_web_sdk/kernel/dart2js_platform_unsound.dill"
+  null_environment = true
 }
 
-group("flutter_legacy_platform_dills") {
+_compile_platform("flutter_dart2js_kernel_sdk_full_sound") {
+  sound_null_safety = true
+  kernel_target = "dart2js"
+  summary_only = false
+  output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2js_platform.dill"
+  null_environment = true
+}
+
+# TODO(jacksongardner): remove these once they are no longer used by the flutter tool
+copy("flutter_dartdevc_kernel_sdk_outline_unsound_legacy") {
+  sources = get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_unsound")
+
+  outputs = [ "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill" ]
+
+  deps = [ ":flutter_dartdevc_kernel_sdk_outline_unsound" ]
+}
+
+copy("flutter_dartdevc_kernel_sdk_outline_sound_legacy") {
+  sources = get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
+
+  outputs =
+      [ "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk_sound.dill" ]
+
+  deps = [ ":flutter_dartdevc_kernel_sdk_outline_sound" ]
+}
+
+group("flutter_platform_dills") {
   public_deps = [
-    ":flutter_dartdevc_kernel_sdk_outline",
+    ":flutter_dart2js_kernel_sdk_full_sound",
+    ":flutter_dart2js_kernel_sdk_full_unsound",
     ":flutter_dartdevc_kernel_sdk_outline_sound",
-  ]
-}
+    ":flutter_dartdevc_kernel_sdk_outline_unsound",
 
-template("_flutter_web_platform") {
-  assert(defined(invoker.output_dir),
-         "output_dir must be defined for $target_name")
-  assert(defined(invoker.use_skia),
-         "use_skia must be defined  for $target_name")
-  assert(defined(invoker.auto_detect),
-         "auto_detect must be defined for $target_name")
-
-  define_flags = [
-    "-DFLUTTER_WEB_USE_SKIA=${invoker.use_skia}",
-    "-DFLUTTER_WEB_AUTO_DETECT=${invoker.auto_detect}",
-  ]
-
-  _compile_platform("${target_name}_ddc_sound") {
-    sound_null_safety = true
-    kernel_target = "ddc"
-    summary_only = true
-    output_dill = "${invoker.output_dir}/ddc_outline_sound.dill"
-    extra_args = define_flags
-  }
-  _compile_platform("${target_name}_ddc_unsound") {
-    sound_null_safety = false
-    kernel_target = "ddc"
-    summary_only = true
-    output_dill = "${invoker.output_dir}/ddc_outline.dill"
-    extra_args = define_flags
-  }
-  _compile_platform("${target_name}_dart2js_sound") {
-    sound_null_safety = true
-    kernel_target = "dart2js"
-    summary_only = false
-    output_dill = "${invoker.output_dir}/dart2js_platform.dill"
-    extra_args = define_flags
-  }
-  _compile_platform("${target_name}_dart2js_unsound") {
-    sound_null_safety = false
-    kernel_target = "dart2js"
-    summary_only = false
-    output_dill = "${invoker.output_dir}/dart2js_platform_unsound.dill"
-    extra_args = define_flags
-  }
-
-  group(target_name) {
-    public_deps = [
-      ":${target_name}_dart2js_sound",
-      ":${target_name}_dart2js_unsound",
-      ":${target_name}_ddc_sound",
-      ":${target_name}_ddc_unsound",
-    ]
-  }
-}
-
-_flutter_web_platform("flutter_auto_platform") {
-  output_dir = "$root_out_dir/flutter_web_sdk/kernel/platforms/auto"
-  use_skia = true
-  auto_detect = true
-}
-
-_flutter_web_platform("flutter_html_platform") {
-  output_dir = "$root_out_dir/flutter_web_sdk/kernel/platforms/html"
-  use_skia = false
-  auto_detect = false
-}
-
-_flutter_web_platform("flutter_canvaskit_platform") {
-  output_dir = "$root_out_dir/flutter_web_sdk/kernel/platforms/canvaskit"
-  use_skia = true
-  auto_detect = false
-}
-
-group("flutter_web_platforms") {
-  public_deps = [
-    ":flutter_auto_platform",
-    ":flutter_canvaskit_platform",
-    ":flutter_html_platform",
+    # TODO(jacksongardner): remove these once they are no longer used by the flutter tool
+    # https://github.com/flutter/flutter/issues/113303
+    ":flutter_dartdevc_kernel_sdk_outline_sound",
+    ":flutter_dartdevc_kernel_sdk_outline_unsound",
   ]
 }
 
@@ -561,6 +522,11 @@ group("flutter_ddc_modules") {
     ":flutter_dartdevc_canvaskit_kernel_sdk_sound",
     ":flutter_dartdevc_kernel_sdk",
     ":flutter_dartdevc_kernel_sdk_sound",
+
+    # TODO(jacksongardner): remove these once they are no longer used by the flutter tool
+    # https://github.com/flutter/flutter/issues/113303
+    ":flutter_dartdevc_kernel_sdk_outline_sound_legacy",
+    ":flutter_dartdevc_kernel_sdk_outline_unsound_legacy",
   ]
 }
 
@@ -577,8 +543,7 @@ if (!is_fuchsia) {
     }
     deps = [
              ":flutter_ddc_modules",
-             ":flutter_legacy_platform_dills",
-             ":flutter_web_platforms",
+             ":flutter_platform_dills",
            ] + web_engine_libraries
 
     if (build_canvaskit) {
@@ -595,25 +560,19 @@ if (!is_fuchsia) {
     sources +=
         get_target_outputs(":flutter_dartdevc_canvaskit_html_kernel_sdk_sound")
 
-    # flutter_legacy_platform_dills
-    sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline")
+    # flutter_platform_dills
+    sources +=
+        get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_unsound")
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
+    sources += get_target_outputs(":flutter_dart2js_kernel_sdk_full_unsound")
+    sources += get_target_outputs(":flutter_dart2js_kernel_sdk_full_sound")
 
-    # flutter_web_platforms
-    sources += get_target_outputs(":flutter_auto_platform_ddc_sound")
-    sources += get_target_outputs(":flutter_auto_platform_ddc_unsound")
-    sources += get_target_outputs(":flutter_auto_platform_dart2js_sound")
-    sources += get_target_outputs(":flutter_auto_platform_dart2js_unsound")
-
-    sources += get_target_outputs(":flutter_html_platform_ddc_sound")
-    sources += get_target_outputs(":flutter_html_platform_ddc_unsound")
-    sources += get_target_outputs(":flutter_html_platform_dart2js_sound")
-    sources += get_target_outputs(":flutter_html_platform_dart2js_unsound")
-
-    sources += get_target_outputs(":flutter_canvaskit_platform_ddc_sound")
-    sources += get_target_outputs(":flutter_canvaskit_platform_ddc_unsound")
-    sources += get_target_outputs(":flutter_canvaskit_platform_dart2js_sound")
-    sources += get_target_outputs(":flutter_canvaskit_platform_dart2js_unsound")
+    # TODO(jacksongardner): remove these once they are no longer used by the flutter tool
+    # https://github.com/flutter/flutter/issues/113303
+    sources += get_target_outputs(
+            ":flutter_dartdevc_kernel_sdk_outline_unsound_legacy")
+    sources +=
+        get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound_legacy")
 
     foreach(web_engine_library, web_engine_libraries) {
       sources += get_target_outputs(web_engine_library)
