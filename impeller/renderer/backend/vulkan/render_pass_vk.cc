@@ -346,7 +346,9 @@ bool RenderPassVK::UpdateDescriptorSets(const char* label,
   }
 
   std::array<vk::CopyDescriptorSet, 0> copies;
-  device_.updateDescriptorSets(writes, copies);
+  if (!writes.empty()) {
+    device_.updateDescriptorSets(writes, copies);
+  }
 
   return true;
 }
