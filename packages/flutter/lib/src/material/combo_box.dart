@@ -207,8 +207,8 @@ class ComboBox extends StatefulWidget {
   /// Descriptions of the menu items in the [ComboBox].
   ///
   /// This is a required parameter. It is recommended that at least one [ComboBoxEntry]
-  /// is provided. If this is a empty list, the menu is empty and only contains
-  /// vertical paddings.
+  /// is provided. If this is an empty list, the menu will be empty and only
+  /// contain space for padding.
   final List<ComboBoxEntry> comboBoxEntries;
 
   @override
@@ -308,14 +308,16 @@ class _ComboBoxState extends State<ComboBox> {
     for (int i = 0; i < filteredEntries.length; i++) {
       final ComboBoxEntry entry = filteredEntries[i];
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
-      final Color foregroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
+      final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;
 
       // Simulate the focused state because the text field should always be focused
       // during traversal. If the menu item has a custom foreground color, the "focused"
       // color will also change to foregroundColor.withOpacity(0.12).
       effectiveStyle = entry.enabled && i == focusedIndex
-        ? effectiveStyle.copyWith(backgroundColor: MaterialStatePropertyAll<Color>(foregroundColor.withOpacity(0.12)))
+        ? effectiveStyle.copyWith(
+            backgroundColor: MaterialStatePropertyAll<Color>(focusedBackgroundColor.withOpacity(0.12))
+          )
         : effectiveStyle;
 
       final MenuItemButton menuItemButton = MenuItemButton(
