@@ -209,7 +209,7 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
-}) : _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
