@@ -130,5 +130,8 @@
   "keyboardKeySpace": "स्पेस",
   "keyboardKeyMetaMacOs": "कमांड",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "मेनू बार मेनू"
+  "menuBarMenuLabel": "मेनू बार मेनू",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

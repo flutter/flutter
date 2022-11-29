@@ -132,5 +132,8 @@
   "keyboardKeySpace": "Razmaknica",
   "keyboardKeyMetaMacOs": "Naredba",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Izbornik trake izbornika"
+  "menuBarMenuLabel": "Izbornik trake izbornika",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

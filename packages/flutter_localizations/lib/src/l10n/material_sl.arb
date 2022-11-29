@@ -135,5 +135,8 @@
   "keyboardKeySpace": "Preslednica",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Meni menijske vrstice"
+  "menuBarMenuLabel": "Meni menijske vrstice",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

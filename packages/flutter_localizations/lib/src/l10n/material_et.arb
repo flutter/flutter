@@ -129,5 +129,8 @@
   "keyboardKeySpace": "Tühik",
   "keyboardKeyMetaMacOs": "Käsk",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menüüriba menüü"
+  "menuBarMenuLabel": "Menüüriba menüü",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

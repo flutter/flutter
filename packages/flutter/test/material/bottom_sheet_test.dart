@@ -785,7 +785,17 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(),
+            TestSemantics(
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 6,
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Scrim',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
           ],
         ),
       ],
@@ -929,7 +939,16 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(),
+            TestSemantics(
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              children: <TestSemantics>[
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Scrim',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
           ],
         ),
       ],
