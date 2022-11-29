@@ -42,7 +42,7 @@ Widget buildInputDecorator({
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
               useMaterial3: useMaterial3,
-              textTheme: const TextTheme(bodyLarge: TextStyle(fontFamily: 'Ahem', fontSize: 16.0)), 
+              textTheme: const TextTheme(bodyLarge: TextStyle(fontFamily: 'Ahem', fontSize: 16.0)),
             ),
             child: Align(
               alignment: Alignment.topLeft,
@@ -1108,7 +1108,7 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
     expect(getOpacity(tester, 'hint'), 0.0);
-    expect(getBorderBottom(tester),  48.0);
+    expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
 
     // Label is visible, hint is not (opacity 0.0).
@@ -1125,13 +1125,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0,  48.0));
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 8.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
     expect(getOpacity(tester, 'hint'), 1.0);
-    expect(getBorderBottom(tester),  48.0);
+    expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
   });
 
@@ -1296,7 +1296,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
-    expect(getBorderBottom(tester),  48.0);
+    expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('error')), const Offset(12.0, 56.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
@@ -3143,7 +3143,7 @@ void main() {
         useMaterial3: useMaterial3,
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
           labelText: 'label',
           hintText: 'hint',
@@ -3163,7 +3163,7 @@ void main() {
         // isEmpty: false (default)
         isFocused: true, // label is floating, still adjusted for contentPadding
         textDirection: TextDirection.rtl,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
           labelText: 'label',
           hintText: 'hint',
@@ -3616,7 +3616,7 @@ void main() {
 
     expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 50.0 : kMinInteractiveDimension)); // 45.5 bumped up to minimum.
     expect(tester.getSize(find.text('hint')).height, 10.0);
-    expect(tester.getSize(find.text('label')).height,  useMaterial3 ? 16.0 : 10.0);
+    expect(tester.getSize(find.text('label')).height, useMaterial3 ? 16.0 : 10.0);
     expect(tester.getSize(find.text('text')).height, 10.0);
     expect(tester.getTopLeft(find.text('hint')).dy, useMaterial3 ? 28 : 24.75);
     expect(tester.getTopLeft(find.text('label')).dy, useMaterial3 ? 17 : 19.0);
@@ -4554,43 +4554,43 @@ void main() {
     await pumpDecorator(focused: false);
     await tester.pumpAndSettle();
     const Size labelSize= Size(80, 16);
-    expect(getLabelRect(tester).topLeft, equals(Offset(12,  20)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
     expect(getLabelRect(tester).size, equals(labelSize));
 
     await pumpDecorator(focused: false, empty: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(Offset(12, -5.5)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
     await pumpDecorator(focused: true);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(Offset(12, -5.5)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
     await pumpDecorator(focused: true, empty: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals( Offset(12, -5.5)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
     await pumpDecorator(focused: false, enabled: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(Offset(12,  20)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
     expect(getLabelRect(tester).size, equals(labelSize));
 
     await pumpDecorator(focused: false, empty: false, enabled: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals( Offset(12, -5.5)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
     // Focused and disabled happens with NavigationMode.directional.
     await pumpDecorator(focused: true, enabled: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals(Offset(12,  20)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
     expect(getLabelRect(tester).size, equals(labelSize));
 
     await pumpDecorator(focused: true, empty: false, enabled: false);
     await tester.pumpAndSettle();
-    expect(getLabelRect(tester).topLeft, equals( Offset(12, -5.5)));
+    expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
     expect(getLabelRect(tester).size, equals(labelSize * 0.75));
   });
 
