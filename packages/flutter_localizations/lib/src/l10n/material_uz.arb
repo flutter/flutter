@@ -128,5 +128,8 @@
   "keyboardKeySpace": "Boʻsh joy",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menyu paneli"
+  "menuBarMenuLabel": "Menyu paneli",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

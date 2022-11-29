@@ -320,23 +320,21 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
-typedef onChangeCallback<T> = void Function(T newValue);
+typedef _SizeChangeCallback<Size> = void Function(Size newValue);
 
 class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
-  /// Creates a custom single child layout.
-  ///
-  /// The [delegate] argument must not be null.
+
   const _BottomSheetLayoutWrapper({
     super.key,
     required this.animationValue,
     required this.isScrollControlled,
-    this.onChildSizeChanged,
+    required this.onChildSizeChanged,
     super.child,
   }) : assert(animationValue != null);
 
   final double animationValue;
   final bool isScrollControlled;
-  final onChangeCallback<Size>? onChildSizeChanged;
+  final _SizeChangeCallback<Size>? onChildSizeChanged;
 
   @override
   _RenderBottomSheetLayoutWrapper createRenderObject(BuildContext context) {
@@ -353,7 +351,7 @@ class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
 class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
   _RenderBottomSheetLayoutWrapper({
     RenderBox? child,
-    onChangeCallback<Size>? onChildSizeChanged,
+    _SizeChangeCallback<Size>? onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
   }) : assert(animationValue != null),
@@ -362,8 +360,8 @@ class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
        _onChildSizeChanged = onChildSizeChanged,
        super(child);
 
-  var _lastSize = Size.zero;
-  onChangeCallback<Size>? _onChildSizeChanged;
+  Size _lastSize = Size.zero;
+  final _SizeChangeCallback<Size>? _onChildSizeChanged;
 
   double get animationValue => _animationValue;
   double _animationValue;
@@ -392,10 +390,6 @@ class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
   Size _getSize(BoxConstraints constraints) {
     return constraints.constrain(constraints.biggest);
   }
-
-  // TODO(ianh): It's a bit dubious to be using the getSize function from the delegate to
-  // figure out the intrinsic dimensions. We really should either not support intrinsics,
-  // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -468,35 +462,6 @@ class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
         _onChildSizeChanged?.call(_lastSize);
       }
     }
-  }
-}
-
-// MODAL BOTTOM SHEETS
-class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetLayout(this.progress, this.isScrollControlled);
-
-  final double progress;
-  final bool isScrollControlled;
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints(
-      minWidth: constraints.maxWidth,
-      maxWidth: constraints.maxWidth,
-      maxHeight: isScrollControlled
-        ? constraints.maxHeight
-        : constraints.maxHeight * 9.0 / 16.0,
-    );
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    return Offset(0.0, size.height - childSize.height * progress);
-  }
-
-  @override
-  bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
-    return progress != oldDelegate.progress;
   }
 }
 
@@ -597,7 +562,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           child: ClipRect(
             child: _BottomSheetLayoutWrapper(
               onChildSizeChanged: (Size size) {
-                widget.route.updateClipDetails(size);
+                widget.route.didChangeBarrierSemanticsClip(widget.route._getNewClipDetails(size));
                 // widget.route.topLayerSizeNotifier.value = size;
                 //widget.route.didChangeBarrierSemanticsInsets();
               },
@@ -870,8 +835,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
 
-  @override
-  EdgeInsets getNewClipDetails(Size topLayerSize) {
+  EdgeInsets _getNewClipDetails(Size topLayerSize) {
     return EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);
   }
 }
@@ -1005,7 +969,7 @@ Future<T?> showModalBottomSheet<T>({
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).scrimLabel,
     backgroundColor: backgroundColor,
     elevation: elevation,
     shape: shape,
