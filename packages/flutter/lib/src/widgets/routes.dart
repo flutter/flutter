@@ -1690,7 +1690,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // one of the builders
   late OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != barrierColor!.withOpacity(0.0));
