@@ -365,7 +365,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || oldDelegate.scrollbars != scrollbars
         || oldDelegate.overscroll != overscroll
         || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
-        || oldDelegate.pointerAxisModifiers != pointerAxisModifiers
+        || !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers)
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
         || delegate.shouldNotify(oldDelegate.delegate);
