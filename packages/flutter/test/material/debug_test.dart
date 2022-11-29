@@ -316,7 +316,6 @@ void main() {
       '     TextButtonTheme\n'
       '     Padding\n'
       '     Row\n'
-      '     Column\n'
       '     Padding\n'
       '     MediaQuery\n'
       '     Padding\n'
