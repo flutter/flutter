@@ -627,6 +627,17 @@ TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   ).run;
 }
 
+TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({
+  bool enableImpeller = false,
+}) {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/animated_complex_image_filtered_perf_e2e.dart',
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
+
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {
