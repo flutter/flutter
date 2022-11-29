@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:intl/locale.dart';
 
 import '../base/file_system.dart';
@@ -138,9 +139,9 @@ class L10nParserException extends L10nException {
     this.messageString,
     this.charNumber
   ): super('''
-$error
-[$fileName:$messageId] $messageString
-${List<String>.filled(4 + fileName.length + messageId.length + charNumber, ' ').join()}^''');
+[$fileName:$messageId] $error
+    $messageString
+    ${List<String>.filled(charNumber, ' ').join()}^''');
 
   final String error;
   final String fileName;
@@ -319,6 +320,7 @@ class Message {
     AppResourceBundleCollection allBundles,
     this.resourceId,
     bool isResourceAttributeRequired,
+    Logger logger,
     { this.useEscaping = false }
   ) : assert(templateBundle != null),
       assert(allBundles != null),
@@ -335,7 +337,7 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation, useEscaping: useEscaping).parse();
+      parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation, useEscaping: useEscaping).parse(logger);
     }
     // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
     for (final LocaleInfo locale in parsedMessages.keys) {
