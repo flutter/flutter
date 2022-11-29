@@ -355,6 +355,7 @@ class _DefaultPub implements Pub {
   }) async {
     int exitCode;
 
+    _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
     try {

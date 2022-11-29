@@ -558,6 +558,9 @@ void main() {
         ),
       ),
     );
+    expect(logger.statusText,
+      'Running "flutter pub get" in /...\n'
+    );
     expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -924,6 +927,7 @@ void main() {
       context: PubContext.flutterTests,
     ); // pub sets date of .packages to 2002
 
+    expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
     logger.clear();
@@ -938,6 +942,7 @@ void main() {
       context: PubContext.flutterTests,
     ); // pub does nothing
 
+    expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
     expect(fileSystem.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
     logger.clear();
