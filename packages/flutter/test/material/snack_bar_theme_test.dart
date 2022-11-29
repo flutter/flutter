@@ -24,7 +24,7 @@ void main() {
     expect(snackBarTheme.width, null);
     expect(snackBarTheme.insetPadding, null);
     expect(snackBarTheme.showCloseIcon, null);
-    expect(snackBarTheme.iconColor, null);
+    expect(snackBarTheme.closeIconColor, null);
   });
 
   test(
@@ -64,7 +64,7 @@ void main() {
       width: 400.0,
       insetPadding: EdgeInsets.all(10.0),
       showCloseIcon: false,
-      iconColor: Color(0xFF0000AA),
+      closeIconColor: Color(0xFF0000AA),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -83,7 +83,7 @@ void main() {
       'width: 400.0',
       'insetPadding: EdgeInsets.all(10.0)',
       'showCloseIcon: false',
-      'iconColor: Color(0xff0000aa)',
+      'closeIconColor: Color(0xff0000aa)',
     ]);
   });
 

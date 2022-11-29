@@ -63,7 +63,7 @@ class SnackBarThemeData with Diagnosticable {
     this.width,
     this.insetPadding,
     this.showCloseIcon,
-    this.iconColor,
+    this.closeIconColor,
   })  : assert(elevation == null || elevation >= 0.0),
         assert(
             width == null ||
@@ -128,10 +128,10 @@ class SnackBarThemeData with Diagnosticable {
   /// Whether to show an optional "Close" icon.
   final bool? showCloseIcon;
 
-  /// Overrides the default value for [SnackBar.iconColor].
+  /// Overrides the default value for [SnackBar.closeIconColor].
   ///
   /// This value is only used if [showCloseIcon] is true.
-  final Color? iconColor;
+  final Color? closeIconColor;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -146,7 +146,7 @@ class SnackBarThemeData with Diagnosticable {
     double? width,
     EdgeInsets? insetPadding,
     bool? showCloseIcon,
-    Color? iconColor,
+    Color? closeIconColor,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -159,7 +159,7 @@ class SnackBarThemeData with Diagnosticable {
       width: width ?? this.width,
       insetPadding: insetPadding ?? this.insetPadding,
       showCloseIcon: showCloseIcon ?? this.showCloseIcon,
-      iconColor: iconColor ?? this.iconColor,
+      closeIconColor: closeIconColor ?? this.closeIconColor,
     );
   }
 
@@ -180,7 +180,7 @@ class SnackBarThemeData with Diagnosticable {
       behavior: t < 0.5 ? a?.behavior : b?.behavior,
       width: lerpDouble(a?.width, b?.width, t),
       insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
-      iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
+      closeIconColor: Color.lerp(a?.closeIconColor, b?.closeIconColor, t),
     );
   }
 
@@ -196,7 +196,7 @@ class SnackBarThemeData with Diagnosticable {
         width,
         insetPadding,
         showCloseIcon,
-        iconColor,
+        closeIconColor,
       );
 
   @override
@@ -218,7 +218,7 @@ class SnackBarThemeData with Diagnosticable {
         && other.width == width
         && other.insetPadding == insetPadding
         && other.showCloseIcon == showCloseIcon
-        && other.iconColor == iconColor;
+        && other.closeIconColor == closeIconColor;
   }
 
   @override
@@ -234,6 +234,6 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showCloseIcon', showCloseIcon, defaultValue: null));
-    properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
+    properties.add(ColorProperty('closeIconColor', closeIconColor, defaultValue: null));
   }
 }

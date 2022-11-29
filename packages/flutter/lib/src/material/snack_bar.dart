@@ -236,7 +236,7 @@ class SnackBar extends StatefulWidget {
     this.behavior,
     this.action,
     this.showCloseIcon,
-    this.iconColor,
+    this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
@@ -365,15 +365,15 @@ class SnackBar extends StatefulWidget {
   /// (optional) An optional color for the close icon, if [showCloseIcon] is
   /// true.
   ///
-  /// If this property is null, then [SnackBarThemeData.iconColor] of
+  /// If this property is null, then [SnackBarThemeData.closeIconColor] of
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// inverse surface.
   ///
-  /// If [iconColor] is a [MaterialStateColor], then the icon color will be
+  /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
   /// be resolved against the set of [MaterialState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
-  final Color? iconColor;
+  final Color? closeIconColor;
 
   /// The amount of time the snack bar should be displayed.
   ///
@@ -431,7 +431,7 @@ class SnackBar extends StatefulWidget {
       behavior: behavior,
       action: action,
       showCloseIcon: showCloseIcon,
-      iconColor: iconColor,
+      closeIconColor: closeIconColor,
       duration: duration,
       animation: newAnimation,
       onVisible: onVisible,
@@ -579,7 +579,7 @@ class _SnackBarState extends State<SnackBar> {
         ? IconButton(
             icon: const Icon(Icons.close),
             iconSize: 24.0,
-            color: widget.iconColor ?? snackBarTheme.iconColor ?? defaults.iconColor,
+            color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
             onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
           )
         : null;
@@ -818,7 +818,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
   bool get showCloseIcon => false;
 
   @override
-  Color get iconColor => _colors.onSurface;
+  Color get closeIconColor => _colors.onSurface;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Snackbar
@@ -885,7 +885,7 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
   bool get showCloseIcon => false;
 
   @override
-  Color get iconColor => _colors.onInverseSurface;
+  Color get closeIconColor => _colors.onInverseSurface;
   }
 
 
