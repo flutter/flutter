@@ -1397,77 +1397,61 @@ void main() {
       final FocusNode scope = nodes[0].enclosingScope!;
       nodes[4].requestFocus();
 
-      void expectState(List<bool?> states, String stage) {
-        expect(focus, orderedEquals(states), reason: 'for $stage');
-        for (int index = 0; index < states.length; ++index) {
-          expect(focus[index], states[index] == null ? isNull : (states[index]! ? isTrue : isFalse),
-            reason: 'focus $index for $stage is ${focus[index]}, not ${states[index]}, states: $states');
-          if (states[index] == null) {
-            expect(nodes[index].hasFocus, isFalse,
-            reason: "node $index for $stage has focus when it shouldn't");
-          } else {
-            expect(nodes[index].hasFocus, states[index],
-              reason: "node $index focus for $stage isn't the expected value of ${states[index]}");
-          }
-        }
-        expect(scope.hasFocus, isTrue, reason: "Scope in $stage doesn't have focus");
-      }
-
       // Test to make sure that the same path is followed backwards and forwards.
       await tester.pump();
-      expectState(<bool?>[null, null, null, null, true, null], 'stage 1');
+      expect(focus, orderedEquals(<bool?>[null, null, null, null, true, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[null, null, true, null, false, null], 'stage 2');
+      expect(focus, orderedEquals(<bool?>[null, null, true, null, false, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[true, null, false, null, null, null], 'stage 3');
+      expect(focus, orderedEquals(<bool?>[true, null, false, null, null, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[false, null, true, null, null, null], 'stage 4');
+      expect(focus, orderedEquals(<bool?>[false, null, true, null, null, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expectState(<bool?>[null, null, false, null, true, null], 'stage 5');
+      expect(focus, orderedEquals(<bool?>[null, null, false, null, true, null]));
       clear();
 
       // Make sure that moving in a different axis clears the history.
       expect(scope.focusInDirection(TraversalDirection.left), isTrue);
       await tester.pump();
-      expectState(<bool?>[null, null, null, true, false, null], 'stage 6');
+      expect(focus, orderedEquals(<bool?>[null, null, null, true, false, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[null, true, null, false, null, null], 'stage 7');
+      expect(focus, orderedEquals(<bool?>[null, true, null, false, null, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.up), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[true, false, null, null, null, null], 'stage 8');
+      expect(focus, orderedEquals(<bool?>[true, false, null, null, null, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
 
-      expectState(<bool?>[false, true, null, null, null, null], 'stage 9');
+      expect(focus, orderedEquals(<bool?>[false, true, null, null, null, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expectState(<bool?>[null, false, null, true, null, null], 'stage 10');
+      expect(focus, orderedEquals(<bool?>[null, false, null, true, null, null]));
       clear();
     });
 
