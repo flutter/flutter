@@ -25,6 +25,7 @@ import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'drawer_theme.dart';
+import 'dropdown_menu_theme.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
 import 'filled_button_theme.dart';
@@ -348,6 +349,7 @@ class ThemeData with Diagnosticable {
     DialogTheme? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
+    DropdownMenuThemeData? dropdownMenuTheme,
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
     FilledButtonThemeData? filledButtonTheme,
@@ -602,6 +604,7 @@ class ThemeData with Diagnosticable {
     dialogTheme ??= const DialogTheme();
     dividerTheme ??= const DividerThemeData();
     drawerTheme ??= const DrawerThemeData();
+    dropdownMenuTheme ??= const DropdownMenuThemeData();
     elevatedButtonTheme ??= const ElevatedButtonThemeData();
     expansionTileTheme ??= const ExpansionTileThemeData();
     filledButtonTheme ??= const FilledButtonThemeData();
@@ -699,6 +702,7 @@ class ThemeData with Diagnosticable {
       dialogTheme: dialogTheme,
       dividerTheme: dividerTheme,
       drawerTheme: drawerTheme,
+      dropdownMenuTheme: dropdownMenuTheme,
       elevatedButtonTheme: elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme,
       filledButtonTheme: filledButtonTheme,
@@ -812,6 +816,7 @@ class ThemeData with Diagnosticable {
     required this.dialogTheme,
     required this.dividerTheme,
     required this.drawerTheme,
+    required this.dropdownMenuTheme,
     required this.elevatedButtonTheme,
     required this.expansionTileTheme,
     required this.filledButtonTheme,
@@ -983,6 +988,7 @@ class ThemeData with Diagnosticable {
        assert(dialogTheme != null),
        assert(dividerTheme != null),
        assert(drawerTheme != null),
+       assert(dropdownMenuTheme != null),
        assert(elevatedButtonTheme != null),
        assert(expansionTileTheme != null),
        assert(filledButtonTheme != null),
@@ -1554,6 +1560,9 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [Drawer] widgets.
   final DrawerThemeData drawerTheme;
 
+  /// A theme for customizing the appearance and layout of [DropdownMenu] widgets.
+  final DropdownMenuThemeData dropdownMenuTheme;
+
   /// A theme for customizing the appearance and internal layout of
   /// [ElevatedButton]s.
   final ElevatedButtonThemeData elevatedButtonTheme;
@@ -1816,6 +1825,13 @@ class ThemeData with Diagnosticable {
   Color get toggleableActiveColor => _toggleableActiveColor!;
   final Color? _toggleableActiveColor;
 
+  // The number 5 was chosen without any real science or research behind it. It
+
+  // copies of ThemeData in memory comfortably) and not too small (most apps
+  // shouldn't have more than 5 theme/localization pairs).
+  static const int _localizedThemeDataCacheSize = 5;
+  /// Caches localized themes to speed up the [localize] method.
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ///
   /// The [brightness] value is applied to the [colorScheme].
@@ -1883,6 +1899,7 @@ class ThemeData with Diagnosticable {
     DialogTheme? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
+    DropdownMenuThemeData? dropdownMenuTheme,
     ElevatedButtonThemeData? elevatedButtonTheme,
     ExpansionTileThemeData? expansionTileTheme,
     FilledButtonThemeData? filledButtonTheme,
@@ -2047,6 +2064,7 @@ class ThemeData with Diagnosticable {
       dialogTheme: dialogTheme ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
+      dropdownMenuTheme: dropdownMenuTheme ?? this.dropdownMenuTheme,
       elevatedButtonTheme: elevatedButtonTheme ?? this.elevatedButtonTheme,
       expansionTileTheme: expansionTileTheme ?? this.expansionTileTheme,
       filledButtonTheme: filledButtonTheme ?? this.filledButtonTheme,
@@ -2089,14 +2107,7 @@ class ThemeData with Diagnosticable {
       bottomAppBarColor: bottomAppBarColor ?? _bottomAppBarColor,
     );
   }
-
-  // The number 5 was chosen without any real science or research behind it. It
   // just seemed like a number that's not too big (we should be able to fit 5
-  // copies of ThemeData in memory comfortably) and not too small (most apps
-  // shouldn't have more than 5 theme/localization pairs).
-  static const int _localizedThemeDataCacheSize = 5;
-
-  /// Caches localized themes to speed up the [localize] method.
   static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache =
       _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
 
@@ -2253,6 +2264,7 @@ class ThemeData with Diagnosticable {
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
+      dropdownMenuTheme: DropdownMenuThemeData.lerp(a.dropdownMenuTheme, b.dropdownMenuTheme, t),
       elevatedButtonTheme: ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t)!,
       expansionTileTheme: ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
       filledButtonTheme: FilledButtonThemeData.lerp(a.filledButtonTheme, b.filledButtonTheme, t)!,
@@ -2361,6 +2373,7 @@ class ThemeData with Diagnosticable {
         other.dialogTheme == dialogTheme &&
         other.dividerTheme == dividerTheme &&
         other.drawerTheme == drawerTheme &&
+        other.dropdownMenuTheme == dropdownMenuTheme &&
         other.elevatedButtonTheme == elevatedButtonTheme &&
         other.expansionTileTheme == expansionTileTheme &&
         other.filledButtonTheme == filledButtonTheme &&
@@ -2466,6 +2479,7 @@ class ThemeData with Diagnosticable {
       dialogTheme,
       dividerTheme,
       drawerTheme,
+      dropdownMenuTheme,
       elevatedButtonTheme,
       expansionTileTheme,
       filledButtonTheme,
@@ -2573,6 +2587,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DrawerThemeData>('drawerTheme', drawerTheme, defaultValue: defaultData.drawerTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DropdownMenuThemeData>('dropdownMenuTheme', dropdownMenuTheme, defaultValue: defaultData.dropdownMenuTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ElevatedButtonThemeData>('elevatedButtonTheme', elevatedButtonTheme, defaultValue: defaultData.elevatedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ExpansionTileThemeData>('expansionTileTheme', expansionTileTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FilledButtonThemeData>('filledButtonTheme', filledButtonTheme, defaultValue: defaultData.filledButtonTheme, level: DiagnosticLevel.debug));
