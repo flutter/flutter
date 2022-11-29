@@ -135,10 +135,6 @@ template("metal_library") {
       rebase_path(depfile),
     ]
 
-    if (!is_debug) {
-      args += [ "--optimize" ]
-    }
-
     if (is_ios) {
       if (use_ios_simulator) {
         args += [ "--platform=ios-simulator" ]
