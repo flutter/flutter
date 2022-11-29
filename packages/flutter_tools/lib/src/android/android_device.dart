@@ -626,7 +626,8 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      '--ez', 'enable-dart-profiling', 'true',
+      if (debuggingOptions.enableDartProfiling)
+        ...<String>['--ez', 'enable-dart-profiling', 'true'],
       if (traceStartup)
         ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null)

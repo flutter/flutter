@@ -37,6 +37,12 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
+/// If `--dump-info` should be passed to dart2js.
+const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
+
+// If `--no-frequency-based-minification` should be based to dart2js
+const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
+
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
 
@@ -220,6 +226,8 @@ class Dart2JSTarget extends Target {
     }
 
     final String? dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final bool dumpInfo = environment.defines[kDart2jsDumpInfo] == 'true';
+    final bool noFrequencyBasedMinification = environment.defines[kDart2jsNoFrequencyBasedMinification] == 'true';
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
     final bool csp = environment.defines[kCspMode] == 'true';
 
@@ -227,6 +235,8 @@ class Dart2JSTarget extends Target {
       ...sharedCommandOptions,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
+      if (dumpInfo) '--dump-info',
+      if (noFrequencyBasedMinification) '--no-frequency-based-minification',
       if (csp) '--csp',
       '-o',
       outputJSFile.path,

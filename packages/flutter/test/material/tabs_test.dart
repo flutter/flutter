@@ -3420,6 +3420,49 @@ void main() {
     ));
   });
 
+  testWidgets('TabController changes with different initialIndex', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/115917
+    const Key lastTabKey = Key('Last Tab');
+    TabController? controller;
+
+    Widget buildFrame(int length) {
+      controller = TabController(
+        vsync: const TestVSync(),
+        length: length,
+        initialIndex: length - 1,
+      );
+      return boilerplate(
+        child: TabBar(
+          labelPadding: EdgeInsets.zero,
+          controller: controller,
+          isScrollable: true,
+          tabs: List<Widget>.generate(
+            length,
+            (int index) {
+              return SizedBox(
+                width: 100,
+                child: Tab(
+                  key: index == length - 1 ? lastTabKey : null,
+                  text: 'Tab $index',
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10));
+    expect(controller!.index, 9);
+    expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
+
+    // Rebuild with a new controller with more tabs and last tab selected.
+    // Last tab should be visible and on the right of the window.
+    await tester.pumpWidget(buildFrame(15));
+    expect(controller!.index, 14);
+    expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
+  });
+
   testWidgets('Default tab indicator color is white', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/15958
     final List<String> tabs = <String>['LEFT', 'RIGHT'];

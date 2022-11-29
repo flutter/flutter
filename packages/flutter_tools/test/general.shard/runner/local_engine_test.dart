@@ -146,6 +146,30 @@ void main() {
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
+  testWithoutContext('works if local engine is host engine with suffixes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt_arm64/')
+      ..createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localEngineLocator.findEnginePath(null, localEngine.path, null),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/host_debug_unopt_arm64',
+        targetEngine: '/arbitrary/engine/src/out/host_debug_unopt_arm64',
+      ),
+    );
+  });
+
   testWithoutContext('fails if host_debug does not exist', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory localEngine = fileSystem

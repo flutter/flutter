@@ -25,11 +25,13 @@ Future<void> buildWeb(
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
-  bool nativeNullAssertions,
-  String? baseHref,
+  bool nativeNullAssertions, {
   String? dart2jsOptimization,
-  {String? outputDirectoryPath}
-) async {
+  String? baseHref,
+  bool dumpInfo = false,
+  bool noFrequencyBasedMinification = false,
+  String? outputDirectoryPath,
+}) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = outputDirectoryPath == null
@@ -68,6 +70,8 @@ Future<void> buildWeb(
           kServiceWorkerStrategy: serviceWorkerStrategy,
           if (dart2jsOptimization != null)
           kDart2jsOptimization: dart2jsOptimization,
+          kDart2jsDumpInfo: dumpInfo.toString(),
+          kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,
