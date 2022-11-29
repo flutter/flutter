@@ -1694,7 +1694,8 @@ targets:
 
   - name: Linux_android flavors_test
     recipe: devicelab/devicelab_drone
-    presubmit: true # TESTING PURPOSES ONLY
+    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >
