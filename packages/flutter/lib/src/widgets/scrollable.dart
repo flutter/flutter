@@ -757,28 +757,41 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // Returns the delta that should result from applying [event] with axis,
   // direction, and any modifier specified by the ScrollBehavior taken into
-  // account.
+  // account for horizontal scrollers.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     final TargetPlatform platform = _configuration.getPlatform(context);
-    final bool shiftEnabled = HardwareKeyboard.instance.logicalKeysPressed.contains(
-      _configuration.pointerAxisModifier,
-    );
     final bool horizontal = widget.axis == Axis.horizontal;
 
+    final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
+    final bool keyModifiersAreActive = pressed.any(_configuration.pointerAxisModifiers.contains);
+    pressed.removeAll(_configuration.pointerAxisModifiers);
+    // Ensure no other keys are currently pressed so as to not conflict with
+    // other shortcuts.
+    final bool axisIsFlipped = keyModifiersAreActive & pressed.isEmpty;
     double delta = horizontal ? event.scrollDelta.dx : event.scrollDelta.dy;
 
-    if (horizontal & shiftEnabled) {
+    if (horizontal & axisIsFlipped) {
       switch(platform) {
+        case TargetPlatform.macOS:
+          // Mac already handles shift to flip the input axis, so if the
+          // modifier is currently LogicalKeyboardKey.shift (the default),
+          // ignore.
+        final bool alreadyHandled = HardwareKeyboard.instance.logicalKeysPressed.any(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.shiftRight,
+            }.contains);
+          if (alreadyHandled) {
+            break;
+          }
+          continue flip;
+        flip:
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           delta = event.scrollDelta.dy;
-          break;
-        case TargetPlatform.macOS:
-          // Mac already handles shift to flip the input axis.
-          // TODO(Piinks): Should we undo it in the engine?
           break;
       }
     }

@@ -101,7 +101,7 @@ class ScrollBehavior {
     bool? scrollbars,
     bool? overscroll,
     Set<PointerDeviceKind>? dragDevices,
-    LogicalKeyboardKey? pointerAxisModifier,
+    Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
     @Deprecated(
@@ -115,7 +115,7 @@ class ScrollBehavior {
       scrollbars: scrollbars ?? true,
       overscroll: overscroll ?? true,
       dragDevices: dragDevices,
-      pointerAxisModifier: pointerAxisModifier,
+      pointerAxisModifiers: pointerAxisModifiers,
       physics: physics,
       platform: platform,
       androidOverscrollIndicator: androidOverscrollIndicator
@@ -135,15 +135,25 @@ class ScrollBehavior {
   /// impossible to select text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
-  /// The [LogicalKeyboardKey] that, when pressed in combination with a pointer
-  /// scroll event, will flip the axis of the scroll input.
+  /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in
+  /// combination with a vertical pointer scroll event, will flip the axis of
+  /// the scroll input to be horizontal.
   ///
-  /// This will for example, result in the vertical input of a physical mouse
-  /// wheel, to apply to a [ScrollView] with an [Axis.horizontal] scroll
-  /// direction.
+  /// This will for example, result in the input of a physical mouse wheel, to
+  /// apply to a [ScrollView] with an [Axis.horizontal] scroll direction.
   ///
-  /// Defaults to [LogicalKeyboardKey.shift], cannot be null.
-  LogicalKeyboardKey get pointerAxisModifier => LogicalKeyboardKey.shift;
+  /// If other keys exclusive of this set are pressed during a scroll event, in
+  /// conjunction with keys from this set, the scroll input will not be affected.
+  ///
+  /// On MacOs, [LogicalKeyboardKey.shift] will always flip the input axes,
+  /// regardless of this value.
+  ///
+  /// Defaults to [LogicalKeyboardKey.shiftLeft],
+  /// [LogicalKeyboardKey.shiftRight], cannot be null.
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => <LogicalKeyboardKey>{
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+  };
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
@@ -275,13 +285,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.scrollbars = true,
     this.overscroll = true,
     Set<PointerDeviceKind>? dragDevices,
-    LogicalKeyboardKey? pointerAxisModifier,
+    Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) : _androidOverscrollIndicator = androidOverscrollIndicator,
        _dragDevices = dragDevices,
-       _pointerAxisModifier = pointerAxisModifier;
+       _pointerAxisModifiers = pointerAxisModifiers;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -289,7 +299,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
-  final LogicalKeyboardKey? _pointerAxisModifier;
+  final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
   @override
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
@@ -297,7 +307,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
-  LogicalKeyboardKey get pointerAxisModifier => _pointerAxisModifier ?? delegate.pointerAxisModifier;
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
 
   @override
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
@@ -323,7 +333,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     bool? scrollbars,
     bool? overscroll,
     Set<PointerDeviceKind>? dragDevices,
-    LogicalKeyboardKey? pointerAxisModifier,
+    Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
     AndroidOverscrollIndicator? androidOverscrollIndicator
@@ -332,7 +342,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       scrollbars: scrollbars ?? this.scrollbars,
       overscroll: overscroll ?? this.overscroll,
       dragDevices: dragDevices ?? this.dragDevices,
-      pointerAxisModifier: pointerAxisModifier ?? this.pointerAxisModifier,
+      pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
@@ -355,7 +365,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || oldDelegate.scrollbars != scrollbars
         || oldDelegate.overscroll != overscroll
         || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
-        || oldDelegate.pointerAxisModifier != pointerAxisModifier
+        || oldDelegate.pointerAxisModifiers != pointerAxisModifiers
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
         || delegate.shouldNotify(oldDelegate.delegate);
