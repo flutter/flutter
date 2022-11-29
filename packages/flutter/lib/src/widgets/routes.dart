@@ -1707,7 +1707,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
         clipDetailsNotifier: _clipDetailsNotifier,
-        semanticsOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
+        semanticsOnTapHint: barrierOnTapHint,
       );
     } else {
       barrier = ModalBarrier(
@@ -1715,7 +1715,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
         clipDetailsNotifier: _clipDetailsNotifier,
-        semanticsOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
+        semanticsOnTapHint: barrierOnTapHint,
       );
     }
     if (filter != null) {
