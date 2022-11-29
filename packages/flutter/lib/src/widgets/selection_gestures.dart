@@ -986,8 +986,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   void didStopTrackingLastPointer(int pointer) {
     switch (_dragState) {
       case _DragState.ready:
-        resolve(GestureDisposition.rejected);
         _checkCancel();
+        resolve(GestureDisposition.rejected);
         break;
 
       case _DragState.possible:
