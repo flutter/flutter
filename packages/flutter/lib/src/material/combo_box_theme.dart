@@ -37,12 +37,12 @@ class ComboBoxThemeData with Diagnosticable {
   /// Overrides the default value for [ComboBox.textStyle].
   final TextStyle? textStyle;
 
-  /// The input decoration theme for the [TextField]s in the [ComboBox].
+  /// The input decoration theme for the [TextField]s in a [ComboBox].
   ///
   /// If this is null, the [ComboBox] provides its own defaults.
   final InputDecorationTheme? inputDecorationTheme;
 
-  /// Overrides the menu's default style in the [ComboBox].
+  /// Overrides the menu's default style in a [ComboBox].
   ///
   /// Any values not set in the [MenuStyle] will use the menu default for that
   /// property.

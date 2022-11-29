@@ -64,7 +64,7 @@ class ComboBoxEntry {
   /// this entry is disabled.
   final bool enabled;
 
-  /// Customizes this button's appearance.
+  /// Customizes this menu item's appearance.
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -206,7 +206,9 @@ class ComboBox extends StatefulWidget {
 
   /// Descriptions of the menu items in the [ComboBox].
   ///
-  /// This is a required parameter.
+  /// This is a required parameter. It is recommended that at least one [ComboBoxEntry]
+  /// is provided. If this is a empty list, the menu is empty and only contains
+  /// vertical paddings.
   final List<ComboBoxEntry> comboBoxEntries;
 
   @override
@@ -231,12 +233,8 @@ class _ComboBoxState extends State<ComboBox> {
     super.initState();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.comboBoxEntries;
-    for (final ComboBoxEntry entry in filteredEntries) {
-      if (entry.enabled) {
-        _menuHasEnabledItem = true;
-        break;
-      }
-    }
+    _menuHasEnabledItem = filteredEntries.any((ComboBoxEntry entry) => entry.enabled);
+
     refreshLeadingPadding();
   }
 
@@ -244,13 +242,7 @@ class _ComboBoxState extends State<ComboBox> {
   void didUpdateWidget(ComboBox oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.comboBoxEntries != widget.comboBoxEntries) {
-      _menuHasEnabledItem = false;
-      for (final ComboBoxEntry entry in filteredEntries) {
-        if (entry.enabled) {
-          _menuHasEnabledItem = true;
-          break;
-        }
-      }
+      _menuHasEnabledItem = filteredEntries.any((ComboBoxEntry entry) => entry.enabled);
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
@@ -275,22 +267,20 @@ class _ComboBoxState extends State<ComboBox> {
   }
 
   List<ComboBoxEntry> filter(List<ComboBoxEntry> entries, TextEditingController textEditingController) {
-    final List<ComboBoxEntry> filteredEntries = entries.where((ComboBoxEntry entry)
-      => entry.label.toLowerCase().contains(textEditingController.text.toLowerCase())).toList();
-
-    return filteredEntries;
+    final String filterText = textEditingController.text.toLowerCase();
+    return entries
+      .where((ComboBoxEntry entry) => entry.label.toLowerCase().contains(filterText))
+      .toList();
   }
 
   int? search(List<ComboBoxEntry> entries, TextEditingController textEditingController) {
-    for (int i = 0; i < entries.length; i++) {
-      final ComboBoxEntry entry = entries[i];
-      if (textEditingController.value.text.isNotEmpty
-          && entry.label.toLowerCase().contains(textEditingController.text.toLowerCase())) {
-        return i;
-      }
+    final String searchText = textEditingController.value.text.toLowerCase();
+    if (searchText.isEmpty) {
+      return null;
     }
+    final int index = entries.indexWhere((ComboBoxEntry entry) => entry.label.toLowerCase().contains(searchText));
 
-    return null;
+    return index != -1 ? index : null;
   }
 
   List<Widget> _buildButtons(
@@ -302,14 +292,17 @@ class _ComboBoxState extends State<ComboBox> {
     final List<Widget> result = <Widget>[];
     final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
     final ButtonStyle defaultStyle;
-    if (textDirection == TextDirection.ltr) {
-      defaultStyle = MenuItemButton.styleFrom(
-        padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
-      );
-    } else {
-      defaultStyle = MenuItemButton.styleFrom(
-        padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
-      );
+    switch (textDirection) {
+      case TextDirection.rtl:
+        defaultStyle = MenuItemButton.styleFrom(
+          padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
+        );
+        break;
+      case TextDirection.ltr:
+        defaultStyle = MenuItemButton.styleFrom(
+          padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
+        );
+        break;
     }
 
     for (int i = 0; i < filteredEntries.length; i++) {
@@ -319,7 +312,8 @@ class _ComboBoxState extends State<ComboBox> {
         ?? Theme.of(context).colorScheme.onSurface;
 
       // Simulate the focused state because the text field should always be focused
-      // during traversal.
+      // during traversal. If the menu item has a custom foreground color, the "focused"
+      // color will also change to foregroundColor.withOpacity(0.12).
       effectiveStyle = entry.enabled && i == focusedIndex
         ? effectiveStyle.copyWith(backgroundColor: MaterialStatePropertyAll<Color>(foregroundColor.withOpacity(0.12)))
         : effectiveStyle;
@@ -328,12 +322,14 @@ class _ComboBoxState extends State<ComboBox> {
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
         trailingIcon: entry.trailingIcon,
-        onPressed: entry.enabled ? () {
-          textEditingController.text = entry.label;
-          textEditingController.selection =
-              TextSelection.collapsed(offset: textEditingController.text.length);
-          currentHighlight = widget.enableSearch ? i : -1;
-        } : null,
+        onPressed: entry.enabled
+          ? () {
+              textEditingController.text = entry.label;
+              textEditingController.selection =
+                  TextSelection.collapsed(offset: textEditingController.text.length);
+              currentHighlight = widget.enableSearch ? i : -1;
+            }
+          : null,
         requestFocusOnHover: false,
         child: Text(entry.label),
       );
@@ -342,6 +338,36 @@ class _ComboBoxState extends State<ComboBox> {
 
     return result;
   }
+
+  void handleUpKeyInvoke(_) => setState(() {
+    if (!_menuHasEnabledItem || !_controller.isOpen) {
+      return;
+    }
+    _enableFilter = false;
+    currentHighlight ??= 0;
+    currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
+    while (!filteredEntries[currentHighlight!].enabled) {
+      currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
+    }
+    _textEditingController.text = filteredEntries[currentHighlight!].label;
+    _textEditingController.selection =
+      TextSelection.collapsed(offset: _textEditingController.text.length);
+  });
+
+  void handleDownKeyInvoke(_) => setState(() {
+    if (!_menuHasEnabledItem || !_controller.isOpen) {
+      return;
+    }
+    _enableFilter = false;
+    currentHighlight ??= -1;
+    currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
+    while (!filteredEntries[currentHighlight!].enabled) {
+      currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
+    }
+    _textEditingController.text = filteredEntries[currentHighlight!].label;
+    _textEditingController.selection =
+      TextSelection.collapsed(offset: _textEditingController.text.length);
+  });
 
   void handlePressed(MenuController controller) {
     if (controller.isOpen) {
@@ -404,42 +430,17 @@ class _ComboBoxState extends State<ComboBox> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
-            onInvoke: (_ArrowUpIntent intent) => setState(() {
-              if (!_menuHasEnabledItem || !_controller.isOpen) {
-                return;
-              }
-              _enableFilter = false;
-              currentHighlight ??= 0;
-              currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
-              while (!filteredEntries[currentHighlight!].enabled) {
-                currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
-              }
-              _textEditingController.text = filteredEntries[currentHighlight!].label;
-              _textEditingController.selection =
-                  TextSelection.collapsed(offset: _textEditingController.text.length);
-            }),
+            onInvoke: handleUpKeyInvoke,
           ),
           _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
-            onInvoke: (_ArrowDownIntent intent) => setState(() {
-              if (!_menuHasEnabledItem || !_controller.isOpen) {
-                return;
-              }
-              _enableFilter = false;
-              currentHighlight ??= -1;
-              currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
-              while (!filteredEntries[currentHighlight!].enabled) {
-                currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
-              }
-              _textEditingController.text = filteredEntries[currentHighlight!].label;
-              _textEditingController.selection =
-                  TextSelection.collapsed(offset: _textEditingController.text.length);
-            }),
+            onInvoke: handleDownKeyInvoke,
           ),
         },
         child: MenuAnchor(
           style: effectiveMenuStyle,
           controller: _controller,
           menuChildren: menu,
+          crossAxisUnconstrained: false,
           builder: (BuildContext context, MenuController controller, Widget? child) {
             assert(_initialMenu != null);
             final Widget trailingButton = Padding(
@@ -723,6 +724,7 @@ class _RenderComboBoxBody extends RenderBox
   }
 }
 
+// Hand coded defaults. These will be updated once we have tokens/spec.
 class _ComboBoxDefaultsM3 extends ComboBoxThemeData {
   _ComboBoxDefaultsM3(this.context);
 

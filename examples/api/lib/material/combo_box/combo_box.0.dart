@@ -17,13 +17,8 @@ class ComboBoxExample extends StatelessWidget {
 
     for (int index = 0; index < EntryLabel.values.length; index++) {
       // Disabled item 1, 2 and 6.
-      if (index == 1 || index == 2 || index == 6) {
-        final ComboBoxEntry entry = ComboBoxEntry(label: EntryLabel.values[index].label, enabled: false);
-        entries.add(entry);
-      } else {
-        final ComboBoxEntry entry = ComboBoxEntry(label: EntryLabel.values[index].label);
-        entries.add(entry);
-      }
+      final bool enabled = index != 1 && index != 2 && index != 6;
+      entries.add(ComboBoxEntry(label: EntryLabel.values[index].label, enabled: enabled));
     }
     return entries;
   }
@@ -33,7 +28,6 @@ class ComboBoxExample extends StatelessWidget {
     final List<ComboBoxEntry> comboBoxEntries = getEntryList();
 
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green
