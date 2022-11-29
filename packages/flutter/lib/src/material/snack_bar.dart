@@ -24,7 +24,10 @@ const double _singleLineVerticalPadding = 14.0;
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
-const Curve _snackBarFadeInCurve = Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarM3HeightCurve = Curves.easeInOutQuart;
+
+const Curve _snackBarFadeInCurve = Interval(0.4, 1.0);
+const Curve _snackBarM3FadeInCurve = Interval(0.4, 0.6, curve: Curves.easeInCirc);
 const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [SnackBar] was closed.
@@ -137,9 +140,17 @@ class _SnackBarActionState extends State<SnackBarAction> {
         : _SnackbarDefaultsM2(context);
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
+
+
     MaterialStateColor resolveForegroundColor() {
       if (widget.textColor is MaterialStateColor) {
         return widget.textColor! as MaterialStateColor;
+      }
+      if (snackBarTheme.actionTextColor is MaterialStateColor) {
+        return snackBarTheme.actionTextColor! as MaterialStateColor;
+      }
+      if (defaults.actionTextColor is MaterialStateColor) {
+        return defaults.actionTextColor! as MaterialStateColor;
       }
       return MaterialStateColor.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
@@ -592,12 +603,12 @@ class _SnackBarState extends State<SnackBar> {
             end: widget.action != null || widget.icon != null ? 0 : horizontalPadding);
 
     final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
-
     final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
-    const double horizontalMargin = 15.0;
 
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarFadeInCurve);
+    final CurvedAnimation fadeInM3Animation = CurvedAnimation(parent: widget.animation!, curve: _snackBarM3FadeInCurve);
+
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
       parent: widget.animation!,
       curve: _snackBarFadeOutCurve,
@@ -606,7 +617,7 @@ class _SnackBarState extends State<SnackBar> {
     // Material 3 Animation has a height animation on entry, but a direct fade out on exit.
     final CurvedAnimation heightM3Animation = CurvedAnimation(
       parent: widget.animation!,
-      curve: _snackBarHeightCurve,
+      curve: _snackBarM3HeightCurve,
       reverseCurve: const Threshold(0.0),
     );
 
@@ -625,7 +636,9 @@ class _SnackBarState extends State<SnackBar> {
             ? (widget.icon?.icon?.size ?? 0 + iconHorizontalMargin)
             : 0);
 
-    final double snackBarWidth = widget.width ?? mediaQueryData.size.width - (horizontalMargin * 2);
+    final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
+
+    final double snackBarWidth = widget.width ?? mediaQueryData.size.width - (margin.left + margin.right);
     // Action and Icon will overflow to a new line if their width is greater
     // than one quarter of the total Snack Bar width.
     final bool actionLineOverflow =
@@ -711,23 +724,16 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     if (isFloatingSnackBar) {
-      const double topMargin = 5.0;
-      const double bottomMargin = 10.0;
       // If width is provided, do not include horizontal margins.
       if (width != null) {
         snackBar = Container(
-          margin: const EdgeInsets.only(top: topMargin, bottom: bottomMargin),
+          margin: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
           width: width,
           child: snackBar,
         );
       } else {
         snackBar = Padding(
-          padding: widget.margin ?? const EdgeInsets.fromLTRB(
-            horizontalMargin,
-            topMargin,
-            horizontalMargin,
-            bottomMargin,
-          ),
+          padding: margin,
           child: snackBar,
         );
       }
@@ -758,15 +764,15 @@ class _SnackBarState extends State<SnackBar> {
     final Widget snackBarTransition;
     if (mediaQueryData.accessibleNavigation) {
       snackBarTransition = snackBar;
-    } else if (isFloatingSnackBar && !Theme.of(context).useMaterial3) {
+    } else if (isFloatingSnackBar && !theme.useMaterial3) {
       snackBarTransition = FadeTransition(
         opacity: fadeInAnimation,
         child: snackBar,
       );
      // Is Material 3 Floating Snack Bar.
-    } else if (isFloatingSnackBar && Theme.of(context).useMaterial3) {
+    } else if (isFloatingSnackBar && theme.useMaterial3) {
       snackBarTransition = FadeTransition(
-        opacity: fadeInAnimation,
+        opacity: fadeInM3Animation,
         child: AnimatedBuilder(
           animation: heightM3Animation,
           builder: (BuildContext context, Widget? child) {
@@ -845,6 +851,9 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
       );
 
   @override
+  EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
+
+  @override
   Icon get icon => Icon(
         Icons.close,
         size: 24.0,
@@ -908,6 +917,9 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
+
+  @override
+  EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
 
   @override
   Icon get icon => Icon(

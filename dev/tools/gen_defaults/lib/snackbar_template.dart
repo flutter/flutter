@@ -15,7 +15,7 @@ class SnackbarTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends SnackBarThemeData {
-  _${blockName}DefaultsM3(this.context);
+    _${blockName}DefaultsM3(this.context);
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
@@ -61,6 +61,9 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;
+
+  @override
+  EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
 
   @override
   Icon get icon => Icon(

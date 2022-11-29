@@ -62,6 +62,7 @@ class SnackBarThemeData with Diagnosticable {
     this.behavior,
     this.width,
     this.icon,
+    this.insetPadding,
   })  : assert(elevation == null || elevation >= 0.0),
         assert(
             width == null ||
@@ -116,11 +117,16 @@ class SnackBarThemeData with Diagnosticable {
   /// [SnackBarBehavior.floating].
   final double? width;
 
-  /// Default value for [SnackBarIcon.icon].
+  /// Overrides the default value for [SnackBarIcon.icon].
   ///
   /// If null, and an [icon] property is included in the snack bar constructor,
   /// a default 'Close' icon will display.
-  final Icon? icon;
+  final Widget? icon;
+
+  /// Overrides the default value for [SnackBar.margin].
+  ///
+  /// This value is only used when [behavior] is [SnackBarBehavior.floating].
+  final EdgeInsets? insetPadding;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -134,6 +140,7 @@ class SnackBarThemeData with Diagnosticable {
     SnackBarBehavior? behavior,
     double? width,
     Icon? icon,
+    EdgeInsets? insetPadding,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -145,6 +152,7 @@ class SnackBarThemeData with Diagnosticable {
       behavior: behavior ?? this.behavior,
       width: width ?? this.width,
       icon: icon ?? this.icon,
+      insetPadding: insetPadding ?? this.insetPadding,
     );
   }
 
@@ -164,6 +172,7 @@ class SnackBarThemeData with Diagnosticable {
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       behavior: t < 0.5 ? a?.behavior : b?.behavior,
       width: lerpDouble(a?.width, b?.width, t),
+      insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
     );
   }
 
@@ -178,6 +187,7 @@ class SnackBarThemeData with Diagnosticable {
         behavior,
         width,
         icon,
+        insetPadding,
       );
 
   @override
@@ -197,7 +207,8 @@ class SnackBarThemeData with Diagnosticable {
         && other.shape == shape
         && other.behavior == behavior
         && other.width == width
-        && other.icon == icon;
+        && other.icon == icon
+        && other.insetPadding == insetPadding;
   }
 
   @override
@@ -211,6 +222,7 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
-    properties.add(DiagnosticsProperty<Icon>('icon', icon, defaultValue: null));
+    properties.add(DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null));
   }
 }
