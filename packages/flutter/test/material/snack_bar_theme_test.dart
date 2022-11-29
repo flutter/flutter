@@ -22,9 +22,6 @@ void main() {
     expect(snackBarTheme.shape, null);
     expect(snackBarTheme.behavior, null);
     expect(snackBarTheme.width, null);
-    expect(snackBarTheme.insetPadding, null);
-    expect(snackBarTheme.showCloseIcon, null);
-    expect(snackBarTheme.closeIconColor, null);
   });
 
   test(
@@ -62,9 +59,6 @@ void main() {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       behavior: SnackBarBehavior.floating,
       width: 400.0,
-      insetPadding: EdgeInsets.all(10.0),
-      showCloseIcon: false,
-      closeIconColor: Color(0xFF0000AA),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -81,9 +75,6 @@ void main() {
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'behavior: SnackBarBehavior.floating',
       'width: 400.0',
-      'insetPadding: EdgeInsets.all(10.0)',
-      'showCloseIcon: false',
-      'closeIconColor: Color(0xff0000aa)',
     ]);
   });
 
@@ -124,7 +115,7 @@ void main() {
   testWidgets('SnackBar uses values from SnackBarThemeData', (WidgetTester tester) async {
     const String text = 'I am a snack bar.';
     const String action = 'ACTION';
-    final SnackBarThemeData snackBarTheme = _snackBarTheme(showCloseIcon: true);
+    final SnackBarThemeData snackBarTheme = _snackBarTheme();
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(snackBarTheme: snackBarTheme),
@@ -153,14 +144,12 @@ void main() {
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph button = _getSnackBarActionTextRenderObject(tester, action);
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
-    final Icon icon = _getSnackBarIcon(tester);
 
     expect(content.text.style, snackBarTheme.contentTextStyle);
     expect(material.color, snackBarTheme.backgroundColor);
     expect(material.elevation, snackBarTheme.elevation);
     expect(material.shape, snackBarTheme.shape);
     expect(button.text.style!.color, snackBarTheme.actionTextColor);
-    expect(icon.icon, Icons.close);
   });
 
   testWidgets('SnackBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -174,7 +163,7 @@ void main() {
     const double snackBarWidth = 400.0;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(snackBarTheme: _snackBarTheme(showCloseIcon: true)),
+      theme: ThemeData(snackBarTheme: _snackBarTheme()),
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
@@ -193,7 +182,6 @@ void main() {
                     label: action,
                     onPressed: () {},
                   ),
-                  showCloseIcon: false,
                 ));
               },
               child: const Text('X'),
@@ -216,7 +204,6 @@ void main() {
     expect(material.elevation, elevation);
     expect(material.shape, shape);
     expect(button.text.style!.color, textColor);
-    expect(_getSnackBarIconFinder(tester), findsNothing);
     // Assert width.
     final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder.first);
     final Offset snackBarBottomRight = tester.getBottomRight(materialFinder.first);
@@ -227,7 +214,8 @@ void main() {
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)),
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+      ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.send),
@@ -401,14 +389,13 @@ void main() {
   });
 }
 
-SnackBarThemeData _snackBarTheme({bool? showCloseIcon}) {
-  return SnackBarThemeData(
+SnackBarThemeData _snackBarTheme() {
+  return const SnackBarThemeData(
     backgroundColor: Colors.orange,
     actionTextColor: Colors.green,
-    contentTextStyle: const TextStyle(color: Colors.blue),
+    contentTextStyle: TextStyle(color: Colors.blue),
     elevation: 12.0,
-    showCloseIcon: showCloseIcon,
-    shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+    shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
   );
 }
 
@@ -422,6 +409,7 @@ Finder _getSnackBarMaterialFinder(WidgetTester tester) {
   return find.descendant(
     of: find.byType(SnackBar),
     matching: find.byType(Material),
+
   );
 }
 
@@ -430,17 +418,6 @@ RenderParagraph _getSnackBarActionTextRenderObject(WidgetTester tester, String t
     of: find.byType(TextButton),
     matching: find.text(text),
   ));
-}
-
-Icon _getSnackBarIcon(WidgetTester tester) {
-  return tester.widget<Icon>(_getSnackBarIconFinder(tester));
-}
-
-Finder _getSnackBarIconFinder(WidgetTester tester) {
-  return find.descendant(
-    of: find.byType(SnackBar),
-    matching: find.byIcon(Icons.close),
-  );
 }
 
 RenderParagraph _getSnackBarTextRenderObject(WidgetTester tester, String text) {
