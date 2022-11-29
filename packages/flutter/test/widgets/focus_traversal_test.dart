@@ -1331,27 +1331,21 @@ void main() {
     });
 
     testWidgets('Directional focus avoids hysteresis.', (WidgetTester tester) async {
-      final List<GlobalKey> keys = <GlobalKey>[
-        GlobalKey(debugLabel: 'row 1:1'),
-        GlobalKey(debugLabel: 'row 2:1'),
-        GlobalKey(debugLabel: 'row 2:2'),
-        GlobalKey(debugLabel: 'row 3:1'),
-        GlobalKey(debugLabel: 'row 3:2'),
-        GlobalKey(debugLabel: 'row 3:3'),
-      ];
-      List<bool?> focus = List<bool?>.generate(keys.length, (int _) => null);
+      List<bool?> focus = List<bool?>.generate(6, (int _) => null);
+      final List<FocusNode> nodes = List<FocusNode>.generate(6, (int index) => FocusNode(debugLabel: 'Node $index'));
       Focus makeFocus(int index) {
         return Focus(
-          debugLabel: keys[index].toString(),
+          debugLabel: '[$index]',
+          focusNode: nodes[index],
           onFocusChange: (bool isFocused) => focus[index] = isFocused,
-          child: SizedBox(width: 100, height: 100, key: keys[index]),
+          child: const SizedBox(width: 100, height: 100),
         );
       }
 
       /// Layout is:
-      ///           keys[0]
-      ///       keys[1] keys[2]
-      ///    keys[3] keys[4] keys[5]
+      ///          [0]
+      ///       [1]   [2]
+      ///    [3]   [4]   [5]
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1390,10 +1384,9 @@ void main() {
       );
 
       void clear() {
-        focus = List<bool?>.generate(keys.length, (int _) => null);
+        focus = List<bool?>.generate(focus.length, (int _) => null);
       }
 
-      final List<FocusNode> nodes = keys.map<FocusNode>((GlobalKey key) => Focus.of(tester.element(find.byKey(key)))).toList();
       final FocusNode scope = nodes[0].enclosingScope!;
       nodes[4].requestFocus();
 
@@ -1452,6 +1445,142 @@ void main() {
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
       expect(focus, orderedEquals(<bool?>[null, false, null, true, null, null]));
+      clear();
+    });
+
+    testWidgets('Directional prefers the closest node even on irregular grids', (WidgetTester tester) async {
+      const int cols = 3;
+      const int rows = 3;
+      List<bool?> focus = List<bool?>.generate(rows * cols, (int _) => null);
+      final List<FocusNode> nodes = List<FocusNode>.generate(rows * cols, (int index) => FocusNode(debugLabel: 'Node $index'));
+
+      Widget makeFocus(int row, int col) {
+        final int index = row * rows + col;
+        return Focus(
+          focusNode: nodes[index],
+          onFocusChange: (bool isFocused) => focus[index] = isFocused,
+          child: Container(
+            // Make some of the items a different size to test the code that
+            // checks for the closest node.
+            width: index == 3 ? 150 : 100,
+            height: index == 1 ? 150 : 100,
+            color: Colors.primaries[index],
+            child: Text('[$row, $col]'),
+          ),
+        );
+      }
+
+      /// Layout is:
+      ///           [0, 1]
+      ///    [0, 0] [    ] [0, 2]
+      ///    [  1,  0 ] [1, 1] [1, 2]
+      ///    [2, 0] [2, 1] [2, 2]
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
+            child: FocusScope(
+              debugLabel: 'Scope',
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      makeFocus(0, 0),
+                      makeFocus(0, 1),
+                      makeFocus(0, 2),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      makeFocus(1, 0),
+                      makeFocus(1, 1),
+                      makeFocus(1, 2),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      makeFocus(2, 0),
+                      makeFocus(2, 1),
+                      makeFocus(2, 2),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      void clear() {
+        focus = List<bool?>.generate(focus.length, (int _) => null);
+      }
+
+      final FocusNode scope = nodes[0].enclosingScope!;
+
+      // Go down the center column and make sure that the focus stays in that
+      // column, even though the second row is irregular.
+      nodes[1].requestFocus();
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, true, null, null, null, null, null, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, false, null, null, true, null, null, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null, false, null, null, true, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isFalse);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null, null, null, null, null, null]));
+      clear();
+
+      // Go back up the right column and make sure that the focus stays in that
+      // column, even though the second row is irregular.
+      expect(scope.focusInDirection(TraversalDirection.right), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null, null, null, null, false, true]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.up), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null, null, true, null, null, false]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.up), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, true, null, null, false, null, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.up), isFalse);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null, null, null, null, null, null]));
+      clear();
+
+      // Go left on the top row and make sure that the focus stays in that
+      // row, even though the second column is irregular.
+      expect(scope.focusInDirection(TraversalDirection.left), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, true, false, null, null, null, null, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.left), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[true, false, null, null, null, null, null, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.left), isFalse);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, null, null, null, null, null, null, null, null]));
       clear();
     });
 
