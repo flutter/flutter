@@ -79,7 +79,11 @@ class _ImageFilterRenderObject extends RenderProxyBox {
     if (enabled == value) {
       return;
     }
+    final bool wasRepaintBoundary = isRepaintBoundary;
     _enabled = value;
+    if (isRepaintBoundary != wasRepaintBoundary) {
+      markNeedsCompositingBitsUpdate();
+    }
     markNeedsPaint();
   }
 
@@ -89,32 +93,20 @@ class _ImageFilterRenderObject extends RenderProxyBox {
     assert(value != null);
     if (value != _imageFilter) {
       _imageFilter = value;
-      markNeedsPaint();
+      markNeedsCompositedLayerUpdate();
     }
   }
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant ImageFilterLayer? oldLayer}) {
+    final ImageFilterLayer layer = oldLayer ?? ImageFilterLayer();
+    layer.imageFilter = imageFilter;
+    return layer;
+  }
+
+  @override
+  bool get isRepaintBoundary => child != null && enabled;
 
   @override
   bool get alwaysNeedsCompositing => child != null && enabled;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    assert(imageFilter != null);
-    if (!enabled) {
-      layer = null;
-      return super.paint(context, offset);
-    }
-
-    if (layer == null) {
-      layer = ImageFilterLayer(imageFilter: imageFilter, offset: offset);
-    } else {
-      final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
-      filterLayer.imageFilter = imageFilter;
-      filterLayer.offset = offset;
-    }
-    context.pushLayer(layer!, super.paint, Offset.zero);
-    assert(() {
-      layer!.debugCreator = debugCreator;
-      return true;
-    }());
-  }
 }
