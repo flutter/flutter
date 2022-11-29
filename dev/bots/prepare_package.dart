@@ -638,8 +638,7 @@ class ArchivePublisher {
     );
     assert(tempDir.existsSync());
     final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
-    final File metadataFile = await _updateMetadata(gcsPath);
-    await _publishMetadata(metadataFile, gcsPath);
+    await _publishMetadata(gcsPath);
   }
 
   /// Downloads and updates the metadata file without publishing it.
@@ -684,7 +683,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<File> _updateMetadata(String gsPath) async {
+  Future<void> _updateMetadata(String gsPath) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -712,11 +711,13 @@ class ArchivePublisher {
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
-    return metadataFile;
   }
 
   /// Publishes the metadata file to GCS.
-  Future<void> _publishMetadata(File metadataFile, String gsPath) async {
+  Future<void> _publishMetadata(String gsPath) async {
+    final File metadataFile = File(
+      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
+    );
     await _cloudCopy(
       src: metadataFile.absolute.path,
       dest: gsPath,
@@ -919,11 +920,9 @@ Future<void> main(List<String> rawArguments) async {
       outputFile,
       dryRun,
     );
+    await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {
       await publisher.publishArchive(parsedArguments['force'] as bool);
-    } else {
-      // Download and update metadata without uploading to GCS.
-      await publisher.generateLocalMetadata();
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;
