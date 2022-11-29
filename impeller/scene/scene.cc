@@ -9,12 +9,14 @@
 
 #include "flutter/fml/logging.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/scene/scene_context.h"
 #include "impeller/scene/scene_encoder.h"
 
 namespace impeller {
 namespace scene {
 
-Scene::Scene(const std::shared_ptr<Context>& context) : context_(context){};
+Scene::Scene(std::shared_ptr<Context> context)
+    : scene_context_(std::make_unique<SceneContext>(std::move(context))){};
 
 void Scene::Add(const std::shared_ptr<SceneEntity>& child) {
   root_.Add(child);
@@ -31,7 +33,8 @@ bool Scene::Render(const RenderTarget& render_target,
 
   // Encode the commands.
   std::shared_ptr<CommandBuffer> command_buffer =
-      encoder.BuildSceneCommandBuffer(*context_, render_target);
+      encoder.BuildSceneCommandBuffer(*scene_context_->GetContext(),
+                                      render_target);
 
   // TODO(bdero): Do post processing.
 
