@@ -249,7 +249,8 @@ class KernelCompiler {
     required PackageConfig packageConfig,
   }) async {
     final String frontendServer = _artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      platform: (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null,
     );
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
