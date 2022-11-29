@@ -1743,14 +1743,14 @@ void main() {
 
       // These should not cause a scroll.
       final double lowestOffset = controller.offset;
-      for (int i = 10; i >= 7; --i) {
+      for (int i = 10; i >= 8; --i) {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pump();
         expect(controller.offset, equals(lowestOffset), reason: 'Focusing item $i caused a scroll');
       }
 
       // These should all cause a scroll.
-      for (int i = 6; i >= 1; --i) {
+      for (int i = 7; i >= 1; --i) {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pump();
         final double expectedOffset = 100.0 * (i - 1);
