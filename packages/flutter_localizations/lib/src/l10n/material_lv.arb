@@ -132,4 +132,7 @@
   "keyboardKeyMetaWindows": "Windows",
   "menuBarMenuLabel": "Izvēļņu joslas izvēlne",
   "currentDateLabel": "Date of today"
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

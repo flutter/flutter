@@ -132,4 +132,7 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "மெனு பட்டியின் மெனு",
   "currentDateLabel": "Date of today"
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

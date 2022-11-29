@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1664,18 +1665,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
-  EdgeInsets getNewClipDetails(Size topLayerSize) {
-    return EdgeInsets.zero;
-  }
-
-  void updateClipDetails(Size topLayerSize) {
-    final EdgeInsets newClipDetails = getNewClipDetails(topLayerSize);
+  /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
+  /// the barrier of this [ModalRoute] should be clipped.
+  void didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
     _clipDetailsNotifier.value = newClipDetails;
   }
 
   // one of the builders
   late OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != barrierColor!.withOpacity(0.0));
@@ -1692,6 +1691,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
         clipDetailsNotifier: _clipDetailsNotifier,
+        semanticsOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
       );
     } else {
       barrier = ModalBarrier(
@@ -1699,6 +1699,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
         clipDetailsNotifier: _clipDetailsNotifier,
+        semanticsOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
       );
     }
     if (filter != null) {

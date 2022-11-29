@@ -132,4 +132,7 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Мәзір жолағының мәзірі",
   "currentDateLabel": "Date of today"
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }

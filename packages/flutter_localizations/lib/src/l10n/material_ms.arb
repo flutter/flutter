@@ -132,4 +132,7 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menu bar menu",
   "currentDateLabel": "Date of today"
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName"
 }
