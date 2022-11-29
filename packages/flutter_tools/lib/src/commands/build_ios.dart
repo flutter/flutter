@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
@@ -188,22 +187,22 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
 
       // for example, "64x64". Parse the width since it is a square.
-      final double? parsedSize = size.split('x')
+      final Iterable<double> parsedSizes = size.split('x')
           .map((String element) => double.tryParse(element))
-          .whereType<double>()
-          .firstOrNull;
-      if (parsedSize == null) {
+          .whereType<double>();
+      if (parsedSizes.isEmpty) {
         continue;
       }
+      final double parsedSize = parsedSizes.first;
 
       // for example, "3x".
-      final int? parsedScale = scale.split('x')
+      final Iterable<int> parsedScales = scale.split('x')
           .map((String element) => int.tryParse(element))
-          .whereType<int>()
-          .firstOrNull;
-      if (parsedScale == null) {
+          .whereType<int>();
+      if (parsedScales.isEmpty) {
         continue;
       }
+      final int parsedScale = parsedScales.first;
 
       iconInfo[_AppIconImageFileKey(idiom, parsedSize, parsedScale)] = fileName;
     }
