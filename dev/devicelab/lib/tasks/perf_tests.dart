@@ -1356,6 +1356,7 @@ class WebCompileTest {
     Map<String, String> files = const <String, String>{},
     required String metric,
   }) async {
+    const String kGzipCompressionLevel = '-9';
     final Map<String, int> sizeMetrics = <String, int>{};
 
     final Directory tempDir = Directory.systemTemp.createTempSync('perf_tests_gzips');
@@ -1364,7 +1365,7 @@ class WebCompileTest {
       final String filePath = entry.value;
       sizeMetrics['${metric}_${key}_uncompressed_bytes'] = File(filePath).lengthSync();
 
-      await Process.run('gzip',<String>['--keep', '-9', filePath]);
+      await Process.run('gzip',<String>['--keep', kGzipCompressionLevel, filePath]);
       // gzip does not provide a CLI option to specify an output file, so
       // instead just move the output file to the temp dir
       final File compressedFile = File('$filePath.gz')
@@ -1389,9 +1390,10 @@ class WebCompileTest {
       final String tarball = path.join(tempDir.absolute.path, '$key.tar.gz');
       await Process.run('tar', <String>[
         '--create',
-        '--gzip',
         '--verbose',
         '--file=$tarball',
+        '--use-compress-program',
+        'gzip $kGzipCompressionLevel',
         dirPath,
       ]);
       sizeMetrics['${metric}_${key}_compressed_bytes'] = File(tarball).lengthSync();
