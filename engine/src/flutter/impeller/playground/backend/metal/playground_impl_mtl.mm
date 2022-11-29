@@ -22,6 +22,7 @@
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/surface_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+#include "impeller/scene/shaders/mtl/scene_shaders.h"
 
 namespace impeller {
 
@@ -40,6 +41,8 @@ ShaderLibraryMappingsForPlayground() {
                                              impeller_fixtures_shaders_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_imgui_shaders_data,
                                              impeller_imgui_shaders_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_data,
+                                             impeller_scene_shaders_length),
 
   };
 }

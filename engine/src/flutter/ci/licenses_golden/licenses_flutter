@@ -1598,11 +1598,15 @@ FILE: ../../../flutter/impeller/scene/material.cc
 FILE: ../../../flutter/impeller/scene/material.h
 FILE: ../../../flutter/impeller/scene/scene.cc
 FILE: ../../../flutter/impeller/scene/scene.h
+FILE: ../../../flutter/impeller/scene/scene_context.cc
+FILE: ../../../flutter/impeller/scene/scene_context.h
 FILE: ../../../flutter/impeller/scene/scene_encoder.cc
 FILE: ../../../flutter/impeller/scene/scene_encoder.h
 FILE: ../../../flutter/impeller/scene/scene_entity.cc
 FILE: ../../../flutter/impeller/scene/scene_entity.h
 FILE: ../../../flutter/impeller/scene/scene_unittests.cc
+FILE: ../../../flutter/impeller/scene/shaders/geometry.vert
+FILE: ../../../flutter/impeller/scene/shaders/unlit.frag
 FILE: ../../../flutter/impeller/scene/static_mesh_entity.cc
 FILE: ../../../flutter/impeller/scene/static_mesh_entity.h
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.cc

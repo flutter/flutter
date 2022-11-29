@@ -14,6 +14,8 @@ impeller_component("scene") {
     "material.h",
     "scene.cc",
     "scene.h",
+    "scene_context.cc",
+    "scene_context.h",
     "scene_encoder.cc",
     "scene_encoder.h",
     "scene_entity.cc",
@@ -22,7 +24,10 @@ impeller_component("scene") {
     "static_mesh_entity.h",
   ]
 
-  public_deps = [ "../renderer" ]
+  public_deps = [
+    "../renderer",
+    "shaders",
+  ]
 
   deps = [ "//flutter/fml" ]
 }

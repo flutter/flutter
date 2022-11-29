@@ -43,6 +43,7 @@ impeller_component("playground") {
     "../entity:modern_entity_shaders",
     "../fixtures:shader_fixtures",
     "../renderer",
+    "../scene/shaders",
     "imgui:imgui_impeller_backend",
     "//flutter/fml",
     "//third_party/glfw",
