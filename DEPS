@@ -148,6 +148,7 @@ vars = {
   "upstream_http_parser": "https://github.com/dart-lang/http_parser.git",
   "upstream_http": "https://github.com/dart-lang/http.git",
   "upstream_icu": "https://github.com/unicode-org/icu.git",
+  "upstream_intl": "https://github.com/dart-lang/intl.git",
   "upstream_imgui": "https://github.com/ocornut/imgui.git",
   "upstream_inja": "https://github.com/pantor/inja.git",
   "upstream_json": "https://github.com/nlohmann/json.git",
@@ -364,6 +365,9 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/http_parser':
    Var('dart_git') + '/http_parser.git@c73967535ce31120e218120f70ef98cc22688c82',
+
+  'src/third_party/dart/third_party/pkg/intl':
+   Var('dart_git') + '/intl.git@a127902594a964f2090239fb454adadf7c1a77ef',
 
   'src/third_party/dart/third_party/pkg/json_rpc_2':
    Var('dart_git') + '/json_rpc_2.git@16fed53fbebd38edf170f58c1da1de2a325b2b98',
