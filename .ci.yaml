@@ -3625,6 +3625,7 @@ targets:
       task_name: native_platform_view_ui_tests_ios
 
   - name: Mac_ios new_gallery_ios__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/116284
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
