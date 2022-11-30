@@ -570,7 +570,7 @@ void main() {
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
 
-      // Open the CupertinoContextMenu
+      // Open the CupertinoContextMenu.
       final Rect childRect = tester.getRect(find.byWidget(child));
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
@@ -578,7 +578,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
 
-      // Check border radius
+      // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
       final ClipRRect previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRRect;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
