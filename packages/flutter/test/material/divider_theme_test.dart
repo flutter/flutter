@@ -284,8 +284,7 @@ void main() {
         final BoxDecoration decoration = container.decoration! as BoxDecoration;
         expect(decoration.border!.bottom.width, 0.0);
 
-        final ThemeData theme = ThemeData();
-        expect(decoration.border!.bottom.color, theme.dividerColor);
+        expect(decoration.border!.bottom.color, const Color(0x1F000000));
 
         final Rect dividerRect = tester.getRect(find.byType(Divider));
         final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -327,8 +326,7 @@ void main() {
         final Border border = decoration.border! as Border;
         expect(border.left.width, 0.0);
 
-        final ThemeData theme = ThemeData();
-        expect(border.left.color, theme.dividerColor);
+        expect(border.left.color, const Color(0x1F000000));
 
         final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));
         final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
