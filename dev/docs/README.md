@@ -18,6 +18,29 @@ the following locations:
 * [Codelabs](https://flutter.dev/docs/codelabs)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 
+## Offline Documentation
+
+In addition to the online sites above, Flutter's documentation can be downloaded
+as an HTML documentation ZIP file for use when offline or when you have a poor
+internet connection.
+
+**Warning: the offline documentation files are quite large, approximately 700 MB
+to 900 MB.**
+
+Offline HTML documentation ZIP bundles:
+
+ * [Stable channel](https://api.flutter.dev/offline/flutter.docs.zip)
+ * [Master channel](https://master-api.flutter.dev/offline/flutter.docs.zip)
+
+Or, you can add Flutter to the open-source [Zeal](https://zealdocs.org/) app
+using the following XML configurations. Follow the instructions in the
+application for adding a feed.
+
+ * Stable channel Zeal XML configuration URL:
+   <https://api.flutter.dev/offline/flutter.xml>
+ * Master channel Zeal XML configuration URL:
+   <https://master-api.flutter.dev/offline/flutter.xml>
+
 ## Importing a Library
 
 ### Framework Libraries
