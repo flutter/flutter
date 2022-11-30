@@ -628,33 +628,35 @@ class _SnackBarState extends State<SnackBar> {
 
     Widget snackBar = Padding(
       padding: padding,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  padding: widget.padding == null
-                      ? const EdgeInsets.symmetric(
-                          vertical: _singleLineVerticalPadding)
-                      : null,
-                  child: DefaultTextStyle(
-                    style: contentTextStyle!,
-                    child: widget.content,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    padding: widget.padding == null
+                        ? const EdgeInsets.symmetric(
+                            vertical: _singleLineVerticalPadding)
+                        : null,
+                    child: DefaultTextStyle(
+                      style: contentTextStyle!,
+                      child: widget.content,
+                    ),
                   ),
                 ),
-              ),
-              if(!actionLineOverflow) ...maybeActionAndIcon,
-              if(actionLineOverflow) SizedBox(width: snackBarWidth*0.4),
-            ],
-          ),
-          if(actionLineOverflow) Padding(
-            padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
-            child: Row(mainAxisAlignment: MainAxisAlignment.end,
-            children: maybeActionAndIcon),
-          ),
-        ],
+                if(!actionLineOverflow) ...maybeActionAndIcon,
+                if(actionLineOverflow) SizedBox(width: snackBarWidth*0.4),
+              ],
+            ),
+            if(actionLineOverflow) Padding(
+              padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
+              child: Row(mainAxisAlignment: MainAxisAlignment.end,
+              children: maybeActionAndIcon),
+            ),
+          ],
+        ),
       ),
     );
 
