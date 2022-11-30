@@ -21,6 +21,7 @@ void main() {
     expect(themeData.headingRowColor, null);
     expect(themeData.headingRowHeight, null);
     expect(themeData.headingTextStyle, null);
+    expect(themeData.secondaryHeadingRowColor, null);
     expect(themeData.horizontalMargin, null);
     expect(themeData.columnSpacing, null);
     expect(themeData.dividerThickness, null);
@@ -34,6 +35,7 @@ void main() {
     expect(theme.data.headingRowColor, null);
     expect(theme.data.headingRowHeight, null);
     expect(theme.data.headingTextStyle, null);
+    expect(theme.data.secondaryHeadingRowColor, null);
     expect(theme.data.horizontalMargin, null);
     expect(theme.data.columnSpacing, null);
     expect(theme.data.dividerThickness, null);
@@ -66,6 +68,7 @@ void main() {
       ),
       headingRowHeight: 52.0,
       headingTextStyle:  const TextStyle(fontSize: 14.0),
+      secondaryHeadingRowColor: Colors.red,
       horizontalMargin: 3.0,
       columnSpacing: 4.0,
       dividerThickness: 5.0,
@@ -84,10 +87,11 @@ void main() {
     expect(description[4], "headingRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
     expect(description[5], 'headingRowHeight: 52.0');
     expect(description[6], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
-    expect(description[7], 'horizontalMargin: 3.0');
-    expect(description[8], 'columnSpacing: 4.0');
-    expect(description[9], 'dividerThickness: 5.0');
-    expect(description[10], 'checkboxHorizontalMargin: 6.0');
+    expect(description[7], 'secondaryHeadingRowColor: MaterialColor(primary value: Color(0xfff44336))');
+    expect(description[8], 'horizontalMargin: 3.0');
+    expect(description[9], 'columnSpacing: 4.0');
+    expect(description[10], 'dividerThickness: 5.0');
+    expect(description[11], 'checkboxHorizontalMargin: 6.0');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {

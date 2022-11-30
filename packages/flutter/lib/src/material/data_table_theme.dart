@@ -45,6 +45,7 @@ class DataTableThemeData with Diagnosticable {
     this.headingRowColor,
     this.headingRowHeight,
     this.headingTextStyle,
+    this.secondaryHeadingRowColor,
     this.horizontalMargin,
     this.columnSpacing,
     this.dividerThickness,
@@ -74,6 +75,9 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.dataTable.headingTextStyle}
   final TextStyle? headingTextStyle;
 
+  /// Overrides the default for [PaginatedDataTable.secondaryHeadingRowColor].
+  final Color? secondaryHeadingRowColor;
+
   /// {@macro flutter.material.dataTable.horizontalMargin}
   final double? horizontalMargin;
 
@@ -96,6 +100,7 @@ class DataTableThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? headingRowColor,
     double? headingRowHeight,
     TextStyle? headingTextStyle,
+    Color? secondaryHeadingRowColor,
     double? horizontalMargin,
     double? columnSpacing,
     double? dividerThickness,
@@ -109,6 +114,7 @@ class DataTableThemeData with Diagnosticable {
       headingRowColor: headingRowColor ?? this.headingRowColor,
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,
       headingTextStyle: headingTextStyle ?? this.headingTextStyle,
+      secondaryHeadingRowColor: secondaryHeadingRowColor ?? this.secondaryHeadingRowColor,
       horizontalMargin: horizontalMargin ?? this.horizontalMargin,
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
@@ -131,6 +137,7 @@ class DataTableThemeData with Diagnosticable {
       headingRowColor: MaterialStateProperty.lerp<Color?>(a.headingRowColor, b.headingRowColor, t, Color.lerp),
       headingRowHeight: lerpDouble(a.headingRowHeight, b.headingRowHeight, t),
       headingTextStyle: TextStyle.lerp(a.headingTextStyle, b.headingTextStyle, t),
+      secondaryHeadingRowColor: Color.lerp(a.secondaryHeadingRowColor, b.secondaryHeadingRowColor, t),
       horizontalMargin: lerpDouble(a.horizontalMargin, b.horizontalMargin, t),
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
       dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
@@ -147,6 +154,7 @@ class DataTableThemeData with Diagnosticable {
     headingRowColor,
     headingRowHeight,
     headingTextStyle,
+    secondaryHeadingRowColor,
     horizontalMargin,
     columnSpacing,
     dividerThickness,
@@ -169,6 +177,7 @@ class DataTableThemeData with Diagnosticable {
       && other.headingRowColor == headingRowColor
       && other.headingRowHeight == headingRowHeight
       && other.headingTextStyle == headingTextStyle
+      && other.secondaryHeadingRowColor == secondaryHeadingRowColor
       && other.horizontalMargin == horizontalMargin
       && other.columnSpacing == columnSpacing
       && other.dividerThickness == dividerThickness
@@ -185,6 +194,7 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('headingRowColor', headingRowColor, defaultValue: null));
     properties.add(DoubleProperty('headingRowHeight', headingRowHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('headingTextStyle', headingTextStyle, defaultValue: null));
+    properties.add(ColorProperty('secondaryHeadingRowColor', secondaryHeadingRowColor, defaultValue: null));
     properties.add(DoubleProperty('horizontalMargin', horizontalMargin, defaultValue: null));
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));

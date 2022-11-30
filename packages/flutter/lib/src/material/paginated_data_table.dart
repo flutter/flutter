@@ -83,6 +83,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.secondaryHeadingRowColor,
     this.arrowHeadColor,
     required this.source,
     this.checkboxHorizontalMargin,
@@ -240,6 +241,9 @@ class PaginatedDataTable extends StatefulWidget {
   /// of the table and the checkbox, as well as the margin between the checkbox
   /// and the content in the first data column. This value defaults to 24.0.
   final double? checkboxHorizontalMargin;
+
+  /// Defines the color of the secondary header, when there are selected rows.
+  final Color? secondaryHeadingRowColor;
 
   /// Defines the color of the arrow heads in the footer.
   final Color? arrowHeadColor;
@@ -501,7 +505,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                       ),
                       child: Ink(
                         height: 64.0,
-                        color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                        color: _selectedRowCount > 0 ? widget.secondaryHeadingRowColor ?? themeData.dataTableTheme.secondaryHeadingRowColor : null,
                         child: Padding(
                           padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                           child: Row(
