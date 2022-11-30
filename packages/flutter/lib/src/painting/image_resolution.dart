@@ -482,7 +482,7 @@ class _LegacyAssetManifest implements _AssetManifest {
     List<_AssetVariant> adaptLegacyVariantList(String mainAsset, List<String> variants) {
       return variants
         .map((String variant) =>
-          _AssetVariant(asset: mainAsset, devicePixelRatio: _parseScale(mainAsset, variant)))
+          _AssetVariant(asset: variant, devicePixelRatio: _parseScale(mainAsset, variant)))
         .toList();
     }
 
