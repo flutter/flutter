@@ -32,9 +32,9 @@ bool Scene::Render(const RenderTarget& render_target,
   }
 
   // Encode the commands.
+
   std::shared_ptr<CommandBuffer> command_buffer =
-      encoder.BuildSceneCommandBuffer(*scene_context_->GetContext(),
-                                      render_target);
+      encoder.BuildSceneCommandBuffer(*scene_context_, render_target);
 
   // TODO(bdero): Do post processing.
 

@@ -19,19 +19,16 @@ class Geometry {
  public:
   static std::shared_ptr<CuboidGeometry> MakeCuboid(Vector3 size);
 
- private:
-  virtual VertexBuffer GetVertexBuffer(
-      std::shared_ptr<Allocator>& allocator) const = 0;
+  virtual VertexBuffer GetVertexBuffer(Allocator& allocator) const = 0;
 };
 
 class CuboidGeometry final : public Geometry {
  public:
   void SetSize(Vector3 size);
 
- private:
-  VertexBuffer GetVertexBuffer(
-      std::shared_ptr<Allocator>& allocator) const override;
+  VertexBuffer GetVertexBuffer(Allocator& allocator) const override;
 
+ private:
   Vector3 size_;
 };
 
