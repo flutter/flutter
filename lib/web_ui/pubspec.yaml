@@ -8,6 +8,8 @@ environment:
 dependencies:
   js: 0.6.4
   meta: ^1.7.0
+  web_locale_keymap:
+    path: ../../third_party/web_locale_keymap
 
   web_unicode:
     path: ../../third_party/web_unicode
