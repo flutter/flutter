@@ -769,7 +769,7 @@ class DataTable extends StatelessWidget {
     required bool sorted,
     required bool ascending,
     required MaterialStateProperty<Color?>? overlayColor,
-    required String headingLabel,
+    required String semanticsHeadingLabel,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -825,7 +825,7 @@ class DataTable extends StatelessWidget {
         child: InkWell(
           onTap: () {
             onSort();
-            SemanticsService.announce('Table sorted by column $headingLabel, $nextSortOrderLabel', TextDirection.ltr);
+            SemanticsService.announce('Table sorted by column $semanticsHeadingLabel, $nextSortOrderLabel', TextDirection.ltr);
           },
           overlayColor: overlayColor,
           child: label,
@@ -1080,7 +1080,7 @@ class DataTable extends StatelessWidget {
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
-        headingLabel: column.heading != null ? column.heading! : '',
+        semanticsHeadingLabel: column.heading != null ? column.heading! : '',
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
