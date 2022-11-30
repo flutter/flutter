@@ -4620,33 +4620,45 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
 
-  - name: Linux flutter_packaging_beta
+  - name: Linux flutter_packaging_beta_linux
     recipe: packaging/packaging
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
+    properties:
+      task_name: flutter_packaging_beta_linux
 
-  - name: Mac flutter_packaging_beta
-    recipe: packaging/packaging
-    scheduler: release
-    bringup: true
-    enabled_branches:
-      - beta
 
-  - name: Mac_arm64 flutter_packaging_beta
+  - name: Mac flutter_packaging_beta_mac
     recipe: packaging/packaging
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
+    properties:
+      task_name: flutter_packaging_beta_mac
 
-  - name: Windows flutter_packaging_beta
+
+  - name: Mac_arm64 flutter_packaging_beta_mac_arm64
     recipe: packaging/packaging
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
+    properties:
+      task_name: flutter_packaging_beta_mac_arm64
+
+
+  - name: Windows flutter_packaging_beta_win
+    recipe: packaging/packaging
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta_win
+
 
   # TODO(drewroengoogle): Remove this target when the release scheduler is
   # confirmed to be working correctly and as intended.
