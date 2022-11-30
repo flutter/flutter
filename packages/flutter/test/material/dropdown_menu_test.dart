@@ -802,40 +802,46 @@ void main() {
     ));
 
     // Open the menu
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
+
+    // Test onChanged on key press
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(selectionCount, 1);
 
     // Disabled item doesn't trigger onChanged callback.
     final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 1').last;
     await tester.tap(item1);
     await tester.pumpAndSettle();
 
-    expect(controller.text.isEmpty, true);
-    expect(selectionCount, 0);
+    expect(controller.text, 'Item 0');
+    expect(selectionCount, 1);
 
     final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
     await tester.tap(item2);
     await tester.pumpAndSettle();
 
     expect(controller.text, 'Item 2');
-    expect(selectionCount, 1);
+    expect(selectionCount, 2);
 
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(DropdownMenu));
     await tester.pump();
     final Finder item3 = find.widgetWithText(MenuItemButton, 'Item 3').last;
     await tester.tap(item3);
     await tester.pumpAndSettle();
 
     expect(controller.text, 'Item 3');
-    expect(selectionCount, 2);
+    expect(selectionCount, 3);
 
     // When typing something in the text field without selecting any of the options,
     // the onChanged gets called.
     await tester.enterText(find.byType(TextField).first, 'New Item');
     expect(controller.text, 'New Item');
-    expect(selectionCount, 3);
+    expect(selectionCount, 4);
     expect(find.widgetWithText(TextField, 'New Item'), findsOneWidget);
-    controller.clear();
+    await tester.enterText(find.byType(TextField).first, '');
+    expect(selectionCount, 5);
     expect(controller.text.isEmpty, true);
   });
 }

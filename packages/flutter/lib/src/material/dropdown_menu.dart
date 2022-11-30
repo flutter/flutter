@@ -369,9 +369,11 @@ class _DropdownMenuState extends State<DropdownMenu> {
     while (!filteredEntries[currentHighlight!].enabled) {
       currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
     }
-    _textEditingController.text = filteredEntries[currentHighlight!].label;
+    final String currentLabel = filteredEntries[currentHighlight!].label;
+    _textEditingController.text = currentLabel;
     _textEditingController.selection =
       TextSelection.collapsed(offset: _textEditingController.text.length);
+    widget.onChanged?.call(currentLabel);
   });
 
   void handleDownKeyInvoke(_) => setState(() {
@@ -384,9 +386,11 @@ class _DropdownMenuState extends State<DropdownMenu> {
     while (!filteredEntries[currentHighlight!].enabled) {
       currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
     }
-    _textEditingController.text = filteredEntries[currentHighlight!].label;
+    final String currentLabel = filteredEntries[currentHighlight!].label;
+    _textEditingController.text = currentLabel;
     _textEditingController.selection =
       TextSelection.collapsed(offset: _textEditingController.text.length);
+    widget.onChanged?.call(currentLabel);
   });
 
   void handlePressed(MenuController controller) {
