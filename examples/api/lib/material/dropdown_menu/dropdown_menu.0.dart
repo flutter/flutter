@@ -19,35 +19,21 @@ class DropdownMenuExample extends StatefulWidget {
 class _DropdownMenuExampleState extends State<DropdownMenuExample> {
   final TextEditingController colorController = TextEditingController();
   final TextEditingController iconController = TextEditingController();
-  bool hasColor = false;
-  bool hasIcon = false;
-
-  Map<String, Color> colors = <String, Color>{
-    'Blue': Colors.blue,
-    'Pink': Colors.pink,
-    'Green': Colors.green,
-    'Yellow': Colors.yellow,
-    'Grey': Colors.grey,
-  };
-  Map<String, IconData> icons = <String, IconData>{
-    'Smile': Icons.sentiment_satisfied_outlined,
-    'Cloud': Icons.cloud_outlined,
-    'Brush': Icons.brush_outlined,
-    'Heart': Icons.favorite,
-  };
-
-  List<DropdownMenuEntry> getEntry(List<String> labels, {String? disabledLabel}) {
-    final List<DropdownMenuEntry> entries = <DropdownMenuEntry>[];
-    for (final String label in labels) {
-      entries.add(DropdownMenuEntry(label: label, enabled: label != disabledLabel));
-    }
-    return entries;
-  }
+  ColorLabel? selectedColor;
+  IconLabel? selectedIcon;
 
   @override
   Widget build(BuildContext context) {
-    final List<DropdownMenuEntry> colorEntries = getEntry(colors.keys.toList(), disabledLabel: 'Grey');
-    final List<DropdownMenuEntry> iconEntries = getEntry(icons.keys.toList());
+    final List<DropdownMenuEntry<ColorLabel>> colorEntries = <DropdownMenuEntry<ColorLabel>>[];
+    for (final ColorLabel color in ColorLabel.values) {
+      colorEntries.add(
+        DropdownMenuEntry<ColorLabel>(value: color, label: color.label, enabled: color.label != 'Grey'));
+    }
+
+    final List<DropdownMenuEntry<IconLabel>> iconEntries = <DropdownMenuEntry<IconLabel>>[];
+    for (final IconLabel icon in IconLabel.values) {
+      iconEntries.add(DropdownMenuEntry<IconLabel>(value: icon, label: icon.label));
+    }
 
     return MaterialApp(
       theme: ThemeData(
@@ -63,41 +49,41 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    DropdownMenu(
+                    DropdownMenu<ColorLabel>(
                       controller: colorController,
                       label: const Text('Color'),
                       dropdownMenuEntries: colorEntries,
-                      onChanged: (String text) {
+                      onSelected: (ColorLabel? color) {
                         setState(() {
-                          hasColor = colors.containsKey(text);
+                          selectedColor = color;
                         });
                       },
                     ),
                     const SizedBox(width: 20),
-                    DropdownMenu(
+                    DropdownMenu<IconLabel>(
                       controller: iconController,
                       enableFilter: true,
                       leadingIcon: const Icon(Icons.search),
                       label: const Text('Icon'),
                       dropdownMenuEntries: iconEntries,
                       inputDecorationTheme: const InputDecorationTheme(filled: true),
-                      onChanged: (String text) {
+                      onSelected: (IconLabel? icon) {
                         setState(() {
-                          hasIcon = icons.containsKey(text);
+                          selectedIcon = icon;
                         });
                       },
                     )
                   ],
                 ),
               ),
-              if (hasColor && hasIcon)
+              if (selectedColor != null && selectedIcon != null)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text('You selected a ${colorController.text} ${iconController.text}'),
+                    Text('You selected a ${selectedColor?.label} ${selectedIcon?.label}'),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Icon(icons[iconController.text], color: colors[colorController.text],))
+                      child: Icon(selectedIcon?.icon, color: selectedColor?.color,))
                   ],
                 )
               else const Text('Please select a color and an icon.')
@@ -107,4 +93,27 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
       ),
     );
   }
+}
+
+enum ColorLabel {
+  blue('Blue', Colors.blue),
+  pink('Pink', Colors.pink),
+  green('Green', Colors.green),
+  yellow('Yellow', Colors.yellow),
+  grey('Grey', Colors.grey);
+
+  const ColorLabel(this.label, this.color);
+  final String label;
+  final Color color;
+}
+
+enum IconLabel {
+  smile('Smile', Icons.sentiment_satisfied_outlined),
+  cloud('Cloud', Icons.cloud_outlined,),
+  brush('Brush', Icons.brush_outlined),
+  heart('Heart', Icons.favorite);
+
+  const IconLabel(this.label, this.icon);
+  final String label;
+  final IconData icon;
 }
