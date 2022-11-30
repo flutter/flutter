@@ -64,7 +64,10 @@ def main():
 
   best_sdk = None
   sdk_output = None
-  for properties in list(sdk_json):
+
+  # Xcode can return the same version for different symlinked paths.
+  # Sort by path to keep the list stable between runs.
+  for properties in sorted(list(sdk_json), key=lambda d: d['sdkPath']):
     # Filter out macOS DriverKit, watchOS, AppleTV, and other SDKs.
     if properties.get('platform') != 'macosx' or 'driver' in properties.get('canonicalName'):
       continue
