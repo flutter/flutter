@@ -991,20 +991,17 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         break;
 
       case _DragState.possible:
-        if (currentUp == null) {
-          _checkCancel();
-          resolve(GestureDisposition.rejected);
-          break;
-        }
         if (pastTapTolerance) {
           // This means the pointer was not accepted as a tap.
           if (_wonArenaForPrimaryPointer) {
             // If the recognizer has already won the arena for the primary pointer being tracked
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
-            _dragState = _DragState.accepted;
-            _acceptDrag(currentDown!);
-            _checkDragEnd();
+            if (currentDown != null) {
+              _dragState = _DragState.accepted;
+              _acceptDrag(currentDown!);
+              _checkDragEnd();
+            }
           } else {
             _checkCancel();
             resolve(GestureDisposition.rejected);
@@ -1073,6 +1070,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _giveUpPointer(event.pointer);
       }
     } else if (event is PointerCancelEvent) {
+      _dragState = _DragState.ready;
       _giveUpPointer(event.pointer);
     }
   }
