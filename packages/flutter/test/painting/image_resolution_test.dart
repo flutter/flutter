@@ -47,11 +47,19 @@ class BundleWithoutAssetManifestBin extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
+    ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
+
     if (key == 'AssetManifest.bin') {
       throw FlutterError('AssetManifest.bin was not found.');
     }
     if (key == 'AssetManifest.json') {
       return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(json.encode(_legacyAssetBundleMap))).buffer);
+    }
+    switch (key) {
+      case 'assets/image.png':
+        return testByteData(1.0); // see "...with a main asset and a 1.0x asset"
+      case 'assets/2.0x/image.png':
+        return testByteData(1.5);
     }
 
     throw FlutterError('Unexpected key: $key');
@@ -69,12 +77,24 @@ void main() {
   // TODO(andrewkolos): Once google3 is migrated away from using AssetManifest.json,
   // remove all references to it. See https://github.com/flutter/flutter/issues/114913.
   test('AssetBundle falls back to using AssetManifest.json if AssetManifest.bin cannot be found.', () async {
-    const String assetPath = 'assets/assetPath.png';
+    const String assetPath = 'assets/image.png';
     final Map<dynamic, List<String>> assetBundleMap = <dynamic, List<String>>{};
     assetBundleMap[assetPath] = <String>[];
     final AssetImage assetImage = AssetImage(assetPath, bundle: BundleWithoutAssetManifestBin(assetBundleMap));
     final AssetBundleImageKey key = await assetImage.obtainKey(ImageConfiguration.empty);
     expect(key.name, assetPath);
+    expect(key.scale, 1.0);
+  });
+
+  test('When using AssetManifest.json, on a high DPR device, a high dpr variant is selected.', () async {
+    const String assetPath = 'assets/image.png';
+    const String asset2xPath = 'assets/2.0x/image.png';
+    final Map<dynamic, List<String>> assetBundleMap = <dynamic, List<String>>{};
+    assetBundleMap[assetPath] = <String>[asset2xPath];
+    final AssetImage assetImage = AssetImage(assetPath, bundle: BundleWithoutAssetManifestBin(assetBundleMap));
+    final AssetBundleImageKey key = await assetImage.obtainKey(const ImageConfiguration(devicePixelRatio: 2.0));
+    expect(key.name, asset2xPath);
+    expect(key.scale, 2.0);
   });
 
   group('1.0 scale device tests', () {
