@@ -1273,6 +1273,11 @@ class LocalizationsGenerator {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
+    // If there were any syntax errors, don't write to files.
+    if (logger.hadErrorOutput) {
+      throw L10nException('Found syntax errors.');
+    }
+
     // A pubspec.yaml file is required when using a synthetic package. If it does not
     // exist, create a blank one.
     if (useSyntheticPackage) {
