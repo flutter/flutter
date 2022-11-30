@@ -66,7 +66,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   };
 
   /// A list of events from `flutter run --machine` that should be forwarded to the client.
-  final Set<String> _eventsToForwardToClient = <String>{
+  static const Set<String> _eventsToForwardToClient = <String>{
     // The 'app.webLaunchUrl' event is sent to the client to tell it about a URL
     // that should be launched (including a flag for whether it has been
     // launched by the tool or needs launching by the editor).
