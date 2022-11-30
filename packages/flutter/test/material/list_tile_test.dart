@@ -2230,7 +2230,7 @@ void main() {
       );
     }
 
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     // ListTile - ListTileStyle.list (default).
     await tester.pumpWidget(buildFrame());
