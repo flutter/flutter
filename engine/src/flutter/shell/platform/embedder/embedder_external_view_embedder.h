@@ -40,7 +40,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   /// @brief      Creates an external view embedder used by the generic embedder
   ///             API.
   ///
-  /// @param[in] avoid_backing_store_cache If set, create_render_target callback
+  /// @param[in] avoid_backing_store_cache If set, create_render_target_callback
   ///                                      will beinvoked every frame for every
   ///                                      engine composited layer. The result
   ///                                      will not cached.
