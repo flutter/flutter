@@ -297,6 +297,7 @@ String generateString(String value) {
 
 /// Given a list of strings, placeholders, or helper function calls, concatenate
 /// them into one expression to be returned.
+/// If isSingleStringVar is passed, then we want to convert "'$expr'" to simply "expr".
 String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
   if (expressions.isEmpty) {
     return "''";
@@ -453,7 +454,7 @@ LocalizationOptions parseLocalizationsOptions({
     useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
     usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
-    format: _tryReadBool(yamlNode, 'format', logger) ?? true,
+    format: _tryReadBool(yamlNode, 'format', logger) ?? false,
     useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger) ?? false,
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger) ?? false,
   );

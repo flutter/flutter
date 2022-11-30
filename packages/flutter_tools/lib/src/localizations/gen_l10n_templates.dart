@@ -139,26 +139,23 @@ const String methodTemplate = '''
   String @(name)(@(parameters)) {
 @(dateFormatting)
 @(numberFormatting)
-@(helperMethods)
-    return @(message);
+@(tempVars)    return @(message);
   }''';
 
 const String pluralVariableTemplate = '''
     String @(varName) = intl.Intl.pluralLogic(
-        @(count),
-        locale: localeName,
+      @(count),
+      locale: localeName,
 @(pluralLogicArgs)
-      );
-    }''';
+    );''';
 
 const String selectVariableTemplate = '''
     String @(varName) = intl.Intl.selectLogic(
-        @(choice),
-        {
+      @(choice),
+      {
 @(selectCases)
-        },
-      );
-    }''';
+      },
+    );''';
 
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';

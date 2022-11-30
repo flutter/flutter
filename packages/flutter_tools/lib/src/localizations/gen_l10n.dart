@@ -1125,17 +1125,16 @@ class LocalizationsGenerator {
             }
             return generateVariables(node);
           }).toList();
-
-          final bool isSingleStringVar = expressions.length == 1 && (
-            expressions[0].substring(0, 5) == '_temp' ||
-            message.placeholders.keys.contains(expressions[0].substring(1))
-          );
-          return generateReturnExpr(expressions, isSingleStringVar: isSingleStringVar);
+          return generateReturnExpr(expressions);
 
         case ST.placeholderExpr:
           assert(node.children[1].type == ST.identifier);
-          final Node identifier = node.children[1];
-          return '\$$identifier';
+          final String identifier = node.children[1].value!;
+          final Placeholder placeholder = message.placeholders[identifier]!;
+          if (placeholder.requiresFormatting) {
+            return '\$${node.children[1].value}String';
+          }
+          return '\$${node.children[1].value}';
 
         case ST.pluralExpr:
           requiresIntlImport = true;
@@ -1190,7 +1189,6 @@ class LocalizationsGenerator {
           final Node identifier = node.children[1];
           final List<String> selectLogicArgs = <String>[];
           final Node selectParts = node.children[5];
-
           for (final Node selectPart in selectParts.children) {
             assert(selectPart.children[0].type == ST.identifier || selectPart.children[0].type == ST.other);
             assert(selectPart.children[2].type == ST.message);
@@ -1201,7 +1199,7 @@ class LocalizationsGenerator {
           }
           final String tempVarName = getTempVariableName();
           tempVariables.add(selectVariableTemplate
-            .replaceAll('@(name)', tempVarName)
+            .replaceAll('@(varName)', tempVarName)
             .replaceAll('@(choice)', identifier.value!)
             .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
           );
@@ -1212,11 +1210,13 @@ class LocalizationsGenerator {
       }
     }
     final String messageString = generateVariables(node, isRoot: true);
+    final String tempVarLines = tempVariables.isEmpty ? '' : '${tempVariables.join('\n')}\n';
     return methodTemplate
               .replaceAll('@(name)', message.resourceId)
               .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
               .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
               .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+              .replaceAll('@(tempVars)', tempVarLines)
               .replaceAll('@(message)', messageString)
               .replaceAll('@(none)\n', '');
     } on L10nParserException catch (error) {
