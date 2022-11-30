@@ -1360,45 +1360,44 @@ class WebCompileTest {
     final Map<String, int> sizeMetrics = <String, int>{};
 
     final Directory tempDir = Directory.systemTemp.createTempSync('perf_tests_gzips');
-    for (final MapEntry<String, String> entry in files.entries) {
-      final String key = entry.key;
-      final String filePath = entry.value;
-      sizeMetrics['${metric}_${key}_uncompressed_bytes'] = File(filePath).lengthSync();
+    try {
+      for (final MapEntry<String, String> entry in files.entries) {
+        final String key = entry.key;
+        final String filePath = entry.value;
+        sizeMetrics['${metric}_${key}_uncompressed_bytes'] = File(filePath).lengthSync();
 
-      await Process.run('gzip',<String>['--keep', kGzipCompressionLevel, filePath]);
-      // gzip does not provide a CLI option to specify an output file, so
-      // instead just move the output file to the temp dir
-      final File compressedFile = File('$filePath.gz')
-          .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
-      sizeMetrics['${metric}_${key}_compressed_bytes'] = compressedFile.lengthSync();
+        await Process.run('gzip',<String>['--keep', kGzipCompressionLevel, filePath]);
+        // gzip does not provide a CLI option to specify an output file, so
+        // instead just move the output file to the temp dir
+        final File compressedFile = File('$filePath.gz')
+            .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
+        sizeMetrics['${metric}_${key}_compressed_bytes'] = compressedFile.lengthSync();
+      }
 
+      for (final MapEntry<String, String> entry in directories.entries) {
+        final String key = entry.key;
+        final String dirPath = entry.value;
+
+        final String tarball = path.join(tempDir.absolute.path, '$key.tar');
+        await Process.run('tar', <String>[
+          '--create',
+          '--verbose',
+          '--file=$tarball',
+          dirPath,
+        ]);
+        sizeMetrics['${metric}_${key}_uncompressed_bytes'] = File(tarball).lengthSync();
+
+        // get size of compressed build directory
+        await Process.run('gzip',<String>['--keep', kGzipCompressionLevel, tarball]);
+        sizeMetrics['${metric}_${key}_compressed_bytes'] = File('$tarball.gz').lengthSync();
+      }
+    } finally {
+      try {
+        tempDir.deleteSync(recursive: true);
+      } on FileSystemException {
+        print('Failed to delete ${tempDir.path}.');
+      }
     }
-
-    for (final MapEntry<String, String> entry in directories.entries) {
-      final String key = entry.key;
-      final String dirPath = entry.value;
-      final Directory dir = Directory(dirPath);
-      sizeMetrics['${metric}_${key}_uncompressed_bytes'] = dir
-          .listSync(recursive: true)
-          .whereType<File>()
-          .fold<int>(
-            0,
-            (int totalSize, File file) => totalSize + file.lengthSync(),
-          );
-
-      // get size of compressed build directory
-      final String tarball = path.join(tempDir.absolute.path, '$key.tar.gz');
-      await Process.run('tar', <String>[
-        '--create',
-        '--verbose',
-        '--file=$tarball',
-        '--use-compress-program',
-        'gzip $kGzipCompressionLevel',
-        dirPath,
-      ]);
-      sizeMetrics['${metric}_${key}_compressed_bytes'] = File(tarball).lengthSync();
-    }
-
     return sizeMetrics;
   }
 }
