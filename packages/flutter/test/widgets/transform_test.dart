@@ -616,7 +616,7 @@ void main() {
       moreOrLessEquals(0.7071067811865476), moreOrLessEquals(0.7071067811865475), 0.0, 0.0,
       moreOrLessEquals(-0.7071067811865475), moreOrLessEquals(0.7071067811865476), 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
-      moreOrLessEquals(329.28932188134524), moreOrLessEquals(-194.97474683058329), 0.0, 1.0,
+      moreOrLessEquals(49.99999999999999), moreOrLessEquals(-20.710678118654755), 0.0, 1.0,
     ]);
   });
 
