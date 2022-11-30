@@ -1390,6 +1390,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: animated_complex_opacity_perf__e2e_summary
 
+  - name: Linux_android animated_complex_image_filtered_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: animated_complex_image_filtered_perf__e2e_summary
+
   - name: Linux_android animated_placeholder_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4512,7 +4522,6 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/113706
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4610,3 +4619,28 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
+
+  # TODO(drewroengoogle): Remove this target when the release scheduler is
+  # confirmed to be working correctly and as intended.
+  # (https://github.com/flutter/flutter/issues/100806)
+  # This target is marked `bringup: true` because this is a temporary target
+  # that is not intended to impact the tree.
+  - name: Linux docs_deploy_with_release_scheduler
+    recipe: flutter/flutter
+    scheduler: release
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"},
+          {"dependency": "firebase", "version": "v11.0.1"}
+        ]
+      tags: >
+        ["framework", "hostonly", "linux"]
+      validation: docs
+      validation_name: Docs
+      firebase_project: master-docs-flutter-dev
+      release_ref: refs/heads/master
