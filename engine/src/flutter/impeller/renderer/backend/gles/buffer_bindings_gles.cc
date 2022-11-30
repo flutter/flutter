@@ -60,15 +60,14 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
 }
 
 static std::string NormalizeUniformKey(const std::string& key) {
-  std::stringstream stream;
-  for (size_t i = 0, count = key.length(); i < count; i++) {
-    auto ch = key.data()[i];
-    if (ch == '_') {
-      continue;
+  std::string result;
+  result.reserve(key.length());
+  for (char ch : key) {
+    if (ch != '_') {
+      result.push_back(toupper(ch));
     }
-    stream << static_cast<char>(toupper(ch));
   }
-  return stream.str();
+  return result;
 }
 
 static std::string CreateUnifiormMemberKey(const std::string& struct_name,
