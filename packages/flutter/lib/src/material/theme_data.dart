@@ -1339,6 +1339,7 @@ class ThemeData with Diagnosticable {
   ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio]
+  ///   * Snack bar: [SnackBar]
   ///   * Slider: [Slider]
   ///   * Switch: [Switch]
   ///   * Tabs: [TabBar]
