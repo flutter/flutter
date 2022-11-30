@@ -1300,7 +1300,7 @@ class ThemeData with Diagnosticable {
   /// \* if the target platform is Android and the app is not
   /// running on the web, otherwise it will fallback to [InkRipple].
   ///
-  /// If [brighness] is [Brightness.dark] then the default color scheme will
+  /// If [brightness] is [Brightness.dark] then the default color scheme will
   /// be either the M3 baseline dark color scheme or the M2 baseline dark color
   /// scheme depending on [useMaterial3].
   ///
