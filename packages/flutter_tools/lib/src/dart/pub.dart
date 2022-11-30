@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -148,6 +149,18 @@ abstract class Pub {
     required Usage usage,
   }) = _DefaultPub;
 
+  /// Create a [Pub] instance with a mocked [stdio].
+  @visibleForTesting
+  factory Pub.test({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Platform platform,
+    required BotDetector botDetector,
+    required Usage usage,
+    required Stdio stdio,
+  }) = _DefaultPub.test;
+
   /// Runs `pub get` or `pub upgrade` for [project].
   ///
   /// [context] provides extra information to package server requests to
@@ -218,7 +231,29 @@ class _DefaultPub implements Pub {
          logger: logger,
          processManager: processManager,
        ),
-       _processManager = processManager;
+       _processManager = processManager,
+       _stdio = null;
+
+  @visibleForTesting
+  _DefaultPub.test({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Platform platform,
+    required BotDetector botDetector,
+    required Usage usage,
+    required Stdio stdio,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _platform = platform,
+       _botDetector = botDetector,
+       _usage = usage,
+       _processUtils = ProcessUtils(
+         logger: logger,
+         processManager: processManager,
+       ),
+       _processManager = processManager,
+       _stdio = stdio;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -227,6 +262,7 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final Usage _usage;
   final ProcessManager _processManager;
+  final Stdio? _stdio;
 
   @override
   Future<void> get({
@@ -340,6 +376,9 @@ class _DefaultPub implements Pub {
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
+  /// Uses [ProcessStartMode.normal] and [Pub._stdio] if [Pub.test] constructor
+  /// was used.
+  ///
   /// Prints the stdout and stderr of the whole run.
   ///
   /// Sends an analytics event.
@@ -359,12 +398,38 @@ class _DefaultPub implements Pub {
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
     try {
-      final io.Process process = await _processUtils.start(
-        pubCommand,
-        workingDirectory: _fileSystem.path.current,
-        environment: pubEnvironment,
-        mode: ProcessStartMode.inheritStdio,
-      );
+      final io.Process process;
+      final io.Stdio? stdio = _stdio;
+
+      if (stdio != null) {
+        // Omit mode parameter and direct pub output to [Pub._stdio] for tests.
+        process = await _processUtils.start(
+          pubCommand,
+          workingDirectory: _fileSystem.path.current,
+          environment: pubEnvironment,
+        );
+
+        final StreamSubscription<List<int>> stdoutSubscription =
+          process.stdout.listen(stdio.stdout.add);
+        final StreamSubscription<List<int>> stderrSubscription =
+          process.stderr.listen(stdio.stderr.add);
+
+        await Future.wait<void>(<Future<void>>[
+          stdoutSubscription.asFuture<void>(),
+          stderrSubscription.asFuture<void>(),
+        ]);
+
+        unawaited(stdoutSubscription.cancel());
+        unawaited(stderrSubscription.cancel());
+      } else {
+        // Let pub inherit stdio for normal operation.
+        process = await _processUtils.start(
+          pubCommand,
+          workingDirectory: _fileSystem.path.current,
+          environment: pubEnvironment,
+          mode: ProcessStartMode.inheritStdio,
+        );
+      }
 
       exitCode = await process.exitCode;
     // The exception is rethrown, so don't catch only Exceptions.

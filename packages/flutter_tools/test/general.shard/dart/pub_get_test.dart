@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -12,12 +11,14 @@ import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   setUpAll(() {
@@ -32,13 +33,14 @@ void main() {
 
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await expectLater(() => pub.get(
@@ -78,13 +80,14 @@ void main() {
   }
   ''');
 
-      final Pub pub = Pub(
+      final Pub pub = Pub.test(
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -128,13 +131,14 @@ void main() {
       fileSystem.file('.dart_tool/version').writeAsStringSync('a');
       fileSystem.file('version').writeAsStringSync('b');
 
-      final Pub pub = Pub(
+      final Pub pub = Pub.test(
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -177,13 +181,14 @@ void main() {
       fileSystem.file('.dart_tool/version').writeAsStringSync('a');
       fileSystem.file('version').writeAsStringSync('b');
 
-      final Pub pub = Pub(
+      final Pub pub = Pub.test(
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -208,13 +213,14 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('{"generator": "third-party"}');
 
-      final Pub pub = Pub(
+      final Pub pub = Pub.test(
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
         botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       );
 
       await pub.get(
@@ -242,13 +248,14 @@ void main() {
     fileSystem.file('.dart_tool/version').writeAsStringSync('a');
     fileSystem.file('version').writeAsStringSync('a');
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -281,13 +288,14 @@ void main() {
     fileSystem.file('.dart_tool/version').writeAsStringSync('a');
     fileSystem.file('version').writeAsStringSync('b');
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -320,13 +328,14 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
     fileSystem.file('version').writeAsStringSync('b');
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -359,13 +368,14 @@ void main() {
     fileSystem.file('pubspec.lock').createSync();
     fileSystem.file('version').writeAsStringSync('b');
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -397,13 +407,14 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
     fileSystem.file('.dart_tool/version').writeAsStringSync('b');
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -437,13 +448,14 @@ void main() {
       ..setLastModifiedSync(DateTime(1991));
     fileSystem.file('version').writeAsStringSync('b');
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -479,13 +491,14 @@ void main() {
     fileSystem.file('version').writeAsStringSync('b');
     fileSystem.file('.dart_tool/version').writeAsStringSync('b');
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
     await pub.get(
@@ -496,6 +509,68 @@ void main() {
 
     expect(processManager, hasNoRemainingExpectations);
     expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
+  });
+
+  testWithoutContext('pub get 66 shows message from pub', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--directory',
+          '.',
+          'get',
+          '--example',
+        ],
+        exitCode: 66,
+        stderr: 'err1\nerr2\nerr3\n',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+      ),
+    ]);
+    final FakeStdio mockStdio = FakeStdio();
+    final Pub pub = Pub.test(
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const BotDetectorAlwaysNo(),
+      stdio: mockStdio,
+      processManager: processManager,
+    );
+    const String toolExitMessage = '''
+pub get failed
+command: "bin/cache/dart-sdk/bin/dart __deprecated_pub --directory . get --example"
+pub env: {
+  "FLUTTER_ROOT": "",
+  "PUB_ENVIRONMENT": "flutter_cli:flutter_tests",
+}
+exit code: 66
+''';
+    await expectLater(
+      () => pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+      ),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', toolExitMessage)),
+    );
+    expect(logger.statusText, 'Running "flutter pub get" in /...\n');
+    expect(
+      mockStdio.stdout.writes.map(utf8.decode),
+      <String>[
+        'out1\nout2\nout3\n',
+      ]
+    );
+    expect(
+      mockStdio.stderr.writes.map(utf8.decode),
+      <String>[
+        'err1\nerr2\nerr3\n',
+      ]
+    );
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('pub get shows working directory on process exception', () async {
@@ -533,12 +608,13 @@ void main() {
       ),
     ]);
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       processManager: processManager,
     );
     await expectLater(
@@ -582,30 +658,37 @@ void main() {
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
         },
+        stdout: "FakeCommand's env successfully matched"
       ),
     ]);
 
-    final Pub pub = Pub(
+    final FakeStdio mockStdio = FakeStdio();
+    final Pub pub = Pub.test(
       platform: FakePlatform(),
       usage: TestUsage(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: mockStdio,
     );
 
-    FakeAsync().run((FakeAsync time) {
-      pub.get(
+    try {
+      await pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests
-      ).then((void value) {
-        return;
-      }, onError: (dynamic thrownError) {
-        return;
-      });
-      time.elapse(const Duration(milliseconds: 500));
-      expect(processManager, hasNoRemainingExpectations);
-    });
+      );
+    } on ToolExit {
+      // Ignore.
+    }
+
+    expect(
+      mockStdio.stdout.writes.map(utf8.decode),
+      <String>[
+        "FakeCommand's env successfully matched",
+      ]
+    );
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('pub cache local is merge to global', () async {
@@ -652,33 +735,32 @@ void main() {
     final Platform platform = FakePlatform(
       environment: <String, String>{'HOME': '/global'}
     );
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       platform: platform,
       usage: TestUsage(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
     );
 
-    FakeAsync().run((FakeAsync time) {
-      pub.get(
+    try {
+      await pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests,
-      ).then((void value) {
-        return;
-      }, onError: (dynamic thrownError) {
-        return;
-      });
-      time.elapse(const Duration(milliseconds: 500));
-      expect(processManager, hasNoRemainingExpectations);
-      expect(local.existsSync(), false);
-      expect(globalHosted.childFile('second.file').existsSync(), false);
-      expect(
-          globalHosted.childDirectory('dir').childFile('third.file').existsSync(), false
-      ); // do not copy dependencies that are already downloaded
-      expect(globalHosted.childDirectory('dir_2').childFile('fourth.file').existsSync(), true);
-    });
+        context: PubContext.flutterTests
+      );
+    } on ToolExit {
+      // Ignore.
+    }
+
+    expect(processManager, hasNoRemainingExpectations);
+    expect(local.existsSync(), false);
+    expect(globalHosted.childFile('second.file').existsSync(), false);
+    expect(
+        globalHosted.childDirectory('dir').childFile('third.file').existsSync(), false
+    ); // do not copy dependencies that are already downloaded
+    expect(globalHosted.childDirectory('dir_2').childFile('fourth.file').existsSync(), true);
   });
 
   testWithoutContext('pub cache in environment is used', () async {
@@ -700,14 +782,18 @@ void main() {
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
           'PUB_CACHE': 'custom/pub-cache/path',
         },
+        stdout: "FakeCommand's env successfully matched"
       ),
     ]);
-    final Pub pub = Pub(
+
+    final FakeStdio mockStdio = FakeStdio();
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
       usage: TestUsage(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: mockStdio,
       platform: FakePlatform(
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
@@ -715,28 +801,33 @@ void main() {
       ),
     );
 
-    FakeAsync().run((FakeAsync time) {
-      pub.get(
+    try {
+      await pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests
-      ).then((void value) {
-        return;
-      }, onError: (dynamic thrownError) {
-        return;
-      });
-      time.elapse(const Duration(milliseconds: 500));
-      expect(processManager, hasNoRemainingExpectations);
-    });
+      );
+    } on ToolExit {
+      // Ignore.
+    }
+
+    expect(
+      mockStdio.stdout.writes.map(utf8.decode),
+      <String>[
+        "FakeCommand's env successfully matched",
+      ]
+    );
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('analytics sent on success', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TestUsage usage = TestUsage();
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       usage: usage,
       platform: FakePlatform(
         environment: const <String, String>{
@@ -762,11 +853,12 @@ void main() {
   testWithoutContext('package_config_subset file is generated from packages and not timestamp', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final TestUsage usage = TestUsage();
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       usage: usage,
       platform: FakePlatform(
         environment: const <String, String>{
@@ -823,12 +915,13 @@ void main() {
       ),
     ]);
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       usage: usage,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio(),
       platform: FakePlatform(
         environment: const <String, String>{
           'PUB_CACHE': 'custom/pub-cache/path',
@@ -903,7 +996,7 @@ void main() {
         ],
       ),
     ]);
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       usage: TestUsage(),
       fileSystem: fileSystem,
       logger: logger,
@@ -912,6 +1005,7 @@ void main() {
         environment: <String, String>{},
       ),
       botDetector: const BotDetectorAlwaysNo(),
+      stdio: FakeStdio()
     );
 
     fileSystem.file('version').createSync();
