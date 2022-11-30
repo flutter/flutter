@@ -145,8 +145,10 @@ class ScrollBehavior {
   /// If other keys exclusive of this set are pressed during a scroll event, in
   /// conjunction with keys from this set, the scroll input will not be affected.
   ///
-  /// On MacOs, [LogicalKeyboardKey.shift] will always flip the input axes,
-  /// regardless of this value.
+  /// On [TargetPlatform.macOS], the framework will not flip the input axes
+  /// when the default modifier of [LogicalKeyboardKey.shift]
+  /// is pressed, regardless of this value. This is because MacOS automatically
+  /// changes the input axis in this case.
   ///
   /// Defaults to [LogicalKeyboardKey.shiftLeft],
   /// [LogicalKeyboardKey.shiftRight], cannot be null.
