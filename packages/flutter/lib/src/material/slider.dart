@@ -41,7 +41,7 @@ enum _SliderType { material, adaptive }
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// {@tool dartpad}
-/// ![A slider widget, consisting of 5 divisions and showing the default value
+/// ![A legacy slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
 ///
 /// The Sliders value is part of the Stateful widget subclass to change the value
@@ -51,8 +51,8 @@ enum _SliderType { material, adaptive }
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This sample shows the creation of a [Slider], as described in:
-/// https://m3.material.io/components/sliders/overview
+/// This sample shows the creation of a [Slider] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/sliders/overview.
 ///
 /// ** See code in examples/api/lib/material/slider/slider.1.dart **
 /// {@end-tool}
