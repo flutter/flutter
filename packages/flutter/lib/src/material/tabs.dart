@@ -331,7 +331,7 @@ class _IndicatorPainter extends CustomPainter {
     required _IndicatorPainter? old,
     required this.indicatorPadding,
     this.dividerColor,
-    required this.labelPaddings,    
+    required this.labelPaddings,
   }) : assert(controller != null),
        assert(indicator != null),
        super(repaint: controller.animation) {
