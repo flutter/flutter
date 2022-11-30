@@ -781,9 +781,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         flip:
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-        case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+        // iOS does not have the same quirk as MacOS.
+        case TargetPlatform.iOS:
           return true;
       }
     }
