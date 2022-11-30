@@ -51,7 +51,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   bool get supportsRestartRequest => true;
 
   /// A list of reverse-requests from `flutter run --machine` that should be forwarded to the client.
-  final Set<String> _requestsToForwardToClient = <String>{
+  static const Set<String> _requestsToForwardToClient = <String>{
     // The 'app.exposeUrl' request is sent by Flutter to request the client
     // exposes a URL to the user and return the public version of that URL.
     //
