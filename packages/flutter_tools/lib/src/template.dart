@@ -17,7 +17,7 @@ import 'dart/package_map.dart';
 /// They are escaped in Kotlin files.
 ///
 /// https://kotlinlang.org/docs/keyword-reference.html
-const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
+const List<String> kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
