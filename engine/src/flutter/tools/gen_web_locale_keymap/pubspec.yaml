@@ -1,0 +1,20 @@
+name: gen_web_keyboard_layouts
+description: Generates keyboard layouts for Web from external sources.
+
+environment:
+  sdk: ">=2.18.0-0 <3.0.0"
+
+dependencies:
+  args: any
+  http: ^0.13.4
+  path: ^1.8.1
+  meta: any
+
+dev_dependencies:
+  test: ^1.21.1
+
+dependency_overrides:
+  args:
+    path: ../../../third_party/dart/third_party/pkg/args
+  meta:
+    path: ../../../third_party/dart/pkg/meta
