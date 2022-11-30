@@ -208,7 +208,9 @@ class _TabStyle extends AnimatedWidget {
        ?? defaults.labelColor!;
     final Color unselectedColor = unselectedLabelColor
       ?? tabBarTheme.unselectedLabelColor
-      ?? defaults.unselectedLabelColor!;
+      ?? (themeData.useMaterial3
+           ? defaults.unselectedLabelColor!
+           : selectedColor.withAlpha(0xB2)); // 70% alpha
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)!
       : Color.lerp(unselectedColor, selectedColor, animation.value)!;
@@ -763,16 +765,18 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The color of selected tab labels.
   ///
-  /// Unselected tab labels are rendered with the same color rendered at 70%
-  /// opacity unless [unselectedLabelColor] is non-null.
+  /// If [ThemeData.useMaterial3] is false, unselected tab labels are rendered with
+  /// the same color with 70% opacity unless [unselectedLabelColor] is non-null.
   ///
-  /// If this parameter is null, then the color of the [ThemeData.primaryTextTheme]'s
+  /// If this property is null and [ThemeData.useMaterial3] is true, [ColorScheme.primary]
+  /// will be used, otherwise the color of the [ThemeData.primaryTextTheme]'s
   /// [TextTheme.bodyLarge] text color is used.
   final Color? labelColor;
 
   /// The color of unselected tab labels.
   ///
-  /// If this property is null, unselected tab labels are rendered with the
+  /// If this property is null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurfaceVariant]
+  /// will be used, otherwise unselected tab labels are rendered with the
   /// [labelColor] with 70% opacity.
   final Color? unselectedLabelColor;
 
@@ -781,8 +785,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [unselectedLabelStyle] is null, then this text style will be used for
   /// both selected and unselected label styles.
   ///
-  /// If this property is null, then the text style of the
-  /// [ThemeData.primaryTextTheme]'s [TextTheme.bodyLarge] definition is used.
+  /// If this property is null and [ThemeData.useMaterial3] is true, [TextTheme.titleSmall]
+  /// will be used, otherwise the text style of the [ThemeData.primaryTextTheme]'s
+  /// [TextTheme.bodyLarge] definition is used.
   final TextStyle? labelStyle;
 
   /// The padding added to each of the tab labels.
@@ -796,8 +801,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The text style of the unselected tab labels.
   ///
-  /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
-  /// is null, then the text style of the [ThemeData.primaryTextTheme]'s
+  /// If this property is null and [ThemeData.useMaterial3] is true, [TextTheme.titleSmall]
+  /// will be used, otherwise then the [labelStyle] value is used. If [labelStyle]
+  /// is null, the text style of the [ThemeData.primaryTextTheme]'s
   /// [TextTheme.bodyLarge] definition is used.
   final TextStyle? unselectedLabelStyle;
 
@@ -1867,11 +1873,10 @@ class TabPageSelector extends StatelessWidget {
 
 // Hand coded defaults based on Material Design 2.
 class _TabsDefaultsM2 extends TabBarTheme {
-  _TabsDefaultsM2(this.context)
+  const _TabsDefaultsM2(this.context)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
   final BuildContext context;
-  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   Color? get indicatorColor => Theme.of(context).indicatorColor;
@@ -1880,13 +1885,10 @@ class _TabsDefaultsM2 extends TabBarTheme {
   Color? get labelColor => Theme.of(context).primaryTextTheme.bodyLarge!.color!;
 
   @override
-  TextStyle? get labelStyle => _textTheme.bodyLarge;
+  TextStyle? get labelStyle => Theme.of(context).primaryTextTheme.bodyLarge;
 
   @override
-  Color? get unselectedLabelColor => Theme.of(context).primaryTextTheme.bodyLarge!.color!.withAlpha(0xB2); // 70% alpha
-
-  @override
-  TextStyle? get unselectedLabelStyle => _textTheme.bodyLarge;
+  TextStyle? get unselectedLabelStyle => Theme.of(context).primaryTextTheme.bodyLarge;
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
