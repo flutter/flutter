@@ -261,6 +261,54 @@ void main() {
       expect(controller.value.canRedo, true);
     }, variant: TargetPlatformVariant.all());
 
+    testWidgets('ignores value changes pushed during onTriggered', (WidgetTester tester) async {
+      final ValueNotifier<int> value = ValueNotifier<int>(0);
+      final UndoHistoryController controller = UndoHistoryController();
+      int Function(int newValue) valueToUse = (int value) => value;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: UndoHistory<int>(
+            value: value,
+            controller: controller,
+            onTriggered: (int newValue) {
+              value.value = valueToUse(newValue);
+            },
+            focusNode: focusNode,
+            child: Container(),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Undo/redo have no effect if the value has never changed.
+      expect(controller.value.canUndo, false);
+      expect(controller.value.canRedo, false);
+      controller.undo();
+      expect(value.value, 0);
+      controller.redo();
+      expect(value.value, 0);
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(controller.value.canUndo, false);
+      expect(controller.value.canRedo, false);
+      controller.undo();
+      expect(value.value, 0);
+      controller.redo();
+      expect(value.value, 0);
+
+      value.value = 1;
+
+      // Wait for the throttling.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      valueToUse = (int value) => 3;
+      controller.undo();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(controller.value.canUndo, false);
+    }, variant: TargetPlatformVariant.all());
+
     testWidgets('changes should send setUndoState to the UndoManagerConnection on iOS', (WidgetTester tester) async {
       final List<MethodCall> log = <MethodCall>[];
       SystemChannels.undoManager.setMockMethodCallHandler((MethodCall methodCall) async {

@@ -4200,11 +4200,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   selection: value.selection,),
                 SelectionChangedCause.keyboard);
             },
-            shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue, bool duringTrigger) {
-              if (duringTrigger) {
-                return false;
-              }
-
+            shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
               if (newValue == TextEditingValue.empty) {
                 return false;
               }

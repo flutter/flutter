@@ -41,13 +41,18 @@ class UndoHistory<T> extends StatefulWidget {
 
   /// Called when checking whether a value change should be pushed onto
   /// the undo stack.
-  final bool Function(T? oldValue, T newValue, bool duringTrigger)? shouldChangeUndoStack;
+  final bool Function(T? oldValue, T newValue)? shouldChangeUndoStack;
 
   /// Called when an undo or redo causes a state change.
   ///
   /// If the state would still be the same before and after the undo/redo, this
   /// will not be called. For example, receiving a redo when there is nothing
   /// to redo will not call this method.
+  ///
+  /// Changes to the [value] while this method is running will not be recorded
+  /// on the undo stack. For example, a [TextInputFormatter] may change the value
+  /// from what was on the undo stack, but this new value will not be recorded,
+  /// as that would wipe out the redo history.
   final void Function(T value) onTriggered;
 
   /// The [FocusNode] that will be used to listen for focus to set the initial
@@ -151,7 +156,11 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient 
       return;
     }
 
-    if (!(widget.shouldChangeUndoStack?.call(_lastValue, widget.value.value, _duringTrigger) ?? true)) {
+    if (_duringTrigger) {
+      return;
+    }
+
+    if (!(widget.shouldChangeUndoStack?.call(_lastValue, widget.value.value) ?? true)) {
       return;
     }
 
