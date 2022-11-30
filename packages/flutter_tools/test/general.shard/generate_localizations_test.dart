@@ -1902,7 +1902,36 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('plural messages', () {
-      testWithoutContext('should warn attempting to generate a plural message without placeholders', () {
+      testWithoutContext('warnings are generated when plural parts are repeated', () {
+        const String pluralMessageWithOverridenParts = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello}zero{hello}}",
+  "@helloWorlds": {
+    "description": "Properly formatted but has redundant zero cases."
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(pluralMessageWithOverridenParts);
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        expect(logger.hadWarningOutput, isTrue);
+        expect(logger.warningText, contains('''
+ICU Syntax Warning: 
+'''));
+      });
+
+      testWithoutContext('should throw attempting to generate a plural message without placeholders', () {
         const String pluralMessageWithoutPlaceholdersAttribute = '''
 {
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
@@ -2893,7 +2922,10 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
+<<<<<<< HEAD
       useEscaping: true,
+=======
+>>>>>>> tae/add-option-to-suppress-warnings
     )
       ..loadResources()
       ..writeOutputFiles();
@@ -2903,4 +2935,37 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     ).readAsStringSync();
     expect(localizationsFile, contains(r"Flutter\'s amazing"));
   });
+<<<<<<< HEAD
+=======
+
+  testWithoutContext('suppress warnings flag actually suppresses warnings', () {
+    const String pluralMessageWithOverridenParts = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
+  "@helloWorlds": {
+    "description": "Properly formatted but has redundant zero cases.",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(pluralMessageWithOverridenParts);
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+      suppressWarnings: true,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
+    expect(logger.hadWarningOutput, isFalse);
+  });
+>>>>>>> tae/add-option-to-suppress-warnings
 }
