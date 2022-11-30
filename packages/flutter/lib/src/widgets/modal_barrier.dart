@@ -14,16 +14,16 @@ import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
-/// A widget that modifies the size of the [SemanticsNode.rect] (focus) of its 
+/// A widget that modifies the size of the [SemanticsNode.rect] (focus) of its
 /// child widget. It clips the focus in possibily four directions based on the
 /// specified [EdgeInsets].
-/// 
+///
 /// If a [ValueNotifier] is provided, the size of the focus is adjusted based on
 /// value changes inside the [ValueNotifier].
-/// 
+///
 /// If no [ValueNotifier] is provided, the [SemanticsClipper] applies a default
 /// value of [EdgeInsets.zero], which preserves the default size of the focus.
-/// 
+///
 /// See also:
 ///
 ///  * [ModalBarrier], which utilizes thi widget to adjust the barrier focus
@@ -188,7 +188,7 @@ class ModalBarrier extends StatelessWidget {
   /// This [ValueNotifier] contains a value of type [EdgeInsets] that specifies
   /// how the [SemanticsNode.rect] of the barrier should be clipped (so that
   /// it does not overlap with the content rendered on top of it).
-  /// 
+  ///
   /// See also"
   ///
   ///  * [SemanticsClipper], which utilizes the value inside this [ValueNotifier]
@@ -197,8 +197,8 @@ class ModalBarrier extends StatelessWidget {
 
   /// This hint text instructs user what they are able to do when they tap on
   /// the [ModalBarrier], annouced in the format of 'Double tap to
-  /// $[semanticsOnTapHint].' 
-  /// 
+  /// $[semanticsOnTapHint].'
+  ///
   /// If this value is null, the default onTapHint will be applied, resulting
   /// in the annoucement of 'Double tap to activate'.
   final String? semanticsOnTapHint;
@@ -248,7 +248,6 @@ class ModalBarrier extends StatelessWidget {
               onTapHint: semanticsOnTapHint,
               onTap: handleDismiss,
               label: semanticsDismissible ? semanticsLabel : null,
-              onDismiss: semanticsDismissible ? handleDismiss : null,
               textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
               child: MouseRegion(
                 cursor: SystemMouseCursors.basic,
@@ -336,7 +335,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// This [ValueNotifier] contains a value of type [EdgeInsets] that specifies
   /// how the [SemanticsNode.rect] of the barrier should be clipped (so that
   /// it does not overlap with the content rendered on top of it).
-  /// 
+  ///
   /// See also"
   ///
   ///  * [SemanticsClipper], which utilizes the value inside this [ValueNotifier]
@@ -345,8 +344,8 @@ class AnimatedModalBarrier extends AnimatedWidget {
 
   /// This hint text instructs user what they are able to do when they tap on
   /// the [ModalBarrier], annouced in the format of 'Double tap to
-  /// $[semanticsOnTapHint].' 
-  /// 
+  /// $[semanticsOnTapHint].'
+  ///
   /// If this value is null, the default onTapHint will be applied, resulting
   /// in the annoucement of 'Double tap to activate'.
   final String? semanticsOnTapHint;

@@ -1382,13 +1382,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// The semantic hint text that informs users what will happen if they
   /// tap on the barrier.
-  /// 
+  ///
   /// If the barrier is dismissible, the hint text will be read out after
   /// [barrierLabel], in the form of 'Double tap to $[barrierOnTapHint].
-  /// 
+  ///
   /// If no [barrierOnTapHint] is specified, i.e. it's null, the default hint
   /// will be used, which results in announcement of 'Double tap to activate'.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [barrierDismissible], which controls the behavior of the barrier when
@@ -1699,8 +1699,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
-      barrier = 
-      AnimatedModalBarrier(
+      barrier = AnimatedModalBarrier(
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
