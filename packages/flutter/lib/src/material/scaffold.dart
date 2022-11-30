@@ -1752,7 +1752,9 @@ class Scaffold extends StatefulWidget {
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
-  /// The theme's [ThemeData.scaffoldBackgroundColor] by default.
+  /// Defaults to [ThemeData.scaffoldTheme]'s [ScaffoldThemeData.backgroundColor].
+  /// If that is null and [ThemeData.useMaterial3] is true, then defaults to
+  /// [ColorScheme.background]. Otherwise, defaults to M2 specification.
   final Color? backgroundColor;
 
   /// A bottom navigation bar to display at the bottom of the scaffold.
@@ -2991,7 +2993,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       geometryNotifier: _geometryNotifier,
       child: ScrollNotificationObserver(
         child: Material(
-          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+          color: widget.backgroundColor
+            ?? themeData.scaffoldTheme.backgroundColor
+            ?? (themeData.useMaterial3
+              ? themeData.colorScheme.background
+              : themeData.brightness == Brightness.dark ? Colors.grey[850]! : Colors.grey[50]!),
           child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
             return Actions(
               actions: <Type, Action<Intent>>{

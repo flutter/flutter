@@ -1261,9 +1261,6 @@ class ThemeData with Diagnosticable {
   final TargetPlatform platform;
 
   /// A theme for customizing the appearance of [Scaffold] widgets.
-  ///
-  /// Currently unused by the framework.
-  // TODO(guidezpl): Hook into [Scaffold].
   final ScaffoldThemeData scaffoldTheme;
 
   /// A theme for customizing the colors, thickness, and shape of [Scrollbar]s.
