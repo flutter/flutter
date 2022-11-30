@@ -403,9 +403,9 @@ class CupertinoContextMenu extends StatefulWidget {
   /// be used to animate the preview in sync with this opening and closing. The
   /// child parameter provides access to the child displayed when the
   /// CupertinoContextMenu is closed.
-  /// 
+  ///
   /// {@tool snippet}
-  /// 
+  ///
   /// Below is an example of using [previewBuilder] to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of
   /// these could be used in a GridView for a similar effect.
