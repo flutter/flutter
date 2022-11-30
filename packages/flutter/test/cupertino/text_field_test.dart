@@ -4108,7 +4108,7 @@ void main() {
 
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
-    // Here we tap on '|d', where our selection was previously, and move to '|g'.
+    // Here we tap on '|g', where our selection was previously, and move to '|i'.
     await gesture.down(textOffsetToPosition(tester, 7));
     await tester.pump();
     await gesture.moveTo(iPos);
