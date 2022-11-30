@@ -297,25 +297,22 @@ String generateString(String value) {
 
 /// Given a list of strings, placeholders, or helper function calls, concatenate
 /// them into one expression to be returned.
-String generateReturnExpr(List<HelperMethod> helpers) {
-  if (helpers.isEmpty) {
+String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
+  if (expressions.isEmpty) {
     return "''";
-  } else if (
-    helpers.length == 1
-      && helpers[0].string == null
-      && (helpers[0].placeholder?.type == 'String' || helpers[0].helper != null)
-  ) {
-    return helpers[0].helperOrPlaceholder;
+  } else if (isSingleStringVar) {
+    // If our expression is "$varName" where varName is a String, this is equivalent to just varName.
+    return expressions[0].substring(1);
   } else {
-    final String string = helpers.reversed.fold<String>('', (String string, HelperMethod helper) {
-      if (helper.string != null) {
-        return generateString(helper.string!) + string;
+    final String string = expressions.reversed.fold<String>('', (String string, String expression) {
+      if (expression[0] != r'$') {
+        return generateString(expression) + string;
       }
       final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
-      if (alphanumeric.hasMatch(helper.helperOrPlaceholder) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
-        return '\$${helper.helperOrPlaceholder}$string';
+      if (alphanumeric.hasMatch(expression.substring(1)) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
+        return '$expression$string';
       } else {
-        return '\${${helper.helperOrPlaceholder}}$string';
+        return '\${${expression.substring(1)}}$string';
       }
     });
     return "'$string'";

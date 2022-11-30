@@ -143,23 +143,16 @@ const String methodTemplate = '''
     return @(message);
   }''';
 
-const String messageHelperTemplate = '''
-    String @(name)(@(parameters)) {
-      return @(message);
-    }''';
-
-const String pluralHelperTemplate = '''
-    String @(name)(@(parameters)) {
-      return intl.Intl.pluralLogic(
+const String pluralVariableTemplate = '''
+    String @(varName) = intl.Intl.pluralLogic(
         @(count),
         locale: localeName,
 @(pluralLogicArgs)
       );
     }''';
 
-const String selectHelperTemplate = '''
-    String @(name)(@(parameters)) {
-      return intl.Intl.selectLogic(
+const String selectVariableTemplate = '''
+    String @(varName) = intl.Intl.selectLogic(
         @(choice),
         {
 @(selectCases)

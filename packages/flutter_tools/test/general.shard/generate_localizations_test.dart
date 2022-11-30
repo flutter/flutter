@@ -1284,6 +1284,40 @@ class AppLocalizationsEn extends AppLocalizations {
   });
 
   group('writeOutputFiles', () {
+    testWithoutContext('multiple messages with syntax error all log their errors', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(r'''
+{
+  "msg1": "{",
+  "msg2": "{ {"
+}''');
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+      try {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+      } on L10nException catch (error) {
+        expect(error.message, equals('Found syntax errors.'));
+        expect(logger.errorText, contains('''
+[app_en.arb:msg1] ICU Syntax Error: Expected "identifier" but found no tokens.
+    {
+      ^
+[app_en.arb:msg2] ICU Syntax Error: Expected "identifier" but found "{".
+    { {
+      ^'''));
+      }
+    });
     testWithoutContext('message without placeholders - should generate code comment with description and template message translation', () {
       _standardFlutterDirectoryL10nSetup(fs);
       LocalizationsGenerator(
@@ -2078,30 +2112,25 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
           .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            contains('''
+        try {
+          LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            logger: logger,
+          )
+            ..loadResources()
+            ..writeOutputFiles();
+        } on L10nException {
+          expect(logger.errorText, contains('''
 [app_en.arb:genderSelect] ICU Syntax Error: Select expressions must have an "other" case.
     {gender, select,}
-                    ^'''),
-          )),
-        );
+                    ^''')
+          );
+        }
       });
     });
 
