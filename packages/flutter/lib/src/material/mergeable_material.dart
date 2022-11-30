@@ -130,8 +130,7 @@ class MergeableMaterial extends StatefulWidget {
 
   /// Defines color used for dividers if [hasDividers] is true.
   ///
-  /// If [dividerColor] is null, then [DividerThemeData.color] is used. If that
-  /// is null, then [ThemeData.dividerColor] is used.
+  /// {@macro flutter.material.divider.color}
   final Color? dividerColor;
 
   @override

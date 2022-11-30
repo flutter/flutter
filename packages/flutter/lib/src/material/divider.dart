@@ -97,8 +97,12 @@ class Divider extends StatelessWidget {
 
   /// The color to use when painting the line.
   ///
-  /// If this is null, then the [DividerThemeData.color] is used. If that is
-  /// also null, then [ThemeData.dividerColor] is used.
+  /// {@template flutter.material.divider.color}
+  /// If the color is null, then [DividerThemeData.color] is used. If that is
+  /// also null and if [ThemeData.useMaterial3] is true, then it defaults to
+  /// [ThemeData.colorScheme]'s [ColorScheme.outlineVariant]. Otherwise
+  /// it defaults to M2 specification.
+  /// {@endtemplate}
   ///
   /// {@tool snippet}
   ///
@@ -112,10 +116,7 @@ class Divider extends StatelessWidget {
 
   /// Computes the [BorderSide] that represents a divider.
   ///
-  /// If [color] is null, then [DividerThemeData.color] is used. If that is also
-  /// null, then if [ThemeData.useMaterial3] is true then it defaults to
-  /// [ThemeData.colorScheme]'s [ColorScheme.outlineVariant]. Otherwise
-  /// [ThemeData.dividerColor] is used.
+  /// {@macro flutter.material.divider.color}
   ///
   /// If [width] is null, then [DividerThemeData.thickness] is used. If that is
   /// also null, then this defaults to 0.0 (a hairline border).
@@ -268,8 +269,7 @@ class VerticalDivider extends StatelessWidget {
 
   /// The color to use when painting the line.
   ///
-  /// If this is null, then the [DividerThemeData.color] is used. If that is
-  /// also null, then [ThemeData.dividerColor] is used.
+  /// {@macro flutter.material.divider.color}
   ///
   /// {@tool snippet}
   ///
@@ -318,7 +318,7 @@ class _DividerDefaultsM2 extends DividerThemeData {
 
   final BuildContext context;
 
-  @override Color? get color => Theme.of(context).dividerColor;
+  @override Color? get color => Theme.of(context).brightness == Brightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Divider

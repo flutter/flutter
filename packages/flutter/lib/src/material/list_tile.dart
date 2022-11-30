@@ -555,8 +555,9 @@ class ListTile extends StatelessWidget {
   /// that is also null, then a default value of 40 is used.
   final double? minLeadingWidth;
 
-  /// Add a one pixel border in between each tile. If color isn't specified the
-  /// [ThemeData.dividerColor] of the context's [Theme] is used.
+  /// Add a one pixel border in between each tile.
+  ///
+  /// {@macro flutter.material.divider.color}
   ///
   /// See also:
   ///

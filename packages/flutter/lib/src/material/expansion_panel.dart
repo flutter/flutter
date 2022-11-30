@@ -240,8 +240,7 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// Defines color for the divider when [ExpansionPanel.isExpanded] is false.
   ///
-  /// If [dividerColor] is null, then [DividerThemeData.color] is used. If that
-  /// is null, then [ThemeData.dividerColor] is used.
+  /// {@macro flutter.material.divider.color}
   final Color? dividerColor;
 
   /// Defines elevation for the [ExpansionPanel] while it's expanded.

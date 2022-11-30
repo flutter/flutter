@@ -261,7 +261,7 @@ class ExpansionTile extends StatefulWidget {
   /// The tile's border shape when the sublist is expanded.
   ///
   /// If this property is null, the [ExpansionTileThemeData.shape] is used. If that
-  /// is also null, a [Border] with vertical sides default to [ThemeData.dividerColor] is used
+  /// is also null, a [Border] with vertical dividers with default [Divider.color] is used.
   ///
   /// See also:
   ///
@@ -444,6 +444,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    // Default for M2 and M3.
+    final Color dividerColor = theme.useMaterial3
+      ? colorScheme.outlineVariant
+      : theme.brightness == Brightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     _borderTween
       ..begin = widget.collapsedShape
         ?? expansionTileTheme.collapsedShape
@@ -454,8 +458,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ..end = widget.shape
         ?? expansionTileTheme.collapsedShape
         ?? Border(
-          top: BorderSide(color: theme.dividerColor),
-          bottom: BorderSide(color: theme.dividerColor),
+          top: BorderSide(color: dividerColor),
+          bottom: BorderSide(color: dividerColor),
         );
     _headerColorTween
       ..begin = widget.collapsedTextColor
