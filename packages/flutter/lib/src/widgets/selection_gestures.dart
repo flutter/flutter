@@ -1008,6 +1008,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
             _checkDragEnd();
           } else {
             _checkCancel();
+            resolve(GestureDisposition.rejected);
           }
         } else {
           _checkDragCancel();
@@ -1066,19 +1067,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       }
     } else if (event is PointerUpEvent) {
       if (_dragState == _DragState.possible) {
-        // If a [PointerUpEvent] is tracked, and the recognizer has not won the arena, and the tap drift
-        // has exceeded its tolerance, then reject this recognizer.
-        if (pastTapTolerance) {
-          _giveUpPointer(event.pointer);
-          return;
-        }
         // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
-        // only registers a tap has occurred.
+        // attempts to recognize a tap.
         stopTrackingIfPointerNoLongerDown(event);
       } else if (_dragState == _DragState.accepted) {
         _giveUpPointer(event.pointer);
       }
-    } else if (event is PointerCancelEvent){
+    } else if (event is PointerCancelEvent) {
       _giveUpPointer(event.pointer);
     }
   }
@@ -1094,7 +1089,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _giveUpPointer(pointer);
     _resetTaps();
     _resetDragUpdateThrottle();
-    _initialButtons = null;
   }
 
   @override
@@ -1107,7 +1101,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   String get debugDescription => 'tap_and_drag';
 
-  void _acceptDrag(PointerEvent event) {
+  void _acceptDrag(PointerEvent event) { 
     _checkTapCancel();
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
@@ -1145,7 +1139,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           _giveUpPointer(event.pointer);
           _resetTaps();
           _resetDragUpdateThrottle();
-          _initialButtons = null;
         }
         resolve(GestureDisposition.rejected);
         return;
@@ -1221,7 +1214,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     if (!_acceptedActivePointers.remove(event.pointer)) {
       resolvePointer(event.pointer, GestureDisposition.rejected);
     }
-    _initialButtons = null;
   }
 
   void _checkDragStart(PointerEvent event) {
