@@ -422,7 +422,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   // The FittedBox in the preview here allows the image to animate its
   ///   // aspect ratio when the CupertinoContextMenu is animating its preview
   ///   // widget open and closed.
-  // ignore: deprecated_member_use
+  ///   // ignore: deprecated_member_use
   ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
   ///     return FittedBox(
   ///       fit: BoxFit.cover,
