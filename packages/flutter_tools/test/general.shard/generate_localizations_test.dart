@@ -2922,10 +2922,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
-<<<<<<< HEAD
       useEscaping: true,
-=======
->>>>>>> tae/add-option-to-suppress-warnings
     )
       ..loadResources()
       ..writeOutputFiles();
@@ -2935,8 +2932,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     ).readAsStringSync();
     expect(localizationsFile, contains(r"Flutter\'s amazing"));
   });
-<<<<<<< HEAD
-=======
 
   testWithoutContext('suppress warnings flag actually suppresses warnings', () {
     const String pluralMessageWithOverridenParts = '''
@@ -2967,5 +2962,4 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       ..writeOutputFiles();
     expect(logger.hadWarningOutput, isFalse);
   });
->>>>>>> tae/add-option-to-suppress-warnings
 }
