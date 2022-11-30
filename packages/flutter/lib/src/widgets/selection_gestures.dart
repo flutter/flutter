@@ -997,20 +997,20 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           break;
         }
         if (pastTapTolerance) {
-          // This means our pointer was not accepted as a tap nor a drag.
-          // This can happen when a user drags on a right click, going past the
-          // tap tolerance, and drag tolerance, but being rejected since a right click
-          // drag is not allowed by this recognizer.
-          _start = currentDown;
-          _dragState = _DragState.accepted;
+          // This means the pointer was not accepted as a tap.
           if (_wonArenaForPrimaryPointer) {
-            _acceptDrag(_start!);
+            // If the recognizer has already won the arena for the primary pointer being tracked
+            // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
+            // drag gesture.
+            _dragState = _DragState.accepted;
+            _acceptDrag(currentDown!);
             _checkDragEnd();
           } else {
             _checkCancel();
             resolve(GestureDisposition.rejected);
           }
         } else {
+          // The pointer is accepted as a tap.
           _checkDragCancel();
           if (currentUp != null) {
             _checkTapUp(currentUp!);
@@ -1022,7 +1022,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         // For the case when the pointer has been accepted as a drag.
         // Meaning [_checkTapDown] and [_checkDragStart] have already ran.
         _checkDragEnd();
-        _initialButtons = null;
         break;
     }
 
