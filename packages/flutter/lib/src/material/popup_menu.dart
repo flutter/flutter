@@ -697,15 +697,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
     final double buttonHeight = size.height - position.top - position.bottom;
     // Find the ideal vertical position.
-    double y = position.top;
-    if (selectedItemIndex != null && itemSizes != null) {
-      double selectedItemOffset = _kMenuVerticalPadding;
-      for (int index = 0; index < selectedItemIndex!; index += 1) {
-        selectedItemOffset += itemSizes[index]!.height;
-      }
-      selectedItemOffset += itemSizes[selectedItemIndex!]!.height / 2;
-      y = y + buttonHeight - selectedItemOffset - _kMenuVerticalPadding;
-    }
+    double y = position.top + buttonHeight;
 
     // Find the ideal horizontal position.
     double x;
