@@ -1555,14 +1555,14 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         case TextDirection.rtl: // origin is on the right
           startX = labelOffset.dx + labelWidth * (1.0 - scale);
           floatStartX = startX;
-          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
             floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.left : 0.0;
           }
           break;
         case TextDirection.ltr: // origin on the left
           startX = labelOffset.dx;
           floatStartX = startX;
-          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
             floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.left : 0.0;
           }
           break;
@@ -2345,18 +2345,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : themeData.useMaterial3
-            ? const EdgeInsets.fromLTRB(12.0, 12.75, 12.0, 12.75)
-            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : themeData.useMaterial3
-            ? const EdgeInsets.fromLTRB(0.0, 12.75, 0.0, 12.75)
-            : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
@@ -4484,9 +4480,8 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_143
 
-// Generated version v0_141
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();

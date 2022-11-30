@@ -53,11 +53,15 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   late List<String> processArgs;
   late Map<String, String>? env;
 
-  /// A list of all messages sent to the `flutter run` processes `stdin`.
-  final List<Map<String, Object?>> flutterMessages = <Map<String, Object?>>[];
+  /// A list of all messages sent from the adapter back to the client.
+  final List<Map<String, Object?>> dapToClientMessages = <Map<String, Object?>>[];
 
-  /// The `method`s of all requests send to the `flutter run` processes `stdin`.
-  List<String> get flutterRequests => flutterMessages
+  /// A list of all messages sent from the adapter to the `flutter run` processes `stdin`.
+  final List<Map<String, Object?>> dapToFlutterMessages = <Map<String, Object?>>[];
+
+  /// The `method`s of all mesages sent to the `flutter run` processes `stdin`
+  /// by the debug adapter.
+  List<String> get dapToFlutterRequests => dapToFlutterMessages
       .map((Map<String, Object?> message) => message['method'] as String?)
       .whereNotNull()
       .toList();
@@ -92,6 +96,8 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   /// Handles messages sent from the debug adapter back to the client.
   void _handleDapToClientMessage(ProtocolMessage message) {
+    dapToClientMessages.add(message.toJson());
+
     // Pretend to be the client, delegating any reverse-requests to the relevant
     // handler that is provided by the test.
     if (message is Event && message.event == 'flutter.forwardedRequest') {
@@ -133,7 +139,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   @override
   void sendFlutterMessage(Map<String, Object?> message) {
-    flutterMessages.add(message);
+    dapToFlutterMessages.add(message);
     // Don't call super because it will try to write to the process that we
     // didn't actually spawn.
   }
