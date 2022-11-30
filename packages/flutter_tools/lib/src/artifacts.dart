@@ -1033,7 +1033,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
        _fileSystem = fileSystem,
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils;
-  
+
 
   final Artifacts _parent;
   final String _webSdkPath;
