@@ -8,10 +8,15 @@
 
 #include "impeller/geometry/scalar.h"
 #include "impeller/renderer/formats.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture.h"
 
 namespace impeller {
 namespace scene {
+
+class SceneContext;
+struct SceneContextOptions;
+class Geometry;
 
 class UnlitMaterial;
 class StandardMaterial;
@@ -40,7 +45,16 @@ class Material {
 
   void SetTranslucent(bool is_translucent);
 
+  virtual std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
+      const SceneContext& scene_context,
+      const RenderPass& pass) const = 0;
+  virtual void BindToCommand(const SceneContext& scene_context,
+                             HostBuffer& buffer,
+                             Command& command) const = 0;
+
  protected:
+  SceneContextOptions GetContextOptions(const RenderPass& pass) const;
+
   BlendConfig blend_config_;
   StencilConfig stencil_config_;
   bool is_translucent_ = false;
@@ -50,8 +64,21 @@ class UnlitMaterial final : public Material {
  public:
   void SetColor(Color color);
 
+  void SetColorTexture(std::shared_ptr<Texture> color_texture);
+
+  // |Material|
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
+      const SceneContext& scene_context,
+      const RenderPass& pass) const override;
+
+  // |Material|
+  void BindToCommand(const SceneContext& scene_context,
+                     HostBuffer& buffer,
+                     Command& command) const override;
+
  private:
-  Color color_;
+  Color color_ = Color::White();
+  std::shared_ptr<Texture> color_texture_;
 };
 
 class StandardMaterial final : public Material {
@@ -67,8 +94,18 @@ class StandardMaterial final : public Material {
 
   void SetEnvironmentMap(std::shared_ptr<Texture> environment_map);
 
+  // |Material|
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
+      const SceneContext& scene_context,
+      const RenderPass& pass) const override;
+
+  // |Material|
+  void BindToCommand(const SceneContext& scene_context,
+                     HostBuffer& buffer,
+                     Command& command) const override;
+
  private:
-  Color albedo_ = Color::CornflowerBlue();
+  Color albedo_ = Color::White();
   Scalar roughness_ = 0.5;
   Scalar metallic_ = 0.5;
 

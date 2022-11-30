@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/scene/shaders/geometry.vert.h"
@@ -46,22 +48,19 @@ class SceneContext {
 
   std::shared_ptr<Context> GetContext() const;
 
+  std::shared_ptr<Texture> GetPlaceholderTexture() const;
+
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetUnlitPipeline(
       SceneContextOptions opts) const {
     return GetPipeline(unlit_pipeline_, opts);
   }
 
  private:
-  std::shared_ptr<Context> context_;
-
   template <class T>
   using Variants = std::unordered_map<SceneContextOptions,
                                       std::unique_ptr<T>,
                                       SceneContextOptions::Hash,
                                       SceneContextOptions::Equal>;
-
-  mutable Variants<UnlitPipeline> unlit_pipeline_;
-
   template <class TypedPipeline>
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
       Variants<TypedPipeline>& container,
@@ -91,7 +90,13 @@ class SceneContext {
     return variant_pipeline;
   }
 
+  std::shared_ptr<Context> context_;
+  mutable Variants<UnlitPipeline> unlit_pipeline_;
+
   bool is_valid_ = false;
+  // A 1x1 opaque white texture that can be used as a placeholder binding.
+  // Available for the lifetime of the scene context
+  std::shared_ptr<Texture> placeholder_texture_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SceneContext);
 };
