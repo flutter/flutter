@@ -2306,7 +2306,11 @@ abstract class BuildContext {
   ///
   /// Returns null if a widget of the requested type does not appear in the
   /// ancestors of this context.
-  T? findAncestorWidgetOfExactType<T extends Widget>();
+  ///
+  /// When `stopAtLookUpBoundary` is set to true, the method returns null if a
+  /// [LookUpBoundary] is reached and the specified widget has not been found
+  /// yet.
+  T? findAncestorWidgetOfExactType<T extends Widget>({bool stopAtLookUpBoundary = false});
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
   /// that is an instance of the given type `T`.
@@ -2339,7 +2343,11 @@ abstract class BuildContext {
   /// ScrollableState? scrollable = context.findAncestorStateOfType<ScrollableState>();
   /// ```
   /// {@end-tool}
-  T? findAncestorStateOfType<T extends State>();
+  ///
+  /// When `stopAtLookUpBoundary` is set to true, the method returns null if a
+  /// [LookUpBoundary] is reached and the specified state has not been found
+  /// yet.
+  T? findAncestorStateOfType<T extends State>({bool stopAtLookUpBoundary = false});
 
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
   /// that is an instance of the given type `T`.
@@ -2350,7 +2358,12 @@ abstract class BuildContext {
   ///
   /// This operation is O(N) as well though N is the entire widget tree rather than
   /// a subtree.
-  T? findRootAncestorStateOfType<T extends State>();
+  ///
+  /// When `stopAtLookUpBoundary` is set to true, the nearest [LookUpBoundary]
+  /// is considered to be the root and the closest descendant of that boundary
+  /// that matches the specified state is returned. If the [LookUpBoundary]
+  /// does not have a descendant of the specified type, null is returned.
+  T? findRootAncestorStateOfType<T extends State>({bool stopAtLookUpBoundary = false});
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
   /// that is an instance of the given type `T`.
@@ -2371,7 +2384,11 @@ abstract class BuildContext {
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [findAncestorRenderObjectOfType] in [State.didChangeDependencies].
-  T? findAncestorRenderObjectOfType<T extends RenderObject>();
+  ///
+  /// When `stopAtLookUpBoundary` is set to true, the method returns null if a
+  /// [LookUpBoundary] is reached and the specified render object has not been
+  /// found yet.
+  T? findAncestorRenderObjectOfType<T extends RenderObject>({bool stopAtLookUpBoundary = false});
 
   /// Walks the ancestor chain, starting with the parent of this build context's
   /// widget, invoking the argument for each ancestor. The callback is given a
@@ -4401,22 +4418,28 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  T? findAncestorWidgetOfExactType<T extends Widget>() {
+  T? findAncestorWidgetOfExactType<T extends Widget>({bool stopAtLookUpBoundary = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != T) {
+      if (stopAtLookUpBoundary && ancestor is LookUpBoundary) {
+        return null;
+      }
       ancestor = ancestor._parent;
     }
     return ancestor?.widget as T?;
   }
 
   @override
-  T? findAncestorStateOfType<T extends State<StatefulWidget>>() {
+  T? findAncestorStateOfType<T extends State<StatefulWidget>>({bool stopAtLookUpBoundary = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is StatefulElement && ancestor.state is T) {
         break;
+      }
+      if (stopAtLookUpBoundary && ancestor is LookUpBoundary) {
+        return null;
       }
       ancestor = ancestor._parent;
     }
@@ -4425,7 +4448,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  T? findRootAncestorStateOfType<T extends State<StatefulWidget>>() {
+  T? findRootAncestorStateOfType<T extends State<StatefulWidget>>({bool stopAtLookUpBoundary = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
     StatefulElement? statefulAncestor;
@@ -4433,18 +4456,24 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (ancestor is StatefulElement && ancestor.state is T) {
         statefulAncestor = ancestor;
       }
+      if (stopAtLookUpBoundary && ancestor is LookUpBoundary) {
+        break;
+      }
       ancestor = ancestor._parent;
     }
     return statefulAncestor?.state as T?;
   }
 
   @override
-  T? findAncestorRenderObjectOfType<T extends RenderObject>() {
+  T? findAncestorRenderObjectOfType<T extends RenderObject>({bool stopAtLookUpBoundary = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && ancestor.renderObject is T) {
         return ancestor.renderObject as T;
+      }
+      if (stopAtLookUpBoundary && ancestor is LookUpBoundary) {
+        return null;
       }
       ancestor = ancestor._parent;
     }
@@ -6632,4 +6661,8 @@ class _NullWidget extends Widget {
 // a reassemble.
 bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
   return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
+}
+
+mixin LookUpBoundary on Element {
+
 }
