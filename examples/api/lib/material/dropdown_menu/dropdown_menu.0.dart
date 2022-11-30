@@ -50,6 +50,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     DropdownMenu<ColorLabel>(
+                      selectedValue: ColorLabel.green,
                       controller: colorController,
                       label: const Text('Color'),
                       dropdownMenuEntries: colorEntries,

@@ -847,6 +847,41 @@ void main() {
     expect(selectionCount, 3);
     expect(controller.text.isEmpty, true);
   });
+
+
+  testWidgets('The selectedValue gives an initial text and highlights the according item', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                selectedValue: TestMenu.mainMenu3,
+                dropdownMenuEntries: menuChildren,
+                controller: controller,
+              ),
+            );
+          }
+      ),
+    ));
+
+    expect(find.widgetWithText(TextField, 'Item 3'), findsOneWidget);
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'Item 3'),
+      matching: find.byType(Material),
+    ).last;
+
+    // Validate the item 3 is highlighted.
+    final Material itemMaterial = tester.widget<Material>(buttonMaterial);
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+  });
 }
 
 enum TestMenu {

@@ -133,6 +133,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.inputDecorationTheme,
     this.menuStyle,
     this.controller,
+    this.selectedValue,
     this.onSelected,
     required this.dropdownMenuEntries,
   });
@@ -217,6 +218,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController? controller;
 
+  ///
+  final T? selectedValue;
+
   /// The callback is called when a selection is made.
   ///
   /// Defaults to null. If null, only the text field is updated.
@@ -254,6 +258,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     filteredEntries = widget.dropdownMenuEntries;
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
+    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.selectedValue);
+    if (index != -1) {
+      _textEditingController.text = filteredEntries[index].label;
+      _textEditingController.selection =
+          TextSelection.collapsed(offset: _textEditingController.text.length);
+    }
     refreshLeadingPadding();
   }
 
@@ -265,6 +275,14 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
+    }
+    if (oldWidget.selectedValue != widget.selectedValue) {
+      final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.selectedValue);
+      if (index != -1) {
+        _textEditingController.text = filteredEntries[index].label;
+        _textEditingController.selection =
+            TextSelection.collapsed(offset: _textEditingController.text.length);
+      }
     }
   }
 
