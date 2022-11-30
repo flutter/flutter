@@ -4092,9 +4092,9 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
 
-    // Tap on text field to gain focus, and set selection to '|d'. On iOS
+    // Tap on text field to gain focus, and set selection to '|g'. On iOS
     // the selection is set to the word edge closest to the tap position.
     // We await for [kDoubleTapTimeout] after the up event, so our next down
     // event does not register as a double tap.
@@ -4104,18 +4104,18 @@ void main() {
     await tester.pumpAndSettle(kDoubleTapTimeout);
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, testValue.indexOf('d'));
+    expect(controller.selection.baseOffset, 7);
 
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
     // Here we tap on '|d', where our selection was previously, and move to '|g'.
-    await gesture.down(textOffsetToPosition(tester, testValue.indexOf('d')));
+    await gesture.down(textOffsetToPosition(tester, 7));
     await tester.pump();
-    await gesture.moveTo(gPos);
+    await gesture.moveTo(iPos);
     await tester.pumpAndSettle();
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, testValue.indexOf('g'));
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
