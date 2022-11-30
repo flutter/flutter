@@ -61,14 +61,14 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 /// It consists of (idiom, size, scale).
 @immutable
 class _AppIconImageFileKey {
-  const _AppIconImageFileKey(this.idiom, this.size, this.scale);
+  const _AppIconImageFileKey(this.idiom, this.scale, this.size);
 
   /// The idiom (iphone or ipad).
   final String idiom;
-  /// The logical size in point (e.g. 83.5).
-  final double size;
   /// The scale factor (e.g. 2).
   final int scale;
+  /// The logical size in point (e.g. 83.5).
+  final double size;
 
   @override
   int get hashCode => Object.hash(idiom, size, scale);
@@ -76,11 +76,31 @@ class _AppIconImageFileKey {
   @override
   bool operator ==(Object other) => other is _AppIconImageFileKey
       && other.idiom == idiom
-      && other.size == size
-      && other.scale == scale;
+      && other.scale == scale
+      && other.size == size;
 
   /// The pixel size.
   int get pixelSize => (size * scale).toInt(); // pixel size must be an int.
+}
+
+/// The key that uniquely identifies an image file in a launch image set.
+/// It consists of (idiom, scale). No `size` needed (unlike app icon).
+@immutable
+class _LaunchImageFileKey {
+  const _LaunchImageFileKey(this.idiom, this.scale);
+
+  /// The idiom (iphone or ipad).
+  final String idiom;
+  /// The scale factor (e.g. 2).
+  final int scale;
+
+  @override
+  int get hashCode => Object.hash(idiom, scale);
+
+  @override
+  bool operator ==(Object other) => other is _LaunchImageFileKey
+      && other.idiom == idiom
+      && other.scale == scale;
 }
 
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
@@ -159,11 +179,16 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return super.validateCommand();
   }
 
-  // Parses Contents.json into a map, with the key to be _AppIconImageFileKey, and value to be the icon image file name.
-  Map<_AppIconImageFileKey, String> _parseIconContentsJson(String contentsJsonDirName) {
+  // Parses Contents.json of an app icon or launch image asset into a map,
+  // with the key to be a list of `idiom`, `scale` (and `size` if required),
+  // and value to be the image file name.
+  Map<List<String>, String> _parseContentsJson(
+    String contentsJsonDirName,
+    { required bool requiresSize })
+  {
     final Directory contentsJsonDirectory = globals.fs.directory(contentsJsonDirName);
     if (!contentsJsonDirectory.existsSync()) {
-      return <_AppIconImageFileKey, String>{};
+      return <List<String>, String>{};
     }
     final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
     final Map<String, dynamic> contents = json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>? ?? <String, dynamic>{};
@@ -171,10 +196,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final Map<String, dynamic> info = contents['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
     if ((info['version'] as int?) != 1) {
       // Skips validation for unknown format.
-      return <_AppIconImageFileKey, String>{};
+      return <List<String>, String>{};
     }
 
-    final Map<_AppIconImageFileKey, String> iconInfo = <_AppIconImageFileKey, String>{};
+    final Map<List<String>, String> iconInfo = <List<String>, String>{};
     for (final dynamic image in images) {
       final Map<String, dynamic> imageMap = image as Map<String, dynamic>;
       final String? idiom = imageMap['idiom'] as String?;
@@ -182,32 +207,61 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final String? scale = imageMap['scale'] as String?;
       final String? fileName = imageMap['filename'] as String?;
 
-      if (size == null || idiom == null || scale == null || fileName == null) {
+      if ((requiresSize && size == null) || idiom == null || scale == null || fileName == null) {
         continue;
       }
 
-      // for example, "64x64". Parse the width since it is a square.
-      final Iterable<double> parsedSizes = size.split('x')
-          .map((String element) => double.tryParse(element))
-          .whereType<double>();
-      if (parsedSizes.isEmpty) {
-        continue;
-      }
-      final double parsedSize = parsedSizes.first;
-
+      // key will contain idiom, scale (and size if required).
+      final List<String> key = <String>[idiom];
       // for example, "3x".
-      final Iterable<int> parsedScales = scale.split('x')
-          .map((String element) => int.tryParse(element))
-          .whereType<int>();
-      if (parsedScales.isEmpty) {
+      final Iterable<String> parsedScales = scale.split('x');
+      if (parsedScales.isEmpty || int.tryParse(parsedScales.first) == null) {
         continue;
       }
-      final int parsedScale = parsedScales.first;
+      key.add(parsedScales.first);
 
-      iconInfo[_AppIconImageFileKey(idiom, parsedSize, parsedScale)] = fileName;
+      if (requiresSize && size != null) {
+        // for example, "64x64". Parse the width since it is a square.
+        final Iterable<String> parsedSizes = size.split('x');
+        if (parsedSizes.isEmpty || double.tryParse(parsedSizes.first) == null) {
+          continue;
+        }
+        key.add(parsedSizes.first);
+      }
+      iconInfo[key] = fileName;
     }
-
     return iconInfo;
+  }
+
+  // Parses Contents.json into a map, with the key to be _LaunchImageFileKey, and value to be the launch image file name.
+  Map<_LaunchImageFileKey, String> _parseLaunchImageContentsJson(String contentsJsonDirName) {
+    return _parseContentsJson(contentsJsonDirName, requiresSize: false)
+      .map((List<String> key, String value) {
+      final String idiom = key.elementAt(0);
+      // scale is guaranteed to be a valid int.
+      final int scale = int.parse(key.elementAt(1));
+      return MapEntry<_LaunchImageFileKey, String>(_LaunchImageFileKey(idiom, scale), value);
+    });
+  }
+
+  // Parses Contents.json into a map, with the key to be _AppIconImageFileKey, and value to be the icon image file name.
+  Map<_AppIconImageFileKey, String> _parseIconContentsJson(String contentsJsonDirName) {
+    return _parseContentsJson(contentsJsonDirName, requiresSize: true)
+      .map((List<String> key, String value) {
+        final String idiom = key.elementAt(0);
+        // scale is guaranteed to be a valid int.
+        final int scale = int.parse(key.elementAt(1));
+        // size is guaranteed to be a valid double.
+        final double size = double.parse(key.elementAt(2));
+        return MapEntry<_AppIconImageFileKey, String>(_AppIconImageFileKey(idiom, scale, size), value);
+    });
+  }
+
+  bool _hasConflictOfContentBetweenFiles(String path1, String path2) {
+    final File file1 = globals.fs.file(path1);
+    final File file2 = globals.fs.file(path2);
+    return file1.existsSync() && file2.existsSync()
+      && md5.convert(file1.readAsBytesSync()) == md5.convert(file2.readAsBytesSync());
   }
 
   Future<void> _validateIconsAfterArchive(StringBuffer messageBuffer) async {
@@ -231,10 +285,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
       // validate conflict with template icon file.
       if (templateIconFileName != null) {
-        final File templateIconFile = globals.fs.file(globals.fs.path.join(
-            templateIconImageDirName, templateIconFileName));
-        if (templateIconFile.existsSync() && md5.convert(projectIconBytes) ==
-            md5.convert(templateIconFile.readAsBytesSync())) {
+        if (_hasConflictOfContentBetweenFiles(
+          globals.fs.path.join(templateIconImageDirName, templateIconFileName),
+          projectIconFile.path))
+        {
           filesWithTemplateIcon.add(entry.value);
         }
       }
@@ -258,6 +312,28 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
     if (filesWithWrongSize.isNotEmpty) {
       messageBuffer.writeln('\nWarning: App icon is using the wrong size (e.g. ${filesWithWrongSize.first}).');
+    }
+  }
+
+  Future<void> _validateLaunchImagesAfterArchive(StringBuffer messageBuffer) async {
+    final BuildableIOSApp app = await buildableIOSApp;
+    final String templateLaunchImageDirName = await app.templateLaunchImageDirNameForImages;
+    final Map<_LaunchImageFileKey, String> templateLaunchImageMap = _parseLaunchImageContentsJson(app.templateLaunchImageDirNameForContentsJson);
+    final Map<_LaunchImageFileKey, String> projectLaunchImageMap = _parseLaunchImageContentsJson(app.projectLaunchImageDirName);
+
+    final bool anyConflict = projectLaunchImageMap.entries.where((MapEntry<_LaunchImageFileKey, String> entry) {
+      final String projectLaunchImageFileName = entry.value;
+      final String? templateLaunchImageFileName = templateLaunchImageMap[entry.key];
+      if (templateLaunchImageFileName == null) {
+        return false;
+      }
+      return _hasConflictOfContentBetweenFiles(
+        globals.fs.path.join(templateLaunchImageDirName, templateLaunchImageFileName),
+        globals.fs.path.join(app.projectLaunchImageDirName, projectLaunchImageFileName));
+    }).isNotEmpty;
+
+    if (anyConflict) {
+      messageBuffer.writeln('\nWarning: Launch image is set to the default placeholder. Replace with unique launch image.');
     }
   }
 
@@ -297,6 +373,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final StringBuffer validationMessageBuffer = StringBuffer();
     await _validateXcodeBuildSettingsAfterArchive(validationMessageBuffer);
     await _validateIconsAfterArchive(validationMessageBuffer);
+    await _validateLaunchImagesAfterArchive(validationMessageBuffer);
     validationMessageBuffer.write('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios');
     globals.printBox(validationMessageBuffer.toString(), title: 'App Settings');
 

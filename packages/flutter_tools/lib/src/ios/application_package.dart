@@ -178,12 +178,41 @@ class BuildableIOSApp extends IOSApp {
     );
   }
 
+  String get projectLaunchImageDirName => globals.fs.path.join('ios', _launchImageDirNameSuffix);
+
+  // template launch image's Contents.json is in flutter_tools.
+  String get templateLaunchImageDirNameForContentsJson => globals.fs.path.join(
+    Cache.flutterRoot!,
+    'packages',
+    'flutter_tools',
+    'templates',
+    'app_shared',
+    'ios.tmpl',
+    _launchImageDirNameSuffix,
+  );
+
+  // template launch image's image assets are in flutter_template_images package.
+  Future<String> get templateLaunchImageDirNameForImages async {
+    final Directory imageTemplate = await templateImageDirectory(null, globals.fs, globals.logger);
+    return globals.fs.path.join(
+      imageTemplate.path,
+      'app_shared',
+      'ios.tmpl',
+      _launchImageDirNameSuffix,
+    );
+  }
+
   String get ipaOutputPath =>
       globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
   String _buildAppPath(String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
+
+  String get _launchImageDirNameSuffix => globals.fs.path.join(
+    'Runner',
+    'Assets.xcassets',
+    'LaunchImage.imageset');
 
   String get _appIconDirNameSuffix => globals.fs.path.join(
     'Runner',

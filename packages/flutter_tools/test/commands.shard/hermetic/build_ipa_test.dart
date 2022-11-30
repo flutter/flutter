@@ -1476,6 +1476,162 @@ void main() {
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
+
+  testUsingContext('Validate template launch images with conflicts', () async {
+    const String projectLaunchImageContentsJsonPath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String projectLaunchImagePath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+    final String templateLaunchImageContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String templateLaunchImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(templateLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+      testLogger.statusText,
+      contains('Warning: Launch image is set to the default placeholder. Replace with unique launch image.'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+
+  testUsingContext('Validate template launch images without conflicts', () async {
+    const String projectLaunchImageContentsJsonPath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String projectLaunchImagePath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+    final String templateLaunchImageContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String templateLaunchImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(templateLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[4, 5, 6]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+      testLogger.statusText,
+      isNot(contains('Warning: Launch image is set to the default placeholder. Replace with unique launch image.')),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
 }
 
 

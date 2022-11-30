@@ -476,6 +476,92 @@ void main() {
         ),
       );
     }, overrides: overrides);
+
+    testUsingContext('returns project launch image dirname', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(iosApp.projectLaunchImageDirName, globals.fs.path.join('ios', launchImageDirSuffix));
+    }, overrides: overrides);
+
+    testUsingContext('returns template launch image dirname for Contents.json', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(
+        iosApp.templateLaunchImageDirNameForContentsJson,
+        globals.fs.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          launchImageDirSuffix,
+        ),
+      );
+    }, overrides: overrides);
+
+    testUsingContext('returns template launch image dirname for images', () async {
+      final String toolsDir = globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+      );
+      final String packageConfigPath = globals.fs.path.join(
+          toolsDir,
+          '.dart_tool',
+          'package_config.json'
+      );
+      globals.fs.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+          'com.foo.bar',
+          'Runner');
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(
+        await iosApp.templateLaunchImageDirNameForImages,
+        globals.fs.path.absolute(
+          'flutter_template_images',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          launchImageDirSuffix,
+        ),
+      );
+    }, overrides: overrides);
   });
 
   group('FuchsiaApp', () {

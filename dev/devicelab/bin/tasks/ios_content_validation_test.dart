@@ -46,9 +46,12 @@ Future<void> main() async {
             throw TaskResult.failure('Must validate incorrect app icon image size.');
           }
 
-          // The project is still using Flutter template icon.
+          // The project is still using Flutter template icon and launch image.
           if (!output.contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')) {
             throw TaskResult.failure('Must validate template app icon.');
+          }
+          if (!output.contains('Warning: Launch image is set to the default placeholder. Replace with unique launch image.')) {
+            throw TaskResult.failure('Must validate template launch image.');
           }
         });
 
