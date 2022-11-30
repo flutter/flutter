@@ -352,7 +352,13 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation, useEscaping: useEscaping).parse();
+      parsedMessages[bundle.locale] = translation == null ? null : Parser(
+        resourceId,
+        bundle.file.basename,
+        translation,
+        useEscaping: useEscaping,
+        logger: logger
+      ).parse();
     }
     // Infer the placeholders
     _inferPlaceholders(filenames);

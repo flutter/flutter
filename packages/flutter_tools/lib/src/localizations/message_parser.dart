@@ -6,6 +6,7 @@
 // See https://flutter.dev/go/icu-message-parser.
 
 // Symbol Types
+import '../base/logger.dart';
 import 'gen_l10n_types.dart';
 
 enum ST {
@@ -181,13 +182,17 @@ class Parser {
     this.messageId,
     this.filename,
     this.messageString,
-    { this.useEscaping = false }
+    {
+      this.useEscaping = false,
+      this.logger
+    }
   );
 
   final String messageId;
   final String messageString;
   final String filename;
   final bool useEscaping;
+  final Logger? logger;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
@@ -571,8 +576,13 @@ class Parser {
   }
 
   Node parse() {
-    final Node syntaxTree = compress(parseIntoTree());
-    checkExtraRules(syntaxTree);
-    return syntaxTree;
+    try {
+      final Node syntaxTree = compress(parseIntoTree());
+      checkExtraRules(syntaxTree);
+      return syntaxTree;
+    } on L10nParserException catch (error) {
+      logger?.printError(error.toString());
+      return Node(ST.empty, 0, value: '');
+    }
   }
 }

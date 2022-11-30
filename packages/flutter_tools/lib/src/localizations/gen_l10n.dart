@@ -1090,6 +1090,7 @@ class LocalizationsGenerator {
   }
 
   String _generateMethod(Message message, LocaleInfo locale) {
+    try {
     // Determine if we must import intl for date or number formatting.
     if (message.placeholdersRequireFormatting) {
       requiresIntlImport = true;
@@ -1262,6 +1263,10 @@ class LocalizationsGenerator {
     }
     generateHelperMethods(node, isRoot: true);
     return helperMethods.last.replaceAll('@(helperMethods)', helperMethods.sublist(0, helperMethods.length - 1).join('\n\n'));
+    } on L10nParserException catch (error) {
+      logger.printError(error.toString());
+      return '';
+    }
   }
 
   List<String> writeOutputFiles({ bool isFromYaml = false }) {
