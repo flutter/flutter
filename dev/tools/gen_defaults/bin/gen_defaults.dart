@@ -47,7 +47,6 @@ import 'package:gen_defaults/slider_template.dart';
 import 'package:gen_defaults/snackbar_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/switch_template.dart';
-import 'package:gen_defaults/tabs_template.dart';
 import 'package:gen_defaults/text_field_template.dart';
 import 'package:gen_defaults/typography_template.dart';
 
@@ -168,6 +167,5 @@ Future<void> main(List<String> args) async {
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
   SwitchTemplate('Switch', '$materialLib/switch.dart', tokens).updateFile();
   TextFieldTemplate('TextField', '$materialLib/text_field.dart', tokens).updateFile();
-  TabsTemplate('Tabs', '$materialLib/tabs.dart', tokens).updateFile();
   TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();
 }
