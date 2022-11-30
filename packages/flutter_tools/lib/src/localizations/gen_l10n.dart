@@ -1166,7 +1166,7 @@ class LocalizationsGenerator {
               pluralLogicArgs[pluralCases[pluralCase]!] = '      ${pluralCases[pluralCase]}: $pluralPartExpression,';
             } else if (!suppressWarnings) {
               logger.printWarning('''
-[${_inputFileNames[locale]}:${message.resourceId}] ICU Syntax Warning: The plural part specified below is overriden by a later plural part.
+[${_inputFileNames[locale]}:${message.resourceId}] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.
     $translationForMessage
     ${Parser.indentForError(pluralPart.positionInMessage)}''');
             }
