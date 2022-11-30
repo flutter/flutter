@@ -577,7 +577,7 @@ class _PackagesViewState extends State<_PackagesView> {
                   builder: (BuildContext context, int? selectedId, Widget? _) {
                     return Center(
                       child: Material(
-                        color: Theme.of(context).cardColor,
+                        type: MaterialType.card,
                         elevation: 4.0,
                         child: Container(
                           constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
@@ -591,7 +591,7 @@ class _PackagesViewState extends State<_PackagesView> {
               case ConnectionState.active:
               case ConnectionState.waiting:
                 return Material(
-                    color: Theme.of(context).cardColor,
+                    type: MaterialType.card,
                     child: Column(
                     children: <Widget>[
                       widget.about,
@@ -671,7 +671,7 @@ class _PackageListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Ink(
-      color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).cardColor,
+      color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).colorScheme.surface,
       child: ListTile(
         title: Text(packageName),
         subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
@@ -872,7 +872,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         ),
         body: Center(
           child: Material(
-            color: theme.cardColor,
+            type: MaterialType.card,
             elevation: 4.0,
             child: Container(
               constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
@@ -898,7 +898,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           SliverAppBar(
             automaticallyImplyLeading: false,
             pinned: true,
-            backgroundColor: theme.cardColor,
+            backgroundColor: theme.colorScheme.surface,
             title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
           ),
           SliverPadding(
@@ -1474,7 +1474,6 @@ class _DetailView extends StatelessWidget {
         return MouseRegion(
           // TODO(TonicArtos): Remove MouseRegion workaround for pointer hover events passing through DraggableScrollableSheet once https://github.com/flutter/flutter/issues/59741 is resolved.
           child: Card(
-            color: Theme.of(context).cardColor,
             elevation: _kCardElevation,
             clipBehavior: Clip.antiAlias,
             margin: const EdgeInsets.fromLTRB(_kCardElevation, 0.0, _kCardElevation, 0.0),

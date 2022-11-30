@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
+import 'colors.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -79,7 +80,8 @@ class Card extends StatelessWidget {
   /// Defines the card's [Material.color].
   ///
   /// If this property is null then [CardTheme.color] of [ThemeData.cardTheme]
-  /// is used. If that's null then [ThemeData.cardColor] is used.
+  /// is used. If that's null and [ThemeData.useMaterial3] is true, then\
+  /// [ColorScheme.surface] is used, otherwise an M2 default is used.
   final Color? color;
 
   /// The color to paint the shadow below the card.
@@ -201,7 +203,7 @@ class _CardDefaultsM2 extends CardTheme {
   final BuildContext context;
 
   @override
-  Color? get color => Theme.of(context).cardColor;
+  Color? get color => Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.white;
 
   @override
   Color? get shadowColor => Theme.of(context).shadowColor;

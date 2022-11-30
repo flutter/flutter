@@ -52,7 +52,8 @@ class MaterialSlice extends MergeableMaterialItem {
 
   /// Defines the color for the slice.
   ///
-  /// By default, the value of [color] is [ThemeData.cardColor].
+  /// Defaults to [ThemeData.cardTheme]'s [CardTheme.color]. If that is null,
+  /// defaults to [ColorScheme.surface].
   final Color? color;
 
   @override
@@ -600,10 +601,13 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           );
         }
 
+        final Color color = (_children[i] as MaterialSlice).color
+          ?? Theme.of(context).cardTheme.color
+          ?? Theme.of(context).colorScheme.surface;
         slices.add(
           Container(
             decoration: BoxDecoration(
-              color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
+              color: color,
               borderRadius: _borderRadius(i, i == 0, i == _children.length - 1),
             ),
             child: Material(

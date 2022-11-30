@@ -48,8 +48,6 @@ class CardTheme with Diagnosticable {
   final Clip? clipBehavior;
 
   /// Overrides the default value for [Card.color].
-  ///
-  /// If null, [Card] uses [ThemeData.cardColor].
   final Color? color;
 
   /// Overrides the default value for [Card.shadowColor].

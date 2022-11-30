@@ -430,7 +430,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
           color = theme.canvasColor;
           break;
         case MaterialType.card:
-          color = theme.cardColor;
+          color = theme.cardTheme.color;
           break;
         case MaterialType.button:
         case MaterialType.circle:
