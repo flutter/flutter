@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/slider/slider.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Slider can change value', (WidgetTester tester) async {
+  testWidgets('Slider can change its value', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SliderApp(),
     );
