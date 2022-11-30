@@ -55,6 +55,7 @@ class Badge extends StatelessWidget {
     this.padding,
     this.alignment,
     required int count,
+    this.isLabelVisible = true,
     this.child,
   }) : label = Text(count > 999 ? '999+' : '$count');
 
@@ -192,7 +193,7 @@ class Badge extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_143
 
 class _BadgeDefaultsM3 extends BadgeThemeData {
   _BadgeDefaultsM3(this.context) : super(

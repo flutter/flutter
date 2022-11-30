@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../src/common.dart';
 import '../src/context.dart';
 
-const String shaderLibDir = './shader_lib';
+const String shaderLibDir = '/./shader_lib';
 
 void main() {
   group('AssetBundle.build', () {

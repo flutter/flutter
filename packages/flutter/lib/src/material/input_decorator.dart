@@ -1555,14 +1555,14 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         case TextDirection.rtl: // origin is on the right
           startX = labelOffset.dx + labelWidth * (1.0 - scale);
           floatStartX = startX;
-          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
             floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.left : 0.0;
           }
           break;
         case TextDirection.ltr: // origin on the left
           startX = labelOffset.dx;
           floatStartX = startX;
-          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
             floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.left : 0.0;
           }
           break;
@@ -4484,9 +4484,8 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_143
 
-// Generated version v0_141
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();
