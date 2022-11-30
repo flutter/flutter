@@ -218,7 +218,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController? controller;
 
+  /// The value used to for an initial selection.
   ///
+  /// Defaults to null.
   final T? selectedValue;
 
   /// The callback is called when a selection is made.
