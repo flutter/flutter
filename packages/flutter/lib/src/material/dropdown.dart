@@ -1402,10 +1402,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       final Widget displayedHint = _enabled ? widget.hint! : widget.disabledHint ?? widget.hint!;
+      final ThemeData theme = Theme.of(context);
+      final Color textColor = theme.inputDecorationTheme.hintColor
+        ?? (theme.brightness == Brightness.dark ? Colors.white60 : Colors.black.withOpacity(0.6));
 
       hintIndex = items.length;
       items.add(DefaultTextStyle(
-        style: _textStyle!.copyWith(color: Theme.of(context).hintColor),
+        style: _textStyle!.copyWith(color: textColor),
         child: IgnorePointer(
           ignoringSemantics: false,
           child: _DropdownMenuItemContainer(

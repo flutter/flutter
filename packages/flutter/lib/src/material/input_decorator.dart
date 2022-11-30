@@ -1992,7 +1992,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return themeData.colorScheme.primary;
     }
     if (decoration.filled!) {
-      return themeData.hintColor;
+      return themeData.brightness == Brightness.dark ? Colors.white60 : Colors.black.withOpacity(0.6);
     }
     final Color enabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
     if (isHovering) {
@@ -2503,6 +2503,7 @@ class InputDecoration {
     this.helperMaxLines,
     this.hintText,
     this.hintStyle,
+    this.hintColor,
     this.hintTextDirection,
     this.hintMaxLines,
     this.errorText,
@@ -2557,6 +2558,7 @@ class InputDecoration {
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.hintStyle,
+    this.hintColor,
     this.hintTextDirection,
     this.filled = false,
     this.fillColor,
@@ -2769,8 +2771,19 @@ class InputDecoration {
   /// text may be entered in the [InputDecorator.child]).
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// input field and [hintColor].
   final TextStyle? hintStyle;
+
+  /// The [Color] to use for the [InputDecoration.hint].
+  ///
+  /// If [hintColor] is a [MaterialStateColor], then the effective
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
+  ///
+  /// A default color for [hintStyle]. For M2 only, it is also a default color
+  /// for [hintStyle, [labelStyle], [floatingLabelStyle], [helperStyle], as well
+  /// as the border color if [decoration.filled] is true.
+  final Color? hintColor;
 
   /// The direction to use for the [hintText].
   ///
@@ -3428,6 +3441,7 @@ class InputDecoration {
     int? helperMaxLines,
     String? hintText,
     TextStyle? hintStyle,
+    Color? hintColor,
     TextDirection? hintTextDirection,
     int? hintMaxLines,
     String? errorText,
@@ -3480,6 +3494,7 @@ class InputDecoration {
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintColor: hintColor ?? this.hintColor,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
@@ -3534,6 +3549,7 @@ class InputDecoration {
       helperStyle: helperStyle ?? theme.helperStyle,
       helperMaxLines : helperMaxLines ?? theme.helperMaxLines,
       hintStyle: hintStyle ?? theme.hintStyle,
+      hintColor: hintColor ?? theme.hintColor,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
@@ -3579,6 +3595,7 @@ class InputDecoration {
         && other.helperMaxLines == helperMaxLines
         && other.hintText == hintText
         && other.hintStyle == hintStyle
+        && other.hintColor == hintColor
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
         && other.errorText == errorText
@@ -3634,6 +3651,7 @@ class InputDecoration {
       helperMaxLines,
       hintText,
       hintStyle,
+      hintColor,
       hintTextDirection,
       hintMaxLines,
       errorText,
@@ -3753,6 +3771,7 @@ class InputDecorationTheme with Diagnosticable {
     this.helperStyle,
     this.helperMaxLines,
     this.hintStyle,
+    this.hintColor,
     this.errorStyle,
     this.errorMaxLines,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
@@ -3824,8 +3843,19 @@ class InputDecorationTheme with Diagnosticable {
   /// field).
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
-  /// input field and the current [Theme].
+  /// input field and [hintColor].
   final TextStyle? hintStyle;
+
+  /// The [Color] to use for the [InputDecoration.hint].
+  ///
+  /// If [hintColor] is a [MaterialStateColor], then the effective
+  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// if the [TextField] is focused or not.
+  ///
+  /// A default color for [hintStyle]. For M2 only, it is also a default color
+  /// for [hintStyle, [labelStyle], [floatingLabelStyle], [helperStyle], as well
+  /// as the border color if [decoration.filled] is true.
+  final Color? hintColor;
 
   /// {@macro flutter.material.inputDecoration.errorStyle}
   final TextStyle? errorStyle;
@@ -4164,6 +4194,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? helperStyle,
     int? helperMaxLines,
     TextStyle? hintStyle,
+    Color? hintColor,
     TextStyle? errorStyle,
     int? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
@@ -4198,6 +4229,7 @@ class InputDecorationTheme with Diagnosticable {
       helperStyle: helperStyle ?? this.helperStyle,
       helperMaxLines: helperMaxLines ?? this.helperMaxLines,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintColor: hintColor ?? this.hintColor,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
@@ -4235,6 +4267,7 @@ class InputDecorationTheme with Diagnosticable {
     helperStyle,
     helperMaxLines,
     hintStyle,
+    hintColor,
     errorStyle,
     errorMaxLines,
     floatingLabelBehavior,
@@ -4248,8 +4281,8 @@ class InputDecorationTheme with Diagnosticable {
     suffixStyle,
     suffixIconColor,
     counterStyle,
-    filled,
     Object.hash(
+      filled,
       fillColor,
       activeIndicatorBorder,
       outlineBorder,
@@ -4280,6 +4313,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.helperStyle == helperStyle
         && other.helperMaxLines == helperMaxLines
         && other.hintStyle == hintStyle
+        && other.hintColor == hintColor
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
         && other.isDense == isDense
@@ -4319,6 +4353,7 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines));
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
+    properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultTheme.hintStyle));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));
@@ -4350,58 +4385,57 @@ class InputDecorationTheme with Diagnosticable {
 }
 
 class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
-  const _InputDecoratorDefaultsM2(this.context)
+  _InputDecoratorDefaultsM2(this.context)
       : super();
 
   final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
 
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: _theme.disabledColor);
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: _theme.inputDecorationTheme.hintColor);
   });
 
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: _theme.disabledColor);
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: _theme.inputDecorationTheme.hintColor);
   });
 
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: _theme.disabledColor);
     }
     if (states.contains(MaterialState.error)) {
-      return TextStyle(color: Theme.of(context).colorScheme.error);
+      return TextStyle(color: _theme.colorScheme.error);
     }
     if (states.contains(MaterialState.focused)) {
-      return TextStyle(color: Theme.of(context).colorScheme.primary);
+      return TextStyle(color: _theme.colorScheme.primary);
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: _theme.inputDecorationTheme.hintColor);
   });
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
+      return _theme.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
 
-    return themeData.textTheme.bodySmall!.copyWith(color: themeData.hintColor);
+    return _theme.textTheme.bodySmall!.copyWith(color: _theme.inputDecorationTheme.hintColor);
   });
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
-      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
+      return _theme.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
-    return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
+    return _theme.textTheme.bodySmall!.copyWith(color: _theme.colorScheme.error);
   });
 
   @override
@@ -4409,7 +4443,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       // dark theme: 5% white
       // light theme: 2% black
-      switch (Theme.of(context).brightness) {
+      switch (_theme.brightness) {
         case Brightness.dark:
           return const Color(0x0DFFFFFF);
         case Brightness.light:
@@ -4418,7 +4452,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     }
     // dark theme: 10% white
     // light theme: 4% black
-    switch (Theme.of(context).brightness) {
+    switch (_theme.brightness) {
       case Brightness.dark: return const Color(0x1AFFFFFF);
       case Brightness.light:return const Color(0x0A000000) ;
     }
@@ -4427,12 +4461,12 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   @override
   Color? get iconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
-      return Theme.of(context).disabledColor;
+      return _theme.disabledColor;
     }
     if (states.contains(MaterialState.focused)) {
-      return Theme.of(context).colorScheme.primary;
+      return _theme.colorScheme.primary;
     }
-    switch (Theme.of(context).brightness) {
+    switch (_theme.brightness) {
       case Brightness.dark:
         return Colors.white70;
       case Brightness.light:
@@ -4443,12 +4477,12 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
-      return Theme.of(context).disabledColor;
+      return _theme.disabledColor;
     }
     if (states.contains(MaterialState.focused)) {
-      return Theme.of(context).colorScheme.primary;
+      return _theme.colorScheme.primary;
     }
-    switch (Theme.of(context).brightness) {
+    switch (_theme.brightness) {
       case Brightness.dark:
         return Colors.white70;
       case Brightness.light:
@@ -4459,12 +4493,12 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
-      return Theme.of(context).disabledColor;
+      return _theme.disabledColor;
     }
     if (states.contains(MaterialState.focused)) {
-      return Theme.of(context).colorScheme.primary;
+      return _theme.colorScheme.primary;
     }
-    switch (Theme.of(context).brightness) {
+    switch (_theme.brightness) {
       case Brightness.dark:
         return Colors.white70;
       case Brightness.light:
@@ -4496,7 +4530,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: Theme.of(context).inputDecorationTheme.hintColor);
   });
 
   @override
