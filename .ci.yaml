@@ -298,6 +298,7 @@ targets:
       validation_name: Docs
       firebase_project: master-docs-flutter-dev
       release_ref: refs/heads/master
+      release_build: "true"
 
   - name: Linux docs_test
     recipe: flutter/flutter
