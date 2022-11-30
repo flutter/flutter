@@ -320,11 +320,11 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
-typedef _SizeChangeCallback<Size> = void Function(Size newValue);
+typedef _SizeChangeCallback<Size> = void Function(Size);
 
-class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
+class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 
-  const _BottomSheetLayoutWrapper({
+  const _BottomSheetLayoutWithSizeListener({
     super.key,
     required this.animationValue,
     required this.isScrollControlled,
@@ -334,24 +334,29 @@ class _BottomSheetLayoutWrapper extends SingleChildRenderObjectWidget {
 
   final double animationValue;
   final bool isScrollControlled;
-  final _SizeChangeCallback<Size>? onChildSizeChanged;
+  final _SizeChangeCallback<Size> onChildSizeChanged;
 
   @override
-  _RenderBottomSheetLayoutWrapper createRenderObject(BuildContext context) {
-    return _RenderBottomSheetLayoutWrapper(animationValue: animationValue, isScrollControlled: isScrollControlled, onChildSizeChanged: onChildSizeChanged,);
+  _RenderBottomSheetLayoutWithSizeListener createRenderObject(BuildContext context) {
+    return _RenderBottomSheetLayoutWithSizeListener(
+      animationValue: animationValue,
+      isScrollControlled: isScrollControlled,
+      onChildSizeChanged: onChildSizeChanged,
+    );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderBottomSheetLayoutWrapper renderObject) {
+  void updateRenderObject(BuildContext context, _RenderBottomSheetLayoutWithSizeListener renderObject) {
+    renderObject.onChildSizeChanged = onChildSizeChanged;
     renderObject.animationValue = animationValue;
     renderObject.isScrollControlled = isScrollControlled;
   }
 }
 
-class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
-  _RenderBottomSheetLayoutWrapper({
+class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
+  _RenderBottomSheetLayoutWithSizeListener({
     RenderBox? child,
-    _SizeChangeCallback<Size>? onChildSizeChanged,
+    required _SizeChangeCallback<Size> onChildSizeChanged,
     required double animationValue,
     required bool isScrollControlled,
   }) : assert(animationValue != null),
@@ -361,7 +366,18 @@ class _RenderBottomSheetLayoutWrapper extends RenderShiftedBox {
        super(child);
 
   Size _lastSize = Size.zero;
-  final _SizeChangeCallback<Size>? _onChildSizeChanged;
+
+  _SizeChangeCallback<Size> get onChildSizeChanged => _onChildSizeChanged;
+  _SizeChangeCallback<Size> _onChildSizeChanged;
+    set onChildSizeChanged(_SizeChangeCallback<Size> newCallback) {
+    assert(newCallback != null);
+    if (_onChildSizeChanged == newCallback) {
+      return;
+    }
+
+    _onChildSizeChanged = newCallback;
+    markNeedsLayout();
+  }
 
   double get animationValue => _animationValue;
   double _animationValue;
@@ -508,6 +524,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     }
   }
 
+  EdgeInsets _getNewClipDetails(Size topLayerSize) {
+    return EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);
+  }
+
   void handleDragStart(DragStartDetails details) {
     // Allow the bottom sheet to track the user's finger accurately.
     animationCurve = Curves.linear;
@@ -560,13 +580,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           label: routeLabel,
           explicitChildNodes: true,
           child: ClipRect(
-            child: _BottomSheetLayoutWrapper(
+            child: _BottomSheetLayoutWithSizeListener(
               onChildSizeChanged: (Size size) {
-                widget.route.didChangeBarrierSemanticsClip(widget.route._getNewClipDetails(size));
-                // widget.route.topLayerSizeNotifier.value = size;
-                //widget.route.didChangeBarrierSemanticsInsets();
+                widget.route.didChangeBarrierSemanticsClip(_getNewClipDetails(size));
               },
-              //delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
               animationValue: animationValue,
               isScrollControlled: widget.isScrollControlled,
               child: child,
@@ -837,10 +854,6 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         );
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
-  }
-
-  EdgeInsets _getNewClipDetails(Size topLayerSize) {
-    return EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);
   }
 }
 

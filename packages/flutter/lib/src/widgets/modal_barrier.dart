@@ -235,31 +235,39 @@ class ModalBarrier extends StatelessWidget {
       }
     }
 
+    Widget barrier = Semantics(
+      onTapHint: semanticsOnTapHint,
+      onTap: handleDismiss,
+      label: semanticsDismissible ? semanticsLabel : null,
+      textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: ConstrainedBox(
+        constraints: const BoxConstraints.expand(),
+        child: color == null ? null : ColoredBox(
+          color: color!,
+          ),
+        ),
+      ),
+    );
+
+    final bool excluding = !semanticsDismissible || !modalBarrierSemanticsDismissible;
+
+    if (!excluding && clipDetailsNotifier != null) {
+      barrier = SemanticsClipper(
+        clipDetailsNotifier: clipDetailsNotifier,
+        child: barrier,
+      );
+    }
+
     return BlockSemantics(
       child: ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal. On iOS, some
         // modal barriers are not dismissible in accessibility mode.
-        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
+        excluding: excluding,
         child: _ModalBarrierGestureDetector(
           onDismiss: handleDismiss,
-          child: SemanticsClipper(
-            clipDetailsNotifier: clipDetailsNotifier,
-            child: Semantics(
-              onTapHint: semanticsOnTapHint,
-              onTap: handleDismiss,
-              label: semanticsDismissible ? semanticsLabel : null,
-              textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.basic,
-                child: ConstrainedBox(
-                constraints: const BoxConstraints.expand(),
-                child: color == null ? null : ColoredBox(
-                  color: color!,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          child: barrier,
         ),
       ),
     );
