@@ -4759,7 +4759,6 @@ class OrdinalSortKey extends SemanticsSortKey {
     this.order, {
     super.name,
   }) : assert(order != null),
-       assert(order != double.nan),
        assert(order > double.negativeInfinity),
        assert(order < double.infinity);
 

@@ -70,7 +70,40 @@ void main() {
     expect(_drawerMaterial(tester).elevation, 16.0);
     expect(_drawerMaterial(tester).shadowColor, useMaterial3 ? Colors.transparent : ThemeData().shadowColor);
     expect(_drawerMaterial(tester).surfaceTintColor, useMaterial3 ? ThemeData().colorScheme.surfaceTint : null);
-    expect(_drawerMaterial(tester).shape, null);
+    expect(
+      _drawerMaterial(tester).shape,
+      useMaterial3
+        ? const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(right:  Radius.circular(16.0)))
+        : null,
+    );
+    expect(_scrim(tester).color, Colors.black54);
+    expect(_drawerRenderBox(tester).size.width, 304.0);
+  });
+
+  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final bool useMaterial3 = ThemeData().useMaterial3;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+    scaffoldKey.currentState!.openEndDrawer();
+    await tester.pumpAndSettle();
+
+    expect(_drawerMaterial(tester).color, null);
+    expect(_drawerMaterial(tester).elevation, 16.0);
+    expect(_drawerMaterial(tester).shadowColor, useMaterial3 ? Colors.transparent : ThemeData().shadowColor);
+    expect(_drawerMaterial(tester).surfaceTintColor, useMaterial3 ? ThemeData().colorScheme.surfaceTint : null);
+    expect(
+      _drawerMaterial(tester).shape,
+      useMaterial3
+        ? const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left:  Radius.circular(16.0)))
+        : null,
+    );
     expect(_scrim(tester).color, Colors.black54);
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });

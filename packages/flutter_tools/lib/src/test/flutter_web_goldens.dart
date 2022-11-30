@@ -98,14 +98,14 @@ class TestGoldenComparator {
     return _processManager.start(command, environment: environment);
   }
 
-  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens, Map<String, dynamic>? customProperties) async {
+  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
     final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
     final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
     if (process == null) {
       return 'process was null';
     }
 
-    process.sendCommand(imageFile, goldenKey, updateGoldens, customProperties);
+    process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse();
 
@@ -152,13 +152,11 @@ class TestGoldenComparatorProcess {
     await process.exitCode;
   }
 
-  void sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens, Map<String, dynamic>? customProperties) {
+  void sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens) {
     final Object command = jsonEncode(<String, dynamic>{
       'imageFile': imageFile.path,
       'key': goldenKey.toString(),
       'update': updateGoldens,
-      if (customProperties != null)
-        'customProperties': customProperties,
     });
     _logger.printTrace('Preparing to send command: $command');
     process.stdin.writeln(command);
@@ -170,22 +168,7 @@ class TestGoldenComparatorProcess {
     return streamIterator.current;
   }
 
-  /// Generates the source code for the comparator process for the test file.
-  ///
-  /// If a test configuation exists for the tested package, uses its
-  /// implementation. Otherwise, uses the default implementation.
   static String generateBootstrap(File testFile, Uri testUri, {required Logger logger}) {
-    final File? webTestConfigFile = findWebTestConfigFile(testFile, logger);
-    if (webTestConfigFile != null) {
-      return _generateBootstrapWithWebTestConfig(webTestConfigFile, testFile, testUri);
-    } else {
-      return _generateBasicBootstrap(testFile, testUri, logger: logger);
-    }
-  }
-
-  // Generates the bootstrap used by tests that either don't have a test
-  // configuration file, or don't have a `flutter_web_test_config.dart`.
-  static String _generateBasicBootstrap(File testFile, Uri testUri, {required Logger logger}) {
     final File? testConfigFile = findTestConfigFile(testFile, logger);
     // Generate comparator process for the file.
     return '''
@@ -228,19 +211,6 @@ void main() async {
     }
   }
   ${testConfigFile != null ? '});' : ''}
-}
-    ''';
-  }
-
-  // Generates the bootstrap used by tests that have a `flutter_web_test_config.dart`.
-  static String _generateBootstrapWithWebTestConfig(File webTestConfigFile, File testFile, Uri testUri) {
-    return '''
-import 'package:flutter_test/flutter_test.dart';
-import '${Uri.file(webTestConfigFile.path)}' as web_test_config;
-void main() async {
-  final String testUri = '$testUri';
-  goldenFileComparator = LocalFileComparator(Uri.parse(testUri));
-  await web_test_config.startWebTestHostConfiguration(testUri);
 }
     ''';
   }

@@ -149,7 +149,10 @@ $indent])''';
   }
 }
 
-RegExp unescapedString = RegExp(r'[^{}]+');
+RegExp escapedString = RegExp(r"'[^']*'");
+RegExp unescapedString = RegExp(r"[^{}']+");
+RegExp normalString = RegExp(r'[^{}]+');
+
 RegExp brace = RegExp(r'{|}');
 
 RegExp whitespace = RegExp(r'\s+');
@@ -174,11 +177,17 @@ Map<ST, RegExp> matchers = <ST, RegExp>{
 };
 
 class Parser {
-  Parser(this.messageId, this.filename, this.messageString);
+  Parser(
+    this.messageId,
+    this.filename,
+    this.messageString,
+    { this.useEscaping = false }
+  );
 
   final String messageId;
   final String messageString;
   final String filename;
+  final bool useEscaping;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
@@ -201,20 +210,41 @@ class Parser {
     while (startIndex < messageString.length) {
       Match? match;
       if (isString) {
-        // TODO(thkim1011): Uncomment this when we add escaping as an option.
-        // See https://github.com/flutter/flutter/issues/113455.
-        // match = escapedString.matchAsPrefix(message, startIndex);
-        // if (match != null) {
-        //   final String string = match.group(0)!;
-        //   tokens.add(Node.string(startIndex, string == "''" ? "'" : string.substring(1, string.length - 1)));
-        //   startIndex = match.end;
-        //   continue;
-        // }
-        match = unescapedString.matchAsPrefix(messageString, startIndex);
-        if (match != null) {
-          tokens.add(Node.string(startIndex, match.group(0)!));
-          startIndex = match.end;
-          continue;
+        if (useEscaping) {
+          // This case is slightly involved. Essentially, wrapping any syntax in
+          // single quotes escapes the syntax except when there are consecutive pair of single
+          // quotes. For example, "Hello! 'Flutter''s amazing'. { unescapedPlaceholder }"
+          // converts the '' in "Flutter's" to a single quote for convenience, since technically,
+          // we should interpret this as two strings 'Flutter' and 's amazing'. To get around this,
+          // we also check if the previous character is a ', and if so, add a single quote at the beginning
+          // of the token.
+          match = escapedString.matchAsPrefix(messageString, startIndex);
+          if (match != null) {
+            final String string = match.group(0)!;
+            if (string == "''") {
+              tokens.add(Node.string(startIndex, "'"));
+            } else if (startIndex > 1 && messageString[startIndex - 1] == "'") {
+              // Include a single quote in the beginning of the token.
+              tokens.add(Node.string(startIndex, string.substring(0, string.length - 1)));
+            } else {
+              tokens.add(Node.string(startIndex, string.substring(1, string.length - 1)));
+            }
+            startIndex = match.end;
+            continue;
+          }
+          match = unescapedString.matchAsPrefix(messageString, startIndex);
+          if (match != null) {
+            tokens.add(Node.string(startIndex, match.group(0)!));
+            startIndex = match.end;
+            continue;
+          }
+        } else {
+          match = normalString.matchAsPrefix(messageString, startIndex);
+          if (match != null) {
+            tokens.add(Node.string(startIndex, match.group(0)!));
+            startIndex = match.end;
+            continue;
+          }
         }
         match = brace.matchAsPrefix(messageString, startIndex);
         if (match != null) {

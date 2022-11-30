@@ -117,7 +117,7 @@ void main() {
     final List<String> allowedPaths = <String>[
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
-      fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_goldens.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'test_wrapper.dart'),
     ];
     bool isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
 

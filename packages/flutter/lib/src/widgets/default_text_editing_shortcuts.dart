@@ -19,6 +19,12 @@ import 'text_editing_intents.dart';
 /// lower in the widget tree than this. See the [Action] class for an example
 /// of remapping an [Intent] to a custom [Action].
 ///
+/// The [Shortcuts] widget usually takes precedence over system keybindings.
+/// Proceed with caution if the shortcut you wish to override is also used by
+/// the system. For example, overriding [LogicalKeyboardKey.backspace] could
+/// cause CJK input methods to discard more text than they should when the
+/// backspace key is pressed during text composition on iOS.
+///
 /// {@tool snippet}
 ///
 /// This example shows how to use an additional [Shortcuts] widget to override
@@ -440,11 +446,26 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   static final Map<ShortcutActivator, Intent> _macDisablingTextShortcuts = <ShortcutActivator, Intent>{
     ..._commonDisablingTextShortcuts,
+    ..._iOSDisablingTextShortcuts,
     const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+  };
+
+  // Hand backspace/delete events that do not depend on text layout (delete
+  // character and delete to the next word) back to the IME to allow it to
+  // update composing text properly.
+  static const Map<ShortcutActivator, Intent> _iOSDisablingTextShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.backspace): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true): DoNothingAndStopPropagationTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
@@ -469,13 +490,13 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       return _webDisablingTextShortcuts;
     }
     switch (defaultTargetPlatform) {
-
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return null;
+      case TargetPlatform.iOS:
+        return _iOSDisablingTextShortcuts;
       case TargetPlatform.macOS:
         return _macDisablingTextShortcuts;
     }
