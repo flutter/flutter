@@ -20,6 +20,9 @@
       },
       "_web_unicode": {
         "uri": "lib/_web_unicode/web_unicode.dart"
+      },
+      "_web_locale_keymap": {
+        "uri": "lib/_web_locale_keymap/web_locale_keymap.dart"
       }
     }
   },
@@ -42,6 +45,9 @@
       },
       "_web_unicode": {
         "uri": "lib/_web_unicode/web_unicode.dart"
+      },
+      "_web_locale_keymap": {
+        "uri": "lib/_web_locale_keymap/web_locale_keymap.dart"
       }
     }
   },
@@ -64,6 +70,9 @@
       },
       "_web_unicode": {
         "uri": "lib/_web_unicode/web_unicode.dart"
+      },
+      "_web_locale_keymap": {
+        "uri": "lib/_web_locale_keymap/web_locale_keymap.dart"
       }
     }
   }

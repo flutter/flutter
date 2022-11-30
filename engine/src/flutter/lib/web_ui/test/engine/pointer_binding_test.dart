@@ -52,7 +52,7 @@ void testMain() {
     return KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    });
+    }, OperatingSystem.linux);
   }
 
   test('ios workaround', () {

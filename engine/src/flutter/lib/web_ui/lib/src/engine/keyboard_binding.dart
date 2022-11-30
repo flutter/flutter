@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_locale_keymap/web_locale_keymap.dart' as locale_keymap;
 
 import '../engine.dart'  show registerHotRestartListener;
 import 'browser_detection.dart';
@@ -54,16 +55,6 @@ final Map<int, _ModifierGetter> _kLogicalKeyToModifierGetter = <int, _ModifierGe
   _kLogicalMetaRight: (FlutterHtmlKeyboardEvent event) => event.metaKey,
 };
 
-// ASCII for a, z, A, and Z
-const int _kCharLowerA = 0x61;
-const int _kCharLowerZ = 0x7a;
-const int _kCharUpperA = 0x41;
-const int _kCharUpperZ = 0x5a;
-bool isAlphabet(int charCode) {
-  return (charCode >= _kCharLowerA && charCode <= _kCharLowerZ)
-      || (charCode >= _kCharUpperA && charCode <= _kCharUpperZ);
-}
-
 const String _kPhysicalCapsLock = 'CapsLock';
 
 const String _kLogicalDead = 'Dead';
@@ -98,9 +89,24 @@ Duration _eventTimeStampToDuration(num milliseconds) {
   return Duration(milliseconds: ms, microseconds: micro);
 }
 
+// Returns a function that caches the result of `body`, ensuring that `body` is
+// only run once.
+ValueGetter<T> _cached<T>(ValueGetter<T> body) {
+  T? cache;
+  return () {
+    return cache ??= body();
+  };
+}
+
 class KeyboardBinding {
   KeyboardBinding._() {
-    _setup();
+    _addEventListener('keydown', allowInterop((DomEvent domEvent) {
+      final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
+      return _converter.handleEvent(event);
+    }));
+    _addEventListener('keyup', allowInterop((DomEvent event) {
+      return _converter.handleEvent(FlutterHtmlKeyboardEvent(event as DomKeyboardEvent));
+    }));
   }
 
   /// The singleton instance of this object.
@@ -117,8 +123,19 @@ class KeyboardBinding {
     }
   }
 
+  /// The platform as used in the initialization.
+  ///
+  /// By default it is derived from [operatingSystem].
+  @protected
+  OperatingSystem get localPlatform {
+    return operatingSystem;
+  }
+
   KeyboardConverter get converter => _converter;
-  late final KeyboardConverter _converter;
+  late final KeyboardConverter _converter = KeyboardConverter(
+    _onKeyData,
+    localPlatform,
+  );
   final Map<String, DomEventListener> _listeners = <String, DomEventListener>{};
 
   void _addEventListener(String eventName, DomEventListener handler) {
@@ -152,16 +169,6 @@ class KeyboardBinding {
     EnginePlatformDispatcher.instance.invokeOnKeyData(data,
       (bool handled) { result = handled; });
     return result!;
-  }
-
-  void _setup() {
-    _addEventListener('keydown', allowInterop((DomEvent event) {
-      return _converter.handleEvent(FlutterHtmlKeyboardEvent(event as DomKeyboardEvent));
-    }));
-    _addEventListener('keyup', allowInterop((DomEvent event) {
-      return _converter.handleEvent(FlutterHtmlKeyboardEvent(event as DomKeyboardEvent));
-    }));
-    _converter = KeyboardConverter(_onKeyData, onMacOs: operatingSystem == OperatingSystem.macOs);
   }
 
   void _reset() {
@@ -211,10 +218,30 @@ class FlutterHtmlKeyboardEvent {
 // [dispatchKeyData] as given in the constructor. Some key data might be
 // dispatched asynchronously.
 class KeyboardConverter {
-  KeyboardConverter(this.performDispatchKeyData, {this.onMacOs = false});
+  KeyboardConverter(this.performDispatchKeyData, OperatingSystem platform)
+    : onMacOs = platform == OperatingSystem.macOs,
+      _mapping = _mappingFromPlatform(platform);
 
   final DispatchKeyData performDispatchKeyData;
+  /// Whether the current platform is macOS, which affects how certain key events
+  /// are comprehended.
   final bool onMacOs;
+  /// Maps logical keys from key event properties.
+  final locale_keymap.LocaleKeymap _mapping;
+
+  static locale_keymap.LocaleKeymap _mappingFromPlatform(OperatingSystem platform) {
+    switch (platform) {
+      case OperatingSystem.iOs:
+      case OperatingSystem.macOs:
+        return locale_keymap.LocaleKeymap.darwin();
+      case OperatingSystem.windows:
+        return locale_keymap.LocaleKeymap.win();
+      case OperatingSystem.android:
+      case OperatingSystem.linux:
+      case OperatingSystem.unknown:
+        return locale_keymap.LocaleKeymap.linux();
+    }
+  }
 
   // The `performDispatchKeyData` wrapped with tracking logic.
   //
@@ -273,29 +300,14 @@ class KeyboardConverter {
            (metaDown ? _kDeadKeyMeta : 0);
   }
 
-  // Whether `event.key` should be considered a key name.
+  // Whether `event.key` is a key name, such as "Shift", or otherwise a
+  // character, such as "S" or "ж".
   //
-  // The `event.key` can either be a key name or the printable character. If the
-  // first character is an alphabet, it must be either 'A' to 'Z' ( and return
-  // true), or be a key name (and return false). Otherwise, return true.
-  static bool _eventKeyIsKeyname(String key) {
-    assert(key.isNotEmpty);
-    return isAlphabet(key.codeUnitAt(0)) && key.length > 1;
-  }
-
-  static int _characterToLogicalKey(String key) {
-    // Assume the length being <= 2 to be sufficient in all cases. If not,
-    // extend the algorithm.
-    assert(key.length <= 2);
-    int result = key.codeUnitAt(0) & 0xffff;
-    if (key.length == 2) {
-      result += key.codeUnitAt(1) << 16;
-    }
-    // Convert upper letters to lower letters
-    if (result >= _kCharUpperA && result <= _kCharUpperZ) {
-      result = result + _kCharLowerA - _kCharUpperA;
-    }
-    return result;
+  // A key name always has more than 1 code unit, and they are all alnums.
+  // Character keys, however, can also have more than 1 code unit: en-in
+  // maps KeyL to L̥/l̥. To resolve this, we check the second code unit.
+  static bool _eventKeyIsKeyName(String key) {
+    return key.length > 1 && key.codeUnitAt(0) < 0x7F && key.codeUnitAt(1) < 0x7F;
   }
 
   static int _deadKeyToLogicalKey(int physicalKey, FlutterHtmlKeyboardEvent event) {
@@ -305,10 +317,6 @@ class KeyboardConverter {
     // Assume they can be told apart with the physical key and the modifiers
     // pressed.
     return physicalKey + _getModifierMask(event) + _kWebKeyIdPlane;
-  }
-
-  static int _otherLogicalKey(String key) {
-    return kWebToLogicalKey[key] ?? (key.hashCode + _kWebKeyIdPlane);
   }
 
   // Map from pressed physical key to corresponding pressed logical key.
@@ -369,22 +377,36 @@ class KeyboardConverter {
     final String eventKey = event.key!;
 
     final int physicalKey = _getPhysicalCode(event.code!);
-    final bool logicalKeyIsCharacter = !_eventKeyIsKeyname(eventKey);
-    final String? character = logicalKeyIsCharacter ? eventKey : null;
-    final int logicalKey = () {
+    final bool logicalKeyIsCharacter = !_eventKeyIsKeyName(eventKey);
+    // The function body might or might not be evaluated. If the event is a key
+    // up event, the resulting event will simply use the currently pressed
+    // logical key.
+    final ValueGetter<int> logicalKey = _cached<int>(() {
+      // Mapped logical keys, such as ArrowLeft, Escape, AudioVolumeDown.
+      final int? mappedLogicalKey = kWebToLogicalKey[eventKey];
+      if (mappedLogicalKey != null) {
+        return mappedLogicalKey;
+      }
+      // Keys with locations, such as modifier keys (Shift) or numpad keys.
       if (kWebLogicalLocationMap.containsKey(event.key)) {
         final int? result = kWebLogicalLocationMap[event.key!]?[event.location!];
         assert(result != null, 'Invalid modifier location: ${event.key}, ${event.location}');
         return result!;
       }
-      if (character != null) {
-        return _characterToLogicalKey(character);
+      // Locale-sensitive keys: letters, digits, and certain symbols.
+      if (logicalKeyIsCharacter) {
+        final int? localeLogicalKeys = _mapping.getLogicalKey(event.code, event.key, event.keyCode);
+        if (localeLogicalKeys != null) {
+          return localeLogicalKeys;
+        }
       }
+      // Dead keys that are not handled by the locale mapping.
       if (eventKey == _kLogicalDead) {
         return _deadKeyToLogicalKey(physicalKey, event);
       }
-      return _otherLogicalKey(eventKey);
-    }();
+      // Minted logical keys.
+      return eventKey.hashCode + _kWebKeyIdPlane;
+    });
 
     assert(event.type == 'keydown' || event.type == 'keyup');
     final bool isPhysicalDown = event.type == 'keydown' ||
@@ -406,7 +428,7 @@ class KeyboardConverter {
           timeStamp: timeStamp,
           type: ui.KeyEventType.up,
           physical: physicalKey,
-          logical: logicalKey,
+          logical: logicalKey(),
           character: null,
           synthesized: true,
         ),
@@ -441,7 +463,7 @@ class KeyboardConverter {
             timeStamp: timeStamp,
             type: ui.KeyEventType.up,
             physical: physicalKey,
-            logical: logicalKey,
+            logical: logicalKey(),
             character: null,
             synthesized: true,
           ));
@@ -474,7 +496,7 @@ class KeyboardConverter {
     switch (type) {
       case ui.KeyEventType.down:
         assert(lastLogicalRecord == null);
-        nextLogicalRecord = logicalKey;
+        nextLogicalRecord = logicalKey();
         break;
       case ui.KeyEventType.up:
         assert(lastLogicalRecord != null);
@@ -499,7 +521,7 @@ class KeyboardConverter {
     _kLogicalKeyToModifierGetter.forEach((int testeeLogicalKey, _ModifierGetter getModifier) {
       // Do not synthesize for the key of the current event. The event is the
       // ground truth.
-      if (logicalKey == testeeLogicalKey) {
+      if (logicalKey() == testeeLogicalKey) {
         return;
       }
       if (_pressingRecords.containsValue(testeeLogicalKey) && !getModifier(event)) {
@@ -525,17 +547,18 @@ class KeyboardConverter {
     // Update key guards
     if (logicalKeyIsCharacter) {
       if (nextLogicalRecord != null) {
-        _startGuardingKey(physicalKey, logicalKey, timeStamp);
+        _startGuardingKey(physicalKey, logicalKey(), timeStamp);
       } else {
         _stopGuardingKey(physicalKey);
       }
     }
 
+    final String? character = logicalKeyIsCharacter ? eventKey : null;
     final ui.KeyData keyData = ui.KeyData(
       timeStamp: timeStamp,
       type: type,
       physical: physicalKey,
-      logical: lastLogicalRecord ?? logicalKey,
+      logical: lastLogicalRecord ?? logicalKey(),
       character: type == ui.KeyEventType.up ? null : character,
       synthesized: false,
     );

@@ -14,72 +14,66 @@ class FetchedContentsOf extends Key { FetchedContentsOf(dynamic value) : super(v
 enum LicenseType { unknown, bsd, gpl, lgpl, mpl, afl, mit, freetype, apache, apacheNotice, eclipse, ijg, zlib, icu, apsl, libpng, openssl, vulkan, bison }
 
 LicenseType convertLicenseNameToType(String? name) {
-  switch (name) {
-    case 'Apache':
+  switch (name?.toLowerCase()) {
+    case 'apache':
     case 'apache-license-2.0':
-    case 'LICENSE-APACHE-2.0.txt':
-    case 'Apache-2.0.txt':
-    case 'LICENSE.vulkan':
+    case 'license-apache-2.0.txt':
+    case 'apache-2.0.txt':
+    case 'license.vulkan':
       return LicenseType.apache;
-    case 'BSD':
-    case 'BSD.txt':
-    case 'BSD-3-Clause.txt':
+    case 'bsd':
+    case 'bsd.txt':
+    case 'bsd-3-clause.txt':
       return LicenseType.bsd;
-    case 'LICENSE-LGPL-2':
-    case 'LICENSE-LGPL-2.1':
-    case 'COPYING-LGPL-2.1':
+    case 'license-lgpl-2':
+    case 'license-lgpl-2.1':
+    case 'copying-lgpl-2.1':
       return LicenseType.lgpl;
-    case 'COPYING-GPL-3':
-    case 'GPL-3.0-only.txt':
+    case 'copying-gpl-3':
+    case 'gpl-3.0-only.txt':
       return LicenseType.gpl;
-    case 'FTL.TXT':
+    case 'ftl.txt':
       return LicenseType.freetype;
     case 'zlib.h':
       return LicenseType.zlib;
     case 'png.h':
       return LicenseType.libpng;
-    case 'ICU':
+    case 'icu':
       return LicenseType.icu;
-    case 'Apple Public Source License':
+    case 'apple public source license':
       return LicenseType.apsl;
-    case 'OpenSSL':
+    case 'openssl':
       return LicenseType.openssl;
-    case 'LICENSE.MPLv2':
-    case 'COPYING-MPL-1.1':
+    case 'license.mplv2':
+    case 'copying-mpl-1.1':
       return LicenseType.mpl;
-    case 'COPYRIGHT.vulkan':
+    case 'copyright.vulkan':
       return LicenseType.vulkan;
-    case 'LICENSE.MIT':
-    case 'MIT.txt':
+    case 'license.mit':
+    case 'mit.txt':
       return LicenseType.mit;
     // common file names that don't say what the type is
-    case 'COPYING':
-    case 'COPYING.txt':
-    case 'COPYING.LIB': // lgpl usually
-    case 'COPYING.RUNTIME': // gcc exception usually
-    case 'LICENSE':
-    case 'LICENSE.md':
+    case 'copying':
+    case 'copying.txt':
+    case 'copying.lib': // lgpl usually
+    case 'copying.runtime': // gcc exception usually
+    case 'license':
+    case 'license.md':
     case 'license.html':
-    case 'LICENSE.txt':
-    case 'LICENSE.TXT':
-    case 'LICENSE.cssmin':
-    case 'NOTICE':
-    case 'NOTICE.txt':
-    case 'Copyright':
-    case 'copyright':
     case 'license.txt':
+    case 'license.cssmin':
+    case 'notice':
+    case 'notice.txt':
+    case 'copyright':
       return LicenseType.unknown;
     // particularly weird file names
-    case 'COPYRIGHT.musl':
-    case 'LICENSE-APPLE':
-    case 'extreme.indiana.edu.license.TXT':
+    case 'copyright.musl':
+    case 'license-apple':
     case 'extreme.indiana.edu.license.txt':
-    case 'javolution.license.TXT':
     case 'javolution.license.txt':
     case 'libyaml-license.txt':
     case 'license.patch':
     case 'license.rst':
-    case 'LICENSE.rst':
     case 'mh-bsd-gcc':
     case 'pivotal.labs.license.txt':
       return LicenseType.unknown;

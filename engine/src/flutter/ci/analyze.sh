@@ -52,6 +52,7 @@ echo ""
 
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/flutter_frontend_server"
 
+(cd "$FLUTTER_DIR/tools/gen_web_locale_keymap"; "$DART" pub get)
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools"
 
 (cd "$FLUTTER_DIR/testing/skia_gold_client"; "$DART" pub get)
