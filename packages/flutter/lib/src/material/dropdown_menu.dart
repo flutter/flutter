@@ -126,6 +126,8 @@ class DropdownMenu extends StatefulWidget {
     this.textStyle,
     this.inputDecorationTheme,
     this.menuStyle,
+    this.controller,
+    this.onChanged,
     required this.dropdownMenuEntries,
   });
 
@@ -204,6 +206,20 @@ class DropdownMenu extends StatefulWidget {
   /// The default width of the menu is set to the width of the text field.
   final MenuStyle? menuStyle;
 
+  /// Controls the text being edited or selected in the menu.
+  ///
+  /// If null, this widget will create its own [TextEditingController].
+  final TextEditingController? controller;
+
+  /// The callback is called when a selection is made or there are any changes in
+  /// the text field.
+  ///
+  /// {@macro flutter.widgets.editableText.onChanged}
+  ///
+  /// Defaults to null. By default, the menu shows up if there's any changes in the
+  /// text field.
+  final ValueChanged<String>? onChanged;
+
   /// Descriptions of the menu items in the [DropdownMenu].
   ///
   /// This is a required parameter. It is recommended that at least one [DropdownMenuEntry]
@@ -216,11 +232,11 @@ class DropdownMenu extends StatefulWidget {
 }
 
 class _DropdownMenuState extends State<DropdownMenu> {
-  final MenuController _controller = MenuController();
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   final FocusNode _textFocusNode = FocusNode();
-  final TextEditingController _textEditingController = TextEditingController();
+  final MenuController _controller = MenuController();
+  late final TextEditingController _textEditingController;
   late bool _enableFilter;
   late List<DropdownMenuEntry> filteredEntries;
   List<Widget>? _initialMenu;
@@ -231,6 +247,7 @@ class _DropdownMenuState extends State<DropdownMenu> {
   @override
   void initState() {
     super.initState();
+    _textEditingController = widget.controller ?? TextEditingController();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry entry) => entry.enabled);
@@ -329,7 +346,8 @@ class _DropdownMenuState extends State<DropdownMenu> {
               textEditingController.text = entry.label;
               textEditingController.selection =
                   TextSelection.collapsed(offset: textEditingController.text.length);
-              currentHighlight = widget.enableSearch ? i : -1;
+              currentHighlight = widget.enableSearch ? i : null;
+              widget.onChanged?.call(entry.label);
             }
           : null,
         requestFocusOnHover: false,
@@ -373,7 +391,7 @@ class _DropdownMenuState extends State<DropdownMenu> {
 
   void handlePressed(MenuController controller) {
     if (controller.isOpen) {
-      currentHighlight = -1;
+      currentHighlight = null;
       controller.close();
     } else {  // close to open
       if (_textEditingController.text.isNotEmpty) {
@@ -473,21 +491,29 @@ class _DropdownMenuState extends State<DropdownMenu> {
                   controller: _textEditingController,
                   onEditingComplete: () {
                     if (currentHighlight != null) {
-                      _textEditingController.text = filteredEntries[currentHighlight!].label;
+                      final String entryLabel = filteredEntries[currentHighlight!].label;
+                      _textEditingController.text = entryLabel;
                       _textEditingController.selection =
-                          TextSelection.collapsed(offset: _textEditingController.text.length);
+                        TextSelection.collapsed(offset: _textEditingController.text.length);
+                      widget.onChanged?.call(entryLabel);
                     }
-                    controller.close();
+                    if (!widget.enableSearch) {
+                      currentHighlight = null;
+                    }
+                    if (_textEditingController.text.isNotEmpty) {
+                      controller.close();
+                    }
                   },
                   onTap: () {
                     handlePressed(controller);
                   },
-                  onChanged: (_) {
+                  onChanged: (String text) {
                     controller.open();
                     setState(() {
                       filteredEntries = widget.dropdownMenuEntries;
                       _enableFilter = widget.enableFilter;
                     });
+                    widget.onChanged?.call(text);
                   },
                   decoration: InputDecoration(
                     enabled: widget.enabled,

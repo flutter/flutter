@@ -9,23 +9,45 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const DropdownMenuExample());
 
-class DropdownMenuExample extends StatelessWidget {
+class DropdownMenuExample extends StatefulWidget {
   const DropdownMenuExample({super.key});
 
-  List<DropdownMenuEntry> getEntryList() {
-    final List<DropdownMenuEntry> entries = <DropdownMenuEntry>[];
+  @override
+  State<DropdownMenuExample> createState() => _DropdownMenuExampleState();
+}
 
-    for (int index = 0; index < EntryLabel.values.length; index++) {
-      // Disabled item 1, 2 and 6.
-      final bool enabled = index != 1 && index != 2 && index != 6;
-      entries.add(DropdownMenuEntry(label: EntryLabel.values[index].label, enabled: enabled));
+class _DropdownMenuExampleState extends State<DropdownMenuExample> {
+  final TextEditingController colorController = TextEditingController();
+  final TextEditingController iconController = TextEditingController();
+  bool hasColor = false;
+  bool hasIcon = false;
+
+  Map<String, Color> colors = <String, Color>{
+    'Blue': Colors.blue,
+    'Pink': Colors.pink,
+    'Green': Colors.green,
+    'Yellow': Colors.yellow,
+    'Grey': Colors.grey,
+  };
+  Map<String, IconData> icons = <String, IconData>{
+    'Smile': Icons.sentiment_satisfied_outlined,
+    'Cloud': Icons.cloud_outlined,
+    'Brush': Icons.brush_outlined,
+    'Heart': Icons.favorite,
+  };
+
+  List<DropdownMenuEntry> getEntry(List<String> labels, {String? disabledLabel}) {
+    final List<DropdownMenuEntry> entries = <DropdownMenuEntry>[];
+    for (final String label in labels) {
+      entries.add(DropdownMenuEntry(label: label, enabled: label != disabledLabel));
     }
     return entries;
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<DropdownMenuEntry> dropdownMenuEntries = getEntryList();
+    final List<DropdownMenuEntry> colorEntries = getEntry(colors.keys.toList(), disabledLabel: 'Grey');
+    final List<DropdownMenuEntry> iconEntries = getEntry(icons.keys.toList());
 
     return MaterialApp(
       theme: ThemeData(
@@ -34,41 +56,55 @@ class DropdownMenuExample extends StatelessWidget {
       ),
       home: Scaffold(
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                DropdownMenu(
-                  label: const Text('Label'),
-                  dropdownMenuEntries: dropdownMenuEntries,
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    DropdownMenu(
+                      controller: colorController,
+                      label: const Text('Color'),
+                      dropdownMenuEntries: colorEntries,
+                      onChanged: (String text) {
+                        setState(() {
+                          hasColor = colors.containsKey(text);
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 20),
+                    DropdownMenu(
+                      controller: iconController,
+                      enableFilter: true,
+                      leadingIcon: const Icon(Icons.search),
+                      label: const Text('Icon'),
+                      dropdownMenuEntries: iconEntries,
+                      inputDecorationTheme: const InputDecorationTheme(filled: true),
+                      onChanged: (String text) {
+                        setState(() {
+                          hasIcon = icons.containsKey(text);
+                        });
+                      },
+                    )
+                  ],
                 ),
-                const SizedBox(width: 20),
-                DropdownMenu(
-                  enableFilter: true,
-                  leadingIcon: const Icon(Icons.search),
-                  label: const Text('Label'),
-                  dropdownMenuEntries: dropdownMenuEntries,
-                  inputDecorationTheme: const InputDecorationTheme(filled: true),
+              ),
+              if (hasColor && hasIcon)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('You selected a ${colorController.text} ${iconController.text}'),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: Icon(icons[iconController.text], color: colors[colorController.text],))
+                  ],
                 )
-              ],
-            ),
+              else const Text('Please select a color and an icon.')
+            ],
           )
         ),
       ),
     );
   }
-}
-
-enum EntryLabel {
-  item0('Item 0'),
-  item1('Item 1'),
-  item2('Item 2'),
-  item3('Item 3'),
-  item4('Item 4'),
-  item5('Item 5'),
-  item6('Item 6');
-
-  const EntryLabel(this.label);
-  final String label;
 }

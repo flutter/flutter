@@ -738,6 +738,106 @@ void main() {
       }
     }
   });
+
+  testWidgets('The controller can access the value in the input field', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: DropdownMenu(
+              enableFilter: true,
+              dropdownMenuEntries: menuChildren,
+              controller: controller,
+            ),
+          );
+        }
+      ),
+    ));
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu));
+    await tester.pump();
+    final Finder item3 = find.widgetWithText(MenuItemButton, 'Item 3').last;
+    await tester.tap(item3);
+    await tester.pumpAndSettle();
+
+    expect(controller.text, 'Item 3');
+
+    await tester.enterText(find.byType(TextField).first, 'New Item');
+    expect(controller.text, 'New Item');
+  });
+
+  testWidgets('The onChanged gets called when a selection is made or there is '
+      'a change in the text field', (WidgetTester tester) async {
+    int selectionCount = 0;
+
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry> menuWithDisabledItems = <DropdownMenuEntry>[
+      const DropdownMenuEntry(label: 'Item 0'),
+      const DropdownMenuEntry(label: 'Item 1', enabled: false),
+      const DropdownMenuEntry(label: 'Item 2'),
+      const DropdownMenuEntry(label: 'Item 3'),
+    ];
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu(
+                dropdownMenuEntries: menuWithDisabledItems,
+                controller: controller,
+                onChanged: (_) {
+                  setState(() {
+                    selectionCount++;
+                  });
+                },
+              ),
+            );
+          }
+      ),
+    ));
+
+    // Open the menu
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Disabled item doesn't trigger onChanged callback.
+    final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 1').last;
+    await tester.tap(item1);
+    await tester.pumpAndSettle();
+
+    expect(controller.text.isEmpty, true);
+    expect(selectionCount, 0);
+
+    final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
+    await tester.tap(item2);
+    await tester.pumpAndSettle();
+
+    expect(controller.text, 'Item 2');
+    expect(selectionCount, 1);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    final Finder item3 = find.widgetWithText(MenuItemButton, 'Item 3').last;
+    await tester.tap(item3);
+    await tester.pumpAndSettle();
+
+    expect(controller.text, 'Item 3');
+    expect(selectionCount, 2);
+
+    // When typing something in the text field without selecting any of the options,
+    // the onChanged gets called.
+    await tester.enterText(find.byType(TextField).first, 'New Item');
+    expect(controller.text, 'New Item');
+    expect(selectionCount, 3);
+    expect(find.widgetWithText(TextField, 'New Item'), findsOneWidget);
+    controller.clear();
+    expect(controller.text.isEmpty, true);
+  });
 }
 
 enum TestMenu {
