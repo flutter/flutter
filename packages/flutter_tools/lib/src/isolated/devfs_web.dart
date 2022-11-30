@@ -562,7 +562,7 @@ class WebAssetServer implements AssetReader {
     // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
     final Directory dartSdkParent = globals.fs
         .directory(globals.artifacts!.getArtifactPath(
-          Artifact.engineDartSdkPath, 
+          Artifact.engineDartSdkPath,
           platform: TargetPlatform.web_javascript))
         .parent;
     final File dartSdkFile = globals.fs.file(dartSdkParent.uri.resolve(path));

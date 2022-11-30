@@ -227,9 +227,9 @@ void main() {
           processManager: FakeProcessManager.any(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
-        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'), 
-        fileSystem: fileSystem, 
-        platform: platform, 
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: platform,
         operatingSystemUtils: FakeOperatingSystemUtils());
     });
 
@@ -356,14 +356,12 @@ void main() {
     });
 
     testWithoutContext('uses prebuilt dart sdk for web platform', () {
-      final String failureMessage = 'Unable to find a built dart sdk at:'
-          ' "${fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk')}"'
-          ' or a prebuilt dart sdk at:'
+      final String failureMessage = 'Unable to find a prebuilt dart sdk at:'
           ' "${fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk')}"';
 
       expect(
         () => artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk, 
+          Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: TargetPlatform.web_javascript),
         throwsToolExit(message: failureMessage),
       );
@@ -448,9 +446,9 @@ void main() {
           processManager: FakeProcessManager.any(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
-        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'), 
-        fileSystem: fileSystem, 
-        platform: FakePlatform(operatingSystem: 'windows'), 
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: FakePlatform(operatingSystem: 'windows'),
         operatingSystemUtils: FakeOperatingSystemUtils());
 
       fileSystem
@@ -491,9 +489,9 @@ void main() {
           processManager: FakeProcessManager.any(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
-        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'), 
-        fileSystem: fileSystem, 
-        platform: FakePlatform(operatingSystem: 'windows'), 
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: FakePlatform(operatingSystem: 'windows'),
         operatingSystemUtils: FakeOperatingSystemUtils());
 
       fileSystem
@@ -521,9 +519,9 @@ void main() {
           processManager: FakeProcessManager.any(),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
-        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'), 
-        fileSystem: fileSystem, 
-        platform: FakePlatform(operatingSystem: 'macos'), 
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: FakePlatform(operatingSystem: 'macos'),
         operatingSystemUtils: FakeOperatingSystemUtils());
 
       fileSystem
