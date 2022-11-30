@@ -11,7 +11,7 @@ permissions: read-all
 jobs:
   vuln-scan:
     name: Vulnerability scanning
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: ${{ github.repository == 'flutter/engine' }}
     steps:
       - name: "Checkout code"
