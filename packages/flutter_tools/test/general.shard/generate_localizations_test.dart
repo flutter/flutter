@@ -1928,7 +1928,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
     group('plural messages', () {
       testWithoutContext('warnings are generated when plural parts are repeated', () {
-        const String pluralMessageWithOverridenParts = '''
+        const String pluralMessageWithOverriddenParts = '''
 {
   "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
   "@helloWorlds": {
@@ -1938,7 +1938,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithOverridenParts);
+          .writeAsStringSync(pluralMessageWithOverriddenParts);
         LocalizationsGenerator(
           fileSystem: fs,
           inputPathString: defaultL10nPathString,
@@ -1952,7 +1952,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           ..writeOutputFiles();
         expect(logger.hadWarningOutput, isTrue);
         expect(logger.warningText, contains('''
-[app_en.arb:helloWorlds] ICU Syntax Warning: The plural part specified below is overriden by a later plural part.
+[app_en.arb:helloWorlds] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.
     {count,plural, =0{Hello}zero{hello} other{hi}}
                    ^'''));
       });
@@ -2891,7 +2891,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   });
 
   testWithoutContext('suppress warnings flag actually suppresses warnings', () {
-    const String pluralMessageWithOverridenParts = '''
+    const String pluralMessageWithOverriddenParts = '''
 {
   "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
   "@helloWorlds": {
@@ -2904,7 +2904,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
       ..createSync(recursive: true);
     l10nDirectory.childFile(defaultTemplateArbFileName)
-      .writeAsStringSync(pluralMessageWithOverridenParts);
+      .writeAsStringSync(pluralMessageWithOverriddenParts);
     LocalizationsGenerator(
       fileSystem: fs,
       inputPathString: defaultL10nPathString,
