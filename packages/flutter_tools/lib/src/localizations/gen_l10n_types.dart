@@ -337,62 +337,8 @@ class Message {
       messages[bundle.locale] = translation;
       parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation, useEscaping: useEscaping).parse();
     }
-    // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
-    for (final LocaleInfo locale in parsedMessages.keys) {
-      if (parsedMessages[locale] == null) {
-        continue;
-      }
-      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
-      while (traversalStack.isNotEmpty) {
-        final Node node = traversalStack.removeLast();
-        if (node.type == ST.pluralExpr) {
-          final Placeholder? placeholder = placeholders[node.children[1].value!];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified plural placeholder is defined in your arb file.',
-              filenames[locale]!,
-              resourceId,
-              messages[locale]!,
-              node.children[1].positionInMessage
-            );
-          }
-          placeholders[node.children[1].value!]!.isPlural = true;
-        }
-        if (node.type == ST.selectExpr) {
-          final Placeholder? placeholder = placeholders[node.children[1].value!];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified select placeholder is defined in your arb file.',
-              filenames[locale]!,
-              resourceId,
-              messages[locale]!,
-              node.children[1].positionInMessage
-            );
-          }
-          placeholders[node.children[1].value!]!.isSelect = true;
-        }
-        traversalStack.addAll(node.children);
-      }
-    }
-    for (final Placeholder placeholder in placeholders.values) {
-      if (placeholder.isPlural && placeholder.isSelect) {
-        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
-      } else if (placeholder.isPlural) {
-        if (placeholder.type == null) {
-          placeholder.type = 'num';
-        }
-        else if (!<String>['num', 'int'].contains(placeholder.type)) {
-          throw L10nException("Placeholders used in plurals must be of type 'num' or 'int'");
-        }
-      } else if (placeholder.isSelect) {
-        if (placeholder.type == null) {
-          placeholder.type = 'String';
-        } else if (placeholder.type != 'String') {
-          throw L10nException("Placeholders used in selects must be of type 'String'");
-        }
-      }
-      placeholder.type ??= 'Object';
-    }
+    // Infer the placeholders
+    _inferPlaceholders(filenames);
   }
 
   final String resourceId;
@@ -495,6 +441,63 @@ class Message {
         return MapEntry<String, Placeholder>(placeholderName, Placeholder(resourceId, placeholderName, value));
       }),
     );
+  }
+
+  // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
+  // For undeclared placeholders, create a new placeholder.
+  void _inferPlaceholders(Map<LocaleInfo, String> filenames) {
+    // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
+    final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
+    // Helper for getting placeholder by name.
+    Placeholder? getPlaceholder(String name) => placeholders[name] ?? undeclaredPlaceholders[name];
+    for (final LocaleInfo locale in parsedMessages.keys) {
+      if (parsedMessages[locale] == null) {
+        continue;
+      }
+      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
+      while (traversalStack.isNotEmpty) {
+        final Node node = traversalStack.removeLast();
+        if (<ST>[ST.placeholderExpr, ST.pluralExpr, ST.selectExpr].contains(node.type)) {
+          final String identifier = node.children[1].value!;
+          Placeholder? placeholder = getPlaceholder(identifier);
+          if (placeholder == null) {
+            placeholder = Placeholder(resourceId, identifier, <String, Object?>{});
+            undeclaredPlaceholders[identifier] = placeholder;
+          }
+          if (node.type == ST.pluralExpr) {
+            placeholder.isPlural = true;
+          } else if (node.type == ST.selectExpr) {
+            placeholder.isSelect = true;
+          }
+        }
+        traversalStack.addAll(node.children);
+      }
+    }
+    placeholders.addEntries(
+      undeclaredPlaceholders.entries
+        .toList()
+        ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
+    );
+
+    for (final Placeholder placeholder in placeholders.values) {
+      if (placeholder.isPlural && placeholder.isSelect) {
+        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
+      } else if (placeholder.isPlural) {
+        if (placeholder.type == null) {
+          placeholder.type = 'num';
+        }
+        else if (!<String>['num', 'int'].contains(placeholder.type)) {
+          throw L10nException("Placeholders used in plurals must be of type 'num' or 'int'");
+        }
+      } else if (placeholder.isSelect) {
+        if (placeholder.type == null) {
+          placeholder.type = 'String';
+        } else if (placeholder.type != 'String') {
+          throw L10nException("Placeholders used in selects must be of type 'String'");
+        }
+      }
+      placeholder.type ??= 'Object';
+    }
   }
 }
 

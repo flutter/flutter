@@ -1909,6 +1909,35 @@ Make sure that the specified placeholder is defined in your arb file.
     });
 
     group('plural messages', () {
+      testWithoutContext('warnings are generated when plural parts are repeated', () {
+        const String pluralMessageWithOverridenParts = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello}zero{hello}}",
+  "@helloWorlds": {
+    "description": "Properly formatted but has redundant zero cases."
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(pluralMessageWithOverridenParts);
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        expect(logger.hadWarningOutput, isTrue);
+        expect(logger.warningText, contains('''
+ICU Syntax Warning: 
+'''));
+      });
+
       testWithoutContext('should throw attempting to generate a plural message without placeholders', () {
         const String pluralMessageWithoutPlaceholdersAttribute = '''
 {
@@ -2984,37 +3013,65 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
 '''));
   });
 
-  // TODO(thkim1011): Uncomment when implementing escaping.
-  // See https://github.com/flutter/flutter/issues/113455.
-//   testWithoutContext('escaping with single quotes', () {
-//     const String arbFile = '''
-// {
-//   "singleQuote": "Flutter''s amazing!",
-//   "@singleQuote": {
-//     "description": "A message with a single quote."
-//   }
-// }''';
+  testWithoutContext('escaping with single quotes', () {
+    const String arbFile = '''
+{
+  "singleQuote": "Flutter''s amazing!",
+  "@singleQuote": {
+    "description": "A message with a single quote."
+  }
+}''';
 
-//     final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-//       ..createSync(recursive: true);
-//     l10nDirectory.childFile(defaultTemplateArbFileName)
-//         .writeAsStringSync(arbFile);
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(arbFile);
 
-//     LocalizationsGenerator(
-//       fileSystem: fs,
-//       inputPathString: defaultL10nPathString,
-//       outputPathString: defaultL10nPathString,
-//       templateArbFileName: defaultTemplateArbFileName,
-//       outputFileString: defaultOutputFileString,
-//       classNameString: defaultClassNameString,
-//       logger: logger,
-//     )
-//       ..loadResources()
-//       ..writeOutputFiles();
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
 
-//     final String localizationsFile = fs.file(
-//       fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
-//     ).readAsStringSync();
-//     expect(localizationsFile, contains(r"Flutter\'s amazing"));
-//   });
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+    ).readAsStringSync();
+    expect(localizationsFile, contains(r"Flutter\'s amazing"));
+  });
+
+  testWithoutContext('suppress warnings flag actually suppresses warnings', () {
+    const String pluralMessageWithOverridenParts = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
+  "@helloWorlds": {
+    "description": "Properly formatted but has redundant zero cases.",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(pluralMessageWithOverridenParts);
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+      suppressWarnings: true,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
+    expect(logger.hadWarningOutput, isFalse);
+  });
 }

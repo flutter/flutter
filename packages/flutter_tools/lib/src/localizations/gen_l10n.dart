@@ -67,6 +67,7 @@ LocalizationsGenerator generateLocalizations({
       usesNullableGetter: options.usesNullableGetter,
       useEscaping: options.useEscaping,
       logger: logger,
+      suppressWarnings: options.suppressWarnings,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: true);
@@ -456,6 +457,7 @@ class LocalizationsGenerator {
     bool usesNullableGetter = true,
     bool useEscaping = false,
     required Logger logger,
+    bool suppressWarnings = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -478,6 +480,7 @@ class LocalizationsGenerator {
       areResourceAttributesRequired: areResourceAttributesRequired,
       useEscaping: useEscaping,
       logger: logger,
+      suppressWarnings: suppressWarnings,
     );
   }
 
@@ -501,6 +504,7 @@ class LocalizationsGenerator {
     this.usesNullableGetter = true,
     required this.logger,
     this.useEscaping = false,
+    this.suppressWarnings = false,
   });
 
   final FileSystem _fs;
@@ -636,6 +640,9 @@ class LocalizationsGenerator {
 
   /// Logger to be used during the execution of the script.
   Logger logger;
+
+  /// Whether or not to suppress warnings or not.
+  final bool suppressWarnings;
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -1218,7 +1225,7 @@ class LocalizationsGenerator {
               final HelperMethod pluralPartHelper = generateHelperMethods(pluralMessage);
               pluralLogicArgs[pluralCases[pluralCase]!] = '      ${pluralCases[pluralCase]}: ${pluralPartHelper.helperOrPlaceholder},';
               dependentPlaceholders.addAll(pluralPartHelper.dependentPlaceholders);
-            } else {
+            } else if (!suppressWarnings) {
               logger.printWarning('''
 The plural part specified below is overrided by a later plural part.
 $translationForMessage
