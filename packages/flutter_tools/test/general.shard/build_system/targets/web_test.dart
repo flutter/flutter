@@ -333,7 +333,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -346,7 +346,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
@@ -370,7 +370,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
@@ -384,7 +384,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
@@ -406,7 +406,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -419,7 +419,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
@@ -440,7 +440,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -453,7 +453,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O4',
@@ -474,7 +474,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--native-null-assertions',
         '-Ddart.vm.product=true',
         '--no-source-maps',
@@ -488,7 +488,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--native-null-assertions',
         '-Ddart.vm.product=true',
         '--no-source-maps',
@@ -510,7 +510,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -523,7 +523,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O3',
@@ -543,7 +543,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -574,7 +574,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -589,7 +589,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -612,7 +612,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -624,7 +624,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.product=true',
         '-O4',
         '-o',
@@ -645,7 +645,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -660,7 +660,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/auto',
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -678,46 +678,13 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
-    test('Dart2JSTarget uses correct platform binaries with canvaskit web renderer', () => testbed.run(() async {
-    environment.defines[kBuildMode] = 'profile';
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/canvaskit',
-        '-Ddart.vm.profile=true',
-        '--no-source-maps',
-        '-o',
-        environment.buildDir.childFile('app.dill').absolute.path,
-        '--packages=.dart_tool/package_config.json',
-        '--cfe-only',
-        environment.buildDir.childFile('main.dart').absolute.path,
-      ]
-    ));
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        ...kDart2jsLinuxArgs,
-        '--platform-binaries=bin/cache/flutter_web_sdk/kernel/platforms/canvaskit',
-        '-Ddart.vm.profile=true',
-        '--no-source-maps',
-        '-O4',
-        '--no-minify',
-        '-o',
-        environment.buildDir.childFile('main.dart.js').absolute.path,
-        environment.buildDir.childFile('app.dill').absolute.path,
-      ]
-    ));
-
-    await const Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => processManager,
-  }));
-
   test('Dart2JSTarget calls dart2js with expected args with dump-info', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kDart2jsDumpInfo] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -730,6 +697,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
@@ -752,6 +720,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -764,6 +733,7 @@ void main() {
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
+        '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-O4',
