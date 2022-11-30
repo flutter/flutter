@@ -319,7 +319,7 @@ class OutlinedButton extends ButtonStyleButton {
           disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           backgroundColor: Colors.transparent,
           disabledBackgroundColor: Colors.transparent,
-          shadowColor: theme.shadowColor,
+          shadowColor: theme.colorScheme.shadow,
           elevation: 0,
           textStyle: theme.textTheme.labelLarge,
           padding: _scaledPadding(context),

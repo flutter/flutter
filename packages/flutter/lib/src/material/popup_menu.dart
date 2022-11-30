@@ -1106,7 +1106,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// The color used to paint the shadow below the menu.
   ///
   /// If null then the ambient [PopupMenuThemeData.shadowColor] is used.
-  /// If that is null too, then the overall theme's [ThemeData.shadowColor]
+  /// If that is null too, then [ThemeData]'s [ColorScheme.shadow]
   /// (default black) is used.
   final Color? shadowColor;
 

@@ -258,9 +258,7 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
-  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
-  /// [ColorScheme.shadow] will be used. If [ThemeData.useMaterial3] is false
-  /// then [ThemeData.shadowColor] will be used.
+  /// If null then [ThemeData]'s [ColorScheme.shadow] will be used.
   ///
   /// To remove the drop shadow when [elevation] is greater than 0, set
   /// [shadowColor] to [Colors.transparent].
@@ -445,7 +443,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color? backgroundColor = _getBackgroundColor(context);
-    final Color modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
+    final Color modelShadowColor = widget.shadowColor ?? theme.colorScheme.shadow;
     // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
     final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
     assert(

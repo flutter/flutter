@@ -85,8 +85,7 @@ class Card extends StatelessWidget {
   /// The color to paint the shadow below the card.
   ///
   /// If null then the ambient [CardTheme]'s shadowColor is used.
-  /// If that's null too, then the overall theme's [ThemeData.shadowColor]
-  /// (default black) is used.
+  /// If that's null then [ThemeData]'s [ColorScheme.shadow] (default black) is used.
   final Color? shadowColor;
 
   /// The color used as an overlay on [color] to indicate elevation.
@@ -204,7 +203,7 @@ class _CardDefaultsM2 extends CardTheme {
   Color? get color => Theme.of(context).cardColor;
 
   @override
-  Color? get shadowColor => Theme.of(context).shadowColor;
+  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Card

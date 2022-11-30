@@ -363,7 +363,7 @@ class ElevatedButton extends ButtonStyleButton {
           foregroundColor: colorScheme.onPrimary,
           disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
           disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-          shadowColor: theme.shadowColor,
+          shadowColor: theme.colorScheme.shadow,
           elevation: 2,
           textStyle: theme.textTheme.labelLarge,
           padding: _scaledPadding(context),

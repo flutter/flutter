@@ -121,7 +121,7 @@ class Dialog extends StatelessWidget {
   /// be rendered.
   ///
   /// If null and [ThemeData.useMaterial3] is false then it will default to
-  /// [ThemeData.shadowColor].
+  /// [ThemeData]'s [ColorScheme.shadow].
   ///
   /// See also:
   ///   * [Material.shadowColor], which describes how the drop shadow is painted.
@@ -1412,7 +1412,7 @@ class _DialogDefaultsM2 extends DialogTheme {
   Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
 
   @override
-  Color? get shadowColor => Theme.of(context).shadowColor;
+  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
 
   @override
   TextStyle? get titleTextStyle => _textTheme.titleLarge;
