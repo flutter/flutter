@@ -865,7 +865,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start where the slider is.
-        final List<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 8);
+        final List<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 7);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(start: find.byType(Slider)),
@@ -887,7 +887,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to end where the slider is, inclusive.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(0, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(0, 8);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(end: find.byType(Slider)),
@@ -909,7 +909,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start at the text field and end at the slider.
-        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(1, 9);
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers].getRange(1, 8);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(
