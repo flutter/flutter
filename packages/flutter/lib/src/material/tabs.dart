@@ -975,9 +975,9 @@ class _TabBarState extends State<TabBar> {
     }
 
     Color color = widget.indicatorColor
-      ?? (theme.useMaterial3
-         ? tabBarTheme.indicatorColor ?? defaults.indicatorColor!
-         : Theme.of(context).indicatorColor);
+      ?? tabBarTheme.indicatorColor
+      ?? defaults.indicatorColor!;
+
     // ThemeData tries to avoid this by having indicatorColor avoid being the
     // primaryColor. However, it's possible that the tab bar is on a
     // Material that isn't the primaryColor. In that case, if the indicator
@@ -1879,7 +1879,7 @@ class _TabsDefaultsM2 extends TabBarTheme {
   final BuildContext context;
 
   @override
-  Color? get indicatorColor => Theme.of(context).indicatorColor;
+  Color? get indicatorColor => Theme.of(context).colorScheme.primary;
 
   @override
   Color? get labelColor => Theme.of(context).primaryTextTheme.bodyLarge!.color!;
