@@ -1581,23 +1581,16 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('placeholder tests', () {
-      testWithoutContext('should throw attempting to generate a select message without placeholders', () {
-        const String selectMessageWithoutPlaceholdersAttribute = '''
+      testWithoutContext('should automatically infer placeholders that are not explicitly defined', () {
+        const String messageWithoutDefinedPlaceholder = '''
 {
-  "helloWorld": "Hello {name}",
-  "@helloWorld": {
-    "description": "Improperly formatted since it has no placeholder attribute.",
-    "placeholders": {
-      "hello": {},
-      "world": {}
-    }
-  }
+  "helloWorld": "Hello {name}"
 }''';
 
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
+          .writeAsStringSync(messageWithoutDefinedPlaceholder);
         LocalizationsGenerator(
           fileSystem: fs,
           inputPathString: defaultL10nPathString,
@@ -1609,12 +1602,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         )
           ..loadResources()
           ..writeOutputFiles();
-        expect(logger.hadWarningOutput, isTrue);
-        expect(logger.warningText, contains('''
-[app_en.arb:helloWorld] ICU Syntax Warning: Missing placeholder declaration. Defaulting to using the message as is without parsing.
-    Hello {name}
-           ^'''
-        ));
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains('String helloWorld(Object name) {'));
       });
     });
 
@@ -1905,7 +1896,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       testWithoutContext('warnings are generated when plural parts are repeated', () {
         const String pluralMessageWithOverridenParts = '''
 {
-  "helloWorlds": "{count,plural, =0{Hello}zero{hello}}",
+  "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
   "@helloWorlds": {
     "description": "Properly formatted but has redundant zero cases."
   }
@@ -1927,11 +1918,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           ..writeOutputFiles();
         expect(logger.hadWarningOutput, isTrue);
         expect(logger.warningText, contains('''
-ICU Syntax Warning: 
-'''));
+[app_en.arb:helloWorlds] ICU Syntax Warning: The plural part specified below is overriden by a later plural part.
+    {count,plural, =0{Hello}zero{hello} other{hi}}
+                   ^'''));
       });
 
-      testWithoutContext('should throw attempting to generate a plural message without placeholders', () {
+      testWithoutContext('should automatically infer plural placeholders that are not explicitly defined', () {
         const String pluralMessageWithoutPlaceholdersAttribute = '''
 {
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
@@ -1955,73 +1947,10 @@ ICU Syntax Warning:
         )
           ..loadResources()
           ..writeOutputFiles();
-
-        expect(logger.hadWarningOutput, isTrue);
-        expect(logger.warningText, contains('''
-[app_en.arb:helloWorlds] ICU Syntax Warning: Missing placeholder declaration. Defaulting to using the message as is without parsing.
-    {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-     ^'''));
-      });
-
-      testWithoutContext('should warn attempting to generate a plural message with an empty placeholders map', () {
-        const String pluralMessageWithEmptyPlaceholdersMap = '''
-{
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
-  "@helloWorlds": {
-    "description": "Improperly formatted since it has no placeholder attribute.",
-    "placeholders": {}
-  }
-}''';
-
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithEmptyPlaceholdersMap);
-
-        LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPathString,
-          outputPathString: defaultL10nPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          logger: logger,
-        )
-          ..loadResources()
-          ..writeOutputFiles();
-        expect(logger.hadWarningOutput, isTrue);
-        expect(logger.warningText, contains('''
-[app_en.arb:helloWorlds] ICU Syntax Warning: Missing placeholder declaration. Defaulting to using the message as is without parsing.
-    {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-     ^'''));
-      });
-
-      testWithoutContext('should warn attempting to generate a plural message with no resource attributes', () {
-        const String pluralMessageWithoutResourceAttributes = '''
-{
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}"
-}''';
-
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithoutResourceAttributes);
-        LocalizationsGenerator(
-          fileSystem: fs,
-          inputPathString: defaultL10nPathString,
-          outputPathString: defaultL10nPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-          logger: logger,
-        )
-          ..loadResources()
-          ..writeOutputFiles();
-        expect(logger.hadWarningOutput, isTrue);
-        expect(logger.warningText, contains('''
-[app_en.arb:helloWorlds] ICU Syntax Warning: Missing placeholder declaration. Defaulting to using the message as is without parsing.
-    {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-     ^'''));
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains('String helloWorlds(num count) {'));
       });
 
       testWithoutContext('should throw attempting to generate a plural message with incorrect format for placeholders', () {
@@ -2065,7 +1994,7 @@ ICU Syntax Warning:
     });
 
     group('select messages', () {
-      testWithoutContext('should warn attempting to generate a select message without placeholders', () {
+      testWithoutContext('should auotmatically infer select placeholders that are not explicitly defined', () {
         const String selectMessageWithoutPlaceholdersAttribute = '''
 {
   "genderSelect": "{gender, select, female {She} male {He} other {they} }",
@@ -2089,11 +2018,10 @@ ICU Syntax Warning:
         )
           ..loadResources()
           ..writeOutputFiles();
-        expect(logger.hadWarningOutput, isTrue);
-        expect(logger.warningText, contains('''
-[app_en.arb:genderSelect] ICU Syntax Warning: Missing placeholder declaration. Defaulting to using the message as is without parsing.
-    {gender, select, female {She} male {He} other {they} }
-     ^'''));
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains('String genderSelect(String gender) {'));
       });
 
       testWithoutContext('should throw attempting to generate a select message with incorrect format for placeholders', () {

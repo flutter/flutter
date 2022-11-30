@@ -297,6 +297,11 @@ class Parser {
           // Do not add whitespace as a token.
           startIndex = match.end;
           continue;
+        } else if (<ST>[ST.plural, ST.select].contains(matchedType) && tokens.last.type == ST.openBrace) {
+          // Treat "plural" or "select" as identifier if it comes right after an open brace.
+          tokens.add(Node(ST.identifier, startIndex, value: match.group(0)));
+          startIndex = match.end;
+          continue;
         } else {
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;

@@ -1208,7 +1208,7 @@ class LocalizationsGenerator {
               dependentPlaceholders.addAll(pluralPartHelper.dependentPlaceholders);
             } else if (!suppressWarnings) {
               logger.printWarning('''
-[${_inputFileNames[locale]}:${message.resourceId}] The plural part specified below is overriden by a later plural part.
+[${_inputFileNames[locale]}:${message.resourceId}] ICU Syntax Warning: The plural part specified below is overriden by a later plural part.
     $translationForMessage
     ${Parser.indentForError(pluralPart.positionInMessage)}''');
             }

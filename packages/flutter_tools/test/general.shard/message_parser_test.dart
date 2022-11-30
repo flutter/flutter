@@ -218,6 +218,14 @@ void main() {
     ]));
   });
 
+  testWithoutContext('lexer identifier names can be "select" or "plural"', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ select } { plural, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('select'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('plural'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser(
       'syntax',
