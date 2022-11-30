@@ -15,12 +15,12 @@ void main() {
     menuChildren.add(entry);
   }
 
-  Widget buildTest(ThemeData themeData, List<DropdownMenuEntry<dynamic>> entries,
+  Widget buildTest<T extends Enum>(ThemeData themeData, List<DropdownMenuEntry<T>> entries,
       {double? width, double? menuHeight, Widget? leadingIcon, Widget? label}) {
     return MaterialApp(
       theme: themeData,
       home: Scaffold(
-        body: DropdownMenu<dynamic>(
+        body: DropdownMenu<T>(
           label: label,
           leadingIcon: leadingIcon,
           width: width,
@@ -167,10 +167,10 @@ void main() {
 
     const double customBigWidth = 250.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customBigWidth));
-    RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<dynamic>));
+    RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
     expect(box.size.width, customBigWidth);
 
-    await tester.tap(find.byType(DropdownMenu<dynamic>));
+    await tester.tap(find.byType(DropdownMenu<ShortMenu>));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(6));
     Size buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').last);
@@ -180,10 +180,10 @@ void main() {
     await tester.pumpWidget(Container());
     const double customSmallWidth = 100.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customSmallWidth));
-    box = tester.firstRenderObject(find.byType(DropdownMenu<dynamic>));
+    box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
     expect(box.size.width, customSmallWidth);
 
-    await tester.tap(find.byType(DropdownMenu<dynamic>));
+    await tester.tap(find.byType(DropdownMenu<ShortMenu>));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(6));
     buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').last);
@@ -195,7 +195,7 @@ void main() {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
-    await tester.tap(find.byType(DropdownMenu<dynamic>));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
 
     final Element firstItem = tester.element(find.widgetWithText(MenuItemButton, 'Item 0').last);
@@ -219,7 +219,7 @@ void main() {
     await tester.pumpWidget(buildTest(themeData, menuChildren, menuHeight: 100));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(DropdownMenu<dynamic>));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
 
     final Finder updatedMenu = find.ancestor(
@@ -240,7 +240,7 @@ void main() {
     final Finder label = find.text('label');
     final Offset labelTopLeft = tester.getTopLeft(label);
 
-    await tester.tap(find.byType(DropdownMenu<dynamic>));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
     final Finder itemText = find.text('Item 0').last;
     final Offset itemTextTopLeft = tester.getTopLeft(itemText);
@@ -259,7 +259,7 @@ void main() {
     final Finder updatedLabel = find.text('label');
     final Offset updatedLabelTopLeft = tester.getTopLeft(updatedLabel);
 
-    await tester.tap(find.byType(DropdownMenu<dynamic>));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
     final Finder updatedItemText = find.text('Item 0').last;
     final Offset updatedItemTextTopLeft = tester.getTopLeft(updatedItemText);
@@ -282,7 +282,7 @@ void main() {
     final Finder updatedLabel1 = find.text('label');
     final Offset updatedLabelTopLeft1 = tester.getTopLeft(updatedLabel1);
 
-    await tester.tap(find.byType(DropdownMenu<dynamic>));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
     final Finder updatedItemText1 = find.text('Item 0').last;
     final Offset updatedItemTextTopLeft1 = tester.getTopLeft(updatedItemText1);
