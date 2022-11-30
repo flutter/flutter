@@ -147,6 +147,7 @@ class L10nParserException extends L10nException {
   final String fileName;
   final String messageId;
   final String messageString;
+  // Position of character within the "messageString" where the error is.
   final int charNumber;
 }
 
