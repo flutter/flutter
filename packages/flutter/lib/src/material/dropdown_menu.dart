@@ -517,10 +517,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                   onEditingComplete: () {
                     if (currentHighlight != null) {
                       final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
-                      _textEditingController.text = entry.label;
-                      _textEditingController.selection =
-                        TextSelection.collapsed(offset: _textEditingController.text.length);
-                      widget.onSelected?.call(entry.value);
+                      if (entry.enabled) {
+                        _textEditingController.text = entry.label;
+                        _textEditingController.selection =
+                            TextSelection.collapsed(offset: _textEditingController.text.length);
+                        widget.onSelected?.call(entry.value);
+                      }
                     } else {
                       widget.onSelected?.call(null);
                     }
