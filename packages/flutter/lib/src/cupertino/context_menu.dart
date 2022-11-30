@@ -369,7 +369,7 @@ class CupertinoContextMenu extends StatefulWidget {
   }
 
   // TODO(mitchgoodwin): deprecate [child] with builder refactor https://github.com/flutter/flutter/issues/116306
-  
+
   /// The widget that can be "opened" with the [CupertinoContextMenu].
   ///
   /// When the [CupertinoContextMenu] is long-pressed, the menu will open and
