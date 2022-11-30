@@ -133,7 +133,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.inputDecorationTheme,
     this.menuStyle,
     this.controller,
-    this.selectedValue,
+    this.initialSelection,
     this.onSelected,
     required this.dropdownMenuEntries,
   });
@@ -221,7 +221,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// The value used to for an initial selection.
   ///
   /// Defaults to null.
-  final T? selectedValue;
+  final T? initialSelection;
 
   /// The callback is called when a selection is made.
   ///
@@ -260,7 +260,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     filteredEntries = widget.dropdownMenuEntries;
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
-    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.selectedValue);
+    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
     if (index != -1) {
       _textEditingController.text = filteredEntries[index].label;
       _textEditingController.selection =
@@ -278,8 +278,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
     }
-    if (oldWidget.selectedValue != widget.selectedValue) {
-      final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.selectedValue);
+    if (oldWidget.initialSelection != widget.initialSelection) {
+      final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
       if (index != -1) {
         _textEditingController.text = filteredEntries[index].label;
         _textEditingController.selection =
@@ -521,6 +521,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                       _textEditingController.selection =
                         TextSelection.collapsed(offset: _textEditingController.text.length);
                       widget.onSelected?.call(entry.value);
+                    } else {
+                      widget.onSelected?.call(null);
                     }
                     if (!widget.enableSearch) {
                       currentHighlight = null;

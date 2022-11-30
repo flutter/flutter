@@ -858,7 +858,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
               body: DropdownMenu<TestMenu>(
-                selectedValue: TestMenu.mainMenu3,
+                initialSelection: TestMenu.mainMenu3,
                 dropdownMenuEntries: menuChildren,
                 controller: controller,
               ),
