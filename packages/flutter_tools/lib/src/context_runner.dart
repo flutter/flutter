@@ -208,7 +208,7 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),

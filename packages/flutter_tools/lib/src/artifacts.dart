@@ -29,7 +29,16 @@ enum Artifact {
   platformKernelDill,
   platformLibrariesJson,
   flutterPatchedSdkPath,
+
+  /// The root directory of the dart SDK.
+  engineDartSdkPath,
+  /// The dart binary used to execute any of the required snapshots.
+  engineDartBinary,
+  /// The snapshot of frontend_server compiler.
   frontendServerSnapshotForEngineDartSdk,
+  /// The dart snapshot of the dart2js compiler.
+  dart2jsSnapshot,
+  
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
   // The root of the cpp headers for Linux desktop.
@@ -53,16 +62,6 @@ enum Artifact {
 
 /// A subset of [Artifact]s that are platform and build mode independent
 enum HostArtifact {
-  /// The root directory of the dart SDK.
-  engineDartSdkPath,
-  /// The dart binary used to execute any of the required snapshots.
-  engineDartBinary,
-  /// The dart snapshot of the dart2js compiler.
-  dart2jsSnapshot,
-  /// The dart snapshot of the dartdev compiler.
-  dartdevcSnapshot,
-  /// The dart snapshot of the kernel worker compiler.
-  kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
   /// The libraries JSON file for web release builds.
@@ -73,7 +72,7 @@ enum HostArtifact {
 
   /// The summary dill for the dartdevc target.
   webPlatformDDCKernelDill,
-  /// The summary dill with null safety enabled for the dartdevc target.
+  /// The summary dill with null safety enabled for the dartdevc target.g
   webPlatformDDCSoundKernelDill,
   /// The summary dill for the dartdevc target.
   webPlatformDart2JSKernelDill,
@@ -187,6 +186,12 @@ String? _artifactToFileName(Artifact artifact, [ TargetPlatform? platform, Build
     case Artifact.flutterPatchedSdkPath:
       assert(false, 'No filename for sdk path, should not be invoked');
       return null;
+    case Artifact.engineDartSdkPath:
+      return 'dart-sdk';
+    case Artifact.engineDartBinary:
+      return 'dart$exe';
+    case Artifact.dart2jsSnapshot:
+      return 'dart2js.dart.snapshot';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
     case Artifact.linuxDesktopPath:
@@ -223,16 +228,6 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
   switch (artifact) {
     case HostArtifact.flutterWebSdk:
       return '';
-    case HostArtifact.engineDartSdkPath:
-      return 'dart-sdk';
-    case HostArtifact.engineDartBinary:
-      return 'dart$exe';
-    case HostArtifact.dart2jsSnapshot:
-      return 'dart2js.dart.snapshot';
-    case HostArtifact.dartdevcSnapshot:
-      return 'dartdevc.dart.snapshot';
-    case HostArtifact.kernelWorkerSnapshot:
-      return 'kernel_worker.dart.snapshot';
     case HostArtifact.iosDeploy:
       return 'ios-deploy';
     case HostArtifact.idevicesyslog:
@@ -397,12 +392,6 @@ class CachedArtifacts implements Artifacts {
     HostArtifact artifact,
   ) {
     switch (artifact) {
-      case HostArtifact.engineDartSdkPath:
-        final String path = _dartSdkPath(_cache);
-        return _fileSystem.directory(path);
-      case HostArtifact.engineDartBinary:
-        final String path = _fileSystem.path.join(_dartSdkPath(_cache), 'bin', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
       case HostArtifact.flutterWebSdk:
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
@@ -450,11 +439,6 @@ class CachedArtifacts implements Artifacts {
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         final String path = _fileSystem.path.join(dartPackageDirectory.path,  _hostArtifactToFileName(artifact, _platform));
         return _fileSystem.directory(path);
-      case HostArtifact.dart2jsSnapshot:
-      case HostArtifact.dartdevcSnapshot:
-      case HostArtifact.kernelWorkerSnapshot:
-        final String path = _fileSystem.path.join(_dartSdkPath(_cache), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
       case HostArtifact.iosDeploy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
@@ -524,6 +508,9 @@ class CachedArtifacts implements Artifacts {
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         return _fileSystem.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
+      case Artifact.engineDartSdkPath:
+      case Artifact.engineDartBinary:
+      case Artifact.dart2jsSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterFramework:
@@ -558,6 +545,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterFramework:
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem);
+      case Artifact.engineDartSdkPath:
+      case Artifact.engineDartBinary:
+      case Artifact.dart2jsSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
@@ -610,6 +600,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
       case Artifact.fontSubset:
+      case Artifact.engineDartSdkPath:
+      case Artifact.engineDartBinary:
+      case Artifact.dart2jsSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
@@ -641,6 +634,7 @@ class CachedArtifacts implements Artifacts {
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
+      case Artifact.dart2jsSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
           _dartSdkPath(_cache), 'bin', 'snapshots',
@@ -659,6 +653,10 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
         return _getFlutterPatchedSdkPath(mode);
+      case Artifact.engineDartSdkPath:
+        return _dartSdkPath(_cache);
+      case Artifact.engineDartBinary:
+        return _fileSystem.path.join(_dartSdkPath(_cache), 'bin', _artifactToFileName(artifact, platform));
       case Artifact.flutterMacOSFramework:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
@@ -820,21 +818,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
     switch (artifact) {
-      case HostArtifact.engineDartSdkPath:
-        final String path = _getDartSdkPath();
-        return _fileSystem.directory(path);
-      case HostArtifact.engineDartBinary:
-        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
-      case HostArtifact.dart2jsSnapshot:
-        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
-      case HostArtifact.dartdevcSnapshot:
-        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
-      case HostArtifact.kernelWorkerSnapshot:
-        final String path = _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, _platform));
-        return _fileSystem.file(path);
       case HostArtifact.flutterWebSdk:
         final String path = _getFlutterWebSdkPath();
         return _fileSystem.directory(path);
@@ -961,6 +944,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.windowsCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
+      case Artifact.engineDartSdkPath:
+        return _dartSdkPath(_cache);
+      case Artifact.engineDartBinary:
+        return _fileSystem.path.join(_dartSdkPath(_cache), 'bin', artifactFileName);
+      case Artifact.dart2jsSnapshot:
+        return _fileSystem.path.join(_dartSdkPath(_cache), 'bin', 'snapshots', artifactFileName);
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
           _getDartSdkPath(), 'bin', 'snapshots', artifactFileName,
@@ -1090,21 +1079,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
     switch (artifact) {
-      case HostArtifact.engineDartSdkPath:
-        final String path = _getDartSdkPath();
-        return fileSystem.directory(path);
-      case HostArtifact.engineDartBinary:
-        final String path = fileSystem.path.join(_getDartSdkPath(), 'bin', _hostArtifactToFileName(artifact, platform));
-        return fileSystem.file(path);
-      case HostArtifact.dart2jsSnapshot:
-        final String path = fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, platform));
-        return fileSystem.file(path);
-      case HostArtifact.dartdevcSnapshot:
-        final String path = fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, platform));
-        return fileSystem.file(path);
-      case HostArtifact.kernelWorkerSnapshot:
-        final String path = fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', _hostArtifactToFileName(artifact, platform));
-        return fileSystem.file(path);
       case HostArtifact.flutterWebSdk:
         final String path = _getFlutterWebSdkPath();
         return fileSystem.directory(path);
@@ -1237,6 +1211,9 @@ class OverrideArtifacts implements Artifacts {
     BuildMode? mode,
     EnvironmentType? environmentType,
   }) {
+    if (artifact == Artifact.engineDartBinary && engineDartBinary != null) {
+      return engineDartBinary!.path;
+    }
     if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
       return frontendServer!.path;
     }
@@ -1262,9 +1239,6 @@ class OverrideArtifacts implements Artifacts {
 
   @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) {
-    if (artifact == HostArtifact.engineDartBinary && engineDartBinary != null) {
-      return engineDartBinary!;
-    }
     return parent.getHostArtifact(
       artifact,
     );

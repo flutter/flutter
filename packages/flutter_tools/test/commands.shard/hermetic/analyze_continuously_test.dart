@@ -92,7 +92,7 @@ void main() {
       );
 
       final AnalysisServer server = AnalysisServer(
-        globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+        globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
@@ -132,7 +132,7 @@ void main() {
     );
 
     final AnalysisServer server = AnalysisServer(
-      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
@@ -159,7 +159,7 @@ void main() {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     final AnalysisServer server = AnalysisServer(
-      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,

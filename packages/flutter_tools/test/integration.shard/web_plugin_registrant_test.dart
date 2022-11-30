@@ -9,6 +9,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -412,7 +413,7 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
     args,
     workingDirectory: target is Directory ? target.path : target.dirname,
   );
@@ -451,7 +452,7 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
     args,
     workingDirectory: workingDir.path,
   );

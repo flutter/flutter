@@ -248,15 +248,16 @@ class KernelCompiler {
     required List<String> dartDefines,
     required PackageConfig packageConfig,
   }) async {
+    final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
-      platform: (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null,
+      platform: platform,
     );
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
     if (!_processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -741,12 +742,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? outputPath,
     {String? additionalSourceUri}
   ) async {
+    final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
-      platform: (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null,
+      platform: platform,
     );
     final List<String> command = <String>[
-      _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',

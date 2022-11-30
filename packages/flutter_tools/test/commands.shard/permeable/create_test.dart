@@ -1180,7 +1180,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -1277,7 +1277,7 @@ void main() {
         final String original = file.readAsStringSync();
 
         final Process process = await Process.start(
-          globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+          globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
           <String>['format', '--output=show', file.path],
           workingDirectory: projectDir.path,
         );
@@ -3138,7 +3138,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
     args,
     workingDirectory: workingDir,
   );
@@ -3195,7 +3195,7 @@ Future<void> _getPackages(Directory workingDir) async {
   // While flutter test does get packages, it doesn't write version
   // files anymore.
   await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
     <String>[
       flutterToolsSnapshotPath,
       'packages',
@@ -3224,7 +3224,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String? target }) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
     args,
     workingDirectory: workingDir.path,
   );

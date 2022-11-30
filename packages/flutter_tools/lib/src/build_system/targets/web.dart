@@ -158,8 +158,8 @@ class Dart2JSTarget extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.hostArtifact(HostArtifact.flutterWebSdk),
-    Source.hostArtifact(HostArtifact.dart2jsSnapshot),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.dart2jsSnapshot),
+    Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
@@ -194,9 +194,9 @@ class Dart2JSTarget extends Target {
     final Artifacts artifacts = globals.artifacts!;
     final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
     final List<String> sharedCommandOptions = <String>[
-      artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       '--disable-dart-dev',
-      artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
+      artifacts.getArtifactPath(Artifact.dart2jsSnapshot, platform: TargetPlatform.web_javascript),
       '--platform-binaries=$platformBinariesPath',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
