@@ -219,13 +219,13 @@ class FlutterHtmlKeyboardEvent {
 // dispatched asynchronously.
 class KeyboardConverter {
   KeyboardConverter(this.performDispatchKeyData, OperatingSystem platform)
-    : onMacOs = platform == OperatingSystem.macOs,
+    : onDarwin = platform == OperatingSystem.macOs || platform == OperatingSystem.iOs,
       _mapping = _mappingFromPlatform(platform);
 
   final DispatchKeyData performDispatchKeyData;
-  /// Whether the current platform is macOS, which affects how certain key events
-  /// are comprehended.
-  final bool onMacOs;
+  /// Whether the current platform is macOS or iOS, which affects how certain key
+  /// events are comprehended, including CapsLock and key guarding.
+  final bool onDarwin;
   /// Maps logical keys from key event properties.
   final locale_keymap.LocaleKeymap _mapping;
 
@@ -261,7 +261,7 @@ class KeyboardConverter {
   // key down, and synthesizes immediate cancel events following them. The state
   // of "whether CapsLock is on" should be accessed by "activeLocks".
   bool _shouldSynthesizeCapsLockUp() {
-    return onMacOs;
+    return onDarwin;
   }
 
   // ## About Key guards
@@ -272,10 +272,10 @@ class KeyboardConverter {
   //
   // To avoid this, we rely on the fact that browsers send repeat events
   // while the key is held down by the user. If we don't receive a repeat
-  // event within a specific duration ([_keydownCancelDurationMac]) we assume
+  // event within a specific duration (_kKeydownCancelDurationMac) we assume
   // the user has released the key and we synthesize a keyup event.
   bool _shouldDoKeyGuard() {
-    return onMacOs;
+    return onDarwin;
   }
 
   /// After a keydown is received, this is the duration we wait for a repeat event
