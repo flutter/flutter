@@ -472,7 +472,7 @@ void main() {
     { placeholder =
                   ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -484,7 +484,7 @@ void main() {
     { count, plural, = }
                        ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -496,7 +496,7 @@ void main() {
     { , plural , = }
       ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
