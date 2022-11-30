@@ -131,6 +131,7 @@ class MenuAnchor extends StatefulWidget {
     this.anchorTapClosesMenu = false,
     this.onOpen,
     this.onClose,
+    this.crossAxisUnconstrained = true,
     required this.menuChildren,
     this.builder,
     this.child,
@@ -212,6 +213,14 @@ class MenuAnchor extends StatefulWidget {
 
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
+
+  /// Determine if the menu panel can be wrapped by a [UnconstrainedBox] which allows
+  /// the panel to render at its "natural" size.
+  ///
+  /// Defaults to true as it allows developers to render the menu panel at the
+  /// size it should be. When it is set to false, it can be useful when the menu should
+  /// be constrained in both main axis and cross axis, such as a [DropdownMenu].
+  final bool crossAxisUnconstrained;
 
   /// A list of children containing the menu items that are the contents of the
   /// menu surrounded by this [MenuAnchor].
@@ -516,6 +525,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                     menuPosition: position,
                     clipBehavior: widget.clipBehavior,
                     menuChildren: widget.menuChildren,
+                    crossAxisUnconstrained: widget.crossAxisUnconstrained,
                   ),
                 ),
                 to: overlay.context,
@@ -791,6 +801,7 @@ class MenuItemButton extends StatefulWidget {
     super.key,
     this.onPressed,
     this.onHover,
+    this.requestFocusOnHover = true,
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
@@ -816,6 +827,11 @@ class MenuItemButton extends StatefulWidget {
   /// The value passed to the callback is true if a pointer has entered button
   /// area and false if a pointer has exited.
   final ValueChanged<bool>? onHover;
+
+  /// Determine if hovering can request focus.
+  ///
+  /// Defaults to true.
+  final bool requestFocusOnHover;
 
   /// Handler called when the focus changes.
   ///
@@ -1064,7 +1080,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
-    if (hovering) {
+    if (hovering && widget.requestFocusOnHover) {
       assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
       _focusNode.requestFocus();
     }
@@ -2424,7 +2440,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }
@@ -2455,7 +2474,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }
@@ -3198,6 +3220,7 @@ class _MenuPanel extends StatefulWidget {
     required this.menuStyle,
     this.clipBehavior = Clip.none,
     required this.orientation,
+    this.crossAxisUnconstrained = true,
     required this.children,
   });
 
@@ -3208,6 +3231,13 @@ class _MenuPanel extends StatefulWidget {
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
+
+  /// Determine if a [UnconstrainedBox] can be applied to the menu panel to allow it to render
+  /// at its "natural" size.
+  ///
+  /// Defaults to true. When it is set to false, it can be useful when the menu should
+  /// be constrained in both main-axis and cross-axis, such as a [DropdownMenu].
+  final bool crossAxisUnconstrained;
 
   /// The layout orientation of this panel.
   final Axis orientation;
@@ -3297,37 +3327,44 @@ class _MenuPanelState extends State<_MenuPanel> {
         );
       }
     }
-    return ConstrainedBox(
-      constraints: effectiveConstraints,
-      child: UnconstrainedBox(
-        constrainedAxis: widget.orientation,
+
+    Widget menuPanel = _intrinsicCrossSize(
+      child: Material(
+        elevation: elevation,
+        shape: shape,
+        color: backgroundColor,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
         clipBehavior: Clip.hardEdge,
-        alignment: AlignmentDirectional.centerStart,
-        child: _intrinsicCrossSize(
-          child: Material(
-            elevation: elevation,
-            shape: shape,
-            color: backgroundColor,
-            shadowColor: shadowColor,
-            surfaceTintColor: surfaceTintColor,
-            type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-            clipBehavior: Clip.hardEdge,
-            child: Padding(
-              padding: resolvedPadding,
-              child: SingleChildScrollView(
-                scrollDirection: widget.orientation,
-                child: Flex(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  textDirection: Directionality.of(context),
-                  direction: widget.orientation,
-                  mainAxisSize: MainAxisSize.min,
-                  children: widget.children,
-                ),
-              ),
+        child: Padding(
+          padding: resolvedPadding,
+          child: SingleChildScrollView(
+            scrollDirection: widget.orientation,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              textDirection: Directionality.of(context),
+              direction: widget.orientation,
+              mainAxisSize: MainAxisSize.min,
+              children: widget.children,
             ),
           ),
         ),
       ),
+    );
+
+    if (widget.crossAxisUnconstrained) {
+      menuPanel = UnconstrainedBox(
+        constrainedAxis: widget.orientation,
+        clipBehavior: Clip.hardEdge,
+        alignment: AlignmentDirectional.centerStart,
+        child: menuPanel,
+      );
+    }
+
+    return ConstrainedBox(
+      constraints: effectiveConstraints,
+      child: menuPanel,
     );
   }
 
@@ -3349,6 +3386,7 @@ class _Submenu extends StatelessWidget {
     required this.menuPosition,
     required this.alignmentOffset,
     required this.clipBehavior,
+    this.crossAxisUnconstrained = true,
     required this.menuChildren,
   });
 
@@ -3357,6 +3395,7 @@ class _Submenu extends StatelessWidget {
   final Offset? menuPosition;
   final Offset alignmentOffset;
   final Clip clipBehavior;
+  final bool crossAxisUnconstrained;
   final List<Widget> menuChildren;
 
   @override
@@ -3454,6 +3493,7 @@ class _Submenu extends StatelessWidget {
                         menuStyle: menuStyle,
                         clipBehavior: clipBehavior,
                         orientation: anchor._orientation,
+                        crossAxisUnconstrained: crossAxisUnconstrained,
                         children: menuChildren,
                       ),
                     ),

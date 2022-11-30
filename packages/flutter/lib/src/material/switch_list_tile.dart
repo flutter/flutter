@@ -176,6 +176,7 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.material,
@@ -221,6 +222,7 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
@@ -368,6 +370,9 @@ class SwitchListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@macro flutter.material.ListTile.enableFeedback}
   ///
   /// See also:
@@ -394,6 +399,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
+          onFocusChange: onFocusChange,
         );
         break;
 
@@ -409,6 +415,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
+          onFocusChange: onFocusChange,
         );
     }
 
@@ -452,6 +459,7 @@ class SwitchListTile extends StatelessWidget {
         tileColor: tileColor,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
         hoverColor: hoverColor,
       ),
