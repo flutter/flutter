@@ -87,7 +87,8 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ThemeData.dialogBackgroundColor] is used.
+  /// If null then [DialogTheme.backgroundColor] is used, and if that is null
+  /// then the elevation will match the Material Design specification for Dialogs.
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -235,7 +236,7 @@ class Dialog extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
           child: Material(
-            color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+            color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
             shadowColor: shadowColor ?? dialogTheme.shadowColor ?? defaults.shadowColor,
             surfaceTintColor: surfaceTintColor ?? dialogTheme.surfaceTintColor ?? defaults.surfaceTintColor,
@@ -1409,7 +1410,7 @@ class _DialogDefaultsM2 extends DialogTheme {
   Color? get iconColor => _iconTheme.color;
 
   @override
-  Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
+  Color? get backgroundColor => Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.white;
 
   @override
   Color? get shadowColor => Theme.of(context).shadowColor;
