@@ -697,7 +697,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
     final double buttonHeight = size.height - position.top - position.bottom;
     // Find the ideal vertical position.
-    double y = position.top + buttonHeight;
+    final double y = position.top + buttonHeight;
 
     // Find the ideal horizontal position.
     double x;
