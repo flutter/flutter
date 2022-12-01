@@ -1046,14 +1046,19 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     if (event is PointerMoveEvent) {
       // Receiving a [PointerMoveEvent], does not automatically mean the pointer
       // being tracked is doing a drag gesture. There is some drift that can happen
-      // between the initial [PointerDownEvent] and subsequent [PointerMoveEvent]s,
-      // that drift is handled by the tap status tracker. Accessing [_pastSlopTolerance]
-      // lets us know if our tap has moved past the acceptable tolerance. If the pointer
-      // does not move past this tolerance than it is not considered a drag.
+      // between the initial [PointerDownEvent] and subsequent [PointerMoveEvent]s.
+      // Accessing [_pastSlopTolerance] lets us know if our tap has moved past the
+      // acceptable tolerance. If the pointer does not move past this tolerance than
+      // it is not considered a drag.
       //
       // To be recognized as a drag, the [PointerMoveEvent] must also have moved
       // a sufficient global distance from the initial [PointerDownEvent] to be
       // accepted as a drag. This logic is handled in [_hasSufficientGlobalDistanceToAccept].
+      //
+      // The recognizer will also detect the gesture as a drag when the pointer
+      // has been accepted and it has moved past the [slopTolerance] but has not moved
+      // a sufficient global distance from the initial position to be considered a drag.
+      // In this case since the gesture cannot be a tap, it defaults to a drag.
 
       // If the buttons differ from the [PointerDownEvent]s buttons then stop tracking
       // the pointer.
