@@ -371,8 +371,11 @@ class MyStatelessLookupBoundary extends StatelessWidget {
   }
 }
 
-class MyStatelessLookupBoundaryElement extends StatelessElement with LookUpBoundary {
+class MyStatelessLookupBoundaryElement extends StatelessElement {
   MyStatelessLookupBoundaryElement(super.widget);
+
+  @override
+  bool get isLookUpBoundary => true;
 }
 
 class MyStatefulLookupBoundary extends StatefulWidget {
@@ -394,8 +397,11 @@ class MyStatefulLookupBoundaryState extends State<MyStatefulLookupBoundary> {
   }
 }
 
-class MyStatefulLookupBoundaryElement extends StatefulElement with LookUpBoundary {
+class MyStatefulLookupBoundaryElement extends StatefulElement {
   MyStatefulLookupBoundaryElement(super.widget);
+
+  @override
+  bool get isLookUpBoundary => true;
 }
 
 class MyStatefulContainer extends StatefulWidget {
@@ -424,8 +430,11 @@ class MyRenderObjectWidgetLookupBoundary extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) => RenderPadding(padding: EdgeInsets.zero);
 }
 
-class MyRenderObjectWidgetLookupBoundaryElement extends SingleChildRenderObjectElement with LookUpBoundary {
+class MyRenderObjectWidgetLookupBoundaryElement extends SingleChildRenderObjectElement {
   MyRenderObjectWidgetLookupBoundaryElement(super.widget);
+
+  @override
+  bool get isLookUpBoundary => true;
 }
 
 class MyInheritedWidget extends InheritedWidget {
@@ -445,6 +454,9 @@ class MyInheritedLookUpBoundary extends InheritedWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
 }
 
-class MyInheritedElement extends InheritedElement with LookUpBoundary {
+class MyInheritedElement extends InheritedElement {
   MyInheritedElement(super.widget);
+
+  @override
+  bool get isLookUpBoundary => true;
 }
