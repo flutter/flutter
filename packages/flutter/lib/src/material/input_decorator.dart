@@ -2774,7 +2774,7 @@ class InputDecoration {
   /// input field and [hintColor].
   final TextStyle? hintStyle;
 
-  /// The [Color] to use for the [InputDecoration.hint].
+  /// The [Color] to use for the [InputDecoration.hintText].
   ///
   /// If [hintColor] is a [MaterialStateColor], then the effective
   /// color can depend on the [MaterialState.focused] state, i.e.
@@ -2782,7 +2782,7 @@ class InputDecoration {
   ///
   /// A default color for [hintStyle]. For M2 only, it is also a default color
   /// for [hintStyle, [labelStyle], [floatingLabelStyle], [helperStyle], as well
-  /// as the border color if [decoration.filled] is true.
+  /// as the border color if [InputDecoration.filled] is true.
   final Color? hintColor;
 
   /// The direction to use for the [hintText].
@@ -3846,7 +3846,7 @@ class InputDecorationTheme with Diagnosticable {
   /// input field and [hintColor].
   final TextStyle? hintStyle;
 
-  /// The [Color] to use for the [InputDecoration.hint].
+  /// The [Color] to use for the [InputDecoration.hintText].
   ///
   /// If [hintColor] is a [MaterialStateColor], then the effective
   /// color can depend on the [MaterialState.focused] state, i.e.
@@ -3854,7 +3854,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// A default color for [hintStyle]. For M2 only, it is also a default color
   /// for [hintStyle, [labelStyle], [floatingLabelStyle], [helperStyle], as well
-  /// as the border color if [decoration.filled] is true.
+  /// as the border color if [InputDecoration.filled] is true.
   final Color? hintColor;
 
   /// {@macro flutter.material.inputDecoration.errorStyle}
