@@ -441,14 +441,14 @@ void main() {
   themeData = ThemeData.raw(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
   themeData = ThemeData.copyWith(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData();
   themeData = ThemeData.raw();
   themeData = themeData.copyWith();
   themeData.colorScheme.background;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData(cardTheme: CardTheme(color: Colors.black));
   themeData = ThemeData(
@@ -467,7 +467,7 @@ void main() {
   );
   themeData.cardTheme.color;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData(dialogTheme: DialogTheme(backgroundColor: Colors.black));
   themeData = ThemeData(
@@ -486,7 +486,7 @@ void main() {
   );
   themeData.dialogTheme.backgroundColor;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData(dividerTheme: DividerThemeData(color: Colors.black));
   themeData = ThemeData(
@@ -505,7 +505,7 @@ void main() {
   );
   themeData.dividerTheme.color;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData(inputDecorationTheme: InputDecorationTheme(hintColor: Colors.black));
   themeData = ThemeData(
@@ -524,7 +524,7 @@ void main() {
   );
   themeData.inputDecorationTheme.hintColor;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData(tabBarTheme: TabBarTheme(indicatorColor: Colors.black));
   themeData = ThemeData(
@@ -557,7 +557,7 @@ void main() {
   themeData = themeData.copyWith();
   themeData.primaryColorLight; // Removing field reference not supported.
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   // Simpler than other tests, because corresponding theme is newly introduced and does not need a fix.
   ThemeData themeData = ThemeData();
   themeData = ThemeData(scaffoldTheme: ScaffoldThemeData(backgroundColor: Colors.black));
@@ -565,7 +565,7 @@ void main() {
   themeData = themeData.copyWith(scaffoldTheme: ScaffoldThemeData(backgroundColor: Colors.black));
   themeData.scaffoldTheme.backgroundColor;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData(dataTableTheme: DataTableThemeData(secondaryHeadingRowColor: Colors.black));
   themeData = ThemeData(
@@ -584,7 +584,7 @@ void main() {
   );
   themeData.dataTableTheme.secondaryHeadingRowColor;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Changes made in https://github.com/flutter/flutter/pull/116369
   ThemeData themeData = ThemeData();
   themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(shadow: Colors.grey));
   themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(shadow: Colors.grey));

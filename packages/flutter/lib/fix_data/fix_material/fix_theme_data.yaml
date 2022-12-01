@@ -26,7 +26,7 @@
 #     * TextTheme: fix_text_theme.yaml
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'ColorScheme.shadow'"
     date: 2022-12-02
     element:
@@ -37,7 +37,7 @@ transforms:
       - kind: 'rename'
         newName: 'colorScheme.shadow'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'ColorScheme.shadow'"
     date: 2022-12-02
     element:
@@ -108,7 +108,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[colorScheme]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'ColorScheme.shadow'"
     date: 2022-12-02
     element:
@@ -179,7 +179,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[colorScheme]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'ColorScheme.shadow'"
     date: 2022-12-02
     element:
@@ -250,7 +250,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[colorScheme]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
     date: 2022-12-02
     element:
@@ -290,7 +290,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[secondaryHeaderColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
     date: 2022-12-02
     element:
@@ -322,7 +322,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[secondaryHeaderColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
     date: 2022-12-02
     element:
@@ -354,7 +354,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[secondaryHeaderColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
     date: 2022-12-02
     element:
@@ -365,7 +365,7 @@ transforms:
       - kind: 'rename'
         newName: 'dataTableTheme.secondaryHeadingRowColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   # Simpler than similar fixes, tests, because corresponding theme is newly introduced and does not
   # need to be accounted for.
   - title: "Migrate to 'scaffoldTheme.backgroundColor'"
@@ -389,7 +389,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[scaffoldBackgroundColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   # Simpler than similar fixes, tests, because corresponding theme is newly introduced and does not
   # need to be accounted for.
   - title: "Migrate to 'scaffoldTheme.backgroundColor'"
@@ -413,7 +413,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[scaffoldBackgroundColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   # Simpler than similar fixes, tests, because corresponding theme is newly introduced and does not
   # need to be accounted for.
   - title: "Migrate to 'scaffoldTheme.backgroundColor'"
@@ -437,7 +437,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[scaffoldBackgroundColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'scaffoldTheme.backgroundColor'"
     date: 2022-12-02
     element:
@@ -448,7 +448,7 @@ transforms:
       - kind: 'rename'
         newName: 'scaffoldTheme.backgroundColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'primaryColorLight'"
     date: 2022-09-02
     element:
@@ -459,7 +459,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorLight'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'primaryColorLight'"
     date: 2022-09-02
     element:
@@ -470,7 +470,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorLight'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'primaryColorLight'"
     date: 2022-09-02
     element:
@@ -481,7 +481,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorLight'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'primaryColorDark'"
     date: 2022-09-02
     element:
@@ -492,7 +492,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorDark'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'primaryColorDark'"
     date: 2022-09-02
     element:
@@ -503,7 +503,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorDark'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'primaryColorDark'"
     date: 2022-09-02
     element:
@@ -514,7 +514,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'primaryColorDark'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'tabBarTheme.indicatorColor'"
     date: 2022-12-02
     element:
@@ -554,7 +554,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[indicatorColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'tabBarTheme.indicatorColor'"
     date: 2022-12-02
     element:
@@ -586,7 +586,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[indicatorColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'tabBarTheme.indicatorColor'"
     date: 2022-12-02
     element:
@@ -618,7 +618,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[indicatorColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'tabBarTheme.indicatorColor'"
     date: 2022-12-02
     element:
@@ -629,7 +629,7 @@ transforms:
       - kind: 'rename'
         newName: 'tabBarTheme.indicatorColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'inputDecorationTheme.hintColor'"
     date: 2022-12-02
     element:
@@ -669,7 +669,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[hintColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'inputDecorationTheme.hintColor'"
     date: 2022-12-02
     element:
@@ -701,7 +701,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[hintColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'inputDecorationTheme.hintColor'"
     date: 2022-12-02
     element:
@@ -733,7 +733,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[hintColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'inputDecorationTheme.hintColor'"
     date: 2022-12-02
     element:
@@ -744,7 +744,7 @@ transforms:
       - kind: 'rename'
         newName: 'inputDecorationTheme.hintColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dividerTheme.color'"
     date: 2022-12-02
     element:
@@ -784,7 +784,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[dividerColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dividerTheme.color'"
     date: 2022-12-02
     element:
@@ -816,7 +816,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[dividerColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dividerTheme.color'"
     date: 2022-12-02
     element:
@@ -848,7 +848,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[dividerColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dividerTheme.color'"
     date: 2022-12-02
     element:
@@ -859,7 +859,7 @@ transforms:
       - kind: 'rename'
         newName: 'dividerTheme.color'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dialogTheme.backgroundColor'"
     date: 2022-12-02
     element:
@@ -899,7 +899,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[dialogBackgroundColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dialogTheme.backgroundColor'"
     date: 2022-12-02
     element:
@@ -931,7 +931,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[dialogBackgroundColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dialogTheme.backgroundColor'"
     date: 2022-12-02
     element:
@@ -963,7 +963,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[dialogBackgroundColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'dialogTheme.backgroundColor'"
     date: 2022-12-02
     element:
@@ -974,7 +974,7 @@ transforms:
       - kind: 'rename'
         newName: 'dialogTheme.backgroundColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'cardTheme.color'"
     date: 2022-12-02
     element:
@@ -1014,7 +1014,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[cardColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'cardTheme.color'"
     date: 2022-12-02
     element:
@@ -1046,7 +1046,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[cardColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'cardTheme.color'"
     date: 2022-12-02
     element:
@@ -1078,7 +1078,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[cardColor]'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'cardTheme.color'"
     date: 2022-12-02
     element:
@@ -1089,7 +1089,7 @@ transforms:
       - kind: 'rename'
         newName: 'cardTheme.color'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'canvasColor'"
     date: 2022-12-02
     element:
@@ -1100,7 +1100,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'canvasColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'canvasColor'"
     date: 2022-12-02
     element:
@@ -1111,7 +1111,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'canvasColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Remove 'canvasColor'"
     date: 2022-12-02
     element:
@@ -1122,7 +1122,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'canvasColor'
 
-  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Changes made in https://github.com/flutter/flutter/pull/116369
   - title: "Migrate to 'ColorScheme.background'"
     date: 2022-12-02
     element:
