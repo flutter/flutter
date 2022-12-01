@@ -508,7 +508,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
-      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > kDoubleTapTouchSlop;
+      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > kTouchSlop;
 
       if (isSlopPastTolerance) {
         _consecutiveTapTimerStop();
