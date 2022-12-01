@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'app_bar_theme.dart';
 import 'back_button.dart';
