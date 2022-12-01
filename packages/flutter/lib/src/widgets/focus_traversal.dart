@@ -597,6 +597,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Rect target,
     Iterable<FocusNode> nodes,
   ) {
+    assert(direction == TraversalDirection.left || direction == TraversalDirection.right);
     final Iterable<FocusNode> filtered;
     switch (direction) {
       case TraversalDirection.left:
@@ -607,8 +608,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         break;
       case TraversalDirection.up:
       case TraversalDirection.down:
-        assert(direction == TraversalDirection.left || direction == TraversalDirection.right);
-        throw ArgumentError();
+        throw ArgumentError('Invalid direction $direction');
     }
     final List<FocusNode> sorted = filtered.toList();
     // Sort all nodes from left to right.
@@ -624,6 +624,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     Rect target,
     Iterable<FocusNode> nodes,
   ) {
+    assert(direction == TraversalDirection.up || direction == TraversalDirection.down);
     final Iterable<FocusNode> filtered;
     switch (direction) {
       case TraversalDirection.up:
@@ -634,8 +635,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         break;
       case TraversalDirection.left:
       case TraversalDirection.right:
-        assert(direction == TraversalDirection.up || direction == TraversalDirection.down);
-        throw ArgumentError();
+        throw ArgumentError('Invalid direction $direction');
     }
     final List<FocusNode> sorted = filtered.toList();
     mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) => a.rect.center.dy.compareTo(b.rect.center.dy));
