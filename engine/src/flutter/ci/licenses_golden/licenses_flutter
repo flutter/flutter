@@ -3181,6 +3181,7 @@ FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/plu
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/plugin_registrar_windows_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/cursor_handler.cc
 FILE: ../../../flutter/shell/platform/windows/cursor_handler.h
+FILE: ../../../flutter/shell/platform/windows/cursor_handler_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/direct_manipulation.cc
 FILE: ../../../flutter/shell/platform/windows/direct_manipulation.h
 FILE: ../../../flutter/shell/platform/windows/direct_manipulation_unittests.cc

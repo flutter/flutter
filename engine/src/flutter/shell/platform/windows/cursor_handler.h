@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_CURSOR_HANDLER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_CURSOR_HANDLER_H_
 
+#include <unordered_map>
+
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
@@ -30,7 +32,20 @@ class CursorHandler {
 
   // The delegate for cursor updates.
   WindowBindingHandler* delegate_;
+
+  // The cache map for custom cursors.
+  std::unordered_map<std::string, HCURSOR> custom_cursors_;
 };
+
+// Create a cursor from a rawBGRA buffer and the cursor info.
+HCURSOR GetCursorFromBuffer(const std::vector<uint8_t>& buffer,
+                            double hot_x,
+                            double hot_y,
+                            int width,
+                            int height);
+
+// Get the corresponding mask bitmap from the source bitmap.
+void GetMaskBitmaps(HBITMAP bitmap, HBITMAP& mask_bitmap);
 
 }  // namespace flutter
 
