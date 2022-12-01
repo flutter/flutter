@@ -303,7 +303,7 @@
 # verify_binaries_codesigned @christopherfujino @flutter/releases
 
 ## Packaging builders tests
-flutter_packaging_beta_linux @godofredoc @flutter/infra
-flutter_packaging_beta_mac @godofredoc @flutter/infra
-flutter_packaging_beta_mac_arm64 @godofredoc @flutter/infra
-flutter_packaging_beta_win @godofredoc @flutter/infra
+# flutter_packaging_beta_linux @godofredoc @flutter/infra
+# flutter_packaging_beta_mac @godofredoc @flutter/infra
+# flutter_packaging_beta_mac_arm64 @godofredoc @flutter/infra
+# flutter_packaging_beta_win @godofredoc @flutter/infra
