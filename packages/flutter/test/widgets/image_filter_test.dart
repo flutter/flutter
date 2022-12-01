@@ -119,8 +119,10 @@ void main() {
   testWidgets('Image filter - matrix with offset', (WidgetTester tester) async {
     final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
     final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
+    final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(
+        key: key,
         child: Transform.translate(
           offset: const Offset(50, 50),
           child: ImageFiltered(
@@ -147,7 +149,7 @@ void main() {
       ),
     );
     await expectLater(
-      find.byType(ImageFiltered),
+      find.byKey(key),
       matchesGoldenFile('image_filter_matrix_offset.png'),
     );
   });
