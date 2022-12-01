@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -52,6 +55,32 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
+}
+
+/// The key that uniquely identifies an image file in an app icon asset.
+/// It consists of (idiom, size, scale).
+@immutable
+class _AppIconImageFileKey {
+  const _AppIconImageFileKey(this.idiom, this.size, this.scale);
+
+  /// The idiom (iphone or ipad).
+  final String idiom;
+  /// The logical size in point (e.g. 83.5).
+  final double size;
+  /// The scale factor (e.g. 2).
+  final int scale;
+
+  @override
+  int get hashCode => Object.hash(idiom, size, scale);
+
+  @override
+  bool operator ==(Object other) => other is _AppIconImageFileKey
+      && other.idiom == idiom
+      && other.size == size
+      && other.scale == scale;
+
+  /// The pixel size.
+  int get pixelSize => (size * scale).toInt(); // pixel size must be an int.
 }
 
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
@@ -130,7 +159,109 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return super.validateCommand();
   }
 
-  Future<void> _validateXcodeBuildSettingsAfterArchive() async {
+  // Parses Contents.json into a map, with the key to be _AppIconImageFileKey, and value to be the icon image file name.
+  Map<_AppIconImageFileKey, String> _parseIconContentsJson(String contentsJsonDirName) {
+    final Directory contentsJsonDirectory = globals.fs.directory(contentsJsonDirName);
+    if (!contentsJsonDirectory.existsSync()) {
+      return <_AppIconImageFileKey, String>{};
+    }
+    final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
+    final Map<String, dynamic> contents = json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>? ?? <String, dynamic>{};
+    final List<dynamic> images = contents['images'] as List<dynamic>? ?? <dynamic>[];
+    final Map<String, dynamic> info = contents['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    if ((info['version'] as int?) != 1) {
+      // Skips validation for unknown format.
+      return <_AppIconImageFileKey, String>{};
+    }
+
+    final Map<_AppIconImageFileKey, String> iconInfo = <_AppIconImageFileKey, String>{};
+    for (final dynamic image in images) {
+      final Map<String, dynamic> imageMap = image as Map<String, dynamic>;
+      final String? idiom = imageMap['idiom'] as String?;
+      final String? size = imageMap['size'] as String?;
+      final String? scale = imageMap['scale'] as String?;
+      final String? fileName = imageMap['filename'] as String?;
+
+      if (size == null || idiom == null || scale == null || fileName == null) {
+        continue;
+      }
+
+      // for example, "64x64". Parse the width since it is a square.
+      final Iterable<double> parsedSizes = size.split('x')
+          .map((String element) => double.tryParse(element))
+          .whereType<double>();
+      if (parsedSizes.isEmpty) {
+        continue;
+      }
+      final double parsedSize = parsedSizes.first;
+
+      // for example, "3x".
+      final Iterable<int> parsedScales = scale.split('x')
+          .map((String element) => int.tryParse(element))
+          .whereType<int>();
+      if (parsedScales.isEmpty) {
+        continue;
+      }
+      final int parsedScale = parsedScales.first;
+
+      iconInfo[_AppIconImageFileKey(idiom, parsedSize, parsedScale)] = fileName;
+    }
+
+    return iconInfo;
+  }
+
+  Future<void> _validateIconsAfterArchive(StringBuffer messageBuffer) async {
+    final BuildableIOSApp app = await buildableIOSApp;
+    final String templateIconImageDirName = await app.templateAppIconDirNameForImages;
+
+    final Map<_AppIconImageFileKey, String> templateIconMap = _parseIconContentsJson(app.templateAppIconDirNameForContentsJson);
+    final Map<_AppIconImageFileKey, String> projectIconMap = _parseIconContentsJson(app.projectAppIconDirName);
+
+    // validate each of the project icon images.
+    final List<String> filesWithTemplateIcon = <String>[];
+    final List<String> filesWithWrongSize = <String>[];
+    for (final MapEntry<_AppIconImageFileKey, String> entry in projectIconMap.entries) {
+      final String projectIconFileName = entry.value;
+      final String? templateIconFileName = templateIconMap[entry.key];
+      final File projectIconFile = globals.fs.file(globals.fs.path.join(app.projectAppIconDirName, projectIconFileName));
+      if (!projectIconFile.existsSync()) {
+        continue;
+      }
+      final Uint8List projectIconBytes = projectIconFile.readAsBytesSync();
+
+      // validate conflict with template icon file.
+      if (templateIconFileName != null) {
+        final File templateIconFile = globals.fs.file(globals.fs.path.join(
+            templateIconImageDirName, templateIconFileName));
+        if (templateIconFile.existsSync() && md5.convert(projectIconBytes) ==
+            md5.convert(templateIconFile.readAsBytesSync())) {
+          filesWithTemplateIcon.add(entry.value);
+        }
+      }
+
+      // validate image size is correct.
+      // PNG file's width is at byte [16, 20), and height is at byte [20, 24), in big endian format.
+      // Based on https://en.wikipedia.org/wiki/Portable_Network_Graphics#File_format
+      final ByteData projectIconData = projectIconBytes.buffer.asByteData();
+      if (projectIconData.lengthInBytes < 24) {
+        continue;
+      }
+      final int width = projectIconData.getInt32(16);
+      final int height = projectIconData.getInt32(20);
+      if (width != entry.key.pixelSize || height != entry.key.pixelSize) {
+        filesWithWrongSize.add(entry.value);
+      }
+    }
+
+    if (filesWithTemplateIcon.isNotEmpty) {
+      messageBuffer.writeln('\nWarning: App icon is set to the default placeholder icon. Replace with unique icons.');
+    }
+    if (filesWithWrongSize.isNotEmpty) {
+      messageBuffer.writeln('\nWarning: App icon is using the wrong size (e.g. ${filesWithWrongSize.first}).');
+    }
+  }
+
+  Future<void> _validateXcodeBuildSettingsAfterArchive(StringBuffer messageBuffer) async {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
@@ -148,21 +279,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-    final StringBuffer buffer = StringBuffer();
     xcodeProjectSettingsMap.forEach((String title, String? info) {
-      buffer.writeln('$title: ${info ?? "Missing"}');
+      messageBuffer.writeln('$title: ${info ?? "Missing"}');
     });
 
-    final String message;
     if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      buffer.writeln('\nYou must set up the missing settings');
-      buffer.write('Instructions: https://docs.flutter.dev/deployment/ios');
-      message = buffer.toString();
-    } else {
-      // remove the new line
-      message = buffer.toString().trim();
+      messageBuffer.writeln('\nYou must set up the missing settings.');
     }
-    globals.printBox(message, title: 'App Settings');
   }
 
   @override
@@ -171,7 +294,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
-    await _validateXcodeBuildSettingsAfterArchive();
+    final StringBuffer validationMessageBuffer = StringBuffer();
+    await _validateXcodeBuildSettingsAfterArchive(validationMessageBuffer);
+    await _validateIconsAfterArchive(validationMessageBuffer);
+    validationMessageBuffer.write('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios');
+    globals.printBox(validationMessageBuffer.toString(), title: 'App Settings');
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {

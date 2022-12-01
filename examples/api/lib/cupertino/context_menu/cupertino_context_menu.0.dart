@@ -49,7 +49,7 @@ class ContextMenuExample extends StatelessWidget {
                   Navigator.pop(context);
                 },
                 trailingIcon: CupertinoIcons.share,
-                child: const Text('Share  '),
+                child: const Text('Share'),
               ),
               CupertinoContextMenuAction(
                 onPressed: () {
@@ -68,10 +68,7 @@ class ContextMenuExample extends StatelessWidget {
               ),
             ],
             child: Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemYellow,
-                borderRadius: BorderRadius.circular(20.0),
-              ),
+              color: CupertinoColors.systemYellow,
               child: const FlutterLogo(size: 500.0),
             ),
           ),

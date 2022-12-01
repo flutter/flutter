@@ -6386,69 +6386,71 @@ void main() {
     expect(controller.text, equals(testText), reason: 'on $platform');
     expect((await Clipboard.getData(Clipboard.kTextPlain))!.text, equals(testText));
 
-    // Delete
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.delete,
-      ],
-      targetPlatform: defaultTargetPlatform,
-    );
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: 0,
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      // Delete
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.delete,
+        ],
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(
+        selection,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: 0,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, isEmpty, reason: 'on $platform');
+        reason: 'on $platform',
+      );
+      expect(controller.text, isEmpty, reason: 'on $platform');
 
-    controller.text = 'abc';
-    controller.selection = const TextSelection(baseOffset: 2, extentOffset: 2);
+      controller.text = 'abc';
+      controller.selection = const TextSelection(baseOffset: 2, extentOffset: 2);
 
-    // Backspace
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.backspace,
-      ],
-      targetPlatform: defaultTargetPlatform,
-    );
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 1,
-          extentOffset: 1,
+      // Backspace
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.backspace,
+        ],
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(
+        selection,
+        equals(
+          const TextSelection(
+            baseOffset: 1,
+            extentOffset: 1,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, 'ac', reason: 'on $platform');
+        reason: 'on $platform',
+      );
+      expect(controller.text, 'ac', reason: 'on $platform');
 
-    // Shift-backspace (same as backspace)
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.backspace,
-      ],
-      shift: true,
-      targetPlatform: defaultTargetPlatform,
-    );
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: 0,
+      // Shift-backspace (same as backspace)
+      await sendKeys(
+        tester,
+        <LogicalKeyboardKey>[
+          LogicalKeyboardKey.backspace,
+        ],
+        shift: true,
+        targetPlatform: defaultTargetPlatform,
+      );
+      expect(
+        selection,
+        equals(
+          const TextSelection(
+            baseOffset: 0,
+            extentOffset: 0,
+          ),
         ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, 'c', reason: 'on $platform');
+        reason: 'on $platform',
+      );
+      expect(controller.text, 'c', reason: 'on $platform');
+    }
   }
 
   testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
