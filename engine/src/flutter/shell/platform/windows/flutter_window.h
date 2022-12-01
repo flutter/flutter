@@ -132,6 +132,9 @@ class FlutterWindow : public Window, public WindowBindingHandler {
   void UpdateFlutterCursor(const std::string& cursor_name) override;
 
   // |FlutterWindowBindingHandler|
+  void SetFlutterCursor(HCURSOR cursor) override;
+
+  // |FlutterWindowBindingHandler|
   void OnWindowResized() override;
 
   // |FlutterWindowBindingHandler|
