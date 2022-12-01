@@ -4,8 +4,12 @@
 
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 
+#include <vector>
+
 #include "flutter/fml/logging.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
+#include "include/core/SkFontTypes.h"
+#include "include/core/SkRect.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/src/core/SkStrikeSpec.h"    // nogncheck
@@ -13,7 +17,8 @@
 
 namespace impeller {
 
-static Font ToFont(const SkFont& font, Scalar scale) {
+static Font ToFont(const SkTextBlobRunIterator& run, Scalar scale) {
+  auto& font = run.font();
   auto typeface = std::make_shared<TypefaceSkia>(font.refTypefaceOrDefault());
 
   SkFontMetrics sk_metrics;
@@ -24,8 +29,20 @@ static Font ToFont(const SkFont& font, Scalar scale) {
   metrics.point_size = font.getSize();
   metrics.ascent = sk_metrics.fAscent;
   metrics.descent = sk_metrics.fDescent;
-  metrics.min_extent = {sk_metrics.fXMin, sk_metrics.fAscent};
-  metrics.max_extent = {sk_metrics.fXMax, sk_metrics.fDescent};
+  metrics.min_extent = {sk_metrics.fXMin, sk_metrics.fTop};
+  metrics.max_extent = {sk_metrics.fXMax, sk_metrics.fBottom};
+
+  std::vector<SkRect> glyph_bounds;
+  SkPaint paint;
+
+  glyph_bounds.resize(run.glyphCount());
+  run.font().getBounds(run.glyphs(), run.glyphCount(), glyph_bounds.data(),
+                       nullptr);
+  for (auto& bounds : glyph_bounds) {
+    metrics.min_extent = metrics.min_extent.Min({bounds.fLeft, bounds.fTop});
+    metrics.max_extent =
+        metrics.max_extent.Max({bounds.fRight, bounds.fBottom});
+  }
 
   return Font{std::move(typeface), metrics};
 }
@@ -38,7 +55,7 @@ TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob, Scalar scale) {
   TextFrame frame;
 
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
-    TextRun text_run(ToFont(run.font(), scale));
+    TextRun text_run(ToFont(run, scale));
 
     // TODO(jonahwilliams): ask Skia for a public API to look this up.
     // https://github.com/flutter/flutter/issues/112005
