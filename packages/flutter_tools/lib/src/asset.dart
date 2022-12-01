@@ -4,7 +4,6 @@
 
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
@@ -478,11 +477,25 @@ class ManifestAssetBundle implements AssetBundle {
   List<File> additionalDependencies = <File>[];
 
   void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
+    bool areEqual(List<int> o1, List<int> o2) {
+      if (o1.length != o2.length) {
+        return false;
+      }
+
+      for (int index = 0; index < o1.length; index++) {
+        if (o1[index] != o2[index]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
     final DevFSContent? oldContent = entries[key];
     // In the case that the content is unchanged, we want to avoid an overwrite
     // as the isModified property may be reset to true,
     if (oldContent is DevFSByteContent && content is DevFSByteContent &&
-        const ListEquality<int>().equals(oldContent.bytes, content.bytes)) {
+        areEqual(oldContent.bytes, content.bytes)) {
       return;
     }
 
