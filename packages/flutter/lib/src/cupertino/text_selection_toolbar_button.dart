@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Brightness;
+
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -21,8 +23,8 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
   // This value was extracted from a screenshot of iOS 16.0.3, as light mode
   // didn't appear in the Apple design resources assets linked above.
-  color: Color(0xEB202020),
-  darkColor: Color(0xEBF7F7F7),
+  color: Color(0xEBF7F7F7),
+  darkColor: Color(0xEB202020),
 );
 
 const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
@@ -114,20 +116,21 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     final Widget child = this.child ?? Text(
-       text ?? getButtonLabel(context, buttonItem!),
-       overflow: TextOverflow.ellipsis,
-       style: _kToolbarButtonFontStyle.copyWith(
-         color: onPressed != null
-             ? _kToolbarTextColor
-             : CupertinoColors.inactiveGray,
-       ),
-     );
+      text ?? getButtonLabel(context, buttonItem!),
+      overflow: TextOverflow.ellipsis,
+      style: _kToolbarButtonFontStyle.copyWith(
+        color: onPressed != null
+            ? isDarkMode ? _kToolbarTextColor.darkColor : _kToolbarTextColor.color
+            : CupertinoColors.inactiveGray,
+      ),
+    );
 
     return CupertinoButton(
       borderRadius: null,
-      color: _kToolbarBackgroundColor,
-      disabledColor: _kToolbarBackgroundColor,
+      color: isDarkMode ? _kToolbarBackgroundColor.darkColor : _kToolbarBackgroundColor.color,
+      disabledColor: isDarkMode ? _kToolbarBackgroundColor.darkColor : _kToolbarBackgroundColor.color,
       onPressed: onPressed,
       padding: _kToolbarButtonPadding,
       pressedOpacity: onPressed == null ? 1.0 : 0.7,

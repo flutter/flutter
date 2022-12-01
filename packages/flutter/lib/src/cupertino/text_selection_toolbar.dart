@@ -139,12 +139,13 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
   static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
+    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     final Widget outputChild = _CupertinoTextSelectionToolbarShape(
       anchor: anchor,
       isAbove: isAbove,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: _kToolbarDividerColor,
+        decoration: BoxDecoration(
+          color: isDarkMode ? _kToolbarDividerColor.darkColor : _kToolbarDividerColor.color,
         ),
         child: child,
       ),
