@@ -33,6 +33,11 @@ impeller_shaders("shader_fixtures") {
   }
 }
 
+scene_importer("geometry_fixtures") {
+  geometry = [ "flutter_logo.glb" ]
+  type = "gltf"
+}
+
 impellerc("runtime_stages") {
   shaders = [
     "ink_sparkle.frag",
@@ -88,6 +93,7 @@ group("fixtures") {
 
   public_deps = [
     ":file_fixtures",
+    ":geometry_fixtures",
     ":shader_fixtures",
   ]
 }
