@@ -6681,9 +6681,8 @@ bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
   return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }
 
-/// A [LookUpBoundary] controls what entities are available for lookup by
-/// descendants of the boundary via the various lookup methods provided on
-/// [BuildContext].
+/// A [LookUpBoundary] controls what entities are visible to descendants of the
+/// boundary via the various lookup methods provided on [BuildContext].
 ///
 /// The lookup methods affected by a [LookUpBoundary] are:
 ///
@@ -6695,14 +6694,15 @@ bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
 ///  * [BuildContext.findAncestorRenderObjectOfType].
 ///
 /// When these methods are called with their `stopAtLookUpBoundary` parameter
-/// set to true, they do not return any ancestor entities of the [LookUpBoundary]
-/// closest to the [BuildContext] queried. If `stopAtLookUpBoundary` is set to
-/// false (the default), the [LookupBoundary] has no effect on the query.
+/// set to true, they do not return any ancestor entities of the
+/// [LookUpBoundary] closest to the [BuildContext] queried. If
+/// `stopAtLookUpBoundary` is set to false (the default), the [LookupBoundary]
+/// has no effect on the query.
 ///
 /// {@tool snippet}
 ///
 /// In the example below, the [BuildContext.findAncestorWidgetOfExactType] call
-/// returns null because the LookUpBoundary "hides" `MyWidget` from the
+/// returns null because the [LookUpBoundary] "hides" `MyWidget` from the
 /// [BuildContext] that was queried.
 ///
 /// ```dart
@@ -6721,20 +6721,29 @@ bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
 /// ```
 /// {@end-tool}
 ///
-/// [LookUpBoundary]s are used in locations of the element tree where the
-/// render tree diverges from the element tree, which is rather uncommon.
-/// Such divergences are created by [RenderObjectElement]s that don't attach
-/// their [RenderObject] to the closest ancestor [RenderObjectElement]. This
-/// behavior breaks the assumption some widgets have about the structure of the
-/// render tree. These widgets may try to reach out to an ancestor widget,
-/// assuming that their associated [RenderObject]s are also ancestors. However,
-/// due to the divergence in the trees this may not be the case. At the point of
-/// the divergence a [LookUpBoundary] can be used to hide that ancestor from the
-/// querying widget.
+/// [LookUpBoundary]s are used in locations of the element tree where the render
+/// tree diverges from the element tree, which is rather uncommon. Such
+/// anomalies are created by [RenderObjectElement]s that don't attach their
+/// [RenderObject] to the closest ancestor [RenderObjectElement]. This behavior
+/// breaks the assumption some widgets have about the structure of the render
+/// tree. These widgets may try to reach out to an ancestor widget, assuming
+/// that their associated [RenderObject]s are also ancestors. However, due to
+/// the anomaly in the trees this may not be the case. At the point where the
+/// divergence in the two trees is introduced, a [LookUpBoundary] can be used to
+/// hide that ancestor from the querying widget.
 // TODO(goderbauer): Mention the View widget and the OverlayPortal here as an
 //   example for diverging element and render trees once those are available.
 ///
-/// [Material.of] makes use of []
+/// As an example, [Material.of] relies on [LookUpBoundary]s to hide the
+/// [Material] widget from certain descendant button widget. Buttons reach out
+/// to their [Material] ancestor to draw ink splashes on its associated render
+/// object. This only produces the desired effect if the button render object is
+/// a descendant of the [Material] render object. If the element tree and the
+/// render tree are not in sync due to anomalies described above, this may not
+/// be the case. To avoid incorrect visuals, the [Material] relies on
+/// [LookUpBoundary]s to hide itself from descendants in subtrees with such
+/// anomalies. Those subtrees are expected to introduce their own [Material]
+/// widget that buttons there can utilize without crossing a [LookUpBoundary].
 mixin LookUpBoundary on Element {
   // Left empty, this is just a marker interface used by the [Element] class.
 }
