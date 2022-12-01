@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
@@ -85,9 +86,8 @@ class CircleAvatar extends StatelessWidget {
   /// color will cause the avatar to animate to the new color.
   ///
   /// If a [backgroundColor] is not specified and [ThemeData.useMaterial3] is true,
-  /// [ColorScheme.primaryContainer] will be used, otherwise the theme's
-  /// [ThemeData.primaryColorLight] is used with dark foreground colors, and
-  /// [ThemeData.primaryColorDark] with light foreground colors.
+  /// [ColorScheme.primaryContainer] will be used, otherwise an appropriate
+  /// default is used.
   final Color? backgroundColor;
 
   /// The default text color for text in the circle.
@@ -96,9 +96,8 @@ class CircleAvatar extends StatelessWidget {
   /// specified.
   ///
   /// If a [foregroundColor] is not specified and [ThemeData.useMaterial3] is true,
-  /// [ColorScheme.onPrimaryContainer] will be used, otherwise the theme's
-  /// [ThemeData.primaryColorLight] for dark background colors, and
-  /// [ThemeData.primaryColorDark] for light background colors.
+  /// [ColorScheme.onPrimaryContainer] will be used, otherwise an appropriate
+  /// default is used.
   final Color? foregroundColor;
 
   /// The background image of the circle. Changing the background
@@ -203,22 +202,25 @@ class CircleAvatar extends StatelessWidget {
     TextStyle textStyle = effectiveTextStyle.copyWith(color: effectiveForegroundColor);
     Color? effectiveBackgroundColor = backgroundColor
       ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
+
+    final Color defaultPrimaryLight = theme.colorScheme.brightness == Brightness.dark ? Colors.grey[500]! : Colors.blue[100]!;
+    final Color defaultPrimaryDark = theme.colorScheme.brightness == Brightness.dark ? Colors.black : Colors.blue[700]!;
     if (effectiveBackgroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         case Brightness.dark:
-          effectiveBackgroundColor = theme.primaryColorLight;
+          effectiveBackgroundColor = defaultPrimaryLight;
           break;
         case Brightness.light:
-          effectiveBackgroundColor = theme.primaryColorDark;
+          effectiveBackgroundColor = defaultPrimaryDark;
           break;
       }
     } else if (effectiveForegroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
         case Brightness.dark:
-          textStyle = textStyle.copyWith(color: theme.primaryColorLight);
+          textStyle = textStyle.copyWith(color: defaultPrimaryLight);
           break;
         case Brightness.light:
-          textStyle = textStyle.copyWith(color: theme.primaryColorDark);
+          textStyle = textStyle.copyWith(color: defaultPrimaryDark);
           break;
       }
     }
