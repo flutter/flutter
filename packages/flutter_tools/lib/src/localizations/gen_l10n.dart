@@ -201,7 +201,11 @@ Map<String, String> pluralCases = <String, String>{
 };
 
 String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
-  final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
+  final String comment = message
+    .description
+    ?.split('\n')
+    .map((String line) => '  /// $line')
+    .join('\n') ?? '  /// No description provided for @${message.resourceId}.';
   final String templateLocaleTranslationComment = '''
   /// In $templateArbLocale, this message translates to:
   /// **'${generateString(message.value)}'**''';
