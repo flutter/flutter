@@ -19,7 +19,7 @@ class BuildWebCommand extends BuildSubCommand {
     required FileSystem fileSystem,
     required bool verboseHelp,
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
-    addTreeShakeIconsFlag();
+    addTreeShakeIconsFlag(enabledByDefault: false);
     usesTargetOption();
     usesOutputDir();
     usesPubOption();
