@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'app_bar_theme.dart';
 import 'back_button.dart';
@@ -1085,13 +1086,20 @@ class _AppBarState extends State<AppBar> {
 
     // Allow the trailing actions to have their own theme if necessary.
     if (actions != null) {
-      actions = Padding(
-        padding: const EdgeInsets.only(right: 4.0),
-        child: IconTheme.merge(
-          data: actionsIconTheme,
-          child: actions,
-        ),
+      actions = IconTheme.merge(
+        data: actionsIconTheme,
+        child: actions,
       );
+
+      final TextDirection textDirection = Directionality.of(context);
+      if (Theme.of(context).useMaterial3) {
+        actions = Padding(
+          padding: textDirection == TextDirection.rtl
+            ? const EdgeInsets.only(left: 4.0)
+            : const EdgeInsets.only(right: 4.0),
+          child: actions,
+        );
+      }
     }
 
     final Widget toolbar = NavigationToolbar(

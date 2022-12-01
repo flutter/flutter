@@ -296,12 +296,15 @@ void main() {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets.
 
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
     final Key titleKey = UniqueKey();
     Widget leading = Container();
     List<Widget> actions = <Widget>[];
 
     Widget buildApp() {
       return MaterialApp(
+        theme: theme,
         home: Scaffold(
           appBar: AppBar(
             leading: leading,
@@ -343,14 +346,15 @@ void main() {
       - 56.0 // Leading button width.
       - 16.0 // Leading button to title padding.
       - 16.0 // Title to actions padding
-      - 200.0,
+      - 200.0
+      - (material3 ? 4.0 : 0.0) // actions right side padding,
     )); // Actions' width.
 
     leading = Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 56.0 - 16.0 - 16.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 56.0 - 16.0 - 16.0 - 200.0 - (material3 ? 4.0 : 0.0)));
   });
 
   testWidgets('AppBar centerTitle:true title overflow OK (LTR)', (WidgetTester tester) async {
@@ -358,6 +362,8 @@ void main() {
     // between the leading and actions widgets. When it's also centered it may
     // also be start or end justified if it doesn't fit in the overall center.
 
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
     Widget? leading = Container();
@@ -401,7 +407,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 16);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 16 - (material3 ? 4 : 0));
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -410,6 +416,8 @@ void main() {
     // between the leading and actions widgets. When it's also centered it may
     // also be start or end justified if it doesn't fit in the overall center.
 
+    final ThemeData theme = ThemeData();
+    final bool material3 = theme.useMaterial3;
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
     Widget? leading = Container();
@@ -417,6 +425,7 @@ void main() {
 
     Widget buildApp() {
       return MaterialApp(
+        theme: theme,
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
@@ -456,7 +465,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 16);
+    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 16 + (material3 ? 4 : 0));
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -3761,9 +3770,11 @@ void main() {
     expect(tester.getSize(find.byKey(leadingKey)).width, leadingWidth);
   });
 
-  testWidgets('The AppBar actions should have a 4dp space for padding on the right by default', (WidgetTester tester) async {
+  testWidgets('The M3 AppBar actions should have a 4dp space for padding to edge by default - LTR', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
     Widget buildApp() {
       return MaterialApp(
+        theme: theme,
         home: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               return Scaffold(
@@ -3783,5 +3794,34 @@ void main() {
     final Offset actionTopRight = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.more_vert));
     final Offset appBarTopRight = tester.getTopRight(find.byType(AppBar));
     expect(appBarTopRight.dx, actionTopRight.dx + 4.0);
+  });
+
+  testWidgets('The M3 AppBar actions should have a 4dp space for padding to edge by default - RTL', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    Widget buildApp() {
+      return MaterialApp(
+        theme: theme,
+        home: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Directionality(
+                textDirection: TextDirection.rtl,
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Title'),
+                    actions: <Widget>[
+                      IconButton(icon: const Icon(Icons.more_vert), onPressed: () {},)
+                    ],
+                  ),
+                ),
+              );
+            }
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Offset actionTopLeft = tester.getTopLeft(find.widgetWithIcon(IconButton, Icons.more_vert));
+    final Offset appBarTopLeft = tester.getTopLeft(find.byType(AppBar));
+    expect(appBarTopLeft.dx, actionTopLeft.dx - 4.0);
   });
 }
