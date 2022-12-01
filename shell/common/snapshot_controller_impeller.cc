@@ -64,7 +64,8 @@ sk_sp<DlImage> SnapshotControllerImpeller::DoMakeRasterSnapshot(
     std::shared_ptr<impeller::Image> image =
         picture.ToImage(*context, render_target_size);
     if (image) {
-      return impeller::DlImageImpeller::Make(image->GetTexture());
+      return impeller::DlImageImpeller::Make(image->GetTexture(),
+                                             DlImage::OwningContext::kRaster);
     }
   }
 
