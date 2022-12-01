@@ -24,6 +24,11 @@ declare_args() {
   # If it is non-empty, it should be the absolute path to impellerc.
   impeller_use_prebuilt_impellerc = ""
 
+  # Whether to use a prebuilt scene_importer.
+  # If this is the empty string, scene_importer will be built.
+  # If it is non-empty, it should be the absolute path to scene_importer.
+  impeller_use_prebuilt_scene_importer = ""
+
   # If enabled, all OpenGL calls will be traced. Because additional trace
   # overhead may be substantial, this is not enabled by default.
   impeller_trace_all_gl_calls = false
@@ -611,5 +616,49 @@ template("impeller_shaders") {
     if (impeller_enable_vulkan) {
       public_deps += [ ":$vk_shaders" ]
     }
+  }
+}
+
+# Dispatches to the build or prebuilt scene_importer depending on the value of
+# the impeller_use_prebuilt_scene_importer argument. Forwards all variables to
+# compiled_action_foreach or action_foreach as appropriate.
+template("_scene_importer") {
+  if (impeller_use_prebuilt_scene_importer == "") {
+    compiled_action_foreach(target_name) {
+      forward_variables_from(invoker, "*")
+      tool = "//flutter/impeller/scene/importer:scene_importer"
+    }
+  } else {
+    action_foreach(target_name) {
+      forward_variables_from(invoker, "*", [ "args" ])
+      script = "//build/gn_run_binary.py"
+      scene_importer_path =
+          rebase_path(impeller_use_prebuilt_scene_importer, root_build_dir)
+      args = [ scene_importer_path ] + invoker.args
+    }
+  }
+}
+
+template("scene_importer") {
+  assert(defined(invoker.geometry), "Geometry input files must be specified.")
+  assert(defined(invoker.type),
+         "The type of geometry to be parsed (gltf, etc..).")
+
+  _scene_importer(target_name) {
+    sources = invoker.geometry
+    generated_dir = "$target_gen_dir"
+
+    input_type = invoker.type
+    args = [
+      "--input={{source}}",
+      "--input-type=$input_type",
+    ]
+
+    output = "$generated_dir/{{source_file_part}}.ipmesh"
+    output_path = rebase_path(output, root_build_dir)
+
+    args += [ "--output=$output_path" ]
+
+    outputs = [ output ]
   }
 }
