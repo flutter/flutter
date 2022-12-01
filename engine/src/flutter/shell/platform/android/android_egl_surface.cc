@@ -72,8 +72,8 @@ static bool HasExtension(const char* extensions, const char* name) {
 class AndroidEGLSurfaceDamage {
  public:
   void init(EGLDisplay display, EGLContext context) {
-    if (GetAPILevel() < 28) {
-      // Disable partial repaint for devices older than Android 9. There
+    if (GetAPILevel() < 29) {
+      // Disable partial repaint for devices older than Android 10. There
       // are old devices that have extensions below available but the
       // implementation causes glitches (i.e. Xperia Z3 with Android 6).
       partial_redraw_supported_ = false;
