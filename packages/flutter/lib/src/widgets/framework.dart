@@ -46,6 +46,8 @@ export 'package:flutter/rendering.dart' show RenderBox, RenderObject, debugDumpL
 // late Object? _myState, newValue;
 // int _counter = 0;
 // Future<Directory> getApplicationDocumentsDirectory() async => Directory('');
+// class MyWidget extends StatelessWidget { const MyWidget({super.key, required this.child}); final Widget child; @override Widget build(BuildContext context) => child; }
+// class MyLookUpBoundary extends StatelessWidget { const MyLookUpBoundary({super.key, required this.child}); final Widget child; @override Widget build(BuildContext context) => child; }
 
 // An annotation used by test_analysis package to verify patterns are followed
 // that allow for tree-shaking of both fields and their initializers. This
@@ -4400,8 +4402,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// {@tool snippet}
   ///
-  /// In the example below, the [BuildContext.findAncestorWidgetOfExactType] call
-  /// returns null because the lookup boundary "hides" `MyWidget` from the
+  /// In the example below, the [BuildContext.findAncestorWidgetOfExactType]
+  /// call returns null because the lookup boundary "hides" `MyWidget` from the
   /// [BuildContext] that was queried.
   ///
   /// ```dart
@@ -4410,7 +4412,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///     child: Builder(
   ///       builder: (BuildContext context) {
   ///         MyWidget? widget = context.findAncestorWidgetOfExactType<MyWidget>(
-  ///           findAncestorWidgetOfExactType: true,
+  ///           stopAtLookUpBoundary: true,
   ///         );
   ///         return Text('$widget'); // "null"
   ///       },
@@ -4420,26 +4422,26 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// ```
   /// {@end-tool}
   ///
-  /// Lookup boundaries are used in locations of the element tree where the render
-  /// tree diverges from the element tree, which is rather uncommon. Such
+  /// Lookup boundaries are used in locations of the element tree where the
+  /// render tree diverges from the element tree, which is rather uncommon. Such
   /// anomalies are created by [RenderObjectElement]s that don't attach their
-  /// [RenderObject] to the closest ancestor [RenderObjectElement]. This behavior
-  /// breaks the assumption some widgets have about the structure of the render
-  /// tree. These widgets may try to reach out to an ancestor widget, assuming
-  /// that their associated [RenderObject]s are also ancestors. However, due to
-  /// the anomaly in the trees this may not be the case. At the point where the
-  /// divergence in the two trees is introduced, a lookup boundary can be used to
-  /// hide that ancestor from the querying widget.
+  /// [RenderObject] to the closest ancestor [RenderObjectElement]. This
+  /// behavior breaks the assumption some widgets have about the structure of
+  /// the render tree. These widgets may try to reach out to an ancestor widget,
+  /// assuming that their associated [RenderObject]s are also ancestors.
+  /// However, due to the anomaly in the trees this may not be the case. At the
+  /// point where the divergence in the two trees is introduced, a lookup
+  /// boundary can be used to hide that ancestor from the querying widget.
 // TODO(goderbauer): Mention the View widget and the OverlayPortal here as an
 //   example for diverging element and render trees once those are available.
   ///
   /// As an example, [Material.of] relies on lookup boundaries to hide the
   /// [Material] widget from certain descendant button widget. Buttons reach out
   /// to their [Material] ancestor to draw ink splashes on its associated render
-  /// object. This only produces the desired effect if the button render object is
-  /// a descendant of the [Material] render object. If the element tree and the
-  /// render tree are not in sync due to anomalies described above, this may not
-  /// be the case. To avoid incorrect visuals, the [Material] relies on
+  /// object. This only produces the desired effect if the button render object
+  /// is a descendant of the [Material] render object. If the element tree and
+  /// the render tree are not in sync due to anomalies described above, this may
+  /// not be the case. To avoid incorrect visuals, the [Material] relies on
   /// lookup boundaries to hide itself from descendants in subtrees with such
   /// anomalies. Those subtrees are expected to introduce their own [Material]
   /// widget that buttons there can utilize without crossing a lookup boundary.
