@@ -77,6 +77,7 @@ static size_t PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
 
   for (size_t i = 0; i < pairs.size(); i++) {
     const auto& pair = pairs[i];
+
     const auto glyph_size =
         ISize::Ceil(pair.font.GetMetrics().GetBoundingBox().size *
                     pair.font.GetMetrics().scale);
@@ -291,9 +292,9 @@ static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
                        &glyph_id,  // glyphs
                        &position,  // positions
                        SkPoint::Make(-metrics.min_extent.x,
-                                     -metrics.ascent),  // origin
-                       sk_font,                         // font
-                       glyph_paint                      // paint
+                                     -metrics.min_extent.y),  // origin
+                       sk_font,                               // font
+                       glyph_paint                            // paint
     );
     return true;
   });

@@ -131,8 +131,7 @@ static bool CommonRender(
     auto glyph_size_ = font.GetMetrics().GetBoundingBox().size;
     auto glyph_size = Point{static_cast<Scalar>(glyph_size_.width),
                             static_cast<Scalar>(glyph_size_.height)};
-    auto metrics_offset =
-        Point{font.GetMetrics().min_extent.x, font.GetMetrics().ascent};
+    auto metrics_offset = font.GetMetrics().min_extent;
 
     for (const auto& glyph_position : run.GetGlyphPositions()) {
       FontGlyphPair font_glyph_pair{font, glyph_position.glyph};

@@ -110,7 +110,7 @@ TEST_P(TypographerTest, GlyphAtlasWithOddUniqueGlyphSize) {
 
   // The 3 unique glyphs should not evenly fit into a square texture, so we
   // should have a rectangular one.
-  ASSERT_EQ(atlas->GetTexture()->GetSize().width * 2,
+  ASSERT_EQ(atlas->GetTexture()->GetSize().width,
             atlas->GetTexture()->GetSize().height);
 }
 
@@ -166,7 +166,7 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 
-  ASSERT_EQ(atlas->GetTexture()->GetSize().width * 2,
+  ASSERT_EQ(atlas->GetTexture()->GetSize().width,
             atlas->GetTexture()->GetSize().height);
 }
 
