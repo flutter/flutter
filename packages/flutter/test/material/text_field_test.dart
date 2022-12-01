@@ -4264,7 +4264,11 @@ void main() {
   });
 
   testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(hintColor: Colors.blue[500]);
+    final ThemeData themeData = ThemeData(
+      inputDecorationTheme: InputDecorationTheme(
+        hintColor: Colors.blue[500],
+      ),
+    );
     await tester.pumpWidget(
       overlay(
         child: Theme(
@@ -4278,7 +4282,7 @@ void main() {
       ),
     );
     final Text helperText = tester.widget(find.text('helper text'));
-    expect(helperText.style!.color, themeData.hintColor);
+    expect(helperText.style!.color, themeData.inputDecorationTheme.hintColor);
     expect(helperText.style!.fontSize, Typography.englishLike2014.bodySmall!.fontSize);
   });
 
@@ -4309,7 +4313,9 @@ void main() {
       fontSize: 10.0,
     );
     final ThemeData themeData = ThemeData(
-      hintColor: Colors.blue[500],
+      inputDecorationTheme: InputDecorationTheme(
+        hintColor: Colors.blue[500],
+      ),
     );
 
     await tester.pumpWidget(
@@ -4327,7 +4333,7 @@ void main() {
     );
 
     final Text hintText = tester.widget(find.text('Placeholder'));
-    expect(hintText.style!.color, themeData.hintColor);
+    expect(hintText.style!.color, themeData.inputDecorationTheme.hintColor);
     expect(hintText.style!.fontSize, style.fontSize);
   });
 
