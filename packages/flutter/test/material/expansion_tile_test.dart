@@ -58,7 +58,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        dividerColor: dividerColor,
+        dividerTheme: const DividerThemeData(color: dividerColor),
       ),
       home: Material(
         child: SingleChildScrollView(
