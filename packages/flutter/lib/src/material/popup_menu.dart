@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
-import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
@@ -1363,9 +1362,6 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
   late final TextTheme _textTheme = _theme.textTheme;
-
-  @override
-  Color? get color => _theme.brightness == Brightness.dark ? Colors.grey[800]! : Colors.white;
 
   @override
   TextStyle? get textStyle => _textTheme.subtitle1;
