@@ -854,8 +854,8 @@ void main() {
   });
 
   testWidgets('MaterialApp animates theme changes', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
-    final ThemeData darkTheme = ThemeData.dark();
+    final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -868,13 +868,13 @@ void main() {
         ),
       ),
     );
-    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.scaffoldBackgroundColor);
+    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.background);
 
     // Change to dark theme
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
+        theme: lightTheme,
+        darkTheme: darkTheme,
         themeMode: ThemeMode.dark,
         home: Builder(
           builder: (BuildContext context) {
@@ -889,7 +889,7 @@ void main() {
 
     // Default curve is linear so background should be half way between
     // the two colors.
-    final Color halfBGColor = Color.lerp(lightTheme.scaffoldBackgroundColor, darkTheme.scaffoldBackgroundColor, 0.5)!;
+    final Color halfBGColor = Color.lerp(lightTheme.colorScheme.background, darkTheme.colorScheme.background, 0.5)!;
     expect(tester.widget<Material>(find.byType(Material)).color, halfBGColor);
   });
 
