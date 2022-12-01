@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 class TestAssetBundle extends CachingAssetBundle {
   TestAssetBundle(this._assetBundleMap);
 
-  final Map<dynamic, dynamic> _assetBundleMap;
+  final Map<String, List<Map<dynamic, dynamic>>> _assetBundleMap;
 
   Map<String, int> loadCallCount = <String, int>{};
 
@@ -99,7 +99,8 @@ void main() {
 
   group('1.0 scale device tests', () {
     void buildAndTestWithOneAsset(String mainAssetPath) {
-      final Map<dynamic, List<Map<dynamic, dynamic>>> assetBundleMap = <dynamic, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
       assetBundleMap[mainAssetPath] = <Map<dynamic,dynamic>>[];
 
@@ -147,7 +148,8 @@ void main() {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
       const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
-      final Map<dynamic, List<Map<dynamic, dynamic>>> assetBundleMap = <dynamic, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
       final Map<dynamic, dynamic> mainAssetVariantManifestEntry = <dynamic, dynamic>{};
       mainAssetVariantManifestEntry['asset'] = variantPath;
@@ -179,7 +181,8 @@ void main() {
     test('When high-res device and high-res asset not present in bundle then return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
-      final Map<dynamic, List<Map<dynamic, dynamic>>> assetBundleMap = <dynamic, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
       assetBundleMap[mainAssetPath] = <Map<dynamic, dynamic>>[];
 
@@ -216,7 +219,8 @@ void main() {
       double chosenAssetRatio,
       String expectedAssetPath,
     ) {
-      final Map<dynamic, List<Map<dynamic, dynamic>>> assetBundleMap = <dynamic, List<Map<dynamic, dynamic>>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
       final Map<dynamic, dynamic> mainAssetVariantManifestEntry = <dynamic, dynamic>{};
       mainAssetVariantManifestEntry['asset'] = variantPath;

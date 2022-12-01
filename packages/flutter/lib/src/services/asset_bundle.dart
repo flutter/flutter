@@ -280,7 +280,7 @@ abstract class CachingAssetBundle extends AssetBundle {
         result = SynchronousFuture<T>(value);
         if (completer != null) {
           // The load and parse operation ran asynchronously. We already returned
-          // from the loadStructuredBinaryData function an thus the caller
+          // from the loadStructuredBinaryData function and therefore the caller
           // was given the future of the completer.
           completer.complete(value);
         }
@@ -292,14 +292,14 @@ abstract class CachingAssetBundle extends AssetBundle {
       // The above code ran synchronously. We can synchronously return the result.
       _structuredBinaryDataCache[key] = result!;
       return result!;
-    } else {
-      // Since the above code is being run asynchronously and thus hasn't run its
-      // `then` handler yet, we'll return a completer that will be completed
-      // when the handler does run.
-      completer = Completer<T>();
-      _structuredBinaryDataCache[key] = completer.future;
-      return completer.future;
     }
+
+    // Since the above code is being run asynchronously and thus hasn't run its
+    // `then` handler yet, we'll return a completer that will be completed
+    // when the handler does run.
+    completer = Completer<T>();
+    _structuredBinaryDataCache[key] = completer.future;
+    return completer.future;
   }
 
   @override
