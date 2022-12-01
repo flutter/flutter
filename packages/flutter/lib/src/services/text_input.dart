@@ -478,7 +478,7 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
-    this.contentInsertionMimeTypes = const <String>[],
+    this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
   }) : assert(inputType != null),
        assert(obscureText != null),
@@ -490,7 +490,7 @@ class TextInputConfiguration {
        assert(inputAction != null),
        assert(textCapitalization != null),
        assert(enableIMEPersonalizedLearning != null),
-       assert(contentInsertionMimeTypes != null),
+       assert(allowedMimeTypes != null),
        assert(enableDeltaModel != null);
 
   /// The type of information for which to optimize the text input control.
@@ -630,8 +630,8 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableIMEPersonalizedLearning;
 
-  /// {@macro flutter.widgets.contentInsertionConfiguration.contentInsertionMimeTypes}
-  final List<String> contentInsertionMimeTypes;
+  /// {@macro flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
+  final List<String> allowedMimeTypes;
 
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
@@ -649,7 +649,7 @@ class TextInputConfiguration {
     Brightness? keyboardAppearance,
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
-    List<String>? contentInsertionMimeTypes,
+    List<String>? allowedMimeTypes,
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
   }) {
@@ -666,7 +666,7 @@ class TextInputConfiguration {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
-      contentInsertionMimeTypes: contentInsertionMimeTypes ?? this.contentInsertionMimeTypes,
+      allowedMimeTypes: allowedMimeTypes ?? this.allowedMimeTypes,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
@@ -714,7 +714,7 @@ class TextInputConfiguration {
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
-      'contentCommitMimeTypes': contentInsertionMimeTypes,
+      'contentCommitMimeTypes': allowedMimeTypes,
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel' : enableDeltaModel,
     };

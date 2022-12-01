@@ -78,10 +78,10 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-/// The default mime types to be used when contentInsertionMimeTypes is not provided.
+/// The default mime types to be used when allowedMimeTypes is not provided.
 ///
 /// The default value supports inserting images of any supported format.
-const List<String> kDefaultContentInsertionMimeTypes = <String>[
+const List<String> _kDefaultContentInsertionMimeTypes = <String>[
   'image/png',
   'image/bmp',
   'image/jpg',
@@ -358,13 +358,13 @@ class ContentInsertionConfiguration {
   /// be supplied.
   ///
   /// The allowable mime types of inserted content may also
-  /// be provided via [contentInsertionMimeTypes], which cannot be an empty list.
+  /// be provided via [allowedMimeTypes], which cannot be an empty list.
   ContentInsertionConfiguration({
     required this.onContentInserted,
-    this.contentInsertionMimeTypes = kDefaultContentInsertionMimeTypes,
+    this.allowedMimeTypes = _kDefaultContentInsertionMimeTypes,
   }) : assert(onContentInserted != null),
-       assert(contentInsertionMimeTypes != null),
-       assert(contentInsertionMimeTypes.isNotEmpty);
+       assert(allowedMimeTypes != null),
+       assert(allowedMimeTypes.isNotEmpty);
 
   /// Called when a user inserts content through the virtual / on-screen keyboard,
   /// currently only used on Android.
@@ -384,14 +384,14 @@ class ContentInsertionConfiguration {
   ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
   final ValueChanged<KeyboardInsertedContent> onContentInserted;
 
-  /// {@template flutter.widgets.contentInsertionConfiguration.contentInsertionMimeTypes}
+  /// {@template flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
   /// Used when a user inserts image-based content through the device keyboard,
   /// currently only used on Android.
   ///
   /// The passed list of strings will determine which MIME types are allowed to
   /// be inserted via the device keyboard.
   ///
-  /// The default mime types are given by [kDefaultContentInsertionMimeTypes].
+  /// The default mime types are given by [_kDefaultContentInsertionMimeTypes].
   /// These are all the mime types that are able to be handled and inserted
   /// from keyboards.
   ///
@@ -407,7 +407,7 @@ class ContentInsertionConfiguration {
   ///
   ///  * <https://developer.android.com/guide/topics/text/image-keyboard>
   /// {@endtemplate}
-  final List<String> contentInsertionMimeTypes;
+  final List<String> allowedMimeTypes;
 }
 
 // A time-value pair that represents a key frame in an animation.
@@ -1681,16 +1681,23 @@ class EditableText extends StatefulWidget {
   /// Configuration of handler for media content inserted via the system input
   /// method.
   ///
-  /// By default, no handler will be created for inserted content. Set
-  /// [ContentInsertionConfiguration.onContentInserted] to provide a handler.
-  /// Additionally, set [ContentInsertionConfiguration.contentInsertionMimeTypes]
+  /// Defaults to null in which case media content insertion will be disabled,
+  /// and the system will display a message informing the user that the text field
+  /// does not support inserting media content.
+  ///
+  /// Set [ContentInsertionConfiguration.onContentInserted] to provide a handler.
+  /// Additionally, set [ContentInsertionConfiguration.allowedMimeTypes]
   /// to limit the allowable mime types for inserted content.
   ///
-  /// See [ContentInsertionConfiguration.onContentInserted] and
-  /// [ContentInsertionConfiguration.contentInsertionMimeTypes] for full examples
-  /// of using this parameter.
+  /// {@tool dartpad}
   ///
-  /// Note that if [contentInsertionConfiguration] is not provided, by default
+  /// This example shows how to access the data for inserted content in your
+  /// `TextField`.
+  ///
+  /// ** See code in examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart **
+  /// {@end-tool}
+  ///
+  /// If [contentInsertionConfiguration] is not provided, by default
   /// an empty list of mime types will be sent to the Flutter Engine.
   /// A handler function must be provided in order to customize the allowable
   /// mime types for inserted content.
@@ -1989,7 +1996,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration == null ? const <String>[] : contentInsertionConfiguration!.contentInsertionMimeTypes, defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[]));
   }
 }
 
@@ -2744,7 +2751,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertContent(KeyboardInsertedContent content) {
-    assert(widget.contentInsertionConfiguration?.contentInsertionMimeTypes.contains(content.mimeType ?? '') ?? false);
+    assert(widget.contentInsertionConfiguration?.allowedMimeTypes.contains(content.mimeType ?? '') ?? false);
     widget.contentInsertionConfiguration?.onContentInserted.call(content);
   }
 
@@ -3883,9 +3890,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: autofillConfiguration,
       enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-      contentInsertionMimeTypes: widget.contentInsertionConfiguration == null
+      allowedMimeTypes: widget.contentInsertionConfiguration == null
         ? const <String>[]
-        : widget.contentInsertionConfiguration!.contentInsertionMimeTypes,
+        : widget.contentInsertionConfiguration!.allowedMimeTypes,
     );
   }
 

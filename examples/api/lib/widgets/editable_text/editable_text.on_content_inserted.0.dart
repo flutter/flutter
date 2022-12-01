@@ -52,7 +52,7 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
           TextField(
             controller: _controller,
             contentInsertionConfiguration: ContentInsertionConfiguration(
-              contentInsertionMimeTypes: const <String>['image/png', 'image/gif'],
+              allowedMimeTypes: const <String>['image/png', 'image/gif'],
               onContentInserted: (KeyboardInsertedContent data) async {
                 if (data.data != null) {
                   setState(() {

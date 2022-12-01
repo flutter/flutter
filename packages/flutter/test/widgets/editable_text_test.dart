@@ -442,7 +442,7 @@ void main() {
                 onContentInserted: (KeyboardInsertedContent content) {
                   latestUri = content.uri;
                 },
-                contentInsertionMimeTypes: const <String>['image/gif'],
+                allowedMimeTypes: const <String>['image/gif'],
               ),
             ),
           ),
