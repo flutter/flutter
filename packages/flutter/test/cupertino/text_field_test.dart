@@ -1523,11 +1523,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     Text text = tester.widget<Text>(find.text('Paste'));
-    const CupertinoDynamicColor toolbarTextColor = CupertinoDynamicColor.withBrightness(
-      color: CupertinoColors.black,
-      darkColor: CupertinoColors.white,
-    );
-    expect(text.style!.color, toolbarTextColor);
+    expect(text.style!.color, CupertinoColors.white);
     expect(text.style!.fontSize, 14);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
@@ -1559,7 +1555,7 @@ void main() {
 
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
-    expect(text.style!.color, toolbarTextColor);
+    expect(text.style!.color, CupertinoColors.white);
     expect(text.style!.fontSize, 14);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
