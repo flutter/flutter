@@ -8,6 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
 
+double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
+  assert(originPosition != null);
+  final Offset offset = event.position - originPosition!.global;
+  return offset.distance;
+}
+
 // The possible states of a [TapAndDragGestureRecognizer].
 //
 // The recognizer advances from [ready] to [possible] when it starts tracking
@@ -445,18 +451,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // or the recognizer is disposed of then this value is reset.
   Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
 
-  // Whether the tap drifted past the tolerance defined by [kDoubleTapTouchSlop] in any subsequent
-  // tracked [PointerMoveEvent]s.
-  //
-  // This value default to false.
-  //
-  // If the tap does drift past the tolerance then all of the tracked state is reset except
-  // the [currentDown], [currentUp], [consecutiveTapCount], and [keysPressedOnDown]. This is because
-  // the [OneSequenceGestureRecognizer] may be handling a gesture that does accept a tap drift past
-  // the tolerance defined by [kDoubleTapTouchSlop], such as a drag, so it may still want access
-  // to the tracked tap state.
-  bool get pastTapTolerance => _pastTapTolerance;
-
   // The upper limit for the [consecutiveTapCount]. When this limit is reached
   // all tap related state is reset and a new tap series is tracked.
   //
@@ -468,7 +462,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   PointerUpEvent? _up;
   int _consecutiveTapCount = 0;
   Set<LogicalKeyboardKey>? _keysPressedOnDown;
-  bool _pastTapTolerance = false;
 
   bool _wonArena = false;
   OffsetPair? _originPosition;
@@ -487,7 +480,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       _tapTrackerReset();
     }
     _up = null;
-    _pastTapTolerance = false;
     _wonArena = false;
     if (_down != null && !_representsSameSeries(event)) {
       // The given tap does not match the specifications of the series of taps being tracked,
@@ -513,19 +505,12 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     }
   }
 
-  double _getGlobalDistance(PointerEvent event) {
-    assert(_originPosition != null);
-    final Offset offset = event.position - _originPosition!.global;
-    return offset.distance;
-  }
-
   @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
-      final bool isSlopPastTolerance = _getGlobalDistance(event) > kDoubleTapTouchSlop;
+      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > kDoubleTapTouchSlop;
 
       if (isSlopPastTolerance) {
-        _pastTapTolerance = true;
         _consecutiveTapTimerStop();
         _previousButtons = null;
         _lastTapOffset = null;
@@ -611,7 +596,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _keysPressedOnDown = null;
     _down = null;
     _up = null;
-    _pastTapTolerance = false;
   }
 }
 
@@ -854,6 +838,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   GestureDragCancelCallback? onDragCancel;
 
   // Tap related state.
+  bool _pastTapTolerance = false;
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
@@ -991,7 +976,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         break;
 
       case _DragState.possible:
-        if (pastTapTolerance) {
+        if (_pastTapTolerance) {
           // This means the pointer was not accepted as a tap.
           if (_wonArenaForPrimaryPointer) {
             // If the recognizer has already won the arena for the primary pointer being tracked
@@ -1024,6 +1009,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     _stopDeadlineTimer();
     _dragState = _DragState.ready;
+    _pastTapTolerance = false;
   }
 
   @override
@@ -1036,7 +1022,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // Receiving a [PointerMoveEvent], does not automatically mean the pointer
       // being tracked is doing a drag gesture. There is some drift that can happen
       // between the initial [PointerDownEvent] and subsequent [PointerMoveEvent]s,
-      // that drift is handled by the tap status tracker. Accessing [_TapStatusTracker.pastTapTolerance]
+      // that drift is handled by the tap status tracker. Accessing [_pastTapTolerance]
       // lets us know if our tap has moved past the acceptable tolerance. If the pointer
       // does not move past this tolerance than it is not considered a drag.
       //
@@ -1048,6 +1034,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // the pointer.
       if (event.buttons != _initialButtons) {
         _giveUpPointer(event.pointer);
+      }
+
+      final bool isSlopPastTolerance = _getGlobalDistance(event, _initialPosition) > kTouchSlop;
+
+      if (isSlopPastTolerance) {
+        _pastTapTolerance = true;
       }
 
       if (_dragState == _DragState.accepted) {
