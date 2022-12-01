@@ -81,7 +81,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// The default mime types to be used when allowedMimeTypes is not provided.
 ///
 /// The default value supports inserting images of any supported format.
-const List<String> _kDefaultContentInsertionMimeTypes = <String>[
+const List<String> kDefaultContentInsertionMimeTypes = <String>[
   'image/png',
   'image/bmp',
   'image/jpg',
@@ -361,7 +361,7 @@ class ContentInsertionConfiguration {
   /// be provided via [allowedMimeTypes], which cannot be an empty list.
   ContentInsertionConfiguration({
     required this.onContentInserted,
-    this.allowedMimeTypes = _kDefaultContentInsertionMimeTypes,
+    this.allowedMimeTypes = kDefaultContentInsertionMimeTypes,
   }) : assert(onContentInserted != null),
        assert(allowedMimeTypes != null),
        assert(allowedMimeTypes.isNotEmpty);
@@ -391,7 +391,7 @@ class ContentInsertionConfiguration {
   /// The passed list of strings will determine which MIME types are allowed to
   /// be inserted via the device keyboard.
   ///
-  /// The default mime types are given by [_kDefaultContentInsertionMimeTypes].
+  /// The default mime types are given by [kDefaultContentInsertionMimeTypes].
   /// These are all the mime types that are able to be handled and inserted
   /// from keyboards.
   ///
@@ -1996,7 +1996,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<bool>('enableInteractiveSelection', enableInteractiveSelection, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[]));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[], defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
   }
 }
 
