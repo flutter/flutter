@@ -43,11 +43,11 @@ void main() {
         theme: themeData,
         home: const Scaffold(
           body: Center(
-            child: DropdownMenu(
-              dropdownMenuEntries: <DropdownMenuEntry>[
-                DropdownMenuEntry(label: 'Item 0'),
-                DropdownMenuEntry(label: 'Item 1'),
-                DropdownMenuEntry(label: 'Item 2'),
+            child: DropdownMenu<int>(
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+                DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+                DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
               ],
             ),
           ),
@@ -122,11 +122,11 @@ void main() {
         theme: theme,
         home: const Scaffold(
           body: Center(
-            child: DropdownMenu(
-              dropdownMenuEntries: <DropdownMenuEntry>[
-                DropdownMenuEntry(label: 'Item 0'),
-                DropdownMenuEntry(label: 'Item 1'),
-                DropdownMenuEntry(label: 'Item 2'),
+            child: DropdownMenu<int>(
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+                DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+                DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
               ],
             ),
           ),
@@ -223,11 +223,11 @@ void main() {
           data: dropdownMenuTheme,
           child: const Scaffold(
             body: Center(
-              child: DropdownMenu(
-                dropdownMenuEntries: <DropdownMenuEntry>[
-                  DropdownMenuEntry(label: 'Item 0'),
-                  DropdownMenuEntry(label: 'Item 1'),
-                  DropdownMenuEntry(label: 'Item 2'),
+              child: DropdownMenu<int>(
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+                  DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
                 ],
               ),
             ),
@@ -326,7 +326,7 @@ void main() {
           data: dropdownMenuTheme,
           child: Scaffold(
             body: Center(
-              child: DropdownMenu(
+              child: DropdownMenu<int>(
                 textStyle: TextStyle(
                   color: Colors.pink,
                   backgroundColor: Colors.cyan,
@@ -345,10 +345,10 @@ void main() {
                   ),
                 ),
                 inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.deepPurple),
-                dropdownMenuEntries: const <DropdownMenuEntry>[
-                  DropdownMenuEntry(label: 'Item 0'),
-                  DropdownMenuEntry(label: 'Item 1'),
-                  DropdownMenuEntry(label: 'Item 2'),
+                dropdownMenuEntries: const <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+                  DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
                 ],
               ),
             ),
