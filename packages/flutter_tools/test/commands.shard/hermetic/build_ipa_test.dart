@@ -1545,7 +1545,7 @@ void main() {
 
     expect(
       testLogger.statusText,
-      contains('Warning: Launch image is set to the default placeholder. Replace with unique launch image.'),
+      contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.'),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1623,7 +1623,7 @@ void main() {
 
     expect(
       testLogger.statusText,
-      isNot(contains('Warning: Launch image is set to the default placeholder. Replace with unique launch image.')),
+      isNot(contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.')),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

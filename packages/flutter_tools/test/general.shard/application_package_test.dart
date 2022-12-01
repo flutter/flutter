@@ -543,9 +543,9 @@ void main() {
 }
 ''');
       final BuildableIOSApp iosApp = BuildableIOSApp(
-          IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
-          'com.foo.bar',
-          'Runner');
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner');
       final String launchImageDirSuffix = globals.fs.path.join(
         'Runner',
         'Assets.xcassets',

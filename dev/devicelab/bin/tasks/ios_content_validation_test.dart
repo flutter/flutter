@@ -50,7 +50,7 @@ Future<void> main() async {
           if (!output.contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')) {
             throw TaskResult.failure('Must validate template app icon.');
           }
-          if (!output.contains('Warning: Launch image is set to the default placeholder. Replace with unique launch image.')) {
+          if (!output.contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.')) {
             throw TaskResult.failure('Must validate template launch image.');
           }
         });
