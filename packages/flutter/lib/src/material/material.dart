@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'elevation_overlay.dart';
 import 'theme.dart';
@@ -430,7 +431,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
           color = theme.canvasColor;
           break;
         case MaterialType.card:
-          color = theme.cardTheme.color;
+          color = theme.cardTheme.color
+            ?? (theme.useMaterial3
+              ? theme.colorScheme.surface
+              : theme.brightness == Brightness.dark ? Colors.grey[800]! : Colors.white);
           break;
         case MaterialType.button:
         case MaterialType.circle:
@@ -450,10 +454,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
-      'If Material type is not MaterialType.transparency, a color must '
-      'either be passed in through the `color` property, or be defined '
-      'in the theme (ex. canvasColor != null if type is set to '
-      'MaterialType.canvas)',
+      'If Material type is not MaterialType.transparency, a null background '
+      'color is invalid.'
     );
     Widget? contents = widget.child;
     if (contents != null) {
