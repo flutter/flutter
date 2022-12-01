@@ -69,6 +69,7 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedTextColor,
     this.iconColor,
     this.collapsedIconColor,
+    this.dividerColor,
     this.shape,
     this.collapsedShape,
     this.clipBehavior,
@@ -258,6 +259,11 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final Color? collapsedTextColor;
 
+  /// Defines color for the divider when the [ExpansionTile] is expanded.
+  ///
+  /// {@macro flutter.material.divider.color}
+  final Color? dividerColor;
+
   /// The tile's border shape when the sublist is expanded.
   ///
   /// If this property is null, the [ExpansionTileThemeData.shape] is used. If that
@@ -444,10 +450,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    // Default for M2 and M3.
-    final Color dividerColor = theme.useMaterial3
-      ? colorScheme.outlineVariant
-      : theme.brightness == Brightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
+    final Color effectiveDividerColor = widget.dividerColor
+      ?? theme.dividerTheme.color
+      // Default for M3 and M2 [Divider.color].
+      ?? (theme.useMaterial3
+        ? colorScheme.outlineVariant
+        : theme.brightness == Brightness.dark ? const Color(0x1FFFFFFF) : const Color(0x1F000000));
     _borderTween
       ..begin = widget.collapsedShape
         ?? expansionTileTheme.collapsedShape
@@ -458,8 +466,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ..end = widget.shape
         ?? expansionTileTheme.collapsedShape
         ?? Border(
-          top: BorderSide(color: dividerColor),
-          bottom: BorderSide(color: dividerColor),
+          top: BorderSide(color: effectiveDividerColor),
+          bottom: BorderSide(color: effectiveDividerColor),
         );
     _headerColorTween
       ..begin = widget.collapsedTextColor
