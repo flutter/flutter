@@ -298,6 +298,10 @@ class AssetImage extends AssetBundleImageProvider {
     // See https://github.com/flutter/flutter/issues/114913.
     Future<_AssetManifest>? manifest;
 
+    // Since AssetBundle load calls can be synchronous (e.g. in the case of tests),
+    // it is not sufficient to only use catchError/onError or the onError parameter
+    // of Future.then--we also have to use a synchronous try/catch. Once google3
+    // tooling starts producing AssetManifest.bin, this block can be removed.
     try {
       manifest = chosenBundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
     } catch (error) {
