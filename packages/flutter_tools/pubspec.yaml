@@ -17,6 +17,7 @@ dependencies:
   crypto: 3.0.2
   file: 6.1.4
   flutter_template_images: 4.2.0
+  flutter_migrate: 0.0.1
   html: 0.15.1
   http: 0.13.5
   intl: 0.17.0
