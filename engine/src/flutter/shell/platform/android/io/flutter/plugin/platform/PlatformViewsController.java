@@ -1215,6 +1215,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
         // Hide overlay surfaces that aren't rendered in the current frame.
         overlayView.setVisibility(View.GONE);
+        flutterView.removeView(overlayView);
       }
     }
 
@@ -1306,5 +1307,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       flutterView.removeView(overlayLayerViews.valueAt(viewId));
     }
     overlayLayerViews.clear();
+  }
+
+  @VisibleForTesting
+  public SparseArray<PlatformOverlayView> getOverlayLayerViews() {
+    return overlayLayerViews;
   }
 }
