@@ -110,20 +110,6 @@ void main() {
     expect(material.color, cardTheme.color);
   });
 
-  testWidgets('ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
-    final ThemeData themeData = _themeData();
-
-    await tester.pumpWidget(MaterialApp(
-      theme: themeData,
-      home: const Scaffold(
-        body: Card(),
-      ),
-    ));
-
-    final Material material = _getCardMaterial(tester);
-    expect(material.color, themeData.cardColor);
-  });
-
   testWidgets('CardTheme customizes shape', (WidgetTester tester) async {
     const CardTheme cardTheme = CardTheme(
       color: Colors.white,
