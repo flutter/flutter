@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
 import 'card.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
@@ -483,6 +484,10 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     ]);
 
     // CARD
+    final Color resolvedSecondaryHeadingRowColor = widget.secondaryHeadingRowColor
+      ?? themeData.dataTableTheme.secondaryHeadingRowColor
+      // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
+      ?? (themeData.brightness == Brightness.dark ? Colors.grey[700]! : Colors.blue[50]!);
     return Card(
       semanticContainer: false,
       child: LayoutBuilder(
@@ -505,7 +510,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                       ),
                       child: Ink(
                         height: 64.0,
-                        color: _selectedRowCount > 0 ? widget.secondaryHeadingRowColor ?? themeData.dataTableTheme.secondaryHeadingRowColor : null,
+                        color: _selectedRowCount > 0 ? resolvedSecondaryHeadingRowColor : null,
                         child: Padding(
                           padding: const EdgeInsetsDirectional.only(start: 24, end: 14.0),
                           child: Row(
