@@ -964,8 +964,8 @@ class _TabBarState extends State<TabBar> {
     super.initState();
     // If indicatorSize is TabIndicatorSize.label, _tabKeys[i] is used to find
     // the width of tab widget i. See _IndicatorPainter.indicatorRect().
-    _tabKeys = List<GlobalKey>.filled(widget.tabs.length, GlobalKey());
-    _labelPaddings = List<EdgeInsetsGeometry>.filled(widget.tabs.length, EdgeInsets.zero);
+    _tabKeys = widget.tabs.map((Widget tab) => GlobalKey()).toList();
+    _labelPaddings = List<EdgeInsetsGeometry>.filled(widget.tabs.length, EdgeInsets.zero, growable: true);
   }
 
   Decoration _getIndicator() {
@@ -1104,7 +1104,7 @@ class _TabBarState extends State<TabBar> {
 
     if (widget.tabs.length > _tabKeys.length) {
       final int delta = widget.tabs.length - _tabKeys.length;
-      _tabKeys.addAll(List<GlobalKey>.filled(delta, GlobalKey()));
+      _tabKeys.addAll(List<GlobalKey>.generate(delta, (int n) => GlobalKey()));
       _labelPaddings.addAll(List<EdgeInsetsGeometry>.filled(delta, EdgeInsets.zero));
     } else if (widget.tabs.length < _tabKeys.length) {
       _tabKeys.removeRange(widget.tabs.length, _tabKeys.length);
