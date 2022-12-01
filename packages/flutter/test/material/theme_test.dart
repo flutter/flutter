@@ -273,48 +273,6 @@ void main() {
     expect(Theme.of(tester.element(find.text('dialog'))).brightness, equals(Brightness.light));
   });
 
-  testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (WidgetTester tester) async {
-    const Color green = Color(0xFF00FF00);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(scaffoldBackgroundColor: green),
-        home: Scaffold(
-          body: Center(
-            child: Builder(
-              builder: (BuildContext context) {
-                return GestureDetector(
-                  onTap: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const Scaffold(
-                          body: SizedBox(
-                            width: 200.0,
-                            height: 200.0,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: const Text('SHOW'),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('SHOW'));
-    await tester.pump(const Duration(seconds: 1));
-
-    final List<Material> materials = tester.widgetList<Material>(find.byType(Material)).toList();
-    expect(materials.length, equals(2));
-    expect(materials[0].color, green); // app scaffold
-    expect(materials[1].color, green); // dialog scaffold
-  });
-
   testWidgets('IconThemes are applied', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
