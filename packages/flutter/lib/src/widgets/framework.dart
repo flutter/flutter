@@ -4408,7 +4408,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// ```dart
   /// MyWidget(
-  ///   child: MyLookUpBoundary( // Uses an Element with the LookUpBoundary mixin.
+  ///   child: MyLookUpBoundary( // Has Element.isLookUpBoundary set to true.
   ///     child: Builder(
   ///       builder: (BuildContext context) {
   ///         MyWidget? widget = context.findAncestorWidgetOfExactType<MyWidget>(
