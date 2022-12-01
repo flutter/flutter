@@ -70,14 +70,15 @@ class UndoHistory<T> extends StatefulWidget {
   final Widget child;
 
   @override
-  State<UndoHistory<T>> createState() => _UndoHistoryState<T>();
+  State<UndoHistory<T>> createState() => UndoHistoryState<T>();
 }
 
 /// State for a [UndoHistory].
 ///
 /// Provides [undo], [redo], [canUndo], and [canRedo] for programmatic access
 /// to the undo state for custom undo and redo UI implementations.
-class _UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
+@visibleForTesting
+class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
   final _UndoStack<T> _stack = _UndoStack<T>();
   late final _Throttled<T> _throttledPush;
   Timer? _throttleTimer;
@@ -142,10 +143,12 @@ class _UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient 
     if (nextValue == _lastValue) {
       return;
     }
+    final T? lastValue = _lastValue;
     _lastValue = nextValue;
     _duringTrigger = true;
     try {
       widget.onTriggered(nextValue);
+      assert(widget.value.value == nextValue || widget.value.value == lastValue);
     } finally {
       _duringTrigger = false;
     }

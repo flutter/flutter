@@ -265,9 +265,11 @@ void main() {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
       final UndoHistoryController controller = UndoHistoryController();
       int Function(int newValue) valueToUse = (int value) => value;
+      final GlobalKey<UndoHistoryState<int>> key = GlobalKey<UndoHistoryState<int>>();
       await tester.pumpWidget(
         MaterialApp(
           home: UndoHistory<int>(
+            key: key,
             value: value,
             controller: controller,
             onTriggered: (int newValue) {
@@ -304,9 +306,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       valueToUse = (int value) => 3;
-      controller.undo();
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(controller.value.canUndo, false);
+      expect(() => key.currentState!.undo(), throwsAssertionError);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('changes should send setUndoState to the UndoManagerConnection on iOS', (WidgetTester tester) async {
