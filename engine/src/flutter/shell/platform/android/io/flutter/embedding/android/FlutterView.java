@@ -1289,6 +1289,13 @@ public class FlutterView extends FrameLayout
     }
     renderSurface.detachFromRenderer();
 
+    releaseImageView();
+
+    previousRenderSurface = null;
+    flutterEngine = null;
+  }
+
+  private void releaseImageView() {
     if (flutterImageView != null) {
       flutterImageView.closeImageReader();
       // Remove the FlutterImageView that was previously added by {@code convertToImageView} to
@@ -1297,8 +1304,6 @@ public class FlutterView extends FrameLayout
       removeView(flutterImageView);
       flutterImageView = null;
     }
-    previousRenderSurface = null;
-    flutterEngine = null;
   }
 
   @VisibleForTesting
@@ -1352,14 +1357,12 @@ public class FlutterView extends FrameLayout
     }
     renderSurface = previousRenderSurface;
     previousRenderSurface = null;
-    if (flutterEngine == null) {
-      flutterImageView.detachFromRenderer();
-      onDone.run();
-      return;
-    }
+
     final FlutterRenderer renderer = flutterEngine.getRenderer();
-    if (renderer == null) {
+
+    if (flutterEngine == null || renderer == null) {
       flutterImageView.detachFromRenderer();
+      releaseImageView();
       onDone.run();
       return;
     }
@@ -1377,6 +1380,7 @@ public class FlutterView extends FrameLayout
             onDone.run();
             if (!(renderSurface instanceof FlutterImageView) && flutterImageView != null) {
               flutterImageView.detachFromRenderer();
+              releaseImageView();
             }
           }
 
