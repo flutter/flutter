@@ -73,6 +73,7 @@ test_fixtures("file_fixtures") {
     "table_mountain_pz.png",
     "test_texture.frag",
     "types.h",
+    "wtf.otf",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]
