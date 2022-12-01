@@ -50,6 +50,11 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   // |DlImage|
   size_t GetApproximateByteSize() const override;
 
+  // |DlImage|
+  OwningContext owning_context() const override {
+    return OwningContext::kRaster;
+  }
+
  private:
   class ImageWrapper final : public std::enable_shared_from_this<ImageWrapper>,
                              public ContextListener {

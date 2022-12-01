@@ -9,11 +9,13 @@
 
 namespace impeller {
 
-sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture) {
+sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
+                                             OwningContext owning_context) {
   if (!texture) {
     return nullptr;
   }
-  return sk_sp<DlImageImpeller>(new DlImageImpeller(std::move(texture)));
+  return sk_sp<DlImageImpeller>(
+      new DlImageImpeller(std::move(texture), owning_context));
 }
 
 sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
@@ -33,8 +35,9 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
   return impeller::DlImageImpeller::Make(snapshot->texture);
 }
 
-DlImageImpeller::DlImageImpeller(std::shared_ptr<Texture> texture)
-    : texture_(std::move(texture)) {}
+DlImageImpeller::DlImageImpeller(std::shared_ptr<Texture> texture,
+                                 OwningContext owning_context)
+    : texture_(std::move(texture)), owning_context_(owning_context) {}
 
 // |DlImage|
 DlImageImpeller::~DlImageImpeller() = default;

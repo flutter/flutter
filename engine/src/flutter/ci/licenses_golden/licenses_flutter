@@ -1771,7 +1771,11 @@ FILE: ../../../flutter/lib/ui/painting/image_descriptor.h
 FILE: ../../../flutter/lib/ui/painting/image_dispose_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h
+FILE: ../../../flutter/lib/ui/painting/image_encoding_impeller.cc
+FILE: ../../../flutter/lib/ui/painting/image_encoding_impeller.h
 FILE: ../../../flutter/lib/ui/painting/image_encoding_impl.h
+FILE: ../../../flutter/lib/ui/painting/image_encoding_skia.cc
+FILE: ../../../flutter/lib/ui/painting/image_encoding_skia.h
 FILE: ../../../flutter/lib/ui/painting/image_encoding_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_filter.cc
 FILE: ../../../flutter/lib/ui/painting/image_filter.h
