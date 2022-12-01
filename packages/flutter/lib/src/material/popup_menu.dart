@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
@@ -1168,8 +1169,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If provided, the background color used for the menu.
   ///
   /// If this property is null, then [PopupMenuThemeData.color] is used.
-  /// If [PopupMenuThemeData.color] is also null, then
-  /// Theme.of(context).cardColor is used.
+  /// If that is also null, a default value is used.
   final Color? color;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -1363,6 +1363,9 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
   late final TextTheme _textTheme = _theme.textTheme;
+
+  @override
+  Color? get color => _theme.brightness == Brightness.dark ? Colors.grey[800]! : Colors.white;
 
   @override
   TextStyle? get textStyle => _textTheme.subtitle1;
