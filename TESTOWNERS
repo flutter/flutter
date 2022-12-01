@@ -304,7 +304,7 @@
 
 ## Packaging builders tests
 # Linux flutter_packaging_beta_linux
-flutter_packaging_beta_linux @godofredoc @flutter/infra
+Linux flutter_packaging_beta_linux @godofredoc @flutter/infra
 # Mac flutter_packaging_beta_mac
 flutter_packaging_beta_mac @godofredoc @flutter/infra
 # Mac_arm64 flutter_packaging_beta_mac_arm64
