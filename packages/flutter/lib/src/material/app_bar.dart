@@ -1085,9 +1085,12 @@ class _AppBarState extends State<AppBar> {
 
     // Allow the trailing actions to have their own theme if necessary.
     if (actions != null) {
-      actions = IconTheme.merge(
-        data: actionsIconTheme,
-        child: actions,
+      actions = Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: IconTheme.merge(
+          data: actionsIconTheme,
+          child: actions,
+        ),
       );
     }
 

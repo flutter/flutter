@@ -3760,4 +3760,28 @@ void main() {
     expect(tester.getTopLeft(find.byKey(titleKey)).dx, leadingWidth + 16.0);
     expect(tester.getSize(find.byKey(leadingKey)).width, leadingWidth);
   });
+
+  testWidgets('The AppBar actions should have a 4dp space for padding on the right by default', (WidgetTester tester) async {
+    Widget buildApp() {
+      return MaterialApp(
+        home: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Title'),
+                  actions: <Widget>[
+                    IconButton(icon: const Icon(Icons.more_vert), onPressed: () {},)
+                  ],
+                ),
+              );
+            }
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Offset actionTopRight = tester.getTopRight(find.widgetWithIcon(IconButton, Icons.more_vert));
+    final Offset appBarTopRight = tester.getTopRight(find.byType(AppBar));
+    expect(appBarTopRight.dx, actionTopRight.dx + 4.0);
+  });
 }
