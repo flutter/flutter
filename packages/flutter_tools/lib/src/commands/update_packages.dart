@@ -1436,18 +1436,7 @@ String generateFakePubspec(
     if (verbose) {
       globals.printStatus('WARNING: the following packages use hard-coded version constraints:');
     }
-    final Set<String> allTransitive = <String>{
-      for (final PubspecDependency dependency in dependencies)
-        dependency.name,
-    };
     kManuallyPinnedDependencies.forEach((String package, String version) {
-      // Don't add pinned dependency if it is not in the set of all transitive dependencies.
-      if (!allTransitive.contains(package)) {
-        if (verbose) {
-          globals.printStatus('Skipping $package because it was not transitive');
-        }
-        return;
-      }
       result.writeln('  $package: $version');
       if (verbose) {
         globals.printStatus('  - $package: $version');
