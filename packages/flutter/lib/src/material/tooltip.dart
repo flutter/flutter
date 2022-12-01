@@ -739,6 +739,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
     Widget result = Semantics(
+      container: true,
+      onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
+      onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
       tooltip: _excludeFromSemantics
           ? null
           : _tooltipMessage,
