@@ -2,6 +2,8 @@ package io.flutter.plugin.platform;
 
 import static android.os.Looper.getMainLooper;
 import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -1238,6 +1240,74 @@ public class PlatformViewsControllerTest {
     FlutterView newFlutterView = mock(FlutterView.class);
     platformViewsController.attachToView(newFlutterView);
     verify(newFlutterView, times(1)).addView(any(PlatformViewWrapper.class));
+  }
+
+  @Config(
+      shadows = {
+        ShadowFlutterSurfaceView.class,
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class
+      })
+  public void revertImageViewAndRemoveImageView() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    final int platformViewId = 0;
+    assertNull(platformViewsController.getPlatformViewById(platformViewId));
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+
+    final FlutterView flutterView = attach(jni, platformViewsController);
+
+    jni.onFirstFrame();
+
+    // Simulate create call from the framework.
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+
+    // The simulation creates an Overlay on top of the PlatformView
+    // This is going to be called `flutterView.convertToImageView`
+    platformViewsController.createOverlaySurface();
+    platformViewsController.onDisplayOverlaySurface(platformViewId, 0, 0, 10, 10);
+
+    // This will contain three views: Background ImageView、PlatformView、Overlay ImageView
+    assertEquals(flutterView.getChildCount(), 3);
+
+    FlutterImageView imageView = flutterView.getCurrentImageSurface();
+
+    // Make sure the ImageView is inside the current FlutterView.
+    assertTrue(imageView != null);
+    assertTrue(flutterView.indexOfChild(imageView) != -1);
+
+    // Make sure the overlayView is inside the current FlutterView
+    assertTrue(platformViewsController.getOverlayLayerViews().size() != 0);
+    PlatformOverlayView overlayView = platformViewsController.getOverlayLayerViews().get(0);
+    assertTrue(overlayView != null);
+    assertTrue(flutterView.indexOfChild(overlayView) != -1);
+
+    // Simulate in a new frame, there's no PlatformView, which is called
+    // `flutterView.revertImageView`. And register a `FlutterUiDisplayListener` callback.
+    // During callback execution it will invoke `flutterImageView.detachFromRenderer()`.
+    platformViewsController.onBeginFrame();
+    platformViewsController.onEndFrame();
+
+    // Invoke all registered `FlutterUiDisplayListener` callback
+    jni.onFirstFrame();
+
+    assertEquals(null, flutterView.getCurrentImageSurface());
+
+    // Make sure the background ImageVIew is not in the FlutterView
+    assertTrue(flutterView.indexOfChild(imageView) == -1);
+
+    // Make sure the overlay ImageVIew is not in the FlutterView
+    assertTrue(flutterView.indexOfChild(overlayView) == -1);
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
