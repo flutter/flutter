@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -45,9 +43,11 @@ void main() {
     Widget? containerThroughBoundary;
     Widget? containerStoppedAtBoundary;
 
+    final Key outerContainerKey = UniqueKey();
     final Key innerContainerKey = UniqueKey();
 
     await tester.pumpWidget(Container(
+      key: outerContainerKey,
       child: MyStatelessLookupBoundary(
         child: Container(
           key: innerContainerKey,
@@ -81,8 +81,8 @@ void main() {
         key: boundaryKey,
         child: Builder(
           builder: (BuildContext context) {
-            containerThroughBoundary = context.findAncestorStateOfType<_MyStatefulContainerState>();
-            containerStoppedAtBoundary = context.findAncestorStateOfType<_MyStatefulContainerState>(stopAtLookUpBoundary: true);
+            containerThroughBoundary = context.findAncestorStateOfType<MyStatefulContainerState>();
+            containerStoppedAtBoundary = context.findAncestorStateOfType<MyStatefulContainerState>(stopAtLookUpBoundary: true);
             boundaryThroughBoundary = context.findAncestorStateOfType<MyStatefulLookupBoundaryState>();
             boundaryStoppedAtBoundary = context.findAncestorStateOfType<MyStatefulLookupBoundaryState>(stopAtLookUpBoundary: true);
             return const SizedBox.expand();
@@ -109,8 +109,8 @@ void main() {
           key: innerKey,
           child: Builder(
             builder: (BuildContext context) {
-              containerThroughBoundary = context.findAncestorStateOfType<_MyStatefulContainerState>();
-              containerStoppedAtBoundary = context.findAncestorStateOfType<_MyStatefulContainerState>(stopAtLookUpBoundary: true);
+              containerThroughBoundary = context.findAncestorStateOfType<MyStatefulContainerState>();
+              containerStoppedAtBoundary = context.findAncestorStateOfType<MyStatefulContainerState>(stopAtLookUpBoundary: true);
               return const SizedBox.expand();
             },
           ),
@@ -178,8 +178,6 @@ void main() {
     expect(containerStoppedAtBoundary, equals(tester.renderObject(find.byKey(innerKey))));
   });
 
-  ///
-
   testWidgets('findRootAncestorStateOfType respects stopAtLookUpBoundary', (WidgetTester tester) async {
     State? containerThroughBoundary;
     State? containerStoppedAtBoundary;
@@ -199,8 +197,8 @@ void main() {
             key: innerBoundaryKey,
             child: Builder(
               builder: (BuildContext context) {
-                containerThroughBoundary = context.findRootAncestorStateOfType<_MyStatefulContainerState>();
-                containerStoppedAtBoundary = context.findRootAncestorStateOfType<_MyStatefulContainerState>(stopAtLookUpBoundary: true);
+                containerThroughBoundary = context.findRootAncestorStateOfType<MyStatefulContainerState>();
+                containerStoppedAtBoundary = context.findRootAncestorStateOfType<MyStatefulContainerState>(stopAtLookUpBoundary: true);
                 boundaryThroughBoundary = context.findRootAncestorStateOfType<MyStatefulLookupBoundaryState>();
                 boundaryStoppedAtBoundary = context.findRootAncestorStateOfType<MyStatefulLookupBoundaryState>(stopAtLookUpBoundary: true);
                 return const SizedBox.expand();
@@ -232,8 +230,8 @@ void main() {
           child: MyStatefulContainer(
             child: Builder(
               builder: (BuildContext context) {
-                containerThroughBoundary = context.findRootAncestorStateOfType<_MyStatefulContainerState>();
-                containerStoppedAtBoundary = context.findRootAncestorStateOfType<_MyStatefulContainerState>(stopAtLookUpBoundary: true);
+                containerThroughBoundary = context.findRootAncestorStateOfType<MyStatefulContainerState>();
+                containerStoppedAtBoundary = context.findRootAncestorStateOfType<MyStatefulContainerState>(stopAtLookUpBoundary: true);
                 return const SizedBox.expand();
               },
             ),
@@ -244,6 +242,118 @@ void main() {
 
     expect(containerThroughBoundary, equals(tester.state(find.byKey(outerRootKey))));
     expect(containerStoppedAtBoundary, equals(tester.state(find.byKey(innerRootKey))));
+  });
+
+  testWidgets('dependOnInheritedWidgetOfExactType respects stopAtLookUpBoundary', (WidgetTester tester) async {
+    InheritedWidget? containerThroughBoundary;
+    InheritedWidget? containerStoppedAtBoundary;
+    InheritedWidget? boundaryThroughBoundary;
+    InheritedWidget? boundaryStoppedAtBoundary;
+
+    final Key boundaryKey = UniqueKey();
+    final Key inheritedKey = UniqueKey();
+
+    await tester.pumpWidget(MyInheritedWidget(
+      key: inheritedKey,
+      child: MyInheritedLookUpBoundary(
+        key: boundaryKey,
+        child: Builder(
+          builder: (BuildContext context) {
+            containerThroughBoundary = context.dependOnInheritedWidgetOfExactType<MyInheritedWidget>();
+            containerStoppedAtBoundary = context.dependOnInheritedWidgetOfExactType<MyInheritedWidget>(stopAtLookUpBoundary: true);
+            boundaryThroughBoundary = context.dependOnInheritedWidgetOfExactType<MyInheritedLookUpBoundary>();
+            boundaryStoppedAtBoundary = context.dependOnInheritedWidgetOfExactType<MyInheritedLookUpBoundary>(stopAtLookUpBoundary: true);
+            return const SizedBox.expand();
+          },
+        ),
+      ),
+    ));
+
+    expect(containerThroughBoundary, equals(tester.widget(find.byKey(inheritedKey))));
+    expect(containerStoppedAtBoundary, isNull);
+    expect(boundaryThroughBoundary, equals(tester.widget(find.byKey(boundaryKey))));
+    expect(boundaryStoppedAtBoundary, equals(tester.widget(find.byKey(boundaryKey))));
+  });
+
+  testWidgets('dependOnInheritedWidgetOfExactType finds state before boundary', (WidgetTester tester) async {
+    InheritedWidget? containerThroughBoundary;
+    InheritedWidget? containerStoppedAtBoundary;
+
+    final Key inheritedKey = UniqueKey();
+
+    await tester.pumpWidget(MyInheritedWidget(
+      child: MyInheritedLookUpBoundary(
+        child: MyInheritedWidget(
+          key: inheritedKey,
+          child: Builder(
+            builder: (BuildContext context) {
+              containerThroughBoundary = context.dependOnInheritedWidgetOfExactType<MyInheritedWidget>();
+              containerStoppedAtBoundary = context.dependOnInheritedWidgetOfExactType<MyInheritedWidget>(stopAtLookUpBoundary: true);
+              return const SizedBox.expand();
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(containerThroughBoundary, equals(tester.widget(find.byKey(inheritedKey))));
+    expect(containerStoppedAtBoundary, equals(tester.widget(find.byKey(inheritedKey))));
+  });
+
+  testWidgets('getElementForInheritedWidgetOfExactType respects stopAtLookUpBoundary', (WidgetTester tester) async {
+    InheritedElement? containerThroughBoundary;
+    InheritedElement? containerStoppedAtBoundary;
+    InheritedElement? boundaryThroughBoundary;
+    InheritedElement? boundaryStoppedAtBoundary;
+
+    final Key boundaryKey = UniqueKey();
+    final Key inheritedKey = UniqueKey();
+
+    await tester.pumpWidget(MyInheritedWidget(
+      key: inheritedKey,
+      child: MyInheritedLookUpBoundary(
+        key: boundaryKey,
+        child: Builder(
+          builder: (BuildContext context) {
+            containerThroughBoundary = context.getElementForInheritedWidgetOfExactType<MyInheritedWidget>();
+            containerStoppedAtBoundary = context.getElementForInheritedWidgetOfExactType<MyInheritedWidget>(stopAtLookUpBoundary: true);
+            boundaryThroughBoundary = context.getElementForInheritedWidgetOfExactType<MyInheritedLookUpBoundary>();
+            boundaryStoppedAtBoundary = context.getElementForInheritedWidgetOfExactType<MyInheritedLookUpBoundary>(stopAtLookUpBoundary: true);
+            return const SizedBox.expand();
+          },
+        ),
+      ),
+    ));
+
+    expect(containerThroughBoundary, equals(tester.element(find.byKey(inheritedKey))));
+    expect(containerStoppedAtBoundary, isNull);
+    expect(boundaryThroughBoundary, equals(tester.element(find.byKey(boundaryKey))));
+    expect(boundaryStoppedAtBoundary, equals(tester.element(find.byKey(boundaryKey))));
+  });
+
+  testWidgets('getElementForInheritedWidgetOfExactType finds state before boundary', (WidgetTester tester) async {
+    InheritedElement? containerThroughBoundary;
+    InheritedElement? containerStoppedAtBoundary;
+
+    final Key inheritedKey = UniqueKey();
+
+    await tester.pumpWidget(MyInheritedWidget(
+      child: MyInheritedLookUpBoundary(
+        child: MyInheritedWidget(
+          key: inheritedKey,
+          child: Builder(
+            builder: (BuildContext context) {
+              containerThroughBoundary = context.getElementForInheritedWidgetOfExactType<MyInheritedWidget>();
+              containerStoppedAtBoundary = context.getElementForInheritedWidgetOfExactType<MyInheritedWidget>(stopAtLookUpBoundary: true);
+              return const SizedBox.expand();
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(containerThroughBoundary, equals(tester.element(find.byKey(inheritedKey))));
+    expect(containerStoppedAtBoundary, equals(tester.element(find.byKey(inheritedKey))));
   });
 }
 
@@ -294,10 +404,10 @@ class MyStatefulContainer extends StatefulWidget {
   final Widget child;
 
   @override
-  State<MyStatefulContainer> createState() => _MyStatefulContainerState();
+  State<MyStatefulContainer> createState() => MyStatefulContainerState();
 }
 
-class _MyStatefulContainerState extends State<MyStatefulContainer> {
+class MyStatefulContainerState extends State<MyStatefulContainer> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
@@ -316,4 +426,25 @@ class MyRenderObjectWidgetLookupBoundary extends SingleChildRenderObjectWidget {
 
 class MyRenderObjectWidgetLookupBoundaryElement extends SingleChildRenderObjectElement with LookUpBoundary {
   MyRenderObjectWidgetLookupBoundaryElement(super.widget);
+}
+
+class MyInheritedWidget extends InheritedWidget {
+  const MyInheritedWidget({super.key, required super.child});
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
+}
+
+class MyInheritedLookUpBoundary extends InheritedWidget {
+  const MyInheritedLookUpBoundary({super.key, required super.child});
+
+  @override
+  InheritedElement createElement() => MyInheritedElement(this);
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
+}
+
+class MyInheritedElement extends InheritedElement with LookUpBoundary {
+  MyInheritedElement(super.widget);
 }

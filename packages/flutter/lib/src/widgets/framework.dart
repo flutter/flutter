@@ -2262,7 +2262,11 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
+  ///
+  /// When `stopAtLookUpBoundary` is set to true, null is returned if
+  /// no inherited widget of the specified type exists between this
+  /// [BuildContext] and the closest ancestor [LookUpBoundary].
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect, bool stopAtLookUpBoundary = false });
 
   /// Obtains the element corresponding to the nearest widget of the given type `T`,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -2280,7 +2284,11 @@ abstract class BuildContext {
   /// [dependOnInheritedWidgetOfExactType] in [State.didChangeDependencies]. It is
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
-  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
+  ///
+  /// When `stopAtLookUpBoundary` is set to true, null is returned if
+  /// no inherited widget of the specified type exists between this
+  /// [BuildContext] and the closest ancestor [LookUpBoundary].
+  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>({bool stopAtLookUpBoundary = false});
 
   /// Returns the nearest ancestor widget of the given type `T`, which must be the
   /// type of a concrete [Widget] subclass.
@@ -3754,6 +3762,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner!._registerGlobalKey(key, this);
     }
     _updateInheritance();
+    _updateLookUpBoundary();
     attachNotificationTree();
   }
 
@@ -4105,6 +4114,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
+    _updateLookUpBoundary();
     attachNotificationTree();
     if (_dirty) {
       owner!.scheduleBuildFor(this);
@@ -4342,6 +4352,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   PersistentHashMap<Type, InheritedElement>? _inheritedWidgets;
+  Element? _lookUpBoundary; // The closest [LookUpBoundary] ancestor, or null if none exists.
   Set<InheritedElement>? _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
@@ -4381,20 +4392,23 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect, bool stopAtLookUpBoundary = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
-    if (ancestor != null) {
-      return dependOnInheritedElement(ancestor, aspect: aspect) as T;
+    if (ancestor == null || (stopAtLookUpBoundary && ancestor._lookUpBoundary != _lookUpBoundary)) {
+      _hadUnsatisfiedDependencies = true;
+      return null;
     }
-    _hadUnsatisfiedDependencies = true;
-    return null;
+    return dependOnInheritedElement(ancestor, aspect: aspect) as T;
   }
 
   @override
-  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+  InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>({bool stopAtLookUpBoundary = false}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedWidgets == null ? null : _inheritedWidgets![T];
+    if (stopAtLookUpBoundary && ancestor?._lookUpBoundary != _lookUpBoundary) {
+      return null;
+    }
     return ancestor;
   }
 
@@ -4415,6 +4429,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void _updateInheritance() {
     assert(_lifecycleState == _ElementLifecycle.active);
     _inheritedWidgets = _parent?._inheritedWidgets;
+  }
+
+  void _updateLookUpBoundary() {
+    _lookUpBoundary = this is LookUpBoundary ? this : _parent?._lookUpBoundary;
   }
 
   @override
@@ -6663,6 +6681,60 @@ bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
   return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }
 
+/// A [LookUpBoundary] controls what entities are available for lookup by
+/// descendants of the boundary via the various lookup methods provided on
+/// [BuildContext].
+///
+/// The lookup methods affected by a [LookUpBoundary] are:
+///
+///  * [BuildContext.dependOnInheritedWidgetOfExactType],
+///  * [BuildContext.getElementForInheritedWidgetOfExactType],
+///  * [BuildContext.findAncestorWidgetOfExactType],
+///  * [BuildContext.findAncestorStateOfType],
+///  * [BuildContext.findRootAncestorStateOfType], and
+///  * [BuildContext.findAncestorRenderObjectOfType].
+///
+/// When these methods are called with their `stopAtLookUpBoundary` parameter
+/// set to true, they do not return any ancestor entities of the [LookUpBoundary]
+/// closest to the [BuildContext] queried. If `stopAtLookUpBoundary` is set to
+/// false (the default), the [LookupBoundary] has no effect on the query.
+///
+/// {@tool snippet}
+///
+/// In the example below, the [BuildContext.findAncestorWidgetOfExactType] call
+/// returns null because the LookUpBoundary "hides" `MyWidget` from the
+/// [BuildContext] that was queried.
+///
+/// ```dart
+/// MyWidget(
+///   child: MyLookUpBoundary( // Uses an Element with the LookUpBoundary mixin.
+///     child: Builder(
+///       builder: (BuildContext context) {
+///         MyWidget? widget = context.findAncestorWidgetOfExactType<MyWidget>(
+///           findAncestorWidgetOfExactType: true,
+///         );
+///         return Text('$widget'); // "null"
+///       },
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// [LookUpBoundary]s are used in locations of the element tree where the
+/// render tree diverges from the element tree, which is rather uncommon.
+/// Such divergences are created by [RenderObjectElement]s that don't attach
+/// their [RenderObject] to the closest ancestor [RenderObjectElement]. This
+/// behavior breaks the assumption some widgets have about the structure of the
+/// render tree. These widgets may try to reach out to an ancestor widget,
+/// assuming that their associated [RenderObject]s are also ancestors. However,
+/// due to the divergence in the trees this may not be the case. At the point of
+/// the divergence a [LookUpBoundary] can be used to hide that ancestor from the
+/// querying widget.
+// TODO(goderbauer): Mention the View widget and the OverlayPortal here as an
+//   example for diverging element and render trees once those are available.
+///
+/// [Material.of] makes use of []
 mixin LookUpBoundary on Element {
-
+  // Left empty, this is just a marker interface used by the [Element] class.
 }
