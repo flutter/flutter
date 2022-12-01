@@ -565,7 +565,9 @@ class ThemeData with Diagnosticable {
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
     // TYPOGRAPHY & ICONOGRAPHY
-    typography ??= useMaterial3 ? Typography.material2021(platform: platform) : Typography.material2014(platform: platform);
+    typography ??= useMaterial3
+      ? Typography.material2021(platform: platform, colorScheme: colorScheme)
+      : Typography.material2014(platform: platform);
     TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
@@ -1291,43 +1293,57 @@ class ThemeData with Diagnosticable {
   ///
   /// <style>table,td,th { border-collapse: collapse; padding: 0.45em; } td { border: 1px solid }</style>
   ///
-  /// | Property        | Material 3 default           | Material 2 default        |
-  /// | :-------------- | :--------------------------- | :------------------------ |
-  /// | [typography]    | [Typography.material2021]    | [Typography.material2014] |
-  /// | [splashFactory] | [InkSparkle]* or [InkRipple] | [InkSplash]               |
+  /// | Property        | Material 3 default             | Material 2 default             |
+  /// | :-------------- | :----------------------------- | :----------------------------- |
+  /// | [colorScheme]   | M3 baseline light color scheme | M2 baseline light color scheme |
+  /// | [typography]    | [Typography.material2021]      | [Typography.material2014]      |
+  /// | [splashFactory] | [InkSparkle]* or [InkRipple]   | [InkSplash]                    |
   ///
   /// \* if the target platform is Android and the app is not
   /// running on the web, otherwise it will fallback to [InkRipple].
+  ///
+  /// If [brightness] is [Brightness.dark] then the default color scheme will
+  /// be either the M3 baseline dark color scheme or the M2 baseline dark color
+  /// scheme depending on [useMaterial3].
   ///
   /// ## Affected widgets
   ///
   /// This flag affects styles and components.
   ///
   /// ### Styles
-  ///   * Color: [ColorScheme], [Material]
+  ///   * Color: [ColorScheme], [Material] (see table above)
   ///   * Shape: (see components below)
-  ///   * Typography: `typography` (see table above)
+  ///   * Typography: [Typography] (see table above)
   ///
   /// ### Components
+  ///   * Badges: [Badge]
   ///   * Bottom app bar: [BottomAppBar]
+  ///   * Bottom sheets: [BottomSheet]
   ///   * Buttons
-  ///     - Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton], [IconButton]
+  ///     - Common buttons: [ElevatedButton], [FilledButton], [OutlinedButton], [TextButton]
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
+  ///     - Icon buttons: [IconButton]
   ///     - Segmented buttons: [SegmentedButton]
   ///   * Cards: [Card]
-  ///   * TextFields: [TextField] together with its [InputDecoration]
+  ///   * Checkbox: [Checkbox]
   ///   * Chips:
   ///     - [ActionChip] (used for Assist and Suggestion chips),
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
-  ///   * Checkbox: [Checkbox]
   ///   * Dialogs: [Dialog], [AlertDialog]
+  ///   * Divider: [Divider]
   ///   * Lists: [ListTile]
+  ///   * Menus: [MenuBar], [DropdownMenu]
   ///   * Navigation bar: [NavigationBar] (new, replacing [BottomNavigationBar])
-  ///   * [Navigation rail](https://m3.material.io/components/navigation-rail): [NavigationRail]
+  ///   * Navigation drawer: [NavigationDrawer]
+  ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio]
+  ///   * Snack bar: [SnackBar]
+  ///   * Slider: [Slider]
   ///   * Switch: [Switch]
+  ///   * Tabs: [TabBar]
+  ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Top app bar: [AppBar]
   ///
   /// In addition, this flag enables features introduced in Android 12.

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/slider/slider.1.dart' as example;
+import 'package:flutter_api_samples/material/slider/slider.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

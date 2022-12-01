@@ -358,6 +358,39 @@ void main() {
     expect(find.byType(TabBar), paints..line(color: Colors.blue[500]));
   });
 
+  testWidgets('TabBar default selected/unselected text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    const String selectedValue = 'A';
+    const String unSelectedValue = 'C';
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: buildFrame(tabs: tabs, value: selectedValue),
+      ),
+    );
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+
+    // Test selected label text style.
+    expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontFamily, 'Roboto');
+    expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontSize, 14.0);
+    expect(tester.renderObject<RenderParagraph>(
+      find.text(selectedValue)).text.style!.color,
+      theme.colorScheme.primary,
+    );
+
+    // Test unselected label text style.
+    expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontFamily, 'Roboto');
+    expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontSize, 14.0);
+    expect(tester.renderObject<RenderParagraph>(
+      find.text(unSelectedValue)).text.style!.color,
+      theme.colorScheme.onSurfaceVariant,
+    );
+  });
+
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
@@ -5309,6 +5342,69 @@ void main() {
           color: theme.colorScheme.primary.withOpacity(0.12),
         ),
     );
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('TabBar default selected/unselected text style', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      final List<String> tabs = <String>['A', 'B', 'C'];
+
+      const String selectedValue = 'A';
+      const String unSelectedValue = 'C';
+      await tester.pumpWidget(buildFrame(tabs: tabs, value: selectedValue));
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+
+      // Test selected label text style.
+      expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontFamily, 'Roboto');
+      expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontSize, 14.0);
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(selectedValue)).text.style!.color,
+        theme.primaryTextTheme.bodyLarge!.color,
+      );
+
+      // Test unselected label text style.
+      expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontFamily, 'Roboto');
+      expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontSize, 14.0);
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(unSelectedValue)).text.style!.color,
+        theme.primaryTextTheme.bodyLarge!.color!.withAlpha(0xB2) // 70% alpha,
+      );
+    });
+
+    testWidgets('TabBar default unselectedLabelColor inherits labelColor with 70% opacity', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/pull/116273
+      final List<String> tabs = <String>['A', 'B', 'C'];
+
+      const String selectedValue = 'A';
+      const String unSelectedValue = 'C';
+      const Color labelColor = Color(0xff0000ff);
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(tabBarTheme: const TabBarTheme(labelColor: labelColor)),
+          child: buildFrame(tabs: tabs, value: selectedValue),
+        ),
+      );
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+
+      // Test selected label color.
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(selectedValue)).text.style!.color,
+        labelColor,
+      );
+
+      // Test unselected label color.
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(unSelectedValue)).text.style!.color,
+        labelColor.withAlpha(0xB2) // 70% alpha,
+      );
+    });
   });
 }
 

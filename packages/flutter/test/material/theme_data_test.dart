@@ -72,15 +72,15 @@ void main() {
   test('light, dark and fallback constructors support useMaterial3', () {
     final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
     expect(lightTheme.useMaterial3, true);
-    expect(lightTheme.typography, Typography.material2021());
+    expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     expect(darkTheme.useMaterial3, true);
-    expect(darkTheme.typography, Typography.material2021());
+    expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
     final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
     expect(fallbackTheme.useMaterial3, true);
-    expect(fallbackTheme.typography, Typography.material2021());
+    expect(fallbackTheme.typography, Typography.material2021(colorScheme: fallbackTheme.colorScheme));
   });
 
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {

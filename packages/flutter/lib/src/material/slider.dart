@@ -41,7 +41,7 @@ enum _SliderType { material, adaptive }
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// {@tool dartpad}
-/// ![A slider widget, consisting of 5 divisions and showing the default value
+/// ![A legacy slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
 ///
 /// The Sliders value is part of the Stateful widget subclass to change the value
@@ -51,10 +51,17 @@ enum _SliderType { material, adaptive }
 /// {@end-tool}
 ///
 /// {@tool dartpad}
+/// This sample shows the creation of a [Slider] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/sliders/overview.
+///
+/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example shows a [Slider] widget using the [Slider.secondaryTrackValue]
 /// to show a secondary track in the slider.
 ///
-/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// ** See code in examples/api/lib/material/slider/slider.2.dart **
 /// {@end-tool}
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
