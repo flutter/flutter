@@ -86,7 +86,7 @@ enum BottomNavigationBarLandscapeLayout {
 ///    and [ColorScheme.secondary] for [Brightness.dark] themes.
 ///    If [backgroundColor] is null, The
 ///    navigation bar's background color defaults to the [Material] background
-///    color, [ThemeData.canvasColor] (essentially opaque white).
+///    color.
 ///  * [BottomNavigationBarType.shifting], the default when there are four
 ///    or more [items]. If [selectedItemColor] is null, all items are rendered
 ///    in white. The navigation bar's background color is the same as the

@@ -255,6 +255,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     // in the first 0.25s.
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final ThemeData theme = Theme.of(context);
     final _DropdownRoute<T> route = widget.route;
     final List<Widget> children = <Widget>[
       for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex)
@@ -272,7 +273,10 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
       opacity: _fadeOpacity,
       child: CustomPaint(
         painter: _DropdownMenuPainter(
-          color: widget.dropdownColor ?? Theme.of(context).canvasColor,
+          color: widget.dropdownColor
+            ?? (theme.useMaterial3
+              ? theme.colorScheme.background
+              : theme.brightness == Brightness.dark ? Colors.grey[850] : Colors.grey[50]),
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
           resize: _resize,
@@ -858,8 +862,9 @@ class DropdownButton<T> extends StatefulWidget {
   /// The [autofocus] argument must not be null.
   ///
   /// The [dropdownColor] argument specifies the background color of the
-  /// dropdown when it is open. If it is null, the current theme's
-  /// [ThemeData.canvasColor] will be used instead.
+  /// dropdown when it is open. If that is null and [ThemeData.useMaterial3] is
+  /// true, defaults to [ColorScheme.background]. Otherwise, defaults to M2
+  /// specification.
   DropdownButton({
     super.key,
     required this.items,
@@ -1124,8 +1129,8 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// The background color of the dropdown.
   ///
-  /// If it is not provided, the theme's [ThemeData.canvasColor] will be used
-  /// instead.
+  /// If that is null and [ThemeData.useMaterial3] is true, defaults to
+  /// [ColorScheme.background]. Otherwise, defaults to M2 specification.
   final Color? dropdownColor;
 
   /// The maximum height of the menu.

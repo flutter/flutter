@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'material.dart';
 import 'progress_indicator_theme.dart';
 import 'theme.dart';
@@ -761,8 +762,8 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   ///
   /// If [RefreshIndicator.backgroundColor] is null then the
   /// ambient [ProgressIndicatorThemeData.refreshBackgroundColor] will be used.
-  /// If that is null, then the ambient theme's [ThemeData.canvasColor]
-  /// will be used.
+  /// If that is null and [ThemeData.useMaterial3] is true, defaults to
+  /// [ColorScheme.background]. Otherwise, defaults to M2 specification.
   /// {@endtemplate}
   @override
   Color? get backgroundColor => super.backgroundColor;
@@ -835,6 +836,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   @override
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+    final ThemeData theme = Theme.of(context);
     final double? value = widget.value;
     final double arrowheadScale = value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
     final double rotation;
@@ -849,10 +851,12 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double opacity = valueColor.opacity;
     valueColor = valueColor.withOpacity(1.0);
 
-    final Color backgroundColor =
+    final Color? backgroundColor =
       widget.backgroundColor ??
       ProgressIndicatorTheme.of(context).refreshBackgroundColor ??
-      Theme.of(context).canvasColor;
+      (theme.useMaterial3
+        ? theme.colorScheme.background
+        : theme.brightness == Brightness.dark ? Colors.grey[850] : Colors.grey[50]);
 
     return widget._buildSemanticsWrapper(
       context: context,

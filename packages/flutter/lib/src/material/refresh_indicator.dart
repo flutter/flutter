@@ -186,8 +186,9 @@ class RefreshIndicator extends StatefulWidget {
   /// [ColorScheme.primary] by default.
   final Color? color;
 
-  /// The progress indicator's background color. The current theme's
-  /// [ThemeData.canvasColor] by default.
+  /// The progress indicator's background color. If [ThemeData.useMaterial3] is
+  /// true, defaults to [ColorScheme.background]. Otherwise, defaults to M2
+  /// specification.
   final Color? backgroundColor;
 
   /// A check that specifies whether a [ScrollNotification] should be

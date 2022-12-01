@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'elevation_overlay.dart';
 import 'theme.dart';
@@ -26,7 +27,8 @@ typedef RectCallback = Rect Function();
 ///  * [Material], in particular [Material.type].
 ///  * [kMaterialEdges]
 enum MaterialType {
-  /// Rectangle using default theme canvas color.
+  /// Rectangle using [ThemeData]'s [ColorScheme.background] if
+  /// [ThemeData.useMaterial3] is true, otherwise an opaque white.
   canvas,
 
   /// Rounded edges, card theme color.
@@ -427,7 +429,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     if (color == null) {
       switch (widget.type) {
         case MaterialType.canvas:
-          color = theme.canvasColor;
+          color = theme.useMaterial3
+            ? theme.colorScheme.background
+            : theme.brightness == Brightness.dark ? Colors.grey[850]! : Colors.grey[50];
           break;
         case MaterialType.card:
           color = theme.cardColor;
