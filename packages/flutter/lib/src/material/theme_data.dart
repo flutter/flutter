@@ -299,29 +299,18 @@ class ThemeData with Diagnosticable {
     bool? useMaterial3,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The other color
-    // properties (as well as primaryColorBrightness, and primarySwatch)
-    // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
+    /// [colorScheme] or [colorSchemeSeed] are the preferred way to configure
+    /// colors. The other color properties (as well as [primarySwatch]) will
+    /// gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
     Brightness? brightness,
-    Color? canvasColor,
-    Color? cardColor,
     ColorScheme? colorScheme,
     Color? colorSchemeSeed,
-    Color? dialogBackgroundColor,
     Color? disabledColor,
-    Color? dividerColor,
     Color? focusColor,
     Color? highlightColor,
-    Color? hintColor,
     Color? hoverColor,
-    Color? indicatorColor,
     Color? primaryColor,
-    Color? primaryColorDark,
-    Color? primaryColorLight,
     MaterialColor? primarySwatch,
-    Color? scaffoldBackgroundColor,
-    Color? secondaryHeaderColor,
-    Color? shadowColor,
     Color? splashColor,
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
@@ -452,6 +441,61 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
+    @Deprecated(
+      'Use materialTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? canvasColor,
+    @Deprecated(
+      'Use cardTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? cardColor,
+    @Deprecated(
+      'Use dialogTheme.backgroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? dialogBackgroundColor,
+    @Deprecated(
+      'Use dividerTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? dividerColor,
+    @Deprecated(
+      'Use inputDecorationTheme.hintColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? hintColor,
+    @Deprecated(
+      'Use tabBarTheme.indicatorColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? indicatorColor,
+    @Deprecated(
+      'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? primaryColorDark,
+    @Deprecated(
+      'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? primaryColorLight,
+    @Deprecated(
+      'Use dataTableTheme.secondaryHeadingRowColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? secondaryHeaderColor,
+    @Deprecated(
+      'Use scaffoldTheme.backgroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? scaffoldBackgroundColor,
+    @Deprecated(
+      'Use colorScheme.shadow instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? shadowColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -479,7 +523,7 @@ class ThemeData with Diagnosticable {
       ? useInkSparkle ? InkSparkle.splashFactory : InkRipple.splashFactory
       : InkSplash.splashFactory;
 
-    // COLOR
+    // COLOR. Note, some deprecated properties remain here for backwards compatibility.
     assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
     assert(colorSchemeSeed == null || colorScheme == null);
     assert(colorSchemeSeed == null || primarySwatch == null);
@@ -525,11 +569,8 @@ class ThemeData with Diagnosticable {
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
     hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
-    shadowColor ??= Colors.black;
-    canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
-    scaffoldBackgroundColor ??= canvasColor;
     cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
+    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     // Create a ColorScheme that is backwards compatible as possible
     // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
@@ -541,13 +582,6 @@ class ThemeData with Diagnosticable {
       errorColor: Colors.red[700],
       brightness: effectiveBrightness,
     );
-    selectedRowColor ??= Colors.grey[100]!;
-    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
-    // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
-    secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
-    dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     // The default [buttonTheme] is here because it doesn't use the defaults for
     // [disabledColor], [highlightColor], and [splashColor].
     buttonTheme ??= ButtonThemeData(
@@ -640,9 +674,19 @@ class ThemeData with Diagnosticable {
     buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
     primaryColorBrightness = estimatedPrimaryColorBrightness;
+    selectedRowColor ??= Colors.grey[100]!;
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
     bottomAppBarColor ??= colorSchemeSeed != null ? colorScheme.surface : isDark ? Colors.grey[800]! : Colors.white;
+    canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
+    dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
+    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
+    indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
+    scaffoldBackgroundColor ??= canvasColor;
+    // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
+    secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
+    shadowColor ??= Colors.black;
 
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
@@ -663,23 +707,12 @@ class ThemeData with Diagnosticable {
       useMaterial3: useMaterial3,
       visualDensity: visualDensity,
       // COLOR
-      canvasColor: canvasColor,
-      cardColor: cardColor,
       colorScheme: colorScheme,
-      dialogBackgroundColor: dialogBackgroundColor,
       disabledColor: disabledColor,
-      dividerColor: dividerColor,
       focusColor: focusColor,
       highlightColor: highlightColor,
-      hintColor: hintColor,
       hoverColor: hoverColor,
-      indicatorColor: indicatorColor,
       primaryColor: primaryColor,
-      primaryColorDark: primaryColorDark,
-      primaryColorLight: primaryColorLight,
-      scaffoldBackgroundColor: scaffoldBackgroundColor,
-      secondaryHeaderColor: secondaryHeaderColor,
-      shadowColor: shadowColor,
       splashColor: splashColor,
       unselectedWidgetColor: unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
@@ -745,6 +778,17 @@ class ThemeData with Diagnosticable {
       errorColor: errorColor,
       backgroundColor: backgroundColor,
       bottomAppBarColor: bottomAppBarColor,
+      canvasColor: canvasColor,
+      cardColor: cardColor,
+      dialogBackgroundColor: dialogBackgroundColor,
+      dividerColor: dividerColor,
+      hintColor: hintColor,
+      indicatorColor: indicatorColor,
+      primaryColorDark: primaryColorDark,
+      primaryColorLight: primaryColorLight,
+      secondaryHeaderColor: secondaryHeaderColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      shadowColor: shadowColor,
     );
   }
 
@@ -777,23 +821,12 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
-    required this.canvasColor,
-    required this.cardColor,
     required this.colorScheme,
-    required this.dialogBackgroundColor,
     required this.disabledColor,
-    required this.dividerColor,
     required this.focusColor,
     required this.highlightColor,
-    required this.hintColor,
     required this.hoverColor,
-    required this.indicatorColor,
     required this.primaryColor,
-    required this.primaryColorDark,
-    required this.primaryColorLight,
-    required this.scaffoldBackgroundColor,
-    required this.secondaryHeaderColor,
-    required this.shadowColor,
     required this.splashColor,
     required this.unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
@@ -921,7 +954,61 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
-
+    @Deprecated(
+      'Use materialTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? canvasColor,
+    @Deprecated(
+      'Use cardTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? cardColor,
+    @Deprecated(
+      'Use dialogTheme.backgroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? dialogBackgroundColor,
+    @Deprecated(
+      'Use dividerTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? dividerColor,
+    @Deprecated(
+      'Use inputDecorationTheme.hintColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? hintColor,
+    @Deprecated(
+      'Use tabBarTheme.indicatorColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? indicatorColor,
+    @Deprecated(
+      'Use dataTableTheme.secondaryHeadingRowColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? primaryColorDark,
+    @Deprecated(
+      'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? primaryColorLight,
+    @Deprecated(
+      'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? secondaryHeaderColor,
+    @Deprecated(
+      'Use scaffoldTheme.backgroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? scaffoldBackgroundColor,
+    @Deprecated(
+      'Use colorScheme.shadow instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? shadowColor,
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
        _accentColor = accentColor,
@@ -936,6 +1023,17 @@ class ThemeData with Diagnosticable {
        _errorColor = errorColor,
        _backgroundColor = backgroundColor,
        _bottomAppBarColor = bottomAppBarColor,
+       _canvasColor = canvasColor,
+       _cardColor = cardColor,
+       _dialogBackgroundColor = dialogBackgroundColor,
+       _dividerColor = dividerColor,
+       _hintColor = hintColor,
+       _indicatorColor = indicatorColor,
+       _secondaryHeaderColor = secondaryHeaderColor,
+       _primaryColorDark = primaryColorDark,
+       _primaryColorLight = primaryColorLight,
+       _scaffoldBackgroundColor = scaffoldBackgroundColor,
+       _shadowColor = shadowColor,
        // GENERAL CONFIGURATION
        assert(applyElevationOverlayColor != null),
        assert(extensions != null),
@@ -948,23 +1046,12 @@ class ThemeData with Diagnosticable {
        assert(useMaterial3 != null),
        assert(visualDensity != null),
         // COLOR
-       assert(canvasColor != null),
-       assert(cardColor != null),
        assert(colorScheme != null),
-       assert(dialogBackgroundColor != null),
        assert(disabledColor != null),
-       assert(dividerColor != null),
        assert(focusColor != null),
        assert(highlightColor != null),
-       assert(hintColor != null),
        assert(hoverColor != null),
-       assert(indicatorColor != null),
        assert(primaryColor != null),
-       assert(primaryColorDark != null),
-       assert(primaryColorLight != null),
-       assert(scaffoldBackgroundColor != null),
-       assert(secondaryHeaderColor != null),
-       assert(shadowColor != null),
        assert(splashColor != null),
        assert(toggleableActiveColor != null),
        assert(unselectedWidgetColor != null),
@@ -1026,7 +1113,19 @@ class ThemeData with Diagnosticable {
        assert(fixTextFieldOutlineLabel != null),
        assert(primaryColorBrightness != null),
        assert(errorColor != null),
-       assert(backgroundColor != null);
+       assert(backgroundColor != null),
+       assert(canvasColor != null),
+       assert(cardColor != null),
+       assert(dialogBackgroundColor != null),
+       assert(dividerColor != null),
+       assert(hintColor != null),
+       assert(indicatorColor != null),
+       assert(indicatorColor != null),
+       assert(primaryColorDark != null),
+       assert(primaryColorLight != null),
+       assert(secondaryHeaderColor != null),
+       assert(scaffoldBackgroundColor != null),
+       assert(shadowColor != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1391,44 +1490,21 @@ class ThemeData with Diagnosticable {
 
   // COLOR
 
-  /// The default color of the [BottomAppBar].
-    @Deprecated(
-      'Use BottomAppBarTheme.color instead. '
-      'This feature was deprecated after v3.3.0-0.6.pre.',
-    )
-  Color get bottomAppBarColor => _bottomAppBarColor!;
-  final Color? _bottomAppBarColor;
-
-  /// The default color of [MaterialType.canvas] [Material].
-  final Color canvasColor;
-
-  /// The color of [Material] when it is used as a [Card].
-  final Color cardColor;
-
-  /// A set of twelve colors that can be used to configure the
-  /// color properties of most components.
+  /// A set of colors that are used to configure the color properties of all
+  /// components.
   ///
   /// This property was added much later than the theme's set of highly
   /// specific colors, like [cardColor], [buttonColor], [canvasColor] etc.
   /// New components can be defined exclusively in terms of [colorScheme].
   /// Existing components will gradually migrate to it, to the extent
   /// that is possible without significant backwards compatibility breaks.
+  // TODO(guidezpl): add code sample, mention colorSchemeSeed, etc.
   final ColorScheme colorScheme;
-
-  /// The background color of [Dialog] elements.
-  final Color dialogBackgroundColor;
 
   /// The color used for widgets that are inoperative, regardless of
   /// their state. For example, a disabled checkbox (which may be
   /// checked or unchecked).
   final Color disabledColor;
-
-  /// The color of [Divider]s and [PopupMenuDivider]s, also used
-  /// between [ListTile]s, between rows in [DataTable]s, and so forth.
-  ///
-  /// To create an appropriate [BorderSide] that uses this color, consider
-  /// [Divider.createBorderSide].
-  final Color dividerColor;
 
   /// The focus color used indicate that a component has the input focus.
   final Color focusColor;
@@ -1437,16 +1513,9 @@ class ThemeData with Diagnosticable {
   /// indicate an item in a menu is selected.
   final Color highlightColor;
 
-  /// The color to use for hint text or placeholder text, e.g. in
-  /// [TextField] fields.
-  final Color hintColor;
-
   /// The hover color used to indicate when a pointer is hovering over a
   /// component.
   final Color hoverColor;
-
-  /// The color of the selected tab indicator in a tab bar.
-  final Color indicatorColor;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   ///
@@ -1455,41 +1524,6 @@ class ThemeData with Diagnosticable {
   /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
   /// visuals in terms of the theme's [colorScheme].
   final Color primaryColor;
-
-  /// A darker version of the [primaryColor].
-  final Color primaryColorDark;
-
-  /// A lighter version of the [primaryColor].
-  final Color primaryColorLight;
-
-  /// The default color of the [Material] that underlies the [Scaffold]. The
-  /// background color for a typical material app or a page within the app.
-  final Color scaffoldBackgroundColor;
-
-  /// The color of the header of a [PaginatedDataTable] when there are selected rows.
-  // According to the spec for data tables:
-  // https://material.io/archive/guidelines/components/data-tables.html#data-tables-tables-within-cards
-  // ...this should be the "50-value of secondary app color".
-  final Color secondaryHeaderColor;
-
-  /// The color used to highlight selected rows.
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  Color get selectedRowColor => _selectedRowColor!;
-  final Color? _selectedRowColor;
-
-  /// The color that the [Material] widget uses to draw elevation shadows.
-  ///
-  /// Defaults to fully opaque black.
-  ///
-  /// Shadows can be difficult to see in a dark theme, so the elevation of a
-  /// surface should be rendered with an "overlay" in addition to the shadow.
-  /// As the elevation of the component increases, the overlay increases in
-  /// opacity. The [applyElevationOverlayColor] property turns the elevation
-  /// overlay on or off for dark themes.
-  final Color shadowColor;
 
   /// The color of ink splashes.
   ///
@@ -1812,6 +1846,25 @@ class ThemeData with Diagnosticable {
   )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
+  /// The color used to highlight the active states of toggleable widgets like
+  /// [Switch], [Radio], and [Checkbox].
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'For more information, consult the migration guide at '
+    'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
+    'This feature was deprecated after v3.4.0-19.0.pre.',
+  )
+  Color get toggleableActiveColor => _toggleableActiveColor!;
+  final Color? _toggleableActiveColor;
+
+  /// The color used to highlight selected rows.
+  @Deprecated(
+    'No longer used by the framework, please remove any reference to it. '
+    'This feature was deprecated after v3.1.0-0.0.pre.',
+  )
+  Color get selectedRowColor => _selectedRowColor!;
+  final Color? _selectedRowColor;
+
   /// Obsolete property that was used for input validation errors, e.g. in
   /// [TextField] fields. Use [ColorScheme.error] instead.
   @Deprecated(
@@ -1830,19 +1883,110 @@ class ThemeData with Diagnosticable {
   Color get backgroundColor => _backgroundColor!;
   final Color? _backgroundColor;
 
-  /// The color used to highlight the active states of toggleable widgets like
-  /// [Switch], [Radio], and [Checkbox].
+  /// The default color of the [BottomAppBar].
+    @Deprecated(
+      'Use BottomAppBarTheme.color instead. '
+      'This feature was deprecated after v3.3.0-0.6.pre.',
+    )
+  Color get bottomAppBarColor => _bottomAppBarColor!;
+  final Color? _bottomAppBarColor;
+
+  /// Obsolete property that was used as the default color for [Material] of
+  /// type [MaterialType.canvas].
   @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'For more information, consult the migration guide at '
-    'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
-    'This feature was deprecated after v3.4.0-19.0.pre.',
+    'Use materialTheme.color instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
   )
-  Color get toggleableActiveColor => _toggleableActiveColor!;
-  final Color? _toggleableActiveColor;
+  Color get canvasColor => _canvasColor!;
+  final Color? _canvasColor;
+
+  /// Obsolete property that was used as the default color for [Material] of
+  /// type [MaterialType.card].
+  @Deprecated(
+    'Use cardTheme.color instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get cardColor => _cardColor!;
+  final Color? _cardColor;
+
+  /// Obsolete property that was used as the background color of [Dialog] elements.
+  @Deprecated(
+    'Use dialogTheme.backgroundColor instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get dialogBackgroundColor => _dialogBackgroundColor!;
+  final Color? _dialogBackgroundColor;
+
+  /// Obsolete property that was used as the color of various dividers.
+  @Deprecated(
+    'Use dividerTheme.color instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get dividerColor => _dividerColor!;
+  final Color? _dividerColor;
+
+  /// Obsolete property that was used for hint text or placeholder text.
+  @Deprecated(
+    'Use inputDecorationTheme.hintColor instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get hintColor => _hintColor!;
+  final Color? _hintColor;
+
+  /// Obsolete property that was used as the color of the selected tab
+  /// indicator in a tab bar.
+  @Deprecated(
+    'Use tabBarTheme.indicatorColor instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get indicatorColor => _indicatorColor!;
+  final Color? _indicatorColor;
+
+  /// Obsolete property which was used as the foreground color for
+  /// [CircleAvatar]s.
+  @Deprecated(
+    'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get primaryColorDark => _primaryColorDark!;
+  final Color? _primaryColorDark;
+
+  /// Obsolete property which was used as the foreground color for
+  /// [CircleAvatar]s.
+  @Deprecated(
+    'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+    Color get primaryColorLight => _primaryColorLight!;
+  final Color? _primaryColorLight;
+
+  /// Obsolete property that was used as the color of the header of a
+  /// [PaginatedDataTable] when there are selected rows.
+  @Deprecated(
+    'Use dataTableTheme.secondaryHeadingRowColor instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get secondaryHeaderColor => _secondaryHeaderColor!;
+  final Color? _secondaryHeaderColor;
+
+  /// Obsolete property that was used for the [Material] that underlies [Scaffold].
+  @Deprecated(
+    'Use scaffoldTheme.backgroundColor instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get scaffoldBackgroundColor => _scaffoldBackgroundColor!;
+  final Color? _scaffoldBackgroundColor;
+
+  /// Obsolete property that was used by [Material] to draw elevation shadows.
+  /// Use [ColorScheme.shadow] instead.
+  @Deprecated(
+    'Use colorScheme.shadow instead. '
+    'This feature was deprecated after v3.6.0-0.1.pre.',
+  )
+  Color get shadowColor => _shadowColor!;
+  final Color? _shadowColor;
 
   // The number 5 was chosen without any real science or research behind it. It
-
   // copies of ThemeData in memory comfortably) and not too small (most apps
   // shouldn't have more than 5 theme/localization pairs).
   static const int _localizedThemeDataCacheSize = 5;
@@ -1874,23 +2018,12 @@ class ThemeData with Diagnosticable {
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     Brightness? brightness,
-    Color? canvasColor,
-    Color? cardColor,
     ColorScheme? colorScheme,
-    Color? dialogBackgroundColor,
     Color? disabledColor,
-    Color? dividerColor,
     Color? focusColor,
     Color? highlightColor,
-    Color? hintColor,
     Color? hoverColor,
-    Color? indicatorColor,
     Color? primaryColor,
-    Color? primaryColorDark,
-    Color? primaryColorLight,
-    Color? scaffoldBackgroundColor,
-    Color? secondaryHeaderColor,
-    Color? shadowColor,
     Color? splashColor,
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
@@ -2018,6 +2151,61 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
+    @Deprecated(
+      'Use materialTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? canvasColor,
+    @Deprecated(
+      'Use cardTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? cardColor,
+    @Deprecated(
+      'Use dialogTheme.backgroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? dialogBackgroundColor,
+    @Deprecated(
+      'Use dividerTheme.color instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? dividerColor,
+    @Deprecated(
+      'Use inputDecorationTheme.hintColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? hintColor,
+    @Deprecated(
+      'Use tabBarTheme.indicatorColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? indicatorColor,
+    @Deprecated(
+      'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? primaryColorDark,
+    @Deprecated(
+      'Use CircleAvatar.backgroundColor or CircleAvatar.foregroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? primaryColorLight,
+    @Deprecated(
+      'Use dataTableTheme.secondaryHeadingRowColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? secondaryHeaderColor,
+    @Deprecated(
+      'Use scaffoldTheme.backgroundColor instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? scaffoldBackgroundColor,
+    @Deprecated(
+      'Use colorScheme.shadow instead. '
+      'This feature was deprecated after v3.6.0-0.1.pre.',
+    )
+    Color? shadowColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -2039,23 +2227,12 @@ class ThemeData with Diagnosticable {
       useMaterial3: useMaterial3 ?? this.useMaterial3,
       visualDensity: visualDensity ?? this.visualDensity,
       // COLOR
-      canvasColor: canvasColor ?? this.canvasColor,
-      cardColor: cardColor ?? this.cardColor,
       colorScheme: (colorScheme ?? this.colorScheme).copyWith(brightness: brightness),
-      dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
       disabledColor: disabledColor ?? this.disabledColor,
-      dividerColor: dividerColor ?? this.dividerColor,
       focusColor: focusColor ?? this.focusColor,
       highlightColor: highlightColor ?? this.highlightColor,
-      hintColor: hintColor ?? this.hintColor,
       hoverColor: hoverColor ?? this.hoverColor,
-      indicatorColor: indicatorColor ?? this.indicatorColor,
       primaryColor: primaryColor ?? this.primaryColor,
-      primaryColorDark: primaryColorDark ?? this.primaryColorDark,
-      primaryColorLight: primaryColorLight ?? this.primaryColorLight,
-      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
-      secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
-      shadowColor: shadowColor ?? this.shadowColor,
       splashColor: splashColor ?? this.splashColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
@@ -2121,6 +2298,17 @@ class ThemeData with Diagnosticable {
       errorColor: errorColor ?? _errorColor,
       backgroundColor: backgroundColor ?? _backgroundColor,
       bottomAppBarColor: bottomAppBarColor ?? _bottomAppBarColor,
+      canvasColor: canvasColor ?? this.canvasColor,
+      cardColor: cardColor ?? this.cardColor,
+      dialogBackgroundColor: dialogBackgroundColor ?? _dialogBackgroundColor,
+      dividerColor: dividerColor ?? _dividerColor,
+      hintColor: hintColor ?? _hintColor,
+      indicatorColor: indicatorColor ?? _indicatorColor,
+      primaryColorDark: primaryColorDark ?? this.primaryColorDark,
+      primaryColorLight: primaryColorLight ?? this.primaryColorLight,
+      secondaryHeaderColor: secondaryHeaderColor ?? _secondaryHeaderColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+      shadowColor: shadowColor ?? this.shadowColor,
     );
   }
   // just seemed like a number that's not too big (we should be able to fit 5
@@ -2239,23 +2427,12 @@ class ThemeData with Diagnosticable {
       useMaterial3: t < 0.5 ? a.useMaterial3 : b.useMaterial3,
       visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       // COLOR
-      canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t)!,
-      cardColor: Color.lerp(a.cardColor, b.cardColor, t)!,
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
-      dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t)!,
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t)!,
-      dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t)!,
       focusColor: Color.lerp(a.focusColor, b.focusColor, t)!,
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
-      hintColor: Color.lerp(a.hintColor, b.hintColor, t)!,
       hoverColor: Color.lerp(a.hoverColor, b.hoverColor, t)!,
-      indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t)!,
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
-      primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t)!,
-      primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t)!,
-      scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t)!,
-      secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t)!,
-      shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
       splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
       // TYPOGRAPHY & ICONOGRAPHY
@@ -2321,6 +2498,17 @@ class ThemeData with Diagnosticable {
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
+      canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t),
+      cardColor: Color.lerp(a.cardColor, b.cardColor, t),
+      dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t),
+      dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
+      hintColor: Color.lerp(a.hintColor, b.hintColor, t),
+      indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
+      primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t),
+      primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
+      secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t),
+      scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t),
+      shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t),
     );
   }
 
@@ -2348,23 +2536,12 @@ class ThemeData with Diagnosticable {
         other.useMaterial3 == useMaterial3 &&
         other.visualDensity == visualDensity &&
         // COLOR
-        other.canvasColor == canvasColor &&
-        other.cardColor == cardColor &&
         other.colorScheme == colorScheme &&
-        other.dialogBackgroundColor == dialogBackgroundColor &&
         other.disabledColor == disabledColor &&
-        other.dividerColor == dividerColor &&
         other.focusColor == focusColor &&
         other.highlightColor == highlightColor &&
-        other.hintColor == hintColor &&
         other.hoverColor == hoverColor &&
-        other.indicatorColor == indicatorColor &&
         other.primaryColor == primaryColor &&
-        other.primaryColorDark == primaryColorDark &&
-        other.primaryColorLight == primaryColorLight &&
-        other.scaffoldBackgroundColor == scaffoldBackgroundColor &&
-        other.secondaryHeaderColor == secondaryHeaderColor &&
-        other.shadowColor == shadowColor &&
         other.splashColor == splashColor &&
         other.unselectedWidgetColor == unselectedWidgetColor &&
         // TYPOGRAPHY & ICONOGRAPHY
@@ -2429,7 +2606,18 @@ class ThemeData with Diagnosticable {
         other.selectedRowColor == selectedRowColor &&
         other.errorColor == errorColor &&
         other.backgroundColor == backgroundColor &&
-        other.bottomAppBarColor == bottomAppBarColor;
+        other.bottomAppBarColor == bottomAppBarColor &&
+        other.canvasColor == canvasColor &&
+        other.cardColor == cardColor &&
+        other.dialogBackgroundColor == dialogBackgroundColor &&
+        other.dividerColor == dividerColor &&
+        other.hintColor == hintColor &&
+        other.indicatorColor == indicatorColor &&
+        other.primaryColorDark == primaryColorDark &&
+        other.primaryColorLight == primaryColorLight &&
+        other.secondaryHeaderColor == secondaryHeaderColor &&
+        other.scaffoldBackgroundColor == scaffoldBackgroundColor &&
+        other.shadowColor == shadowColor;
   }
 
   @override
@@ -2454,23 +2642,12 @@ class ThemeData with Diagnosticable {
       useMaterial3,
       visualDensity,
       // COLOR
-      canvasColor,
-      cardColor,
       colorScheme,
-      dialogBackgroundColor,
       disabledColor,
-      dividerColor,
       focusColor,
       highlightColor,
-      hintColor,
       hoverColor,
-      indicatorColor,
       primaryColor,
-      primaryColorDark,
-      primaryColorLight,
-      scaffoldBackgroundColor,
-      secondaryHeaderColor,
-      shadowColor,
       splashColor,
       unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
@@ -2536,6 +2713,17 @@ class ThemeData with Diagnosticable {
       errorColor,
       backgroundColor,
       bottomAppBarColor,
+      canvasColor,
+      cardColor,
+      dialogBackgroundColor,
+      dividerColor,
+      hintColor,
+      indicatorColor,
+      primaryColorDark,
+      primaryColorLight,
+      secondaryHeaderColor,
+      scaffoldBackgroundColor,
+      shadowColor,
     ];
     return Object.hashAll(values);
   }
@@ -2562,23 +2750,12 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('useMaterial3', useMaterial3, defaultValue: defaultData.useMaterial3, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity, level: DiagnosticLevel.debug));
     // COLORS
-    properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.debug));
     // TYPOGRAPHY & ICONOGRAPHY
@@ -2644,6 +2821,17 @@ class ThemeData with Diagnosticable {
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('primaryColorDark', primaryColorDark, defaultValue: defaultData.primaryColorDark, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('primaryColorLight', primaryColorLight, defaultValue: defaultData.primaryColorLight, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.debug));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor, level: DiagnosticLevel.debug));
   }
 }
 

@@ -26,6 +26,1113 @@
 #     * TextTheme: fix_text_theme.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'ColorScheme.shadow'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'shadowColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.shadow'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'ColorScheme.shadow'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "shadowColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.light().copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+    - if: "shadowColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "shadowColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+    - if: "shadowColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      shadowColor:
+        kind: 'fragment'
+        value: 'arguments[shadowColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'ColorScheme.shadow'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "shadowColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.light().copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch == '' && colorScheme ==''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+    - if: "shadowColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "shadowColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+    - if: "shadowColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      shadowColor:
+        kind: 'fragment'
+        value: 'arguments[shadowColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'ColorScheme.shadow'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "shadowColor != '' && primarySwatch == '' && colorScheme == ''"
+      changes:
+        - kind: 'addParameter'
+          index: 56
+          name: 'colorScheme'
+          style: optional_named
+          argumentValue:
+            expression: 'ColorScheme.light().copyWith(shadow: {% shadowColor %})'
+            requiredIf: "shadowColor != '' && primarySwatch == '' && colorScheme == ''"
+        - kind: 'removeParameter'
+          name: 'shadowColor'
+    - if: "shadowColor != '' && primarySwatch != '' && colorScheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.fromSwatch(primarySwatch: {% primarySwatch %}).copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch != '' && colorScheme == ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    - if: "shadowColor != '' && primarySwatch == '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch == '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+    - if: "shadowColor != '' && primarySwatch != '' && colorScheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'colorScheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 56
+        name: 'colorScheme'
+        style: optional_named
+        argumentValue:
+          expression: '{% colorScheme %}.copyWith(primarySwatch: {% primarySwatch %}, shadow: {% shadowColor %})'
+          requiredIf: "shadowColor != '' && primarySwatch != '' && colorScheme != ''"
+      - kind: 'removeParameter'
+        name: 'shadowColor'
+      - kind: 'removeParameter'
+        name: 'primarySwatch'
+    variables:
+      shadowColor:
+        kind: 'fragment'
+        value: 'arguments[shadowColor]'
+      primarySwatch:
+        kind: 'fragment'
+        value: 'arguments[primarySwatch]'
+      colorScheme:
+        kind: 'fragment'
+        value: 'arguments[colorScheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "secondaryHeaderColor != '' && dataTableTheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 96
+        name: 'dataTableTheme'
+        style: optional_named
+        argumentValue:
+          expression: "DataTableThemeData(secondaryHeadingRowColor: {% secondaryHeaderColor %})"
+          requiredIf: "secondaryHeaderColor != '' && dataTableTheme == ''"
+      - kind: 'removeParameter'
+        name: 'secondaryHeaderColor'
+    - if: "secondaryHeaderColor != '' && dataTableTheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'dataTableTheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 97
+        name: 'dataTableTheme'
+        style: optional_named
+        argumentValue:
+          expression: "{% dataTableTheme %}.copyWith(secondaryHeadingRowColor: {% secondaryHeaderColor %})"
+          requiredIf: "secondaryHeaderColor != '' && dataTableTheme != ''"
+      - kind: 'removeParameter'
+        name: 'secondaryHeaderColor'
+    variables:
+      dataTableTheme:
+        kind: 'fragment'
+        value: 'arguments[dataTableTheme]'
+      secondaryHeaderColor:
+        kind: 'fragment'
+        value: 'arguments[secondaryHeaderColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'secondaryHeaderColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'dataTableTheme'
+      style: optional_named
+      argumentValue:
+        expression: "DataTableThemeData(secondaryHeadingRowColor: {% secondaryHeaderColor %})"
+        requiredIf: "secondaryHeaderColor != '' && dataTableTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'dataTableTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% dataTableTheme %}.copyWith(secondaryHeadingRowColor: {% secondaryHeaderColor %})"
+        requiredIf: "secondaryHeaderColor != '' && dataTableTheme != ''"
+    variables:
+      dataTableTheme:
+        kind: 'fragment'
+        value: 'arguments[dataTableTheme]'
+      secondaryHeaderColor:
+        kind: 'fragment'
+        value: 'arguments[secondaryHeaderColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'secondaryHeaderColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'dataTableTheme'
+      style: optional_named
+      argumentValue:
+        expression: "DataTableThemeData(secondaryHeadingRowColor: {% secondaryHeaderColor %})"
+        requiredIf: "secondaryHeaderColor != '' && dataTableTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'dataTableTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% dataTableTheme %}.copyWith(secondaryHeadingRowColor: {% secondaryHeaderColor %})"
+        requiredIf: "secondaryHeaderColor != '' && dataTableTheme != ''"
+    variables:
+      dataTableTheme:
+        kind: 'fragment'
+        value: 'arguments[dataTableTheme]'
+      secondaryHeaderColor:
+        kind: 'fragment'
+        value: 'arguments[secondaryHeaderColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dataTableTheme.secondaryHeadingRowColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'secondaryHeaderColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'dataTableTheme.secondaryHeadingRowColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Simpler than similar fixes, tests, because corresponding theme is newly introduced and does not
+  # need to be accounted for.
+  - title: "Migrate to 'scaffoldTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'scaffoldBackgroundColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'scaffoldTheme'
+      style: optional_named
+      argumentValue:
+        expression: "ScaffoldThemeData(backgroundColor: {% scaffoldBackgroundColor %})"
+        requiredIf: "scaffoldBackgroundColor != ''"
+    variables:
+      scaffoldBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[scaffoldBackgroundColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Simpler than similar fixes, tests, because corresponding theme is newly introduced and does not
+  # need to be accounted for.
+  - title: "Migrate to 'scaffoldTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'scaffoldBackgroundColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'scaffoldTheme'
+      style: optional_named
+      argumentValue:
+        expression: "ScaffoldThemeData(backgroundColor: {% scaffoldBackgroundColor %})"
+        requiredIf: "scaffoldBackgroundColor != ''"
+    variables:
+      scaffoldBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[scaffoldBackgroundColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  # Simpler than similar fixes, tests, because corresponding theme is newly introduced and does not
+  # need to be accounted for.
+  - title: "Migrate to 'scaffoldTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'scaffoldBackgroundColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'scaffoldTheme'
+      style: optional_named
+      argumentValue:
+        expression: "ScaffoldThemeData(backgroundColor: {% scaffoldBackgroundColor %})"
+        requiredIf: "scaffoldBackgroundColor != ''"
+    variables:
+      scaffoldBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[scaffoldBackgroundColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'scaffoldTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'scaffoldBackgroundColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'scaffoldTheme.backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'primaryColorLight'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorLight'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'primaryColorLight'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorLight'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'primaryColorLight'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorLight'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'primaryColorDark'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorDark'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'primaryColorDark'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorDark'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'primaryColorDark'"
+    date: 2022-09-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'primaryColorDark'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'tabBarTheme.indicatorColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "indicatorColor != '' && tabBarTheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 96
+        name: 'tabBarTheme'
+        style: optional_named
+        argumentValue:
+          expression: "TabBarTheme(indicatorColor: {% indicatorColor %})"
+          requiredIf: "indicatorColor != '' && tabBarTheme == ''"
+      - kind: 'removeParameter'
+        name: 'indicatorColor'
+    - if: "indicatorColor != '' && tabBarTheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'tabBarTheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 97
+        name: 'tabBarTheme'
+        style: optional_named
+        argumentValue:
+          expression: "{% tabBarTheme %}.copyWith(indicatorColor: {% indicatorColor %})"
+          requiredIf: "indicatorColor != '' && tabBarTheme != ''"
+      - kind: 'removeParameter'
+        name: 'indicatorColor'
+    variables:
+      tabBarTheme:
+        kind: 'fragment'
+        value: 'arguments[tabBarTheme]'
+      indicatorColor:
+        kind: 'fragment'
+        value: 'arguments[indicatorColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'tabBarTheme.indicatorColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'indicatorColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'tabBarTheme'
+      style: optional_named
+      argumentValue:
+        expression: "TabBarTheme(indicatorColor: {% indicatorColor %})"
+        requiredIf: "indicatorColor != '' && tabBarTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'tabBarTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% tabBarTheme %}.copyWith(indicatorColor: {% indicatorColor %})"
+        requiredIf: "indicatorColor != '' && tabBarTheme != ''"
+    variables:
+      tabBarTheme:
+        kind: 'fragment'
+        value: 'arguments[tabBarTheme]'
+      indicatorColor:
+        kind: 'fragment'
+        value: 'arguments[indicatorColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'tabBarTheme.indicatorColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'indicatorColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'tabBarTheme'
+      style: optional_named
+      argumentValue:
+        expression: "TabBarTheme(indicatorColor: {% indicatorColor %})"
+        requiredIf: "indicatorColor != '' && tabBarTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'tabBarTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% tabBarTheme %}.copyWith(indicatorColor: {% indicatorColor %})"
+        requiredIf: "indicatorColor != '' && tabBarTheme != ''"
+    variables:
+      tabBarTheme:
+        kind: 'fragment'
+        value: 'arguments[tabBarTheme]'
+      indicatorColor:
+        kind: 'fragment'
+        value: 'arguments[indicatorColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'tabBarTheme.indicatorColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'indicatorColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'tabBarTheme.indicatorColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'inputDecorationTheme.hintColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "hintColor != '' && inputDecorationTheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 96
+        name: 'inputDecorationTheme'
+        style: optional_named
+        argumentValue:
+          expression: "InputDecorationTheme(hintColor: {% hintColor %})"
+          requiredIf: "hintColor != '' && inputDecorationTheme == ''"
+      - kind: 'removeParameter'
+        name: 'hintColor'
+    - if: "hintColor != '' && inputDecorationTheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'inputDecorationTheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 97
+        name: 'inputDecorationTheme'
+        style: optional_named
+        argumentValue:
+          expression: "{% inputDecorationTheme %}.copyWith(hintColor: {% hintColor %})"
+          requiredIf: "hintColor != '' && inputDecorationTheme != ''"
+      - kind: 'removeParameter'
+        name: 'hintColor'
+    variables:
+      inputDecorationTheme:
+        kind: 'fragment'
+        value: 'arguments[inputDecorationTheme]'
+      hintColor:
+        kind: 'fragment'
+        value: 'arguments[hintColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'inputDecorationTheme.hintColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'hintColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'inputDecorationTheme'
+      style: optional_named
+      argumentValue:
+        expression: "InputDecorationTheme(hintColor: {% hintColor %})"
+        requiredIf: "hintColor != '' && inputDecorationTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'inputDecorationTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% inputDecorationTheme %}.copyWith(hintColor: {% hintColor %})"
+        requiredIf: "hintColor != '' && inputDecorationTheme != ''"
+    variables:
+      inputDecorationTheme:
+        kind: 'fragment'
+        value: 'arguments[inputDecorationTheme]'
+      hintColor:
+        kind: 'fragment'
+        value: 'arguments[hintColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'inputDecorationTheme.hintColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'hintColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'inputDecorationTheme'
+      style: optional_named
+      argumentValue:
+        expression: "InputDecorationTheme(hintColor: {% hintColor %})"
+        requiredIf: "hintColor != '' && inputDecorationTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'inputDecorationTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% inputDecorationTheme %}.copyWith(hintColor: {% hintColor %})"
+        requiredIf: "hintColor != '' && inputDecorationTheme != ''"
+    variables:
+      inputDecorationTheme:
+        kind: 'fragment'
+        value: 'arguments[inputDecorationTheme]'
+      hintColor:
+        kind: 'fragment'
+        value: 'arguments[hintColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'inputDecorationTheme.hintColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'hintColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'inputDecorationTheme.hintColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dividerTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "dividerColor != '' && dividerTheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 96
+        name: 'dividerTheme'
+        style: optional_named
+        argumentValue:
+          expression: "DividerThemeData(color: {% dividerColor %})"
+          requiredIf: "dividerColor != '' && dividerTheme == ''"
+      - kind: 'removeParameter'
+        name: 'dividerColor'
+    - if: "dividerColor != '' && dividerTheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'dividerTheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 97
+        name: 'dividerTheme'
+        style: optional_named
+        argumentValue:
+          expression: "{% dividerTheme %}.copyWith(color: {% dividerColor %})"
+          requiredIf: "dividerColor != '' && dividerTheme != ''"
+      - kind: 'removeParameter'
+        name: 'dividerColor'
+    variables:
+      dividerTheme:
+        kind: 'fragment'
+        value: 'arguments[dividerTheme]'
+      dividerColor:
+        kind: 'fragment'
+        value: 'arguments[dividerColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dividerTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'dividerColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'dividerTheme'
+      style: optional_named
+      argumentValue:
+        expression: "DividerThemeData(color: {% dividerColor %})"
+        requiredIf: "dividerColor != '' && dividerTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'dividerTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% dividerTheme %}.copyWith(color: {% dividerColor %})"
+        requiredIf: "dividerColor != '' && dividerTheme != ''"
+    variables:
+      dividerTheme:
+        kind: 'fragment'
+        value: 'arguments[dividerTheme]'
+      dividerColor:
+        kind: 'fragment'
+        value: 'arguments[dividerColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dividerTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'dividerColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'dividerTheme'
+      style: optional_named
+      argumentValue:
+        expression: "DividerThemeData(color: {% dividerColor %})"
+        requiredIf: "dividerColor != '' && dividerTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'dividerTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% dividerTheme %}.copyWith(color: {% dividerColor %})"
+        requiredIf: "dividerColor != '' && dividerTheme != ''"
+    variables:
+      dividerTheme:
+        kind: 'fragment'
+        value: 'arguments[dividerTheme]'
+      dividerColor:
+        kind: 'fragment'
+        value: 'arguments[dividerColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dividerTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'dividerColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'dividerTheme.color'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dialogTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "dialogBackgroundColor != '' && dialogTheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 96
+        name: 'dialogTheme'
+        style: optional_named
+        argumentValue:
+          expression: "DialogTheme(backgroundColor: {% dialogBackgroundColor %})"
+          requiredIf: "dialogBackgroundColor != '' && dialogTheme == ''"
+      - kind: 'removeParameter'
+        name: 'dialogBackgroundColor'
+    - if: "dialogBackgroundColor != '' && dialogTheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'dialogTheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 97
+        name: 'dialogTheme'
+        style: optional_named
+        argumentValue:
+          expression: "{% dialogTheme %}.copyWith(backgroundColor: {% dialogBackgroundColor %})"
+          requiredIf: "dialogBackgroundColor != '' && dialogTheme != ''"
+      - kind: 'removeParameter'
+        name: 'dialogBackgroundColor'
+    variables:
+      dialogTheme:
+        kind: 'fragment'
+        value: 'arguments[dialogTheme]'
+      dialogBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[dialogBackgroundColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dialogTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'dialogBackgroundColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'dialogTheme'
+      style: optional_named
+      argumentValue:
+        expression: "DialogTheme(backgroundColor: {% dialogBackgroundColor %})"
+        requiredIf: "dialogBackgroundColor != '' && dialogTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'dialogTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% dialogTheme %}.copyWith(backgroundColor: {% dialogBackgroundColor %})"
+        requiredIf: "dialogBackgroundColor != '' && dialogTheme != ''"
+    variables:
+      dialogTheme:
+        kind: 'fragment'
+        value: 'arguments[dialogTheme]'
+      dialogBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[dialogBackgroundColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dialogTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'dialogBackgroundColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'dialogTheme'
+      style: optional_named
+      argumentValue:
+        expression: "DialogTheme(backgroundColor: {% dialogBackgroundColor %})"
+        requiredIf: "dialogBackgroundColor != '' && dialogTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'dialogTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% dialogTheme %}.copyWith(backgroundColor: {% dialogBackgroundColor %})"
+        requiredIf: "dialogBackgroundColor != '' && dialogTheme != ''"
+    variables:
+      dialogTheme:
+        kind: 'fragment'
+        value: 'arguments[dialogTheme]'
+      dialogBackgroundColor:
+        kind: 'fragment'
+        value: 'arguments[dialogBackgroundColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'dialogTheme.backgroundColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'dialogBackgroundColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'dialogTheme.backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'cardTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    oneOf:
+    - if: "cardColor != '' && cardTheme == ''"
+      changes:
+      - kind: 'addParameter'
+        index: 96
+        name: 'cardTheme'
+        style: optional_named
+        argumentValue:
+          expression: "CardTheme(color: {% cardColor %})"
+          requiredIf: "cardColor != '' && cardTheme == ''"
+      - kind: 'removeParameter'
+        name: 'cardColor'
+    - if: "cardColor != '' && cardTheme != ''"
+      changes:
+      - kind: 'removeParameter'
+        name: 'cardTheme' # Remove to add back with modification
+      - kind: 'addParameter'
+        index: 97
+        name: 'cardTheme'
+        style: optional_named
+        argumentValue:
+          expression: "{% cardTheme %}.copyWith(color: {% cardColor %})"
+          requiredIf: "cardColor != '' && cardTheme != ''"
+      - kind: 'removeParameter'
+        name: 'cardColor'
+    variables:
+      cardTheme:
+        kind: 'fragment'
+        value: 'arguments[cardTheme]'
+      cardColor:
+        kind: 'fragment'
+        value: 'arguments[cardColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'cardTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'cardColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'cardTheme'
+      style: optional_named
+      argumentValue:
+        expression: "CardTheme(color: {% cardColor %})"
+        requiredIf: "cardColor != '' && cardTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'cardTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% cardTheme %}.copyWith(color: {% cardColor %})"
+        requiredIf: "cardColor != '' && cardTheme != ''"
+    variables:
+      cardTheme:
+        kind: 'fragment'
+        value: 'arguments[cardTheme]'
+      cardColor:
+        kind: 'fragment'
+        value: 'arguments[cardColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'cardTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+    - kind: 'removeParameter'
+      name: 'cardColor'
+    - kind: 'addParameter'
+      index: 96
+      name: 'cardTheme'
+      style: optional_named
+      argumentValue:
+        expression: "CardTheme(color: {% cardColor %})"
+        requiredIf: "cardColor != '' && cardTheme == ''"
+    - kind: 'addParameter'
+      index: 97
+      name: 'cardTheme'
+      style: optional_named
+      argumentValue:
+        expression: "{% cardTheme %}.copyWith(color: {% cardColor %})"
+        requiredIf: "cardColor != '' && cardTheme != ''"
+    variables:
+      cardTheme:
+        kind: 'fragment'
+        value: 'arguments[cardTheme]'
+      cardColor:
+        kind: 'fragment'
+        value: 'arguments[cardColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'cardTheme.color'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'cardColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'cardTheme.color'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'canvasColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'canvasColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'canvasColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'raw'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'canvasColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Remove 'canvasColor'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'canvasColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  - title: "Migrate to 'ColorScheme.background'"
+    date: 2022-12-02
+    element:
+      uris: [ 'material.dart' ]
+      field: 'canvasColor'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'rename'
+        newName: 'colorScheme.background'
+
   # Changes made in https://github.com/flutter/flutter/pull/87281
   - title: "Remove 'fixTextFieldOutlineLabel'"
     date: 2021-04-30

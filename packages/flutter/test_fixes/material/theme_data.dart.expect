@@ -440,4 +440,166 @@ void main() {
   themeData = ThemeData(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
   themeData = ThemeData.raw(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
   themeData = ThemeData.copyWith(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.colorScheme.background;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(cardTheme: CardTheme(color: Colors.black));
+  themeData = ThemeData(
+    cardTheme: CardTheme(color: Colors.black),
+  );
+  themeData = ThemeData(
+    cardTheme: CardTheme().copyWith(color: Colors.black),
+  );
+  themeData = ThemeData.raw(cardTheme: CardTheme(color: Colors.black));
+  themeData = ThemeData.raw(
+    cardTheme: CardTheme(), cardTheme: CardTheme().copyWith(color: Colors.black),
+  );
+  themeData = themeData.copyWith(cardTheme: CardTheme(color: Colors.black));
+  themeData = themeData.copyWith(
+    cardTheme: CardTheme(), cardTheme: CardTheme().copyWith(color: Colors.black),
+  );
+  themeData.cardTheme.color;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(dialogTheme: DialogTheme(backgroundColor: Colors.black));
+  themeData = ThemeData(
+    dialogTheme: DialogTheme(backgroundColor: Colors.black),
+  );
+  themeData = ThemeData(
+    dialogTheme: DialogTheme().copyWith(backgroundColor: Colors.black),
+  );
+  themeData = ThemeData.raw(dialogTheme: DialogTheme(backgroundColor: Colors.black));
+  themeData = ThemeData.raw(
+    dialogTheme: DialogTheme(), dialogTheme: DialogTheme().copyWith(backgroundColor: Colors.black),
+  );
+  themeData = themeData.copyWith(dialogTheme: DialogTheme(backgroundColor: Colors.black));
+  themeData = themeData.copyWith(
+    dialogTheme: DialogTheme(), dialogTheme: DialogTheme().copyWith(backgroundColor: Colors.black),
+  );
+  themeData.dialogTheme.backgroundColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(dividerTheme: DividerThemeData(color: Colors.black));
+  themeData = ThemeData(
+    dividerTheme: DividerThemeData(color: Colors.black),
+  );
+  themeData = ThemeData(
+    dividerTheme: DividerThemeData().copyWith(color: Colors.black),
+  );
+  themeData = ThemeData.raw(dividerTheme: DividerThemeData(color: Colors.black));
+  themeData = ThemeData.raw(
+    dividerTheme: DividerThemeData(), dividerTheme: DividerThemeData().copyWith(color: Colors.black),
+  );
+  themeData = themeData.copyWith(dividerTheme: DividerThemeData(color: Colors.black));
+  themeData = themeData.copyWith(
+    dividerTheme: DividerThemeData(), dividerTheme: DividerThemeData().copyWith(color: Colors.black),
+  );
+  themeData.dividerTheme.color;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(inputDecorationTheme: InputDecorationTheme(hintColor: Colors.black));
+  themeData = ThemeData(
+    inputDecorationTheme: InputDecorationTheme(hintColor: Colors.black),
+  );
+  themeData = ThemeData(
+    inputDecorationTheme: InputDecorationTheme().copyWith(hintColor: Colors.black),
+  );
+  themeData = ThemeData.raw(inputDecorationTheme: InputDecorationTheme(hintColor: Colors.black));
+  themeData = ThemeData.raw(
+    inputDecorationTheme: InputDecorationTheme(), inputDecorationTheme: InputDecorationTheme().copyWith(hintColor: Colors.black),
+  );
+  themeData = themeData.copyWith(inputDecorationTheme: InputDecorationTheme(hintColor: Colors.black));
+  themeData = themeData.copyWith(
+    inputDecorationTheme: InputDecorationTheme(), inputDecorationTheme: InputDecorationTheme().copyWith(hintColor: Colors.black),
+  );
+  themeData.inputDecorationTheme.hintColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(tabBarTheme: TabBarTheme(indicatorColor: Colors.black));
+  themeData = ThemeData(
+    tabBarTheme: TabBarTheme(indicatorColor: Colors.black),
+  );
+  themeData = ThemeData(
+    tabBarTheme: TabBarTheme().copyWith(indicatorColor: Colors.black),
+  );
+  themeData = ThemeData.raw(tabBarTheme: TabBarTheme(indicatorColor: Colors.black));
+  themeData = ThemeData.raw(
+    tabBarTheme: TabBarTheme(), tabBarTheme: TabBarTheme().copyWith(indicatorColor: Colors.black),
+  );
+  themeData = themeData.copyWith(tabBarTheme: TabBarTheme(indicatorColor: Colors.black));
+  themeData = themeData.copyWith(
+    tabBarTheme: TabBarTheme(), tabBarTheme: TabBarTheme().copyWith(indicatorColor: Colors.black),
+  );
+  themeData.tabBarTheme.indicatorColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/110848
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.primaryColorDark; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/110848
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData();
+  themeData = ThemeData.raw();
+  themeData = themeData.copyWith();
+  themeData.primaryColorLight; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  // Simpler than other tests, because corresponding theme is newly introduced and does not need a fix.
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(scaffoldTheme: ScaffoldThemeData(backgroundColor: Colors.black));
+  themeData = ThemeData.raw(scaffoldTheme: ScaffoldThemeData(backgroundColor: Colors.black));
+  themeData = themeData.copyWith(scaffoldTheme: ScaffoldThemeData(backgroundColor: Colors.black));
+  themeData.scaffoldTheme.backgroundColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(dataTableTheme: DataTableThemeData(secondaryHeadingRowColor: Colors.black));
+  themeData = ThemeData(
+    dataTableTheme: DataTableThemeData(secondaryHeadingRowColor: Colors.black),
+  );
+  themeData = ThemeData(
+    dataTableTheme: DataTableThemeData().copyWith(secondaryHeadingRowColor: Colors.black),
+  );
+  themeData = ThemeData.raw(dataTableTheme: DataTableThemeData(secondaryHeadingRowColor: Colors.black));
+  themeData = ThemeData.raw(
+    dataTableTheme: DataTableThemeData(), dataTableTheme: DataTableThemeData().copyWith(secondaryHeadingRowColor: Colors.black),
+  );
+  themeData = themeData.copyWith(dataTableTheme: DataTableThemeData(secondaryHeadingRowColor: Colors.black));
+  themeData = themeData.copyWith(
+    dataTableTheme: DataTableThemeData(), dataTableTheme: DataTableThemeData().copyWith(secondaryHeadingRowColor: Colors.black),
+  );
+  themeData.dataTableTheme.secondaryHeadingRowColor;
+
+  // Changes made in https://github.com/flutter/flutter/pull/XXXXX
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(shadow: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(shadow: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(shadow: Colors.grey));
+  themeData = ThemeData(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, shadow: Colors.grey));
+  themeData = ThemeData(otherParam: '');
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(shadow: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(shadow: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(shadow: Colors.grey));
+  themeData = ThemeData.raw(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, shadow: Colors.grey));
+  themeData = ThemeData.raw(otherParam: '');
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(shadow: Colors.grey));
+  themeData = themeData.copyWith(otherParam: '');
+  themeData = themeData.copyWith(colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(shadow: Colors.grey));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(shadow: Colors.grey));
+  themeData = themeData.copyWith(colorScheme: ColorScheme.light().copyWith(primarySwatch: Colors.blue, shadow: Colors.grey));
+  themeData.colorScheme.shadow;
 }

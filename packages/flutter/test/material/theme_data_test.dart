@@ -743,23 +743,12 @@ void main() {
       useMaterial3: false,
       visualDensity: VisualDensity.standard,
       // COLOR
-      canvasColor: Colors.black,
-      cardColor: Colors.black,
       colorScheme: const ColorScheme.light(),
-      dialogBackgroundColor: Colors.black,
       disabledColor: Colors.black,
-      dividerColor: Colors.black,
       focusColor: Colors.black,
       highlightColor: Colors.black,
-      hintColor: Colors.black,
       hoverColor: Colors.black,
-      indicatorColor: Colors.black,
       primaryColor: Colors.black,
-      primaryColorDark: Colors.black,
-      primaryColorLight: Colors.black,
-      scaffoldBackgroundColor: Colors.black,
-      secondaryHeaderColor: Colors.black,
-      shadowColor: Colors.black,
       splashColor: Colors.black,
       unselectedWidgetColor: Colors.black,
       // TYPOGRAPHY & ICONOGRAPHY
@@ -825,6 +814,17 @@ void main() {
       errorColor: Colors.black,
       backgroundColor: Colors.black,
       bottomAppBarColor: Colors.black,
+      canvasColor: Colors.black,
+      cardColor: Colors.black,
+      dialogBackgroundColor: Colors.black,
+      dividerColor: Colors.black,
+      hintColor: Colors.black,
+      indicatorColor: Colors.black,
+      primaryColorDark: Colors.black,
+      primaryColorLight: Colors.black,
+      secondaryHeaderColor: Colors.black,
+      scaffoldBackgroundColor: Colors.black,
+      shadowColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -862,23 +862,12 @@ void main() {
       visualDensity: VisualDensity.standard,
 
       // COLOR
-      canvasColor: Colors.white,
-      cardColor: Colors.white,
       colorScheme: const ColorScheme.light(),
-      dialogBackgroundColor: Colors.white,
       disabledColor: Colors.white,
-      dividerColor: Colors.white,
       focusColor: Colors.white,
       highlightColor: Colors.white,
-      hintColor: Colors.white,
       hoverColor: Colors.white,
-      indicatorColor: Colors.white,
       primaryColor: Colors.white,
-      primaryColorDark: Colors.white,
-      primaryColorLight: Colors.white,
-      scaffoldBackgroundColor: Colors.white,
-      secondaryHeaderColor: Colors.white,
-      shadowColor: Colors.white,
       splashColor: Colors.white,
       unselectedWidgetColor: Colors.white,
 
@@ -947,6 +936,17 @@ void main() {
       errorColor: Colors.white,
       backgroundColor: Colors.white,
       bottomAppBarColor: Colors.white,
+      canvasColor: Colors.white,
+      cardColor: Colors.white,
+      dialogBackgroundColor: Colors.white,
+      dividerColor: Colors.white,
+      hintColor: Colors.white,
+      indicatorColor: Colors.white,
+      primaryColorDark: Colors.white,
+      primaryColorLight: Colors.white,
+      secondaryHeaderColor: Colors.white,
+      scaffoldBackgroundColor: Colors.white,
+      shadowColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -969,23 +969,12 @@ void main() {
       visualDensity: otherTheme.visualDensity,
 
       // COLOR
-      canvasColor: otherTheme.canvasColor,
-      cardColor: otherTheme.cardColor,
       colorScheme: otherTheme.colorScheme,
-      dialogBackgroundColor: otherTheme.dialogBackgroundColor,
       disabledColor: otherTheme.disabledColor,
-      dividerColor: otherTheme.dividerColor,
       focusColor: otherTheme.focusColor,
       highlightColor: otherTheme.highlightColor,
-      hintColor: otherTheme.hintColor,
       hoverColor: otherTheme.hoverColor,
-      indicatorColor: otherTheme.indicatorColor,
       primaryColor: otherTheme.primaryColor,
-      primaryColorDark: otherTheme.primaryColorDark,
-      primaryColorLight: otherTheme.primaryColorLight,
-      scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
-      secondaryHeaderColor: otherTheme.secondaryHeaderColor,
-      shadowColor: otherTheme.shadowColor,
       splashColor: otherTheme.splashColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
 
@@ -1052,6 +1041,17 @@ void main() {
       errorColor: otherTheme.errorColor,
       backgroundColor: otherTheme.backgroundColor,
       bottomAppBarColor: otherTheme.bottomAppBarColor,
+      canvasColor: otherTheme.canvasColor,
+      cardColor: otherTheme.cardColor,
+      dialogBackgroundColor: otherTheme.dialogBackgroundColor,
+      dividerColor: otherTheme.dividerColor,
+      hintColor: otherTheme.hintColor,
+      indicatorColor: otherTheme.indicatorColor,
+      primaryColorDark: otherTheme.primaryColorDark,
+      primaryColorLight: otherTheme.primaryColorLight,
+      secondaryHeaderColor: otherTheme.secondaryHeaderColor,
+      scaffoldBackgroundColor: otherTheme.scaffoldBackgroundColor,
+      shadowColor: otherTheme.shadowColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1073,23 +1073,12 @@ void main() {
     expect(themeDataCopy.visualDensity, equals(otherTheme.visualDensity));
 
     // COLOR
-    expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
-    expect(themeDataCopy.cardColor, equals(otherTheme.cardColor));
     expect(themeDataCopy.colorScheme, equals(otherTheme.colorScheme));
-    expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
     expect(themeDataCopy.disabledColor, equals(otherTheme.disabledColor));
-    expect(themeDataCopy.dividerColor, equals(otherTheme.dividerColor));
     expect(themeDataCopy.focusColor, equals(otherTheme.focusColor));
     expect(themeDataCopy.highlightColor, equals(otherTheme.highlightColor));
-    expect(themeDataCopy.hintColor, equals(otherTheme.hintColor));
     expect(themeDataCopy.hoverColor, equals(otherTheme.hoverColor));
-    expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
     expect(themeDataCopy.primaryColor, equals(otherTheme.primaryColor));
-    expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
-    expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
-    expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
-    expect(themeDataCopy.secondaryHeaderColor, equals(otherTheme.secondaryHeaderColor));
-    expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
 
@@ -1158,6 +1147,17 @@ void main() {
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
+    expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
+    expect(themeDataCopy.cardColor, equals(otherTheme.cardColor));
+    expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
+    expect(themeDataCopy.dividerColor, equals(otherTheme.dividerColor));
+    expect(themeDataCopy.hintColor, equals(otherTheme.hintColor));
+    expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
+    expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
+    expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
+    expect(themeDataCopy.secondaryHeaderColor, equals(otherTheme.secondaryHeaderColor));
+    expect(themeDataCopy.scaffoldBackgroundColor, equals(otherTheme.scaffoldBackgroundColor));
+    expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1215,24 +1215,12 @@ void main() {
       'useMaterial3',
       // COLOR
       'colorScheme',
-      'primaryColor',
-      'primaryColorLight',
-      'primaryColorDark',
       'focusColor',
       'hoverColor',
-      'shadowColor',
-      'canvasColor',
-      'scaffoldBackgroundColor',
-      'cardColor',
-      'dividerColor',
-      'highlightColor',
+      'primaryColor',
       'splashColor',
       'unselectedWidgetColor',
       'disabledColor',
-      'secondaryHeaderColor',
-      'dialogBackgroundColor',
-      'indicatorColor',
-      'hintColor',
       // TYPOGRAPHY & ICONOGRAPHY
       'typography',
       'textTheme',
@@ -1296,6 +1284,18 @@ void main() {
       'errorColor',
       'backgroundColor',
       'bottomAppBarColor',
+      'canvasColor',
+      'cardColor',
+      'dialogBackgroundColor',
+      'dividerColor',
+      'hintColor',
+      'indicatorColor',
+      'highlightColor',
+      'primaryColorDark',
+      'primaryColorLight',
+      'secondaryHeaderColor',
+      'scaffoldBackgroundColor',
+      'shadowColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
