@@ -2704,6 +2704,31 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           )),
         );
       });
+
+      testWithoutContext('can start with and contain a dollar sign', () {
+        const String dollarArbFile = r'''
+{
+  "$title$": "Stocks",
+  "@$title$": {
+    "description": "Title for the application"
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(dollarArbFile);
+
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+      });
     });
 
     testWithoutContext('throws when the language code is not supported', () {

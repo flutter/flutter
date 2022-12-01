@@ -838,15 +838,15 @@ class LocalizationsGenerator {
     if (name[0] == '_') {
       return false;
     }
-    // Dart getter and method name cannot contain non-alphanumeric symbols
-    if (name.contains(RegExp(r'[^a-zA-Z_\d]'))) {
+    // Dart identifiers can only use letters, numbers, underscores, and `$`
+    if (name.contains(RegExp(r'[^a-zA-Z_$\d]'))) {
       return false;
     }
-    // Dart method name must start with lower case character
+    // Dart getter and method name should start with lower case character
     if (name[0].contains(RegExp(r'[A-Z]'))) {
       return false;
     }
-    // Dart class name cannot start with a number
+    // Dart getter and method name cannot start with a number
     if (name[0].contains(RegExp(r'\d'))) {
       return false;
     }
