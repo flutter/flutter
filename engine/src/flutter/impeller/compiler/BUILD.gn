@@ -5,6 +5,24 @@
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/version/version.gni")
 
+impeller_component("utilities") {
+  # Current versions of libcxx have deprecated some of the UTF-16 string
+  # conversion APIs.
+  defines = [ "_LIBCPP_DISABLE_DEPRECATION_WARNINGS" ]
+
+  sources = [
+    "utilities.cc",
+    "utilities.h",
+  ]
+
+  public_deps = [
+    "../base",
+    "../geometry",
+    "../runtime_stage",
+    "//flutter/fml",
+  ]
+}
+
 impeller_component("compiler_lib") {
   include_dirs = [ "//third_party/vulkan-deps/spirv-cross/src/" ]
 
@@ -34,11 +52,10 @@ impeller_component("compiler_lib") {
     "switches.h",
     "types.cc",
     "types.h",
-    "utilities.cc",
-    "utilities.h",
   ]
 
   public_deps = [
+    ":utilities",
     "../base",
     "../geometry",
     "../runtime_stage",

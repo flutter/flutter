@@ -1648,6 +1648,13 @@ FILE: ../../../flutter/impeller/scene/camera.cc
 FILE: ../../../flutter/impeller/scene/camera.h
 FILE: ../../../flutter/impeller/scene/geometry.cc
 FILE: ../../../flutter/impeller/scene/geometry.h
+FILE: ../../../flutter/impeller/scene/importer/importer.h
+FILE: ../../../flutter/impeller/scene/importer/importer_gltf.cc
+FILE: ../../../flutter/impeller/scene/importer/importer_main.cc
+FILE: ../../../flutter/impeller/scene/importer/mesh.fbs
+FILE: ../../../flutter/impeller/scene/importer/switches.cc
+FILE: ../../../flutter/impeller/scene/importer/switches.h
+FILE: ../../../flutter/impeller/scene/importer/types.h
 FILE: ../../../flutter/impeller/scene/material.cc
 FILE: ../../../flutter/impeller/scene/material.h
 FILE: ../../../flutter/impeller/scene/scene.cc
