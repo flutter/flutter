@@ -457,6 +457,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // If this value is null, [consecutiveTapCount] can grow infinitely large.
   int? get maxConsecutiveTap;
 
+  // The maximum distance in logical pixels the gesture is allowed to drift
+  // from the initial touch down position before the [consecutiveTapCount]
+  // and [keysPressedOnDown] are frozen and the remaining tracker state is
+  // reset. These values remain frozen until the next [PointerDownEvent] is
+  // tracked in [addAllowedPointer].
+  double? get slopTolerance;
+
   // Private tap state tracked.
   PointerDownEvent? _down;
   PointerUpEvent? _up;
@@ -508,7 +515,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
-      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > kTouchSlop;
+      final bool isSlopPastTolerance = slopTolerance != null && _getGlobalDistance(event, _originPosition) > slopTolerance!;
 
       if (isSlopPastTolerance) {
         _consecutiveTapTimerStop();
@@ -656,6 +663,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     this.dragStartBehavior = DragStartBehavior.start,
     this.dragUpdateThrottleFrequency,
     this.maxConsecutiveTap,
+    this.slopTolerance = kTouchSlop,
     super.debugOwner,
     super.kind,
     super.supportedDevices,
@@ -698,6 +706,23 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// recognizer will be reset.
   @override
   int? maxConsecutiveTap;
+
+  /// The maximum distance in logical pixels the gesture is allowed to drift
+  /// to still be considered a tap.
+  ///
+  /// Drifting past the allowed slop amount causes the recognizer to reset
+  /// the tap series it is currently tracking, stopping the consecutive tap
+  /// count from increasing. The consecutive tap count and the set of hardware
+  /// keys that were pressed on tap down will retain their pre-past slop
+  /// tolerance values until the next [PointerDownEvent] is tracked.
+  ///
+  /// If the gesture exceeds this value, then it can only be accepted as a drag
+  /// gesture.
+  ///
+  /// Can be null to indicate that the gesture can drift for any distance.
+  /// Defaults to 18 logical pixels.
+  @override
+  double? slopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -838,7 +863,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   GestureDragCancelCallback? onDragCancel;
 
   // Tap related state.
-  bool _pastTapTolerance = false;
+  bool _pastSlopTolerance = false;
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
 
@@ -976,7 +1001,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         break;
 
       case _DragState.possible:
-        if (_pastTapTolerance) {
+        if (_pastSlopTolerance) {
           // This means the pointer was not accepted as a tap.
           if (_wonArenaForPrimaryPointer) {
             // If the recognizer has already won the arena for the primary pointer being tracked
@@ -1009,7 +1034,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     _stopDeadlineTimer();
     _dragState = _DragState.ready;
-    _pastTapTolerance = false;
+    _pastSlopTolerance = false;
   }
 
   @override
@@ -1022,7 +1047,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // Receiving a [PointerMoveEvent], does not automatically mean the pointer
       // being tracked is doing a drag gesture. There is some drift that can happen
       // between the initial [PointerDownEvent] and subsequent [PointerMoveEvent]s,
-      // that drift is handled by the tap status tracker. Accessing [_pastTapTolerance]
+      // that drift is handled by the tap status tracker. Accessing [_pastSlopTolerance]
       // lets us know if our tap has moved past the acceptable tolerance. If the pointer
       // does not move past this tolerance than it is not considered a drag.
       //
@@ -1036,10 +1061,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _giveUpPointer(event.pointer);
       }
 
-      final bool isSlopPastTolerance = _getGlobalDistance(event, _initialPosition) > kTouchSlop;
+      final bool isSlopPastTolerance = slopTolerance != null && _getGlobalDistance(event, _initialPosition) > slopTolerance!;
 
       if (isSlopPastTolerance) {
-        _pastTapTolerance = true;
+        _pastSlopTolerance = true;
       }
 
       if (_dragState == _DragState.accepted) {
