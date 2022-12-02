@@ -100,7 +100,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
 
     final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier!.value;
     final Rect oldRect = node.rect;
-    node.rect = Rect.fromLTRB(oldRect.left - clipDetails.left, oldRect.top - clipDetails.top, oldRect.right - clipDetails.right, oldRect.bottom - clipDetails.bottom);
+    node.rect = Rect.fromLTRB(oldRect.left + clipDetails.left, oldRect.top + clipDetails.top, oldRect.right - clipDetails.right, oldRect.bottom - clipDetails.bottom);
 
     super.assembleSemanticsNode(node, config, children);
   }
