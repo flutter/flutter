@@ -204,6 +204,39 @@ struct TRect {
   constexpr bool IntersectsWithRect(const TRect& o) const {
     return Intersection(o).has_value();
   }
+
+  /// @brief Returns the new boundary rectangle that would result from the
+  ///        rectangle being cutout by a second rectangle.
+  constexpr std::optional<TRect<T>> Cutout(const TRect& o) const {
+    const auto& [a_left, a_top, a_right, a_bottom] = GetLTRB();  // Source rect.
+    const auto& [b_left, b_top, b_right, b_bottom] = o.GetLTRB();  // Cutout.
+    if (b_left <= a_left && b_right >= a_right) {
+      if (b_top <= a_top && b_bottom >= a_bottom) {
+        // Full cutout.
+        return std::nullopt;
+      }
+      if (b_top <= a_top) {
+        // Cuts off the top.
+        return TRect::MakeLTRB(a_left, b_bottom, a_right, a_bottom);
+      }
+      if (b_bottom >= b_bottom) {
+        // Cuts out the bottom.
+        return TRect::MakeLTRB(a_left, a_top, a_right, b_top);
+      }
+    }
+    if (b_top <= a_top && b_bottom >= a_bottom) {
+      if (b_left <= a_left) {
+        // Cuts out the left.
+        return TRect::MakeLTRB(b_right, a_top, a_right, a_bottom);
+      }
+      if (b_right >= a_right) {
+        // Cuts out the right.
+        return TRect::MakeLTRB(a_left, a_top, b_left, a_bottom);
+      }
+    }
+
+    return *this;
+  }
 };
 
 using Rect = TRect<Scalar>;

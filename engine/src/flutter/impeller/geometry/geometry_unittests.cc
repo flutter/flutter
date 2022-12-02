@@ -1369,6 +1369,65 @@ TEST(GeometryTest, RectIntersectsWithRect) {
   }
 }
 
+TEST(GeometryTest, RectCutout) {
+  // No cutout.
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(0, 0, 50, 50);
+    auto u = a.Cutout(b);
+    ASSERT_TRUE(u.has_value());
+    ASSERT_RECT_NEAR(u.value(), a);
+  }
+
+  // Full cutout.
+  {
+    Rect a(0, 0, 100, 100);
+    Rect b(-10, -10, 120, 120);
+    auto u = a.Cutout(b);
+    ASSERT_FALSE(u.has_value());
+  }
+
+  // Cutout from top.
+  {
+    auto a = Rect::MakeLTRB(0, 0, 100, 100);
+    auto b = Rect::MakeLTRB(-10, -10, 110, 90);
+    auto u = a.Cutout(b);
+    auto expected = Rect::MakeLTRB(0, 90, 100, 100);
+    ASSERT_TRUE(u.has_value());
+    ASSERT_RECT_NEAR(u.value(), expected);
+  }
+
+  // Cutout from bottom.
+  {
+    auto a = Rect::MakeLTRB(0, 0, 100, 100);
+    auto b = Rect::MakeLTRB(-10, 10, 110, 110);
+    auto u = a.Cutout(b);
+    auto expected = Rect::MakeLTRB(0, 0, 100, 10);
+    ASSERT_TRUE(u.has_value());
+    ASSERT_RECT_NEAR(u.value(), expected);
+  }
+
+  // Cutout from left.
+  {
+    auto a = Rect::MakeLTRB(0, 0, 100, 100);
+    auto b = Rect::MakeLTRB(-10, -10, 90, 110);
+    auto u = a.Cutout(b);
+    auto expected = Rect::MakeLTRB(90, 0, 100, 100);
+    ASSERT_TRUE(u.has_value());
+    ASSERT_RECT_NEAR(u.value(), expected);
+  }
+
+  // Cutout from right.
+  {
+    auto a = Rect::MakeLTRB(0, 0, 100, 100);
+    auto b = Rect::MakeLTRB(10, -10, 110, 110);
+    auto u = a.Cutout(b);
+    auto expected = Rect::MakeLTRB(0, 0, 10, 100);
+    ASSERT_TRUE(u.has_value());
+    ASSERT_RECT_NEAR(u.value(), expected);
+  }
+}
+
 TEST(GeometryTest, RectContainsPoint) {
   {
     // Origin is inclusive
