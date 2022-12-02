@@ -27,24 +27,12 @@ static Font ToFont(const SkTextBlobRunIterator& run, Scalar scale) {
   Font::Metrics metrics;
   metrics.scale = scale;
   metrics.point_size = font.getSize();
-  metrics.ascent = sk_metrics.fAscent;
-  metrics.descent = sk_metrics.fDescent;
-  metrics.min_extent = {sk_metrics.fXMin, sk_metrics.fTop};
-  metrics.max_extent = {sk_metrics.fXMax, sk_metrics.fBottom};
-
-  std::vector<SkRect> glyph_bounds;
-  SkPaint paint;
-
-  glyph_bounds.resize(run.glyphCount());
-  run.font().getBounds(run.glyphs(), run.glyphCount(), glyph_bounds.data(),
-                       nullptr);
-  for (auto& bounds : glyph_bounds) {
-    metrics.min_extent = metrics.min_extent.Min({bounds.fLeft, bounds.fTop});
-    metrics.max_extent =
-        metrics.max_extent.Max({bounds.fRight, bounds.fBottom});
-  }
 
   return Font{std::move(typeface), metrics};
+}
+
+static Rect ToRect(const SkRect& rect) {
+  return Rect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
 }
 
 TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob, Scalar scale) {
@@ -71,7 +59,11 @@ TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob, Scalar scale) {
       case SkTextBlobRunIterator::kHorizontal_Positioning:
         FML_DLOG(ERROR) << "Unimplemented.";
         break;
-      case SkTextBlobRunIterator::kFull_Positioning:
+      case SkTextBlobRunIterator::kFull_Positioning: {
+        std::vector<SkRect> glyph_bounds;
+        glyph_bounds.resize(glyph_count);
+        run.font().getBounds(glyphs, glyph_count, glyph_bounds.data(), nullptr);
+
         for (auto i = 0u; i < glyph_count; i++) {
           // kFull_Positioning has two scalars per glyph.
           const SkPoint* glyph_points = run.points();
@@ -80,10 +72,11 @@ TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob, Scalar scale) {
                                  ? Glyph::Type::kBitmap
                                  : Glyph::Type::kPath;
 
-          text_run.AddGlyph(Glyph{glyphs[i], type},
+          text_run.AddGlyph(Glyph{glyphs[i], type, ToRect(glyph_bounds[i])},
                             Point{point->x(), point->y()});
         }
         break;
+      }
       case SkTextBlobRunIterator::kRSXform_Positioning:
         FML_DLOG(ERROR) << "Unimplemented.";
         break;

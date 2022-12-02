@@ -71,16 +71,16 @@ static size_t PairsFitInAtlasOfSize(const FontGlyphPair::Vector& pairs,
   glyph_positions.clear();
   glyph_positions.reserve(pairs.size());
 
-  // TODO(114563): We might be able to remove this per-glyph padding if we fix
-  //               the underlying causes of the overlap.
+  // TODO(bdero): We might be able to remove this per-glyph padding if we fix
+  //              the underlying causes of the overlap.
+  //              https://github.com/flutter/flutter/issues/114563
   constexpr auto padding = 2;
 
   for (size_t i = 0; i < pairs.size(); i++) {
     const auto& pair = pairs[i];
 
     const auto glyph_size =
-        ISize::Ceil(pair.font.GetMetrics().GetBoundingBox().size *
-                    pair.font.GetMetrics().scale);
+        ISize::Ceil((pair.glyph.bounds * pair.font.GetMetrics().scale).size);
     SkIPoint16 location_in_atlas;
     if (!rect_packer->addRect(glyph_size.width + padding,   //
                               glyph_size.height + padding,  //
@@ -288,13 +288,14 @@ static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
     glyph_paint.setColor(glyph_color);
     canvas->resetMatrix();
     canvas->scale(metrics.scale, metrics.scale);
-    canvas->drawGlyphs(1u,         // count
-                       &glyph_id,  // glyphs
-                       &position,  // positions
-                       SkPoint::Make(-metrics.min_extent.x,
-                                     -metrics.min_extent.y),  // origin
-                       sk_font,                               // font
-                       glyph_paint                            // paint
+    canvas->drawGlyphs(
+        1u,         // count
+        &glyph_id,  // glyphs
+        &position,  // positions
+        SkPoint::Make(-font_glyph.glyph.bounds.GetLeft(),
+                      -font_glyph.glyph.bounds.GetTop()),  // origin
+        sk_font,                                           // font
+        glyph_paint                                        // paint
     );
     return true;
   });
