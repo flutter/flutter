@@ -128,5 +128,6 @@
   "keyboardKeySpace": "ክፍተት",
   "keyboardKeyMetaMacOs": "ትዕዛዝ",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "የምናሌ አሞሌ ምናሌ"
+  "menuBarMenuLabel": "የምናሌ አሞሌ ምናሌ",
+  "currentDateLabel": "Date of today"
 }

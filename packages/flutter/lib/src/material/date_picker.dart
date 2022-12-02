@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -2348,7 +2349,8 @@ class _MonthItemState extends State<_MonthItem> {
     // day of month before the rest of the date, as they are looking
     // for the day of month. To do that we prepend day of month to the
     // formatted full date.
-    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}';
+    final String semanticLabelSuffix = DateUtils.isSameDay(widget.currentDate, dayToBuild) ? localizations.currentDateLabel : '';
+    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}, $semanticLabelSuffix';
     if (isSelectedDayStart) {
       semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
     } else if (isSelectedDayEnd) {

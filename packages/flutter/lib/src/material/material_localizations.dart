@@ -160,6 +160,9 @@ abstract class MaterialLocalizations {
   /// as a hint text in the text field.
   String get searchFieldLabel;
 
+  /// Label indicating that the focused date is the current date.
+  String get currentDateLabel;
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -1014,6 +1017,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Search';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';

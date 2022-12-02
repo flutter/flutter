@@ -128,5 +128,6 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "ເມນູແຖບເມນູ"
+  "menuBarMenuLabel": "ເມນູແຖບເມນູ",
+  "currentDateLabel": "Date of today"
 }
