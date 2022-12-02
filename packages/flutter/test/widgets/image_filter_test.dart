@@ -31,8 +31,10 @@ void main() {
   });
 
   testWidgets('Image filter - blur with offset', (WidgetTester tester) async {
+    final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(
+        key: key,
         child: Transform.translate(
           offset: const Offset(50, 50),
           child: ImageFiltered(
@@ -43,7 +45,7 @@ void main() {
       ),
     );
     await expectLater(
-      find.byType(ImageFiltered),
+      find.byKey(key),
       matchesGoldenFile('image_filter_blur_offset.png'),
     );
   });
