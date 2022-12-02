@@ -1394,7 +1394,6 @@ targets:
   - name: Linux_android animated_complex_image_filtered_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
