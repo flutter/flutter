@@ -343,7 +343,7 @@ void main() {
       '     _GestureSemantics\n'
       '     RawGestureDetector\n'
       '     GestureDetector\n'
-      "     Dismissible-[<'dismissible\'>]\n"
+      '     Dismissible-[<\'dismissible\'>]\n'
       '     Semantics\n'
       '     Align\n'
       '     AnimatedBuilder\n'
