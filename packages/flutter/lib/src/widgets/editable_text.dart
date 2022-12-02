@@ -3823,6 +3823,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void performSelector(String selectorName) {
+    print(selectorName);
     final Intent? intent = intentForMacOSSelector(selectorName);
 
     if (intent != null) {
@@ -4918,18 +4919,22 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       // the caret will move down vertically. The new caret position
       // is used as the target when finding the next paragraph boundary
       // to extend the selection to.
+      print('case1 $endOfCurrentLine $extent');
       if (endOfCurrentLine == extent) {
+        print('case2');
         currentRun.moveNext();
-        extent = currentRun.current;
+        extent = lineBoundary.getTrailingTextBoundaryAt(currentRun.current);
       }
     } else {
       // If our current extent is at the beginning of the current line then
       // the caret will move up vertically to the previous line. The new caret
       // position is used as the target when finding the next paragraph boundary
       // to extend the selection to.
+      print('case3 $begOfCurrentLine $extent');
       if (begOfCurrentLine == selection.base) {
+        print('case4');
         currentRun.movePrevious();
-        extent = currentRun.current;
+        extent = lineBoundary.getLeadingTextBoundaryAt(currentRun.current);
       }
     }
 

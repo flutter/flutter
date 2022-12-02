@@ -153,6 +153,7 @@ class ParagraphBoundary extends TextBoundary {
   // direction of the text, or if there is no line terminator in a given direction
   // then the bound extends to the start/end of the document in that direction.
   TextRange _getParagraphAtOffset(TextPosition textPosition) {
+    print('hello from get paragraph searching for text position $textPosition');
     final CharacterRange charIter = _text.characters.iterator;
 
     int graphemeStart = 0;
@@ -161,17 +162,34 @@ class ParagraphBoundary extends TextBoundary {
     int tappedTextOffset = textPosition.offset;
 
     while(charIter.moveNext()) {
+      print('case a');
       graphemeEnd += charIter.current.length;
       if (charIter.current == '\n') {
+        print('case b - linebreak');
         if (graphemeEnd < tappedTextOffset) {
+          // The target text position has not been passed yet but we arrived at a
+          // line terminator.
+          print('case c');
           graphemeStart = graphemeEnd;
         } else if (graphemeEnd == tappedTextOffset) {
+          // The target text position is equal to our end.
+          print('case d');
+          graphemeEnd -= charIter.current.length;
           break;
-        } else {
+        } else if (graphemeEnd > tappedTextOffset) {
+          // The target text position was passed. This means that the target position
+          // is contained inside of a paragraph boundary.
+          print('case e');
+          graphemeEnd -= charIter.current.length;
           break;
         }
       }
     }
+    // start
+    // end
+    // 1. Iterate through string
+    // 2. When arriving at a line terminator, set start to the end and continue if we have not reached the target
+    // The line terminator should not be included in the final range.
 
     return TextRange(start: graphemeStart, end: graphemeEnd);
   }
