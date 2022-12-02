@@ -20,7 +20,7 @@ chrome:
   version: '107.0' # CIPD tag for the above Build IDs. Normally "ChromeMajorVersion.UploadAttempt". ;)
 
 firefox:
-  version: '83.0'
+  version: '106.0'
 
 edge:
   launcher_version: '1.2.0.0'
