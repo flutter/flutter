@@ -27,11 +27,12 @@ import 'transitions.dart';
 ///
 ///  * [ModalBarrier], which utilizes this widget to adjust the barrier focus
 /// size based on the size of the content layer rendered on top of it.
-class _SemanticsClipper extends SingleChildRenderObjectWidget{
+class SemanticsClipper extends SingleChildRenderObjectWidget{
   /// creates a [SemanticsClipper] that updates the size of the
   /// [SemanticsNode.rect] of its child based on the value inside the provided
   /// [ValueNotifier], or a default value of [EdgeInsets.zero].
-  const _SemanticsClipper({
+  const SemanticsClipper({
+    super.key,
     super.child,
     required this.clipDetailsNotifier,
   });
@@ -41,21 +42,21 @@ class _SemanticsClipper extends SingleChildRenderObjectWidget{
   final ValueNotifier<EdgeInsets> clipDetailsNotifier;
 
   @override
-  _RenderSemanticsClipper createRenderObject(BuildContext context) {
-    return _RenderSemanticsClipper(clipDetailsNotifier: clipDetailsNotifier,);
+  RenderSemanticsClipper createRenderObject(BuildContext context) {
+    return RenderSemanticsClipper(clipDetailsNotifier: clipDetailsNotifier,);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSemanticsClipper renderObject) {
+  void updateRenderObject(BuildContext context, RenderSemanticsClipper renderObject) {
     renderObject.clipDetailsNotifier = clipDetailsNotifier;
   }
 }
 /// Updates the [SemanticsNode.rect] of its child based on the value inside
 /// provided [ValueNotifier].
-class _RenderSemanticsClipper extends RenderProxyBox {
+class RenderSemanticsClipper extends RenderProxyBox {
   /// Creats a [RenderProxyBox] that Updates the [SemanticsNode.rect] of its child
   /// based on the value inside provided [ValueNotifier].
-  _RenderSemanticsClipper({
+  RenderSemanticsClipper({
     required ValueNotifier<EdgeInsets> clipDetailsNotifier,
     RenderBox? child,
   }) : _clipDetailsNotifier = clipDetailsNotifier,
@@ -107,6 +108,16 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+
+    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier!.value;
+    final Rect oldRect = node.rect;
+    node.rect = Rect.fromLTRB(oldRect.left + clipDetails.left, oldRect.top + clipDetails.top, oldRect.right - clipDetails.right, oldRect.bottom - clipDetails.bottom);
+
+    super.assembleSemanticsNode(node, config, children);
   }
 }
 
@@ -259,7 +270,7 @@ class ModalBarrier extends StatelessWidget {
     final bool excluding = !semanticsDismissible || !modalBarrierSemanticsDismissible;
 
     if (!excluding && clipDetailsNotifier != null) {
-      barrier = _SemanticsClipper(
+      barrier = SemanticsClipper(
         clipDetailsNotifier: clipDetailsNotifier!,
         child: barrier,
       );

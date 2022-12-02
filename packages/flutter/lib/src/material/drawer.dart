@@ -743,21 +743,28 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
       assert(platformHasBackButton != null);
 
+      final double actualWidth = _width * _controller.value;
+      final EdgeInsets drawerWidthEdgeInsets = textDirection == TextDirection.ltr ? EdgeInsets.fromLTRB(actualWidth, 0, 0, 0): EdgeInsets.fromLTRB(0, 0, actualWidth, 0);
+
       final Widget child = _DrawerControllerScope(
         controller: widget,
         child: RepaintBoundary(
           child: Stack(
             children: <Widget>[
               BlockSemantics(
-                child: ExcludeSemantics(
-                  // On Android, the back button is used to dismiss a modal.
-                  excluding: platformHasBackButton,
-                  child: GestureDetector(
-                    onTap: close,
-                    child: Semantics(
-                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: Container( // The drawer's "scrim"
-                        color: _scrimColorTween.evaluate(_controller),
+                child: SemanticsClipper(
+                  clipDetailsNotifier: ValueNotifier<EdgeInsets>(drawerWidthEdgeInsets),
+                  child: ExcludeSemantics(
+                    // On Android, the back button is used to dismiss a modal.
+                    //excluding: platformHasBackButton,
+                    excluding: false,
+                    child: GestureDetector(
+                      onTap: close,
+                      child: Semantics(
+                        label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                        child: Container( // The drawer's "scrim"
+                          color: _scrimColorTween.evaluate(_controller),
+                        ),
                       ),
                     ),
                   ),
