@@ -1115,13 +1115,6 @@ class PerfTest {
 
       Map<String, dynamic> impellerData = <String, dynamic>{};
       if (enableImpeller) {
-        section('Uninstall app');
-        await flutter('install', options: <String>[
-          '--uninstall-only',
-          '-d',
-          deviceId,
-        ]);
-
         section('Run perf test with impeller enabled');
         impellerData = await dataFromDrive(
           driveOptions: options,
