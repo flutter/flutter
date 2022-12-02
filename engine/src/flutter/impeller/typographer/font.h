@@ -38,46 +38,9 @@ class Font : public Comparable<Font> {
     /// The point size of the font.
     ///
     Scalar point_size = 12.0f;
-    //--------------------------------------------------------------------------
-    /// The font ascent relative to the baseline. This is usually negative as
-    /// moving upwards (ascending) in an upper-left-origin coordinate system
-    /// yields smaller numbers.
-    ///
-    Scalar ascent = 0.0f;
-    //--------------------------------------------------------------------------
-    /// The font descent relative to the baseline. This is usually positive as
-    /// moving downwards (descending) in an upper-left-origin coordinate system
-    /// yields larger numbers.
-    ///
-    Scalar descent = 0.0f;
-    //--------------------------------------------------------------------------
-    /// The minimum glyph extents relative to the origin. Typically negative in
-    /// an upper-left-origin coordinate system.
-    ///
-    Point min_extent;
-    //--------------------------------------------------------------------------
-    /// The maximum glyph extents relative to the origin. Typically positive in
-    /// an upper-left-origin coordinate system.
-    ///
-    Point max_extent;
-
-    //--------------------------------------------------------------------------
-    /// @brief      The union of the bounding boxes of all the glyphs.
-    ///
-    /// @return     The bounding box.
-    ///
-    constexpr Rect GetBoundingBox() const {
-      return Rect::MakeLTRB(min_extent.x,  //
-                            min_extent.y,  //
-                            max_extent.x,  //
-                            max_extent.y   //
-      );
-    }
 
     constexpr bool operator==(const Metrics& o) const {
-      return scale == o.scale && point_size == o.point_size &&
-             ascent == o.ascent && descent == o.descent &&
-             min_extent == o.min_extent && max_extent == o.max_extent;
+      return scale == o.scale && point_size == o.point_size;
     }
   };
 
@@ -113,6 +76,6 @@ class Font : public Comparable<Font> {
 template <>
 struct std::hash<impeller::Font::Metrics> {
   constexpr std::size_t operator()(const impeller::Font::Metrics& m) const {
-    return fml::HashCombine(m.scale, m.point_size, m.ascent, m.descent);
+    return fml::HashCombine(m.scale, m.point_size);
   }
 };

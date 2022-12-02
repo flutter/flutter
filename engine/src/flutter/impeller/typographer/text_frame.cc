@@ -14,10 +14,10 @@ std::optional<Rect> TextFrame::GetBounds() const {
   std::optional<Rect> result;
 
   for (const auto& run : runs_) {
-    const auto glyph_bounds = run.GetFont().GetMetrics().GetBoundingBox();
     for (const auto& glyph_position : run.GetGlyphPositions()) {
-      Rect glyph_rect = Rect(glyph_position.position + glyph_bounds.origin,
-                             glyph_bounds.size);
+      Rect glyph_rect =
+          Rect(glyph_position.position + glyph_position.glyph.bounds.origin,
+               glyph_position.glyph.bounds.size);
       result = result.has_value() ? result->Union(glyph_rect) : glyph_rect;
     }
   }
