@@ -311,7 +311,6 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        stdio: globals.stdio,
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),

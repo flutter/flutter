@@ -42,7 +42,7 @@ class UserMessages {
   String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
       'Downloaded executables cannot execute on host.\n'
-      'See https://github.com/flutter/flutter/issues/6207 for more information';
+      'See https://github.com/flutter/flutter/issues/6207 for more information.';
   String get flutterBinariesLinuxRepairCommands =>
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
