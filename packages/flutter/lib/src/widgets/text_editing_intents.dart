@@ -230,7 +230,8 @@ class ExtendSelectionVerticallyToAdjacentParagraphIntent extends DirectionalCare
     required bool forward,
     required bool collapseSelection,
     required bool collapseAtReversal,
-  }) : super(forward, collapseSelection, collapseAtReversal, true);
+    required bool continuesAtWrap,
+  }) : super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
 }
 
 /// Extends, or moves the current selection from the current

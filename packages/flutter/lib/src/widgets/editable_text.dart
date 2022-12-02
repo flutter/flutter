@@ -4897,10 +4897,12 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     // move it just to the other side of the wordwrap.
     if (intent.continuesAtWrap) {
       if (intent.forward && _isAtWordwrapUpstream(extent)) {
+        print('moving to downstream');
         extent = TextPosition(
           offset: extent.offset,
         );
       } else if (!intent.forward && _isAtWordwrapDownstream(extent)) {
+        print('moving to upstream');
         extent = TextPosition(
           offset: extent.offset,
           affinity: TextAffinity.upstream,
@@ -4909,6 +4911,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     }
 
     // Check previous extent.
+    print('original extent $extent');
     TextPosition begOfCurrentLine = lineBoundary.getLeadingTextBoundaryAt(extent.offset);
     TextPosition endOfCurrentLine = lineBoundary.getTrailingTextBoundaryAt(extent.offset);
 
@@ -4920,7 +4923,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       // is used as the target when finding the next paragraph boundary
       // to extend the selection to.
       print('case1 $endOfCurrentLine $extent');
-      if (endOfCurrentLine == extent) {
+      if (endOfCurrentLine.offset == extent.offset) {
         print('case2');
         currentRun.moveNext();
         extent = lineBoundary.getTrailingTextBoundaryAt(currentRun.current);
@@ -4931,7 +4934,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       // position is used as the target when finding the next paragraph boundary
       // to extend the selection to.
       print('case3 $begOfCurrentLine $extent');
-      if (begOfCurrentLine == selection.base) {
+      if (begOfCurrentLine.offset == selection.base.offset) {
         print('case4');
         currentRun.movePrevious();
         extent = lineBoundary.getLeadingTextBoundaryAt(currentRun.current);
