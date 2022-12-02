@@ -221,6 +221,14 @@ void main() {
         hasTapAction: true,
       ),
     );
+
+    expect(
+      tester.getSemantics(find.byType(SemanticsClipper)),
+      matchesSemantics(
+        label: 'Scrim',
+        hasTapAction: true,
+      ),
+    );
   });
 }
 
