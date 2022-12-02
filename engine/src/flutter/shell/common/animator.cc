@@ -80,7 +80,7 @@ void Animator::BeginFrame(
 
   if (!producer_continuation_) {
     // We may already have a valid pipeline continuation in case a previous
-    // begin frame did not result in an Animation::Render. Simply reuse that
+    // begin frame did not result in an Animator::Render. Simply reuse that
     // instead of asking the pipeline for a fresh continuation.
     producer_continuation_ = layer_tree_pipeline_->Produce();
 
