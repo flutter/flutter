@@ -301,9 +301,4 @@
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # verify_binaries_codesigned @christopherfujino @flutter/releases
-
-## Packaging builders tests
-Linux flutter_packaging_beta @godofredoc @flutter/infra
-Mac flutter_packaging_beta @godofredoc @flutter/infra
-Mac_arm64 flutter_packaging @godofredoc @flutter/infra
-Windows flutter_packaging_beta @godofredoc @flutter/infra
+# flutter_packaging_beta @godofredoc @flutter/infra
