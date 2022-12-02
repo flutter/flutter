@@ -991,6 +991,84 @@ void main() {
     PlistParser: () => plistUtils,
   });
 
+  testUsingContext(
+      'Validate basic Xcode settings with default bundle identifier prefix', () async {
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[plistPath] = <String,String>{
+      'CFBundleIdentifier': 'com.example.my_app',
+    };
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+        testLogger.statusText,
+        contains('Warning: You may want to update your bundle identifier.')
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
+  testUsingContext(
+      'Validate basic Xcode settings with custom bundle identifier prefix', () async {
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[plistPath] = <String,String>{
+      'CFBundleIdentifier': 'com.my_company.my_app',
+    };
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+        testLogger.statusText,
+        isNot(contains('Warning: You may want to update your bundle identifier.'))
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
 
   testUsingContext('Validate template app icons with conflicts', () async {
     const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
