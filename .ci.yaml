@@ -4630,7 +4630,7 @@ targets:
     properties:
       task_name: flutter_packaging_beta
       tags: >
-        ["framework", "hostonly", "linux"]
+        ["framework", "hostonly", "shard", "linux"]
 
 
   - name: Mac flutter_packaging_beta
@@ -4643,7 +4643,7 @@ targets:
     properties:
       task_name: flutter_packaging_beta
       tags: >
-        ["framework", "hostonly", "mac"]
+        ["framework", "hostonly", "shard", "mac"]
 
 
   - name: Mac_arm64 flutter_packaging_beta
@@ -4656,7 +4656,7 @@ targets:
     properties:
       task_name: flutter_packaging_beta
       tags: >
-        ["framework", "hostonly", "mac"]
+        ["framework", "hostonly", "shard", "mac"]
 
 
   - name: Windows flutter_packaging_beta
@@ -4669,7 +4669,7 @@ targets:
     properties:
       task_name: flutter_packaging_beta
       tags: >
-        ["framework", "hostonly", "windows"]
+        ["framework", "hostonly", "shard", "windows"]
 
 
   # TODO(drewroengoogle): Remove this target when the release scheduler is
