@@ -5,6 +5,7 @@
 // Included first as it collides with the X11 headers.
 #include "gtest/gtest.h"
 
+#include <pthread.h>
 #include <cstring>
 
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
@@ -383,4 +384,98 @@ TEST(FlBinaryMessengerTest, ReceiveMessage) {
 
   // Blocks here until response_cb is called.
   g_main_loop_run(loop);
+}
+
+struct RespondsOnBackgroundThreadInfo {
+  FlBinaryMessenger* messenger;
+  FlBinaryMessengerResponseHandle* response_handle;
+  GMainLoop* loop;
+};
+
+static gboolean cleanup_responds_on_background_thread_info(gpointer user_data) {
+  RespondsOnBackgroundThreadInfo* info =
+      static_cast<RespondsOnBackgroundThreadInfo*>(user_data);
+  GMainLoop* loop = info->loop;
+
+  g_object_unref(info->messenger);
+  g_object_unref(info->response_handle);
+  free(info);
+
+  g_main_loop_quit(static_cast<GMainLoop*>(loop));
+
+  return G_SOURCE_REMOVE;
+}
+
+static void* response_from_thread_main(void* user_data) {
+  RespondsOnBackgroundThreadInfo* info =
+      static_cast<RespondsOnBackgroundThreadInfo*>(user_data);
+
+  fl_binary_messenger_send_response(info->messenger, info->response_handle,
+                                    nullptr, nullptr);
+
+  g_idle_add(cleanup_responds_on_background_thread_info, info);
+
+  return nullptr;
+}
+
+static void response_from_thread_cb(
+    FlBinaryMessenger* messenger,
+    const gchar* channel,
+    GBytes* message,
+    FlBinaryMessengerResponseHandle* response_handle,
+    gpointer user_data) {
+  EXPECT_NE(message, nullptr);
+  pthread_t thread;
+  RespondsOnBackgroundThreadInfo* info =
+      static_cast<RespondsOnBackgroundThreadInfo*>(
+          malloc(sizeof(RespondsOnBackgroundThreadInfo)));
+  info->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
+  info->response_handle =
+      FL_BINARY_MESSENGER_RESPONSE_HANDLE(g_object_ref(response_handle));
+  info->loop = static_cast<GMainLoop*>(user_data);
+  EXPECT_EQ(0,
+            pthread_create(&thread, nullptr, &response_from_thread_main, info));
+}
+
+TEST(FlBinaryMessengerTest, RespondOnBackgroundThread) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+
+  // Listen for messages from the engine.
+  fl_binary_messenger_set_message_handler_on_channel(
+      messenger, "test/messages", message_cb, nullptr, nullptr);
+
+  // Listen for response from the engine.
+  fl_binary_messenger_set_message_handler_on_channel(
+      messenger, "test/responses", response_from_thread_cb, loop, nullptr);
+
+  // Trigger the engine to send a message.
+  const char* text = "Marco!";
+  g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
+  fl_binary_messenger_send_on_channel(messenger, "test/send-message", message,
+                                      nullptr, nullptr, nullptr);
+
+  // Blocks here until response_cb is called.
+  g_main_loop_run(loop);
+}
+
+static void kill_handler_notify_cb(gpointer was_called) {
+  *static_cast<gboolean*>(was_called) = TRUE;
+}
+
+TEST(FlBinaryMessengerTest, DeletingEngineClearsHandlers) {
+  FlEngine* engine = make_mock_engine();
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
+  gboolean was_killed = FALSE;
+
+  // Listen for messages from the engine.
+  fl_binary_messenger_set_message_handler_on_channel(messenger, "test/messages",
+                                                     message_cb, &was_killed,
+                                                     kill_handler_notify_cb);
+
+  g_clear_object(&engine);
+
+  ASSERT_TRUE(was_killed);
 }

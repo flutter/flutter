@@ -33,7 +33,7 @@ G_DEFINE_INTERFACE(FlBinaryMessenger, fl_binary_messenger, G_TYPE_OBJECT)
 struct _FlBinaryMessengerImpl {
   GObject parent_instance;
 
-  FlEngine* engine;
+  GWeakRef engine;
 
   // PlatformMessageHandler keyed by channel name.
   GHashTable* platform_message_handlers;
@@ -81,7 +81,9 @@ static void fl_binary_messenger_response_handle_impl_dispose(GObject* object) {
   FlBinaryMessengerResponseHandleImpl* self =
       FL_BINARY_MESSENGER_RESPONSE_HANDLE_IMPL(object);
 
-  if (self->response_handle != nullptr && self->messenger->engine != nullptr) {
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_weak_ref_get(&self->messenger->engine));
+  if (self->response_handle != nullptr && engine != nullptr) {
     g_critical("FlBinaryMessengerResponseHandle was not responded to");
   }
 
@@ -144,7 +146,6 @@ static void platform_message_handler_free(gpointer data) {
 static void engine_weak_notify_cb(gpointer user_data,
                                   GObject* where_the_object_was) {
   FlBinaryMessengerImpl* self = FL_BINARY_MESSENGER_IMPL(user_data);
-  self->engine = nullptr;
 
   // Disconnect any handlers.
   // Take the reference in case a handler tries to modify this table.
@@ -180,10 +181,14 @@ static gboolean fl_binary_messenger_platform_message_cb(
 static void fl_binary_messenger_impl_dispose(GObject* object) {
   FlBinaryMessengerImpl* self = FL_BINARY_MESSENGER_IMPL(object);
 
-  if (self->engine != nullptr) {
-    g_object_weak_unref(G_OBJECT(self->engine), engine_weak_notify_cb, self);
-    self->engine = nullptr;
+  {
+    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+    if (engine) {
+      g_object_weak_unref(G_OBJECT(engine), engine_weak_notify_cb, self);
+    }
   }
+
+  g_weak_ref_clear(&self->engine);
 
   g_clear_pointer(&self->platform_message_handlers, g_hash_table_unref);
 
@@ -199,7 +204,8 @@ static void set_message_handler_on_channel(
   FlBinaryMessengerImpl* self = FL_BINARY_MESSENGER_IMPL(messenger);
 
   // Don't set handlers if engine already gone.
-  if (self->engine == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     if (handler != nullptr) {
       g_warning(
           "Attempted to set message handler on an FlBinaryMessenger without an "
@@ -220,6 +226,12 @@ static void set_message_handler_on_channel(
   }
 }
 
+static gboolean do_unref(gpointer value) {
+  g_object_unref(value);
+  return G_SOURCE_REMOVE;
+}
+
+// Note: This function can be called from any thread.
 static gboolean send_response(FlBinaryMessenger* messenger,
                               FlBinaryMessengerResponseHandle* response_handle_,
                               GBytes* response,
@@ -233,21 +245,27 @@ static gboolean send_response(FlBinaryMessenger* messenger,
   g_return_val_if_fail(response_handle->messenger == self, FALSE);
   g_return_val_if_fail(response_handle->response_handle != nullptr, FALSE);
 
-  if (self->engine == nullptr) {
+  FlEngine* engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return TRUE;
   }
 
+  gboolean result = false;
   if (response_handle->response_handle == nullptr) {
     g_set_error(
         error, FL_BINARY_MESSENGER_ERROR,
         FL_BINARY_MESSENGER_ERROR_ALREADY_RESPONDED,
         "Attempted to respond to a message that is already responded to");
-    return FALSE;
+    result = FALSE;
+  } else {
+    result = fl_engine_send_platform_message_response(
+        engine, response_handle->response_handle, response, error);
+    response_handle->response_handle = nullptr;
   }
 
-  gboolean result = fl_engine_send_platform_message_response(
-      self->engine, response_handle->response_handle, response, error);
-  response_handle->response_handle = nullptr;
+  // This guarantees that the dispose method for the engine is executed
+  // on the platform thread in the rare chance this is the last ref.
+  g_idle_add(do_unref, engine);
 
   return result;
 }
@@ -267,12 +285,13 @@ static void send_on_channel(FlBinaryMessenger* messenger,
                             gpointer user_data) {
   FlBinaryMessengerImpl* self = FL_BINARY_MESSENGER_IMPL(messenger);
 
-  if (self->engine == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return;
   }
 
   fl_engine_send_platform_message(
-      self->engine, channel, message, cancellable,
+      engine, channel, message, cancellable,
       callback != nullptr ? platform_message_ready_cb : nullptr,
       callback != nullptr ? g_task_new(self, cancellable, callback, user_data)
                           : nullptr);
@@ -287,11 +306,12 @@ static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
   g_autoptr(GTask) task = G_TASK(result);
   GAsyncResult* r = G_ASYNC_RESULT(g_task_propagate_pointer(task, nullptr));
 
-  if (self->engine == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
     return nullptr;
   }
 
-  return fl_engine_send_platform_message_finish(self->engine, r, error);
+  return fl_engine_send_platform_message_finish(engine, r, error);
 }
 
 static void fl_binary_messenger_impl_class_init(
@@ -321,7 +341,7 @@ FlBinaryMessenger* fl_binary_messenger_new(FlEngine* engine) {
   // Added to stop compiler complaining about an unused function.
   FL_IS_BINARY_MESSENGER_IMPL(self);
 
-  self->engine = engine;
+  g_weak_ref_init(&self->engine, G_OBJECT(engine));
   g_object_weak_ref(G_OBJECT(engine), engine_weak_notify_cb, self);
 
   fl_engine_set_platform_message_handler(
@@ -343,6 +363,7 @@ G_MODULE_EXPORT void fl_binary_messenger_set_message_handler_on_channel(
       self, channel, handler, user_data, destroy_notify);
 }
 
+// Note: This function can be called from any thread.
 G_MODULE_EXPORT gboolean fl_binary_messenger_send_response(
     FlBinaryMessenger* self,
     FlBinaryMessengerResponseHandle* response_handle,
