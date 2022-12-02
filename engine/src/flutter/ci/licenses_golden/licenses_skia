@@ -1,4 +1,4 @@
-Signature: 532824606ea0e9dba7ad4449564bab81
+Signature: 60e531fb5a3969269eb98bf4d76dafdc
 
 UNUSED LICENSES:
 
@@ -2018,7 +2018,6 @@ FILE: ../../../third_party/skia/include/ports/SkTypeface_win.h
 FILE: ../../../third_party/skia/include/private/SkTArray.h
 FILE: ../../../third_party/skia/include/utils/SkNWayCanvas.h
 FILE: ../../../third_party/skia/include/utils/mac/SkCGUtils.h
-FILE: ../../../third_party/skia/samplecode/Sample.h
 FILE: ../../../third_party/skia/src/core/SkAAClip.cpp
 FILE: ../../../third_party/skia/src/core/SkAAClip.h
 FILE: ../../../third_party/skia/src/core/SkAdvancedTypefaceMetrics.h
@@ -3594,8 +3593,6 @@ FILE: ../../../third_party/skia/modules/svg/src/SkSVGShape.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGStop.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGTransformableNode.cpp
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGValue.cpp
-FILE: ../../../third_party/skia/samplecode/DecodeFile.h
-FILE: ../../../third_party/skia/samplecode/Sample.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkRawCodec.h
 FILE: ../../../third_party/skia/src/core/SkATrace.cpp
@@ -7778,6 +7775,7 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLProgram.cpp
+FILE: ../../../third_party/skia/src/sksl/tracing/SkSLDebugInfo.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinFunctions.cpp
