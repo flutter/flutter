@@ -628,7 +628,7 @@ class _SnackBarState extends State<SnackBar> {
 
     Widget snackBar = Padding(
       padding: padding,
-        child: Wrap(direction: Axis.horizontal,
+        child: Wrap(
           children: <Widget>[
             Row(
               children: <Widget>[
