@@ -305,80 +305,80 @@ void main() {
       ),
     );
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
-      'FlutterError\n'
-      '   No ScaffoldMessenger widget found.\n'
-      '   SnackBarAction widgets require a ScaffoldMessenger widget\n'
-      '   ancestor.\n'
-      '   The specific widget that could not find a ScaffoldMessenger\n'
-      '   ancestor was:\n'
-      '     SnackBarAction\n'
-      '   The ancestors of this widget were:\n'
-      '     TextButtonTheme\n'
-      '     Padding\n'
-      '     Row\n'
-      '     Wrap\n'
-      '     Padding\n'
-      '     MediaQuery\n'
-      '     Padding\n'
-      '     SafeArea\n'
-      '     FadeTransition\n'
-      '     DefaultSelectionStyle\n'
-      '     IconTheme\n'
-      '     IconTheme\n'
-      '     _InheritedCupertinoTheme\n'
-      '     CupertinoTheme\n'
-      '     _InheritedTheme\n'
-      '     Theme\n'
-      '     DefaultTextStyle\n'
-      '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#24304 ink renderer]\n'
-      '     NotificationListener<LayoutChangedNotification>\n'
-      '     PhysicalModel\n'
-      '     AnimatedPhysicalModel\n'
-      '     Material\n'
-      '     KeyedSubtree-[GlobalKey#3d33f]\n'
-      '     FractionalTranslation\n'
-      '     SlideTransition\n'
-      '     Listener\n'
-      '     _GestureSemantics\n'
-      '     RawGestureDetector\n'
-      '     GestureDetector\n'
-      '     Dismissible-[<\'dismissible\'>]\n'
-      '     Semantics\n'
-      '     Align\n'
-      '     AnimatedBuilder\n'
-      '     ClipRect\n'
-      '     KeyedSubtree-[GlobalKey#aedd6]\n'
-      '     _EffectiveTickerMode\n'
-      '     TickerMode\n'
-      '     Offstage\n'
-      '     SizedBox\n'
-      '     Hero\n'
-      '     SnackBar-[#6e6b2]\n'
-      '     MediaQuery\n'
-      '     LayoutId-[<_ScaffoldSlot.snackBar>]\n'
-      '     CustomMultiChildLayout\n'
-      '     _ActionsMarker\n'
-      '     Actions\n'
-      '     AnimatedBuilder\n'
-      '     DefaultTextStyle\n'
-      '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#98cc8 ink renderer]\n'
-      '     NotificationListener<LayoutChangedNotification>\n'
-      '     PhysicalModel\n'
-      '     AnimatedPhysicalModel\n'
-      '     Material\n'
-      '     _ScrollNotificationObserverScope\n'
-      '     NotificationListener<ScrollNotification>\n'
-      '     NotificationListener<ScrollMetricsNotification>\n'
-      '     ScrollNotificationObserver\n'
-      '     _ScaffoldScope\n'
-      '     Scaffold-[LabeledGlobalKey<ScaffoldState>#a02f7]\n'
-      '     MediaQuery\n'
-      '     Directionality\n'
-      '     [root]\n'
-      '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-      '   MaterialApp at the top of your application widget tree.\n',
+      "FlutterError\n"
+      "   No ScaffoldMessenger widget found.\n"
+      "   SnackBarAction widgets require a ScaffoldMessenger widget\n"
+      "   ancestor.\n"
+      "   The specific widget that could not find a ScaffoldMessenger\n"
+      "   ancestor was:\n"
+      "     SnackBarAction\n"
+      "   The ancestors of this widget were:\n"
+      "     TextButtonTheme\n"
+      "     Padding\n"
+      "     Row\n"
+      "     Wrap\n"
+      "     Padding\n"
+      "     MediaQuery\n"
+      "     Padding\n"
+      "     SafeArea\n"
+      "     FadeTransition\n"
+      "     DefaultSelectionStyle\n"
+      "     IconTheme\n"
+      "     IconTheme\n"
+      "     _InheritedCupertinoTheme\n"
+      "     CupertinoTheme\n"
+      "     _InheritedTheme\n"
+      "     Theme\n"
+      "     DefaultTextStyle\n"
+      "     AnimatedDefaultTextStyle\n"
+      "     _InkFeatures-[GlobalKey#24304 ink renderer]\n"
+      "     NotificationListener<LayoutChangedNotification>\n"
+      "     PhysicalModel\n"
+      "     AnimatedPhysicalModel\n"
+      "     Material\n"
+      "     KeyedSubtree-[GlobalKey#3d33f]\n"
+      "     FractionalTranslation\n"
+      "     SlideTransition\n"
+      "     Listener\n"
+      "     _GestureSemantics\n"
+      "     RawGestureDetector\n"
+      "     GestureDetector\n"
+      "     Dismissible-[<'dismissible'>]\n"
+      "     Semantics\n"
+      "     Align\n"
+      "     AnimatedBuilder\n"
+      "     ClipRect\n"
+      "     KeyedSubtree-[GlobalKey#aedd6]\n"
+      "     _EffectiveTickerMode\n"
+      "     TickerMode\n"
+      "     Offstage\n"
+      "     SizedBox\n"
+      "     Hero\n"
+      "     SnackBar-[#6e6b2]\n"
+      "     MediaQuery\n"
+      "     LayoutId-[<_ScaffoldSlot.snackBar>]\n"
+      "     CustomMultiChildLayout\n"
+      "     _ActionsMarker\n"
+      "     Actions\n"
+      "     AnimatedBuilder\n"
+      "     DefaultTextStyle\n"
+      "     AnimatedDefaultTextStyle\n"
+      "     _InkFeatures-[GlobalKey#98cc8 ink renderer]\n"
+      "     NotificationListener<LayoutChangedNotification>\n"
+      "     PhysicalModel\n"
+      "     AnimatedPhysicalModel\n"
+      "     Material\n"
+      "     _ScrollNotificationObserverScope\n"
+      "     NotificationListener<ScrollNotification>\n"
+      "     NotificationListener<ScrollMetricsNotification>\n"
+      "     ScrollNotificationObserver\n"
+      "     _ScaffoldScope\n"
+      "     Scaffold-[LabeledGlobalKey<ScaffoldState>#a02f7]\n"
+      "     MediaQuery\n"
+      "     Directionality\n"
+      "     [root]\n"
+      "   Typically, the ScaffoldMessenger widget is introduced by the\n"
+      "   MaterialApp at the top of your application widget tree.\n',
     ));
   });
 }
