@@ -191,7 +191,9 @@ void main() {
   });
 
   test('currentSystemFrameTimeStamp is the raw timestamp', () {
-    // Undo epoch set by previous tests.
+    // Undo epoch set by previous tests. This is not entirely hermetic as
+    // tick/handleBeginFrame still have an expectation of monotonic raw time, so
+    // other tests should avoid advancing time if possible.
     scheduler.resetEpoch();
 
     late Duration lastTimeStamp;
@@ -316,17 +318,17 @@ void main() {
       scheduler.scheduleTask(() => taskExecuted = true, Priority.idle);
       drainTimers();
 
-      tick(const Duration(milliseconds: 20));
+      tick(null);
       drainTimers();
       expect(outstandingFrames, 2);
       expect(taskExecuted, isFalse);
 
-      tick(const Duration(milliseconds: 20));
+      tick(null);
       drainTimers();
       expect(outstandingFrames, 1);
       expect(taskExecuted, isFalse);
 
-      tick(const Duration(milliseconds: 20));
+      tick(null);
       drainTimers();
       expect(outstandingFrames, 0);
       expect(taskExecuted, isTrue);
