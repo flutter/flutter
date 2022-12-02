@@ -248,39 +248,6 @@ Instead, we update this file manually once in a while.
 `canvaskit_lock.yaml` locks the version of CanvasKit for tests and production
 use.
 
-## Troubleshooting
-
-### Can't load Kernel binary: Invalid kernel binary format version.
-
-Sometimes `.dart_tool` cache invalidation fails, and you'll end up with a
-cached version of `felt` that is not compatible with the Dart SDK that you're
-using.
-
-In that case, any invocation to `felt` will fail with:
-
-```
-Can't load Kernel binary: Invalid kernel binary format version.
-```
-
-The solution is to delete the cached `felt.snapshot` files under `lib/web_ui`:
-
-```
-rm .dart_tool/felt.snapshot*
-```
-
-## Hacking on the `felt` tool itself
-
-If you are making changes in the `felt` tool itself, you need to be aware of
-Dart snapshots. We create a Dart snapshot of the `felt` tool to make the startup
-faster.
-
-To run `felt` from sources, disable the snapshot using the `FELT_USE_SNAPSHOT`
-environment variable:
-
-```
-FELT_USE_SNAPSHOT=false felt <command>
-```
-
 ## Building CanvasKit
 
 To build CanvasKit locally, you must first set up your gclient config to
