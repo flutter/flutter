@@ -140,7 +140,7 @@ void fl_binary_messenger_set_message_handler_on_channel(
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
- * Responds to a platform message.
+ * Responds to a platform message. This function is thread-safe.
  *
  * Returns: %TRUE on success.
  */

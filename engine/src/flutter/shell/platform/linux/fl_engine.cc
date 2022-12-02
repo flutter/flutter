@@ -616,6 +616,7 @@ void fl_engine_set_on_pre_engine_restart_handler(
   self->on_pre_engine_restart_handler_destroy_notify = destroy_notify;
 }
 
+// Note: This function can be called from any thread.
 gboolean fl_engine_send_platform_message_response(
     FlEngine* self,
     const FlutterPlatformMessageResponseHandle* handle,
