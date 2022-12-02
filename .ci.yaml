@@ -181,6 +181,8 @@ targets:
   - name: Linux Host Engine
     recipe: engine/engine
     properties:
+      gclient_variables: >-
+        {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
     timeout: 60
@@ -337,6 +339,8 @@ targets:
   - name: Mac Host Engine
     recipe: engine/engine
     properties:
+      gclient_variables: >-
+        {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
       jazzy_version: "0.14.1"
@@ -486,6 +490,8 @@ targets:
     recipe: engine/engine
     timeout: 60
     properties:
+      gclient_variables: >-
+        {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
 
