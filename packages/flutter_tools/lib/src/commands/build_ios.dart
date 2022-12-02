@@ -62,7 +62,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 /// asset, and null for launch image asset.
 @immutable
 class _ImageAssetFileKey {
-  const  _ImageAssetFileKey(this.idiom, this.scale, this.size);
+  const _ImageAssetFileKey(this.idiom, this.scale, this.size);
 
   /// The idiom (iphone or ipad).
   final String idiom;
