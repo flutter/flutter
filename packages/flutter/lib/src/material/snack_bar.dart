@@ -9,8 +9,6 @@ import 'button_style.dart';
 import 'color_scheme.dart';
 import 'icon_button.dart';
 import 'icons.dart';
-import 'icon_button.dart';
-import 'icons.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
@@ -239,8 +237,6 @@ class SnackBar extends StatefulWidget {
     this.action,
     this.showCloseIcon,
     this.closeIconColor,
-    this.showCloseIcon,
-    this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
@@ -348,9 +344,6 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [SnackBarThemeData.behavior] of
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// [SnackBarBehavior.fixed].
-  ///
-  /// If this value is [SnackBarBehavior.floating], the length of the bar
-  /// is defined by either [width] or [margin].
   ///
   /// If this value is [SnackBarBehavior.floating], the length of the bar
   /// is defined by either [width] or [margin].
