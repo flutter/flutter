@@ -475,7 +475,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
       if (_lastSize != childSize) {
         _lastSize = childSize;
-        _onChildSizeChanged?.call(_lastSize);
+        _onChildSizeChanged.call(_lastSize);
       }
     }
   }
