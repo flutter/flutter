@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -112,7 +113,8 @@ void main() {
   });
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
-    final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
+    final Queue<VoidCallback> timerQueueTasks = Queue<VoidCallback>();
+    final Queue<VoidCallback> microtaskQueue = Queue<VoidCallback>();
     bool taskExecuted = false;
     runZoned<void>(
       () {
@@ -120,6 +122,23 @@ void main() {
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
+
+        // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0
+        // because events are locked.
+        expect(timerQueueTasks.length, 2);
+        expect(taskExecuted, false);
+
+        // Run all tasks so that the scheduler is no longer in warm-up state.
+        // New tasks may be added as old ones run. This FIFO behavior that
+        // prioritizes the microtask queue mimics the real behavior.
+        while (microtaskQueue.isNotEmpty || timerQueueTasks.isNotEmpty) {
+          if (microtaskQueue.isNotEmpty) {
+            microtaskQueue.removeFirst()();
+          }
+          if (timerQueueTasks.isNotEmpty) {
+            timerQueueTasks.removeFirst()();
+          }
+        }
       },
       zoneSpecification: ZoneSpecification(
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
@@ -127,25 +146,14 @@ void main() {
           timerQueueTasks.add(f);
           return DummyTimer();
         },
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void Function() f) {
+          microtaskQueue.add(f);
+        },
       ),
     );
-
-    // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0 because
-    // events are locked.
-    expect(timerQueueTasks.length, 2);
-    expect(taskExecuted, false);
-
-    // Run the timers so that the scheduler is no longer in warm-up state.
-    for (final VoidCallback timer in timerQueueTasks) {
-      timer();
-    }
-
-    // As events are locked, make scheduleTask execute after the test or it
-    // will execute during following tests and risk failure.
-    addTearDown(() => scheduler.handleEventLoopCallback());
   });
 
-  test('Flutter.Frame event fired', () async {
+  test('Flutter.Frame event fired', () {
     SchedulerBinding.instance.platformDispatcher.onReportTimings!(<FrameTiming>[
       FrameTiming(
         vsyncStart: 5000,
@@ -276,6 +284,53 @@ void main() {
     await result;
 
     expect(isCompleted, true);
+  });
+
+  test('An idle task is executed after animation has completed', () {
+    scheduler.schedulingStrategy = defaultSchedulingStrategy;
+
+    final Queue<VoidCallback> timers = Queue<VoidCallback>();
+    final ZoneSpecification timerInterceptor = ZoneSpecification(
+      createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() callback) {
+        timers.add(callback);
+        return DummyTimer();
+      },
+    );
+    void drainTimers() {
+      while (timers.isNotEmpty) {
+        timers.removeFirst()();
+      }
+    }
+
+    runZoned<void>(() {
+      int outstandingFrames = 3;
+      late final Ticker ticker; // late to allow reference in onTick
+      ticker = Ticker((Duration elapsed) {
+        if (--outstandingFrames == 0) {
+          ticker.stop();
+        }
+      });
+      ticker.start();
+
+      bool taskExecuted = false;
+      scheduler.scheduleTask(() => taskExecuted = true, Priority.idle);
+      drainTimers();
+
+      tick(const Duration(milliseconds: 20));
+      drainTimers();
+      expect(outstandingFrames, 2);
+      expect(taskExecuted, isFalse);
+
+      tick(const Duration(milliseconds: 20));
+      drainTimers();
+      expect(outstandingFrames, 1);
+      expect(taskExecuted, isFalse);
+
+      tick(const Duration(milliseconds: 20));
+      drainTimers();
+      expect(outstandingFrames, 0);
+      expect(taskExecuted, isTrue);
+    }, zoneSpecification: timerInterceptor);
   });
 }
 
