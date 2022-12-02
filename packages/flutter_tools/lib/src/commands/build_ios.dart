@@ -350,6 +350,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
       messageBuffer.writeln('\nYou must set up the missing settings.');
     }
+
+    if (xcodeProjectSettingsMap['Bundle Identifier']?.startsWith('com.example') ?? false) {
+      messageBuffer.writeln('\nWarning: Your application still contains the default "com.example" bundle identifier.');
+    }
   }
 
   @override
