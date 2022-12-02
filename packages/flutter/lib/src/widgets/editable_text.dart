@@ -4914,22 +4914,22 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     final VerticalCaretMovementRun currentRun = state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
 
     if (intent.forward) {
-      // Find the text position at the end of the current line. If our extent is the same then
-      // move the caret to the next line.
+      // If our current extent is at the end of the current line then
+      // the caret will move down vertically. The new caret position
+      // is used as the target when finding the next paragraph boundary
+      // to extend the selection to.
       if (endOfCurrentLine == extent) {
         currentRun.moveNext();
-        endOfCurrentLine = lineBoundary.getTrailingTextBoundaryAt(currentRun.current.offset);
-      } else {
-        endOfCurrentLine = extent;
+        extent = currentRun.current;
       }
     } else {
-      // Find the text position at the beginnign of the current line. If our extent is the same then
-      // move the caret to the previous line.
+      // If our current extent is at the beginning of the current line then
+      // the caret will move up vertically to the previous line. The new caret
+      // position is used as the target when finding the next paragraph boundary
+      // to extend the selection to.
       if (begOfCurrentLine == selection.base) {
         currentRun.movePrevious();
-        begOfCurrentLine = lineBoundary.getLeadingTextBoundaryAt(currentRun.current.offset);
-      } else {
-        begOfCurrentLine = extent;
+        extent = currentRun.current;
       }
     }
 
