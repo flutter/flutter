@@ -53,6 +53,11 @@ Future<void> main() async {
           if (!output.contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.')) {
             throw TaskResult.failure('Must validate template launch image.');
           }
+
+          // The project is still using com.example as bundle identifier prefix.
+          if (!output.contains('Warning: Your application still contains the default "com.example" bundle identifier.')) {
+            throw TaskResult.failure('Must validate the default bundle identifier prefix');
+          }
         });
 
         final String archivePath = path.join(
