@@ -628,9 +628,7 @@ class _SnackBarState extends State<SnackBar> {
 
     Widget snackBar = Padding(
       padding: padding,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Wrap(direction: Axis.horizontal,
           children: <Widget>[
             Row(
               children: <Widget>[
@@ -656,7 +654,7 @@ class _SnackBarState extends State<SnackBar> {
               children: maybeActionAndIcon),
             ),
           ],
-        ),
+
       ),
     );
 
