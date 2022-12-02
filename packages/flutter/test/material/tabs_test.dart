@@ -5,6 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -355,6 +356,39 @@ void main() {
       MaterialApp(home: Material(type: MaterialType.transparency, child: tabBar)),
     );
     expect(find.byType(TabBar), paints..line(color: Colors.blue[500]));
+  });
+
+  testWidgets('TabBar default selected/unselected text style', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    const String selectedValue = 'A';
+    const String unSelectedValue = 'C';
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: buildFrame(tabs: tabs, value: selectedValue),
+      ),
+    );
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+
+    // Test selected label text style.
+    expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontFamily, 'Roboto');
+    expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontSize, 14.0);
+    expect(tester.renderObject<RenderParagraph>(
+      find.text(selectedValue)).text.style!.color,
+      theme.colorScheme.primary,
+    );
+
+    // Test unselected label text style.
+    expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontFamily, 'Roboto');
+    expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontSize, 14.0);
+    expect(tester.renderObject<RenderParagraph>(
+      find.text(unSelectedValue)).text.style!.color,
+      theme.colorScheme.onSurfaceVariant,
+    );
   });
 
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
@@ -3420,6 +3454,49 @@ void main() {
     ));
   });
 
+  testWidgets('TabController changes with different initialIndex', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/115917
+    const Key lastTabKey = Key('Last Tab');
+    TabController? controller;
+
+    Widget buildFrame(int length) {
+      controller = TabController(
+        vsync: const TestVSync(),
+        length: length,
+        initialIndex: length - 1,
+      );
+      return boilerplate(
+        child: TabBar(
+          labelPadding: EdgeInsets.zero,
+          controller: controller,
+          isScrollable: true,
+          tabs: List<Widget>.generate(
+            length,
+            (int index) {
+              return SizedBox(
+                width: 100,
+                child: Tab(
+                  key: index == length - 1 ? lastTabKey : null,
+                  text: 'Tab $index',
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(10));
+    expect(controller!.index, 9);
+    expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
+
+    // Rebuild with a new controller with more tabs and last tab selected.
+    // Last tab should be visible and on the right of the window.
+    await tester.pumpWidget(buildFrame(15));
+    expect(controller!.index, 14);
+    expect(tester.getCenter(find.byKey(lastTabKey)).dx, equals(750.0));
+  });
+
   testWidgets('Default tab indicator color is white', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/15958
     final List<String> tabs = <String>['LEFT', 'RIGHT'];
@@ -5044,6 +5121,219 @@ void main() {
     );
 
     expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Tab has correct selected/unselected hover color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: buildFrame(tabs: tabs, value: 'C')),
+    );
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ))
+    );
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.08),
+        ))
+    );
+
+    // Start hovering unselected tab.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Tab).first));
+    await tester.pumpAndSettle();
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        )
+    );
+
+    // Start hovering selected tab.
+    await gesture.moveTo(tester.getCenter(find.byType(Tab).last));
+    await tester.pumpAndSettle();
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.08),
+        ),
+    );
+  });
+
+  testWidgets('Tab has correct selected/unselected focus color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B'),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+        ))
+    );
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ))
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(tester.binding.focusManager.primaryFocus?.hasPrimaryFocus, isTrue);
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+        ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(tester.binding.focusManager.primaryFocus?.hasPrimaryFocus, isTrue);
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ),
+    );
+  });
+
+  testWidgets('Tab has correct selected/unselected pressed color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B'),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      inkFeatures,
+      isNot(paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ))
+    );
+
+    // Press unselected tab.
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+    await tester.pumpAndSettle(); // Let the press highlight animation finish.
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ),
+    );
+
+    // Release pressed gesture.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Press selected tab.
+    gesture = await tester.startGesture(tester.getCenter(find.text('B')));
+    await tester.pumpAndSettle(); // Let the press highlight animation finish.
+    expect(
+      inkFeatures,
+      paints
+        ..rect(
+          color: theme.colorScheme.primary.withOpacity(0.12),
+        ),
+    );
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('TabBar default selected/unselected text style', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      final List<String> tabs = <String>['A', 'B', 'C'];
+
+      const String selectedValue = 'A';
+      const String unSelectedValue = 'C';
+      await tester.pumpWidget(buildFrame(tabs: tabs, value: selectedValue));
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+
+      // Test selected label text style.
+      expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontFamily, 'Roboto');
+      expect(tester.renderObject<RenderParagraph>(find.text(selectedValue)).text.style!.fontSize, 14.0);
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(selectedValue)).text.style!.color,
+        theme.primaryTextTheme.bodyLarge!.color,
+      );
+
+      // Test unselected label text style.
+      expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontFamily, 'Roboto');
+      expect(tester.renderObject<RenderParagraph>(find.text(unSelectedValue)).text.style!.fontSize, 14.0);
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(unSelectedValue)).text.style!.color,
+        theme.primaryTextTheme.bodyLarge!.color!.withAlpha(0xB2) // 70% alpha,
+      );
+    });
+
+    testWidgets('TabBar default unselectedLabelColor inherits labelColor with 70% opacity', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/pull/116273
+      final List<String> tabs = <String>['A', 'B', 'C'];
+
+      const String selectedValue = 'A';
+      const String unSelectedValue = 'C';
+      const Color labelColor = Color(0xff0000ff);
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(tabBarTheme: const TabBarTheme(labelColor: labelColor)),
+          child: buildFrame(tabs: tabs, value: selectedValue),
+        ),
+      );
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+
+      // Test selected label color.
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(selectedValue)).text.style!.color,
+        labelColor,
+      );
+
+      // Test unselected label color.
+      expect(tester.renderObject<RenderParagraph>(
+        find.text(unSelectedValue)).text.style!.color,
+        labelColor.withAlpha(0xB2) // 70% alpha,
+      );
+    });
   });
 }
 
