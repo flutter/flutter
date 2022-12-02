@@ -342,7 +342,7 @@ void main() {
       '     Listener\n'
       '     _GestureSemantics\n'
       '     RawGestureDetector\n'
-      '     GestureDetector\n' +
+      '     GestureDetector\n'
       "     Dismissible-[<'dismissible'>]\n"
       '     Semantics\n'
       '     Align\n'
@@ -379,7 +379,6 @@ void main() {
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n'
-      ''
     ));
   });
 }
