@@ -697,7 +697,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('3')), matchesSemantics(
-          label: '3, Sunday, January 3, 2016',
+          label: '3, Sunday, January 3, 2016, Date of today',
           hasTapAction: true,
           isFocusable: true,
         ));
