@@ -55,7 +55,7 @@ Future<void> main() async {
           }
 
           // The project is still using com.example as bundle identifier prefix.
-          if (!output.contains('Warning: You may want to update your bundle identifier.')) {
+          if (!output.contains('Warning: Your application still contains the default "com.example" bundle identifier.')) {
             throw TaskResult.failure('Must validate the default bundle identifier prefix');
           }
         });

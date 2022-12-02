@@ -352,7 +352,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     if (xcodeProjectSettingsMap['Bundle Identifier']?.startsWith('com.example') ?? false) {
-      messageBuffer.writeln('\nWarning: You may want to update your bundle identifier.');
+      messageBuffer.writeln('\nWarning: Your application still contains the default "com.example" bundle identifier.');
     }
   }
 

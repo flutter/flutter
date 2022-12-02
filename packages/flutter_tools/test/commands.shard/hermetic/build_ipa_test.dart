@@ -1020,7 +1020,7 @@ void main() {
 
     expect(
         testLogger.statusText,
-        contains('Warning: You may want to update your bundle identifier.')
+        contains('Warning: Your application still contains the default "com.example" bundle identifier.')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1059,7 +1059,7 @@ void main() {
 
     expect(
         testLogger.statusText,
-        isNot(contains('Warning: You may want to update your bundle identifier.'))
+        isNot(contains('Warning: Your application still contains the default "com.example" bundle identifier.'))
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
