@@ -208,16 +208,19 @@ class Dart2JSTarget extends Target {
         '--no-source-maps',
     ];
 
-    // Run the dart2js compilation in two stages, so that icon tree shaking can
-    // parse the kernel file for web builds.
-    final ProcessResult kernelResult = await globals.processManager.run(<String>[
+    final List<String> compilationArgs = <String>[
       ...sharedCommandOptions,
       '-o',
       environment.buildDir.childFile('app.dill').path,
       '--packages=.dart_tool/package_config.json',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path, // dartfile
-    ]);
+    ];
+    globals.printTrace('compiling dart code to kernel with command "${compilationArgs.join(' ')}"');
+
+    // Run the dart2js compilation in two stages, so that icon tree shaking can
+    // parse the kernel file for web builds.
+    final ProcessResult kernelResult = await globals.processManager.run(compilationArgs);
     if (kernelResult.exitCode != 0) {
       throw Exception(_collectOutput(kernelResult));
     }

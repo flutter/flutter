@@ -6,6 +6,7 @@
 // See https://flutter.dev/go/icu-message-parser.
 
 // Symbol Types
+import '../base/logger.dart';
 import 'gen_l10n_types.dart';
 
 enum ST {
@@ -181,13 +182,17 @@ class Parser {
     this.messageId,
     this.filename,
     this.messageString,
-    { this.useEscaping = false }
+    {
+      this.useEscaping = false,
+      this.logger
+    }
   );
 
   final String messageId;
   final String messageString;
   final String filename;
   final bool useEscaping;
+  final Logger? logger;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
@@ -295,6 +300,11 @@ class Parser {
           );
         } else if (matchedType == ST.empty) {
           // Do not add whitespace as a token.
+          startIndex = match.end;
+          continue;
+        } else if (<ST>[ST.plural, ST.select].contains(matchedType) && tokens.last.type == ST.openBrace) {
+          // Treat "plural" or "select" as identifier if it comes right after an open brace.
+          tokens.add(Node(ST.identifier, startIndex, value: match.group(0)));
           startIndex = match.end;
           continue;
         } else {
@@ -566,8 +576,13 @@ class Parser {
   }
 
   Node parse() {
-    final Node syntaxTree = compress(parseIntoTree());
-    checkExtraRules(syntaxTree);
-    return syntaxTree;
+    try {
+      final Node syntaxTree = compress(parseIntoTree());
+      checkExtraRules(syntaxTree);
+      return syntaxTree;
+    } on L10nParserException catch (error) {
+      logger?.printError(error.toString());
+      return Node(ST.empty, 0, value: '');
+    }
   }
 }

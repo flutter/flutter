@@ -41,7 +41,7 @@ enum _SliderType { material, adaptive }
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// {@tool dartpad}
-/// ![A slider widget, consisting of 5 divisions and showing the default value
+/// ![A legacy slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
 ///
 /// The Sliders value is part of the Stateful widget subclass to change the value
@@ -51,10 +51,17 @@ enum _SliderType { material, adaptive }
 /// {@end-tool}
 ///
 /// {@tool dartpad}
+/// This sample shows the creation of a [Slider] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/sliders/overview.
+///
+/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example shows a [Slider] widget using the [Slider.secondaryTrackValue]
 /// to show a secondary track in the slider.
 ///
-/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// ** See code in examples/api/lib/material/slider/slider.2.dart **
 /// {@end-tool}
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
@@ -821,11 +828,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // in range_slider.dart.
     Size screenSize() => MediaQuery.of(context).size;
 
-    void handleDidGainAccessibilityFocus() {
-      // Automatically activate the slider when it receives a11y focus.
-      if (!focusNode.hasFocus && focusNode.canRequestFocus) {
-        focusNode.requestFocus();
-      }
+    VoidCallback? handleDidGainAccessibilityFocus;
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+        break;
+      case TargetPlatform.windows:
+        handleDidGainAccessibilityFocus = () {
+          // Automatically activate the slider when it receives a11y focus.
+          if (!focusNode.hasFocus && focusNode.canRequestFocus) {
+            focusNode.requestFocus();
+          }
+        };
+        break;
     }
 
     final Map<ShortcutActivator, Intent> shortcutMap;
@@ -846,35 +864,38 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ? math.min(MediaQuery.of(context).textScaleFactor, 1.3)
       : MediaQuery.of(context).textScaleFactor;
 
-    return FocusableActionDetector(
-      actions: _actionMap,
-      shortcuts: shortcutMap,
-      focusNode: focusNode,
-      autofocus: widget.autofocus,
-      enabled: _enabled,
-      onShowFocusHighlight: _handleFocusHighlightChanged,
-      onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: effectiveMouseCursor,
-      includeFocusSemantics: false,
-      child: CompositedTransformTarget(
-        link: _layerLink,
-        child: _SliderRenderObjectWidget(
-          key: _renderObjectKey,
-          value: _convert(widget.value),
-          secondaryTrackValue: (widget.secondaryTrackValue != null) ? _convert(widget.secondaryTrackValue!) : null,
-          divisions: widget.divisions,
-          label: widget.label,
-          sliderTheme: sliderTheme,
-          textScaleFactor: textScaleFactor,
-          screenSize: screenSize(),
-          onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-          onChangeStart: _handleDragStart,
-          onChangeEnd: _handleDragEnd,
-          state: this,
-          semanticFormatterCallback: widget.semanticFormatterCallback,
-          onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-          hasFocus: _focused,
-          hovering: _hovering,
+    return Semantics(
+      container: true,
+      slider: true,
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+      child: FocusableActionDetector(
+        actions: _actionMap,
+        shortcuts: shortcutMap,
+        focusNode: focusNode,
+        autofocus: widget.autofocus,
+        enabled: _enabled,
+        onShowFocusHighlight: _handleFocusHighlightChanged,
+        onShowHoverHighlight: _handleHoverChanged,
+        mouseCursor: effectiveMouseCursor,
+        child: CompositedTransformTarget(
+          link: _layerLink,
+          child: _SliderRenderObjectWidget(
+            key: _renderObjectKey,
+            value: _convert(widget.value),
+            secondaryTrackValue: (widget.secondaryTrackValue != null) ? _convert(widget.secondaryTrackValue!) : null,
+            divisions: widget.divisions,
+            label: widget.label,
+            sliderTheme: sliderTheme,
+            textScaleFactor: textScaleFactor,
+            screenSize: screenSize(),
+            onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+            onChangeStart: _handleDragStart,
+            onChangeEnd: _handleDragEnd,
+            state: this,
+            semanticFormatterCallback: widget.semanticFormatterCallback,
+            hasFocus: _focused,
+            hovering: _hovering,
+          ),
         ),
       ),
     );
@@ -935,7 +956,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChangeEnd,
     required this.state,
     required this.semanticFormatterCallback,
-    required this.onDidGainAccessibilityFocus,
     required this.hasFocus,
     required this.hovering,
   });
@@ -951,7 +971,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double>? onChangeStart;
   final ValueChanged<double>? onChangeEnd;
   final SemanticFormatterCallback? semanticFormatterCallback;
-  final VoidCallback? onDidGainAccessibilityFocus;
   final _SliderState state;
   final bool hasFocus;
   final bool hovering;
@@ -972,7 +991,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       state: state,
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
-      onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
@@ -997,7 +1015,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..onDidGainAccessibilityFocus = onDidGainAccessibilityFocus
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
       ..hovering = hovering
@@ -1019,7 +1036,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required TargetPlatform platform,
     required ValueChanged<double>? onChanged,
     required SemanticFormatterCallback? semanticFormatterCallback,
-    required this.onDidGainAccessibilityFocus,
     required this.onChangeStart,
     required this.onChangeEnd,
     required _SliderState state,
@@ -1105,7 +1121,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _active = false;
   double _currentDragValue = 0.0;
   Rect? overlayRect;
-  late Offset _thumbCenter;
 
   // This rect is used in gesture calculations, where the gesture coordinates
   // are relative to the sliders origin. Therefore, the offset is passed as
@@ -1251,7 +1266,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  VoidCallback? onDidGainAccessibilityFocus;
   ValueChanged<double>? onChangeStart;
   ValueChanged<double>? onChangeEnd;
 
@@ -1575,10 +1589,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    _thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
     if (isInteractive) {
       final Size overlaySize = sliderTheme.overlayShape!.getPreferredSize(isInteractive, false);
-      overlayRect = Rect.fromCircle(center: _thumbCenter, radius: overlaySize.width / 2.0);
+      overlayRect = Rect.fromCircle(center: thumbCenter, radius: overlaySize.width / 2.0);
     }
     final Offset? secondaryOffset = (secondaryVisualPosition != null) ? Offset(trackRect.left + secondaryVisualPosition * trackRect.width, trackRect.center.dy) : null;
 
@@ -1589,7 +1603,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       enableAnimation: _enableAnimation,
       textDirection: _textDirection,
-      thumbCenter: _thumbCenter,
+      thumbCenter: thumbCenter,
       secondaryOffset: secondaryOffset,
       isDiscrete: isDiscrete,
       isEnabled: isInteractive,
@@ -1598,7 +1612,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (!_overlayAnimation.isDismissed) {
       _sliderTheme.overlayShape!.paint(
         context,
-        _thumbCenter,
+        thumbCenter,
         activationAnimation: _overlayAnimation,
         enableAnimation: _enableAnimation,
         isDiscrete: isDiscrete,
@@ -1635,7 +1649,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             sliderTheme: _sliderTheme,
             enableAnimation: _enableAnimation,
             textDirection: _textDirection,
-            thumbCenter: _thumbCenter,
+            thumbCenter: thumbCenter,
             isEnabled: isInteractive,
           );
         }
@@ -1648,7 +1662,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           if (attached) {
             _sliderTheme.valueIndicatorShape!.paint(
               context,
-              offset + _thumbCenter,
+              offset + thumbCenter,
               activationAnimation: _valueIndicatorAnimation,
               enableAnimation: _enableAnimation,
               isDiscrete: isDiscrete,
@@ -1667,7 +1681,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     _sliderTheme.thumbShape!.paint(
       context,
-      _thumbCenter,
+      thumbCenter,
       activationAnimation: _overlayAnimation,
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
@@ -1682,22 +1696,11 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    node.rect = Rect.fromCenter(
-      center: _thumbCenter,
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
-    );
-
-    node.updateWith(config: config);
-  }
-
-  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     // The Slider widget has its own Focus widget with semantics information,
-    // and want that semantics node to collect the semantics information here
+    // and we want that semantics node to collect the semantics information here
     // so that it's all in the same node: otherwise Talkback sees that the node
     // has focusable children, and it won't focus the Slider's Focus widget
     // because it thinks the Focus widget's node doesn't have anything to say
@@ -1705,23 +1708,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     // information into one node means that Talkback will recognize that it has
     // something to say and focus it when it receives keyboard focus.
     // (See https://github.com/flutter/flutter/issues/57038 for context).
-    config.isSemanticBoundary = true;
+    config.isSemanticBoundary = false;
 
     config.isEnabled = isInteractive;
-    config.isSlider = true;
-    config.isFocusable = isInteractive;
-    config.isFocused = hasFocus;
-    switch (_platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-        break;
-      case TargetPlatform.windows:
-        config.onDidGainAccessibilityFocus = onDidGainAccessibilityFocus;
-        break;
-    }
     config.textDirection = textDirection;
     if (isInteractive) {
       config.onIncrease = increaseAction;

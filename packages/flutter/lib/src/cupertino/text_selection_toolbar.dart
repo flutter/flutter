@@ -5,13 +5,11 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart' show Brightness, clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'text_selection_toolbar_button.dart';
-import 'theme.dart';
 
 // Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
@@ -31,27 +29,9 @@ const double _kArrowScreenPadding = 26.0;
 // Values extracted from https://developer.apple.com/design/resources/.
 const Radius _kToolbarBorderRadius = Radius.circular(8);
 
-const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBrightness(
-  // This value was extracted from a screenshot of iOS 16.0.3, as light mode
-  // didn't appear in the Apple design resources assets linked below.
-  color: Color(0xFFB6B6B6),
-  // Color extracted from https://developer.apple.com/design/resources/.
-  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-  darkColor: Color(0xFF808080),
-);
-
-// These values were extracted from a screenshot of iOS 16.0.3, as light mode
-// didn't appear in the Apple design resources assets linked above.
-final BoxDecoration _kToolbarShadow = BoxDecoration(
-  borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
-  boxShadow: <BoxShadow>[
-    BoxShadow(
-      color: CupertinoColors.black.withOpacity(0.1),
-      blurRadius: 16.0,
-      offset: Offset(0, _kToolbarArrowSize.height / 2),
-    ),
-  ],
-);
+// Colors extracted from https://developer.apple.com/design/resources/.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
+const Color _kToolbarDividerColor = Color(0xFF808080);
 
 /// The type for a Function that builds a toolbar's container with the given
 /// child.
@@ -139,22 +119,13 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
   static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
-    final Widget outputChild = _CupertinoTextSelectionToolbarShape(
+    return _CupertinoTextSelectionToolbarShape(
       anchor: anchor,
       isAbove: isAbove,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: _kToolbarDividerColor,
-        ),
+        decoration: const BoxDecoration(color: _kToolbarDividerColor),
         child: child,
       ),
-    );
-    if (CupertinoTheme.brightnessOf(context) == Brightness.dark) {
-      return outputChild;
-    }
-    return DecoratedBox(
-      decoration: _kToolbarShadow,
-      child: outputChild,
     );
   }
 
@@ -254,6 +225,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     this._isAbove,
     super.child,
   );
+
 
   @override
   bool get isRepaintBoundary => true;
@@ -513,7 +485,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           onPressed: _handleNextPage,
           text: '▶',
         ),
-        nextButtonDisabled: const CupertinoTextSelectionToolbarButton.text(
+        nextButtonDisabled: CupertinoTextSelectionToolbarButton.text(
           text: '▶',
         ),
         children: widget.children,
