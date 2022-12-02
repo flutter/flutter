@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -34,6 +35,9 @@ const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 /// The UNAVAILABLE exit code returned by the pub tool.
 /// (see https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart)
 const int _kPubExitCodeUnavailable = 69;
+
+@visibleForTesting
+const int NOOP = 1;
 
 typedef MessageFilter = String? Function(String message);
 
