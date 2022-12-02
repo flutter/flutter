@@ -745,6 +745,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
       final double actualWidth = _width * _controller.value;
       final EdgeInsets drawerWidthEdgeInsets = textDirection == TextDirection.ltr ? EdgeInsets.fromLTRB(actualWidth, 0, 0, 0): EdgeInsets.fromLTRB(0, 0, actualWidth, 0);
+      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
       final Widget child = _DrawerControllerScope(
         controller: widget,
@@ -761,7 +762,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: GestureDetector(
                       onTap: close,
                       child: Semantics(
-                        label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                        label: localizations.scrimLabel,
+                        onTapHint: localizations.scrimOnTapHint(localizations.drawerLabel),
                         child: Container( // The drawer's "scrim"
                           color: _scrimColorTween.evaluate(_controller),
                         ),
