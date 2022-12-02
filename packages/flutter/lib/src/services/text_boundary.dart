@@ -153,7 +153,6 @@ class ParagraphBoundary extends TextBoundary {
   // direction of the text, or if there is no line terminator in a given direction
   // then the bound extends to the start/end of the document in that direction.
   TextRange _getParagraphAtOffset(TextPosition textPosition) {
-    //main issue is that caret is being moved to next line, and paragraph is selected based on that info. Caret should be moved to next line break.
     final CharacterRange charIter = _text.characters.iterator;
 
     int graphemeStart = 0;
@@ -169,13 +168,6 @@ class ParagraphBoundary extends TextBoundary {
         } else if (graphemeEnd == tappedTextOffset) {
           break;
         } else {
-          // graphemeEnd = graphemeStart;
-          graphemeEnd = graphemeEnd - 1;
-          // if (textPosition == TextPosition(offset: 0)) {
-          //   graphemeEnd = graphemeStart;
-          // } else {
-          //   graphemeEnd = graphemeEnd - 1;
-          // }
           break;
         }
       }
