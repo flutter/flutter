@@ -8,27 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
-
-Future<void> sendKeyCombination(
-  WidgetTester tester,
-  SingleActivator activator,
-) async {
-  final List<LogicalKeyboardKey> modifiers = <LogicalKeyboardKey>[
-    if (activator.control) LogicalKeyboardKey.control,
-    if (activator.shift) LogicalKeyboardKey.shift,
-    if (activator.alt) LogicalKeyboardKey.alt,
-    if (activator.meta) LogicalKeyboardKey.meta,
-  ];
-  for (final LogicalKeyboardKey modifier in modifiers) {
-    await tester.sendKeyDownEvent(modifier);
-  }
-  await tester.sendKeyDownEvent(activator.trigger);
-  await tester.sendKeyUpEvent(activator.trigger);
-  await tester.pump();
-  for (final LogicalKeyboardKey modifier in modifiers.reversed) {
-    await tester.sendKeyUpEvent(modifier);
-  }
-}
+import 'keyboard_utils.dart';
 
 Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
   const Iterable<bool> trueFalse = <bool>[false, true];
@@ -170,7 +150,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 19),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('backspace readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -235,7 +215,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 71),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('backspace inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -256,7 +236,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('backspace at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -277,7 +257,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
       });
 
       group('delete: ', () {
@@ -307,7 +287,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 20),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('delete readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -325,7 +305,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 20, affinity: TextAffinity.upstream),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('delete at start', (WidgetTester tester) async {
           controller.text = testText;
@@ -348,7 +328,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('delete at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -393,7 +373,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('delete at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -414,7 +394,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
       });
 
       group('Non-collapsed delete', () {
@@ -440,7 +420,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('at the boundaries of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -461,7 +441,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('cross-cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -482,7 +462,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('cross-cluster obscured text', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -503,7 +483,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 1),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
       });
 
       group('word modifier + backspace', () {
@@ -536,7 +516,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 24),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -601,7 +581,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 71),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -622,7 +602,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -643,7 +623,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
       });
 
       group('word modifier + delete', () {
@@ -676,7 +656,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 23),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -717,7 +697,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -755,7 +735,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 0),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
         testWidgets('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
@@ -776,7 +756,7 @@ void main() {
             controller.selection,
             const TextSelection.collapsed(offset: 8),
           );
-        }, variant: TargetPlatformVariant.all());
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
       });
 
       group('line modifier + backspace', () {
