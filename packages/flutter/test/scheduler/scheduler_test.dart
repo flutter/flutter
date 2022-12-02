@@ -113,7 +113,7 @@ void main() {
   });
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
-    final Queue<VoidCallback> timerQueueTasks = Queue<VoidCallback>();
+    final Queue<VoidCallback> timerQueue = Queue<VoidCallback>();
     final Queue<VoidCallback> microtaskQueue = Queue<VoidCallback>();
     bool taskExecuted = false;
     runZoned<void>(
@@ -122,28 +122,11 @@ void main() {
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
-
-        // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0
-        // because events are locked.
-        expect(timerQueueTasks.length, 2);
-        expect(taskExecuted, false);
-
-        // Run all tasks so that the scheduler is no longer in warm-up state.
-        // New tasks may be added as old ones run. This FIFO behavior that
-        // prioritizes the microtask queue mimics the real behavior.
-        while (microtaskQueue.isNotEmpty || timerQueueTasks.isNotEmpty) {
-          if (microtaskQueue.isNotEmpty) {
-            microtaskQueue.removeFirst()();
-          }
-          if (timerQueueTasks.isNotEmpty) {
-            timerQueueTasks.removeFirst()();
-          }
-        }
       },
       zoneSpecification: ZoneSpecification(
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
           // Don't actually run the tasks, just record that it was scheduled.
-          timerQueueTasks.add(f);
+          timerQueue.add(f);
           return DummyTimer();
         },
         scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void Function() f) {
@@ -151,6 +134,25 @@ void main() {
         },
       ),
     );
+
+    // Run all tasks so that the scheduler is no longer in warm-up state. New
+    // tasks may be added as old ones run. This FIFO behavior that prioritizes
+    // the microtask queue mimics the real behavior.
+    addTearDown(() {
+      while (microtaskQueue.isNotEmpty || timerQueue.isNotEmpty) {
+        if (microtaskQueue.isNotEmpty) {
+          microtaskQueue.removeFirst()();
+        }
+        if (timerQueue.isNotEmpty) {
+          timerQueue.removeFirst()();
+        }
+      }
+    });
+
+    // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0 because
+    // events are locked.
+    expect(timerQueue.length, 2);
+    expect(taskExecuted, false);
   });
 
   test('Flutter.Frame event fired', () {
