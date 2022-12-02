@@ -3319,15 +3319,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_bad_impeller_ios__timeline_summary
 
-  - name: Mac_ios complex_layout_scroll_perf_impeller_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: complex_layout_scroll_perf_impeller_ios__timeline_summary
-
   - name: Mac_ios color_filter_and_fade_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false

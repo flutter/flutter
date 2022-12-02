@@ -1064,58 +1064,120 @@ class PerfTest {
         if (cacheSkSL) '--cache-sksl',
         if (dartDefine.isNotEmpty)
           ...<String>['--dart-define', dartDefine],
-        if (enableImpeller) '--enable-impeller',
         '-d',
         deviceId,
       ];
-      if (flutterDriveCallback != null) {
-        flutterDriveCallback!(options);
-      } else {
-        await flutter('drive', options: options);
-      }
-      final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
 
-      if (data['frame_count'] as int < 5) {
-        return TaskResult.failure(
-          'Timeline contains too few frames: ${data['frame_count']}. Possibly '
-          'trace events are not being captured.',
+      final Directory traceDirectory = Directory(_testOutputDirectory(testDirectory));
+      final String tracePath = path.join(traceDirectory.path, '$traceFilename.json');
+      final File traceFile = File(tracePath);
+
+      final List<String> traceFiles = <String>[];
+      Future<Map<String, dynamic>> dataFromDrive({
+        required List<String> driveOptions,
+        required bool impeller,
+        required String movedTraceBasename,
+      }) async {
+        driveOptions = <String>[
+          ...driveOptions,
+          if (impeller) '--enable-impeller',
+        ];
+        if (flutterDriveCallback != null) {
+          flutterDriveCallback!(driveOptions);
+        } else {
+          await flutter('drive', options: driveOptions);
+        }
+        final Map<String, dynamic> data = json.decode(
+          file('${traceDirectory.path}/$resultFilename.json').readAsStringSync(),
+        ) as Map<String, dynamic>;
+
+        if (data['frame_count'] as int < 5) {
+          throw TaskResult.failure(
+            'Timeline contains too few frames: ${data['frame_count']}. Possibly '
+                'trace events are not being captured.',
+          );
+        }
+
+        // Move the tracefile to a known location so it is not overwritten on subsequent drive runs.
+        if (exists(traceFile)) {
+          move(traceFile, to: traceDirectory, name: movedTraceBasename);
+          traceFiles.add(path.join(traceDirectory.path, movedTraceBasename));
+        }
+        return data;
+      }
+
+      section('Run perf test with Skia, impeller disabled');
+      final Map<String, dynamic> skiaData = await dataFromDrive(
+        driveOptions: options,
+        impeller: false,
+        movedTraceBasename: '${traceFilename}_skia.json',
+      );
+
+      Map<String, dynamic> impellerData = <String, dynamic>{};
+      if (enableImpeller) {
+        section('Uninstall app');
+        await flutter('install', options: <String>[
+          '--uninstall-only',
+          '-d',
+          deviceId,
+        ]);
+
+        section('Run perf test with impeller enabled');
+        impellerData = await dataFromDrive(
+          driveOptions: options,
+          impeller: true,
+          movedTraceBasename: '${traceFilename}_impeller.json',
         );
       }
 
       // TODO(liyuqian): Remove isAndroid restriction once
       // https://github.com/flutter/flutter/issues/61567 is fixed.
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+
+      List<String> benchmarkKeys(Map<String, dynamic> data) => benchmarkScoreKeys ?? <String>[
+        ..._kCommonScoreKeys,
+        'average_vsync_transitions_missed',
+        '90th_percentile_vsync_transitions_missed',
+        '99th_percentile_vsync_transitions_missed',
+        if (measureCpuGpu && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (data['average_cpu_usage'] != null) 'average_cpu_usage',
+          if (data['average_gpu_usage'] != null) 'average_gpu_usage',
+        ],
+        if (measureMemory && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (data['average_memory_usage'] != null) 'average_memory_usage',
+          if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
+          if (data['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
+        ],
+        if (data['30hz_frame_percentage'] != null) '30hz_frame_percentage',
+        if (data['60hz_frame_percentage'] != null) '60hz_frame_percentage',
+        if (data['80hz_frame_percentage'] != null) '80hz_frame_percentage',
+        if (data['90hz_frame_percentage'] != null) '90hz_frame_percentage',
+        if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
+        if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
+      ];
+
+      final Map<String, Object?> adjustedData = skiaData;
+      final List<String> adjustedBenchmarks = benchmarkKeys(skiaData);
+
+      if (enableImpeller) {
+        String impellerKey(String key) => 'impeller_$key';
+
+        // Prepend "impeller_" to the impeller benchmarks, then combine with the Skia data.
+        adjustedBenchmarks.addAll(benchmarkKeys(impellerData).map(impellerKey));
+        adjustedData.addAll(
+          impellerData.map((String key, Object? value) => MapEntry<String, Object?>(impellerKey(key), value))
+        );
+      }
+
       return TaskResult.success(
-        data,
+        adjustedData,
         detailFiles: <String>[
           if (saveTraceFile)
-            '${_testOutputDirectory(testDirectory)}/$traceFilename.json',
+            ...traceFiles,
         ],
-        benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
-          ..._kCommonScoreKeys,
-          'average_vsync_transitions_missed',
-          '90th_percentile_vsync_transitions_missed',
-          '99th_percentile_vsync_transitions_missed',
-          if (measureCpuGpu && !isAndroid) ...<String>[
-            // See https://github.com/flutter/flutter/issues/68888
-            if (data['average_cpu_usage'] != null) 'average_cpu_usage',
-            if (data['average_gpu_usage'] != null) 'average_gpu_usage',
-          ],
-          if (measureMemory && !isAndroid) ...<String>[
-            // See https://github.com/flutter/flutter/issues/68888
-            if (data['average_memory_usage'] != null) 'average_memory_usage',
-            if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
-            if (data['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
-          ],
-          if (data['30hz_frame_percentage'] != null) '30hz_frame_percentage',
-          if (data['60hz_frame_percentage'] != null) '60hz_frame_percentage',
-          if (data['80hz_frame_percentage'] != null) '80hz_frame_percentage',
-          if (data['90hz_frame_percentage'] != null) '90hz_frame_percentage',
-          if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
-          if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
-        ],
+        benchmarkScoreKeys: adjustedBenchmarks,
       );
     });
   }
