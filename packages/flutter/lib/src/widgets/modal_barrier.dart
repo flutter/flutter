@@ -28,11 +28,11 @@ import 'transitions.dart';
 ///
 ///  * [ModalBarrier], which utilizes thi widget to adjust the barrier focus
 /// size based on the size of the content layer rendered on top of it.
-class SemanticsClipper extends SingleChildRenderObjectWidget{
+class _SemanticsClipper extends SingleChildRenderObjectWidget{
   /// creates a [SemanticsClipper] that updates the size of the
   /// [SemanticsNode.rect] of its child based on the value inside the provided
   /// [ValueNotifier], or a default value of [EdgeInsets.zero].
-  const SemanticsClipper({
+  const _SemanticsClipper({
     super.key,
     super.child,
     this.clipDetailsNotifier,
@@ -43,12 +43,12 @@ class SemanticsClipper extends SingleChildRenderObjectWidget{
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
   @override
-  RenderSemanticsClipper createRenderObject(BuildContext context) {
-    return RenderSemanticsClipper(clipDetailsNotifier: clipDetailsNotifier,);
+  _RenderSemanticsClipper createRenderObject(BuildContext context) {
+    return _RenderSemanticsClipper(clipDetailsNotifier: clipDetailsNotifier,);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSemanticsClipper renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSemanticsClipper renderObject) {
     renderObject.clipDetailsNotifier = clipDetailsNotifier;
   }
 }
@@ -56,10 +56,10 @@ class SemanticsClipper extends SingleChildRenderObjectWidget{
 /// provided [ValueNotifier].
 /// If no [ValueNotifier] is provided a value of [EdgeInsets.zero] is used
 /// to clip the [SemanticsNode.rect], which essentially uses its default size.
-class RenderSemanticsClipper extends RenderProxyBox {
+class _RenderSemanticsClipper extends RenderProxyBox {
 /// Creats a [RenderProxyBox] that Updates the [SemanticsNode.rect] of its child
 /// based on the value inside provided [ValueNotifier].
-  RenderSemanticsClipper({
+  _RenderSemanticsClipper({
     ValueNotifier<EdgeInsets>? clipDetailsNotifier,
     RenderBox? child,
   }) : _clipDetailsNotifier = clipDetailsNotifier,
@@ -254,7 +254,7 @@ class ModalBarrier extends StatelessWidget {
     final bool excluding = !semanticsDismissible || !modalBarrierSemanticsDismissible;
 
     if (!excluding && clipDetailsNotifier != null) {
-      barrier = SemanticsClipper(
+      barrier = _SemanticsClipper(
         clipDetailsNotifier: clipDetailsNotifier,
         child: barrier,
       );
