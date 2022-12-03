@@ -7,6 +7,10 @@ source_root = "//third_party/tinygltf"
 source_set("tinygltf") {
   public = [ "$source_root/tiny_gltf.h" ]
 
+  if (is_clang) {
+    cflags_cc = [ "-Wno-sign-compare" ]
+  }
+
   include_dirs = [
     "$source_root",
     "$source_root/third_party/include",
