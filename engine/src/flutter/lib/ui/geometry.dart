@@ -625,7 +625,7 @@ class Size extends OffsetBase {
 /// An immutable, 2D, axis-aligned, floating-point rectangle whose coordinates
 /// are relative to a given origin.
 ///
-/// A Rect can be created with one its constructors or from an [Offset] and a
+/// A Rect can be created with one of its constructors or from an [Offset] and a
 /// [Size] using the `&` operator:
 ///
 /// ```dart

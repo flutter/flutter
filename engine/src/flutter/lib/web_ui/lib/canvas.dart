@@ -25,8 +25,8 @@ abstract class Vertices {
   factory Vertices(
     VertexMode mode,
     List<Offset> positions, {
-    List<Offset>? textureCoordinates,
     List<Color>? colors,
+    List<Offset>? textureCoordinates,
     List<int>? indices,
   }) {
     return engine.renderer.createVertices(mode,
@@ -38,8 +38,8 @@ abstract class Vertices {
   factory Vertices.raw(
     VertexMode mode,
     Float32List positions, {
-    Float32List? textureCoordinates,
     Int32List? colors,
+    Float32List? textureCoordinates,
     Uint16List? indices,
   }) {
     return engine.renderer.createVerticesRaw(mode,

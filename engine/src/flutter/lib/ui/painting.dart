@@ -3001,7 +3001,7 @@ class PathMetric {
   }
 
   @override
-  String toString() => '$runtimeType{length: $length, isClosed: $isClosed, contourIndex:$contourIndex}';
+  String toString() => 'PathMetric(length: $length, isClosed: $isClosed, contourIndex: $contourIndex)';
 }
 
 class _PathMeasure extends NativeFieldWrapperClass1 {
@@ -4103,13 +4103,25 @@ class Gradient extends Shader {
 
 /// A shader (as used by [Paint.shader]) that tiles an image.
 class ImageShader extends Shader {
-  /// Creates an image-tiling shader. The first argument specifies the image to
-  /// tile. The second and third arguments specify the [TileMode] for the x
-  /// direction and y direction respectively. The fourth argument gives the
-  /// matrix to apply to the effect. All the arguments are required and must not
-  /// be null, except for [filterQuality]. If [filterQuality] is not specified
-  /// at construction time it will be deduced from the environment where it is used,
-  /// such as from [Paint.filterQuality].
+  /// Creates an image-tiling shader.
+  ///
+  /// The first argument specifies the image to render. The
+  /// [decodeImageFromList] function can be used to decode an image from bytes
+  /// into the form expected here. (In production code, starting from
+  /// [instantiateImageCodec] may be preferable.)
+  ///
+  /// The second and third arguments specify the [TileMode] for the x direction
+  /// and y direction respectively. [TileMode.repeated] can be used for tiling
+  /// images.
+  ///
+  /// The fourth argument gives the matrix to apply to the effect. The
+  /// expression `Matrix4.identity().storage` creates a [Float64List]
+  /// prepopulated with the identity matrix.
+  ///
+  /// All the arguments are required and must not be null, except for
+  /// [filterQuality]. If [filterQuality] is not specified at construction time
+  /// it will be deduced from the environment where it is used, such as from
+  /// [Paint.filterQuality].
   @pragma('vm:entry-point')
   ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4, {
     FilterQuality? filterQuality,
@@ -4362,46 +4374,119 @@ enum VertexMode {
   /// Draw each sliding window of three points as the vertices of a triangle.
   triangleStrip,
 
-  /// Draw the first point and each sliding window of two points as the vertices of a triangle.
+  /// Draw the first point and each sliding window of two points as the vertices
+  /// of a triangle.
+  ///
+  /// This mode is not natively supported by most backends, and is instead
+  /// implemented by unrolling the points into the equivalent
+  /// [VertexMode.triangles], which is generally more efficient.
   triangleFan,
 }
 
 /// A set of vertex data used by [Canvas.drawVertices].
+///
+/// Vertex data consists of a series of points in the canvas coordinate space.
+/// Based on the [VertexMode], these points are interpreted either as
+/// independent triangles ([VertexMode.triangles]), as a sliding window of
+/// points forming a chain of triangles each sharing one side with the next
+/// ([VertexMode.triangleStrip]), or as a fan of triangles with a single shared
+/// point ([VertexMode.triangleFan]).
+///
+/// Each point can be associated with a color. Each triangle is painted as a
+/// gradient that blends between the three colors at the three points of that
+/// triangle. If no colors are specified, transparent black is assumed for all
+/// the points.
+///
+/// These colors are then blended with the [Paint] specified in the call to
+/// [Canvas.drawVertices]. This paint is either a solid color ([Paint.color]),
+/// or a bitmap, specified using a shader ([Paint.shader]), typically either a
+/// gradient ([Gradient]) or image ([ImageFilter]). The bitmap uses the same
+/// coordinate space as the canvas (in the case of an [ImageFilter], this is
+/// notably different than the coordinate space of the source image; the source
+/// image is tiled according to the filter's configuration, and the image that
+/// is sampled when painting the triangles is the infinite one after all the
+/// repeating is applied.)
+///
+/// Each point in the [Vertices] is associated with a specific point on this
+/// image. Each triangle is painted by sampling points from this image by
+/// interpolating between the three points of the image corresponding to the
+/// three points of the triangle.
+///
+/// The [Vertices.new] constructor configures all this using lists of [Offset]
+/// and [Color] objects. The [Vertices.raw] constructor instead uses
+/// [Float32List], [Int32List], and [Uint16List] objects, which more closely
+/// corresponds to the data format used internally and therefore reduces some of
+/// the conversion overhead. The raw constructor is useful if the data is coming
+/// from another source (e.g. a file) and can therefore be parsed directly into
+/// the underlying representation.
 class Vertices extends NativeFieldWrapperClass1 {
   /// Creates a set of vertex data for use with [Canvas.drawVertices].
   ///
-  /// The [mode] and [positions] parameters must not be null.
-  /// The [positions] parameter is a list of triangular mesh vertices(xy).
+  /// The `mode` parameter describes how the points should be interpreted: as
+  /// independent triangles ([VertexMode.triangles]), as a sliding window of
+  /// points forming a chain of triangles each sharing one side with the next
+  /// ([VertexMode.triangleStrip]), or as a fan of triangles with a single
+  /// shared point ([VertexMode.triangleFan]).
   ///
-  /// If the [textureCoordinates] or [colors] parameters are provided, they must
-  /// be the same length as [positions].
+  /// The `positions` parameter provides the points in the canvas space that
+  /// will be use to draw the triangles.
   ///
-  /// The [textureCoordinates] parameter is used to cutout
-  /// the image set in the image shader.
-  /// The cut part is applied to the triangular mesh.
-  /// Note that the [textureCoordinates] are the coordinates on the image.
+  /// The `colors` parameter, if specified, provides the color for each point in
+  /// `positions`. Each triangle is painted as a gradient that blends between
+  /// the three colors at the three points of that triangle. (These colors are
+  /// then blended with the [Paint] specified in the call to
+  /// [Canvas.drawVertices].)
   ///
-  /// If the [indices] parameter is provided, all values in the list must be
-  /// valid index values for [positions].
-  /// e.g. The [indices] parameter for a simple triangle is [0,1,2].
+  /// The `textureCoordinates` parameter, if specified, provides the points in
+  /// the [Paint] image to sample for the corresponding points in `positions`.
+  ///
+  /// If the `colors` or `textureCoordinates` parameters are specified, they must
+  /// be the same length as `positions`.
+  ///
+  /// The `indices` parameter specifies the order in which the points should be
+  /// painted. If it is omitted (or present but empty), the points are processed
+  /// in the order they are given in `positions`, as if the `indices` was a list
+  /// from 0 to n-1, where _n_ is the number of entries in `positions`. The
+  /// `indices` parameter, if present and non-empty, must have at least three
+  /// entries, but may be of any length beyond this. Indicies may refer to
+  /// offsets in the positions array multiple times, or may skip positions
+  /// entirely.
+  ///
+  /// If the `indices` parameter is specified, all values in the list must be
+  /// valid index values for `positions`.
+  ///
+  /// The `mode` and `positions` parameters must not be null.
+  ///
+  /// This constructor converts its parameters into [dart:typed_data] lists
+  /// (e.g. using [Float32List]s for the coordinates) before sending them to the
+  /// Flutter engine. If the data provided to this constructor is not already in
+  /// [List] form, consider using the [Vertices.raw] constructor instead to
+  /// avoid converting the data twice.
   Vertices(
     VertexMode mode,
     List<Offset> positions, {
-    List<Offset>? textureCoordinates,
     List<Color>? colors,
+    List<Offset>? textureCoordinates,
     List<int>? indices,
   }) : assert(mode != null),
        assert(positions != null) {
-    if (textureCoordinates != null && textureCoordinates.length != positions.length) {
-      throw ArgumentError('"positions" and "textureCoordinates" lengths must match.');
-    }
     if (colors != null && colors.length != positions.length) {
       throw ArgumentError('"positions" and "colors" lengths must match.');
     }
-    if (indices != null && indices.any((int i) => i < 0 || i >= positions.length)) {
-      throw ArgumentError('"indices" values must be valid indices in the positions list.');
+    if (textureCoordinates != null && textureCoordinates.length != positions.length) {
+      throw ArgumentError('"positions" and "textureCoordinates" lengths must match.');
     }
-
+    if (indices != null) {
+      for (int index = 0; index < indices.length; index += 1) {
+        if (indices[index] >= positions.length) {
+          throw ArgumentError(
+            '"indices" values must be valid indices in the positions list '
+            '(i.e. numbers in the range 0..${positions.length - 1}), '
+            'but indices[$index] is ${indices[index]}, which is too big.',
+          );
+        }
+      }
+    }
     final Float32List encodedPositions = _encodePointList(positions);
     final Float32List? encodedTextureCoordinates = (textureCoordinates != null)
       ? _encodePointList(textureCoordinates)
@@ -4418,51 +4503,78 @@ class Vertices extends NativeFieldWrapperClass1 {
     }
   }
 
-  /// Creates a set of vertex data for use with [Canvas.drawVertices], directly
-  /// using the encoding methods of [Vertices.new].
-  /// Note that this constructor uses raw typed data lists,
-  /// so it runs faster than the [Vertices()] constructor
-  /// because it doesn't require any conversion from Dart lists.
+  /// Creates a set of vertex data for use with [Canvas.drawVertices], using the
+  /// encoding expected by the Flutter engine.
   ///
-  /// The [mode] parameter must not be null.
+  /// The `mode` parameter describes how the points should be interpreted: as
+  /// independent triangles ([VertexMode.triangles]), as a sliding window of
+  /// points forming a chain of triangles each sharing one side with the next
+  /// ([VertexMode.triangleStrip]), or as a fan of triangles with a single
+  /// shared point ([VertexMode.triangleFan]).
   ///
-  /// The [positions] parameter is a list of triangular mesh vertices and
-  /// is interpreted as a list of repeated pairs of x,y coordinates.
-  /// It must not be null.
+  /// The `positions` parameter provides the points in the canvas space that
+  /// will be use to draw the triangles. Each point is represented as two
+  /// numbers in the list, the first giving the x coordinate and the second
+  /// giving the y coordinate. (As a result, the list must have an even number
+  /// of entries.)
   ///
-  /// The [textureCoordinates] list is interpreted as a list of repeated pairs
-  /// of x,y coordinates, and must be the same length of [positions] if it
-  /// is not null.
-  /// The [textureCoordinates] parameter is used to cutout
-  /// the image set in the image shader.
-  /// The cut part is applied to the triangular mesh.
-  /// Note that the [textureCoordinates] are the coordinates on the image.
+  /// The `colors` parameter, if specified, provides the color for each point in
+  /// `positions`. Each color is represented as ARGB with 8 bit color channels
+  /// (like [Color.value]'s internal representation), and the list, if
+  /// specified, must therefore be half the length of `positions`. Each triangle
+  /// is painted as a gradient that blends between the three colors at the three
+  /// points of that triangle. (These colors are then blended with the [Paint]
+  /// specified in the call to [Canvas.drawVertices].)
   ///
-  /// The [colors] list is interpreted as a list of ARGB encoded colors, similar
-  /// to [Color.value]. It must be half length of [positions] if it is not
-  /// null.
+  /// The `textureCoordinates` parameter, if specified, provides the points in
+  /// the [Paint] image to sample for the corresponding points in `positions`.
+  /// Each point is represented as two numbers in the list, the first giving the
+  /// x coordinate and the second giving the y coordinate. This list, if
+  /// specified, must be the same length as `positions`.
   ///
-  /// If the [indices] list is provided, all values in the list must be
-  /// valid index values for [positions].
-  /// e.g. The [indices] parameter for a simple triangle is [0,1,2].
+  /// The `indices` parameter specifies the order in which the points should be
+  /// painted. If it is omitted (or present but empty), the points are processed
+  /// in the order they are given in `positions`, as if the `indices` was a list
+  /// from 0 to n-2, where _n_ is the number of pairs in `positions` (i.e. half
+  /// the length of `positions`). The `indices` parameter, if present and
+  /// non-empty, must have at least three entries, but may be of any length
+  /// beyond this. Indicies may refer to offsets in the positions array multiple
+  /// times, or may skip positions entirely.
+  ///
+  /// If the `indices` parameter is specified, all values in the list must be
+  /// valid index values for pairs in `positions`. For example, if there are 12
+  /// numbers in `positions` (representing 6 coordinates), the `indicies` must
+  /// be numbers in the range 0..5 inclusive.
+  ///
+  /// The `mode` and `positions` parameters must not be null.
   Vertices.raw(
     VertexMode mode,
     Float32List positions, {
-    Float32List? textureCoordinates,
     Int32List? colors,
+    Float32List? textureCoordinates,
     Uint16List? indices,
   }) : assert(mode != null),
        assert(positions != null) {
-    if (textureCoordinates != null && textureCoordinates.length != positions.length) {
-      throw ArgumentError('"positions" and "textureCoordinates" lengths must match.');
+    if (positions.length % 2 != 0) {
+      throw ArgumentError('"positions" must have an even number of entries (each coordinate is an x,y pair).');
     }
     if (colors != null && colors.length * 2 != positions.length) {
       throw ArgumentError('"positions" and "colors" lengths must match.');
     }
-    if (indices != null && indices.any((int i) => i < 0 || i >= positions.length)) {
-      throw ArgumentError('"indices" values must be valid indices in the positions list.');
+    if (textureCoordinates != null && textureCoordinates.length != positions.length) {
+      throw ArgumentError('"positions" and "textureCoordinates" lengths must match.');
     }
-
+    if (indices != null) {
+      for (int index = 0; index < indices.length; index += 1) {
+        if (indices[index] * 2 >= positions.length) {
+          throw ArgumentError(
+            '"indices" values must be valid indices in the positions list '
+            '(i.e. numbers in the range 0..${positions.length ~/ 2 - 1}), '
+            'but indices[$index] is ${indices[index]}, which is too big.',
+          );
+        }
+      }
+    }
     if (!_init(this, mode.index, positions, textureCoordinates, colors, indices)) {
       throw ArgumentError('Invalid configuration for vertices.');
     }
@@ -4493,7 +4605,7 @@ class Vertices extends NativeFieldWrapperClass1 {
   external void _dispose();
 
   bool _disposed = false;
-  /// Whether this reference to the underlying picture is [dispose]d.
+  /// Whether this reference to the underlying vertex data is [dispose]d.
   ///
   /// This only returns a valid value if asserts are enabled, and must not be
   /// used otherwise.
@@ -4503,13 +4615,13 @@ class Vertices extends NativeFieldWrapperClass1 {
       disposed = _disposed;
       return true;
     }());
-    return disposed ?? (throw StateError('$runtimeType.debugDisposed is only available when asserts are enabled.'));
+    return disposed ?? (throw StateError('Vertices.debugDisposed is only available when asserts are enabled.'));
   }
 }
 
 /// Defines how a list of points is interpreted when drawing a set of points.
 ///
-/// Used by [Canvas.drawPoints].
+/// Used by [Canvas.drawPoints] and [Canvas.drawRawPoints].
 // These enum values must be kept in sync with SkCanvas::PointMode.
 enum PointMode {
   /// Draw each point separately.
@@ -4531,7 +4643,7 @@ enum PointMode {
   /// [Paint.style]).
   lines,
 
-  /// Draw the entire sequence of point as one line.
+  /// Draw the entire sequence of points as one line.
   ///
   /// The lines are stroked as described by the [Paint] (ignoring
   /// [Paint.style]).
@@ -5286,6 +5398,9 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///
   /// The `points` argument is interpreted as offsets from the origin.
   ///
+  /// The `paint` is used for each point ([PointMode.points]) or line
+  /// ([PointMode.lines] or [PointMode.polygon]), ignoring [Paint.style].
+  ///
   /// See also:
   ///
   ///  * [drawRawPoints], which takes `points` as a [Float32List] rather than a
@@ -5301,6 +5416,9 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///
   /// The `points` argument is interpreted as a list of pairs of floating point
   /// numbers, where each pair represents an x and y offset from the origin.
+  ///
+  /// The `paint` is used for each point ([PointMode.points]) or line
+  /// ([PointMode.lines] or [PointMode.polygon]), ignoring [Paint.style].
   ///
   /// See also:
   ///
@@ -5319,18 +5437,26 @@ class Canvas extends NativeFieldWrapperClass1 {
   @FfiNative<Void Function(Pointer<Void>, Handle, Handle, Int32, Handle)>('Canvas::drawPoints')
   external void _drawPoints(List<Object?>? paintObjects, ByteData paintData, int pointMode, Float32List points);
 
-  /// Draws the set of [Vertices] onto the canvas.
+  /// Draws a set of [Vertices] onto the canvas as one or more triangles.
   ///
-  /// The [blendMode] parameter is used to control how the colors in
-  /// the [vertices] are combined with the colors in the [paint].
-  /// If there are no colors specified in [vertices] then the [blendMode] has
-  /// no effect. If there are colors in the [vertices],
-  /// then the color taken from the [Shader] or [Color] in the [paint] is
-  /// blended with the colors specified in the [vertices] using
-  /// the [blendMode] parameter.
-  /// For purposes of this blending,
-  /// the colors from the [paint] are considered the source and the colors from
-  /// the [vertices] are considered the destination.
+  /// The [Paint.color] property specifies the default color to use for the
+  /// triangles.
+  ///
+  /// The [Paint.shader] property, if set, overrides the color entirely,
+  /// replacing it with the colors from the specified [ImageShader], [Gradient],
+  /// or other shader.
+  ///
+  /// The `blendMode` parameter is used to control how the colors in the
+  /// `vertices` are combined with the colors in the `paint`. If there are no
+  /// colors specified in `vertices` then the `blendMode` has no effect. If
+  /// there are colors in the `vertices`, then the color taken from the
+  /// [Paint.shader] or [Paint.color] in the `paint` is blended with the colors
+  /// specified in the `vertices` using the `blendMode` parameter. For the
+  /// purposes of this blending, the colors from the `paint` parameter are
+  /// considered the source, and the colors from the `vertices` are considered
+  /// the destination. [BlendMode.dstOver] ignores the `paint` and uses only the
+  /// colors of the `vertices`; [BlendMode.srcOver] ignores the colors of the
+  /// `vertices` and uses only the colors in the `paint`.
   ///
   /// All parameters must not be null.
   ///
