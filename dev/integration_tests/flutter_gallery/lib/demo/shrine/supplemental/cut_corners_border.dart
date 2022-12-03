@@ -17,7 +17,7 @@ class CutCornersBorder extends OutlineInputBorder {
   @override
   CutCornersBorder copyWith({
     BorderSide? borderSide,
-    BorderRadius? borderRadius,
+    BorderRadiusGeometry? borderRadius,
     double? gapPadding,
     double? cut,
   }) {
@@ -36,7 +36,7 @@ class CutCornersBorder extends OutlineInputBorder {
     if (a is CutCornersBorder) {
       final CutCornersBorder outline = a;
       return CutCornersBorder(
-        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(outline.borderRadius, borderRadius, t)!,
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         cut: cut,
         gapPadding: outline.gapPadding,
@@ -50,7 +50,7 @@ class CutCornersBorder extends OutlineInputBorder {
     if (b is CutCornersBorder) {
       final CutCornersBorder outline = b;
       return CutCornersBorder(
-        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, outline.borderRadius, t)!,
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         cut: cut,
         gapPadding: outline.gapPadding,
@@ -94,9 +94,10 @@ class CutCornersBorder extends OutlineInputBorder {
     TextDirection? textDirection,
   }) {
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
+    final BorderRadius resolvedRadius = borderRadius.resolve(textDirection);
 
     final Paint paint = borderSide.toPaint();
-    final RRect outer = borderRadius.toRRect(rect);
+    final RRect outer = resolvedRadius.toRRect(rect);
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawPath(_notchedCornerPath(outer.middleRect), paint);
     } else {

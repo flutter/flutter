@@ -3567,13 +3567,14 @@ bool _platformSupportsAccelerators() {
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.bottomStart,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.bottomStart,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -3609,11 +3610,12 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-      : super(
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: AlignmentDirectional.centerStart,
-        );
+    : super(
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: AlignmentDirectional.centerStart,
+    );
+
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -3751,13 +3753,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.topEnd,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.topEnd,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 

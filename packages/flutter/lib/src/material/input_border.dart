@@ -333,7 +333,7 @@ class OutlineInputBorder extends InputBorder {
   ///
   /// The corner radii must be circular, i.e. their [Radius.x] and [Radius.y]
   /// values must be the same.
-  final BorderRadius borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   @override
   bool get isOutline => true;
@@ -341,7 +341,7 @@ class OutlineInputBorder extends InputBorder {
   @override
   OutlineInputBorder copyWith({
     BorderSide? borderSide,
-    BorderRadius? borderRadius,
+    BorderRadiusGeometry? borderRadius,
     double? gapPadding,
   }) {
     return OutlineInputBorder(
@@ -370,7 +370,7 @@ class OutlineInputBorder extends InputBorder {
     if (a is OutlineInputBorder) {
       final OutlineInputBorder outline = a;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(outline.borderRadius, borderRadius, t)!,
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         gapPadding: outline.gapPadding,
       );
@@ -383,7 +383,7 @@ class OutlineInputBorder extends InputBorder {
     if (b is OutlineInputBorder) {
       final OutlineInputBorder outline = b;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, outline.borderRadius, t)!,
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         gapPadding: outline.gapPadding,
       );
@@ -517,10 +517,11 @@ class OutlineInputBorder extends InputBorder {
   }) {
     assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
-    assert(_cornersAreCircular(borderRadius));
+    final BorderRadius resolvedRadius = borderRadius.resolve(textDirection);
+    assert(_cornersAreCircular(resolvedRadius));
 
     final Paint paint = borderSide.toPaint();
-    final RRect outer = borderRadius.toRRect(rect);
+    final RRect outer = resolvedRadius.toRRect(rect);
     final RRect center = outer.deflate(borderSide.width / 2.0);
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawRRect(center, paint);
