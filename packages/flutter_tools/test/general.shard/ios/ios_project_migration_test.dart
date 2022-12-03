@@ -208,6 +208,20 @@ keep this 2
         expect(testLogger.statusText, isEmpty);
       });
 
+      testWithoutContext('skipped if _xcodeWorkspaceSharedSettings is null', () {
+        final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
+          project,
+          testLogger,
+        );
+        project.xcodeWorkspaceSharedSettings = null;
+
+        iosProjectMigration.migrate();
+        expect(xcodeWorkspaceSharedSettings.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('Xcode workspace settings not found, skipping build system migration'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
       testWithoutContext('skipped if nothing to upgrade', () {
         const String contents = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -995,7 +1009,7 @@ class FakeIosProject extends Fake implements IosProject {
   File xcodeProjectWorkspaceData = MemoryFileSystem.test().file('xcodeProjectWorkspaceData');
 
   @override
-  File xcodeWorkspaceSharedSettings = MemoryFileSystem.test().file('xcodeWorkspaceSharedSettings');
+  File? xcodeWorkspaceSharedSettings = MemoryFileSystem.test().file('xcodeWorkspaceSharedSettings');
 
   @override
   File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
