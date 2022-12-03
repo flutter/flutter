@@ -189,6 +189,9 @@ source_set("ui") {
     # Required for M_PI and others.
     defines += [ "_USE_MATH_DEFINES" ]
   }
+  if (impeller_enable_3d) {
+    defines += [ "IMPELLER_ENABLE_3D" ]
+  }
 }
 
 if (enable_unittests) {
