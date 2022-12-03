@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_util' as js_util;
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -141,20 +143,23 @@ void testMain() {
         // Emulate WebGL context loss.
         final DomCanvasElement canvas =
             surface.htmlElement.children.single as DomCanvasElement;
-        final dynamic ctx = canvas.getContext('webgl2');
-        expect(ctx, isNotNull);
-        final dynamic loseContextExtension =
-            ctx.getExtension('WEBGL_lose_context');
-        loseContextExtension.loseContext();
+        final Object ctx = canvas.getContext('webgl2')!;
+        final Object loseContextExtension = js_util.callMethod(
+          ctx,
+          'getExtension',
+          <String>['WEBGL_lose_context'],
+        );
+        js_util.callMethod(loseContextExtension, 'loseContext', const <void>[]);
 
         // Pump a timer to allow the "lose context" event to propagate.
         await Future<void>.delayed(Duration.zero);
         // We don't create a new GL context until the context is restored.
         expect(surface.debugContextLost, isTrue);
-        expect(ctx.isContextLost(), isTrue);
+        final bool isContextLost = js_util.callMethod<bool>(ctx, 'isContextLost', const <void>[]);
+        expect(isContextLost, isTrue);
 
         // Emulate WebGL context restoration.
-        loseContextExtension.restoreContext();
+        js_util.callMethod(loseContextExtension, 'restoreContext', const <void>[]);
 
         // Pump a timer to allow the "restore context" event to propagate.
         await Future<void>.delayed(Duration.zero);
@@ -165,9 +170,8 @@ void testMain() {
         // A new context is created.
         expect(afterContextLost, isNot(same(before)));
       },
-      // Firefox and Safari don't have the WEBGL_lose_context extension.
-      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/115327
-      skip: true,
+      // Firefox can't create a WebGL2 context in headless mode.
+      skip: isFirefox,
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/75286
