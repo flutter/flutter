@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
+import 'page_scroll_physics_test_util.dart';
 import 'semantics_tester.dart';
 import 'states.dart';
 
@@ -1223,6 +1224,8 @@ void main() {
     ///
     Future<int> testPageViewPhysics(
       WidgetTester tester, {
+      // TODO(nt4f04und): this should be default after old variant is completely removed, so remove it here
+      PageScrollPhysics pageSnappingPhysics = const PageScrollPhysics(useNewPhysics: true),
       double? flingVelocity,
       required double offset,
       required double expectedEndValue,
@@ -1233,6 +1236,7 @@ void main() {
           key: UniqueKey(),
           textDirection: TextDirection.ltr,
           child: PageView.builder(
+            pageSnappingPhysics: pageSnappingPhysics,
             itemCount: kStates.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
@@ -1247,10 +1251,11 @@ void main() {
         )
       );
 
-      if (flingVelocity != null)
+      if (flingVelocity != null) {
         await tester.fling(find.byType(PageView), Offset(-offset, 0.0), flingVelocity);
-      else
+      } else {
         await tester.drag(find.byType(PageView), Offset(-offset, 0.0));
+      }
 
       final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
@@ -1267,8 +1272,9 @@ void main() {
       // verify the simulation ended
       expect(values[values.length - 2], values.last);
 
-      if (expectedFrames != null)
+      if (expectedFrames != null) {
         expect(values, hasLength(expectedFrames));
+      }
       expect(position.pixels, expectedEndValue);
       return values.length;
     }
@@ -1407,6 +1413,31 @@ void main() {
         offset: 400.0,
         expectedFrames: lessThan(frames),
         expectedEndValue: 800.0,
+      );
+    });
+
+    testWidgets('can use custom pageSnappingPhysics, and old PageScrollPhysics in particular', (WidgetTester tester) async {
+      int frames = await testPageViewPhysics(
+        tester,
+        pageSnappingPhysics: const CustomPageScrollPhysics(),
+        offset: 200.0,
+        expectedFrames: 11,
+        expectedEndValue: 0.0,
+      );
+      // TODO(nt4f04und): delete after old variant is completely removed
+      frames = await testPageViewPhysics(
+        tester,
+        // ignore: avoid_redundant_argument_values
+        pageSnappingPhysics: const PageScrollPhysics(useNewPhysics: false),
+        offset: 200.0,
+        expectedFrames: greaterThan(frames),
+        expectedEndValue: 0.0,
+      );
+      frames = await testPageViewPhysics(
+        tester,
+        offset: 200.0,
+        expectedFrames: lessThan(frames),
+        expectedEndValue: 0.0,
       );
     });
   });

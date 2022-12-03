@@ -1420,6 +1420,7 @@ class TabBarView extends StatefulWidget {
     required this.children,
     this.controller,
     this.physics,
+    this.pageSnappingPhysics,
     this.dragStartBehavior = DragStartBehavior.start,
     this.viewportFraction = 1.0,
     this.clipBehavior = Clip.hardEdge,
@@ -1444,10 +1445,18 @@ class TabBarView extends StatefulWidget {
   /// user stops dragging the page view.
   ///
   /// The physics are modified to snap to page boundaries using
-  /// [PageScrollPhysics] prior to being used.
+  /// [pageSnappingPhysics] prior to being used.
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics? physics;
+
+  /// Controls how pages should snap to view boundaries.
+  ///
+  /// Prior being used, ombined with other scroll physics
+  /// passed to [physics].
+  ///
+  /// By default uses [PageScrollPhysics].
+  final PageScrollPhysics? pageSnappingPhysics;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
@@ -1688,9 +1697,8 @@ class _TabBarViewState extends State<TabBarView> {
         dragStartBehavior: widget.dragStartBehavior,
         clipBehavior: widget.clipBehavior,
         controller: _pageController,
-        physics: widget.physics == null
-          ? const PageScrollPhysics().applyTo(const ClampingScrollPhysics())
-          : const PageScrollPhysics().applyTo(widget.physics),
+        physics: widget.physics ?? const ClampingScrollPhysics(),
+        pageSnappingPhysics: widget.pageSnappingPhysics,
         children: _childrenWithKey,
       ),
     );

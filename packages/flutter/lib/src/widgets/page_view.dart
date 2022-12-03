@@ -537,7 +537,13 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 ///    used by this class.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
-  const PageScrollPhysics({ super.parent });
+  const PageScrollPhysics({ super.parent, this.useNewPhysics = false });
+
+  /// An opt-in flag for a new implementation of physics.
+  ///
+  /// Enabling this will use scroll physics which are more close to native
+  /// Android and iOS implementations.
+  final bool useNewPhysics;
 
   // See Android ViewPager constants
   // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:viewpager/viewpager/src/main/java/androidx/viewpager/widget/ViewPager.java;l=116;drc=1dcb8847e7aca80ee78c5d9864329b93dd276379
@@ -546,14 +552,17 @@ class PageScrollPhysics extends ScrollPhysics {
   static const double _kMinFlingVelocity = 400.0;
 
   @override
-  double get minFlingDistance => _kMinFlingDistance;
+  double get minFlingDistance => useNewPhysics ? _kMinFlingDistance : super.minFlingDistance;
 
   @override
-  double get minFlingVelocity => _kMinFlingVelocity;
+  double get minFlingVelocity => useNewPhysics ? _kMinFlingVelocity : super.minFlingVelocity;
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return PageScrollPhysics(parent: buildParent(ancestor));
+    return PageScrollPhysics(
+      parent: buildParent(ancestor),
+      useNewPhysics: useNewPhysics,
+    );
   }
 
   double _getPage(ScrollMetrics position) {
@@ -571,10 +580,11 @@ class PageScrollPhysics extends ScrollPhysics {
   }
 
   double _getTargetPage(double page, Tolerance tolerance, double velocity) {
-    if (velocity < -tolerance.velocity)
+    if (velocity < -tolerance.velocity) {
       page -= 0.5;
     } else if (velocity > tolerance.velocity) {
       page += 0.5;
+    }
     return page.roundToDouble();
   }
 
@@ -584,7 +594,10 @@ class PageScrollPhysics extends ScrollPhysics {
     return targetPage - page;
   }
 
-  double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
+  /// Calculates a target position in pixels at which a simulation should end.
+  ///
+  /// Intended to be used inside [createBallisticSimulation].
+  double getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
     final double page = _getPage(position);
     final double targetPage = _getTargetPage(page, tolerance, velocity);
     return _getPixels(position, targetPage);
@@ -599,8 +612,11 @@ class PageScrollPhysics extends ScrollPhysics {
       return super.createBallisticSimulation(position, velocity);
     }
     final Tolerance tolerance = this.tolerance;
-    final double target = _getTargetPixels(position, tolerance, velocity);
+    final double target = getTargetPixels(position, tolerance, velocity);
     if (target != position.pixels) {
+      if (!useNewPhysics) {
+        return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
+      }
       // See Android ViewPager smoothScrollTo logic
       // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:viewpager/viewpager/src/main/java/androidx/viewpager/widget/ViewPager.java;l=952;drc=1dcb8847e7aca80ee78c5d9864329b93dd276379
       final double delta = target - position.pixels;
@@ -657,7 +673,6 @@ class PageScrollPhysics extends ScrollPhysics {
 // a large list of scroll positions. As long as you don't try to actually
 // control the scroll positions, everything should be fine.
 final PageController _defaultPageController = PageController();
-const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
 ///
@@ -716,6 +731,7 @@ class PageView extends StatefulWidget {
     PageController? controller,
     this.physics,
     this.pageSnapping = true,
+    this.pageSnappingPhysics,
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
@@ -761,6 +777,7 @@ class PageView extends StatefulWidget {
     PageController? controller,
     this.physics,
     this.pageSnapping = true,
+    this.pageSnappingPhysics,
     this.onPageChanged,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
@@ -871,6 +888,7 @@ class PageView extends StatefulWidget {
     PageController? controller,
     this.physics,
     this.pageSnapping = true,
+    this.pageSnappingPhysics,
     this.onPageChanged,
     required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -929,7 +947,7 @@ class PageView extends StatefulWidget {
   /// user stops dragging the page view.
   ///
   /// The physics are modified to snap to page boundaries using
-  /// [PageScrollPhysics] prior to being used.
+  /// [pageSnappingPhysics] prior to being used.
   ///
   /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
   /// [ScrollPhysics] provided by that behavior will take precedence after
@@ -944,6 +962,14 @@ class PageView extends StatefulWidget {
   /// the page will snap to the beginning of the viewport; otherwise, the page
   /// will snap to the center of the viewport.
   final bool pageSnapping;
+
+  /// Controls how pages should snap to view boundaries with [pageSnapping].
+  ///
+  /// Prior being used, ombined with other scroll physics
+  /// passed to [physics], or obtained from [scrollBehavior].
+  ///
+  /// By default uses [PageScrollPhysics].
+  final PageScrollPhysics? pageSnappingPhysics;
 
   /// Called whenever the page in the center of the viewport changes.
   final ValueChanged<int>? onPageChanged;
@@ -1018,7 +1044,8 @@ class _PageViewState extends State<PageView> {
       allowImplicitScrolling: widget.allowImplicitScrolling,
     ).applyTo(
       widget.pageSnapping
-        ? _kPagePhysics.applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
+        ? (widget.pageSnappingPhysics ?? const PageScrollPhysics())
+            .applyTo(widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context))
         : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
     );
 

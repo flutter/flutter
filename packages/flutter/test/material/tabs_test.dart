@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
+import '../widgets/page_scroll_physics_test_util.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -5271,6 +5272,48 @@ void main() {
           color: theme.colorScheme.primary.withOpacity(0.12),
         ),
     );
+  });
+
+  testWidgets('TabBarView uses pageSnapping and supports custom pageSnappingPhysics', (WidgetTester tester) async {
+    const ScrollPhysics physics = BouncingScrollPhysics();
+    const PageScrollPhysics pageSnappingPhysics = CustomPageScrollPhysics();
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    Future<void> pump([PageScrollPhysics? pageSnappingPhysics]) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TabBarView(
+              physics: physics,
+              pageSnappingPhysics: pageSnappingPhysics,
+              controller: controller,
+              children: const <Widget>[
+                Text('1'),
+                Text('2'),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pump();
+
+    final PageView pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.pageSnapping, true);
+    expect(pageView.physics, physics);
+    expect(pageView.pageSnappingPhysics, null);
+
+    await pump(pageSnappingPhysics);
+
+    final PageView pageView2 = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView2.pageSnapping, true);
+    expect(pageView2.physics, physics);
+    expect(pageView2.pageSnappingPhysics, pageSnappingPhysics);
   });
 
   group('Material 2', () {

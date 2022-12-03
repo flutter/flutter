@@ -282,13 +282,13 @@ class PageScrollSimulation extends Simulation {
 
   @override
   double x(double time) {
-    time = time.clamp(0.0, duration);
+    time = clampDouble(time, 0.0, duration);
     return position + _delta * _interpolate(time * _durationReciprocal);
   }
 
   @override
   double dx(double time) {
-    time = time.clamp(0.0, duration);
+    time = clampDouble(time, 0.0, duration);
     return _delta * _interpolateDx(time * _durationReciprocal);
   }
 
