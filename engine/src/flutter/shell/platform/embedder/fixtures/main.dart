@@ -498,6 +498,25 @@ void can_composite_platform_views_with_platform_layer_on_bottom() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
+@pragma('vm:external-name', 'SignalBeginFrame')
+external void signalBeginFrame();
+
+@pragma('vm:entry-point')
+void texture_destruction_callback_called_without_custom_compositor() async {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    Color red = Color.fromARGB(127, 255, 0, 0);
+    Size size = Size(50.0, 150.0);
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+    builder.addPicture(
+        Offset(10.0, 10.0), CreateColoredBox(red, size)); // red - flutter
+    builder.pop();
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+
 @pragma('vm:entry-point')
 void can_render_scene_without_custom_compositor() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {

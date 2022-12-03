@@ -71,10 +71,22 @@ bool EmbedderTestContextMetal::PopulateExternalTexture(
   }
 }
 
+TestMetalContext::TextureInfo EmbedderTestContextMetal::GetTextureInfo() {
+  return metal_surface_->GetTextureInfo();
+}
+
+void EmbedderTestContextMetal::SetNextDrawableCallback(
+    NextDrawableCallback next_drawable_callback) {
+  next_drawable_callback_ = std::move(next_drawable_callback);
+}
+
 FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(
     const FlutterFrameInfo* frame_info) {
-  auto texture_info = metal_surface_->GetTextureInfo();
+  if (next_drawable_callback_ != nullptr) {
+    return next_drawable_callback_(frame_info);
+  }
 
+  auto texture_info = metal_surface_->GetTextureInfo();
   FlutterMetalTexture texture;
   texture.struct_size = sizeof(FlutterMetalTexture);
   texture.texture_id = texture_info.texture_id;

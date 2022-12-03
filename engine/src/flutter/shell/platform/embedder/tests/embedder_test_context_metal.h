@@ -20,6 +20,9 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
                          size_t h,
                          FlutterMetalExternalTexture* output)>;
 
+  using NextDrawableCallback =
+      std::function<FlutterMetalTexture(const FlutterFrameInfo* frame_info)>;
+
   explicit EmbedderTestContextMetal(std::string assets_path = "");
 
   ~EmbedderTestContextMetal() override;
@@ -45,6 +48,12 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
 
   TestMetalContext* GetTestMetalContext();
 
+  // Returns the TextureInfo for the test Metal surface.
+  TestMetalContext::TextureInfo GetTextureInfo();
+
+  // Override the default handling for GetNextDrawable.
+  void SetNextDrawableCallback(NextDrawableCallback next_drawable_callback);
+
   FlutterMetalTexture GetNextDrawable(const FlutterFrameInfo* frame_info);
 
  private:
@@ -56,6 +65,7 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
   std::unique_ptr<TestMetalContext> metal_context_;
   std::unique_ptr<TestMetalSurface> metal_surface_;
   size_t present_count_ = 0;
+  NextDrawableCallback next_drawable_callback_ = nullptr;
 
   void SetupSurface(SkISize surface_size) override;
 
