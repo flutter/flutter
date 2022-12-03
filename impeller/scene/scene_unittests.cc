@@ -37,20 +37,21 @@ TEST_P(SceneTest, CuboidUnlit) {
       material->SetColor(Color::Red());
       mesh->SetMaterial(std::move(material));
 
-      Vector3 size(1, 2, 3);
+      Vector3 size(1, 1, 0);
       mesh->SetGeometry(Geometry::MakeCuboid(size));
 
-      mesh->SetLocalTransform(Matrix::MakeTranslation(size / 2));
+      mesh->SetLocalTransform(Matrix::MakeTranslation(-size / 2));
 
       scene.Add(mesh);
     }
 
+    // Face towards the +Z direction (+X right, +Y up).
     auto camera = Camera::MakePerspective(
-                      /* fov */ kPiOver4,
-                      /* position */ {50, -30, 50})
+                      /* fov */ Radians(kPiOver4),
+                      /* position */ {2, 2, -5})
                       .LookAt(
                           /* target */ Vector3(),
-                          /* up */ {0, -1, 0});
+                          /* up */ {0, 1, 0});
 
     scene.Render(render_target, camera);
     return true;
