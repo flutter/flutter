@@ -1650,8 +1650,8 @@ FILE: ../../../flutter/impeller/scene/geometry.cc
 FILE: ../../../flutter/impeller/scene/geometry.h
 FILE: ../../../flutter/impeller/scene/importer/importer.h
 FILE: ../../../flutter/impeller/scene/importer/importer_gltf.cc
-FILE: ../../../flutter/impeller/scene/importer/importer_main.cc
 FILE: ../../../flutter/impeller/scene/importer/mesh.fbs
+FILE: ../../../flutter/impeller/scene/importer/scenec_main.cc
 FILE: ../../../flutter/impeller/scene/importer/switches.cc
 FILE: ../../../flutter/impeller/scene/importer/switches.h
 FILE: ../../../flutter/impeller/scene/importer/types.h

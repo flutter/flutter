@@ -23,8 +23,7 @@ static const std::map<std::string, SourceType> kKnownSourceTypes = {
 
 void Switches::PrintHelp(std::ostream& stream) {
   stream << std::endl;
-  stream << "Scene Importer is an offline 3D geometry file parser."
-         << std::endl;
+  stream << "SceneC is an offline 3D geometry file parser." << std::endl;
   stream << "---------------------------------------------------------------"
          << std::endl;
   stream << "Valid Argument are:" << std::endl;

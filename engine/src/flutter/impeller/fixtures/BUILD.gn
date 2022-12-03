@@ -33,7 +33,7 @@ impeller_shaders("shader_fixtures") {
   }
 }
 
-scene_importer("geometry_fixtures") {
+scenec("geometry_fixtures") {
   geometry = [ "flutter_logo.glb" ]
   type = "gltf"
 }
