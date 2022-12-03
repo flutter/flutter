@@ -272,6 +272,8 @@ class MediaQueryData {
   ///
   /// Padding is derived from the values of [viewInsets] and [viewPadding].
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+  ///
   /// See also:
   ///
   ///  * [ui.window], which provides some additional detail about this
@@ -293,6 +295,8 @@ class MediaQueryData {
   /// bounds of the top level MediaQuery created by [WidgetsApp] are the
   /// same as the window that contains the app. On mobile devices, this will
   /// typically be the full screen.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
   ///
   /// See also:
   ///
