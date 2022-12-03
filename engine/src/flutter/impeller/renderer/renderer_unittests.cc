@@ -117,6 +117,7 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
   desc->SetCullMode(CullMode::kBackFace);
+  desc->SetWindingOrder(WindingOrder::kCounterClockwise);
   desc->SetSampleCount(SampleCount::kCount4);
   auto pipeline =
       context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
@@ -184,7 +185,7 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
 
     uniforms.mvp =
         Matrix::MakePerspective(fov_y, pass.GetRenderTargetSize(), 0, 10) *
-        Matrix::MakeTranslation({0, 0, -distance}) *
+        Matrix::MakeTranslation({0, 0, distance}) *
         Matrix::MakeRotationX(Radians(euler_angles.x)) *
         Matrix::MakeRotationY(Radians(euler_angles.y)) *
         Matrix::MakeRotationZ(Radians(euler_angles.z));

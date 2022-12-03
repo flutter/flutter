@@ -421,7 +421,7 @@ struct Matrix {
     return {
       1.0f / width, 0.0f,           0.0f,                                 0.0f,
       0.0f,         1.0f / height,  0.0f,                                 0.0f,
-      0.0f,         0.0f,           z_far / (z_near - z_far),            -1.0f,
+      0.0f,         0.0f,           z_far / (z_far - z_near),             1.0f,
       0.0f,         0.0f,          -(z_far * z_near) / (z_far - z_near),  0.0f,
     };
     // clang-format on
