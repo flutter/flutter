@@ -294,6 +294,10 @@ typedef CanvasPath Path;
   V(SemanticsUpdate, dispose, 1)                       \
   V(Vertices, dispose, 1)
 
+#ifdef IMPELLER_ENABLE_3D
+#define FFI_METHOD_LIST_3D(V) V(SceneBuilder::addModelLayer, 7)
+#endif  // IMPELLER_ENABLE_3D
+
 #define FFI_FUNCTION_INSERT(FUNCTION, ARGS)     \
   g_function_dispatchers.insert(std::make_pair( \
       std::string_view(#FUNCTION),              \
@@ -320,6 +324,9 @@ void* ResolveFfiNativeFunction(const char* name, uintptr_t args) {
 void InitDispatcherMap() {
   FFI_FUNCTION_LIST(FFI_FUNCTION_INSERT)
   FFI_METHOD_LIST(FFI_METHOD_INSERT)
+#ifdef IMPELLER_ENABLE_3D
+  FFI_METHOD_LIST_3D(FFI_FUNCTION_INSERT)
+#endif  // IMPELLER_ENABLE_3D
 }
 
 }  // anonymous namespace
