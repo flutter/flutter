@@ -17,7 +17,7 @@ flatbuffers("importer_flatbuffers") {
   public_deps = [ "//third_party/flatbuffers" ]
 }
 
-impeller_component("importer_lib") {
+impeller_component("scenec_lib") {
   # Current versions of libcxx have deprecated some of the UTF-16 string
   # conversion APIs.
   defines = [ "_LIBCPP_DISABLE_DEPRECATION_WARNINGS" ]
@@ -37,19 +37,19 @@ impeller_component("importer_lib") {
     "../../geometry",
     "//flutter/fml",
 
-    # All third_party deps must be reflected below in the scene_importer_license
+    # All third_party deps must be reflected below in the scenec_license
     # target.
     # TODO(bdero): Fix tinygltf compilation warnings.
     #"//third_party/tinygltf",
   ]
 }
 
-generated_file("scene_importer_license") {
+generated_file("scenec_license") {
   source_path = rebase_path(".", "//flutter")
   git_url = "https://github.com/flutter/engine/tree/$engine_version"
-  outputs = [ "$target_gen_dir/LICENSE.scene_importer.md" ]
+  outputs = [ "$target_gen_dir/LICENSE.scenec.md" ]
   contents = [
-    "# scene_importer",
+    "# scenec",
     "",
     "This tool is used by the Flutter SDK to import 3D geometry.",
     "",
@@ -57,14 +57,14 @@ generated_file("scene_importer_license") {
     "",
     "## Licenses",
     "",
-    "### scene_importer",
+    "### scenec",
     "",
     read_file("//flutter/sky/packages/sky_engine/LICENSE", "string"),
     "",
 
     # These licenses are ignored by the main license checker, since they are not
     # shipped to end-application binaries and only shipped as part of developer
-    # tooling in scene_importer. Add them here.
+    # tooling in scenec. Add them here.
     "## Additional open source licenses",
     "",
     "### tinygltf",
@@ -75,19 +75,19 @@ generated_file("scene_importer_license") {
 
 group("importer") {
   deps = [
-    ":scene_importer",
-    ":scene_importer_license",
+    ":scenec",
+    ":scenec_license",
   ]
 }
 
-impeller_component("scene_importer") {
+impeller_component("scenec") {
   target_type = "executable"
 
-  sources = [ "importer_main.cc" ]
+  sources = [ "scenec_main.cc" ]
 
-  deps = [ ":importer_lib" ]
+  deps = [ ":scenec_lib" ]
 
   metadata = {
-    entitlement_file_path = [ "scene_importer" ]
+    entitlement_file_path = [ "scenec" ]
   }
 }
