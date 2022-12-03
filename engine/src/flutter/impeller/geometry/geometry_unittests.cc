@@ -240,7 +240,7 @@ TEST(GeometryTest, MatrixVectorMultiplication) {
     auto vector = Vector3(3, 3, -3);
 
     Vector3 result = matrix * vector;
-    auto expected = Vector3(1, 1, 0.673401);
+    auto expected = Vector3(-1, -1, 1.3468);
     ASSERT_VECTOR3_NEAR(result, expected);
   }
 
@@ -250,7 +250,7 @@ TEST(GeometryTest, MatrixVectorMultiplication) {
     auto point = Point(3, 3);
 
     Point result = matrix * point;
-    auto expected = Point(1, 1);
+    auto expected = Point(-1, -1);
     ASSERT_POINT_NEAR(result, expected);
   }
 
@@ -343,10 +343,10 @@ TEST(GeometryTest, MatrixMakePerspective) {
   {
     auto m = Matrix::MakePerspective(Degrees(60), Size(100, 200), 1, 10);
     auto expect = Matrix{
-        3.4641, 0,       0,        0,   //
-        0,      1.73205, 0,        0,   //
-        0,      0,       -1.11111, -1,  //
-        0,      0,       -1.11111, 0,   //
+        3.4641, 0,       0,        0,  //
+        0,      1.73205, 0,        0,  //
+        0,      0,       1.11111,  1,  //
+        0,      0,       -1.11111, 0,  //
     };
     ASSERT_MATRIX_NEAR(m, expect);
   }
@@ -354,10 +354,10 @@ TEST(GeometryTest, MatrixMakePerspective) {
   {
     auto m = Matrix::MakePerspective(Radians(1), 2, 10, 20);
     auto expect = Matrix{
-        0.915244, 0,       0,   0,   //
-        0,        1.83049, 0,   0,   //
-        0,        0,       -2,  -1,  //
-        0,        0,       -20, 0,   //
+        0.915244, 0,       0,   0,  //
+        0,        1.83049, 0,   0,  //
+        0,        0,       2,   1,  //
+        0,        0,       -20, 0,  //
     };
     ASSERT_MATRIX_NEAR(m, expect);
   }
