@@ -800,6 +800,7 @@ std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLay
     return layer;
   }
   SkCanvas* overlay_canvas = frame->SkiaCanvas();
+  overlay_canvas->clipRect(rect);
   overlay_canvas->clear(SK_ColorTRANSPARENT);
   if (frame->GetDisplayListBuilder()) {
     slice->render_into(frame->GetDisplayListBuilder().get());
