@@ -7,17 +7,17 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ShowTimePickerApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class ShowTimePickerApp extends StatefulWidget {
+  const ShowTimePickerApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ShowTimePickerApp> createState() => _ShowTimePickerAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ShowTimePickerAppState extends State<ShowTimePickerApp> {
   ThemeMode themeMode = ThemeMode.dark;
   bool useMaterial3 = true;
 
@@ -39,7 +39,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData.light(useMaterial3: useMaterial3),
       darkTheme: ThemeData.dark(useMaterial3: useMaterial3),
       themeMode: themeMode,
-      home: Home(
+      home: TimePickerOptions(
         themeMode: themeMode,
         useMaterial3: useMaterial3,
         setThemeMode: setThemeMode,
@@ -49,8 +49,8 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class Home extends StatefulWidget {
-  const Home({
+class TimePickerOptions extends StatefulWidget {
+  const TimePickerOptions({
     super.key,
     required this.themeMode,
     required this.useMaterial3,
@@ -64,10 +64,10 @@ class Home extends StatefulWidget {
   final ValueChanged<bool?> setUseMaterial3;
 
   @override
-  State<Home> createState() => _HomeState();
+  State<TimePickerOptions> createState() => _TimePickerOptionsState();
 }
 
-class _HomeState extends State<Home> {
+class _TimePickerOptionsState extends State<TimePickerOptions> {
   TimeOfDay? selectedTime;
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial;
   Orientation? orientation;
@@ -126,10 +126,10 @@ class _HomeState extends State<Home> {
         children: <Widget>[
           Expanded(
             child: GridView(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 300,
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 350,
                 mainAxisSpacing: 4,
-                mainAxisExtent: 200,
+                mainAxisExtent: 200 * MediaQuery.of(context).textScaleFactor,
                 crossAxisSpacing: 4,
               ),
               children: <Widget>[
@@ -194,7 +194,7 @@ class _HomeState extends State<Home> {
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton(
-                    child: const Text('OPEN TIME PICKER'),
+                    child: const Text('Open time picker'),
                     onPressed: () async {
                       final TimeOfDay? time = await showTimePicker(
                         context: context,
@@ -202,6 +202,11 @@ class _HomeState extends State<Home> {
                         initialEntryMode: entryMode,
                         orientation: orientation,
                         builder: (BuildContext context, Widget? child) {
+                          // We just wrap these environmental changes around the
+                          // child in this builder so that we can apply the
+                          // options selected above. In regular usage, this is
+                          // rarely necessary, because the default values are
+                          // usually used as-is.
                           return Theme(
                             data: Theme.of(context).copyWith(
                               materialTapTargetSize: tapTargetSize,
@@ -234,6 +239,8 @@ class _HomeState extends State<Home> {
   }
 }
 
+// This is a simple card that presents a set of radio buttons (inside of a
+// RadioSelection, defined below) for the user to select from.
 class ChoiceCard<T extends Object?> extends StatelessWidget {
   const ChoiceCard({
     super.key,
@@ -253,25 +260,28 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      // If the card gets too small, let it scroll both directions.
       child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(title),
-              ),
-              for (final T choice in choices)
-                RadioSelection<T>(
-                  value: choice,
-                  groupValue: value,
-                  onChanged: onChanged,
-                  child: Text(choiceLabels[choice]!),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(title),
                 ),
-            ],
+                for (final T choice in choices)
+                  RadioSelection<T>(
+                    value: choice,
+                    groupValue: value,
+                    onChanged: onChanged,
+                    child: Text(choiceLabels[choice]!),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -279,6 +289,8 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
   }
 }
 
+// This aggregates a ChoiceCard so that it presents a set of radio buttons for
+// the allowed enum values for the user to select from.
 class EnumCard<T extends Enum> extends StatelessWidget {
   const EnumCard({
     super.key,
@@ -304,6 +316,8 @@ class EnumCard<T extends Enum> extends StatelessWidget {
   }
 }
 
+// A button that has a radio button on one side and a label child. Tapping on
+// the label or the radio button selects the item.
 class RadioSelection<T extends Object?> extends StatefulWidget {
   const RadioSelection({
     super.key,
