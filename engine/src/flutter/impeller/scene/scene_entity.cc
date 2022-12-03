@@ -56,17 +56,17 @@ bool SceneEntity::Add(const std::shared_ptr<SceneEntity>& child) {
   return true;
 }
 
-bool SceneEntity::Render(SceneEncoder& encoder, const Camera& camera) const {
-  OnRender(encoder, camera);
+bool SceneEntity::Render(SceneEncoder& encoder) const {
+  OnRender(encoder);
   for (auto& child : children_) {
-    if (!child->Render(encoder, camera)) {
+    if (!child->Render(encoder)) {
       return false;
     }
   }
   return true;
 }
 
-bool SceneEntity::OnRender(SceneEncoder& encoder, const Camera& camera) const {
+bool SceneEntity::OnRender(SceneEncoder& encoder) const {
   return true;
 }
 

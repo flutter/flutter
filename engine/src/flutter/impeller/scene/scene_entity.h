@@ -34,13 +34,13 @@ class SceneEntity {
 
   bool Add(const std::shared_ptr<SceneEntity>& child);
 
-  bool Render(SceneEncoder& encoder, const Camera& camera) const;
+  bool Render(SceneEncoder& encoder) const;
 
  protected:
   Matrix local_transform_;
 
  private:
-  virtual bool OnRender(SceneEncoder& encoder, const Camera& camera) const;
+  virtual bool OnRender(SceneEncoder& encoder) const;
 
   SceneEntity* parent_ = nullptr;
   std::vector<std::shared_ptr<SceneEntity>> children_;

@@ -25,7 +25,7 @@ class StaticMeshEntity final : public SceneEntity {
 
  private:
   // |SceneEntity|
-  bool OnRender(SceneEncoder& encoder, const Camera& camera) const override;
+  bool OnRender(SceneEncoder& encoder) const override;
 
   std::shared_ptr<Material> material_;
   std::shared_ptr<Geometry> geometry_;
