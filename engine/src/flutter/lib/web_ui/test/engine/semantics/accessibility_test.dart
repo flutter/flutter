@@ -2,90 +2,117 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async' show Future;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/dom.dart';
+import 'package:ui/src/engine/initialization.dart';
 import 'package:ui/src/engine/semantics.dart';
 import 'package:ui/src/engine/services.dart';
 
 const StandardMessageCodec codec = StandardMessageCodec();
-const String testMessage = 'This is an tooltip.';
-const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{
-  'data': <dynamic, dynamic>{'message': testMessage}
-};
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  late AccessibilityAnnouncements accessibilityAnnouncements;
+  setUpAll(() async {
+    await initializeEngine();
+  });
 
   group('$AccessibilityAnnouncements', () {
-    setUp(() {
-      accessibilityAnnouncements = AccessibilityAnnouncements.instance;
-    });
-
-    test(
-        'Creates element when handling a message and removes '
-        'is after a delay', () {
-      // Set the a11y announcement's duration on DOM to half seconds.
-      accessibilityAnnouncements.durationA11yMessageIsOnDom =
-          const Duration(milliseconds: 500);
-
-      // Initially there is no accessibility-element
-      expect(domDocument.getElementById('accessibility-element'), isNull);
-
-      accessibilityAnnouncements.handleMessage(codec,
-          codec.encodeMessage(testInput));
+    void expectAnnouncementElements({required bool present}) {
       expect(
-        domDocument.getElementById('accessibility-element'),
-        isNotNull,
+        domDocument.getElementById('ftl-announcement-polite'),
+        present ? isNotNull : isNull,
       );
-      final DomHTMLLabelElement input =
-          domDocument.getElementById('accessibility-element')! as DomHTMLLabelElement;
-      expect(input.getAttribute('aria-live'), equals('polite'));
-      expect(input.text, testMessage);
+      expect(
+        domDocument.getElementById('ftl-announcement-assertive'),
+        present ? isNotNull : isNull,
+      );
+    }
 
-      // The element should have been removed after the duration.
-      Future<void>.delayed(
-          accessibilityAnnouncements.durationA11yMessageIsOnDom,
-          () =>
-              expect(domDocument.getElementById('accessibility-element'), isNull));
+    test('Initialization and disposal', () {
+      // Elements should be there right after engine initialization.
+      expectAnnouncementElements(present: true);
+
+      accessibilityAnnouncements.dispose();
+      expectAnnouncementElements(present: false);
+
+      initializeAccessibilityAnnouncements();
+      expectAnnouncementElements(present: true);
     });
+
+    void resetAccessibilityAnnouncements() {
+      accessibilityAnnouncements.dispose();
+      initializeAccessibilityAnnouncements();
+      expectAnnouncementElements(present: true);
+    }
 
     test('Default value of aria-live is polite when assertiveness is not specified', () {
-      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'message'}};
+      resetAccessibilityAnnouncements();
+      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'polite message'}};
       accessibilityAnnouncements.handleMessage(codec, codec.encodeMessage(testInput));
-      final DomHTMLLabelElement input = domDocument.getElementById('accessibility-element')! as DomHTMLLabelElement;
-
-      expect(input.getAttribute('aria-live'), equals('polite'));
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, 'polite message');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, '');
     });
 
-     test('aria-live is assertive when assertiveness is set to 1', () {
-      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'message', 'assertiveness': 1}};
+    test('aria-live is assertive when assertiveness is set to 1', () {
+      resetAccessibilityAnnouncements();
+      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'assertive message', 'assertiveness': 1}};
       accessibilityAnnouncements.handleMessage(codec, codec.encodeMessage(testInput));
-      final DomHTMLLabelElement input = domDocument.getElementById('accessibility-element')! as DomHTMLLabelElement;
-
-      expect(input.getAttribute('aria-live'), equals('assertive'));
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, '');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, 'assertive message');
     });
 
     test('aria-live is polite when assertiveness is null', () {
-      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'message', 'assertiveness': null}};
+      resetAccessibilityAnnouncements();
+      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'polite message', 'assertiveness': null}};
       accessibilityAnnouncements.handleMessage(codec, codec.encodeMessage(testInput));
-      final DomHTMLLabelElement input = domDocument.getElementById('accessibility-element')! as DomHTMLLabelElement;
-
-      expect(input.getAttribute('aria-live'), equals('polite'));
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, 'polite message');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, '');
     });
 
     test('aria-live is polite when assertiveness is set to 0', () {
-      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'message', 'assertiveness': 0}};
+      resetAccessibilityAnnouncements();
+      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'polite message', 'assertiveness': 0}};
       accessibilityAnnouncements.handleMessage(codec, codec.encodeMessage(testInput));
-      final DomHTMLLabelElement input = domDocument.getElementById('accessibility-element')! as DomHTMLLabelElement;
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, 'polite message');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, '');
+    });
 
-      expect(input.getAttribute('aria-live'), equals('polite'));
+    test('The same message announced twice is altered to convince the screen reader to read it again.', () {
+      resetAccessibilityAnnouncements();
+      const Map<dynamic, dynamic> testInput = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'Hello'}};
+      accessibilityAnnouncements.handleMessage(codec, codec.encodeMessage(testInput));
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, 'Hello');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, '');
+
+      // The DOM value gains a "." to make the message look updated.
+      const Map<dynamic, dynamic> testInput2 = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'Hello'}};
+      accessibilityAnnouncements.handleMessage(codec, codec.encodeMessage(testInput2));
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, 'Hello.');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, '');
+
+      // Now the "." is removed because the message without it will also look updated.
+      const Map<dynamic, dynamic> testInput3 = <dynamic, dynamic>{'data': <dynamic, dynamic>{'message': 'Hello'}};
+      accessibilityAnnouncements.handleMessage(codec, codec.encodeMessage(testInput3));
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, 'Hello');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, '');
+    });
+
+    test('announce() polite', () {
+      resetAccessibilityAnnouncements();
+      accessibilityAnnouncements.announce('polite message', Assertiveness.polite);
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, 'polite message');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, '');
+    });
+
+    test('announce() assertive', () {
+      resetAccessibilityAnnouncements();
+      accessibilityAnnouncements.announce('assertive message', Assertiveness.assertive);
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite).text, '');
+      expect(accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive).text, 'assertive message');
     });
   });
 }
