@@ -1,4 +1,4 @@
-Signature: 60e531fb5a3969269eb98bf4d76dafdc
+Signature: 736dbfe494c87bf305c7e8ae243612a3
 
 UNUSED LICENSES:
 
@@ -7775,6 +7775,8 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLProgram.cpp
+FILE: ../../../third_party/skia/src/sksl/tracing/SkRPDebugTrace.cpp
+FILE: ../../../third_party/skia/src/sksl/tracing/SkRPDebugTrace.h
 FILE: ../../../third_party/skia/src/sksl/tracing/SkSLDebugInfo.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
