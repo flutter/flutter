@@ -104,10 +104,6 @@ void DisplayListRasterCacheItem::PrerollFinalize(PrerollContext* context,
   }
   auto* raster_cache = context->raster_cache;
   SkRect bounds = display_list_->bounds().makeOffset(offset_.x(), offset_.y());
-  // We must to create an entry whenever if the react is intersect.
-  // if the rect is intersect we will get the entry access_count to confirm if
-  // it great than the threshold. Otherwise we only increase the entry
-  // access_count.
   bool visible = !context->state_stack.content_culled(bounds);
   int accesses = raster_cache->MarkSeen(key_id_, matrix, visible);
   if (!visible || accesses <= raster_cache->access_threshold()) {
