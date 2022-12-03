@@ -12,6 +12,7 @@ import 'package:flutter/physics.dart';
 /// See also:
 ///
 ///  * [ClampingScrollSimulation], which implements Android scroll physics.
+///  * [PageScrollSimulation], which implements Android page view scroll physics.
 class BouncingScrollSimulation extends Simulation {
   /// Creates a simulation group for scrolling on iOS, with the given
   /// parameters.
@@ -134,6 +135,7 @@ class BouncingScrollSimulation extends Simulation {
 /// See also:
 ///
 ///  * [BouncingScrollSimulation], which implements iOS scroll physics.
+///  * [PageScrollSimulation], which implements Android page view scroll physics.
 //
 // This class is based on Scroller.java from Android:
 //   https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
@@ -226,5 +228,72 @@ class ClampingScrollSimulation extends Simulation {
   @override
   bool isDone(double time) {
     return time >= _duration;
+  }
+}
+
+/// An implementation of scroll physics that matches Android page view.
+///
+/// See also:
+///
+///  * [BouncingScrollSimulation], which implements iOS scroll physics.
+///  * [ClampingScrollSimulation], which implements Android scroll physics.
+//
+// This class ports Android logic from Scroller.java `startScroll`, applying
+// the interpolator set in ViewPager.java.
+//
+// See Android Scroller.java `startScroll` source code
+// https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/widget/Scroller.java;l=393;drc=ae5bcf23b5f0875e455790d6af387184dbd009c1
+class PageScrollSimulation extends Simulation {
+  /// Creates a scroll physics simulation that matches Android page view.
+  PageScrollSimulation({
+    required this.position,
+    required this.target,
+    required this.duration,
+  }) : assert(position != target),
+       _delta = target - position,
+       _durationReciprocal = 1.0 / duration;
+
+  /// The position at the beginning of the simulation.
+  final double position;
+
+  /// The target, which will be reached at the end of the simulation.
+  final double target;
+
+  /// The duration of the simulation in seconds.
+  final double duration;
+
+  final double _delta;
+  final double _durationReciprocal;
+
+  /// See Android ViewPager interpolator
+  /// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:viewpager/viewpager/src/main/java/androidx/viewpager/widget/ViewPager.java;l=152;drc=1dcb8847e7aca80ee78c5d9864329b93dd276379
+  double _interpolate(double t) {
+    // y = (t - 1)^5 + 1.0
+    t -= 1.0;
+    return t * t * t * t * t + 1.0;
+  }
+
+  /// A derivative from [_interpolate] function.
+  double _interpolateDx(double t) {
+    // y = 5 * (t - 1)^4
+    t -= 1.0;
+    return 5.0 * t * t * t * t;
+  }
+
+  @override
+  double x(double time) {
+    time = time.clamp(0.0, duration);
+    return position + _delta * _interpolate(time * _durationReciprocal);
+  }
+
+  @override
+  double dx(double time) {
+    time = time.clamp(0.0, duration);
+    return _delta * _interpolateDx(time * _durationReciprocal);
+  }
+
+  @override
+  bool isDone(double time) {
+    return time >= duration;
   }
 }

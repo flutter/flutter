@@ -21,6 +21,7 @@ import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
+import 'scroll_simulation.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
@@ -532,9 +533,23 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 ///  * [ScrollPhysics], the base class which defines the API for scrolling
 ///    physics.
 ///  * [PageView.physics], which can override the physics used by a page view.
+///  * [PageScrollSimulation], which implements Android page view scroll physics, and
+///    used by this class.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
   const PageScrollPhysics({ super.parent });
+
+  // See Android ViewPager constants
+  // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:viewpager/viewpager/src/main/java/androidx/viewpager/widget/ViewPager.java;l=116;drc=1dcb8847e7aca80ee78c5d9864329b93dd276379
+  static const int _kMaxSettleDuration = 600;
+  static const double _kMinFlingDistance = 25.0;
+  static const double _kMinFlingVelocity = 400.0;
+
+  @override
+  double get minFlingDistance => _kMinFlingDistance;
+
+  @override
+  double get minFlingVelocity => _kMinFlingVelocity;
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -555,14 +570,24 @@ class PageScrollPhysics extends ScrollPhysics {
     return page * position.viewportDimension;
   }
 
-  double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
-    double page = _getPage(position);
-    if (velocity < -tolerance.velocity) {
+  double _getTargetPage(double page, Tolerance tolerance, double velocity) {
+    if (velocity < -tolerance.velocity)
       page -= 0.5;
     } else if (velocity > tolerance.velocity) {
       page += 0.5;
-    }
-    return _getPixels(position, page.roundToDouble());
+    return page.roundToDouble();
+  }
+
+  double _getPageDelta(ScrollMetrics position, Tolerance tolerance, double velocity) {
+    final double page = _getPage(position);
+    final double targetPage = _getTargetPage(page, tolerance, velocity);
+    return targetPage - page;
+  }
+
+  double _getTargetPixels(ScrollMetrics position, Tolerance tolerance, double velocity) {
+    final double page = _getPage(position);
+    final double targetPage = _getTargetPage(page, tolerance, velocity);
+    return _getPixels(position, targetPage);
   }
 
   @override
@@ -576,9 +601,51 @@ class PageScrollPhysics extends ScrollPhysics {
     final Tolerance tolerance = this.tolerance;
     final double target = _getTargetPixels(position, tolerance, velocity);
     if (target != position.pixels) {
-      return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
+      // See Android ViewPager smoothScrollTo logic
+      // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:viewpager/viewpager/src/main/java/androidx/viewpager/widget/ViewPager.java;l=952;drc=1dcb8847e7aca80ee78c5d9864329b93dd276379
+      final double delta = target - position.pixels;
+      final double width = position.viewportDimension;
+      final double halfWidth = width / 2;
+      final double distanceRatio = math.min(1.0, 1.0 * delta.abs() / width);
+      final double distance = halfWidth + halfWidth * _distanceInfluenceForSnapDuration(distanceRatio);
+      int duration;
+      if (velocity.abs() > 0) {
+        duration = 4 * (1000 * (distance / velocity).abs()).round();
+      } else {
+        final double pageDelta = _getPageDelta(position, tolerance, velocity).abs();
+        // A slightly different algorithm than on Android, because
+        // Flutter has different velocity estimate, which is more likely to
+        // return zero pointer velocity when user holds his finger after a fling,
+        // compared to Android's VelocityTracker.
+        //
+        // It was not clear why exactly this happens, since the estimate logic is
+        // the same as on Android, so it was decided to adjust this formula
+        // to produce similar results.
+        //
+        // On Android it looks like this:
+        //    duration = ((pageDelta + 1) * 100).toInt();
+        duration = ((pageDelta * 100 + 1) * 100).toInt();
+      }
+      duration = math.min(duration, _kMaxSettleDuration);
+      return PageScrollSimulation(
+        position: position.pixels,
+        target: target,
+        duration: duration / 1000,
+      );
     }
     return null;
+  }
+
+  // See Android ViewPager distanceInfluenceForSnapDuration.
+  //
+  // We want the duration of the page snap animation to be influenced by the distance that
+  // the screen has to travel, however, we don't want this duration to be effected in a
+  // purely linear fashion. Instead, we use this method to moderate the effect that the distance
+  // of travel has on the overall snap duration.
+  double _distanceInfluenceForSnapDuration(double value) {
+    value -= 0.5; // center the values about 0.
+    value *= 0.3 * math.pi / 2.0;
+    return math.sin(value);
   }
 
   @override

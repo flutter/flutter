@@ -379,7 +379,9 @@ class ScrollPhysics {
     ratio: 1.1,
   );
 
-  /// The spring to use for ballistic simulations.
+  /// The spring which [createBallisticSimulation] should use to create
+  /// a [SpringSimulation] to correct the scroll position when it goes
+  /// out of range.
   SpringDescription get spring => parent?.spring ?? _kDefaultSpring;
 
   /// The default accuracy to which scrolling is computed.
