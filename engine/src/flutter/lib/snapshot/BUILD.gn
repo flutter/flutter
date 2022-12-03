@@ -5,6 +5,7 @@
 import("//build/compiled_action.gni")
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
@@ -315,8 +316,13 @@ source_set("snapshot") {
 compile_platform("strong_platform") {
   single_root_scheme = "org-dartlang-sdk"
   single_root_base = rebase_path("../../../")
-  libraries_specification_uri =
-      "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
+  if (impeller_enable_3d) {
+    libraries_specification_uri =
+        "org-dartlang-sdk:///flutter/lib/snapshot/libraries_experimental.json"
+  } else {
+    libraries_specification_uri =
+        "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
+  }
 
   outputs = [
     "$root_out_dir/flutter_patched_sdk/platform_strong.dill",

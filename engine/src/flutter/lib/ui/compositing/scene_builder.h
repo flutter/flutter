@@ -34,6 +34,15 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
     res->AssociateWithDartWrapper(wrapper);
   }
 
+#ifdef IMPELLER_ENABLE_3D
+  static void addModelLayer(Dart_Handle wrapper,
+                            double dx,
+                            double dy,
+                            double width,
+                            double height,
+                            int64_t viewId);
+#endif  // IMPELLER_ENABLE_3D
+
   ~SceneBuilder() override;
 
   void pushTransformHandle(Dart_Handle layer_handle,

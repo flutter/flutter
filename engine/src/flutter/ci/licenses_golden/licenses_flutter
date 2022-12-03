@@ -1714,6 +1714,7 @@ FILE: ../../../flutter/impeller/typographer/typographer_unittests.cc
 FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
 FILE: ../../../flutter/lib/snapshot/libraries.json
+FILE: ../../../flutter/lib/snapshot/libraries_experimental.json
 FILE: ../../../flutter/lib/snapshot/snapshot.h
 FILE: ../../../flutter/lib/ui/annotations.dart
 FILE: ../../../flutter/lib/ui/channel_buffers.dart
@@ -1728,6 +1729,8 @@ FILE: ../../../flutter/lib/ui/dart_runtime_hooks.h
 FILE: ../../../flutter/lib/ui/dart_ui.cc
 FILE: ../../../flutter/lib/ui/dart_ui.h
 FILE: ../../../flutter/lib/ui/dart_wrapper.h
+FILE: ../../../flutter/lib/ui/experiments/compositing_3d.dart
+FILE: ../../../flutter/lib/ui/experiments/ui.dart
 FILE: ../../../flutter/lib/ui/geometry.dart
 FILE: ../../../flutter/lib/ui/hash_codes.dart
 FILE: ../../../flutter/lib/ui/hooks.dart
