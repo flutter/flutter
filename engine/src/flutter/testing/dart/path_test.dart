@@ -225,4 +225,19 @@ void main() {
     expect(newFirstMetric.getTangentForOffset(4.0)!.vector, const Offset(0.0, 1.0));
     expect(newFirstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
   });
+
+  test('PathMetrics on a mutated path', () {
+    final Path path = Path()
+      ..lineTo(0, 30)
+      ..lineTo(40, 30)
+      ..moveTo(100, 0)
+      ..lineTo(100, 30)
+      ..lineTo(140, 30)
+      ..close();
+    final PathMetrics metrics = path.computeMetrics();
+    expect(metrics.toString(),
+      '(PathMetric(length: 70.0, isClosed: false, contourIndex: 0), '
+       'PathMetric(length: 120.0, isClosed: true, contourIndex: 1))',
+    );
+  });
 }

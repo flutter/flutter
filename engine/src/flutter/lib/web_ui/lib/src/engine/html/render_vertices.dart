@@ -70,7 +70,7 @@ class SurfaceVertices implements ui.Vertices {
     if (assertionsEnabled) {
       return _disposed;
     }
-    throw StateError('Vertices.debugDisposed is only avialalbe when asserts are enabled.');
+    throw StateError('Vertices.debugDisposed is only available when asserts are enabled.');
   }
 }
 
