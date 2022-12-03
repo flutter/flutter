@@ -13,14 +13,14 @@ namespace scene {
 
 class Camera {
  public:
-  static Camera MakePerspective(Scalar fov_y, Vector3 position);
+  static Camera MakePerspective(Radians fov_y, Vector3 position);
 
   Camera LookAt(Vector3 target, Vector3 up = Vector3(0, -1, 0)) const;
 
   Matrix GetTransform(ISize target_size) const;
 
  private:
-  Scalar fov_y_ = 60;
+  Radians fov_y_ = Degrees(60);
   Vector3 position_ = Vector3();
   Vector3 target_ = Vector3(0, 0, -1);
   Vector3 up_ = Vector3(0, -1, 0);

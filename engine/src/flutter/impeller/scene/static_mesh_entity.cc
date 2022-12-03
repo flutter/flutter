@@ -24,8 +24,7 @@ void StaticMeshEntity::SetMaterial(std::shared_ptr<Material> material) {
 }
 
 // |SceneEntity|
-bool StaticMeshEntity::OnRender(SceneEncoder& encoder,
-                                const Camera& camera) const {
+bool StaticMeshEntity::OnRender(SceneEncoder& encoder) const {
   SceneCommand command = {
       .label = "Static Mesh",
       .transform = GetGlobalTransform(),
