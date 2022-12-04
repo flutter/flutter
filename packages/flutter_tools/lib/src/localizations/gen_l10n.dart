@@ -65,7 +65,9 @@ LocalizationsGenerator generateLocalizations({
       areResourceAttributesRequired: options.areResourceAttributesRequired,
       untranslatedMessagesFile: options.untranslatedMessagesFile?.toFilePath(),
       usesNullableGetter: options.usesNullableGetter,
+      useEscaping: options.useEscaping,
       logger: logger,
+      suppressWarnings: options.suppressWarnings,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: true);
@@ -89,17 +91,15 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 // For example, if placeholders are used for plurals and no type was specified, then the type will
 // automatically set to 'num'. Similarly, if such placeholders are used for selects, then the type
 // will be set to 'String'. For such placeholders that are used for both, we should throw an error.
-// TODO(thkim1011): Let's store the output of this function in the Message class, so that we don't
-// recompute this. See https://github.com/flutter/flutter/issues/112709
 List<String> generateMethodParameters(Message message) {
-  return message.placeholders.map((Placeholder placeholder) {
+  return message.placeholders.values.map((Placeholder placeholder) {
     return '${placeholder.type} ${placeholder.name}';
   }).toList();
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
 List<String> generateMethodArguments(Message message) {
-  return message.placeholders.map((Placeholder placeholder) => placeholder.name).toList();
+  return message.placeholders.values.map((Placeholder placeholder) => placeholder.name).toList();
 }
 
 String generateDateFormattingLogic(Message message) {
@@ -107,7 +107,7 @@ String generateDateFormattingLogic(Message message) {
     return '@(none)';
   }
 
-  final Iterable<String> formatStatements = message.placeholders
+  final Iterable<String> formatStatements = message.placeholders.values
     .where((Placeholder placeholder) => placeholder.requiresDateFormatting)
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
@@ -150,7 +150,7 @@ String generateNumberFormattingLogic(Message message) {
     return '@(none)';
   }
 
-  final Iterable<String> formatStatements = message.placeholders
+  final Iterable<String> formatStatements = message.placeholders.values
     .where((Placeholder placeholder) => placeholder.requiresNumFormatting)
     .map((Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
@@ -453,7 +453,9 @@ class LocalizationsGenerator {
     bool areResourceAttributesRequired = false,
     String? untranslatedMessagesFile,
     bool usesNullableGetter = true,
+    bool useEscaping = false,
     required Logger logger,
+    bool suppressWarnings = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -474,7 +476,9 @@ class LocalizationsGenerator {
       untranslatedMessagesFile: _untranslatedMessagesFileFromPath(fileSystem, untranslatedMessagesFile),
       inputsAndOutputsListFile: _inputsAndOutputsListFileFromPath(fileSystem, inputsAndOutputsListPath),
       areResourceAttributesRequired: areResourceAttributesRequired,
+      useEscaping: useEscaping,
       logger: logger,
+      suppressWarnings: suppressWarnings,
     );
   }
 
@@ -497,13 +501,17 @@ class LocalizationsGenerator {
     this.untranslatedMessagesFile,
     this.usesNullableGetter = true,
     required this.logger,
+    this.useEscaping = false,
+    this.suppressWarnings = false,
   });
 
   final FileSystem _fs;
-  Iterable<Message> _allMessages = <Message>[];
+  List<Message> _allMessages = <Message>[];
   late final AppResourceBundleCollection _allBundles = AppResourceBundleCollection(inputDirectory);
-
   late final AppResourceBundle _templateBundle = AppResourceBundle(templateArbFile);
+  late final Map<LocaleInfo, String> _inputFileNames = Map<LocaleInfo, String>.fromEntries(
+    _allBundles.bundles.map((AppResourceBundle bundle) => MapEntry<LocaleInfo, String>(bundle.locale, bundle.file.basename))
+  );
   late final LocaleInfo _templateArbLocale = _templateBundle.locale;
 
   @visibleForTesting
@@ -563,6 +571,9 @@ class LocalizationsGenerator {
   // Whether we need to import intl or not. This flag is updated after parsing
   // all of the messages.
   bool requiresIntlImport = false;
+
+  // Whether we want to use escaping for ICU messages.
+  bool useEscaping = false;
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
@@ -627,6 +638,9 @@ class LocalizationsGenerator {
 
   /// Logger to be used during the execution of the script.
   Logger logger;
+
+  /// Whether or not to suppress warnings or not.
+  final bool suppressWarnings;
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -824,15 +838,15 @@ class LocalizationsGenerator {
     if (name[0] == '_') {
       return false;
     }
-    // Dart getter and method name cannot contain non-alphanumeric symbols
-    if (name.contains(RegExp(r'[^a-zA-Z_\d]'))) {
+    // Dart identifiers can only use letters, numbers, underscores, and `$`
+    if (name.contains(RegExp(r'[^a-zA-Z_$\d]'))) {
       return false;
     }
-    // Dart method name must start with lower case character
+    // Dart getter and method name should start with lower case character
     if (name[0].contains(RegExp(r'[A-Z]'))) {
       return false;
     }
-    // Dart class name cannot start with a number
+    // Dart getter and method name cannot start with a number
     if (name[0].contains(RegExp(r'\d'))) {
       return false;
     }
@@ -842,9 +856,6 @@ class LocalizationsGenerator {
   // Load _allMessages from templateArbFile and _allBundles from all of the ARB
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
-    _allMessages = _templateBundle.resourceIds.map((String id) => Message(
-       _templateBundle.resources, id, areResourceAttributesRequired,
-    ));
     for (final String resourceId in _templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
         throw L10nException(
@@ -855,7 +866,10 @@ class LocalizationsGenerator {
         );
       }
     }
-
+    // The call to .toList() is absolutely necessary. Otherwise, it is an iterator and will call Message's constructor again.
+    _allMessages = _templateBundle.resourceIds.map((String id) => Message(
+       _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
+    )).toList();
     if (inputsAndOutputsListFile != null) {
       _inputFileList.addAll(_allBundles.bundles.map((AppResourceBundle bundle) {
         return bundle.file.absolute.path;
@@ -891,21 +905,19 @@ class LocalizationsGenerator {
     String className,
     String fileName,
     String header,
-    AppResourceBundle bundle,
-    AppResourceBundle templateBundle,
-    Iterable<Message> messages,
+    final LocaleInfo locale,
   ) {
-    final LocaleInfo locale = bundle.locale;
-
-    final Iterable<String> methods = messages.map((Message message) {
-      if (bundle.translationFor(message) == null) {
+    final Iterable<String> methods = _allMessages.map((Message message) {
+      if (message.messages[locale] == null) {
         _addUnimplementedMessage(locale, message.resourceId);
+        return _generateMethod(
+          message,
+          _templateArbLocale,
+        );
       }
-
       return _generateMethod(
         message,
-        bundle.file.basename,
-        bundle.translationFor(message) ?? templateBundle.translationFor(message)!,
+        locale,
       );
     });
 
@@ -923,20 +935,19 @@ class LocalizationsGenerator {
   String _generateSubclass(
     String className,
     AppResourceBundle bundle,
-    Iterable<Message> messages,
   ) {
     final LocaleInfo locale = bundle.locale;
     final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
-    messages
-      .where((Message message) => bundle.translationFor(message) == null)
+    _allMessages
+      .where((Message message) => message.messages[locale] == null)
       .forEach((Message message) {
         _addUnimplementedMessage(locale, message.resourceId);
       });
 
-    final Iterable<String> methods = messages
-      .where((Message message) => bundle.translationFor(message) != null)
-      .map((Message message) => _generateMethod(message, bundle.file.basename, bundle.translationFor(message)!));
+    final Iterable<String> methods = _allMessages
+      .where((Message message) => message.messages[locale] != null)
+      .map((Message message) => _generateMethod(message, locale));
 
     return subclassTemplate
       .replaceAll('@(language)', describeLocale(locale.toString()))
@@ -1016,9 +1027,7 @@ class LocalizationsGenerator {
           className,
           outputFileName,
           header,
-          _allBundles.bundleFor(locale)!,
-          _allBundles.bundleFor(_templateArbLocale)!,
-          _allMessages,
+          locale,
         );
 
         // Every locale for the language except the base class.
@@ -1029,7 +1038,6 @@ class LocalizationsGenerator {
           return _generateSubclass(
             className,
             _allBundles.bundleFor(locale)!,
-            _allMessages,
           );
         });
 
@@ -1079,13 +1087,15 @@ class LocalizationsGenerator {
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  String _generateMethod(Message message, String filename, String translationForMessage) {
+  String _generateMethod(Message message, LocaleInfo locale) {
+    try {
     // Determine if we must import intl for date or number formatting.
     if (message.placeholdersRequireFormatting) {
       requiresIntlImport = true;
     }
 
-    final Node node = Parser(message.resourceId, filename, translationForMessage).parse();
+    final String translationForMessage = message.messages[locale]!;
+    final Node node = message.parsedMessages[locale]!;
     // If parse tree is only a string, then return a getter method.
     if (node.children.every((Node child) => child.type == ST.string)) {
       // Use the parsed translation to handle escaping with the same behavior.
@@ -1094,75 +1104,37 @@ class LocalizationsGenerator {
         .replaceAll('@(message)', "'${generateString(node.children.map((Node child) => child.value!).join())}'");
     }
 
-    final List<String> helperMethods = <String>[];
-
-    // Get a unique helper method name.
-    int methodNameCount = 0;
-    String getHelperMethodName() {
-      return '_${message.resourceId}${methodNameCount++}';
+    final List<String> tempVariables = <String>[];
+    // Get a unique temporary variable name.
+    int variableCount = 0;
+    String getTempVariableName() {
+      return '_temp${variableCount++}';
     }
 
-    // Do a DFS post order traversal, generating dependent
-    // placeholder, plural, select helper methods, and combine these into
-    // one message. Returns the method/placeholder to use in parent string.
-    HelperMethod generateHelperMethods(Node node, { bool isRoot = false }) {
-      final Set<Placeholder> dependentPlaceholders = <Placeholder>{};
+    // Do a DFS post order traversal through placeholderExpr, pluralExpr, and selectExpr nodes.
+    // When traversing through a placeholderExpr node, return "$placeholderName".
+    // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
+    // When traversing through a selectExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
+    // When traversing through a message node, return concatenation of all of "generateVariables(child)" for each child.
+    String generateVariables(Node node, { bool isRoot = false }) {
       switch (node.type) {
         case ST.message:
-          final List<HelperMethod> helpers = node.children.map<HelperMethod>((Node node) {
+          final List<String> expressions = node.children.map<String>((Node node) {
             if (node.type == ST.string) {
-              return HelperMethod(<Placeholder>{}, string: node.value);
+              return node.value!;
             }
-            final HelperMethod helper = generateHelperMethods(node);
-            dependentPlaceholders.addAll(helper.dependentPlaceholders);
-            return helper;
+            return generateVariables(node);
           }).toList();
-          final String messageString = generateReturnExpr(helpers);
-
-          // If the message is just a normal string, then only return the string.
-          if (dependentPlaceholders.isEmpty) {
-            return HelperMethod(dependentPlaceholders, string: messageString);
-          }
-
-          // For messages, if we are generating the actual overridden method, then we should also deal with
-          // date and number formatting here.
-          final String helperMethodName = getHelperMethodName();
-          final HelperMethod messageHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
-          if (isRoot) {
-            helperMethods.add(methodTemplate
-              .replaceAll('@(name)', message.resourceId)
-              .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
-              .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
-              .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
-              .replaceAll('@(message)', messageString)
-              .replaceAll('@(none)\n', '')
-            );
-          } else {
-            helperMethods.add(messageHelperTemplate
-              .replaceAll('@(name)', helperMethodName)
-              .replaceAll('@(parameters)', messageHelper.methodParameters)
-              .replaceAll('@(message)', messageString)
-            );
-          }
-          return messageHelper;
+          return generateReturnExpr(expressions);
 
         case ST.placeholderExpr:
           assert(node.children[1].type == ST.identifier);
-          final Node identifier = node.children[1];
-          // Check that placeholders exist.
-          // TODO(thkim1011): Make message.placeholders a map so that we don't need to do linear time search.
-          // See https://github.com/flutter/flutter/issues/112709
-          final Placeholder placeholder = message.placeholders.firstWhere(
-            (Placeholder placeholder) => placeholder.name == identifier.value,
-            orElse: () {
-              throw L10nException('''
-Make sure that the specified placeholder is defined in your arb file.
-$translationForMessage
-${Parser.indentForError(identifier.positionInMessage)}''');
-            }
-          );
-          dependentPlaceholders.add(placeholder);
-          return HelperMethod(dependentPlaceholders, placeholder: placeholder);
+          final String identifier = node.children[1].value!;
+          final Placeholder placeholder = message.placeholders[identifier]!;
+          if (placeholder.requiresFormatting) {
+            return '\$${node.children[1].value}String';
+          }
+          return '\$${node.children[1].value}';
 
         case ST.pluralExpr:
           requiresIntlImport = true;
@@ -1174,26 +1146,6 @@ ${Parser.indentForError(identifier.positionInMessage)}''');
 
           final Node identifier = node.children[1];
           final Node pluralParts = node.children[5];
-
-          // Check that identifier exists and is of type int or num.
-          final Placeholder placeholder = message.placeholders.firstWhere(
-            (Placeholder placeholder) => placeholder.name == identifier.value,
-            orElse: () {
-              throw L10nException('''
-Make sure that the specified plural placeholder is defined in your arb file.
-$translationForMessage
-${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
-            }
-          );
-          dependentPlaceholders.add(placeholder);
-          // TODO(thkim1011): Uncomment the following lines after Message refactor.
-          // See https://github.com/flutter/flutter/issues/112709.
-//           if (placeholder.type != 'num' && placeholder.type != 'int') {
-//             throw L10nException('''
-// The specified placeholder must be of type int or num.
-// $translationForMessage
-// ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
-//           }
 
           for (final Node pluralPart in pluralParts.children.reversed) {
             String pluralCase;
@@ -1210,26 +1162,22 @@ ${List<String>.filled(identifier.positionInMessage, ' ').join()}^''');
               pluralMessage = pluralPart.children[2];
             }
             if (!pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
-              final HelperMethod pluralPartHelper = generateHelperMethods(pluralMessage);
-              pluralLogicArgs[pluralCases[pluralCase]!] = '      ${pluralCases[pluralCase]}: ${pluralPartHelper.helperOrPlaceholder},';
-              dependentPlaceholders.addAll(pluralPartHelper.dependentPlaceholders);
-            } else {
+              final String pluralPartExpression = generateVariables(pluralMessage);
+              pluralLogicArgs[pluralCases[pluralCase]!] = '      ${pluralCases[pluralCase]}: $pluralPartExpression,';
+            } else if (!suppressWarnings) {
               logger.printWarning('''
-The plural part specified below is overrided by a later plural part.
-$translationForMessage
-${Parser.indentForError(pluralPart.positionInMessage)}
-''');
+[${_inputFileNames[locale]}:${message.resourceId}] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.
+    $translationForMessage
+    ${Parser.indentForError(pluralPart.positionInMessage)}''');
             }
           }
-          final String helperMethodName = getHelperMethodName();
-          final HelperMethod pluralHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
-          helperMethods.add(pluralHelperTemplate
-            .replaceAll('@(name)', helperMethodName)
-            .replaceAll('@(parameters)', pluralHelper.methodParameters)
+          final String tempVarName = getTempVariableName();
+          tempVariables.add(pluralVariableTemplate
+            .replaceAll('@(varName)', tempVarName)
             .replaceAll('@(count)', identifier.value!)
             .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n'))
           );
-          return pluralHelper;
+          return '\$$tempVarName';
 
         case ST.selectExpr:
           requiresIntlImport = true;
@@ -1239,51 +1187,52 @@ ${Parser.indentForError(pluralPart.positionInMessage)}
           assert(node.children[5].type == ST.selectParts);
 
           final Node identifier = node.children[1];
-          // Check that identifier exists
-          final Placeholder placeholder = message.placeholders.firstWhere(
-            (Placeholder placeholder) => placeholder.name == identifier.value,
-            orElse: () {
-              throw L10nException('''
-Make sure that the specified select placeholder is defined in your arb file.
-$translationForMessage
-${Parser.indentForError(identifier.positionInMessage)}''');
-            }
-          );
-          dependentPlaceholders.add(placeholder);
           final List<String> selectLogicArgs = <String>[];
           final Node selectParts = node.children[5];
-
           for (final Node selectPart in selectParts.children) {
             assert(selectPart.children[0].type == ST.identifier || selectPart.children[0].type == ST.other);
             assert(selectPart.children[2].type == ST.message);
             final String selectCase = selectPart.children[0].value!;
             final Node selectMessage = selectPart.children[2];
-            final HelperMethod selectPartHelper = generateHelperMethods(selectMessage);
-            selectLogicArgs.add("        '$selectCase': ${selectPartHelper.helperOrPlaceholder},");
-            dependentPlaceholders.addAll(selectPartHelper.dependentPlaceholders);
+            final String selectPartExpression = generateVariables(selectMessage);
+            selectLogicArgs.add("        '$selectCase': $selectPartExpression,");
           }
-          final String helperMethodName = getHelperMethodName();
-          final HelperMethod selectHelper = HelperMethod(dependentPlaceholders, helper: helperMethodName);
-
-          helperMethods.add(selectHelperTemplate
-            .replaceAll('@(name)', helperMethodName)
-            .replaceAll('@(parameters)', selectHelper.methodParameters)
+          final String tempVarName = getTempVariableName();
+          tempVariables.add(selectVariableTemplate
+            .replaceAll('@(varName)', tempVarName)
             .replaceAll('@(choice)', identifier.value!)
             .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
           );
-          return HelperMethod(dependentPlaceholders, helper: helperMethodName);
+          return '\$$tempVarName';
         // ignore: no_default_cases
         default:
           throw Exception('Cannot call "generateHelperMethod" on node type ${node.type}');
       }
     }
-    generateHelperMethods(node, isRoot: true);
-    return helperMethods.last.replaceAll('@(helperMethods)', helperMethods.sublist(0, helperMethods.length - 1).join('\n\n'));
+    final String messageString = generateVariables(node, isRoot: true);
+    final String tempVarLines = tempVariables.isEmpty ? '' : '${tempVariables.join('\n')}\n';
+    return methodTemplate
+              .replaceAll('@(name)', message.resourceId)
+              .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
+              .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+              .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+              .replaceAll('@(tempVars)', tempVarLines)
+              .replaceAll('@(message)', messageString)
+              .replaceAll('@(none)\n', '');
+    } on L10nParserException catch (error) {
+      logger.printError(error.toString());
+      return '';
+    }
   }
 
   List<String> writeOutputFiles({ bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
+
+    // If there were any syntax errors, don't write to files.
+    if (logger.hadErrorOutput) {
+      throw L10nException('Found syntax errors.');
+    }
 
     // A pubspec.yaml file is required when using a synthetic package. If it does not
     // exist, create a blank one.

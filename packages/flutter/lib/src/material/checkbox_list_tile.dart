@@ -176,6 +176,7 @@ class CheckboxListTile extends StatelessWidget {
     this.side,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
   }) : assert(tristate != null),
        assert(tristate || value != null),
@@ -320,6 +321,9 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@macro flutter.material.ListTile.enableFeedback}
   ///
   /// See also:
@@ -401,6 +405,7 @@ class CheckboxListTile extends StatelessWidget {
         tileColor: tileColor,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
       ),
     );

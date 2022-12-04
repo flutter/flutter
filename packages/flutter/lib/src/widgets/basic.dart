@@ -7465,8 +7465,6 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///
 /// {@tool snippet}
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
-///
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
 ///

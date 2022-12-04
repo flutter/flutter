@@ -1284,6 +1284,40 @@ class AppLocalizationsEn extends AppLocalizations {
   });
 
   group('writeOutputFiles', () {
+    testWithoutContext('multiple messages with syntax error all log their errors', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(r'''
+{
+  "msg1": "{",
+  "msg2": "{ {"
+}''');
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+      try {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+      } on L10nException catch (error) {
+        expect(error.message, equals('Found syntax errors.'));
+        expect(logger.errorText, contains('''
+[app_en.arb:msg1] ICU Syntax Error: Expected "identifier" but found no tokens.
+    {
+      ^
+[app_en.arb:msg2] ICU Syntax Error: Expected "identifier" but found "{".
+    { {
+      ^'''));
+      }
+    });
     testWithoutContext('message without placeholders - should generate code comment with description and template message translation', () {
       _standardFlutterDirectoryL10nSetup(fs);
       LocalizationsGenerator(
@@ -1581,47 +1615,31 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     group('placeholder tests', () {
-      testWithoutContext('should throw attempting to generate a select message without placeholders', () {
-        const String selectMessageWithoutPlaceholdersAttribute = '''
+      testWithoutContext('should automatically infer placeholders that are not explicitly defined', () {
+        const String messageWithoutDefinedPlaceholder = '''
 {
-  "helloWorld": "Hello {name}",
-  "@helloWorld": {
-    "description": "Improperly formatted since it has no placeholder attribute.",
-    "placeholders": {
-      "hello": {},
-      "world": {}
-    }
-  }
+  "helloWorld": "Hello {name}"
 }''';
 
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            contains('''
-Make sure that the specified placeholder is defined in your arb file.
-Hello {name}
-       ^'''),
-          )),
-        );
+          .writeAsStringSync(messageWithoutDefinedPlaceholder);
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains('String helloWorld(Object name) {'));
       });
     });
 
@@ -1909,7 +1927,37 @@ Hello {name}
     });
 
     group('plural messages', () {
-      testWithoutContext('should throw attempting to generate a plural message without placeholders', () {
+      testWithoutContext('warnings are generated when plural parts are repeated', () {
+        const String pluralMessageWithOverriddenParts = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
+  "@helloWorlds": {
+    "description": "Properly formatted but has redundant zero cases."
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(pluralMessageWithOverriddenParts);
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        expect(logger.hadWarningOutput, isTrue);
+        expect(logger.warningText, contains('''
+[app_en.arb:helloWorlds] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.
+    {count,plural, =0{Hello}zero{hello} other{hi}}
+                   ^'''));
+      });
+
+      testWithoutContext('should automatically infer plural placeholders that are not explicitly defined', () {
         const String pluralMessageWithoutPlaceholdersAttribute = '''
 {
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
@@ -1922,115 +1970,21 @@ Hello {name}
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
           .writeAsStringSync(pluralMessageWithoutPlaceholdersAttribute);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified plural placeholder is defined in your arb file.
-// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-//  ^'''),
-            contains('Cannot find the count placeholder in plural message "helloWorlds".'),
-          )),
-        );
-      });
-
-      testWithoutContext('should throw attempting to generate a plural message with an empty placeholders map', () {
-        const String pluralMessageWithEmptyPlaceholdersMap = '''
-{
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
-  "@helloWorlds": {
-    "description": "Improperly formatted since it has no placeholder attribute.",
-    "placeholders": {}
-  }
-}''';
-
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithEmptyPlaceholdersMap);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified plural placeholder is defined in your arb file.
-// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-//  ^'''),
-            contains('Cannot find the count placeholder in plural message "helloWorlds".'),
-          )),
-        );
-      });
-
-      testWithoutContext('should throw attempting to generate a plural message with no resource attributes', () {
-        const String pluralMessageWithoutResourceAttributes = '''
-{
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}"
-}''';
-
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithoutResourceAttributes);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified plural placeholder is defined in your arb file.
-// {count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}
-//  ^'''),
-            contains('Resource attribute "@helloWorlds" was not found. Please ensure that plural resources have a corresponding @resource.'),
-          )),
-        );
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains('String helloWorlds(num count) {'));
       });
 
       testWithoutContext('should throw attempting to generate a plural message with incorrect format for placeholders', () {
@@ -2074,7 +2028,7 @@ Hello {name}
     });
 
     group('select messages', () {
-      testWithoutContext('should throw attempting to generate a select message without placeholders', () {
+      testWithoutContext('should auotmatically infer select placeholders that are not explicitly defined', () {
         const String selectMessageWithoutPlaceholdersAttribute = '''
 {
   "genderSelect": "{gender, select, female {She} male {He} other {they} }",
@@ -2087,109 +2041,21 @@ Hello {name}
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
           .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            contains('''
-Make sure that the specified select placeholder is defined in your arb file.
-{gender, select, female {She} male {He} other {they} }
- ^'''),
-          )),
-        );
-      });
-
-      testWithoutContext('should throw attempting to generate a select message with an empty placeholders map', () {
-        const String selectMessageWithEmptyPlaceholdersMap = '''
-{
-  "genderSelect": "{gender, select, female {She} male {He} other {they} }",
-  "@genderSelect": {
-    "description": "Improperly formatted since it has no placeholder attribute.",
-    "placeholders": {}
-  }
-}''';
-
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-            .writeAsStringSync(selectMessageWithEmptyPlaceholdersMap);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            contains('''
-Make sure that the specified select placeholder is defined in your arb file.
-{gender, select, female {She} male {He} other {they} }
- ^'''),
-          )),
-        );
-      });
-
-      testWithoutContext('should throw attempting to generate a select message with no resource attributes', () {
-        const String selectMessageWithoutResourceAttributes = '''
-{
-  "genderSelect": "{gender, select, female {She} male {He} other {they} }"
-}''';
-
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-            .writeAsStringSync(selectMessageWithoutResourceAttributes);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            // TODO(thkim1011): Uncomment after work on refactoring the Message class.
-            // See https://github.com/flutter/flutter/issues/112709.
-//             contains('''
-// Make sure that the specified select placeholder is defined in your arb file.
-// {gender, select, female {She} male {He} other {they} }
-//  ^'''),
-            contains('Resource attribute "@genderSelect" was not found. Please ensure that select resources have a corresponding @resource.'),
-          )),
-        );
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+        final String localizationsFile = fs.file(
+          fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+        ).readAsStringSync();
+        expect(localizationsFile, contains('String genderSelect(String gender) {'));
       });
 
       testWithoutContext('should throw attempting to generate a select message with incorrect format for placeholders', () {
@@ -2246,30 +2112,25 @@ Make sure that the specified select placeholder is defined in your arb file.
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
           .writeAsStringSync(selectMessageWithoutPlaceholdersAttribute);
-
-        expect(
-          () {
-            LocalizationsGenerator(
-              fileSystem: fs,
-              inputPathString: defaultL10nPathString,
-              outputPathString: defaultL10nPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-              logger: logger,
-            )
-              ..loadResources()
-              ..writeOutputFiles();
-          },
-          throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            contains('''
-Select expressions must have an "other" case.
-[app_en.arb:genderSelect] {gender, select,}
-                                          ^'''),
-          )),
-        );
+        try {
+          LocalizationsGenerator(
+            fileSystem: fs,
+            inputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            logger: logger,
+          )
+            ..loadResources()
+            ..writeOutputFiles();
+        } on L10nException {
+          expect(logger.errorText, contains('''
+[app_en.arb:genderSelect] ICU Syntax Error: Select expressions must have an "other" case.
+    {gender, select,}
+                    ^''')
+          );
+        }
       });
     });
 
@@ -2843,6 +2704,31 @@ Select expressions must have an "other" case.
           )),
         );
       });
+
+      testWithoutContext('can start with and contain a dollar sign', () {
+        const String dollarArbFile = r'''
+{
+  "$title$": "Stocks",
+  "@$title$": {
+    "description": "Title for the application"
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(dollarArbFile);
+
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+        )
+          ..loadResources()
+          ..writeOutputFiles();
+      });
     });
 
     testWithoutContext('throws when the language code is not supported', () {
@@ -2996,23 +2882,12 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
 '''));
   });
 
-  // Regression test for https://github.com/flutter/flutter/pull/93228
-  testWithoutContext('should use num type for plural', () {
+  testWithoutContext('escaping with single quotes', () {
     const String arbFile = '''
 {
-  "tryToPollute": "{count, plural, =0{零} =1{一} other{其他}}",
-  "@tryToPollute": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "withoutType": "{count, plural, =0{零} =1{一} other{其他}}",
-  "@withoutType": {
-    "placeholders": {
-      "count": {}
-    }
+  "singleQuote": "Flutter''s amazing!",
+  "@singleQuote": {
+    "description": "A message with a single quote."
   }
 }''';
 
@@ -3029,6 +2904,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       outputFileString: defaultOutputFileString,
       classNameString: defaultClassNameString,
       logger: logger,
+      useEscaping: true,
     )
       ..loadResources()
       ..writeOutputFiles();
@@ -3036,41 +2912,36 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     final String localizationsFile = fs.file(
       fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
     ).readAsStringSync();
-    expect(localizationsFile, containsIgnoringWhitespace(r'String tryToPollute(num count) {'));
-    expect(localizationsFile, containsIgnoringWhitespace(r'String withoutType(num count) {'));
+    expect(localizationsFile, contains(r"Flutter\'s amazing"));
   });
 
-  // TODO(thkim1011): Uncomment when implementing escaping.
-  // See https://github.com/flutter/flutter/issues/113455.
-//   testWithoutContext('escaping with single quotes', () {
-//     const String arbFile = '''
-// {
-//   "singleQuote": "Flutter''s amazing!",
-//   "@singleQuote": {
-//     "description": "A message with a single quote."
-//   }
-// }''';
-
-//     final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-//       ..createSync(recursive: true);
-//     l10nDirectory.childFile(defaultTemplateArbFileName)
-//         .writeAsStringSync(arbFile);
-
-//     LocalizationsGenerator(
-//       fileSystem: fs,
-//       inputPathString: defaultL10nPathString,
-//       outputPathString: defaultL10nPathString,
-//       templateArbFileName: defaultTemplateArbFileName,
-//       outputFileString: defaultOutputFileString,
-//       classNameString: defaultClassNameString,
-//       logger: logger,
-//     )
-//       ..loadResources()
-//       ..writeOutputFiles();
-
-//     final String localizationsFile = fs.file(
-//       fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
-//     ).readAsStringSync();
-//     expect(localizationsFile, contains(r"Flutter\'s amazing"));
-//   });
+  testWithoutContext('suppress warnings flag actually suppresses warnings', () {
+    const String pluralMessageWithOverriddenParts = '''
+{
+  "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
+  "@helloWorlds": {
+    "description": "Properly formatted but has redundant zero cases.",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(pluralMessageWithOverriddenParts);
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+      suppressWarnings: true,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
+    expect(logger.hadWarningOutput, isFalse);
+  });
 }
