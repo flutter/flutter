@@ -122,6 +122,31 @@ struct Matrix {
     // clang-format on
   }
 
+  static Matrix MakeRotation(Quaternion q) {
+    // clang-format off
+    return Matrix(
+      1.0 - 2.0 * q.y * q.y - 2.0 * q.z * q.z,
+      2.0 * q.x * q.y + 2.0 * q.z * q.w,
+      2.0 * q.x * q.z - 2.0 * q.y * q.w,
+      0.0,
+
+      2.0 * q.x * q.y - 2.0 * q.z * q.w,
+      1.0 - 2.0 * q.x * q.x - 2.0 * q.z * q.z,
+      2.0 * q.y * q.z + 2.0 * q.x * q.w,
+      0.0,
+
+      2.0 * q.x * q.z + 2.0 * q.y * q.w,
+      2.0 * q.y * q.z - 2.0 * q.x * q.w,
+      1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y,
+      0.0,
+
+      0.0,
+      0.0,
+      0.0,
+      1.0);
+    // clang-format on
+  }
+
   static Matrix MakeRotation(Scalar radians, const Vector4& r) {
     const Vector4 v = r.Normalize();
 

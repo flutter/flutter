@@ -265,6 +265,26 @@ TEST(GeometryTest, MatrixVectorMultiplication) {
   }
 }
 
+TEST(GeometryTest, MatrixMakeRotationFromQuaternion) {
+  {
+    auto matrix = Matrix::MakeRotation(Quaternion({1, 0, 0}, kPiOver2));
+    auto expected = Matrix::MakeRotationX(Radians(kPiOver2));
+    ASSERT_MATRIX_NEAR(matrix, expected);
+  }
+
+  {
+    auto matrix = Matrix::MakeRotation(Quaternion({0, 1, 0}, kPiOver2));
+    auto expected = Matrix::MakeRotationY(Radians(kPiOver2));
+    ASSERT_MATRIX_NEAR(matrix, expected);
+  }
+
+  {
+    auto matrix = Matrix::MakeRotation(Quaternion({0, 0, 1}, kPiOver2));
+    auto expected = Matrix::MakeRotationZ(Radians(kPiOver2));
+    ASSERT_MATRIX_NEAR(matrix, expected);
+  }
+}
+
 TEST(GeometryTest, MatrixTransformDirection) {
   {
     auto matrix = Matrix::MakeTranslation({100, 100, 100}) *
