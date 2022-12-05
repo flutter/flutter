@@ -20,6 +20,8 @@ void main() {
     Axis axis = Axis.vertical,
     bool reverse = false,
     TextDirection textDirection = TextDirection.ltr,
+    double boxHeight = 250.0,
+    ScrollPhysics? physics,
   }) {
     final AxisDirection axisDirection;
     switch (axis) {
@@ -44,6 +46,7 @@ void main() {
           child: StretchingOverscrollIndicator(
             axisDirection: axisDirection,
             child: CustomScrollView(
+              physics: physics,
               reverse: reverse,
               scrollDirection: axis,
               controller: controller,
@@ -51,19 +54,19 @@ void main() {
                 SliverToBoxAdapter(child: Container(
                   color: const Color(0xD0FF0000),
                   key: box1Key,
-                  height: 250.0,
+                  height: boxHeight,
                   width: 300.0,
                 )),
                 SliverToBoxAdapter(child: Container(
                   color: const Color(0xFFFFFF00),
                   key: box2Key,
-                  height: 250.0,
+                  height: boxHeight,
                   width: 300.0,
                 )),
                 SliverToBoxAdapter(child: Container(
                   color: const Color(0xFF6200EA),
                   key: box3Key,
-                  height: 250.0,
+                  height: boxHeight,
                   width: 300.0,
                 )),
               ],
@@ -387,7 +390,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dx, 500.0);
   });
 
-  testWidgets('Stretch overscroll horizontally RTl', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll horizontally RTL', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -701,7 +704,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Multiple pointers wll not exceed stretch limit', (WidgetTester tester) async {
+  testWidgets('Multiple pointers will not exceed stretch limit', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99264
     await tester.pumpWidget(
       Directionality(
@@ -769,5 +772,75 @@ void main() {
     await pointer3.up();
     await pointer4.up();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Stretch overscroll vertically, change direction mid scroll', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(
+        box1Key, 
+        box2Key, 
+        box3Key, 
+        controller, 
+        // Setting the `boxHeight` to 100.0 will make the boxes fit in the
+        // scrollable viewport.
+        boxHeight: 100, 
+        // To make the scroll view in the test still scrollable, we need to add
+        // the `AlwaysScrollableScrollPhysics`.
+        physics: const AlwaysScrollableScrollPhysics(),
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 100.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll the start
+    await gesture.moveBy(const Offset(0.0, 600.0));
+    await tester.pumpAndSettle();
+
+    // The boxes should now be at different locations because of the scaling.
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero).dy, greaterThan(103.0));
+    expect(box3.localToGlobal(Offset.zero).dy, greaterThan(206.0));
+
+    // Move the pointer up a miniscule amount to trigger a directional change.
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    await tester.pumpAndSettle();
+
+
+    // The boxes should remain roughly at the same locations, since the pointer
+    // didn't move far.
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero).dy, greaterThan(103.0));
+    expect(box3.localToGlobal(Offset.zero).dy, greaterThan(206.0));
+
+    // Now make the pointer overscroll to the end
+    await gesture.moveBy(const Offset(0.0, -1200.0));
+    await tester.pumpAndSettle();
+
+    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-19.0));
+    expect(box2.localToGlobal(Offset.zero).dy, lessThan(85.0));
+    expect(box3.localToGlobal(Offset.zero).dy, lessThan(188.0));
+
+    // Release the pointer
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Now the boxes should be back to their original locations.
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 100.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
   });
 }

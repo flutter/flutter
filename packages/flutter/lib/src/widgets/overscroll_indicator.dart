@@ -601,6 +601,11 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   }
 }
 
+enum _StretchDirection {
+  down,
+  up
+}
+
 /// A Material Design visual indication that a scroll view has overscrolled.
 ///
 /// A [StretchingOverscrollIndicator] listens for [ScrollNotification]s in order
@@ -689,6 +694,10 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   late final _StretchController _stretchController = _StretchController(vsync: this);
   ScrollNotification? _lastNotification;
   OverscrollNotification? _lastOverscrollNotification;
+
+  double _totalOverscroll = 0.0;
+  _StretchDirection _stretchDirection = _StretchDirection.down;
+
   bool _accepted = true;
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -712,42 +721,47 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
+            _totalOverscroll += notification.overscroll;
+            _stretchDirection = _totalOverscroll > 0 ? _StretchDirection.down : _StretchDirection.up;
+
             // We clamp the overscroll amount relative to the length of the viewport,
             // which is the furthest distance a single pointer could pull on the
             // screen. This is because more than one pointer will multiply the
             // amount of overscroll - https://github.com/flutter/flutter/issues/11884
+
             final double viewportDimension = notification.metrics.viewportDimension;
-            final double distanceForPull =
-              (notification.overscroll.abs() / viewportDimension) + _stretchController.pullDistance;
+            final double distanceForPull = _totalOverscroll.abs() / viewportDimension;
             final double clampedOverscroll = clampDouble(distanceForPull, 0, 1.0);
             _stretchController.pull(clampedOverscroll);
           }
         }
       }
     } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
+      // Since the overscrolling ended, we reset the total overscroll amount.
+      _totalOverscroll = 0;
       _stretchController.scrollEnd();
     }
     _lastNotification = notification;
     return false;
   }
 
-  AlignmentGeometry _getAlignmentForAxisDirection(double overscroll) {
+  AlignmentGeometry _getAlignmentForAxisDirection(_StretchDirection stretchDirection) {
     // Accounts for reversed scrollables by checking the AxisDirection
     switch (widget.axisDirection) {
       case AxisDirection.up:
-        return overscroll > 0
+        return stretchDirection == _StretchDirection.down
             ? AlignmentDirectional.topCenter
             : AlignmentDirectional.bottomCenter;
       case AxisDirection.right:
-        return overscroll > 0
+        return stretchDirection == _StretchDirection.down
             ? Alignment.centerRight
             : Alignment.centerLeft;
       case AxisDirection.down:
-        return overscroll > 0
+        return stretchDirection == _StretchDirection.down
             ? AlignmentDirectional.bottomCenter
             : AlignmentDirectional.topCenter;
       case AxisDirection.left:
-        return overscroll > 0
+        return stretchDirection == _StretchDirection.down
             ? Alignment.centerLeft
             : Alignment.centerRight;
     }
@@ -784,7 +798,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           }
 
           final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
-            _lastOverscrollNotification?.overscroll ?? 0.0
+            _stretchDirection
           );
 
           final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
