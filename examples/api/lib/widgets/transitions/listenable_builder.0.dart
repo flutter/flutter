@@ -18,11 +18,11 @@ void main() => runApp(const ListenableBuilderExample());
 class FocusListenerContainer extends StatefulWidget {
   const FocusListenerContainer({
     super.key,
-    required this.child,
     this.border,
     this.padding,
     this.focusedSide,
     this.focusedColor = Colors.black12,
+    required this.child,
   });
 
   /// This is the border that will be used when not focused, and which defines
@@ -61,22 +61,22 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
     final OutlinedBorder effectiveBorder = widget.border ?? const RoundedRectangleBorder();
     return ListenableBuilder(
       listenable: _focusNode,
-      child: widget.child,
+      child: Focus(
+        focusNode: _focusNode,
+        skipTraversal: true,
+        canRequestFocus: false,
+        child: widget.child,
+      ),
       builder: (BuildContext context, Widget? child) {
-        return Focus(
-          focusNode: _focusNode,
-          skipTraversal: true,
-          canRequestFocus: false,
-          child: Container(
-            padding: widget.padding,
-            decoration: ShapeDecoration(
-              color: _focusNode.hasFocus ? widget.focusedColor : null,
-              shape: effectiveBorder.copyWith(
-                side: _focusNode.hasFocus ? widget.focusedSide : null,
-              ),
+        return Container(
+          padding: widget.padding,
+          decoration: ShapeDecoration(
+            color: _focusNode.hasFocus ? widget.focusedColor : null,
+            shape: effectiveBorder.copyWith(
+              side: _focusNode.hasFocus ? widget.focusedSide : null,
             ),
-            child: child,
           ),
+          child: child,
         );
       },
     );
@@ -103,10 +103,11 @@ class _MyFieldState extends State<MyField> {
         Expanded(
           flex: 2,
           child: TextField(
-              controller: controller,
-              onEditingComplete: () {
-                debugPrint('Field ${widget.label} changed to ${controller.value}');
-              }),
+            controller: controller,
+            onEditingComplete: () {
+              debugPrint('Field ${widget.label} changed to ${controller.value}');
+            },
+          ),
         ),
       ],
     );
@@ -136,10 +137,13 @@ class ListenableBuilderExample extends StatelessWidget {
                   FocusListenerContainer(
                     padding: const EdgeInsets.all(8),
                     border: const RoundedRectangleBorder(
-                        side: BorderSide(
-                          strokeAlign: BorderSide.strokeAlignOutside,
-                        ),
-                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                      side: BorderSide(
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(5),
+                      ),
+                    ),
                     // The border side will get wider when the subtree has focus.
                     focusedSide: const BorderSide(
                       width: 4,
