@@ -1513,7 +1513,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, includesNodeWith(
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+      actions: <SemanticsAction>[SemanticsAction.tap],
       label: 'Dismiss',
     ));
     debugDefaultTargetPlatformOverride = null;

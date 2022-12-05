@@ -890,7 +890,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
   });
 
-  group('SemanticsClipper', () { 
+  group('SemanticsClipper', () {
     testWidgets('SemanticsClipper correctly clips Semantics.rect in four directions', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ValueNotifier<EdgeInsets> notifier = ValueNotifier<EdgeInsets>(const EdgeInsets.fromLTRB(10, 20, 30, 40));

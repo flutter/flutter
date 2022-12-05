@@ -1680,8 +1680,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
   /// the barrier for this [ModalRoute] should be clipped.
-  void didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
+  ///
+  /// returns true if the clipDetails did change and false otherwise.
+  bool didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
+    if (_clipDetailsNotifier.value == newClipDetails) {
+      return false;
+    }
     _clipDetailsNotifier.value = newClipDetails;
+    return true;
   }
 
   // one of the builders
