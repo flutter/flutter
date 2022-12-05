@@ -383,6 +383,7 @@ class Switch extends StatelessWidget {
 
   final _SwitchType _switchType;
 
+  /// {@macro flutter.cupertino.CupertinoSwitch.applyTheme}
   final bool? applyCupertinoTheme;
 
   /// {@macro flutter.cupertino.CupertinoSwitch.dragStartBehavior}

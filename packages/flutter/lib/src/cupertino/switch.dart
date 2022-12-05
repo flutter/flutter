@@ -125,12 +125,14 @@ class CupertinoSwitch extends StatefulWidget {
   /// Defaults to [CupertinoColors.white] when null.
   final Color? thumbColor;
 
+  /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
   /// Whether to apply the ambient [CupertinoThemeData].
   ///
   /// If true, the track uses [CupertinoThemeData.primaryColor] for the track
   /// when the switch is on.
   ///
   /// Defaults to [CupertinoThemeData.applyThemeToAll].
+  /// {@endtemplate}
   final bool? applyTheme;
 
   /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
