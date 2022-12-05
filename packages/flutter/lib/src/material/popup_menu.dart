@@ -695,7 +695,6 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
 
-    // Find the ideal vertical position.
     final double y = position.top;
 
     // Find the ideal horizontal position.
