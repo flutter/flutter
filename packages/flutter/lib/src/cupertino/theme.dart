@@ -408,7 +408,7 @@ class NoDefaultCupertinoThemeData {
   /// Flag to apply this theme to all descendant Cupertino widgets.
   ///
   /// Certain Cupertino widgets previously didn't use theming, matching past
-  /// versions of iOS. For example, [CupertinoSwitches] always used
+  /// versions of iOS. For example, [CupertinoSwitch]s always used
   /// [CupertinoColors.systemGreen] when active.
   ///
   /// Today, however, these widgets can indeed be themed on iOS. Moreover on
