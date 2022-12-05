@@ -14,7 +14,7 @@ import 'framework.dart';
 /// same name exposed on [BuildContext] and they can be used as direct
 /// replacements. Unlike the methods on [BuildContext], these methods do not
 /// find any ancestor entities of the closest [LookupBoundary] surrounding the
-/// provided [BuildContext].
+/// provided [BuildContext]. The root of the tree is an implicit lookup boundary.
 ///
 /// {@tool snippet}
 /// In the example below, the [LookupBoundary.findAncestorWidgetOfExactType]
@@ -26,7 +26,7 @@ import 'framework.dart';
 ///   child: LookupBoundary(
 ///     child: Builder(
 ///       builder: (BuildContext context) {
-///         MyWidget? widget = LookupBoundary.findAncestorWidgetOfExactType<MyWidget>();
+///         MyWidget? widget = LookupBoundary.findAncestorWidgetOfExactType<MyWidget>(context);
 ///         return Text('$widget'); // "null"
 ///       },
 ///     ),
@@ -39,7 +39,7 @@ import 'framework.dart';
 /// defined on the boundary. It does not affect the behavior of the lookup
 /// methods defined on [BuildContext].
 ///
-/// [LookupBoundaries] are rarely instantiated directly. They are used at
+/// A [LookupBoundary] is rarely instantiated directly. They are inserted at
 /// locations of the widget tree where the render tree diverges from the element
 /// tree, which is rather uncommon. Such anomalies are created by
 /// [RenderObjectElement]s that don't attach their [RenderObject] to the closest
@@ -81,7 +81,7 @@ class LookupBoundary extends InheritedWidget {
   /// considers [InheritedWidget]s of the specified type `T` between the
   /// provided [BuildContext] and its closest [LookupBoundary] ancestor.
   /// [InheritedWidget]s past that [LookupBoundary] are invisible to this
-  /// method.
+  /// method. The root of the tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}
   static T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(BuildContext context, { Object? aspect }) {
@@ -109,7 +109,7 @@ class LookupBoundary extends InheritedWidget {
   /// considers [InheritedWidget]s of the specified type `T` between the
   /// provided [BuildContext] and its closest [LookupBoundary] ancestor.
   /// [InheritedWidget]s past that [LookupBoundary] are invisible to this
-  /// method.
+  /// method. The root of the tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.getElementForInheritedWidgetOfExactType}
   static InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>(BuildContext context) {
@@ -133,7 +133,8 @@ class LookupBoundary extends InheritedWidget {
   /// [BuildContext.findAncestorWidgetOfExactType], except it only considers
   /// [Widget]s of the specified type `T` between the provided [BuildContext]
   /// and its closest [LookupBoundary] ancestor. [Widget]s past that
-  /// [LookupBoundary] are invisible to this method.
+  /// [LookupBoundary] are invisible to this method. The root of the tree is
+  /// treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.findAncestorWidgetOfExactType}
   static T? findAncestorWidgetOfExactType<T extends Widget>(BuildContext context) {
@@ -156,7 +157,8 @@ class LookupBoundary extends InheritedWidget {
   /// [BuildContext.findAncestorWidgetOfExactType], except it only considers
   /// [State] objects of the specified type `T` between the provided
   /// [BuildContext] and its closest [LookupBoundary] ancestor. [State] objects
-  /// past that [LookupBoundary] are invisible to this method.
+  /// past that [LookupBoundary] are invisible to this method. The root of the
+  /// tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.findAncestorStateOfType}
   static T? findAncestorStateOfType<T extends State>(BuildContext context) {
@@ -178,7 +180,8 @@ class LookupBoundary extends InheritedWidget {
   /// This method behaves exactly like
   /// [BuildContext.findRootAncestorStateOfType], except it considers the
   /// closest [LookupBoundary] ancestor of `context` to be the root. [State]
-  /// objects past that [LookupBoundary] are invisible to this method.
+  /// objects past that [LookupBoundary] are invisible to this method. The root
+  /// of the tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.findRootAncestorStateOfType}
   static T? findRootAncestorStateOfType<T extends State>(BuildContext context) {
@@ -200,7 +203,8 @@ class LookupBoundary extends InheritedWidget {
   /// [BuildContext.findAncestorRenderObjectOfType], except it only considers
   /// [RenderObject]s of the specified type `T` between the provided
   /// [BuildContext] and its closest [LookupBoundary] ancestor. [RenderObject]s
-  /// past that [LookupBoundary] are invisible to this method.
+  /// past that [LookupBoundary] are invisible to this method. The root of the
+  /// tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.findAncestorRenderObjectOfType}
   static T? findAncestorRenderObjectOfType<T extends RenderObject>(BuildContext context) {
@@ -217,11 +221,12 @@ class LookupBoundary extends InheritedWidget {
 
   /// Walks the ancestor chain, starting with the parent of the build context's
   /// widget, invoking the argument for each ancestor until a [LookupBoundary]
-  /// is reached.
+  /// or the root is reached.
   ///
   /// This method behaves exactly like [BuildContext.visitAncestorElements],
   /// except it only walks the tree up to the closest [LookupBoundary] ancestor
-  /// of the provided context.
+  /// of the provided context. The root of the tree is treated as an implicit
+  /// lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.visitAncestorElements}
   static void visitAncestorElements(BuildContext context, ConditionalElementVisitor visitor) {
@@ -231,7 +236,7 @@ class LookupBoundary extends InheritedWidget {
     });
   }
 
-  /// Walks the none-[LookupBoundary] child [elements] of the provided
+  /// Walks the none-[LookupBoundary] child [Element]s of the provided
   /// `context`.
   ///
   /// This method behaves exactly like [BuildContext.visitChildElements],
