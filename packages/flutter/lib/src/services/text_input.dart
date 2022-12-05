@@ -1083,12 +1083,6 @@ mixin TextSelectionDelegate {
   /// If [cause] is [SelectionChangedCause.toolbar], the position of
   /// [bringIntoView] to selection will be called and hide toolbar.
   void copySelection(SelectionChangedCause cause);
-
-  /// Replace selection with specified text.
-  ///
-  /// If the replacement was able to be made, the spell check suggestions
-  /// toolbar menu will be hidden if previously visible.
-  void replaceSelection(SelectionChangedCause cause, String text, int start, int end);
 }
 
 /// An interface to receive information from [TextInput].

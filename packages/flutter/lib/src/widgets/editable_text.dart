@@ -2193,14 +2193,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Replace selection with specified text.
-  @override
-  void replaceSelection(SelectionChangedCause cause, String text, int start, int end) {
-    // Spell check cannot be performed if the text is read only or obscured.
+  /// Replace composing region with specified text.
+  void replaceComposingRegion(SelectionChangedCause cause, String text) {
+    // Replacement cannot be performed if the text is read only or obscured.
     assert(!widget.readOnly && !widget.obscureText);
 
-    final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
-    _replaceText(ReplaceTextIntent(textEditingValue, text, selection, cause));
+    _replaceText(ReplaceTextIntent(textEditingValue, text, textEditingValue.composing, cause));
 
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.

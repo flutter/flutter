@@ -66,11 +66,9 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
           editableTextState
-            .replaceSelection(
+            .replaceComposingRegion(
               SelectionChangedCause.toolbar,
               suggestion,
-              suggestionSpan.range.start,
-              suggestionSpan.range.end,
           );
         },
         label: suggestion,
@@ -82,11 +80,9 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
-          editableTextState.replaceSelection(
+          editableTextState.replaceComposingRegion(
             SelectionChangedCause.toolbar,
             '',
-            suggestionSpan.range.start,
-            suggestionSpan.range.end,
           );
         },
         type: ContextMenuButtonType.delete,
