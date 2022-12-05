@@ -58,11 +58,11 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
-  fb::MeshT mesh;
+  fb::SceneT scene;
   bool success = false;
   switch (switches.input_type) {
     case SourceType::kGLTF:
-      success = ParseGLTF(*source_file_mapping, mesh);
+      success = ParseGLTF(*source_file_mapping, scene);
       break;
     case SourceType::kUnknown:
       std::cerr << "Unknown input type." << std::endl;
@@ -74,7 +74,7 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   flatbuffers::FlatBufferBuilder builder;
-  builder.Finish(fb::Mesh::Pack(builder, &mesh));
+  builder.Finish(fb::Scene::Pack(builder, &scene));
 
   auto output_file_name = std::filesystem::absolute(
       std::filesystem::current_path() / switches.output_file_name);

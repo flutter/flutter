@@ -1,0 +1,72 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+namespace impeller.fb;
+
+struct Vec2 {
+  x: float;
+  y: float;
+}
+
+struct Vec3 {
+  x: float;
+  y: float;
+  z: float;
+}
+
+struct Vec4 {
+  x: float;
+  y: float;
+  z: float;
+  w: float;
+}
+
+struct Color {
+  r: float;
+  g: float;
+  b: float;
+  a: float;
+}
+
+struct Matrix {
+  m: [float:16];
+}
+
+struct Vertex {
+  position: Vec3;
+  normal: Vec3;
+  tangent: Vec4; // The 4th component determines the handedness of the tangent.
+  texture_coords: Vec2;
+  color: Color;
+}
+
+table Texture {
+  // TODO(bdero): Allow optional image data embedding.
+  uri: string;
+}
+
+table Material {
+  base_color_factor: Color;
+  base_color_texture: Texture;
+  // TODO(bdero): PBR textures.
+}
+
+table StaticMesh {
+  vertices: [Vertex];
+  indices: [uint32];
+  material: Material;
+}
+
+table Node {
+  children: [Node];
+  transform: Matrix;
+  meshes: [StaticMesh];
+}
+
+table Scene {
+  children: [Node];
+}
+
+root_type Scene;
+file_identifier "IPSC";

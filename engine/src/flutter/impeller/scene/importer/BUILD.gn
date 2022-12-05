@@ -12,22 +12,26 @@ config("runtime_stage_config") {
 }
 
 flatbuffers("importer_flatbuffers") {
-  flatbuffers = [ "mesh.fbs" ]
+  flatbuffers = [ "scene.fbs" ]
   public_configs = [ ":runtime_stage_config" ]
   public_deps = [ "//third_party/flatbuffers" ]
 }
 
-impeller_component("scenec_lib") {
+impeller_component("importer_lib") {
   # Current versions of libcxx have deprecated some of the UTF-16 string
   # conversion APIs.
   defines = [ "_LIBCPP_DISABLE_DEPRECATION_WARNINGS" ]
 
   sources = [
+    "conversions.cc",
+    "conversions.h",
     "importer.h",
     "importer_gltf.cc",
     "switches.cc",
     "switches.h",
     "types.h",
+    "vertices_builder.cc",
+    "vertices_builder.h",
   ]
 
   public_deps = [
@@ -39,8 +43,7 @@ impeller_component("scenec_lib") {
 
     # All third_party deps must be reflected below in the scenec_license
     # target.
-    # TODO(bdero): Fix tinygltf compilation warnings.
-    #"//third_party/tinygltf",
+    "//third_party/tinygltf",
   ]
 }
 
@@ -85,9 +88,24 @@ impeller_component("scenec") {
 
   sources = [ "scenec_main.cc" ]
 
-  deps = [ ":scenec_lib" ]
+  deps = [ ":importer_lib" ]
 
   metadata = {
     entitlement_file_path = [ "scenec" ]
   }
+}
+
+impeller_component("importer_unittests") {
+  testonly = true
+
+  output_name = "scenec_unittests"
+
+  sources = [ "importer_unittests.cc" ]
+
+  deps = [
+    ":importer_lib",
+    "../../fixtures",
+    "../../geometry:geometry_unittests",
+    "//flutter/testing:testing_lib",
+  ]
 }
