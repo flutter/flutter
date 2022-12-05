@@ -1276,6 +1276,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getSemantics(find.text('snack')), matchesSemantics(
+      isLiveRegion: true,
+      hasDismissAction: true,
+      hasScrollDownAction: true,
+      hasScrollUpAction: true,
       label: 'snack',
       textDirection: TextDirection.ltr,
     ));

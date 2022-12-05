@@ -304,6 +304,7 @@ targets:
       validation_name: Docs
       firebase_project: master-docs-flutter-dev
       release_ref: refs/heads/master
+      release_build: "true"
 
   - name: Linux docs_test
     recipe: flutter/flutter
@@ -1393,7 +1394,6 @@ targets:
   - name: Linux_android animated_complex_image_filtered_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3713,6 +3713,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_impeller_ios__timeline_summary
+
+  - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
