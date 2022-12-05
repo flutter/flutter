@@ -954,7 +954,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _controller.forward();
   }
 
-  // Handle mousewheel scroll events.
+  // Handle mousewheel and web trackpad scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
     final double scaleChange;
     if (event is PointerScrollEvent) {
@@ -970,14 +970,14 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         final Offset localDelta = PointerEvent.transformDeltaViaPositions(
           untransformedEndPosition: event.position + event.scrollDelta,
           untransformedDelta: event.scrollDelta,
-          transform: event.transform
+          transform: event.transform,
         );
 
         if (!_gestureIsSupported(_GestureType.pan)) {
           widget.onInteractionUpdate?.call(ScaleUpdateDetails(
             focalPoint: event.position - event.scrollDelta,
             localFocalPoint: event.localPosition - event.scrollDelta,
-            focalPointDelta: -localDelta
+            focalPointDelta: -localDelta,
           ));
           widget.onInteractionEnd?.call(ScaleEndDetails());
           return;

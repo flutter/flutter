@@ -1751,11 +1751,11 @@ void main() {
       await tester.pump();
       expect(transformationController.value.getMaxScaleOnAxis(), 2.5);
       translation = transformationController.value.getTranslation();
-      // Will be translated to maintain centering
+      // Will be translated to maintain centering.
       expect(translation.x, -150);
       expect(translation.y, -150);
 
-      // Send a trackpad scroll event, it should cause a pan.
+      // Send a trackpad scroll event, it should cause a pan and no scale.
       final TestPointer trackpad = TestPointer(1, PointerDeviceKind.trackpad);
       await tester.sendEventToBinding(trackpad.hover(tester.getCenter(find.byType(SizedBox))));
       await tester.sendEventToBinding(trackpad.scroll(const Offset(100, -25)));
