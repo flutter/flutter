@@ -231,8 +231,7 @@ class LookupBoundary extends InheritedWidget {
   /// {@macro flutter.widgets.BuildContext.visitAncestorElements}
   static void visitAncestorElements(BuildContext context, ConditionalElementVisitor visitor) {
     context.visitAncestorElements((Element ancestor) {
-      visitor(ancestor);
-      return ancestor.widget.runtimeType != LookupBoundary;
+      return visitor(ancestor) && ancestor.widget.runtimeType != LookupBoundary;
     });
   }
 
