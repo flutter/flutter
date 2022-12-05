@@ -488,6 +488,31 @@ void main() {
 
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
+
+  testWidgets('AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/115040
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(
+          controller: controller,
+          initialItemCount: 2,
+          shrinkWrap: true,
+          itemBuilder: (BuildContext context, int index, Animation<double> _) {
+            return SizedBox(
+              height: 100.0,
+              child: Center(
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).shrinkWrap, true);
+  });
 }
 
 

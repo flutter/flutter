@@ -453,6 +453,7 @@ void main() {
         dartFlags: 'c',
         deviceVmServicePort: 1234,
         enableImpeller: true,
+        enableDartProfiling: false,
       );
       final String jsonString = json.encode(original.toJson());
       final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
@@ -464,6 +465,7 @@ void main() {
       expect(deserialized.dartFlags, original.dartFlags);
       expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
       expect(deserialized.enableImpeller, original.enableImpeller);
+      expect(deserialized.enableDartProfiling, original.enableDartProfiling);
     });
   });
 
@@ -659,6 +661,27 @@ void main() {
         launchArguments.join(' '),
         <String>[
           '--enable-dart-profiling',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('No --enable-dart-profiling flag when option is false', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableDartProfiling: false,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        null,
+        <String, Object?>{},
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
           '--enable-checked-mode',
           '--verify-entry-points',
         ].join(' '),

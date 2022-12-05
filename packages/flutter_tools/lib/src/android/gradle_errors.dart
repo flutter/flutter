@@ -552,7 +552,7 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
         .childFile('build.gradle');
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
-      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then update ${gradleFile.path}:\n'
+      'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update ${gradleFile.path}:\n'
       "ext.kotlin_version = '<latest-version>'",
       title: _boxTitle,
     );

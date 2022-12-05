@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -94,6 +96,22 @@ void main() {
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcodeproj')).createSync(recursive: true);
     fileSystem.directory(fileSystem.path.join('ios', 'Runner.xcworkspace')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj')).createSync();
+    final String packageConfigPath = '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
+    fileSystem.file(packageConfigPath)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
     createCoreMockProjectFiles();
   }
 
@@ -940,20 +958,20 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-          '┌─ App Settings ────────────────────────────────────────┐\n'
-                '│ Version Number: Missing                               │\n'
-                '│ Build Number: Missing                                 │\n'
-                '│ Display Name: Missing                                 │\n'
-                '│ Deployment Target: Missing                            │\n'
-                '│ Bundle Identifier: io.flutter.someProject             │\n'
-                '│                                                       │\n'
-                '│ You must set up the missing settings                  │\n'
-                '│ Instructions: https://docs.flutter.dev/deployment/ios │\n'
-                '└───────────────────────────────────────────────────────┘'
-        )
-    );
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: Missing                                                         │\n'
+        '│ Build Number: Missing                                                           │\n'
+        '│ Display Name: Missing                                                           │\n'
+        '│ Deployment Target: Missing                                                      │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ You must set up the missing settings.                                           │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -996,16 +1014,18 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains(
-            '┌─ App Settings ────────────────────────────┐\n'
-                '│ Version Number: 12.34.56                  │\n'
-                '│ Build Number: 666                         │\n'
-                '│ Display Name: Awesome Gallery             │\n'
-                '│ Deployment Target: 11.0                   │\n'
-                '│ Bundle Identifier: io.flutter.someProject │\n'
-                '└───────────────────────────────────────────┘\n'
-        )
+      testLogger.statusText,
+      contains(
+        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
+        '│ Version Number: 12.34.56                                                        │\n'
+        '│ Build Number: 666                                                               │\n'
+        '│ Display Name: Awesome Gallery                                                   │\n'
+        '│ Deployment Target: 11.0                                                         │\n'
+        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
+        '│                                                                                 │\n'
+        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
+        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+      )
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1015,7 +1035,727 @@ void main() {
     PlistParser: () => plistUtils,
   });
 
+  testUsingContext(
+      'Validate basic Xcode settings with default bundle identifier prefix', () async {
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[plistPath] = <String,String>{
+      'CFBundleIdentifier': 'com.example.my_app',
+    };
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+        testLogger.statusText,
+        contains('Warning: Your application still contains the default "com.example" bundle identifier.')
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
+  testUsingContext(
+      'Validate basic Xcode settings with custom bundle identifier prefix', () async {
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[plistPath] = <String,String>{
+      'CFBundleIdentifier': 'com.my_company.my_app',
+    };
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+        testLogger.statusText,
+        isNot(contains('Warning: Your application still contains the default "com.example" bundle identifier.'))
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
+
+  testUsingContext('Validate template app icons with conflicts', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateIconContentsJsonPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
 }
+''');
+        fileSystem.file(templateIconImagePath)
+        ..createSync(recursive: true)
+        ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectIconContentsJsonPath)
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectIconImagePath)
+            ..createSync(recursive: true)
+            ..writeAsBytes(<int>[1, 2, 3]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+      testLogger.statusText,
+      contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate template app icons without conflicts', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+    final String templateIconContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String templateIconImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(templateIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[4, 5, 6]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(testLogger.statusText, isNot(contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate app icon using the wrong width', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(Uint8List(16))
+          // set width to 1 pixel
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append)
+          // set height to 40 pixels
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 40), mode: FileMode.append);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(testLogger.statusText, contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate app icon using the wrong height', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(Uint8List(16))
+          // set width to 40 pixels
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 40), mode: FileMode.append)
+          // set height to 1 pixel
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(testLogger.statusText, contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate app icon using the correct width and height', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(Uint8List(16))
+          // set width to 40 pixels
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 40), mode: FileMode.append)
+          // set height to 40 pixel
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 40), mode: FileMode.append);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(testLogger.statusText, isNot(contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate app icon should skip validation for unknown format version', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    const String projectIconImagePath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        // Uses unknown format version 123.
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 123,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectIconImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(Uint8List(16))
+          // set width to 1 pixel
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append)
+          // set height to 1 pixel
+          ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    // The validation should be skipped, even when the icon size is incorrect.
+    expect(testLogger.statusText, isNot(contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate app icon should skip validation of an icon image if invalid format', () async {
+    const String projectIconContentsJsonPath = 'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+    final List<String> imageFileNames = <String>[
+      'Icon-App-20x20@1x.png',
+      'Icon-App-20x20@2x.png',
+      'Icon-App-20x20@3x.png',
+      'Icon-App-29x29@1x.png',
+      'Icon-App-29x29@2x.png',
+      'Icon-App-29x29@3x.png',
+    ];
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        // The following json contains examples of:
+        // - invalid size
+        // - invalid scale
+        // - missing size
+        // - missing idiom
+        // - missing filename
+        // - missing scale
+        fileSystem.file(projectIconContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "size": "20*20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "1x"
+    },
+    {
+      "size": "20x20",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@2x.png",
+      "scale": "2@"
+    },
+    {
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@3x.png",
+      "scale": "3x"
+    },
+    {
+      "size": "29x29",
+      "filename": "Icon-App-29x29@1x.png",
+      "scale": "1x"
+    },
+    {
+      "size": "29x29",
+      "idiom": "iphone",
+      "scale": "2x"
+    },
+    {
+      "size": "29x29",
+      "idiom": "iphone",
+      "filename": "Icon-App-20x20@3x.png"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+
+        // Resize all related images to 1x1.
+        for (final String imageFileName in imageFileNames) {
+          fileSystem.file('ios/Runner/Assets.xcassets/AppIcon.appiconset/$imageFileName')
+            ..createSync(recursive: true)
+            ..writeAsBytes(Uint8List(16))
+            // set width to 1 pixel
+            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append)
+            // set height to 1 pixel
+            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append);
+        }
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    // The validation should be skipped, even when the image size is incorrect.
+    for (final String imageFileName in imageFileNames) {
+      expect(testLogger.statusText, isNot(contains(
+          'Warning: App icon is using the wrong size (e.g. $imageFileName).')));
+    }
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('Validate template launch images with conflicts', () async {
+    const String projectLaunchImageContentsJsonPath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String projectLaunchImagePath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+    final String templateLaunchImageContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String templateLaunchImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(templateLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+      testLogger.statusText,
+      contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+
+  testUsingContext('Validate template launch images without conflicts', () async {
+    const String projectLaunchImageContentsJsonPath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String projectLaunchImagePath = 'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+    final String templateLaunchImageContentsJsonPath = '${Cache.flutterRoot!}/packages/flutter_tools/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+    const String templateLaunchImagePath = '/flutter_template_images/templates/app_shared/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(templateLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(templateLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[1, 2, 3]);
+
+        fileSystem.file(projectLaunchImageContentsJsonPath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+        fileSystem.file(projectLaunchImagePath)
+          ..createSync(recursive: true)
+          ..writeAsBytes(<int>[4, 5, 6]);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+      testLogger.statusText,
+      isNot(contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.')),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+}
+
 
 const String _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
 const String _exportOptionsPlist = '/.tmp_rand0/flutter_build_ios.rand0/ExportOptions.plist';
