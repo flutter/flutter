@@ -13941,7 +13941,6 @@ void main() {
     });
 
     testWidgets('spell check suggestions toolbar buttons behave correctly changes composing region', (WidgetTester tester) async {
-      String? changedValue;
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(
@@ -13959,10 +13958,6 @@ void main() {
               style: textStyle,
               cursorColor: cursorColor,
               selectionControls: materialTextSelectionControls,
-              onChanged: (String s) {
-                print('CAMILLE $s');
-                changedValue = s;
-              },
               spellCheckConfiguration:
                 const SpellCheckConfiguration(
                   misspelledTextStyle: TextField.materialMisspelledTextStyle,
