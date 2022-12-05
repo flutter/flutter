@@ -1378,14 +1378,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   String? get barrierLabel;
 
+  /// {@template flutter.widgets.ModalRoute.barrierOnTapHint}
   /// The semantic hint text that informs users what will happen if they
-  /// tap on the barrier.
+  /// tap on the widget.annouced in the format of 'Double tap to ...'.
   ///
-  /// If the barrier is dismissible, the hint text will be read out after
-  /// [barrierLabel], in the form of 'Double tap to $[barrierOnTapHint].
-  ///
-  /// If no [barrierOnTapHint] is specified, i.e. it's null, the default hint
-  /// will be used, which results in announcement of 'Double tap to activate'.
+  /// If the field is null, the default hint will be used, which results in
+  /// announcement of 'Double tap to activate'.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -1680,7 +1679,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
-  /// the barrier of this [ModalRoute] should be clipped.
+  /// the barrier for this [ModalRoute] should be clipped.
   void didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
     _clipDetailsNotifier.value = newClipDetails;
   }

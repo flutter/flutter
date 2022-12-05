@@ -1200,7 +1200,16 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                children: <TestSemantics>[
+                  TestSemantics(
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Dismiss',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
+              ),
             ],
           ),
         ],
@@ -1284,7 +1293,16 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                children: <TestSemantics>[
+                  TestSemantics(
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Dismiss',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
+              ),
             ],
           ),
         ],
@@ -1403,7 +1421,16 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                children: <TestSemantics>[
+                  TestSemantics(
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Dismiss',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
+              ),
             ],
           ),
         ],

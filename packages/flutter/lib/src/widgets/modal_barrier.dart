@@ -26,7 +26,7 @@ import 'transitions.dart';
 ///
 /// See also:
 ///
-///  * [ModalBarrier], which utilizes thi widget to adjust the barrier focus
+///  * [ModalBarrier], which utilizes this widget to adjust the barrier focus
 /// size based on the size of the content layer rendered on top of it.
 class _SemanticsClipper extends SingleChildRenderObjectWidget{
   /// creates a [SemanticsClipper] that updates the size of the
@@ -185,22 +185,18 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final String? semanticsLabel;
 
-  /// This [ValueNotifier] contains a value of type [EdgeInsets] that specifies
-  /// how the [SemanticsNode.rect] of the barrier should be clipped (so that
-  /// it does not overlap with the content rendered on top of it).
+  /// {@template flutter.widgets.ModalBarrier.clipDetailsNotifier}
+  /// Contains a value of type [EdgeInsets] that specifies how the
+  /// [SemanticsNode.rect] of the widget should be clipped.
   ///
-  /// See also"
+  /// See also:
   ///
-  ///  * [SemanticsClipper], which utilizes the value inside this [ValueNotifier]
-  /// to update the [SemanticsNode.rect] for its child.
+  ///  * [_SemanticsClipper], which utilizes the value inside to update the
+  /// [SemanticsNode.rect] for its child.
+  /// {@endtemplate}
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
-  /// This hint text instructs user what they are able to do when they tap on
-  /// the [ModalBarrier], annouced in the format of 'Double tap to
-  /// $[semanticsOnTapHint].'
-  ///
-  /// If this value is null, the default onTapHint will be applied, resulting
-  /// in the annoucement of 'Double tap to activate'.
+  /// {@macro flutter.widgets.ModalRoute.barrierOnTapHint}
   final String? semanticsOnTapHint;
 
   @override
@@ -235,39 +231,34 @@ class ModalBarrier extends StatelessWidget {
       }
     }
 
-    Widget barrier = Semantics(
-      onTapHint: semanticsOnTapHint,
-      onTap: handleDismiss,
-      label: semanticsDismissible ? semanticsLabel : null,
-      textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.basic,
-        child: ConstrainedBox(
-        constraints: const BoxConstraints.expand(),
-        child: color == null ? null : ColoredBox(
-          color: color!,
-          ),
-        ),
-      ),
-    );
-
-    final bool excluding = !semanticsDismissible || !modalBarrierSemanticsDismissible;
-
-    if (!excluding && clipDetailsNotifier != null) {
-      barrier = _SemanticsClipper(
-        clipDetailsNotifier: clipDetailsNotifier,
-        child: barrier,
-      );
-    }
-
     return BlockSemantics(
       child: ExcludeSemantics(
-        // On Android, the back button is used to dismiss a modal. On iOS, some
-        // modal barriers are not dismissible in accessibility mode.
-        excluding: excluding,
+        // Developers can set [dismissible: true] and
+        // [barrierSemanticsDismissible: true]
+        // to allow assistive technology users to dismiss a modal BottomSheet by
+        // tapping on the Scrim focus. 
+        // On iOS, some modal barriers are not dismissible in accessibility mode.
+        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
         child: _ModalBarrierGestureDetector(
           onDismiss: handleDismiss,
-          child: barrier,
+          child: _SemanticsClipper(
+           clipDetailsNotifier: clipDetailsNotifier,
+           child: Semantics(
+              onTapHint: semanticsOnTapHint,
+              onTap: handleDismiss,
+              label: semanticsDismissible ? semanticsLabel : null,
+              textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.basic,
+                child: ConstrainedBox(
+                constraints: const BoxConstraints.expand(),
+                child: color == null ? null : ColoredBox(
+                  color: color!,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -340,14 +331,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// {@macro flutter.widgets.ModalBarrier.onDismiss}
   final VoidCallback? onDismiss;
 
-  /// This [ValueNotifier] contains a value of type [EdgeInsets] that specifies
-  /// how the [SemanticsNode.rect] of the barrier should be clipped (so that
-  /// it does not overlap with the content rendered on top of it).
-  ///
-  /// See also"
-  ///
-  ///  * [SemanticsClipper], which utilizes the value inside this [ValueNotifier]
-  /// to update the [SemanticsNode.rect] for its child.
+  /// {@macro flutter.widgets.ModalBarrier.clipDetailsNotifier}
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
   /// This hint text instructs user what they are able to do when they tap on
