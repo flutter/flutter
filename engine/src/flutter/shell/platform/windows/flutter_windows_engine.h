@@ -23,6 +23,7 @@
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
+#include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/settings_plugin.h"
 #include "flutter/shell/platform/windows/task_runner.h"
@@ -305,6 +306,9 @@ class FlutterWindowsEngine {
   // surfaces. Surface creation functionality requires a valid render_target.
   // May be nullptr if ANGLE failed to initialize.
   std::unique_ptr<AngleSurfaceManager> surface_manager_;
+
+  // Handler for the flutter/platform channel.
+  std::unique_ptr<PlatformHandler> platform_handler_;
 
   // The settings plugin.
   std::unique_ptr<SettingsPlugin> settings_plugin_;

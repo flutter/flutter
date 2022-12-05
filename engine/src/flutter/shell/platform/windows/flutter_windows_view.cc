@@ -63,8 +63,6 @@ void FlutterWindowsView::SetEngine(
   // Set up the system channel handlers.
   auto internal_plugin_messenger = internal_plugin_registrar_->messenger();
   InitializeKeyboard();
-  platform_handler_ =
-      std::make_unique<PlatformHandler>(internal_plugin_messenger, this);
   cursor_handler_ = std::make_unique<CursorHandler>(internal_plugin_messenger,
                                                     binding_handler_.get());
 
