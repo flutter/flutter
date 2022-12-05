@@ -3696,12 +3696,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!spellCheckEnabled
         || widget.readOnly
         || _selectionOverlay == null
-        || _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null
         || !_spellCheckResultsReceived) {
       // Only attempt to show the spell check suggestions toolbar if there
       // is a toolbar specified and spell check suggestions available to show.
       return false;
     }
+
+    assert(
+      _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder != null,
+      'SpellCheckSuggestionsToolbarBuilder must be defined in '
+      'SpellCheckConfiguration to show a toolbar with spell check '
+      'suggestions',
+    );
+
     _selectionOverlay!
       .showSpellCheckSuggestionsToolbar(
         (BuildContext context) {
