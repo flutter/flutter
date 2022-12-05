@@ -130,10 +130,6 @@ Switches::Switches(const fml::CommandLine& command_line)
                                                       "0"))),
       entry_point(
           command_line.GetOptionValueWithDefault("entry-point", "main")) {
-  if (!working_directory || !working_directory->is_valid()) {
-    return;
-  }
-
   auto language =
       command_line.GetOptionValueWithDefault("source-language", "glsl");
   std::transform(language.begin(), language.end(), language.begin(),
@@ -142,6 +138,10 @@ Switches::Switches(const fml::CommandLine& command_line)
     source_language = SourceLanguage::kGLSL;
   } else if (language == "hlsl") {
     source_language = SourceLanguage::kHLSL;
+  }
+
+  if (!working_directory || !working_directory->is_valid()) {
+    return;
   }
 
   for (const auto& include_dir_path : command_line.GetOptionValues("include")) {
@@ -196,7 +196,9 @@ bool Switches::AreValid(std::ostream& explain) const {
   }
 
   if (!working_directory || !working_directory->is_valid()) {
-    explain << "Could not figure out working directory." << std::endl;
+    explain << "Could not open the working directory: \""
+            << Utf8FromPath(std::filesystem::current_path()).c_str() << "\""
+            << std::endl;
     valid = false;
   }
 
