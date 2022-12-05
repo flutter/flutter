@@ -11,7 +11,8 @@ import 'package:flutter/services.dart';
 
 import 'image_provider.dart';
 
-const String _kAssetManifestFileName = 'AssetManifest.json';
+const String _kLegacyAssetManifestFilename = 'AssetManifest.json';
+const String _kAssetManifestFilename = 'AssetManifest.bin';
 
 /// A screen with a device-pixel ratio strictly less than this value is
 /// considered a low-resolution screen (typically entry-level to mid-range
@@ -284,18 +285,45 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, manifestParser).then<void>(
-      (Map<String, List<String>>? manifest) {
-        final String chosenName = _chooseVariant(
+    Future<_AssetManifest> loadJsonAssetManifest() {
+      Future<_AssetManifest> parseJson(String data) {
+        final _AssetManifest parsed = _LegacyAssetManifest.fromJsonString(data);
+        return SynchronousFuture<_AssetManifest>(parsed);
+      }
+      return chosenBundle.loadStructuredData(_kLegacyAssetManifestFilename, parseJson);
+    }
+
+    // TODO(andrewkolos): Once google3 and google-fonts-flutter are migrated
+    // away from using AssetManifest.json, remove all references to it.
+    // See https://github.com/flutter/flutter/issues/114913.
+    Future<_AssetManifest>? manifest;
+
+    // Since AssetBundle load calls can be synchronous (e.g. in the case of tests),
+    // it is not sufficient to only use catchError/onError or the onError parameter
+    // of Future.then--we also have to use a synchronous try/catch. Once google3
+    // tooling starts producing AssetManifest.bin, this block can be removed.
+    try {
+      manifest = chosenBundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
+    } catch (error) {
+      manifest = loadJsonAssetManifest();
+    }
+
+    manifest
+      // To understand why we use this no-op `then` instead of `catchError`/`onError`,
+      // see https://github.com/flutter/flutter/issues/115601
+      .then((_AssetManifest manifest) => manifest,
+          onError: (Object? error, StackTrace? stack) => loadJsonAssetManifest())
+      .then((_AssetManifest manifest) {
+        final List<_AssetVariant> candidateVariants = manifest.getVariants(keyName);
+        final _AssetVariant chosenVariant = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : manifest[keyName],
-        )!;
-        final double chosenScale = _parseScale(chosenName);
+          candidateVariants,
+        );
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
-          name: chosenName,
-          scale: chosenScale,
+          name: chosenVariant.asset,
+          scale: chosenVariant.devicePixelRatio,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
@@ -309,14 +337,15 @@ class AssetImage extends AssetBundleImageProvider {
           // ourselves.
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
-      },
-    ).catchError((Object error, StackTrace stack) {
-      // We had an error. (This guarantees we weren't called synchronously.)
-      // Forward the error to the caller.
-      assert(completer != null);
-      assert(result == null);
-      completer!.completeError(error, stack);
-    });
+      })
+      .onError((Object error, StackTrace stack) {
+        // We had an error. (This guarantees we weren't called synchronously.)
+        // Forward the error to the caller.
+        assert(completer != null);
+        assert(result == null);
+        completer!.completeError(error, stack);
+      });
+
     if (result != null) {
       // The code above ran synchronously, and came up with an answer.
       // Return the SynchronousFuture that we created above.
@@ -328,35 +357,29 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  /// Parses the asset manifest string into a strongly-typed map.
+  /// Parses the asset manifest's file contents into it's Dart representation.
   @visibleForTesting
-  static Future<Map<String, List<String>>?> manifestParser(String? jsonData) {
-    if (jsonData == null) {
-      return SynchronousFuture<Map<String, List<String>>?>(null);
-    }
-    // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
-    final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>> {
-      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
-    };
-    // TODO(ianh): convert that data structure to the right types.
-    return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
+  // Return type is set to Object?, because the specific type is private.
+  static Object? parseAssetManifest(ByteData bytes) {
+    return _AssetManifestBin.fromStandardMessageCodecMessage(bytes);
   }
 
-  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
-    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty) {
-      return main;
+  _AssetVariant _chooseVariant(String mainAssetKey, ImageConfiguration config, List<_AssetVariant> candidateVariants) {
+    final _AssetVariant mainAsset = _AssetVariant(asset: mainAssetKey,
+      devicePixelRatio: _naturalResolution);
+    if (config.devicePixelRatio == null || candidateVariants.isEmpty) {
+      return mainAsset;
     }
-    // TODO(ianh): Consider moving this parsing logic into _manifestParser.
-    final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
-    for (final String candidate in candidates) {
-      mapping[_parseScale(candidate)] = candidate;
+    final SplayTreeMap<double, _AssetVariant> candidatesByDevicePixelRatio =
+      SplayTreeMap<double, _AssetVariant>();
+    for (final _AssetVariant candidate in candidateVariants) {
+      candidatesByDevicePixelRatio[candidate.devicePixelRatio] = candidate;
     }
+    candidatesByDevicePixelRatio.putIfAbsent(_naturalResolution, () => mainAsset);
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findBestVariant(mapping, config.devicePixelRatio!);
+    return _findBestVariant(candidatesByDevicePixelRatio, config.devicePixelRatio!);
   }
 
   // Returns the "best" asset variant amongst the available `candidates`.
@@ -371,17 +394,17 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  String? _findBestVariant(SplayTreeMap<double, String> candidates, double value) {
-    if (candidates.containsKey(value)) {
-      return candidates[value]!;
+  _AssetVariant _findBestVariant(SplayTreeMap<double, _AssetVariant> candidatesByDpr, double value) {
+    if (candidatesByDpr.containsKey(value)) {
+      return candidatesByDpr[value]!;
     }
-    final double? lower = candidates.lastKeyBefore(value);
-    final double? upper = candidates.firstKeyAfter(value);
+    final double? lower = candidatesByDpr.lastKeyBefore(value);
+    final double? upper = candidatesByDpr.firstKeyAfter(value);
     if (lower == null) {
-      return candidates[upper];
+      return candidatesByDpr[upper]!;
     }
     if (upper == null) {
-      return candidates[lower];
+      return candidatesByDpr[lower]!;
     }
 
     // On screens with low device-pixel ratios the artifacts from upscaling
@@ -389,30 +412,10 @@ class AssetImage extends AssetBundleImageProvider {
     // ratios because the physical pixels are larger. Choose the higher
     // resolution image in that case instead of the nearest one.
     if (value < _kLowDprLimit || value > (lower + upper) / 2) {
-      return candidates[upper];
+      return candidatesByDpr[upper]!;
     } else {
-      return candidates[lower];
+      return candidatesByDpr[lower]!;
     }
-  }
-
-  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
-
-  double _parseScale(String key) {
-    if (key == assetName) {
-      return _naturalResolution;
-    }
-
-    final Uri assetUri = Uri.parse(key);
-    String directoryPath = '';
-    if (assetUri.pathSegments.length > 1) {
-      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
-    }
-
-    final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
-    if (match != null && match.groupCount > 0) {
-      return double.parse(match.group(1)!);
-    }
-    return _naturalResolution; // i.e. default to 1.0x
   }
 
   @override
@@ -430,4 +433,121 @@ class AssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
+}
+
+/// Centralizes parsing and typecasting of the contents of the asset manifest file,
+/// which is generated by the flutter tool at build time.
+abstract class _AssetManifest {
+  List<_AssetVariant> getVariants(String key);
+}
+
+/// Parses the binary asset manifest into a data structure that's easier to work with.
+///
+/// The asset manifest is a map of asset files to a list of objects containing
+/// information about variants of that asset.
+///
+/// The entries with each variant object are:
+///  - "asset": the location of this variant to load it from.
+///  - "dpr": The device-pixel-ratio that the asset is best-suited for.
+///
+/// New fields could be added to this object schema to support new asset variation
+/// features, such as themes, locale/region support, reading directions, and so on.
+class _AssetManifestBin implements _AssetManifest {
+  _AssetManifestBin(Map<Object?, Object?> standardMessageData): _data = standardMessageData;
+
+  factory _AssetManifestBin.fromStandardMessageCodecMessage(ByteData message) {
+    final Object? data = const StandardMessageCodec().decodeMessage(message);
+    return _AssetManifestBin(data! as Map<Object?, Object?>);
+  }
+
+  final Map<Object?, Object?> _data;
+  final Map<String, List<_AssetVariant>> _typeCastedData = <String, List<_AssetVariant>>{};
+
+  @override
+  List<_AssetVariant> getVariants(String key) {
+    // We lazily delay typecasting to prevent a performance hiccup when parsing
+    // large asset manifests.
+    if (!_typeCastedData.containsKey(key)) {
+      _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as List<Object?>)
+        .cast<Map<Object?, Object?>>()
+        .map(_AssetVariant.fromManifestData)
+        .toList();
+    }
+    return _typeCastedData[key]!;
+  }
+}
+
+class _LegacyAssetManifest implements _AssetManifest {
+  _LegacyAssetManifest({
+    required this.manifest,
+  });
+
+  factory _LegacyAssetManifest.fromJsonString(String jsonString) {
+    List<_AssetVariant> adaptLegacyVariantList(String mainAsset, List<String> variants) {
+      return variants
+        .map((String variant) =>
+          _AssetVariant(asset: variant, devicePixelRatio: _parseScale(mainAsset, variant)))
+        .toList();
+    }
+
+    if (jsonString == null) {
+      return _LegacyAssetManifest(manifest: <String, List<_AssetVariant>>{});
+    }
+    final Map<String, Object?> parsedJson = json.decode(jsonString) as Map<String, dynamic>;
+    final Iterable<String> keys = parsedJson.keys;
+    final Map<String, List<String>> parsedManifest = <String, List<String>> {
+      for (final String key in keys) key: List<String>.from(parsedJson[key]! as List<dynamic>),
+    };
+    final Map<String, List<_AssetVariant>> manifestWithParsedVariants =
+      parsedManifest.map((String asset, List<String> variants) =>
+        MapEntry<String, List<_AssetVariant>>(asset, adaptLegacyVariantList(asset, variants)));
+
+    return _LegacyAssetManifest(manifest: manifestWithParsedVariants);
+  }
+
+  final Map<String, List<_AssetVariant>> manifest;
+
+  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
+  static const double _naturalResolution = 1.0;
+
+  @override
+  List<_AssetVariant> getVariants(String key) {
+    return manifest[key] ?? const <_AssetVariant>[];
+  }
+
+  static double _parseScale(String mainAsset, String variant) {
+    // The legacy asset manifest includes the main asset within its variant list.
+    if (mainAsset == variant) {
+      return _naturalResolution;
+    }
+
+    final Uri assetUri = Uri.parse(variant);
+    String directoryPath = '';
+    if (assetUri.pathSegments.length > 1) {
+      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
+    }
+
+    final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
+    if (match != null && match.groupCount > 0) {
+      return double.parse(match.group(1)!);
+    }
+
+    return _naturalResolution; // i.e. default to 1.0x
+  }
+}
+
+class _AssetVariant {
+  _AssetVariant({
+    required this.asset,
+    required this.devicePixelRatio,
+  });
+
+  factory _AssetVariant.fromManifestData(Object data) {
+    final Map<Object?, Object?> asStructuredData = data as Map<Object?, Object?>;
+    return _AssetVariant(asset: asStructuredData['asset']! as String,
+      devicePixelRatio: asStructuredData['dpr']! as double);
+  }
+
+  final double devicePixelRatio;
+  final String asset;
 }
