@@ -325,7 +325,6 @@ typedef _SizeChangeCallback<Size> = void Function(Size);
 class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 
   const _BottomSheetLayoutWithSizeListener({
-    super.key,
     required this.animationValue,
     required this.isScrollControlled,
     required this.onChildSizeChanged,

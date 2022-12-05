@@ -33,7 +33,6 @@ class _SemanticsClipper extends SingleChildRenderObjectWidget{
   /// [SemanticsNode.rect] of its child based on the value inside the provided
   /// [ValueNotifier], or a default value of [EdgeInsets.zero].
   const _SemanticsClipper({
-    super.key,
     super.child,
     this.clipDetailsNotifier,
   });
@@ -236,7 +235,7 @@ class ModalBarrier extends StatelessWidget {
         // Developers can set [dismissible: true] and
         // [barrierSemanticsDismissible: true]
         // to allow assistive technology users to dismiss a modal BottomSheet by
-        // tapping on the Scrim focus. 
+        // tapping on the Scrim focus.
         // On iOS, some modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
         child: _ModalBarrierGestureDetector(
