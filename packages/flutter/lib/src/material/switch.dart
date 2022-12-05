@@ -117,6 +117,7 @@ class Switch extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
   })  : _switchType = _SwitchType.material,
+        applyCupertinoTheme = false,
         assert(dragStartBehavior != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
@@ -161,6 +162,7 @@ class Switch extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.applyCupertinoTheme,
   })  : assert(autofocus != null),
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
@@ -381,6 +383,8 @@ class Switch extends StatelessWidget {
 
   final _SwitchType _switchType;
 
+  final bool? applyCupertinoTheme;
+
   /// {@macro flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -495,6 +499,7 @@ class Switch extends StatelessWidget {
           onChanged: onChanged,
           activeColor: activeColor,
           trackColor: inactiveTrackColor,
+          applyTheme: applyCupertinoTheme,
         ),
       ),
     );

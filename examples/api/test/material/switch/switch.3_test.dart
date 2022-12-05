@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/switch/switch.1.dart' as example;
+import 'package:flutter_api_samples/material/switch/switch.3.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,7 +13,7 @@ void main() {
     );
 
     final Finder switchFinder = find.byType(Switch);
-    Switch materialSwitch = tester.widget<Switch>(switchFinder);
+    Switch materialSwitch = tester.firstWidget<Switch>(switchFinder);
     expect(materialSwitch.value, true);
 
     await tester.tap(switchFinder);
