@@ -240,7 +240,7 @@ void main() {
   testUsingContext('ipa build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: notMacosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -260,7 +260,6 @@ void main() {
     Platform: () => notMacosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1508,6 +1507,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
