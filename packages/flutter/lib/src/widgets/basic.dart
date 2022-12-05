@@ -4399,8 +4399,8 @@ class PositionedDirectional extends StatelessWidget {
 ///
 /// Layout for a [Flex] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor (e.g., those that are not
-///    [Expanded]) with unbounded main axis constraints and the incoming
+/// 1. Layout each child with a null or zero flex factor (e.g., those that are
+///    not [Expanded]) with unbounded main axis constraints and the incoming
 ///    cross axis constraints. If the [crossAxisAlignment] is
 ///    [CrossAxisAlignment.stretch], instead use tight cross axis constraints
 ///    that match the incoming max extent in the cross axis.
@@ -4776,8 +4776,8 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// Layout for a [Row] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor (e.g., those that are not
-///    [Expanded]) with unbounded horizontal constraints and the incoming
+/// 1. Layout each child with a null or zero flex factor (e.g., those that are
+///    not [Expanded]) with unbounded horizontal constraints and the incoming
 ///    vertical constraints. If the [crossAxisAlignment] is
 ///    [CrossAxisAlignment.stretch], instead use tight vertical constraints that
 ///    match the incoming max height.
@@ -4967,8 +4967,8 @@ class Row extends Flex {
 ///
 /// Layout for a [Column] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor (e.g., those that are not
-///    [Expanded]) with unbounded vertical constraints and the incoming
+/// 1. Layout each child with a null or zero flex factor (e.g., those that are
+///    not [Expanded]) with unbounded vertical constraints and the incoming
 ///    horizontal constraints. If the [crossAxisAlignment] is
 ///    [CrossAxisAlignment.stretch], instead use tight horizontal constraints
 ///    that match the incoming max width.
