@@ -5996,27 +5996,30 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets("Disabled TextField can't be traversed to when disabled.", (WidgetTester tester) async {
+  testWidgets("Disabled TextField can't be traversed to.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                TextField(
-                  focusNode: focusNode1,
-                  autofocus: true,
-                  maxLength: 10,
-                  enabled: true,
-                ),
-                TextField(
-                  focusNode: focusNode2,
-                  maxLength: 10,
-                  enabled: false,
-                ),
-              ],
+          child: Focus(
+            focusNode: FocusScopeNode(),
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    focusNode: focusNode1,
+                    autofocus: true,
+                    maxLength: 10,
+                    enabled: true,
+                  ),
+                  TextField(
+                    focusNode: focusNode2,
+                    maxLength: 10,
+                    enabled: false,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

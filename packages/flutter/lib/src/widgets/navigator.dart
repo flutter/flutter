@@ -1093,7 +1093,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
   }
 }
 
-/// The default value of [MediaQueryData.routeTraversalEdgeBehavior].
+/// The default value of [Navigator.routeTraversalEdgeBehavior].
 ///
 /// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
 const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb

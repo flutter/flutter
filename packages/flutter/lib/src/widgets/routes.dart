@@ -1007,7 +1007,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// {@macro flutter.focus.TraversalEdgeBehavior}
   ///
-  /// If set to null, [MediaQueryData.routeTraversalEdgeBehavior] is used.
+  /// If set to null, [Navigator.routeTraversalEdgeBehavior] is used.
   final TraversalEdgeBehavior? traversalEdgeBehavior;
 
   // The API for general users of this class

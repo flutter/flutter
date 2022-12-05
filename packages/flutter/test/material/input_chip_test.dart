@@ -137,20 +137,23 @@ void main() {
     final FocusNode focusNode2 = FocusNode(debugLabel: 'InputChip 2');
     await tester.pumpWidget(
       wrapForChip(
-        child: Column(
-          children: <Widget>[
-            InputChip(
-              focusNode: focusNode1,
-              autofocus: true,
-              label: const Text('Chip A'),
-              onPressed: () { },
-            ),
-            InputChip(
-              focusNode: focusNode2,
-              autofocus: true,
-              label: const Text('Chip B'),
-            ),
-          ],
+        child: Focus(
+          focusNode: FocusScopeNode(),
+          child: Column(
+            children: <Widget>[
+              InputChip(
+                focusNode: focusNode1,
+                autofocus: true,
+                label: const Text('Chip A'),
+                onPressed: () { },
+              ),
+              InputChip(
+                focusNode: focusNode2,
+                autofocus: true,
+                label: const Text('Chip B'),
+              ),
+            ],
+          ),
         ),
       ),
     );
