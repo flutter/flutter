@@ -149,9 +149,10 @@ class ParagraphBoundary extends TextBoundary {
   }
 
   // Returns the [TextRange] representing a paragraph that bounds the given
-  // `textPosition`. The `textPosition` is bounded by either a line terminator in each
-  // direction of the text, or if there is no line terminator in a given direction
-  // then the bound extends to the start/end of the document in that direction.
+  // `textPosition`. The `textPosition` is bounded by either a line terminator
+  // in each direction of the text, or if there is no line terminator in a given
+  // direction then the bound extends to the start/end of the document in that
+  // direction. The returning range includes the line terminator.
   TextRange _getParagraphAtOffset(TextPosition textPosition) {
     final CharacterRange charIter = _text.characters.iterator;
 
