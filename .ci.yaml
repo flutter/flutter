@@ -4630,6 +4630,58 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
 
+  - name: Linux flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+
+  - name: Mac flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Mac_arm64 flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Windows flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
+
   # TODO(drewroengoogle): Remove this target when the release scheduler is
   # confirmed to be working correctly and as intended.
   # (https://github.com/flutter/flutter/issues/100806)
