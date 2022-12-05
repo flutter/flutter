@@ -46,10 +46,6 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
   [[IntegrationTestPlugin instance] setupChannels:registrar.messenger];
-  // No initialization happens here because of the way XCTest loads the testing
-  // bundles.  Setup on static variables can be disregarded when a new static
-  // instance of IntegrationTestPlugin is allocated when the bundle is reloaded.
-  // See also: https://github.com/flutter/plugins/pull/2465
 }
 
 - (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger {
