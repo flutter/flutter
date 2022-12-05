@@ -100,7 +100,7 @@ void main() {
     webResources.childFile('index.html')
         .createSync(recursive: true);
     environment.buildDir.childFile('main.dart.js').createSync();
-    await const WebReleaseBundle(WebRendererMode.autoDetect).build(environment);
+    await const WebReleaseBundle(WebRendererMode.autoDetect, false).build(environment);
 
     expect(environment.outputDir.childFile('version.json'), exists);
   }));

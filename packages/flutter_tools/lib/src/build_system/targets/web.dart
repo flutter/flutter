@@ -141,13 +141,11 @@ class WebEntrypointTarget extends Target {
 }
 
 /// Compiles a web entry point with dart2js.
-class Dart2JSTarget extends Target {
-  const Dart2JSTarget(this.webRenderer);
+abstract class Dart2WebTarget extends Target {
+  const Dart2WebTarget(this.webRenderer);
 
   final WebRendererMode webRenderer;
-
-  @override
-  String get name => 'dart2js';
+  Source get compilerSnapshot;
 
   @override
   List<Target> get dependencies => const <Target>[
@@ -156,21 +154,16 @@ class Dart2JSTarget extends Target {
   ];
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.hostArtifact(HostArtifact.flutterWebSdk),
-    Source.artifact(Artifact.dart2jsSnapshot),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.pattern('{BUILD_DIR}/main.dart'),
-    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+  List<Source> get inputs => <Source>[
+    const Source.hostArtifact(HostArtifact.flutterWebSdk),
+    compilerSnapshot,
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.pattern('{BUILD_DIR}/main.dart'),
+    const Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[];
-
-  @override
-  List<String> get depfiles => const <String>[
-    'dart2js.d',
-  ];
 
   String _collectOutput(ProcessResult result) {
     final String stdout = result.stdout is List<int>
@@ -181,6 +174,22 @@ class Dart2JSTarget extends Target {
         : result.stderr as String;
     return stdout + stderr;
   }
+
+}
+
+class Dart2JSTarget extends Dart2WebTarget {
+  Dart2JSTarget(super.webRenderer);
+
+  @override
+  String get name => 'dart2js';
+  
+  @override
+  Source get compilerSnapshot => const Source.artifact(Artifact.dart2jsSnapshot);
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
+  ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -270,18 +279,73 @@ class Dart2JSTarget extends Target {
   }
 }
 
+class Dart2WasmTarget extends Dart2WebTarget {
+  Dart2WasmTarget(super.webRenderer);
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final Artifacts artifacts = globals.artifacts!;
+    final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
+    final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+    final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.uri.toString();
+
+    final List<String> compilationArgs = <String>[
+      artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: TargetPlatform.web_javascript),
+      '--disable-dart-dev',
+      artifacts.getArtifactPath(Artifact.dart2wasmSnapshot, platform: TargetPlatform.web_javascript),
+      if (buildMode == BuildMode.profile)
+        '-Ddart.vm.profile=true'
+      else
+        '-Ddart.vm.product=true',
+      ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
+      for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
+        '-D$dartDefine',
+      '--packages=.dart_tool/package_config.json',
+      '--multi-root-scheme',
+      'org-dartlang-sdk',
+      '--multi-root',
+      artifacts.getHostArtifact(HostArtifact.flutterWebSdk).uri.toString(),
+      '--multi-root',
+      dartSdkRoot,
+      '--libraries-spec',
+      'org-dartlang-sdk:///libraries.json',
+
+      // TODO(jacksongardner): multi-root, libraries.json, sdkpath
+      environment.buildDir.childFile('main.dart').path, // dartfile
+      outputWasmFile.path,
+    ];
+    final ProcessResult compileResult = await globals.processManager.run(compilationArgs);
+    if (compileResult.exitCode != 0) {
+      throw Exception(_collectOutput(compileResult));
+    }
+  }
+
+  @override
+  Source get compilerSnapshot => const Source.artifact(Artifact.dart2wasmSnapshot);
+
+  @override
+  String get name => 'dart2wasm';
+
+}
+
 /// Unpacks the dart2js compilation and resources to a given output directory.
 class WebReleaseBundle extends Target {
-  const WebReleaseBundle(this.webRenderer);
+  const WebReleaseBundle(this.webRenderer, this.isWasm);
 
   final WebRendererMode webRenderer;
+  final bool isWasm;
 
   @override
   String get name => 'web_release_bundle';
 
   @override
   List<Target> get dependencies => <Target>[
-    Dart2JSTarget(webRenderer),
+    if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
   ];
 
   @override
@@ -459,19 +523,20 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.cache, this.webRenderer);
+  const WebServiceWorker(this.fileSystem, this.cache, this.webRenderer, this.isWasm);
 
   final FileSystem fileSystem;
   final Cache cache;
   final WebRendererMode webRenderer;
+  final bool isWasm;
 
   @override
   String get name => 'web_service_worker';
 
   @override
   List<Target> get dependencies => <Target>[
-    Dart2JSTarget(webRenderer),
-    WebReleaseBundle(webRenderer),
+    if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
+    WebReleaseBundle(webRenderer, isWasm),
     WebBuiltInAssets(fileSystem, cache),
   ];
 
