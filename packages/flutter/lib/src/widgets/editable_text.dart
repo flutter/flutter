@@ -3697,7 +3697,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         || widget.readOnly
         || _selectionOverlay == null
         || _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder == null
-        ||!_spellCheckResultsReceived) {
+        || !_spellCheckResultsReceived) {
       // Only attempt to show the spell check suggestions toolbar if there
       // is a toolbar specified and spell check suggestions available to show.
       return false;

@@ -23,7 +23,7 @@ const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 
 // The default height of the MaterialSpellCheckSuggestionsToolbar, which
 // assumes there are the maximum number of spell check suggestions available, 3.
-const double _kDefaultToolbarHeight = 193;
+const double _kDefaultToolbarHeight = 193.0;
 
 /// The default spell check suggestions toolbar for Android.
 ///
@@ -82,8 +82,12 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
-          editableTextState.replaceSelection(SelectionChangedCause.toolbar,
-            '', suggestionSpan.range.start, suggestionSpan.range.end);
+          editableTextState.replaceSelection(
+            SelectionChangedCause.toolbar,
+            '',
+            suggestionSpan.range.start,
+            suggestionSpan.range.end,
+          );
         },
         type: ContextMenuButtonType.delete,
         label: localizations.deleteButtonTooltip.toUpperCase(),
@@ -95,47 +99,45 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// Determines the Offset that the toolbar will be anchored to.
   static Offset getToolbarAnchor(TextSelectionToolbarAnchors anchors) {
-    return anchors.secondaryAnchor == null ?  anchors.primaryAnchor : anchors.secondaryAnchor!;
+    return anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!;
   }
 
   /// Builds the toolbar buttons based on the [buttonItems].
   List<Widget> _buildToolbarButtons() {
-   final List<Widget> buttons = buttonItems.map((ContextMenuButtonItem buttonItem) {
+    return buttonItems.map((ContextMenuButtonItem buttonItem) {
       final TextSelectionToolbarTextButton button =
         TextSelectionToolbarTextButton(
           padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
           onPressed: buttonItem.onPressed,
           alignment: Alignment.centerLeft,
           child: Text(buttonItem.label!),
-      );
+        );
 
       if (buttonItem.type == ContextMenuButtonType.delete) {
         return DecoratedBox(
           decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
           child: button.copyWith(
-            child: Text(buttonItem.label!, style: const TextStyle(color: Colors.blue))
+            child: Text(buttonItem.label!, style: const TextStyle(color: Colors.blue)),
           )
         );
       }
       return button;
     }).toList();
-
-    return buttons;
   }
 
   /// Calculates the height available to draw the toolbar below the anchor.
   @visibleForTesting
-  double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
+  double getAvailableHeightBelow(MediaQueryData mediaQueryData, Offset anchorPadded) {
     final double paddingBelow =
-        math.max(MediaQuery.of(context).viewPadding.bottom, MediaQuery.of(context).viewInsets.bottom);
-    return MediaQuery.of(context).size.height - anchorPadded.dy - paddingBelow;
+        math.max(mediaQueryData.viewPadding.bottom, mediaQueryData.viewInsets.bottom);
+    return mediaQueryData.size.height - anchorPadded.dy - paddingBelow;
   }
 
   /// Calculates the height available to draw the toolbar above the anchor.
   @visibleForTesting
-  double getAvailableHeightAbove(BuildContext context, Offset anchorPadded, double heightOffset) {
+  double getAvailableHeightAbove(MediaQueryData mediaQueryData, Offset anchorPadded, double heightOffset) {
     final double paddingAbove =
-        math.max(MediaQuery.of(context).viewPadding.top, MediaQuery.of(context).viewInsets.top);
+        math.max(mediaQueryData.viewPadding.top, mediaQueryData.viewInsets.top);
     return anchorPadded.dy + heightOffset - paddingAbove;
   }
 
@@ -147,18 +149,19 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     // Incorporate the padding distance between the content and toolbar.
     final Offset anchorPadded =
         anchor + const Offset(0.0, _kToolbarContentDistanceBelow);
-    final double availableHeightBelow = getAvailableHeightBelow(context, anchorPadded);
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final double availableHeightBelow = getAvailableHeightBelow(mediaQueryData, anchorPadded);
     final double heightSlack = availableHeightBelow - spellCheckSuggestionsToolbarHeight;
     final bool fitsBelow = heightSlack >= 0;
     // Makes up for any cases where the toolbar may overlap bottom padding.
     final double heightOffset = fitsBelow? 0 : heightSlack;
 
-    if (!fitsBelow && getAvailableHeightAbove(context, anchorPadded, heightOffset) < 0) {
+    if (!fitsBelow && getAvailableHeightAbove(mediaQueryData, anchorPadded, heightOffset) < 0) {
         // Ensure that if toolbar is shifted up, it does not overlap top padding.
         return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    final double paddingAbove = MediaQuery.of(context).padding.top + _kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryData.padding.top + _kToolbarScreenPadding;
     // Makes up for the Padding above the Stack.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
@@ -175,8 +178,8 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
           heightOffset: heightOffset,
         ),
         child: AnimatedSize(
-        // This duration was eyeballed on a Pixel 2 emulator running Android
-        // API 28 for the Material TextSelectionToolbar.
+          // This duration was eyeballed on a Pixel 2 emulator running Android
+          // API 28 for the Material TextSelectionToolbar.
           duration: const Duration(milliseconds: 140),
           child: _spellCheckSuggestionsToolbarBuilder(context, _SpellCheckSuggestsionsToolbarItemsLayout(
             height: spellCheckSuggestionsToolbarHeight,
@@ -231,7 +234,7 @@ class _SpellCheckSuggestsionsToolbarItemsLayout extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[...children],
+        children: children,
       ),
     );
   }

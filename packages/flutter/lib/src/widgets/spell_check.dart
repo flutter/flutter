@@ -355,7 +355,7 @@ void _addComposingRegionTextSpans(
   );
 }
 
-// Methods for showing spell check suggestions for misspelled words in toolbar:
+/// Methods for showing spell check suggestions for misspelled words in toolbar:
 
 /// Finds specified [SuggestionSpan] that matches the provided index using
 /// binary search.
@@ -363,7 +363,7 @@ SuggestionSpan? findSuggestionSpanAtCursorIndex(
   int cursorIndex,
   List<SuggestionSpan> suggestionSpans,
 ) {
-  if(suggestionSpans.last.range.end < cursorIndex) {
+  if (suggestionSpans.last.range.end < cursorIndex) {
     // Cursor index is out of range that suggestionSpans covers.
     return null;
   }

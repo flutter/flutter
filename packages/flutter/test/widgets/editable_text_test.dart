@@ -13921,7 +13921,7 @@ void main() {
       // Can't show the toolbar when there's no focus.
       expect(state.showSpellCheckSuggestionsToolbar(), false);
       await tester.pumpAndSettle();
-      expect(find.text('Delete'), findsNothing);
+      expect(find.text('DELETE'), findsNothing);
 
       // Can't show the toolbar when there are no spell check results.
       expect(state.showSpellCheckSuggestionsToolbar(), false);

@@ -1116,6 +1116,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @override
   void replaceSelection(SelectionChangedCause cause, String text, int start, int end) {
+    // Currently only used for spell check functionality.
     assert(false);
   }
 
