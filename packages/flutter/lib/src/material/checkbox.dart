@@ -88,6 +88,8 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
+    this.labelText,
+    this.semanticLabel,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(autofocus != null);
@@ -341,6 +343,18 @@ class Checkbox extends StatefulWidget {
   /// Must not be null. Defaults to false.
   final bool isError;
 
+  /// The label text that will be rendered side by side with the [CheckBox].
+  /// Serves as default semantics label for the [CheckBox] if provided.
+  ///
+  /// TODO: Actually render the labelText in build method.
+  final String? labelText;
+
+  /// The semantics label that will be announced by a screen reader.
+  ///
+  /// Overrides labelText in terms of semantic labeling of the [CheckBox]
+  /// if they are provided at the same time.
+  final String? semanticLabel;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -493,6 +507,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? defaults.splashRadius!;
 
     return Semantics(
+      label: widget.semanticLabel,
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(

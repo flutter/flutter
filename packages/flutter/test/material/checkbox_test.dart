@@ -190,6 +190,32 @@ void main() {
       hasEnabledState: true,
     ));
 
+    // Check if semanticLabel is there.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Theme(
+        data: theme,
+        child: Material(
+          child: Checkbox(
+            semanticLabel: 'checkbox',
+            value: true,
+            onChanged: (bool? b) { },
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+      label: 'checkbox',
+      textDirection: TextDirection.ltr,
+      hasCheckedState: true,
+      hasEnabledState: true,
+      isChecked: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+    ));
+
     handle.dispose();
   });
 
