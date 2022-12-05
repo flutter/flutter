@@ -781,13 +781,13 @@ void main() {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       buildTest(
-        box1Key, 
-        box2Key, 
-        box3Key, 
-        controller, 
+        box1Key,
+        box2Key,
+        box3Key,
+        controller,
         // Setting the `boxHeight` to 100.0 will make the boxes fit in the
         // scrollable viewport.
-        boxHeight: 100, 
+        boxHeight: 100,
         // To make the scroll view in the test still scrollable, we need to add
         // the `AlwaysScrollableScrollPhysics`.
         physics: const AlwaysScrollableScrollPhysics(),
