@@ -1857,6 +1857,63 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
+  testWidgets('Default value indicator color', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    try {
+      final ThemeData theme = ThemeData(
+        useMaterial3: true,
+        platform: TargetPlatform.android,
+      );
+      Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+        return MaterialApp(
+          theme: theme,
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              child: Material(
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Slider(
+                        value: sliderValue,
+                        label: value,
+                        divisions: 3,
+                        onChanged: (double d) { },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp('1'));
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+      expect(
+        valueIndicatorBox,
+        paints
+          ..rrect(color: const Color(0xfffffbfe))
+          ..rrect(color: const Color(0xff6750a4))
+          ..rrect(color: const Color(0xffe7e0ec))
+          ..path(color: Color(theme.colorScheme.primary.value))
+          ..rrect(
+            color: Color(theme.colorScheme.primary.value),
+          )
+      );
+
+    } finally {
+      debugDisableShadows = true;
+    }
+  });
 
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
@@ -2006,6 +2063,61 @@ void main() {
         await gesture.up();
         // Wait for value indicator animation to finish.
         await tester.pumpAndSettle();
+      } finally {
+        debugDisableShadows = true;
+      }
+    });
+
+    testWidgets('Default value indicator color', (WidgetTester tester) async {
+      debugDisableShadows = false;
+      try {
+        final ThemeData theme = ThemeData(
+          platform: TargetPlatform.android,
+        );
+        Widget buildApp(String value, { double sliderValue = 0.5, double textScale = 1.0 }) {
+          return MaterialApp(
+            theme: theme,
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+                child: Material(
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Slider(
+                          value: sliderValue,
+                          label: value,
+                          divisions: 3,
+                          onChanged: (double d) { },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp('1'));
+
+        final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+        final Offset center = tester.getCenter(find.byType(Slider));
+        await tester.startGesture(center);
+        // Wait for value indicator animation to finish.
+        await tester.pumpAndSettle();
+        expect(
+          valueIndicatorBox,
+          paints
+            ..rrect(color: const Color(0xfffafafa))
+            ..rrect(color: const Color(0xff2196f3))
+            ..rrect(color: const Color(0x3d2196f3))
+            // Test that the value indicator text is painted with the correct color.
+            ..path(color: const Color(0xf55f5f5f))
+        );
+
       } finally {
         debugDisableShadows = true;
       }

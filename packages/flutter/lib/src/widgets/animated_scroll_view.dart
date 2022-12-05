@@ -521,6 +521,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       primary: widget.primary,
       physics: widget.physics,
       clipBehavior: widget.clipBehavior,
+      shrinkWrap: widget.shrinkWrap,
       slivers: <Widget>[
         SliverPadding(
           padding: widget.padding ?? EdgeInsets.zero,
