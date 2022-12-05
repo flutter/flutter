@@ -5,17 +5,17 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/test/web_test_compiler.dart';
 import 'package:test/expect.dart';
 
 import '../../src/context.dart';
-import '../../src/logging_logger.dart';
 
 void main() {
   testUsingContext('web test compiler issues valid compile command', () async {
-    final LoggingLogger logger = LoggingLogger();
+    final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
     fileSystem.file('build/out').createSync(recursive: true);
