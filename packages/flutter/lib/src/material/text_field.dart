@@ -810,11 +810,12 @@ class TextField extends StatefulWidget {
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
-    int cursorIndex,
-    SpellCheckResults results,
   ) {
     final SuggestionSpan? spanAtCursorIndex =
-        findSuggestionSpanAtCursorIndex(cursorIndex, results.suggestionSpans);
+      findSuggestionSpanAtCursorIndex(
+        editableTextState.currentTextEditingValue.selection.baseOffset,
+        editableTextState.spellCheckResults!.suggestionSpans,
+      );
 
     if (spanAtCursorIndex == null) {
       return const SizedBox(width: 0.0, height: 0.0);

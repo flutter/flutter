@@ -116,13 +116,13 @@ class _FitsBelowAndAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolb
   });
 
   @override
-  double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
+  double getAvailableHeightBelow(MediaQueryData mediaQueryData, Offset anchorPadded) {
     // The toolbar will perfectly fit in the space available.
     return _kToolbarHeight;
   }
 
   @override
-  double getAvailableHeightAbove(BuildContext context, Offset ancorPadded, double heightOffset) {
+  double getAvailableHeightAbove(MediaQueryData mediaQueryData, Offset ancorPadded, double heightOffset) {
     // The toolbar will fit above the anchor. Not releavant for present tests.
     return 10;
   }
@@ -135,13 +135,13 @@ class _FitsAboveAnchorToolbar extends MaterialSpellCheckSuggestionsToolbar {
   });
 
   @override
-  double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
+  double getAvailableHeightBelow(MediaQueryData mediaQueryData, Offset anchorPadded) {
     // The toolbar overlaps the bottom view padding by 10 pixels.
     return _kToolbarHeight - _kTestToolbarOverlap;
   }
 
   @override
-  double getAvailableHeightAbove(BuildContext context, Offset ancorPadded, double heightOffset) {
+  double getAvailableHeightAbove(MediaQueryData mediaQueryData, Offset ancorPadded, double heightOffset) {
     // There are 10 pixels above the anchor to fit the toolobar.
     return 10;
   }
@@ -154,13 +154,13 @@ class _DoesNotFitBelowOrAboveAnchorToolbar extends MaterialSpellCheckSuggestions
   });
 
   @override
-  double getAvailableHeightBelow(BuildContext context, Offset anchorPadded) {
+  double getAvailableHeightBelow(MediaQueryData mediaQueryData, Offset anchorPadded) {
     // The toolbar overlaps the bottom view padding by 10 pixels.
     return _kToolbarHeight - _kTestToolbarOverlap;
   }
 
   @override
-  double getAvailableHeightAbove(BuildContext context, Offset ancorPadded, double heightOffset) {
+  double getAvailableHeightAbove(MediaQueryData mediaQueryData, Offset ancorPadded, double heightOffset) {
     // The toolbar will not fit above the the TextField.
     return -10;
   }

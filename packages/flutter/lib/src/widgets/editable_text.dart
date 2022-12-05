@@ -3709,8 +3709,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             .spellCheckSuggestionsToolbarBuilder!(
               context,
               this,
-              currentTextEditingValue.selection.baseOffset,
-              spellCheckResults!,
           );
         }
     );

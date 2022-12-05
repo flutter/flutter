@@ -19,8 +19,6 @@ import 'framework.dart' show BuildContext, Widget, immutable;
 typedef SpellCheckSuggestionsToolbarBuilder = Widget Function(
   BuildContext context,
   EditableTextState editableTextState,
-  int cursorIndex,
-  SpellCheckResults results,
 );
 
 /// Controls how spell check is performed for text input.
