@@ -123,6 +123,10 @@ class LineBoundary extends TextBoundary {
   TextRange getTextBoundaryAt(int position) => _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
 }
 
+/// A text boundary that uses paragraphs as logical boundaries.
+///
+/// A paragraph is defined as the range between line terminators. If no
+/// line terminator exist then the paragraph boundary is the entire document.
 class ParagraphBoundary extends TextBoundary {
   const ParagraphBoundary(this._text);
 
