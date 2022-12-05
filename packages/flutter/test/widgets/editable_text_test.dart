@@ -13939,6 +13939,63 @@ void main() {
       expect(find.text('set'), findsOneWidget);
       expect(find.text('DELETE'), findsOneWidget);
     });
+
+    testWidgets('spell check suggestions toolbar buttons behave correctly changes composing region', (WidgetTester tester) async {
+      String? changedValue;
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        composing: TextRange(start: 0, end: 4),
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              selectionControls: materialTextSelectionControls,
+              onChanged: (String s) {
+                print('CAMILLE $s');
+                changedValue = s;
+              },
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                  spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+                ),
+            ),
+          ),
+        );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pumpAndSettle();
+
+      // Test misspelled word replacement buttons.
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
+      expect(find.text('sets'), findsOneWidget);
+      await tester.tap(find.text('sets'));
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.text, equals('sets test test'));
+
+      // Test delete button.
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('DELETE'));
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.text, equals(' test test'));
+    });
   });
 
   group('magnifier', () {
