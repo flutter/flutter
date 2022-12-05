@@ -1510,7 +1510,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
-    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
     : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
@@ -1820,7 +1820,9 @@ class TextInput {
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
         _currentConnection!._client.performPrivateCommand(
           firstArg['action'] as String,
-          firstArg['data'] as Map<String, dynamic>,
+          firstArg['data'] == null
+              ? <String, dynamic>{}
+              : firstArg['data'] as Map<String, dynamic>,
         );
         break;
       case 'TextInputClient.updateFloatingCursor':

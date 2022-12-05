@@ -241,6 +241,33 @@ void main() {
       expect(record[0].exception.toString(), matches(RegExp(r'\brange.start >= 0 && range.start <= text.length\b')));
       expect(record[0].exception.toString(), matches(RegExp(r'\bRange start 2 is out of text of length 1\b')));
     });
+
+    test('FloatingCursor coordinates type-casting', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/109632.
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      FlutterError.onError = errors.add;
+
+      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateFloatingCursor',
+        'args': <dynamic>[
+          -1,
+          'FloatingCursorDragState.update',
+          <String, dynamic>{ 'X': 2, 'Y': 3 },
+        ],
+      });
+
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(errors, isEmpty);
+    });
   });
 
   group('TextInputConfiguration', () {
@@ -506,6 +533,32 @@ void main() {
       expect(client.latestMethodCall, 'performPrivateCommand');
     });
 
+    test('TextInputClient performPrivateCommand method is called with no data at all', () async {
+      // Assemble a TextInputConnection so we can verify its change in state.
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send performPrivateCommand message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[
+          1,
+          jsonDecode('{"action": "actionCommand"}'), // No `data` parameter.
+        ],
+        'method': 'TextInputClient.performPrivateCommand',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'performPrivateCommand');
+      expect(client.latestPrivateCommandData, <String, dynamic>{});
+    });
+
     test('TextInputClient showAutocorrectionPromptRect method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
@@ -704,6 +757,7 @@ class FakeTextInputClient with TextInputClient {
   FakeTextInputClient(this.currentTextEditingValue);
 
   String latestMethodCall = '';
+  late Map<String, dynamic>? latestPrivateCommandData;
 
   @override
   TextEditingValue currentTextEditingValue;
@@ -717,8 +771,9 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic> data) {
+  void performPrivateCommand(String action, Map<String, dynamic>? data) {
     latestMethodCall = 'performPrivateCommand';
+    latestPrivateCommandData = data;
   }
 
   @override
