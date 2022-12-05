@@ -424,7 +424,8 @@ class ManifestAssetBundle implements AssetBundle {
       // For all platforms, include the shaders unconditionally. They are
       // small, and whether they're used is determined only by the app source
       // code and not by the Flutter manifest.
-      ..._getMaterialShaders(),
+      if (targetPlatform != TargetPlatform.web_javascript)
+        ..._getMaterialShaders(),
     ];
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
