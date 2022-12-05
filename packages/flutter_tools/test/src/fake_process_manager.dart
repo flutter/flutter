@@ -112,7 +112,12 @@ class FakeCommand {
   ) {
     expect(command.length, this.command.length);
     for(int i = 0; i < command.length; i++) {
-      expect(command[i], matches(this.command[i]));
+      final Pattern expected = this.command[i];
+      if (expected is String) {
+        expect(command[i], expected);
+      } else {
+        expect(command[i], matches(this.command[i]));
+      }
     }
     if (this.workingDirectory != null) {
       expect(this.workingDirectory, workingDirectory);
