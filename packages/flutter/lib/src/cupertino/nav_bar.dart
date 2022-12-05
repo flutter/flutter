@@ -33,6 +33,8 @@ const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
 
+const double _kNavBarBottomPadding = 8.0;
+
 const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
@@ -836,7 +838,7 @@ class _LargeTitleNavigationBarSliverDelegate
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(
                     start: _kNavBarEdgePadding,
-                    bottom: 8.0, // Bottom has a different padding.
+                    bottom: _kNavBarBottomPadding
                   ),
                   child: SafeArea(
                     top: false,
@@ -953,11 +955,11 @@ class _RenderLargeTitle extends RenderShiftedBox {
   }
 
   double _scale = 1.0;
-  Size _childSize = Size.zero;
 
   @override
   void performLayout() {
     final RenderBox? child = this.child;
+    Size childSize = Size.zero;
 
     size = constraints.biggest;
 
@@ -971,12 +973,15 @@ class _RenderLargeTitle extends RenderShiftedBox {
     final double maxScale = child.size.width != 0.0
       ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
       : 1.1;
-    // The coefficient 0.03 may need some tweaking.
-    _scale = clampDouble(1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - 8)) / (_kNavBarLargeTitleHeightExtension - 8) * 0.03, 1.0, maxScale);
+    _scale = clampDouble(
+      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
+      1.0,
+      maxScale,
+    );
 
-    _childSize = child.size * _scale;
+    childSize = child.size * _scale;
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = alignment.alongOffset(size - _childSize as Offset);
+    childParentData.offset = alignment.alongOffset(size - childSize as Offset);
   }
 
   @override

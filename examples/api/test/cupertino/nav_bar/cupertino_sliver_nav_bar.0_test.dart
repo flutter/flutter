@@ -20,7 +20,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Large title is hidden and at higher position.
-    expect(tester.getBottomLeft(find.text('Contacts').first).dy, 36.0 + 8);
+    expect(tester.getBottomLeft(find.text('Contacts').first).dy, 36.0 + 8); // Static part + padding.
   });
 
   testWidgets('Middle widget is visible in both collapsed and expanded states', (WidgetTester tester) async {
@@ -43,7 +43,7 @@ void main() {
 
     // Large title is hidden and middle title is visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
-    expect(tester.getBottomLeft(find.text('Family').first).dy, 36.0 + 8);
+    expect(tester.getBottomLeft(find.text('Family').first).dy, 36.0 + 8); // Static part + padding.
   });
 
   testWidgets('CupertinoSliverNavigationBar with previous route has back button', (WidgetTester tester) async {
