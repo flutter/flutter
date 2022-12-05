@@ -39,6 +39,19 @@ void testMain() {
       expect(firstChild.tagName, equalsIgnoringCase('style'));
     });
 
+    test('Attaches styling to remove password reveal icons on Edge', () {
+      final DomElement? edgeStyleElement = hostNode.querySelector('#ms-reveal');
+
+      expect(edgeStyleElement, isNotNull);
+      expect(edgeStyleElement!.innerText, 'input::-ms-reveal {display: none;}');
+    }, skip: !isEdge);
+
+    test('Does not attach the Edge-specific style tag on non-Edge browsers',
+        () {
+      final DomElement? edgeStyleElement = hostNode.querySelector('#ms-reveal');
+      expect(edgeStyleElement, isNull);
+    }, skip: isEdge);
+
     _runDomTests(hostNode);
   });
 

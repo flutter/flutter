@@ -91,9 +91,9 @@ class ShadowDomHostNode implements HostNode {
   /// This also calls [applyGlobalCssRulesToSheet], defined in dom_renderer.
   ShadowDomHostNode(DomElement root) :
     assert(
-    root.isConnected ?? true,
-    'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.',
-    ) {
+          root.isConnected ?? true,
+          'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.',
+        ) {
     _shadow = root.attachShadow(<String, dynamic>{
       'mode': 'open',
       // This needs to stay false to prevent issues like this:
@@ -111,6 +111,19 @@ class ShadowDomHostNode implements HostNode {
       browserEngine: browserEngine,
       hasAutofillOverlay: browserHasAutofillOverlay(),
     );
+
+    // Removes password reveal icon for text inputs in Edge browsers.
+    // Style tag needs to be injected into DOM because non-Edge
+    // browsers will crash trying to parse -ms-reveal CSS selectors if added via
+    // sheet.insertRule().
+    // See: https://github.com/flutter/flutter/issues/83695
+    if (isEdge) {
+      final DomHTMLStyleElement edgeStyleElement = createDomHTMLStyleElement();
+
+      edgeStyleElement.id = 'ms-reveal';
+      edgeStyleElement.innerText = 'input::-ms-reveal {display: none;}';
+      _shadow.appendChild(edgeStyleElement);
+    }
   }
 
   late DomShadowRoot _shadow;
