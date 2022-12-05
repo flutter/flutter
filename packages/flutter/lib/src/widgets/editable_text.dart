@@ -3823,7 +3823,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void performSelector(String selectorName) {
-    print(selectorName);
     final Intent? intent = intentForMacOSSelector(selectorName);
 
     if (intent != null) {
@@ -4890,54 +4889,19 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       ));
     }
 
-    final LineBoundary lineBoundary = LineBoundary(state.renderEditable);
-
     TextPosition extent = selection.extent;
     // If continuesAtWrap is true extent and is at the relevant wordwrap, then
     // move it just to the other side of the wordwrap.
     if (intent.continuesAtWrap) {
       if (intent.forward && _isAtWordwrapUpstream(extent)) {
-        print('moving to downstream');
         extent = TextPosition(
           offset: extent.offset,
         );
       } else if (!intent.forward && _isAtWordwrapDownstream(extent)) {
-        print('moving to upstream');
         extent = TextPosition(
           offset: extent.offset,
           affinity: TextAffinity.upstream,
         );
-      }
-    }
-
-    // Check previous extent.
-    print('original extent $extent');
-    TextPosition begOfCurrentLine = lineBoundary.getLeadingTextBoundaryAt(extent.offset);
-    TextPosition endOfCurrentLine = lineBoundary.getTrailingTextBoundaryAt(extent.offset);
-
-    final VerticalCaretMovementRun currentRun = state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
-
-    if (intent.forward) {
-      // If our current extent is at the end of the current line then
-      // the caret will move down vertically. The new caret position
-      // is used as the target when finding the next paragraph boundary
-      // to extend the selection to.
-      print('case1 $endOfCurrentLine $extent');
-      if (endOfCurrentLine.offset == extent.offset) {
-        print('case2');
-        currentRun.moveNext();
-        extent = lineBoundary.getTrailingTextBoundaryAt(currentRun.current);
-      }
-    } else {
-      // If our current extent is at the beginning of the current line then
-      // the caret will move up vertically to the previous line. The new caret
-      // position is used as the target when finding the next paragraph boundary
-      // to extend the selection to.
-      print('case3 $begOfCurrentLine $extent');
-      if (begOfCurrentLine.offset == selection.base.offset) {
-        print('case4');
-        currentRun.movePrevious();
-        extent = lineBoundary.getLeadingTextBoundaryAt(currentRun.current);
       }
     }
 
