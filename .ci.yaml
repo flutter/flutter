@@ -1394,7 +1394,6 @@ targets:
   - name: Linux_android animated_complex_image_filtered_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3715,6 +3714,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_impeller_ios__timeline_summary
 
+  - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
+
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4620,6 +4629,58 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
+
+  - name: Linux flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+
+  - name: Mac flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Mac_arm64 flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Windows flutter_packaging_beta
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+    properties:
+      task_name: flutter_packaging_beta
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
 
   # TODO(drewroengoogle): Remove this target when the release scheduler is
   # confirmed to be working correctly and as intended.
