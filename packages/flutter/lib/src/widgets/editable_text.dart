@@ -4967,7 +4967,6 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
     final bool shouldMove = intent is ExtendSelectionVerticallyToAdjacentPageIntent
       ? currentRun.moveByOffset((intent.forward ? 1.0 : -1.0) * state.renderEditable.size.height)
       : intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
-    final bool shouldSearchForParagraph = intent is ExtendSelectionVerticallyToAdjacentParagraphIntent;
     final TextPosition newExtent = shouldMove
       ? currentRun.current
       : intent.forward ? TextPosition(offset: state._value.text.length) : const TextPosition(offset: 0);
