@@ -6,6 +6,8 @@
 
 import 'package:flutter/material.dart';
 
+void main() { runApp(const ListenableBuilderExample()); }
+
 class CounterBody extends StatelessWidget {
   const CounterBody({super.key, required this.counterValueNotifier});
 
@@ -18,9 +20,9 @@ class CounterBody extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           const Text('Current counter value:'),
-          // Thanks to the [ListenableBuilder], only the widget displaying the
-          // current count is rebuilt when `counterValueNotifier` notifies its
-          // listeners. The [Text] widget above and [CounterBody] itself aren't
+          // Thanks to the ListenableBuilder, only the widget displaying the
+          // current count is rebuilt when counterValueNotifier notifies its
+          // listeners. The Text widget above and CounterBody itself aren't
           // rebuilt.
           ListenableBuilder(
             listenable: counterValueNotifier,
@@ -34,21 +36,21 @@ class CounterBody extends StatelessWidget {
   }
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class ListenableBuilderExample extends StatefulWidget {
+  const ListenableBuilderExample({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ListenableBuilderExample> createState() => _ListenableBuilderExampleState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('ListenableBuilder example')),
+        appBar: AppBar(title: const Text('ListenableBuilder Example')),
         body: CounterBody(counterValueNotifier: _counter),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _counter.value++,
@@ -57,8 +59,4 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(const MyApp());
 }
