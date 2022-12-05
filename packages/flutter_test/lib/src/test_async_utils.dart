@@ -267,6 +267,11 @@ class TestAsyncUtils {
         '\nWhen the first $originalName was called, this was the stack',
         scope.creationStack,
       ));
+    } else {
+      information.add(DiagnosticsStackTrace(
+        '\nWhen the first function was called, this was the stack',
+        scope.creationStack,
+      ));
     }
     throw FlutterError.fromParts(information);
   }
@@ -302,6 +307,10 @@ class TestAsyncUtils {
 
   static _StackEntry? _findResponsibleMethod(StackTrace rawStack, String method, List<DiagnosticsNode> information) {
     assert(method == 'guard' || method == 'guardSync');
+    // Web/JavaScript stack traces use a different format.
+    if (kIsWeb) {
+      return null;
+    }
     final List<String> stack = rawStack.toString().split('\n').where(_stripAsynchronousSuspensions).toList();
     assert(stack.last == '');
     stack.removeLast();
