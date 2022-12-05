@@ -196,7 +196,7 @@ void main() {
   testUsingContext('ipa build fails when there is no ios project', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -209,7 +209,6 @@ void main() {
       const <String>['build', 'ipa', '--no-pub']
     ), throwsToolExit(message: 'Application not configured for iOS'));
   }, overrides: <Type, Generator>{
-    Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -218,7 +217,7 @@ void main() {
   testUsingContext('ipa build fails in debug with code analysis', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -231,7 +230,6 @@ void main() {
       const <String>['build', 'ipa', '--no-pub', '--debug', '--analyze-size']
     ), throwsToolExit(message: '--analyze-size" can only be used on release builds'));
   }, overrides: <Type, Generator>{
-    Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -267,7 +265,7 @@ void main() {
       () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -289,7 +287,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () =>
         FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -298,7 +295,7 @@ void main() {
     final Directory bogus = fileSystem.directory('bogus')..createSync();
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -320,14 +317,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build fails when --export-options-plist and --export-method are used together', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -351,14 +347,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build reports when IPA fails', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -400,7 +395,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -408,7 +402,7 @@ void main() {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -451,7 +445,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -459,7 +452,7 @@ void main() {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -502,7 +495,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -510,7 +502,7 @@ void main() {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -553,14 +545,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build invokes xcode build with verbosity', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -581,14 +572,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -632,14 +622,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('code size analysis fails when app not found', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -657,14 +646,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -710,7 +698,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -723,7 +710,7 @@ void main() {
       ..createSync();
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -752,14 +739,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Trace error if xcresult is empty.', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -785,14 +771,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Display xcresult issues on console if parsed.', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -819,14 +804,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -855,14 +839,13 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
   testUsingContext('Trace if xcresult bundle does not exist.', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -885,7 +868,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -893,7 +875,7 @@ void main() {
   testUsingContext('Extra error message for provision profile issue in xcresulb bundle.', () async {
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -923,7 +905,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -947,7 +928,7 @@ void main() {
 
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -975,7 +956,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
@@ -1003,7 +983,7 @@ void main() {
 
     final BuildCommand command = BuildCommand(
       flutterUsage: TestUsage(),
-      platform: FakePlatform(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1030,7 +1010,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
@@ -1053,6 +1032,8 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1069,7 +1050,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
@@ -1092,6 +1072,8 @@ void main() {
     };
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1108,7 +1090,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
@@ -1173,6 +1154,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1189,7 +1172,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1252,6 +1234,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1265,7 +1249,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1308,6 +1291,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1321,7 +1306,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1364,6 +1348,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1377,7 +1363,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1420,6 +1405,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1433,7 +1420,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1477,6 +1463,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1491,7 +1479,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1578,6 +1565,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1595,7 +1584,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1656,6 +1644,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1672,7 +1662,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -1734,6 +1723,8 @@ void main() {
     createMinimalMockProjectFiles();
 
     final BuildCommand command = BuildCommand(
+      flutterUsage: TestUsage(),
+      platform: macosPlatform,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -1750,7 +1741,6 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
-    Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
