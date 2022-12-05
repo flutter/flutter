@@ -1093,6 +1093,13 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
   }
 }
 
+/// The default value of [MediaQueryData.routeTraversalEdgeBehavior].
+///
+/// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
+const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
+  ? TraversalEdgeBehavior.leaveFlutterView
+  : TraversalEdgeBehavior.closedLoop;
+
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
 /// Many apps have a navigator near the top of their widget hierarchy in order
@@ -1402,10 +1409,12 @@ class Navigator extends StatefulWidget {
     this.observers = const <NavigatorObserver>[],
     this.requestFocus = true,
     this.restorationScopeId,
+    this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
   }) : assert(pages != null),
        assert(onGenerateInitialRoutes != null),
        assert(transitionDelegate != null),
        assert(observers != null),
+       assert(routeTraversalEdgeBehavior != null),
        assert(reportsRouteUpdateToEngine != null);
 
   /// The list of pages with which to populate the history.
@@ -1512,6 +1521,21 @@ class Navigator extends StatefulWidget {
   ///    to push a restorable route unto the navigator.
   /// {@endtemplate}
   final String? restorationScopeId;
+
+  /// Controls the transfer of focus beyond the first and the last items of a
+  /// focus scope that defines focus traversal of widgets within a route.
+  ///
+  /// {@template flutter.widgets.navigator.routeTraversalEdgeBehavior}
+  /// The focus inside routes installed in the top of the app affects how
+  /// the app behaves with respect to the platform content surrounding it.
+  /// For example, on the web, an app is at a minimum surrounded by browser UI,
+  /// such as the address bar, browser tabs, and more. The user should be able
+  /// to reach browser UI using normal focus shortcuts. Similarly, if the app
+  /// is embedded within an `<iframe>` or inside a custom element, it should
+  /// be able to participate in the overall focus traversal, including elements
+  /// not rendered by Flutter.
+  /// {@endtemplate}
+  final TraversalEdgeBehavior routeTraversalEdgeBehavior;
 
   /// The name for the default route of the application.
   ///

@@ -794,7 +794,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.capturedThemes,
     this.constraints,
     required this.clipBehavior,
-  }) : itemSizes = List<Size?>.filled(items.length, null);
+  }) : itemSizes = List<Size?>.filled(items.length, null),
+       // Menus always cycle focus through its items irrespective of the
+       // focus traversal edge behavior set in the MediaQuery.
+       super(traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop);
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;

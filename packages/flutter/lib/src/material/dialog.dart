@@ -1238,6 +1238,9 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
+/// The `traversalEdgeBehavior` argument controls the transfer of focus
+/// beyond the first and the last items of the dialog route.
+///
 /// ** See code in examples/api/lib/material/dialog/show_dialog.2.dart **
 /// {@end-tool}
 ///
@@ -1263,6 +1266,7 @@ Future<T?> showDialog<T>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  TraversalEdgeBehavior? traversalEdgeBehavior,
 }) {
   assert(builder != null);
   assert(barrierDismissible != null);
@@ -1289,6 +1293,7 @@ Future<T?> showDialog<T>({
     settings: routeSettings,
     themes: themes,
     anchorPoint: anchorPoint,
+    traversalEdgeBehavior: traversalEdgeBehavior,
   ));
 }
 
@@ -1367,6 +1372,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     bool useSafeArea = true,
     super.settings,
     super.anchorPoint,
+    super.traversalEdgeBehavior,
   }) : assert(barrierDismissible != null),
        super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {

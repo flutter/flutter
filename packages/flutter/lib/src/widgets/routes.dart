@@ -15,7 +15,9 @@ import 'basic.dart';
 import 'display_feature_sub_screen.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -835,24 +837,34 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
     ];
     _listenable = Listenable.merge(animations);
-    if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
-    }
   }
 
   @override
   void didUpdateWidget(_ModalScope<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
-    if (widget.route.isCurrent && _shouldRequestFocus) {
-      widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
-    }
+    _updateFocusScopeNode();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _page = null;
+    _updateFocusScopeNode();
+  }
+
+  void _updateFocusScopeNode() {
+    final TraversalEdgeBehavior traversalEdgeBehavior;
+    final ModalRoute<T> route = widget.route;
+    if (route.traversalEdgeBehavior != null) {
+      traversalEdgeBehavior = route.traversalEdgeBehavior!;
+    } else {
+      traversalEdgeBehavior = route.navigator!.widget.routeTraversalEdgeBehavior;
+    }
+    focusScopeNode.traversalEdgeBehavior = traversalEdgeBehavior;
+    if (route.isCurrent && _shouldRequestFocus) {
+      route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
+    }
   }
 
   void _forceRebuildPage() {
@@ -984,6 +996,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ModalRoute({
     super.settings,
     this.filter,
+    this.traversalEdgeBehavior,
   });
 
   /// The filter to add to the barrier.
@@ -991,6 +1004,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// If given, this filter will be applied to the modal barrier using
   /// [BackdropFilter]. This allows blur effects, for example.
   final ui.ImageFilter? filter;
+
+  /// {@macro flutter.focus.TraversalEdgeBehavior}
+  ///
+  /// If set to null, [MediaQueryData.routeTraversalEdgeBehavior] is used.
+  final TraversalEdgeBehavior? traversalEdgeBehavior;
 
   // The API for general users of this class
 
@@ -1771,6 +1789,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   PopupRoute({
     super.settings,
     super.filter,
+    super.traversalEdgeBehavior,
   });
 
   @override
@@ -2018,6 +2037,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     RouteTransitionsBuilder? transitionBuilder,
     super.settings,
     this.anchorPoint,
+    super.traversalEdgeBehavior,
   }) : assert(barrierDismissible != null),
        _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
