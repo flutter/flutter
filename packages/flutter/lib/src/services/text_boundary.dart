@@ -128,6 +128,7 @@ class LineBoundary extends TextBoundary {
 /// A paragraph is defined as the range between line terminators. If no
 /// line terminator exist then the paragraph boundary is the entire document.
 class ParagraphBoundary extends TextBoundary {
+  /// Creates a [ParagraphBoundary] with the text.
   const ParagraphBoundary(this._text);
 
   final String _text;
@@ -159,11 +160,10 @@ class ParagraphBoundary extends TextBoundary {
   // direction. The returning range includes the line terminator.
   TextRange _getParagraphAtOffset(TextPosition textPosition) {
     final CharacterRange charIter = _text.characters.iterator;
+    final int tappedTextOffset = textPosition.offset;
 
     int graphemeStart = 0;
     int graphemeEnd = 0;
-
-    int tappedTextOffset = textPosition.offset;
 
     while(charIter.moveNext()) {
       graphemeEnd += charIter.current.length;
@@ -185,7 +185,7 @@ class ParagraphBoundary extends TextBoundary {
 
 /// A text boundary that uses the entire document as logical boundary.
 class DocumentBoundary extends TextBoundary {
-  /// Creates a [DocumentBoundary] with the text
+  /// Creates a [DocumentBoundary] with the text.
   const DocumentBoundary(this._text);
 
   final String _text;
