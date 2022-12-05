@@ -2751,7 +2751,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void insertContent(KeyboardInsertedContent content) {
-    assert(widget.contentInsertionConfiguration?.allowedMimeTypes.contains(content.mimeType ?? '') ?? false);
+    assert(widget.contentInsertionConfiguration?.allowedMimeTypes.contains(content.mimeType) ?? false);
     widget.contentInsertionConfiguration?.onContentInserted.call(content);
   }
 
