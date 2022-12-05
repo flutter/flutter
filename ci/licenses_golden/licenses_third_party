@@ -1,4 +1,4 @@
-Signature: a4a6a65ff755d69dcd90b4b033422a3c
+Signature: d85c9da7cfc67b15bd1d9beb63ab726f
 
 UNUSED LICENSES:
 
@@ -13972,6 +13972,7 @@ FILE: ../../../third_party/dart/runtime/bin/thread_absl.h
 FILE: ../../../third_party/dart/runtime/lib/integers.h
 FILE: ../../../third_party/dart/runtime/platform/mach_o.h
 FILE: ../../../third_party/dart/runtime/platform/pe.h
+FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/download.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/bin/explore.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/heapsnapshot.dart
 FILE: ../../../third_party/dart/runtime/tools/heapsnapshot/lib/src/analysis.dart
