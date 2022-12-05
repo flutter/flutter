@@ -27,7 +27,11 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
-/** For apps only. Provides the flutter extension used in app/build.gradle. */
+/** For apps only. Provides the flutter extension used in app/build.gradle.
+ * The versions specified here should match the values used in
+ * ../lib/src/android/gradle_utils.dart, so when bumping, make sure to update
+ * the versions specified there.
+*/
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
     static int compileSdkVersion = 31
@@ -61,7 +65,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        /* When bumping, also update ndkVersion above. */
+        /** When bumping, also update ndkVersion above, as well as the Android Gradle Plugin
+         * version in ../lib/src/android/gradle_utils.dart.
+         */
         classpath 'com.android.tools.build:gradle:7.3.0'
     }
 }
