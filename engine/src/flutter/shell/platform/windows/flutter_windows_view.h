@@ -22,7 +22,6 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
-#include "flutter/shell/platform/windows/platform_handler.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
 #include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
@@ -379,9 +378,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
 
   // Handlers for text events from Windows.
   std::unique_ptr<TextInputPlugin> text_input_plugin_;
-
-  // Handler for the flutter/platform channel.
-  std::unique_ptr<PlatformHandler> platform_handler_;
 
   // Handler for cursor events.
   std::unique_ptr<CursorHandler> cursor_handler_;

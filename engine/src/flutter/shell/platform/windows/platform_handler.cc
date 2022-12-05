@@ -199,14 +199,14 @@ int ScopedClipboard::SetString(const std::wstring string) {
 
 PlatformHandler::PlatformHandler(
     BinaryMessenger* messenger,
-    FlutterWindowsView* view,
+    FlutterWindowsEngine* engine,
     std::optional<std::function<std::unique_ptr<ScopedClipboardInterface>()>>
         scoped_clipboard_provider)
     : channel_(std::make_unique<MethodChannel<rapidjson::Document>>(
           messenger,
           kChannelName,
           &JsonMethodCodec::GetInstance())),
-      view_(view) {
+      engine_(engine) {
   channel_->SetMethodCallHandler(
       [this](const MethodCall<rapidjson::Document>& call,
              std::unique_ptr<MethodResult<rapidjson::Document>> result) {
@@ -226,10 +226,17 @@ PlatformHandler::~PlatformHandler() = default;
 void PlatformHandler::GetPlainText(
     std::unique_ptr<MethodResult<rapidjson::Document>> result,
     std::string_view key) {
+  const FlutterWindowsView* view = engine_->view();
+  if (view == nullptr) {
+    result->Error(kClipboardError,
+                  "Clipboard is not available in Windows headless mode");
+    return;
+  }
+
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
-  int open_result = clipboard->Open(std::get<HWND>(*view_->GetRenderTarget()));
+  int open_result = clipboard->Open(std::get<HWND>(*view->GetRenderTarget()));
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);
@@ -262,11 +269,18 @@ void PlatformHandler::GetPlainText(
 
 void PlatformHandler::GetHasStrings(
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  const FlutterWindowsView* view = engine_->view();
+  if (view == nullptr) {
+    result->Error(kClipboardError,
+                  "Clipboard is not available in Windows headless mode");
+    return;
+  }
+
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
   bool hasStrings;
-  int open_result = clipboard->Open(std::get<HWND>(*view_->GetRenderTarget()));
+  int open_result = clipboard->Open(std::get<HWND>(*view->GetRenderTarget()));
   if (open_result != kErrorSuccess) {
     // Swallow errors of type ERROR_ACCESS_DENIED. These happen when the app is
     // not in the foreground and GetHasStrings is irrelevant.
@@ -293,10 +307,17 @@ void PlatformHandler::GetHasStrings(
 void PlatformHandler::SetPlainText(
     const std::string& text,
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  const FlutterWindowsView* view = engine_->view();
+  if (view == nullptr) {
+    result->Error(kClipboardError,
+                  "Clipboard is not available in Windows headless mode");
+    return;
+  }
+
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
-  int open_result = clipboard->Open(std::get<HWND>(*view_->GetRenderTarget()));
+  int open_result = clipboard->Open(std::get<HWND>(*view->GetRenderTarget()));
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);

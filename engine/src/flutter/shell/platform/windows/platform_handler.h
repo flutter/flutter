@@ -18,7 +18,7 @@
 
 namespace flutter {
 
-class FlutterWindowsView;
+class FlutterWindowsEngine;
 class ScopedClipboardInterface;
 
 // Handler for internal system channels.
@@ -26,7 +26,7 @@ class PlatformHandler {
  public:
   explicit PlatformHandler(
       BinaryMessenger* messenger,
-      FlutterWindowsView* view,
+      FlutterWindowsEngine* engine,
       std::optional<std::function<std::unique_ptr<ScopedClipboardInterface>()>>
           scoped_clipboard_provider = std::nullopt);
 
@@ -68,8 +68,8 @@ class PlatformHandler {
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<MethodChannel<rapidjson::Document>> channel_;
 
-  // A reference to the Flutter view.
-  FlutterWindowsView* view_;
+  // A reference to the Flutter engine.
+  FlutterWindowsEngine* engine_;
 
   // A scoped clipboard provider that can be passed in for mocking in tests.
   // Use this to acquire clipboard in each operation to avoid blocking clipboard

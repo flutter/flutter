@@ -207,6 +207,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   // Set up internal channels.
   // TODO: Replace this with an embedder.h API. See
   // https://github.com/flutter/flutter/issues/71099
+  platform_handler_ =
+      std::make_unique<PlatformHandler>(messenger_wrapper_.get(), this);
   settings_plugin_ = std::make_unique<SettingsPlugin>(messenger_wrapper_.get(),
                                                       task_runner_.get());
 }
