@@ -39,7 +39,7 @@ class FakeCommand {
 
   /// The exact commands that must be matched for this [FakeCommand] to be
   /// considered correct.
-  final List<String> command;
+  final List<Pattern> command;
 
   /// The exact working directory that must be matched for this [FakeCommand] to
   /// be considered correct.
@@ -110,7 +110,10 @@ class FakeCommand {
     Map<String, String>? environment,
     Encoding? encoding,
   ) {
-    expect(command, equals(this.command));
+    expect(command.length, this.command.length);
+    for(int i = 0; i < command.length; i++) {
+      expect(command[i], matches(this.command[i]));
+    }
     if (this.workingDirectory != null) {
       expect(this.workingDirectory, workingDirectory);
     }
