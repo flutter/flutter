@@ -4702,7 +4702,7 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      validation: docs
-      validation_name: Docs
+      validation: docs_deploy
+      validation_name: Docs_deploy
       firebase_project: master-docs-flutter-dev
       release_ref: refs/heads/master
