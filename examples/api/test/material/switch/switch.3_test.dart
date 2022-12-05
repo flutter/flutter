@@ -12,8 +12,8 @@ void main() {
       const example.SwitchApp(),
     );
 
-    final Finder switchFinder = find.byType(Switch);
-    Switch materialSwitch = tester.firstWidget<Switch>(switchFinder);
+    final Finder switchFinder = find.byType(Switch).first;
+    Switch materialSwitch = tester.widget<Switch>(switchFinder);
     expect(materialSwitch.value, true);
 
     await tester.tap(switchFinder);
