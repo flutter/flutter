@@ -235,7 +235,7 @@ class LookupBoundary extends InheritedWidget {
     });
   }
 
-  /// Walks the none-[LookupBoundary] child [Element]s of the provided
+  /// Walks the non-[LookupBoundary] child [Element]s of the provided
   /// `context`.
   ///
   /// This method behaves exactly like [BuildContext.visitChildElements],
