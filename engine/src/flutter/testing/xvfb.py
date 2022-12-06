@@ -88,7 +88,7 @@ def StartVirtualX(child_build_name, build_dir):
   # run the tests even if we didn't start the tests from an X session.
   proc = subprocess.Popen([
       cmd, display, '-screen', '0', '1280x800x24', '-ac', '-dpi', '96',
-      '-maxclients', '512'
+      '-maxclients', '512', '-extension', 'MIT-SHM'
   ],
                           stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT,
