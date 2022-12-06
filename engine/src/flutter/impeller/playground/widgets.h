@@ -22,7 +22,7 @@
     impeller::Point mouse_pos(ImGui::GetMousePos().x, ImGui::GetMousePos().y); \
     static impeller::Point prev_mouse_pos = mouse_pos;                         \
                                                                                \
-    if (ImGui::IsKeyPressed('R')) {                                            \
+    if (ImGui::IsKeyPressed(ImGuiKey_R)) {                                     \
       position = reset_position;                                               \
       dragging = false;                                                        \
     }                                                                          \
