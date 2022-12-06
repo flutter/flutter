@@ -524,7 +524,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       }
     } else if (event is PointerUpEvent) {
       _up = event;
-      if (_wonArena && _up != null && _down != null) {
+      if (_wonArena && _down != null) {
         _consecutiveTapTimerStop();
         _consecutiveTapTimerStart();
         _wonArena = false;
@@ -697,7 +697,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// The frequency at which the [onDragUpdate] callback is called.
   ///
   /// The value defaults to null, meaning there is no delay for [onDragUpdate] callback.
-  /// 
+  ///
   /// See also:
   ///   * [TextSelectionGestureDetector], which uses this parameter to avoid excessive updates
   ///     text layouts in text fields.
