@@ -483,7 +483,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
-    if (maxConsecutiveTap != null && maxConsecutiveTap == _consecutiveTapCount) {
+    if (maxConsecutiveTap == _consecutiveTapCount) {
       _tapTrackerReset();
     }
     _up = null;
@@ -697,6 +697,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// The frequency at which the [onDragUpdate] callback is called.
   ///
   /// The value defaults to null, meaning there is no delay for [onDragUpdate] callback.
+  /// 
+  /// See also:
+  ///   * [TextSelectionGestureDetector], which uses this parameter to avoid excessive updates
+  ///     text layouts in text fields.
   Duration? dragUpdateThrottleFrequency;
 
   /// An upper bound for the amount of taps that can belong to one tap series.
