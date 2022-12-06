@@ -1,4 +1,4 @@
-Signature: ee2b6a0636b22af588df9b1ab683594d
+Signature: d0307ece4fc682fb9343775996e469e1
 
 UNUSED LICENSES:
 
@@ -7696,6 +7696,10 @@ FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/UploadTask.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnAsyncWait.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnAsyncWait.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnCaps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnCommandBuffer.cpp
