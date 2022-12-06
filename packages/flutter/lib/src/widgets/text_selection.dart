@@ -2038,8 +2038,8 @@ class TextSelectionGestureDetectorBuilder {
     }
     // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
     // in renderEditable. The gesture callbacks can use the details objects directly
-    // in callbacks variants that provide them [TapAndDragGestureRecognizer.onSecondaryTap]
-    // vs [TapAndDragGestureRecognizer.onSecondaryTapUp] instead of having to track state in
+    // in callbacks variants that provide them [TapGestureRecognizer.onSecondaryTap]
+    // vs [TapGestureRecognizer.onSecondaryTapUp] instead of having to track state in
     // renderEditable. When this migration is complete we should remove this hack.
     // See https://github.com/flutter/flutter/issues/115130.
     renderEditable.handleTapDown(TapDownDetails(globalPosition: details.globalPosition));
@@ -2415,11 +2415,11 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   ///  * [onSecondaryTap], which is typically called after this.
   @protected
-  void onSecondaryTapDown(TapDragDownDetails details) {
+  void onSecondaryTapDown(TapDownDetails details) {
     // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
     // in renderEditable. The gesture callbacks can use the details objects directly
-    // in callbacks variants that provide them [TapAndDragGestureRecognizer.onSecondaryTap]
-    // vs [TapAndDragGestureRecognizer.onSecondaryTapUp] instead of having to track state in
+    // in callbacks variants that provide them [TapGestureRecognizer.onSecondaryTap]
+    // vs [TapGestureRecognizer.onSecondaryTapUp] instead of having to track state in
     // renderEditable. When this migration is complete we should remove this hack.
     // See https://github.com/flutter/flutter/issues/115130.
     renderEditable.handleSecondaryTapDown(TapDownDetails(globalPosition: details.globalPosition));
@@ -2753,7 +2753,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureTapCallback? onSecondaryTap;
 
   /// Called for a tap down event with the secondary mouse button.
-  final GestureTapDragDownCallback? onSecondaryTapDown;
+  final GestureTapDownCallback? onSecondaryTapDown;
 
   /// Called for the first tap in a series of taps, consecutive taps do not call
   /// this method.
@@ -2892,6 +2892,15 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
+    gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+      () => TapGestureRecognizer(debugOwner: this),
+      (TapGestureRecognizer instance) {
+        instance
+          ..onSecondaryTap = widget.onSecondaryTap
+          ..onSecondaryTapDown = widget.onSecondaryTapDown;
+      },
+    );
+
     if (widget.onSingleLongTapStart != null ||
         widget.onSingleLongTapMoveUpdate != null ||
         widget.onSingleLongTapEnd != null) {
@@ -2918,8 +2927,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             ..dragStartBehavior = DragStartBehavior.down
             ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
             ..maxConsecutiveTap = _getDefaultMaxConsecutiveTap()
-            ..onSecondaryTap = widget.onSecondaryTap
-            ..onSecondaryTapDown = widget.onSecondaryTapDown
             ..onTapDown = _handleTapDown
             ..onDragStart = _handleDragStart
             ..onDragUpdate = _handleDragUpdate

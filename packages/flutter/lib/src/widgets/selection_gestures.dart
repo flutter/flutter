@@ -615,13 +615,12 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 ///
 /// [TapAndDragGestureRecognizer] competes on the pointer events of
 /// [kPrimaryButton] only when it has at least one non-null `onTap*`
-/// or `onDrag*` callback. It competes on the pointer events of [kSecondaryButton]
-/// when it has at least one non-null `onSecondaryTap*` callback.
+/// or `onDrag*` callback.
 ///
 /// It will declare defeat if it determines that a gesture is not a
 /// tap (e.g. if the pointer is dragged too far while it's contacting the
 /// screen) or a drag (e.g. if the pointer was not dragged far enough to
-/// be considered a drag or the button used is [kSecondaryButton]).
+/// be considered a drag.
 ///
 /// It will not immediately declare victory for every tap that it
 /// recognizes, but it will declare victory for every drag it recognizes.
@@ -737,7 +736,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onSecondaryTapDown], a similar callback but for a secondary button.
   ///  * [TapDragDownDetails], which is passed as an argument to this callback.
   GestureTapDragDownCallback? onTapDown;
 
@@ -754,7 +752,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onSecondaryTapUp], a similar callback but for a secondary button.
   ///  * [TapDragUpDetails], which is passed as an argument to this callback.
   GestureTapDragUpCallback? onTapUp;
 
@@ -770,40 +767,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// {@endtemplate}
   /// In this case both [onTapCancel] and [onDragCancel] will be called.
   GestureTapCancelCallback? onTapCancel;
-
-  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTap}
-  ///
-  /// See also:
-  ///
-  ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onSecondaryTapUp], which has the same timing but with details.
-  GestureTapCallback? onSecondaryTap;
-
-  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapDown}
-  ///
-  /// See also:
-  ///
-  ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onTapDown], a similar callback but for a primary button.
-  ///  * [TapDragDownDetails], which is passed as an argument to this callback.
-  GestureTapDragDownCallback? onSecondaryTapDown;
-
-  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapUp}
-  ///
-  /// See also:
-  ///
-  ///  * [onSecondaryTap], a handler triggered right after this one that doesn't
-  ///    pass any details about the tap.
-  ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onTapUp], a similar callback but for a primary button.
-  ///  * [TapDragUpDetails], which is passed as an argument to this callback.
-  GestureTapDragUpCallback? onSecondaryTapUp;
-
-  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapCancel}
-  ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.onTapCancel}
-  /// In this case both [onSecondaryTapCancel] and [onDragCancel] will be called.
-  GestureTapCancelCallback? onSecondaryTapCancel;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onStart}
   ///
@@ -918,13 +881,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
               onTapUp == null &&
               onTapCancel == null &&
               onDragCancel == null) {
-            return false;
-          }
-          break;
-        case kSecondaryButton:
-          if (onSecondaryTap == null &&
-              onSecondaryTapDown == null &&
-              onSecondaryTapUp == null) {
             return false;
           }
           break;
@@ -1149,19 +1105,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       untransformedEndPosition: event.localPosition
     ).distance * 1.sign;
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
-      if (event.buttons == kSecondaryButton) {
-        // Reject a right click drag. It is possible that the recognizer may have
-        // already won the arena at this point, if it did then the recognizer state
-        // is cleared to prepare to track the next [PointerDownEvent].
-        if (_wonArenaForPrimaryPointer) {
-          _stopDeadlineTimer();
-          _giveUpPointer(event.pointer);
-          _resetTaps();
-          _resetDragUpdateThrottle();
-        }
-        resolve(GestureDisposition.rejected);
-        return;
-      }
       _start = event;
       _dragState = _DragState.accepted;
       resolve(GestureDisposition.accepted);
@@ -1187,11 +1130,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           invokeCallback('onTapDown', () => onTapDown!(details));
         }
         break;
-      case kSecondaryButton:
-        if (onSecondaryTapDown != null) {
-          invokeCallback('onSecondaryTapDown', () => onSecondaryTapDown!(details));
-        }
-        break;
       default:
         assert(_initialButtons != null);
     }
@@ -1215,14 +1153,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       case kPrimaryButton:
         if (onTapUp != null) {
           invokeCallback('onTapUp', () => onTapUp!(upDetails));
-        }
-        break;
-      case kSecondaryButton:
-        if (onSecondaryTapUp != null) {
-          invokeCallback('onSecondaryTapUp', () => onSecondaryTapUp!(upDetails));
-        }
-        if (onSecondaryTap != null) {
-          invokeCallback<void>('onSecondaryTap', () => onSecondaryTap!());
         }
         break;
       default:
@@ -1315,11 +1245,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       case kPrimaryButton:
         if (onTapCancel != null) {
           invokeCallback('onTapCancel', onTapCancel!);
-        }
-        break;
-      case kSecondaryButton:
-        if (onSecondaryTapCancel != null) {
-          invokeCallback('onSecondaryTapCancel', onSecondaryTapCancel!);
         }
         break;
       default:
