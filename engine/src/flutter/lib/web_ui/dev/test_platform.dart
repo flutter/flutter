@@ -399,15 +399,15 @@ class BrowserPlatform extends PlatformPlugin {
   shelf.Response buildDirectoryHandler(shelf.Request request) {
     File fileInBuild = File(p.join(
       env.environment.webUiBuildDir.path,
+      getBuildDirForRenderer(renderer),
       request.url.path,
     ));
 
-    // If we can't find the file in the top-level `build` directory, then it
-    // may be in the renderer-specific `build` subdirectory.
+    // If we can't find the file in the renderer-specific `build` subdirectory,
+    // then it may be in the top-level `build` subdirectory.
     if (!fileInBuild.existsSync()) {
       fileInBuild = File(p.join(
         env.environment.webUiBuildDir.path,
-        getBuildDirForRenderer(renderer),
         request.url.path,
       ));
     }
