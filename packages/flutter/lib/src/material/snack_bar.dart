@@ -211,7 +211,7 @@ class SnackBar extends StatefulWidget {
     this.padding,
     this.width,
     this.shape,
-    this.hitBehavior = HitTestBehavior.translucent,
+    this.hitTestBehavior = HitTestBehavior.translucent,
     this.behavior,
     this.action,
     this.duration = _snackBarDisplayDuration,
@@ -311,18 +311,10 @@ class SnackBar extends StatefulWidget {
   /// circular corner radius of 4.0.
   final ShapeBorder? shape;
 
-  /// Defines how snackbar area will react to user hits (including margin)
+  /// Defines how the snack bar area, including margin, will behave during hit testing.
   ///
-  /// Use [HitTestBehavior.deferToChild] if you want the snack bar to react
-  /// only when hit directly on it
-  ///
-  /// [HitTestBehavior.opaque] if you want the snack bar to cover whole area
-  /// (including margin) to intercept all hits
-  ///
-  /// [HitTestBehavior.translucent] is the best option, because it
-  /// allows the snack bar not to intercept clicks under indents, but to
-  /// respond to the user gestures
-  final HitTestBehavior hitBehavior;
+  /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
+  final HitTestBehavior hitTestBehavior;
   
   /// This defines the behavior and location of the snack bar.
   ///
@@ -396,7 +388,7 @@ class SnackBar extends StatefulWidget {
       padding: padding,
       width: width,
       shape: shape,
-      hitBehavior: hitBehavior,
+      hitTestBehavior: hitTestBehavior,
       behavior: behavior,
       action: action,
       duration: duration,
@@ -618,7 +610,7 @@ class _SnackBarState extends State<SnackBar> {
       child: Dismissible(
         key: const Key('dismissible'),
         direction: widget.dismissDirection,
-        behavior: widget.hitBehavior,
+        behavior: widget.hitTestBehavior,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
