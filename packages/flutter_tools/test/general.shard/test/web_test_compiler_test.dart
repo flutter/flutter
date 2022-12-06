@@ -36,8 +36,8 @@ void main() {
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <Pattern>[
-        'Artifact.engineDartBinary.TargetPlatform.web_javascript', 
-        '--disable-dart-dev', 
+        'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+        '--disable-dart-dev',
         'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
         '--sdk-root',
         'HostArtifact.flutterWebSdk/',
@@ -57,7 +57,7 @@ void main() {
         'build',
         '--filesystem-scheme',
         'org-dartlang-app',
-        '--initialize-from-dill', 
+        '--initialize-from-dill',
         RegExp(r'^build\/(?:[a-z0-9]{32})\.cache\.dill$'),
         '--platform',
         'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill',
