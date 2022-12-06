@@ -978,12 +978,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       0.0,
       constraints.maxWidth - (
         _boxSize(icon).width
-        + contentPadding.left
+        + (prefixIcon !=null ? 0: contentPadding.left)
         + _boxSize(prefixIcon).width
         + _boxSize(prefix).width
         + _boxSize(suffix).width
         + _boxSize(suffixIcon).width
-        + contentPadding.right),
+        + (suffixIcon !=null ? 0: contentPadding.right)),
     );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
