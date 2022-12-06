@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/services.dart' show PlatformAssetBundle, StandardMessageCodec;
+import 'package:flutter/services.dart' show PlatformAssetBundle, StandardMessageCodec, AssetManifest;
 import 'package:flutter/widgets.dart';
 
 import '../common.dart';
@@ -23,9 +23,12 @@ void main() async {
 
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
+    // TODO--don't merge--Need to figure out if there is a way to fairly update this test.
+
     // This is effectively a test.
     // ignore: invalid_use_of_visible_for_testing_member
-    AssetImage.parseAssetManifest(assetManifest);
+    // AssetImage.parseAssetManifest(assetManifest);
+    AssetManifest.loadFromRootBundle();
   }
   watch.stop();
 
