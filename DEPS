@@ -236,7 +236,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '908edab91bffdea18876868b20bef94f44746d21',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '012a58f159c736a21d9c40a6b98f69e3a9910169',
 
    # Fuchsia compatibility
    #
@@ -257,7 +257,7 @@ deps = {
    Var('llvm_git') + '/llvm-project/libcxxabi' + '@' + '2ce528fb5e0f92e57c97ec3ff53b75359d33af12',
 
   'src/third_party/glfw':
-   Var('fuchsia_git') + '/third_party/glfw' + '@' + '78e6a0063d27ed44c2c4805606309744f6fb29fc',
+   Var('fuchsia_git') + '/third_party/glfw' + '@' + 'dd8a678a66f1967372e5a5e3deac41ebf65ee127',
 
   'src/third_party/shaderc':
    Var('github_git') + '/google/shaderc.git' + '@' + '7ea834ecc59258a5c13c3d3e6fa0582bdde7c543',
@@ -638,7 +638,7 @@ deps = {
   Var('dart_git') + '/external/github.com/google/vector_math.dart.git' + '@' + '0a5fd95449083d404df9768bc1b321b88a7d2eef', # 2.1.0
 
   'src/third_party/imgui':
-  Var('github_git') + '/ocornut/imgui.git' + '@' + '29d462ebce0275345a6ce4621d8fff0ded57c9e5',
+  Var('github_git') + '/ocornut/imgui.git' + '@' + '3ea0fad204e994d669f79ed29dcaf61cd5cb571d',
 
   'src/third_party/tinygltf':
   Var('github_git') + '/syoyo/tinygltf.git' + '@' + '9bb5806df4055ac973b970ba5b3e27ce27d98148',
