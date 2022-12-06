@@ -123,7 +123,7 @@ class WebTestCompiler {
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
-      platformDill: platformDillPath,
+      platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,
