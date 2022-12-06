@@ -26,6 +26,11 @@ double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
 // * If a [PointerMoveEvent] is tracked that has moved a sufficient global distance
 //   from the initial [PointerDownEvent] and it came before a [PointerUpEvent], then
 //   this recognizer moves from the [possible] state to [accepted].
+// * If a [PointerUpEvent] is tracked before the pointer has moved a sufficient global
+//   distance to be considered a drag, then this recognizer moves from the [possible]
+//   state to [ready].
+// * If a [PointerCancelEvent] is tracked then this recognizer moves from its current
+//   state to [ready].
 //
 // Once the recognizer has stopped tracking any remaining pointers, the recognizer
 // returns to the [ready] state.
