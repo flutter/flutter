@@ -374,6 +374,22 @@ void testMain() {
       await testTextStyle('font size', fontSize: 24);
     });
 
+    // A regression test for the special case when CanvasKit would default to
+    // a positive font size when Flutter specifies zero.
+    //
+    // See: https://github.com/flutter/flutter/issues/98248
+    test('text styles - zero font size', () async {
+      // This only sets the inner text style, but not the paragraph style, so
+      // "Hello" should be visible, but "World!" should disappear.
+      await testTextStyle('zero font size', fontSize: 0);
+
+      // This sets the paragraph font size to zero, but the inner text gets
+      // an explicit non-zero size that should override paragraph properties,
+      // so this time "Hello" should disappear, but "World!" should still be
+      // visible.
+      await testTextStyle('zero paragraph font size', paragraphFontSize: 0, fontSize: 14);
+    });
+
     test('text styles - letter spacing', () async {
       await testTextStyle('letter spacing', letterSpacing: 5);
     });
