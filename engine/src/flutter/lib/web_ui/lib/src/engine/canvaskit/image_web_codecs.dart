@@ -44,8 +44,6 @@ void debugRestoreWebDecoderExpireDuration() {
 class CkBrowserImageDecoder implements ui.Codec {
   CkBrowserImageDecoder._({
     required this.contentType,
-    required this.targetWidth,
-    required this.targetHeight,
     required this.data,
     required this.debugSource,
   });
@@ -53,8 +51,6 @@ class CkBrowserImageDecoder implements ui.Codec {
   static Future<CkBrowserImageDecoder> create({
     required Uint8List data,
     required String debugSource,
-    int? targetWidth,
-    int? targetHeight,
   }) async {
     // ImageDecoder does not detect image type automatically. It requires us to
     // tell it what the image type is.
@@ -76,8 +72,6 @@ class CkBrowserImageDecoder implements ui.Codec {
 
     final CkBrowserImageDecoder decoder = CkBrowserImageDecoder._(
       contentType: contentType,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
       data: data,
       debugSource: debugSource,
     );
@@ -88,8 +82,6 @@ class CkBrowserImageDecoder implements ui.Codec {
   }
 
   final String contentType;
-  final int? targetWidth;
-  final int? targetHeight;
   final Uint8List data;
   final String debugSource;
 
@@ -160,9 +152,6 @@ class CkBrowserImageDecoder implements ui.Codec {
 
         // Flutter always uses premultiplied alpha when decoding.
         premultiplyAlpha: 'premultiply',
-        desiredWidth: targetWidth,
-        desiredHeight: targetHeight,
-
         // "default" gives the browser the liberty to convert to display-appropriate
         // color space, typically SRGB, which is what we want.
         colorSpaceConversion: 'default',
