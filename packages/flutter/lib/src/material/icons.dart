@@ -26661,17 +26661,3 @@ class Icons {
   static const IconData zoom_out_map_outlined = IconData(0xf4dd, fontFamily: 'MaterialIcons');
   // END GENERATED ICONS
 }
-
-/// Annotation for classes that only provide static const [IconData] instances.
-///
-/// Use the constant instance [staticIconProvider].
-class StaticIconProvider {
-  const StaticIconProvider._();
-}
-
-/// Annotation for classes that only provide static const [IconData] instances.
-///
-/// This is a hint to the font tree shaker to ignore the constant instances
-/// of [IconData] appearing in the class when tracking which code points
-/// should be retained in the bundled font.
-const StaticIconProvider staticIconProvider = StaticIconProvider._();
