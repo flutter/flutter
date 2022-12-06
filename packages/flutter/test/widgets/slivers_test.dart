@@ -1028,7 +1028,6 @@ void main() {
     await tester.tap(find.text('Index 1'));
     expect(firstTapped, 0);
     expect(secondTapped, 1);
-    
   });
 
   testWidgets('SliverGrid.builder can build children', (WidgetTester tester) async {
