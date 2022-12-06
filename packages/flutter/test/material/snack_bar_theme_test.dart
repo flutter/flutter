@@ -21,9 +21,22 @@ void main() {
     expect(snackBarTheme.elevation, null);
     expect(snackBarTheme.shape, null);
     expect(snackBarTheme.behavior, null);
+    expect(snackBarTheme.width, null);
   });
 
-  testWidgets('Default SnackBarThemeData debugFillProperties', (WidgetTester tester) async {
+  test(
+      'SnackBarTheme throws assertion if width is provided with fixed behaviour',
+      () {
+    expect(
+        () => SnackBarThemeData(
+              behavior: SnackBarBehavior.fixed,
+              width: 300.0,
+            ),
+        throwsAssertionError);
+  });
+
+  testWidgets('Default SnackBarThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData().debugFillProperties(builder);
 
@@ -45,6 +58,7 @@ void main() {
       elevation: 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       behavior: SnackBarBehavior.floating,
+      width: 400.0,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -60,6 +74,7 @@ void main() {
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'behavior: SnackBarBehavior.floating',
+      'width: 400.0',
     ]);
   });
 
@@ -145,6 +160,7 @@ void main() {
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
+    const double snackBarWidth = 400.0;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(snackBarTheme: _snackBarTheme()),
@@ -155,6 +171,8 @@ void main() {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   backgroundColor: backgroundColor,
+                  behavior: SnackBarBehavior.floating,
+                  width: snackBarWidth,
                   elevation: elevation,
                   shape: shape,
                   content: const Text('I am a snack bar.'),
@@ -177,13 +195,20 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
 
+    final Finder materialFinder = _getSnackBarMaterialFinder(tester);
     final Material material = _getSnackBarMaterial(tester);
-    final RenderParagraph button = _getSnackBarActionTextRenderObject(tester, action);
+    final RenderParagraph button =
+        _getSnackBarActionTextRenderObject(tester, action);
 
     expect(material.color, backgroundColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
     expect(button.text.style!.color, textColor);
+    // Assert width.
+    final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder.first);
+    final Offset snackBarBottomRight = tester.getBottomRight(materialFinder.first);
+    expect(snackBarBottomLeft.dx, (800 - snackBarWidth) / 2); // Device width is 800.
+    expect(snackBarBottomRight.dx, (800 + snackBarWidth) / 2); // Device width is 800.
   });
 
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
@@ -376,10 +401,15 @@ SnackBarThemeData _snackBarTheme() {
 
 Material _getSnackBarMaterial(WidgetTester tester) {
   return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(SnackBar),
-      matching: find.byType(Material),
-    ).first,
+    _getSnackBarMaterialFinder(tester).first,
+  );
+}
+
+Finder _getSnackBarMaterialFinder(WidgetTester tester) {
+  return find.descendant(
+    of: find.byType(SnackBar),
+    matching: find.byType(Material),
+
   );
 }
 

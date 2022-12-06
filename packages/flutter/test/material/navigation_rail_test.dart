@@ -78,7 +78,7 @@ void main() {
       ),
     );
 
-    expect(_railMaterial(tester).color, equals(Colors.white));
+    expect(_railMaterial(tester).color, equals(const Color(0xFFFFFBFE))); // default surface color in M3 colorScheme
 
     await _pumpNavigationRail(
       tester,
@@ -4693,14 +4693,14 @@ Finder _opacityAboveLabel(String text) {
 
 // Only valid when labelType != all.
 double? _labelOpacity(WidgetTester tester, String text) {
-  // We search for both Opacity and FadeTransition since in some
+  // We search for both Visibility and FadeTransition since in some
   // cases opacity is animated, in other it's not.
-  final Iterable<Opacity> opacityWidgets = tester.widgetList<Opacity>(find.ancestor(
+  final Iterable<Visibility> visibilityWidgets = tester.widgetList<Visibility>(find.ancestor(
     of: find.text(text),
-    matching: find.byType(Opacity),
+    matching: find.byType(Visibility),
   ));
-  if (opacityWidgets.isNotEmpty) {
-    return opacityWidgets.single.opacity;
+  if (visibilityWidgets.isNotEmpty) {
+    return visibilityWidgets.single.visible ? 1.0 : 0.0;
   }
 
   final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(

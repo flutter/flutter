@@ -96,6 +96,7 @@ class FilledButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _FilledButtonWithIcon;
@@ -138,6 +139,7 @@ class FilledButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) {
@@ -151,6 +153,7 @@ class FilledButton extends ButtonStyleButton {
       focusNode: focusNode,
       autofocus: autofocus,
       clipBehavior: clipBehavior,
+      statesController: statesController,
       icon: icon,
       label: label,
     );
@@ -430,6 +433,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
@@ -450,6 +454,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
@@ -500,7 +505,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _FilledButtonDefaultsM3 extends ButtonStyle {
   _FilledButtonDefaultsM3(this.context)
@@ -624,7 +629,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   _FilledTonalButtonDefaultsM3(this.context)

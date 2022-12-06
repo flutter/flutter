@@ -1028,7 +1028,7 @@ void main() {
       );
       final ScrollController controller = PrimaryScrollController.of(
         tester.element(find.byType(ListView)),
-      )!;
+      );
       expect(controller.position.pixels, 0.0);
       expect(value, isTrue);
 
@@ -1162,10 +1162,10 @@ void main() {
       invoked = 0;
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('handles Ctrl and Meta', (WidgetTester tester) async {
+    testWidgets('handles Alt, Ctrl and Meta', (WidgetTester tester) async {
       int invoked = 0;
       await tester.pumpWidget(activatorTester(
-        const CharacterActivator('?', meta: true, control: true),
+        const CharacterActivator('?', alt: true, meta: true, control: true),
         (Intent intent) { invoked += 1; },
       ));
       await tester.pump();
@@ -1176,7 +1176,8 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
       expect(invoked, 0);
 
-      // Press Ctrl + Meta + Shift + /
+      // Press Left Alt + Ctrl + Meta + Shift + /
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       expect(invoked, 0);
@@ -1185,7 +1186,24 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(invoked, 1);
+      invoked = 0;
+
+      // Press Right Alt + Ctrl + Meta + Shift + /
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftRight);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altRight);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaRight);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+      expect(invoked, 0);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.slash, character: '?');
+      expect(invoked, 1);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.slash);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftRight);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaRight);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altRight);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
       expect(invoked, 1);
       invoked = 0;
     }, variant: KeySimulatorTransitModeVariant.all());

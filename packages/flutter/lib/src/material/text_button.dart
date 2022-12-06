@@ -107,6 +107,7 @@ class TextButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _TextButtonWithIcon;
@@ -152,6 +153,8 @@ class TextButton extends ButtonStyleButton {
     Color? disabledBackgroundColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? iconColor,
+    Color? disabledIconColor,
     double? elevation,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
@@ -192,6 +195,11 @@ class TextButton extends ButtonStyleButton {
     final MaterialStateProperty<Color?>? overlayColor = (foreground == null)
       ? null
       : _TextButtonDefaultOverlay(foreground);
+    final MaterialStateProperty<Color?>? iconColorProp = (iconColor == null && disabledIconColor == null)
+      ? null
+      : disabledIconColor == null
+        ? ButtonStyleButton.allOrNull<Color?>(iconColor)
+        : _TextButtonDefaultIconColor(iconColor, disabledIconColor);
     final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
       ? null
       : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
@@ -203,6 +211,7 @@ class TextButton extends ButtonStyleButton {
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
+      iconColor: iconColorProp,
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -222,13 +231,14 @@ class TextButton extends ButtonStyleButton {
 
   /// Defines the button's default appearance.
   ///
+  /// {@template flutter.material.text_button.default_style_of}
   /// The button [child]'s [Text] and [Icon] widgets are rendered with
   /// the [ButtonStyle]'s foreground color. The button's [InkWell] adds
   /// the style's overlay color when the button is focused, hovered
   /// or pressed. The button's background color becomes its [Material]
   /// color and is transparent by default.
   ///
-  /// All of the ButtonStyle's defaults appear below.
+  /// All of the [ButtonStyle]'s defaults appear below.
   ///
   /// In this list "Theme.foo" is shorthand for
   /// `Theme.of(context).foo`. Color scheme values like
@@ -245,6 +255,7 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
+  /// {@endtemplate}
   ///
   /// ## Material 2 defaults
   ///
@@ -295,6 +306,7 @@ class TextButton extends ButtonStyleButton {
   /// If [ThemeData.useMaterial3] is set to true the following defaults will
   /// be used:
   ///
+  /// {@template flutter.material.text_button.material3_defaults}
   /// * `textStyle` - Theme.textTheme.labelLarge
   /// * `backgroundColor` - transparent
   /// * `foregroundColor`
@@ -326,6 +338,7 @@ class TextButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  /// {@endtemplate}
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -418,6 +431,27 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 }
 
 @immutable
+class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
+  _TextButtonDefaultIconColor(this.iconColor, this.disabledIconColor);
+
+  final Color? iconColor;
+  final Color? disabledIconColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledIconColor;
+    }
+    return iconColor;
+  }
+
+  @override
+  String toString() {
+    return '{disabled: $disabledIconColor, color: $iconColor}';
+  }
+}
+
+@immutable
 class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
   _TextButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
@@ -444,6 +478,7 @@ class _TextButtonWithIcon extends TextButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
@@ -495,7 +530,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _TextButtonDefaultsM3 extends ButtonStyle {
   _TextButtonDefaultsM3(this.context)

@@ -49,7 +49,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return null;
     }
 
-    final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
+    final String? versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
 
     Version? version;
     if (versionString != null) {

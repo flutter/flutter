@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'scrollable.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
@@ -157,8 +159,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  // These are shortcuts are shared between most platforms except macOS for it
-  // uses different modifier keys as the line/word modifier.
+  // These shortcuts are shared between all platforms except Apple platforms,
+  // because they use different modifier keys as the line/word modifier.
   static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     for (final bool pressShift in const <bool>[true, false])
@@ -171,13 +173,13 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
         SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift): const DeleteToLineBreakIntent(forward: true),
       },
 
-    // Arrow: Move Selection.
+    // Arrow: Move selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowRight): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowUp): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowDown): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
-    // Shift + Arrow: Extend Selection.
+    // Shift + Arrow: Extend selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
@@ -198,6 +200,14 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
+
+    // Page Up / Down: Move selection by page.
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
+
+    // Shift + Page Up / Down: Extend selection by page.
+    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 
     const SingleActivator(LogicalKeyboardKey.keyX, control: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
@@ -258,10 +268,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   // macOS document shortcuts: https://support.apple.com/en-us/HT201236.
   // The macOS shortcuts uses different word/line modifiers than most other
   // platforms.
-  static final Map<ShortcutActivator, Intent> _macShortcuts = _iOSShortcuts;
-
-  // There is no complete documentation of iOS shortcuts.
-  static final Map<ShortcutActivator, Intent> _iOSShortcuts = <ShortcutActivator, Intent>{
+  static final Map<ShortcutActivator, Intent> _macShortcuts = <ShortcutActivator, Intent>{
     for (final bool pressShift in const <bool>[true, false])
       ...<SingleActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): const DeleteCharacterIntent(forward: false),
@@ -277,7 +284,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowUp): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowDown): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: true),
 
-    // Shift + Arrow: Extend Selection.
+    // Shift + Arrow: Extend selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
@@ -290,8 +297,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
@@ -309,6 +316,11 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.end): const ScrollToDocumentBoundaryIntent(forward: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
+
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 
     const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, meta: true): CopySelectionTextIntent.copy,
@@ -335,6 +347,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     //   * Control + shift? + Z
   };
 
+  // There is no complete documentation of iOS shortcuts: use macOS ones.
+  static final Map<ShortcutActivator, Intent> _iOSShortcuts = _macShortcuts;
 
   // The following key combinations have no effect on text editing on this
   // platform:
@@ -350,6 +364,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + backspace
   static final Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true, continuesAtWrap: true),
     const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true, continuesAtWrap: true),
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, continuesAtWrap: true),
@@ -385,28 +401,23 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.keyA, meta: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
-
   static const Map<ShortcutActivator, Intent> _commonDisablingTextShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowUp, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.pageUp, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.pageDown, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.home, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationTextIntent(),
@@ -417,6 +428,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     SingleActivator(LogicalKeyboardKey.arrowRight, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.pageUp): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.pageDown): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.end): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.home): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, control: true): DoNothingAndStopPropagationTextIntent(),
@@ -430,6 +443,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
@@ -542,11 +557,10 @@ Intent? intentForMacOSSelector(String selectorName) {
     'scrollToBeginningOfDocument:': ScrollToDocumentBoundaryIntent(forward: false),
     'scrollToEndOfDocument:': ScrollToDocumentBoundaryIntent(forward: true),
 
-    // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
-    'scrollPageUp:': ScrollToDocumentBoundaryIntent(forward: false),
-    'scrollPageDown:': ScrollToDocumentBoundaryIntent(forward: true),
-    'pageUpAndModifySelection': ExpandSelectionToDocumentBoundaryIntent(forward: false),
-    'pageDownAndModifySelection:': ExpandSelectionToDocumentBoundaryIntent(forward: true),
+    'scrollPageUp:': ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    'scrollPageDown:': ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    'pageUpAndModifySelection:': ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
+    'pageDownAndModifySelection:': ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 
     // Escape key when there's no IME selection popup.
     'cancelOperation:': DismissIntent(),

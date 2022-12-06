@@ -95,6 +95,7 @@ class ElevatedButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _ElevatedButtonWithIcon;
@@ -482,6 +483,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
@@ -530,7 +532,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_141
 
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   _ElevatedButtonDefaultsM3(this.context)

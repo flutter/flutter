@@ -41,10 +41,6 @@ final RegExp releaseCandidateBranchRegex = RegExp(
   r'flutter-(\d+)\.(\d+)-candidate\.(\d+)',
 );
 
-/// Whether all releases published to the beta channel should be mirrored to
-/// dev.
-const bool kSynchronizeDevWithBeta = true;
-
 /// Cast a dynamic to String and trim.
 String stdoutToString(dynamic input) {
   final String str = input as String;

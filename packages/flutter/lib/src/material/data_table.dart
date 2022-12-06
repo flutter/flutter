@@ -406,6 +406,7 @@ class DataTable extends StatelessWidget {
     required this.rows,
     this.checkboxHorizontalMargin,
     this.border,
+    this.clipBehavior = Clip.none,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -414,6 +415,7 @@ class DataTable extends StatelessWidget {
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
+       assert(clipBehavior != null),
        _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
@@ -637,6 +639,13 @@ class DataTable extends StatelessWidget {
 
   /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder? border;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// This can be used to clip the content within the border of the [DataTable].
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
 
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
@@ -1056,6 +1065,8 @@ class DataTable extends StatelessWidget {
       decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
       child: Material(
         type: MaterialType.transparency,
+        borderRadius: border?.borderRadius,
+        clipBehavior: clipBehavior,
         child: Table(
           columnWidths: tableColumns.asMap(),
           children: tableRows,
