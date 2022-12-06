@@ -22,6 +22,7 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
     // Values extracted from navigation bar. For toolbar or tabbar the dark color is 0xF0161616.
   ),
   CupertinoColors.systemBackground,
+  false,
   _CupertinoTextThemeDefaults(CupertinoColors.label, CupertinoColors.inactiveGray),
 );
 
@@ -172,6 +173,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    bool? applyThemeToAll,
   }) : this.raw(
         brightness,
         primaryColor,
@@ -179,6 +181,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
         textTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
+        applyThemeToAll,
       );
 
   /// Same as the default constructor but with positional arguments to avoid
@@ -193,6 +196,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    bool? applyThemeToAll,
   ) : this._rawWithDefaults(
     brightness,
     primaryColor,
@@ -200,6 +204,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     textTheme,
     barBackgroundColor,
     scaffoldBackgroundColor,
+    applyThemeToAll,
     _kDefaultTheme,
   );
 
@@ -210,6 +215,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    bool? applyThemeToAll,
     this._defaults,
   ) : super(
     brightness: brightness,
@@ -218,6 +224,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     textTheme: textTheme,
     barBackgroundColor: barBackgroundColor,
     scaffoldBackgroundColor: scaffoldBackgroundColor,
+    applyThemeToAll: applyThemeToAll,
   );
 
   final _CupertinoThemeDefaults _defaults;
@@ -240,6 +247,9 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   Color get scaffoldBackgroundColor => super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
 
   @override
+  bool get applyThemeToAll => super.applyThemeToAll ?? _defaults.applyThemeToAll;
+
+  @override
   NoDefaultCupertinoThemeData noDefault() {
     return NoDefaultCupertinoThemeData(
       brightness: super.brightness,
@@ -248,6 +258,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       textTheme: super.textTheme,
       barBackgroundColor: super.barBackgroundColor,
       scaffoldBackgroundColor: super.scaffoldBackgroundColor,
+      applyThemeToAll: super.applyThemeToAll,
     );
   }
 
@@ -262,6 +273,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       super.textTheme?.resolveFrom(context),
       convertColor(super.barBackgroundColor),
       convertColor(super.scaffoldBackgroundColor),
+      applyThemeToAll,
       _defaults.resolveFrom(context, super.textTheme == null),
     );
   }
@@ -274,6 +286,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    bool? applyThemeToAll,
   }) {
     return CupertinoThemeData._rawWithDefaults(
       brightness ?? super.brightness,
@@ -282,6 +295,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       textTheme ?? super.textTheme,
       barBackgroundColor ?? super.barBackgroundColor,
       scaffoldBackgroundColor ?? super.scaffoldBackgroundColor,
+      applyThemeToAll ?? super.applyThemeToAll,
       _defaults,
     );
   }
@@ -295,6 +309,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
     properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
     properties.add(createCupertinoColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(DiagnosticsProperty<bool>('applyThemeToAll', applyThemeToAll, defaultValue: defaultData.applyThemeToAll));
     textTheme.debugFillProperties(properties);
   }
 }
@@ -322,6 +337,7 @@ class NoDefaultCupertinoThemeData {
     this.textTheme,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
+    this.applyThemeToAll,
   });
 
   /// The brightness override for Cupertino descendants.
@@ -389,6 +405,22 @@ class NoDefaultCupertinoThemeData {
   /// Defaults to [CupertinoColors.systemBackground].
   final Color? scaffoldBackgroundColor;
 
+  /// Flag to apply this theme to all descendant Cupertino widgets.
+  ///
+  /// Certain Cupertino widgets previously didn't use theming, matching past
+  /// versions of iOS. For example, [CupertinoSwitch]s always used
+  /// [CupertinoColors.systemGreen] when active.
+  ///
+  /// Today, however, these widgets can indeed be themed on iOS. Moreover on
+  /// macOS, the accent color is reflected in these widgets. Turning this flag
+  /// on ensures that descendant Cupertino widgets will be themed accordingly.
+  ///
+  /// This flag currently applies to the following widgets:
+  /// - [CupertinoSwitch] & [Switch.adaptive]
+  ///
+  /// Defaults to false.
+  final bool? applyThemeToAll;
+
   /// Returns an instance of the theme data whose property getters only return
   /// the construction time specifications with no derived values.
   ///
@@ -412,6 +444,7 @@ class NoDefaultCupertinoThemeData {
       textTheme: textTheme?.resolveFrom(context),
       barBackgroundColor: convertColor(barBackgroundColor),
       scaffoldBackgroundColor: convertColor(scaffoldBackgroundColor),
+      applyThemeToAll: applyThemeToAll,
     );
   }
 
@@ -428,6 +461,7 @@ class NoDefaultCupertinoThemeData {
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor ,
     Color? scaffoldBackgroundColor,
+    bool? applyThemeToAll,
   }) {
     return NoDefaultCupertinoThemeData(
       brightness: brightness ?? this.brightness,
@@ -436,6 +470,7 @@ class NoDefaultCupertinoThemeData {
       textTheme: textTheme ?? this.textTheme,
       barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+      applyThemeToAll: applyThemeToAll ?? this.applyThemeToAll,
     );
   }
 }
@@ -448,6 +483,7 @@ class _CupertinoThemeDefaults {
     this.primaryContrastingColor,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
+    this.applyThemeToAll,
     this.textThemeDefaults,
   );
 
@@ -456,6 +492,7 @@ class _CupertinoThemeDefaults {
   final Color primaryContrastingColor;
   final Color barBackgroundColor;
   final Color scaffoldBackgroundColor;
+  final bool applyThemeToAll;
   final _CupertinoTextThemeDefaults textThemeDefaults;
 
   _CupertinoThemeDefaults resolveFrom(BuildContext context, bool resolveTextTheme) {
@@ -467,6 +504,7 @@ class _CupertinoThemeDefaults {
       convertColor(primaryContrastingColor),
       convertColor(barBackgroundColor),
       convertColor(scaffoldBackgroundColor),
+      applyThemeToAll,
       resolveTextTheme ? textThemeDefaults.resolveFrom(context) : textThemeDefaults,
     );
   }

@@ -9,14 +9,14 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestAssetBundle extends CachingAssetBundle {
+class _TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
 
   @override
   Future<ByteData> load(String key) async {
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
-    if (key == 'AssetManifest.json') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
+    if (key == 'AssetManifest.bin') {
+      return const StandardMessageCodec().encodeMessage(json.decode('{"one":[]}'))!;
     }
 
     if (key == 'one') {
@@ -30,7 +30,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Caching asset bundle test', () async {
-    final TestAssetBundle bundle = TestAssetBundle();
+    final _TestAssetBundle bundle = _TestAssetBundle();
 
     final ByteData assetData = await bundle.load('one');
     expect(assetData.getInt8(0), equals(49));
@@ -53,7 +53,7 @@ void main() {
 
   test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {
     // This is a regression test for https://github.com/flutter/flutter/issues/12392
-    final AssetImage assetImage = AssetImage('one', bundle: TestAssetBundle());
+    final AssetImage assetImage = AssetImage('one', bundle: _TestAssetBundle());
     final AssetBundleImageKey key = await assetImage.obtainKey(ImageConfiguration.empty);
     expect(key.name, 'one');
     expect(key.scale, 1.0);

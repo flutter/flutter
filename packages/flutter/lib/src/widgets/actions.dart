@@ -585,6 +585,8 @@ class ActionDispatcher with Diagnosticable {
 /// A widget that establishes an [ActionDispatcher] and a map of [Intent] to
 /// [Action] to be used by its descendants when invoking an [Action].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XawP1i314WM}
+///
 /// Actions are typically invoked using [Actions.invoke] with the context
 /// containing the ambient [Actions] widget.
 ///
