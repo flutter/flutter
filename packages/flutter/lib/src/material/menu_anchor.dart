@@ -1796,7 +1796,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    Offset menuPaddingOffset;
+    Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
     // Move the submenu over by the size of the menu padding, so that
     // the first menu item aligns with the submenu button that opens it.
@@ -1804,17 +1804,14 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       case Axis.horizontal:
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
             menuPaddingOffset += Offset(menuPadding.right, 0);
             break;
           case TextDirection.ltr:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
             menuPaddingOffset += Offset(-menuPadding.left, 0);
             break;
         }
         break;
       case Axis.vertical:
-        menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
         menuPaddingOffset += Offset(0, -menuPadding.top);
         break;
     }
