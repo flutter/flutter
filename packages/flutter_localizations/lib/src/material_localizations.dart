@@ -260,6 +260,48 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
+  /// The raw version of [tableColumnHeadingOnTapHint], with `$nextSortOrderLabel`
+  /// verbatim in the string.
+  @protected
+  String get tableColumnHeadingOnTapHintRaw;
+
+  @override
+  String tableColumnHeadingOnTapHint(String nextSortOrderLabel) {
+    final String text = tableColumnHeadingOnTapHintRaw;
+    return text.replaceFirst(r'$nextSortOrderLabel', nextSortOrderLabel);
+  }
+
+  /// The raw version of [tableSortedAnnouncement], with `$sortColumn`, `$sortOrder`
+  /// verbatim in the string.
+  @protected
+  String get tableSortedAnnouncementRaw;
+
+  @override
+  String tableSortedAnnouncement(String sortColumn, String sortOrder) {
+    final String template = tableSortedAnnouncementRaw;
+    return template.replaceFirst(r'$sortColumn', sortColumn)
+      .replaceFirst(r'$sortOrder', sortOrder);
+  }
+
+  /// The raw version of [tableCoordinatesLabel], with `$rowNumber`, `$totalRows`,
+  /// `$columnNumber`, `$totalColumns` verbatim in the string.
+  @protected
+  String get tableCoordinatesLabelRaw;
+
+  @override
+  String tableCoordinatesLabel(
+    String rowNumber,
+    String totalRows,
+    String columnNumber,
+    String totalColumns
+  ) {
+    final String template = tableCoordinatesLabelRaw;
+    return template.replaceFirst(r'$rowNumber', rowNumber)
+      .replaceFirst(r'$totalRows', totalRows)
+      .replaceFirst(r'$columnNumber', columnNumber)
+      .replaceFirst(r'$totalColumns', totalColumns);
+  }
+
   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
   /// in the string.
   @protected

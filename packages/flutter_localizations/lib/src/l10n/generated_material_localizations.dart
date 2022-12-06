@@ -429,7 +429,31 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Aangemeld';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Oortjie $tabIndex van $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -871,7 +895,31 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get signedInLabel => 'በመለያ ገብቷል';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'ትር $tabIndex ከ$tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -1313,7 +1361,31 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'تم تسجيل الدخول';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'علامة التبويب $tabIndex من $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -1755,7 +1827,31 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ছাইন ইন কৰা হ’ল';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCountৰ $tabIndexটা টেব';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -2197,7 +2293,31 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Daxil olundu';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex/$tabCount tab';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -2639,7 +2759,31 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Уваход выкананы';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Укладка $tabIndex з $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -3081,7 +3225,31 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get signedInLabel => 'В профила си сте';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Раздел $tabIndex от $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -3523,7 +3691,31 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get signedInLabel => 'সাইন-ইন করা হয়েছে';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount-এর মধ্যে $tabIndexটি ট্যাব';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -3965,7 +4157,31 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prijavljeni ste';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -4407,7 +4623,31 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sessió iniciada';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Pestanya $tabIndex de $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -4849,7 +5089,31 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Uživatel přihlášen';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Karta $tabIndex z $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -5291,7 +5555,31 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Logget ind';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Fane $tabIndex af $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -5733,7 +6021,31 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Angemeldet';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex von $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -6212,7 +6524,31 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Σε σύνδεση';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Καρτέλα $tabIndex από $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -6654,7 +6990,31 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Signed in';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex of $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => 'Table';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Sorted by column $sortColumn, $sortOrder';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -7953,7 +8313,31 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sesión iniciada';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Pestaña $tabIndex de $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -11598,7 +11982,31 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sisse logitud';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex. vahekaart $tabCount-st';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -12040,7 +12448,31 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Hasi da saioa';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex/$tabCount fitxa';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -12482,7 +12914,31 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'واردشده به سیستم';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'برگه $tabIndex از $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -12924,7 +13380,31 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Kirjautunut sisään';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Välilehti $tabIndex/$tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -13366,7 +13846,31 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Naka-sign in';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex ng $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -13808,7 +14312,31 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Connecté';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Onglet $tabIndex sur $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -14386,7 +14914,31 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Sesión iniciada';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Pestana $tabIndex de $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -14828,7 +15380,31 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Angemeldet';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex von $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -15270,7 +15846,31 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'આમાં સાઇન ઇન કર્યું છે';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCountમાંથી $tabIndex ટૅબ';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -15712,7 +16312,31 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'מחובר';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'כרטיסייה $tabIndex מתוך $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -16154,7 +16778,31 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'साइन इन किया हुआ है';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount का टैब $tabIndex';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -16596,7 +17244,31 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prijavljeni korisnik';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Kartica $tabIndex od $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -17038,7 +17710,31 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Bejelentkezve';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount/$tabIndex. lap';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -17480,7 +18176,31 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Դուք մուտք եք գործել';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Ներդիր $tabIndex՝ $tabCount-ից';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -17922,7 +18642,31 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Telah login';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex dari $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
@@ -18364,7 +19108,31 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Innskráð(ur)';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Flipi $tabIndex af $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -18806,7 +19574,31 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Connesso';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Scheda $tabIndex di $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -19248,7 +20040,31 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ログイン中';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'タブ: $tabIndex/$tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -19690,7 +20506,31 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'შესული';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'ჩანართი $tabIndex / $tabCount-დან';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -20132,7 +20972,31 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Аккаунтқа кірген';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount/$tabIndex қойынды';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -20574,7 +21438,31 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get signedInLabel => 'បានចូល​គណនី';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'ផ្ទាំង $tabIndex ក្នុង​ចំណោម​ $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -21016,7 +21904,31 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get signedInLabel => '\u{cb8}\u{cc8}\u{ca8}\u{ccd}\u{20}\u{c87}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -21458,7 +22370,31 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get signedInLabel => '로그인됨';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'탭 $tabCount개 중 $tabIndex번째';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -21900,7 +22836,31 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Аккаунтуңузга кирдиңиз';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount кыналма ичинен $tabIndex';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -22342,7 +23302,31 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ເຂົ້າສູ່ລະບົບແລ້ວ';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -22784,7 +23768,31 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prisijungta';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex skirtukas iš $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -23226,7 +24234,31 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Esat pierakstījies';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex. cilne no $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -23668,7 +24700,31 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Најавени сте';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Картичка $tabIndex од $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -24110,7 +25166,31 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'സൈൻ ഇൻ ചെയ്‌തു';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount-ൽ $tabIndex';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -24552,7 +25632,31 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Нэвтэрсэн';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount-н $tabIndex-р таб';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -24994,7 +26098,31 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'साइन इन केले आहे';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount पैकी $tabIndex टॅब';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -25436,7 +26564,31 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Dilog masuk';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex dari $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -25878,7 +27030,31 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get signedInLabel => 'လက်မှတ်ထိုး ဝင်ထားသည်';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'တဘ် $tabCount အနက် $tabIndex ခု';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -26320,7 +27496,31 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Pålogget';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Fane $tabIndex av $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -26762,7 +27962,31 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'साइन इन गरियो';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount मध्ये $tabIndex ट्याब';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -27204,7 +28428,31 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Ingelogd';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tabblad $tabIndex van $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -27646,7 +28894,31 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Pålogget';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Fane $tabIndex av $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -28088,7 +29360,31 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ସାଇନ୍ ଇନ୍ କରାଯାଇଛି';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCountର $tabIndex ଟାବ୍';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -28530,7 +29826,31 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ਸਾਈਨ-ਇਨ ਕੀਤਾ ਗਿਆ';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -28972,7 +30292,31 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Zalogowani użytkownicy';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Karta $tabIndex z $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -29414,7 +30758,31 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ننوتل';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex د $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -29856,7 +31224,31 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Conectado a';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Guia $tabIndex de $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -30437,7 +31829,31 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get signedInLabel => 'V-ați conectat';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Fila $tabIndex din $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -30879,7 +32295,31 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Вход выполнен';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Вкладка $tabIndex из $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -31321,7 +32761,31 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'පුරන ලදී';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'ටැබ $tabIndexකින් $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -31763,7 +33227,31 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prihlásili ste sa';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Karta $tabIndex z $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -32205,7 +33693,31 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Prijavljen';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Zavihek $tabIndex od $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -32647,7 +34159,31 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Je identifikuar';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Skeda $tabIndex nga $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -33089,7 +34625,31 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Пријављени сте';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabIndex. картица од $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -33833,7 +35393,31 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Inloggad';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Flik $tabIndex av $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -34275,7 +35859,31 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Umeingia katika akaunti';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Kichupo cha $tabIndex kati ya $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -34717,7 +36325,31 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get signedInLabel => 'உள்நுழைந்துள்ளீர்கள்';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'தாவல் $tabIndex / $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -35159,7 +36791,31 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get signedInLabel => 'సైన్ ఇన్ చేశారు';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCountలో $tabIndexవ ట్యాబ్';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -35601,7 +37257,31 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ลงชื่อเข้าใช้';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'แท็บที่ $tabIndex จาก $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -36043,7 +37723,31 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Naka-sign in';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex ng $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -36485,7 +38189,31 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Oturum açıldı';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Sekme $tabIndex / $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -36927,7 +38655,31 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Ви ввійшли';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Вкладка $tabIndex з $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -37369,7 +39121,31 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get signedInLabel => 'سائن ان کردہ ہے';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount میں سے $tabIndex ٹیب';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -37811,7 +39587,31 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Hisobingizga kirgansiz';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'$tabCount varaqdan $tabIndex';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -38253,7 +40053,31 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Đã đăng nhập';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Tab $tabIndex trong tổng số $tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
@@ -38695,7 +40519,31 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get signedInLabel => '已登录';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'第 $tabIndex 个标签，共 $tabCount 个';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
@@ -39600,7 +41448,31 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Ungene ngemvume';
 
   @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
   String get tabLabelRaw => r'Ithebhu $tabIndex kwangu-$tabCount';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableColumnHeadingOnTapHintRaw => r'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String get tableCoordinatesLabelRaw => r'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
+  @override
+  String get tableLabel => r'Table, $sortStatus';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableSortedAnnouncementRaw => r'Table sorted by Column $sortColumn';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;

@@ -135,5 +135,13 @@
   "keyboardKeySpace": "Tarpas",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Meniu juostos meniu"
+  "menuBarMenuLabel": "Meniu juostos meniu",
+  "sortOrderAscendingLabel": "Ascending",
+  "sortOrderDescendingLabel": "Descending",
+  "tableCellOnTapHint": "Select row",
+  "tableNotSortedLabel": "Not sorted",
+  "tableLabel": "Table, $sortStatus",
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "tableSortedAnnouncement": "Table sorted by Column $sortColumn",
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns"
 }

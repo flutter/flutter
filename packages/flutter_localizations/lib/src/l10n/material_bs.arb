@@ -132,5 +132,13 @@
   "keyboardKeySpace": "tipka za razmak",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Meni trake menija"
+  "menuBarMenuLabel": "Meni trake menija",
+  "sortOrderAscendingLabel": "Ascending",
+  "sortOrderDescendingLabel": "Descending",
+  "tableCellOnTapHint": "Select row",
+  "tableNotSortedLabel": "Not sorted",
+  "tableLabel": "Table, $sortStatus",
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "tableSortedAnnouncement": "Table sorted by Column $sortColumn",
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns"
 }

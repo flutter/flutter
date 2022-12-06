@@ -393,6 +393,49 @@
     "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
   },
 
+  "sortOrderAscendingLabel": "Ascending",
+  "@sortOrderAscendingLabel": {
+    "description": "Label indicating ascending sort order, used in onTapHint for column headings in a table."
+  },
+
+  "sortOrderDescendingLabel": "Descending",
+  "@sortOrderDescendingLabel": {
+    "description": "Label indicating descending sort order, used in onTapHint for column headings in a table."
+  },
+
+  "tableCellOnTapHint": "Select row",
+  "@tableCellOnTapHint": {
+    "description": "Used as onTapHint for an individual cell in a table, indicating tapping on the cell selects the corresponding row."
+  },
+
+  "tableNotSortedLabel": "Not sorted",
+  "@tableNotSortedLabel": {
+    "description": "Label that indicates a table is not sorted."
+  },
+
+  "tableLabel": "Table",
+  "@tableLabel": {
+    "description": "Label announced when focusing on a table."
+  },
+
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "@tableColumnHeadingOnTapHint": {
+    "description": "Used as onTapHint for column headings in tables, indicating tapping on the heading will sort the table by current column in given order.",
+    "parameters": "nextSortOrderLabel"
+  },
+
+  "tableSortedAnnouncement": "Sorted by column $sortColumn, $sortOrder",
+  "@tableSortedAnnouncement": {
+    "description": "Announced after user's tapping on column heading in a table, indicating that the table has already been sorted.",
+    "parameters": "sortColumn, sortOrder"
+  },
+
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns",
+  "@tableCoordinatesLabel": {
+    "description": "Label indicating the current position of the focus inside the table, i.e. which row and column the currrently focused cell is in.",
+    "parameters": "rowNumber, totalRows, columnNumber, totalColumns"
+  },
+
   "reorderItemToStart": "Move to the start",
   "@reorderItemToStart": {
     "description": "The audio announcement to move an item in a Reorderable List to the start of the list."

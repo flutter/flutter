@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -65,6 +66,10 @@ class DataColumn {
   /// The label should not include the sort indicator.
   final Widget label;
 
+  /// {@template flutter.material.dataColumn.heading}
+  /// The heading string used for screen reader announcements.
+  /// {@endtemplate}
+  /// Summarizes the information displayed in this [DataColumn].
   final String? heading;
 
   /// The column heading's tooltip.
@@ -179,6 +184,8 @@ class DataRow {
   /// table.
   final List<DataCell> cells;
 
+  /// {@macro flutter.material.dataColumn.heading}
+  /// Summarizes the information displayed in this [DataRow].
   final String? heading;
 
   /// The color for the row.
@@ -817,19 +824,26 @@ class DataTable extends StatelessWidget {
 
     // TODO(dkwingsmt): Only wrap Inkwell if onSort != null. Blocked by
     // https://github.com/flutter/flutter/issues/51152
-
-    final String nextSortOrderLabel = !sorted ? 'ascending' : ascending? 'descending' : 'ascending';
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String nextSortOrderLabel = !sorted ? localizations.sortOrderAscendingLabel : ascending? localizations.sortOrderDescendingLabel : localizations.sortOrderAscendingLabel;
     if (onSort != null) {
       label = Semantics(
-        onTapHint: !sorted ? 'Sort by column' : 'Sort in $nextSortOrderLabel order',
+        container: true,
+        onTapHint: localizations.tableColumnHeadingOnTapHint(nextSortOrderLabel),
         child: InkWell(
           onTap: () {
             onSort();
-            SemanticsService.announce('Table sorted by column $semanticsHeadingLabel, $nextSortOrderLabel', TextDirection.ltr);
+            SemanticsService.announce(localizations.tableSortedAnnouncement(semanticsHeadingLabel, nextSortOrderLabel), Directionality.of(context));
           },
           overlayColor: overlayColor,
           child: label,
         ),
+      );
+    }
+    else {
+      label = Semantics(
+        container: true,
+        child: label,
       );
     }
     return label;
@@ -879,31 +893,36 @@ class DataTable extends StatelessWidget {
 
     String semanticsLabel = '';
     if (rowHeading != null) {
-      semanticsLabel += '$rowHeading,';
+      semanticsLabel += '$rowHeading, ';
     }
     if (columnHeading != null) {
-      semanticsLabel += '$columnHeading,';
+      semanticsLabel += '$columnHeading, ';
     }
-    label = Container(
-      padding: padding,
-      height: effectiveDataRowHeight,
-      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
-      child: Stack(
-        children: <Widget>[
-          Semantics(
-            label: semanticsLabel,
-            onTapHint: 'Select Row',
-            child: DefaultTextStyle(
-              style: effectiveDataTextStyle.copyWith(
-                color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String tableCoordinatesLabel = localizations.tableCoordinatesLabel('$rowNumber', '$totalRows', '$columnNumber', '$totalColumns');
+    label = Semantics(
+      container: true,
+      child: Container(
+        padding: padding,
+        height: effectiveDataRowHeight,
+        alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
+        child: Stack(
+          children: <Widget>[
+            Semantics(
+              label: semanticsLabel,
+              onTapHint: localizations.tableCellOnTapHint,
+              child: DefaultTextStyle(
+                style: effectiveDataTextStyle.copyWith(
+                  color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
+                ),
+                child: DropdownButtonHideUnderline(child: label),
               ),
-              child: DropdownButtonHideUnderline(child: label),
             ),
-          ),
-          Semantics(
-            label: 'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns',
-          ),
-        ],
+            Semantics(
+              label: ', $tableCoordinatesLabel',
+            ),
+          ],
+        ),
       ),
     );
     if (onTap != null ||
@@ -1080,7 +1099,7 @@ class DataTable extends StatelessWidget {
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
-        semanticsHeadingLabel: column.heading != null ? column.heading! : '',
+        semanticsHeadingLabel: column.heading != null ? column.heading! : '${dataColumnIndex + 1}',
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
@@ -1112,9 +1131,21 @@ class DataTable extends StatelessWidget {
       displayColumnIndex += 1;
     }
 
-    final String tableSortLabel = sortColumnIndex == null ? 'not sorted' : 'sorted by column ${columns[sortColumnIndex!].heading}';
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    String tableSortStatus;
+    if (sortColumnIndex == null) {
+      tableSortStatus = localizations.tableNotSortedLabel;
+    }
+    else {
+      final DataColumn sortColumn = columns[sortColumnIndex!];
+      final int visualSortColumnIndex = sortColumnIndex! + 1;
+      final String sortColumnLabel = sortColumn.heading == null ? '$visualSortColumnIndex' : sortColumn.heading!;
+      final String sortOrder = sortAscending ? localizations.sortOrderAscendingLabel : localizations.sortOrderDescendingLabel;
+      tableSortStatus = localizations.tableSortedAnnouncement(sortColumnLabel, sortOrder);
+    }
+
     return Semantics(
-      label: 'Table, $tableSortLabel',
+      label: '${localizations.tableLabel}, $tableSortStatus',
       child: Container(
         decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
         child: Material(

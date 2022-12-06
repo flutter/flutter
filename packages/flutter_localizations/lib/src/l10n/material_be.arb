@@ -134,5 +134,13 @@
   "keyboardKeySpace": "Прабел",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Меню \"Панэль меню\""
+  "menuBarMenuLabel": "Меню \"Панэль меню\"",
+  "sortOrderAscendingLabel": "Ascending",
+  "sortOrderDescendingLabel": "Descending",
+  "tableCellOnTapHint": "Select row",
+  "tableNotSortedLabel": "Not sorted",
+  "tableLabel": "Table, $sortStatus",
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "tableSortedAnnouncement": "Table sorted by Column $sortColumn",
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns"
 }

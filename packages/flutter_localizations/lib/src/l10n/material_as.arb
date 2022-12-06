@@ -128,5 +128,13 @@
   "keyboardKeySpace": "স্পেচ",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "মেনু বাৰ মেনু"
+  "menuBarMenuLabel": "মেনু বাৰ মেনু",
+  "sortOrderAscendingLabel": "Ascending",
+  "sortOrderDescendingLabel": "Descending",
+  "tableCellOnTapHint": "Select row",
+  "tableNotSortedLabel": "Not sorted",
+  "tableLabel": "Table, $sortStatus",
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "tableSortedAnnouncement": "Table sorted by Column $sortColumn",
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns"
 }

@@ -129,5 +129,13 @@
   "keyboardKeySpace": "스페이스",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "메뉴 바 메뉴"
+  "menuBarMenuLabel": "메뉴 바 메뉴",
+  "sortOrderAscendingLabel": "Ascending",
+  "sortOrderDescendingLabel": "Descending",
+  "tableCellOnTapHint": "Select row",
+  "tableNotSortedLabel": "Not sorted",
+  "tableLabel": "Table, $sortStatus",
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "tableSortedAnnouncement": "Table sorted by Column $sortColumn",
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns"
 }

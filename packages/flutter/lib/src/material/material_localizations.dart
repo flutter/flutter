@@ -160,6 +160,41 @@ abstract class MaterialLocalizations {
   /// as a hint text in the text field.
   String get searchFieldLabel;
 
+  /// Label indicating ascending sort order, used in onTapHint for column headings
+  /// in a table.
+  String get sortOrderAscendingLabel;
+
+  /// Label indicating descending sort order, used in onTapHint for column headings
+  /// in a table.
+  String get sortOrderDescendingLabel;
+
+  /// Used as onTapHint for an individual cell in a table, indicating tapping
+  /// on the cell selects the corresponding row.
+  String get tableCellOnTapHint;
+
+  /// Label that indicates a table is not sorted.
+  String get tableNotSortedLabel;
+
+  /// Label announced when focusing on a table.
+  String get tableLabel;
+
+  /// Used as onTapHint for column headings in tables, indicating tapping on the
+  /// heading will sort the table by current column in given order.
+  String tableColumnHeadingOnTapHint(String nextSortOrderLabel);
+
+  /// Announced after user's tapping on column heading in a table, indicating
+  /// that the table has already been sorted.
+  String tableSortedAnnouncement(String sortColumn, String sortOrder);
+
+  /// Label indicating the current position of the focus inside the table.
+  /// i.e. which row and column the currrently focused cell is in.
+  String tableCoordinatesLabel(
+    String rowNumber,
+    String totalRows,
+    String columnNumber,
+    String totalColumns
+  );
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -1014,6 +1049,36 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get searchFieldLabel => 'Search';
+
+  @override
+  String get sortOrderAscendingLabel => 'Ascending';
+
+  @override
+  String get sortOrderDescendingLabel => 'Descending';
+
+  @override
+  String get tableNotSortedLabel => 'Not sorted';
+
+  @override
+  String get tableCellOnTapHint => 'Select row';
+
+  @override
+  String get tableLabel => 'Table';
+
+  @override
+  String tableColumnHeadingOnTapHint(String nextSortOrderLabel) => 'Sort by column in $nextSortOrderLabel order';
+
+  @override
+  String tableSortedAnnouncement(String sortColumn, String sortOrder) => 'Sorted by column $sortColumn, $sortOrder';
+
+  @override
+  String tableCoordinatesLabel(
+    String rowNumber,
+    String totalRows,
+    String columnNumber,
+    String totalColumns
+  ) => 'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
+
 
   @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';

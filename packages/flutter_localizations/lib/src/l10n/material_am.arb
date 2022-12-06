@@ -128,5 +128,13 @@
   "keyboardKeySpace": "ክፍተት",
   "keyboardKeyMetaMacOs": "ትዕዛዝ",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "የምናሌ አሞሌ ምናሌ"
+  "menuBarMenuLabel": "የምናሌ አሞሌ ምናሌ",
+  "sortOrderAscendingLabel": "Ascending",
+  "sortOrderDescendingLabel": "Descending",
+  "tableCellOnTapHint": "Select row",
+  "tableNotSortedLabel": "Not sorted",
+  "tableLabel": "Table, $sortStatus",
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "tableSortedAnnouncement": "Table sorted by Column $sortColumn",
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns"
 }

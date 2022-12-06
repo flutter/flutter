@@ -127,5 +127,13 @@
   "keyboardKeySpace": "Mellomrom",
   "keyboardKeyMetaMacOs": "Kommando",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Meny med menylinje"
+  "menuBarMenuLabel": "Meny med menylinje",
+  "sortOrderAscendingLabel": "Ascending",
+  "sortOrderDescendingLabel": "Descending",
+  "tableCellOnTapHint": "Select row",
+  "tableNotSortedLabel": "Not sorted",
+  "tableLabel": "Table, $sortStatus",
+  "tableColumnHeadingOnTapHint": "Sort by column in $nextSortOrderLabel order",
+  "tableSortedAnnouncement": "Table sorted by Column $sortColumn",
+  "tableCoordinatesLabel": "Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns"
 }
