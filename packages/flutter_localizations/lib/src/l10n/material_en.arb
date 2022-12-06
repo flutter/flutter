@@ -393,7 +393,7 @@
     "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
   },
 
-  "currentDateLabel": "Date of today",
+  "currentDateLabel": "Today",
   "@currentDateLabel": {
     "description": "Label indicating that the focused date is the current date."
   },

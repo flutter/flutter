@@ -823,7 +823,7 @@ void main() {
         ));
 
         expect(tester.getSemantics(find.text('3')), matchesSemantics(
-          label: '3, Sunday, January 3, 2016, Date of today',
+          label: '3, Sunday, January 3, 2016, Today',
           hasTapAction: true,
           isFocusable: true,
         ));

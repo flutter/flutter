@@ -6339,7 +6339,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copy';
 
   @override
-  String get currentDateLabel => 'Date of today';
+  String get currentDateLabel => 'Today';
 
   @override
   String get cutButtonLabel => 'Cut';

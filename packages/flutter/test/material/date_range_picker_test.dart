@@ -1095,7 +1095,7 @@ group('Semantics', () {
       expect(
         tester.getSemantics(find.text('30')),
         matchesSemantics(
-          label: '30, Saturday, January 30, 2016, Date of today',
+          label: '30, Saturday, January 30, 2016, Today',
           hasTapAction: true,
           isFocusable: true,
         ),
