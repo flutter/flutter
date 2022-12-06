@@ -17,7 +17,6 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
-import 'media_query.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
