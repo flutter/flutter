@@ -365,6 +365,18 @@ class CheckboxListTile extends StatelessWidget {
       tristate: tristate,
       shape: checkboxShape,
       side: side,
+      overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.hovered)) {
+          return hoverColor;
+        }
+        return null;
+      }),
+      fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.hovered)) {
+          return hoverColor;
+        }
+        return null;
+      })
     );
     Widget? leading, trailing;
     switch (controlAffinity) {
