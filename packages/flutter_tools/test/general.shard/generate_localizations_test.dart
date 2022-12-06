@@ -1318,6 +1318,76 @@ class AppLocalizationsEn extends AppLocalizations {
       ^'''));
       }
     });
+
+    testWithoutContext('no description generates generic comment', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(r'''
+{
+  "helloWorld": "Hello world!"
+}''');
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+      LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        logger: logger,
+      )
+        ..loadResources()
+        ..writeOutputFiles();
+      final File baseLocalizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
+      );
+      expect(baseLocalizationsFile.existsSync(), isTrue);
+
+      final String baseLocalizationsFileContents = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
+      ).readAsStringSync();
+      expect(baseLocalizationsFileContents, contains('/// No description provided for @helloWorld.'));
+    });
+
+        testWithoutContext('multiline descriptions are correctly formatted as comments', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(r'''
+{
+  "helloWorld": "Hello world!",
+  "@helloWorld": {
+    "description": "The generic example string in every language.\nUse this for tests!"
+  }
+}''');
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+      LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPathString,
+        outputPathString: defaultL10nPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        logger: logger,
+      )
+        ..loadResources()
+        ..writeOutputFiles();
+      final File baseLocalizationsFile = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
+      );
+      expect(baseLocalizationsFile.existsSync(), isTrue);
+
+      final String baseLocalizationsFileContents = fs.file(
+        fs.path.join(syntheticL10nPackagePath, 'output-localization-file.dart')
+      ).readAsStringSync();
+      expect(baseLocalizationsFileContents, contains('''
+  /// The generic example string in every language.
+  /// Use this for tests!'''));
+    });
+
     testWithoutContext('message without placeholders - should generate code comment with description and template message translation', () {
       _standardFlutterDirectoryL10nSetup(fs);
       LocalizationsGenerator(
