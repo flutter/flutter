@@ -11,7 +11,8 @@ void main() {
     await tester.pumpWidget(const example.ListenableBuilderExample());
 
     Finder findContainer() => find.descendant(of: find.byType(example.FocusListenerContainer), matching: find.byType(Container)).first;
-    bool containerHasFocus() => Focus.of(tester.element(findContainer())).hasFocus;
+    Finder findChild() => find.descendant(of: findContainer(), matching: find.byType(Column)).first;
+    bool childHasFocus() => Focus.of(tester.element(findChild())).hasFocus;
     Container getContainer() => tester.widget(findContainer()) as Container;
     ShapeDecoration getDecoration() => getContainer().decoration! as ShapeDecoration;
     OutlinedBorder getBorder() => getDecoration().shape as OutlinedBorder;
@@ -22,20 +23,20 @@ void main() {
 
     await tester.tap(find.byType(TextField).first);
     await tester.pumpAndSettle();
-    expect(containerHasFocus(), isFalse);
+    expect(childHasFocus(), isFalse);
     expect(getBorder().side.width, equals(1));
     expect(getContainer().color, isNull);
     expect(getDecoration().color, isNull);
 
     await tester.tap(find.byType(TextField).at(1));
     await tester.pumpAndSettle();
-    expect(containerHasFocus(), isTrue);
+    expect(childHasFocus(), isTrue);
     expect(getBorder().side.width, equals(4));
     expect(getDecoration().color, equals(Colors.blue.shade50));
 
     await tester.tap(find.byType(TextField).at(2));
     await tester.pumpAndSettle();
-    expect(containerHasFocus(), isTrue);
+    expect(childHasFocus(), isTrue);
     expect(getBorder().side.width, equals(4));
     expect(getDecoration().color, equals(Colors.blue.shade50));
   });
