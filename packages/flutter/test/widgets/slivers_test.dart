@@ -992,6 +992,45 @@ void main() {
     expect(secondTapped, 1);
   });
 
+  testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return Material(
+                  color: index.isEven ? Colors.yellow : Colors.red,
+                  child: InkWell(
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                    child: Text('Index $index'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+    
+  });
+
   testWidgets('SliverGrid.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
