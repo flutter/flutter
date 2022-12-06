@@ -11,29 +11,29 @@ import '../dom.dart';
 import '../html_image_codec.dart';
 import '../safe_browser_api.dart';
 import '../util.dart';
+import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image_wasm_codecs.dart';
 import 'image_web_codecs.dart';
+import 'painting.dart';
+import 'picture.dart';
+import 'picture_recorder.dart';
 import 'skia_object_cache.dart';
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
-// TODO(yjbanov): Implement targetWidth and targetHeight support.
-//                https://github.com/flutter/flutter/issues/34075
 FutureOr<ui.Codec> skiaInstantiateImageCodec(Uint8List list,
     [int? targetWidth, int? targetHeight]) {
-  if (browserSupportsImageDecoder) {
+  // If we have either a target width or target height, use canvaskit to decode.
+  if (browserSupportsImageDecoder && (targetWidth == null && targetHeight == null)) {
     return CkBrowserImageDecoder.create(
       data: list,
       debugSource: 'encoded image bytes',
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
     );
   } else {
-    return CkAnimatedImage.decodeFromBytes(list, 'encoded image bytes');
+    return CkAnimatedImage.decodeFromBytes(list, 'encoded image bytes', targetWidth: targetWidth, targetHeight: targetHeight);
   }
 }
 
-// TODO(yjbanov): add support for targetWidth/targetHeight (https://github.com/flutter/flutter/issues/34075)
 void skiaDecodeImageFromPixels(
   Uint8List pixels,
   int width,
@@ -45,6 +45,13 @@ void skiaDecodeImageFromPixels(
   int? targetHeight,
   bool allowUpscaling = true,
 }) {
+  if (targetWidth != null) {
+    assert(allowUpscaling || targetWidth <= width);
+  }
+  if (targetHeight != null) {
+    assert(allowUpscaling || targetHeight <= height);
+  }
+
   // Run in a timer to avoid janking the current frame by moving the decoding
   // work outside the frame event.
   Timer.run(() {
@@ -65,8 +72,86 @@ void skiaDecodeImageFromPixels(
       return;
     }
 
+    if (targetWidth != null || targetHeight != null) {
+      if (!validUpscale(allowUpscaling, targetWidth, targetHeight, width, height)) {
+        domWindow.console.warn('Cannot apply targetWidth/targetHeight when allowUpscaling is false.');
+      } else {
+        return callback(scaleImage(skImage, targetWidth, targetHeight));
+      }
+    }
     return callback(CkImage(skImage));
   });
+}
+
+// An invalid upscale happens when allowUpscaling is false AND either the given
+// targetWidth is larger than the originalWidth OR the targetHeight is larger than originalHeight.
+bool validUpscale(bool allowUpscaling, int? targetWidth, int? targetHeight, int originalWidth, int originalHeight) {
+  if (allowUpscaling) {
+    return true;
+  }
+  final bool targetWidthFits;
+  final bool targetHeightFits;
+  if (targetWidth != null) {
+    targetWidthFits = targetWidth <= originalWidth;
+  } else {
+    targetWidthFits = true;
+  }
+
+  if (targetHeight != null) {
+    targetHeightFits = targetHeight <= originalHeight;
+  } else {
+    targetHeightFits = true;
+  }
+  return targetWidthFits && targetHeightFits;
+}
+
+/// Creates a scaled [CkImage] from an [SkImage] by drawing the [SkImage] to a canvas.
+///
+/// This function will only be called if either a targetWidth or targetHeight is not null
+///
+/// If only one of targetWidth or  targetHeight are specified, the other
+/// dimension will be scaled according to the aspect ratio of the supplied
+/// dimension.
+///
+/// If either targetWidth or targetHeight is less than or equal to zero, it
+/// will be treated as if it is null.
+CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
+    assert(targetWidth != null || targetHeight != null);
+    if (targetWidth != null && targetWidth <= 0) {
+      targetWidth = null;
+    }
+    if (targetHeight != null && targetHeight <= 0) {
+      targetHeight = null;
+    }
+    if (targetWidth == null && targetHeight != null) {
+      targetWidth = (targetHeight * (image.width() / image.height())).round();
+      targetHeight = targetHeight;
+    } else if (targetHeight == null && targetWidth != null) {
+      targetWidth = targetWidth;
+      targetHeight = targetWidth ~/ (image.width() / image.height());
+    }
+
+    assert(targetWidth != null);
+    assert(targetHeight != null);
+
+    final CkPictureRecorder recorder = CkPictureRecorder();
+    final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+
+    canvas.drawImageRect(
+      CkImage(image),
+      ui.Rect.fromLTWH(0, 0, image.width(), image.height()),
+      ui.Rect.fromLTWH(0, 0, targetWidth!.toDouble(), targetHeight!.toDouble()),
+      CkPaint()
+    );
+
+    final CkPicture picture = recorder.endRecording();
+    final ui.Image finalImage = picture.toImageSync(
+      targetWidth,
+      targetHeight
+    );
+
+    final CkImage ckImage = finalImage as CkImage;
+    return ckImage;
 }
 
 /// Thrown when the web engine fails to decode an image, either due to a

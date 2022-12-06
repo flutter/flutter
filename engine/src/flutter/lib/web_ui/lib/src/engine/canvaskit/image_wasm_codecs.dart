@@ -14,6 +14,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../util.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
 import 'skia_object_cache.dart';
@@ -24,7 +25,7 @@ import 'skia_object_cache.dart';
 class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     implements ui.Codec {
   /// Decodes an image from a list of encoded bytes.
-  CkAnimatedImage.decodeFromBytes(this._bytes, this.src);
+  CkAnimatedImage.decodeFromBytes(this._bytes, this.src, {this.targetWidth, this.targetHeight});
 
   final String src;
   final Uint8List _bytes;
@@ -34,15 +35,32 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
   /// Current frame index.
   int _currentFrameIndex = 0;
 
+  final int? targetWidth;
+  final int? targetHeight;
+
   @override
   SkAnimatedImage createDefault() {
-    final SkAnimatedImage? animatedImage =
+    SkAnimatedImage? animatedImage =
         canvasKit.MakeAnimatedImageFromEncoded(_bytes);
     if (animatedImage == null) {
       throw ImageCodecException(
         'Failed to decode image data.\n'
         'Image source: $src',
       );
+    }
+
+    if (targetWidth != null || targetHeight != null) {
+      if (animatedImage.getFrameCount() > 1) {
+        printWarning('targetWidth and targetHeight for multi-frame images not supported');
+      } else {
+        animatedImage = _resizeAnimatedImage(animatedImage, targetWidth, targetHeight);
+        if (animatedImage == null) {
+          throw ImageCodecException(
+            'Failed to decode re-sized image data.\n'
+            'Image source: $src',
+          );
+        }
+      }
     }
 
     _frameCount = animatedImage.getFrameCount().toInt();
@@ -59,6 +77,19 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     }
 
     return animatedImage;
+  }
+
+  SkAnimatedImage? _resizeAnimatedImage(SkAnimatedImage animatedImage, int? targetWidth, int? targetHeight) {
+    final SkImage image = animatedImage.makeImageAtCurrentFrame();
+    final CkImage ckImage = scaleImage(image, targetWidth, targetHeight);
+    final Uint8List? resizedBytes = ckImage.skImage.encodeToBytes();
+
+    if (resizedBytes == null) {
+      throw ImageCodecException('Failed to re-size image');
+    }
+
+    final SkAnimatedImage? resizedAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(resizedBytes);
+    return resizedAnimatedImage;
   }
 
   @override

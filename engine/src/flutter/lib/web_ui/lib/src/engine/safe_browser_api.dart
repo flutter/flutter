@@ -280,8 +280,8 @@ class ImageDecoderOptions {
     required String type,
     required Uint8List data,
     required String premultiplyAlpha,
-    required int? desiredWidth,
-    required int? desiredHeight,
+    int? desiredWidth,
+    int? desiredHeight,
     required String colorSpaceConversion,
     required bool preferAnimation,
   });
