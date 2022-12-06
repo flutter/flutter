@@ -57,6 +57,7 @@ android {
         events "passed", "skipped", "failed", "standardOut", "standardError"
         exceptionFormat "full"
         showStackTraces true
+        showStandardStreams true
       }
     }
   }
