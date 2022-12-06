@@ -271,7 +271,7 @@ class IconTreeShaker {
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
       '--class-name', 'IconData',
       '--annotation-class-name', '_StaticIconProvider',
-      '--annotation-class-library-uri', 'package:flutter/src/material/icons.dart',
+      '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
     ];
     _logger.printTrace('Running command: ${cmd.join(' ')}');
     final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
