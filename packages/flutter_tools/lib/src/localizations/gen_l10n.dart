@@ -1163,7 +1163,17 @@ class LocalizationsGenerator {
             }
             if (!pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
               final String pluralPartExpression = generateVariables(pluralMessage);
-              pluralLogicArgs[pluralCases[pluralCase]!] = '      ${pluralCases[pluralCase]}: $pluralPartExpression,';
+              final String? transformedPluralCase = pluralCases[pluralCase];
+              if (transformedPluralCase == null) {
+                throw L10nParserException(
+                  'The plural case $pluralCase is not a valid plural case.',
+                  _inputFileNames[locale]!,
+                  message.resourceId,
+                  translationForMessage,
+                  pluralPart.positionInMessage,
+                );
+              }
+              pluralLogicArgs[transformedPluralCase] = '      ${pluralCases[pluralCase]}: $pluralPartExpression,';
             } else if (!suppressWarnings) {
               logger.printWarning('''
 [${_inputFileNames[locale]}:${message.resourceId}] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.
