@@ -219,7 +219,7 @@ void main() {
     tester.route(pointer.move(const Offset(40.0, 45.0)));
     tester.route(pointer.up());
     GestureBinding.instance.gestureArena.sweep(5);
-    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragupdate#1', 'dragend#1']);
+    expect(events, <String>['down#1', 'dragstart#1', 'dragupdate#1', 'dragend#1']);
   });
 
   testGesture('Recognizes consecutive taps + drag', (GestureTester tester) {
@@ -256,7 +256,6 @@ void main() {
       'dragcancel',
       'up#2',
       'down#3',
-      'tapcancel',
       'dragstart#3',
       'dragupdate#3',
       'dragend#3']);
@@ -353,7 +352,7 @@ void main() {
     tester.route(move5);
     tester.route(up5);
     GestureBinding.instance.gestureArena.sweep(5);
-    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragend#1']);
+    expect(events, <String>['down#1', 'dragstart#1', 'dragend#1']);
   });
 
   testGesture('Recognizer declares self-victory in a non-empty arena when pointer travels minimum distance to be considered a drag', (GestureTester tester) {
@@ -384,7 +383,6 @@ void main() {
     expect(events, <String>[
       'pancancel',
       'down#1',
-      'tapcancel',
       'dragstart#1',
       'dragupdate#1',
       'dragend#1']);
@@ -432,7 +430,6 @@ void main() {
       'down#1',
       'up#1',
       'down#2',
-      'tapcancel',
       'dragstart#2',
       'dragupdate#2',
       'dragend#2']);
@@ -478,7 +475,7 @@ void main() {
     tester.route(move5);
     tester.route(up5);
     GestureBinding.instance.gestureArena.sweep(5);
-    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragend#1']);
+    expect(events, <String>['down#1', 'dragstart#1', 'dragend#1']);
 
     events.clear();
     tester.async.elapse(const Duration(milliseconds: 1000));
@@ -523,7 +520,7 @@ void main() {
     tester.route(move5);
     tester.route(up5);
     GestureBinding.instance.gestureArena.sweep(5);
-    expect(events, <String>['down#1', 'tapcancel', 'dragstart#1', 'dragend#1']);
+    expect(events, <String>['down#1', 'dragstart#1', 'dragend#1']);
 
     events.clear();
     tester.async.elapse(const Duration(milliseconds: 1000));

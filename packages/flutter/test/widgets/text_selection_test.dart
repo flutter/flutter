@@ -173,13 +173,13 @@ void main() {
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
     expect(singleTapUpCount, 0);
-    // Before the move to TapAndDragGestureRecognizer the tapCount and singleTapCancelCount
-    // where 0 because the TapGestureRecognizer rejected itself when the initial pointer
-    // has moved past a certain threshold. With TapAndDragGestureRecognizer, we have two thresholds,
-    // a normal tap threshold, and a drag threshold, so it is possible for the tap count
-    // to increase even though the original pointer has moved beyond the tap threshold.
+    // Before the move to TapAndDragGestureRecognizer the tapCount was 0 because the
+    // TapGestureRecognizer rejected itself when the initial pointer moved past a certain
+    // threshold. With TapAndDragGestureRecognizer, we have two thresholds, a normal tap
+    // threshold, and a drag threshold, so it is possible for the tap count to increase
+    // even though the original pointer has moved beyond the tap threshold.
     expect(tapCount, 1);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
 
@@ -187,7 +187,7 @@ void main() {
     // Nothing else happens on up.
     expect(singleTapUpCount, 0);
     expect(tapCount, 1);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
@@ -200,7 +200,7 @@ void main() {
     await tester.pump();
     expect(singleTapUpCount, 0);
     expect(tapCount, 1);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
@@ -391,7 +391,7 @@ void main() {
 
     expect(tapCount, 1);
     expect(singleTapUpCount, 0);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
@@ -414,7 +414,7 @@ void main() {
 
     // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
     expect(tapCount, 1);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(singleTapUpCount, 0);
 
     expect(dragStartCount, 1);
@@ -439,7 +439,7 @@ void main() {
 
     // The tap and drag gesture recognizer will detect the tap down, but not the tap up.
     expect(tapCount, 1);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(singleTapUpCount, 0);
 
     expect(dragStartCount, 1);

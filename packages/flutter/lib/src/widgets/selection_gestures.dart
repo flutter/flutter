@@ -1086,7 +1086,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   String get debugDescription => 'tap_and_drag';
 
   void _acceptDrag(PointerEvent event) {
-    _checkTapCancel();
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
     }
