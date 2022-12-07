@@ -4,7 +4,7 @@
 {
     include: [ "syslog/client.shard.cml" ],
     program: {
-        data: "data/text_input_view",
+        data: "data/text-input-view",
 
         // Always use the jit runner for now.
         // TODO(fxbug.dev/106577): Implement manifest merging build rules for V2 components.
@@ -12,26 +12,17 @@
     },
     capabilities: [
         {
-            protocol: [ "fuchsia.ui.app.ViewProvider" ],
+            protocol: [ "fuchsia.ui.app.ViewProvider", "fuchsia.settings.Keyboard" ],
         },
     ],
     use: [
         {
-            protocol: [
-                "fuchsia.logger.LogSink",
-                "fuchsia.sysmem.Allocator",
-                "fuchsia.tracing.provider.Registry",
-                "fuchsia.ui.input.ImeService",
-                "fuchsia.ui.input3.Keyboard",
-                "fuchsia.ui.scenic.Scenic",
-                "fuchsia.ui.test.input.KeyboardInputListener",
-                "fuchsia.vulkan.loader.Loader",
-            ],
+            protocol: [ "fuchsia.ui.test.input.KeyboardInputListener", "fuchsia.settings.Keyboard" ],
         },
     ],
     expose: [
         {
-            protocol: [ "fuchsia.ui.app.ViewProvider" ],
+            protocol: [ "fuchsia.ui.app.ViewProvider", "fuchsia.settings.Keyboard" ],
             from: "self",
         },
     ],
