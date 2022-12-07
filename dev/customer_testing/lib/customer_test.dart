@@ -24,8 +24,6 @@ class CustomerTest {
         contacts.add(line.substring(8));
       } else if (line.startsWith('fetch=')) {
         fetch.add(line.substring(6));
-      } else if (line.startsWith('update=')) {
-        update.add(Directory(line.substring(7)));
       } else if (line.startsWith('test=')) {
         hasTests = true;
         test.add(line.substring(5));
