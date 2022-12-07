@@ -59,7 +59,7 @@ Future<void> main(List<String> arguments) async {
   buf.writeln('homepage: https://flutter.dev');
   buf.writeln('version: 0.0.0');
   buf.writeln('environment:');
-  buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  buf.writeln("  sdk: '>=2.10.0 <4.0.0'");
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
