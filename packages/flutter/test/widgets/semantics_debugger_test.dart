@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -437,6 +438,33 @@ void main() {
       'unchecked; disabled',
     );
   });
+
+  testWidgets('SemanticsDebugger ignores duplicated label and tooltip for Android', (WidgetTester tester) async {
+    final Key child = UniqueKey();
+    final Key debugger = UniqueKey();
+    final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: Semantics(
+              container: true,
+              key: child,
+              label: 'text',
+              tooltip: 'text',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      _getMessageShownInSemanticsDebugger(widgetKey: child, debuggerKey: debugger, tester: tester),
+      isPlatformAndroid ? 'text' : 'text\ntext',
+    );
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
     final UniqueKey textField = UniqueKey();
