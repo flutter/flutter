@@ -74,7 +74,6 @@ void PortableUITest::SetUpRealmBase() {
                        Protocol{fuchsia::sysmem::Allocator::Name_},
                        Protocol{fuchsia::tracing::provider::Registry::Name_},
                        Protocol{fuchsia::ui::input::ImeService::Name_},
-                       Protocol{kPointerInjectorRegistryName},
                        Protocol{kPosixSocketProviderName},
                        Protocol{kVulkanLoaderServiceName},
                        component_testing::Directory{"config-data"}},
@@ -87,7 +86,8 @@ void PortableUITest::SetUpRealmBase() {
                        Protocol{fuchsia::ui::composition::Flatland::Name_},
                        Protocol{fuchsia::ui::scenic::Scenic::Name_},
                        Protocol{fuchsia::ui::test::input::Registry::Name_},
-                       Protocol{fuchsia::ui::test::scene::Controller::Name_}},
+                       Protocol{fuchsia::ui::test::scene::Controller::Name_},
+                       Protocol{kPointerInjectorRegistryName}},
       .source = kTestUIStackRef,
       .targets = {ParentRef(), kFlutterJitRunnerRef}});
 }
@@ -240,6 +240,24 @@ void PortableUITest::RegisterMouse() {
   FML_LOG(INFO) << "Mouse registered";
 }
 
+void PortableUITest::RegisterKeyboard() {
+  FML_LOG(INFO) << "Registering fake keyboard";
+  input_registry_ = realm_->Connect<fuchsia::ui::test::input::Registry>();
+  input_registry_.set_error_handler([](auto) {
+    FML_LOG(ERROR) << "Error from input helper: " << &zx_status_get_string;
+  });
+
+  bool keyboard_registered = false;
+  fuchsia::ui::test::input::RegistryRegisterKeyboardRequest request;
+  request.set_device(fake_keyboard_.NewRequest());
+  input_registry_->RegisterKeyboard(
+      std::move(request),
+      [&keyboard_registered]() { keyboard_registered = true; });
+
+  RunLoopUntil([&keyboard_registered] { return keyboard_registered; });
+  FML_LOG(INFO) << "Keyboard registered";
+}
+
 void PortableUITest::InjectTap(int32_t x, int32_t y) {
   fuchsia::ui::test::input::TouchScreenSimulateTapRequest tap_request;
   tap_request.mutable_tap_location()->x = x;
@@ -288,6 +306,19 @@ void PortableUITest::SimulateMouseScroll(
   fake_mouse_->SimulateMouseEvent(std::move(request), [] {
     FML_LOG(INFO) << "Mouse scroll event injected";
   });
+}
+
+void PortableUITest::SimulateTextEntry(std::string text) {
+  FML_LOG(INFO) << "Sending text request";
+  bool done = false;
+
+  fuchsia::ui::test::input::KeyboardSimulateUsAsciiTextEntryRequest request;
+  request.set_text(text);
+  fake_keyboard_->SimulateUsAsciiTextEntry(std::move(request),
+                                           [&done]() { done = true; });
+
+  RunLoopUntil([&] { return done; });
+  FML_LOG(INFO) << "Text request sent";
 }
 
 }  // namespace fuchsia_test_utils

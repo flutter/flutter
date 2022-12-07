@@ -65,6 +65,9 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   // on both axes.
   void RegisterMouse();
 
+  // Register a fake keyboard
+  void RegisterKeyboard();
+
   // Simulates a tap at location (x, y).
   void InjectTap(int32_t x, int32_t y);
 
@@ -84,6 +87,9 @@ class PortableUITest : public ::loop_fixture::RealLoop {
       int scroll_x,
       int scroll_y,
       bool use_physical_units = false);
+
+  // Helper method to simluate text input
+  void SimulateTextEntry(std::string text);
 
  protected:
   component_testing::RealmBuilder* realm_builder() { return &realm_builder_; }
@@ -117,6 +123,7 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   fuchsia::ui::test::input::RegistryPtr input_registry_;
   fuchsia::ui::test::input::TouchScreenPtr fake_touchscreen_;
   fuchsia::ui::test::input::MousePtr fake_mouse_;
+  fuchsia::ui::test::input::KeyboardPtr fake_keyboard_;
   fuchsia::ui::test::scene::ControllerPtr scene_provider_;
   fuchsia::ui::observation::geometry::ViewTreeWatcherPtr view_tree_watcher_;
 

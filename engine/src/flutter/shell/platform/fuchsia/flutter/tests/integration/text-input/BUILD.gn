@@ -15,22 +15,22 @@ group("tests") {
 
 executable("text-input-test-bin") {
   testonly = true
-
   output_name = "text-input-test"
-
   sources = [ "text-input-test.cc" ]
 
   # This is needed for //third_party/googletest for linking zircon symbols.
   libs = [ "$fuchsia_sdk_path/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   deps = [
-    "$fuchsia_sdk_root/fidl:fuchsia.feedback",
-    "$fuchsia_sdk_root/fidl:fuchsia.logger",
-    "$fuchsia_sdk_root/fidl:fuchsia.sys",
+    "$fuchsia_sdk_root/fidl:fuchsia.accessibility.semantics",
+    "$fuchsia_sdk_root/fidl:fuchsia.component",
+    "$fuchsia_sdk_root/fidl:fuchsia.intl",
+    "$fuchsia_sdk_root/fidl:fuchsia.kernel",
     "$fuchsia_sdk_root/fidl:fuchsia.tracing.provider",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-    "$fuchsia_sdk_root/fidl:fuchsia.ui.composition",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.pointerinjector",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.policy",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",
     "$fuchsia_sdk_root/fidl:fuchsia.ui.test.scene",
@@ -40,9 +40,12 @@ executable("text-input-test-bin") {
     "$fuchsia_sdk_root/pkg:scenic_cpp",
     "$fuchsia_sdk_root/pkg:sys_component_cpp_testing",
     "$fuchsia_sdk_root/pkg:zx",
+    "text-input-view:package",
+    "//build/fuchsia/fidl:fuchsia.ui.gfx",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:check_view",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:color",
+    "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:screenshot",
     "//third_party/googletest:gtest",
     "//third_party/googletest:gtest_main",
@@ -52,7 +55,6 @@ executable("text-input-test-bin") {
 fuchsia_test_archive("text-input-test") {
   deps = [
     ":text-input-test-bin",
-    "text-input-view:package",
 
     # "OOT" copies of the runners used by tests, to avoid conflicting with the
     # runners in the base fuchsia image.
@@ -61,6 +63,5 @@ fuchsia_test_archive("text-input-test") {
   ]
 
   binary = "$target_name"
-
   cml_file = rebase_path("meta/$target_name.cml")
 }
