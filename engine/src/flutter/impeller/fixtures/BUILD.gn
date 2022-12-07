@@ -33,7 +33,7 @@ impeller_shaders("shader_fixtures") {
   }
 }
 
-scenec("geometry_fixtures") {
+scenec("scene_fixtures") {
   geometry = [ "flutter_logo.glb" ]
   type = "gltf"
 }
@@ -85,8 +85,12 @@ test_fixtures("file_fixtures") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]
   }
   fixtures +=
-      filter_include(get_target_outputs(":runtime_stages"), [ "*.iplr" ])
-  deps = [ ":runtime_stages" ]
+      filter_include(get_target_outputs(":runtime_stages"), [ "*.iplr" ]) +
+      filter_include(get_target_outputs(":scene_fixtures"), [ "*.ipscene" ])
+  deps = [
+    ":runtime_stages",
+    ":scene_fixtures",
+  ]
 }
 
 group("fixtures") {
@@ -94,7 +98,7 @@ group("fixtures") {
 
   public_deps = [
     ":file_fixtures",
-    ":geometry_fixtures",
+    ":scene_fixtures",
     ":shader_fixtures",
   ]
 }

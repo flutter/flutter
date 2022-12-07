@@ -13,6 +13,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/compiler/utilities.h"
 #include "impeller/scene/importer/importer.h"
+#include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/importer/switches.h"
 #include "impeller/scene/importer/types.h"
 
@@ -74,7 +75,7 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   flatbuffers::FlatBufferBuilder builder;
-  builder.Finish(fb::Scene::Pack(builder, &scene));
+  builder.Finish(fb::Scene::Pack(builder, &scene), fb::SceneIdentifier());
 
   auto output_file_name = std::filesystem::absolute(
       std::filesystem::current_path() / switches.output_file_name);

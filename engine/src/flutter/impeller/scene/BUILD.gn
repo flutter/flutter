@@ -26,6 +26,7 @@ impeller_component("scene") {
 
   public_deps = [
     "../renderer",
+    "importer:importer_flatbuffers",
     "shaders",
   ]
 
@@ -42,7 +43,5 @@ impeller_component("scene_unittests") {
     "../fixtures",
     "../playground:playground_test",
     "//flutter/testing:testing_lib",
-
-    #"//third_party/tinygltf",
   ]
 }

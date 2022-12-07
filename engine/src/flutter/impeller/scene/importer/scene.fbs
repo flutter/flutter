@@ -33,12 +33,25 @@ struct Matrix {
   m: [float:16];
 }
 
+// This attribute layout is expected to be identical to that within
+// `impeller/scene/shaders/geometry.vert`.
 struct Vertex {
   position: Vec3;
   normal: Vec3;
   tangent: Vec4; // The 4th component determines the handedness of the tangent.
   texture_coords: Vec2;
   color: Color;
+}
+
+enum IndicesType:byte {
+  k16Bit,
+  k32Bit,
+}
+
+table Indices {
+  data: [ubyte];
+  count: uint32;
+  type: IndicesType;
 }
 
 table Texture {
@@ -54,7 +67,7 @@ table Material {
 
 table StaticMesh {
   vertices: [Vertex];
-  indices: [uint32];
+  indices: Indices;
   material: Material;
 }
 

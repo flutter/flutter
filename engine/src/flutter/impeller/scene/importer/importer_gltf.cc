@@ -108,10 +108,28 @@ static bool ProcessStaticMesh(const tinygltf::Model& gltf,
 
   auto index_accessor = gltf.accessors[primitive.indices];
   auto index_view = gltf.bufferViews[index_accessor.bufferView];
-  static_mesh.indices.resize(index_accessor.count);
+
+  auto indices = std::make_unique<fb::IndicesT>();
+
+  switch (index_accessor.componentType) {
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+      indices->type = fb::IndicesType::k16Bit;
+      break;
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+      indices->type = fb::IndicesType::k32Bit;
+      break;
+    default:
+      std::cerr << "Mesh primitive has unsupported index type "
+                << index_accessor.componentType << ". Skipping.";
+      return false;
+  }
+  indices->count = index_accessor.count;
+  indices->data.resize(index_view.byteLength);
   const auto* index_buffer =
       &gltf.buffers[index_view.buffer].data[index_view.byteOffset];
-  std::memcpy(static_mesh.indices.data(), index_buffer, index_view.byteLength);
+  std::memcpy(indices->data.data(), index_buffer, indices->data.size());
+
+  static_mesh.indices = std::move(indices);
 
   return true;
 }

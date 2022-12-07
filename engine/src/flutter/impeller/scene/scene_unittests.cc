@@ -9,12 +9,13 @@
 #include "impeller/geometry/vector.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
-
 #include "impeller/scene/camera.h"
 #include "impeller/scene/geometry.h"
+#include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/material.h"
 #include "impeller/scene/scene.h"
 #include "impeller/scene/static_mesh_entity.h"
+#include "third_party/flatbuffers/include/flatbuffers/verifier.h"
 
 // #include "third_party/tinygltf/tiny_gltf.h"
 
@@ -44,6 +45,48 @@ TEST_P(SceneTest, CuboidUnlit) {
 
       scene.Add(mesh);
     }
+
+    // Face towards the +Z direction (+X right, +Y up).
+    auto camera = Camera::MakePerspective(
+                      /* fov */ Radians(kPiOver4),
+                      /* position */ {2, 2, -5})
+                      .LookAt(
+                          /* target */ Vector3(),
+                          /* up */ {0, 1, 0});
+
+    scene.Render(render_target, camera);
+    return true;
+  };
+
+  OpenPlaygroundHere(callback);
+}
+
+TEST_P(SceneTest, GLTFScene) {
+  auto allocator = GetContext()->GetResourceAllocator();
+
+  auto mapping =
+      flutter::testing::OpenFixtureAsMapping("flutter_logo.glb.ipscene");
+
+  flatbuffers::Verifier verifier(mapping->GetMapping(), mapping->GetSize());
+  ASSERT_TRUE(fb::VerifySceneBuffer(verifier));
+
+  // TODO(bdero): Add full scene deserialization utilities.
+  const auto* fb_scene = fb::GetScene(mapping->GetMapping());
+  const auto fb_nodes = fb_scene->children();
+  ASSERT_EQ(fb_nodes->size(), 1u);
+  const auto fb_meshes = fb_nodes->begin()->meshes();
+  ASSERT_EQ(fb_meshes->size(), 1u);
+  const auto* fb_mesh = fb_meshes->Get(0);
+  auto geometry = Geometry::MakeFromFBMesh(*fb_mesh, *allocator);
+  ASSERT_NE(geometry, nullptr);
+
+  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+    auto scene = Scene(GetContext());
+
+    auto mesh = SceneEntity::MakeStaticMesh();
+    mesh->SetMaterial(Material::MakeUnlit());
+    mesh->SetGeometry(geometry);
+    scene.Add(mesh);
 
     // Face towards the +Z direction (+X right, +Y up).
     auto camera = Camera::MakePerspective(

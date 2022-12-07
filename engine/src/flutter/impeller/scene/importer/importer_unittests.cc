@@ -28,7 +28,11 @@ TEST(ImporterTest, CanParseGLTF) {
 
   ASSERT_EQ(node.meshes.size(), 1u);
   auto& mesh = *node.meshes[0];
-  ASSERT_EQ(mesh.indices.size(), 918u);
+  ASSERT_EQ(mesh.indices->count, 918u);
+
+  uint16_t first_index =
+      *reinterpret_cast<uint16_t*>(mesh.indices->data.data());
+  ASSERT_EQ(first_index, 45u);
 
   ASSERT_EQ(mesh.vertices.size(), 260u);
   auto& vertex = mesh.vertices[0];
