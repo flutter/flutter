@@ -111,9 +111,8 @@ $fontsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, containsAll(
-        <String>['AssetManifest.bin', 'AssetManifest.json', 'FontManifest.json', 'NOTICES.Z']
-      ));
+      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.containsKey('FontManifest.json'), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
