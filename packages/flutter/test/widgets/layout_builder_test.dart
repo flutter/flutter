@@ -755,7 +755,48 @@ void main() {
     expect(layoutSpy.paintCount, 2);
   });
 
-  testWidgets('SliverLayoutBuilder can skip unnecessary relayout', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder can skip unnecessary relayout', (WidgetTester tester) async {
+    int innerInvocationCount = 0;
+    int outerInvocationCount = 0;
+    Widget widget = const ColoredBox(color: Color(0xFFFFFFFF));
+    final LayoutBuilder layoutBuilder = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      innerInvocationCount += 1;
+      return widget;
+    });
+    await tester.pumpWidget(
+      // The Center widget makes sure the layout builder's render object is not
+      // a relayout boundary.
+      Center(child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        outerInvocationCount += 1;
+        return _LayoutSpy(child: layoutBuilder);
+      })),
+    );
+
+    final _RenderLayoutSpy layoutSpy = tester.renderObject(find.byType(_LayoutSpy));
+    expect(layoutSpy.performLayoutCount, 1);
+    expect(layoutSpy.paintCount, 1);
+
+    final Element layoutBuilderElement = tester.element(find.byWidget(layoutBuilder));
+    layoutBuilderElement.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(innerInvocationCount, 2);
+    expect(outerInvocationCount, 1);
+    expect(layoutSpy.performLayoutCount, 1);
+    expect(layoutSpy.paintCount, 1);
+
+    // Doesn't skip necessary layout.
+    widget = const SizedBox.shrink();
+    layoutBuilderElement.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(innerInvocationCount, 3);
+    expect(outerInvocationCount, 1);
+    expect(layoutSpy.performLayoutCount, 2);
+    expect(layoutSpy.paintCount, 2);
+  });
+
+  testWidgets('(Sliver)LayoutBuilder can skip unnecessary relayout', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     int innerInvocationCount1 = 0;
     int innerInvocationCount2 = 0;

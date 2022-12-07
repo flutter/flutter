@@ -74,6 +74,8 @@ void main() {
   testWidgets('Moving a global key from another SliverLayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey1 = GlobalKey();
     final GlobalKey victimKey2 = GlobalKey();
+    int victim1LayoutCallbackCount = 0;
+    int victim2LayoutCallbackCount = 0;
 
     await tester.pumpWidget(
       Directionality(
@@ -82,11 +84,13 @@ void main() {
           slivers: <Widget>[
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
+                victim1LayoutCallbackCount += 1;
                 return SliverPadding(key: victimKey1, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
+                victim2LayoutCallbackCount += 1;
                 return SliverPadding(key: victimKey2, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
@@ -99,6 +103,8 @@ void main() {
         ),
       ),
     );
+    expect(victim1LayoutCallbackCount, 1);
+    expect(victim2LayoutCallbackCount, 1);
 
     await tester.pumpWidget(
       Directionality(
@@ -107,6 +113,7 @@ void main() {
           slivers: <Widget>[
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
+                victim2LayoutCallbackCount += 1;
                 return SliverPadding(key: victimKey2, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
@@ -117,6 +124,7 @@ void main() {
             ),
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
+                victim1LayoutCallbackCount += 1;
                 return SliverPadding(key: victimKey1, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
@@ -126,6 +134,8 @@ void main() {
     );
 
     expect(tester.takeException(), null);
+    expect(victim1LayoutCallbackCount, 2);
+    expect(victim2LayoutCallbackCount, 2);
   });
 
   testWidgets('LayoutBuilder does not layout twice', (WidgetTester tester) async {
