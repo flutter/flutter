@@ -7,7 +7,6 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 
 #include <rapidjson/document.h>
-#include <windowsx.h>
 
 namespace flutter {
 namespace testing {

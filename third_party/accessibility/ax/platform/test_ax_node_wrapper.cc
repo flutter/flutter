@@ -54,9 +54,14 @@ std::map<AXNode::AXID, AXNode::AXID> g_hit_test_result;
 class TestAXTreeObserver : public AXTreeObserver {
  private:
   void OnNodeDeleted(AXTree* tree, int32_t node_id) override {
-    const auto iter = g_node_id_to_wrapper_map.find(node_id);
+    const auto& iter = g_node_id_to_wrapper_map.find(node_id);
     if (iter != g_node_id_to_wrapper_map.end()) {
       TestAXNodeWrapper* wrapper = iter->second;
+      const auto& focus_iter = g_focused_node_in_tree.find(tree);
+      if (focus_iter != g_focused_node_in_tree.end() &&
+          focus_iter->second->id() == node_id) {
+        g_focused_node_in_tree.erase(tree);
+      }
       delete wrapper;
       g_node_id_to_wrapper_map.erase(node_id);
     }

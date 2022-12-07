@@ -15,7 +15,7 @@ namespace ui {
 static std::optional<int32_t> g_active_popup_ax_unique_id;
 
 std::optional<int32_t> GetActivePopupAxUniqueId() {
-  return *g_active_popup_ax_unique_id;
+  return g_active_popup_ax_unique_id;
 }
 
 void SetActivePopupAxUniqueId(std::optional<int32_t> ax_unique_id) {

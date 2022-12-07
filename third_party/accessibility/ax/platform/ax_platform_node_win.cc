@@ -2465,6 +2465,19 @@ HRESULT AXPlatformNodeWin::GetPropertyValueImpl(PROPERTYID property_id,
       result->intVal = static_cast<int>(ComputeExpandCollapseState());
       break;
 
+    case UIA_ToggleToggleStatePropertyId: {
+      ToggleState state;
+      get_ToggleState(&state);
+      result->vt = VT_I4;
+      result->lVal = state;
+      break;
+    }
+
+    case UIA_ValueValuePropertyId:
+      result->vt = VT_BSTR;
+      result->bstrVal = GetValueAttributeAsBstr(this);
+      break;
+
     // Not currently implemented.
     case UIA_AnnotationObjectsPropertyId:
     case UIA_AnnotationTypesPropertyId:
@@ -5205,6 +5218,8 @@ std::optional<DWORD> AXPlatformNodeWin::MojoEventToMSAAEvent(
       return EVENT_OBJECT_SHOW;
     case ax::mojom::Event::kValueChanged:
       return EVENT_OBJECT_VALUECHANGE;
+    case ax::mojom::Event::kDocumentSelectionChanged:
+      return EVENT_OBJECT_TEXTSELECTIONCHANGED;
     default:
       return std::nullopt;
   }
@@ -5216,6 +5231,8 @@ std::optional<EVENTID> AXPlatformNodeWin::MojoEventToUIAEvent(
   switch (event) {
     case ax::mojom::Event::kAlert:
       return UIA_SystemAlertEventId;
+    case ax::mojom::Event::kDocumentSelectionChanged:
+      return UIA_Text_TextChangedEventId;
     case ax::mojom::Event::kFocus:
     case ax::mojom::Event::kFocusContext:
     case ax::mojom::Event::kFocusAfterMenuClose:
@@ -5581,6 +5598,11 @@ AXPlatformNodeWin::GetPatternProviderFactoryMethod(PATTERNID pattern_id) {
         }
       }
       break;
+
+      // TODO(schectman): add implementations for ITextProvider and
+      // ITextRangeProvider interfaces.
+      // https://github.com/flutter/flutter/issues/114547 and
+      // https://github.com/flutter/flutter/issues/109804
 
     case UIA_TogglePatternId:
       if (SupportsToggle(data.role)) {

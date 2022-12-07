@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/third_party/accessibility/ax/ax_clipping_behavior.h"
 #include "flutter/third_party/accessibility/ax/ax_coordinate_system.h"
+#include "flutter/third_party/accessibility/ax/platform/ax_fragment_root_win.h"
 
 namespace flutter {
 
@@ -90,14 +91,8 @@ gfx::Rect FlutterPlatformNodeDelegateWindows::GetBoundsRect(
 }
 
 void FlutterPlatformNodeDelegateWindows::DispatchWinAccessibilityEvent(
-    DWORD event_type) {
-  HWND hwnd = view_->GetPlatformWindow();
-  if (!hwnd) {
-    return;
-  }
-  assert(ax_platform_node_);
-  ::NotifyWinEvent(event_type, hwnd, OBJID_CLIENT,
-                   -ax_platform_node_->GetUniqueId());
+    ax::mojom::Event event_type) {
+  ax_platform_node_->NotifyAccessibilityEvent(event_type);
 }
 
 void FlutterPlatformNodeDelegateWindows::SetFocus() {
@@ -105,6 +100,11 @@ void FlutterPlatformNodeDelegateWindows::SetFocus() {
   varchild.vt = VT_I4;
   varchild.lVal = CHILDID_SELF;
   GetNativeViewAccessible()->accSelect(SELFLAG_TAKEFOCUS, varchild);
+}
+
+gfx::AcceleratedWidget
+FlutterPlatformNodeDelegateWindows::GetTargetForNativeAccessibilityEvent() {
+  return view_->GetPlatformWindow();
 }
 
 }  // namespace flutter

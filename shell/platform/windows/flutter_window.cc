@@ -303,4 +303,8 @@ AccessibilityRootNode* FlutterWindow::GetAccessibilityRootNode() {
   return accessibility_root_;
 }
 
+ui::AXFragmentRootDelegateWin* FlutterWindow::GetAxFragmentRootDelegate() {
+  return binding_handler_delegate_->GetAxFragmentRootDelegate();
+}
+
 }  // namespace flutter
