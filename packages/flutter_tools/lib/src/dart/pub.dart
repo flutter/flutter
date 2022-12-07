@@ -32,6 +32,9 @@ const String _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
 /// The console environment key used by the pub tool to find the cache directory.
 const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 
+/// The console environment key used by the pub tool to limit HTTP retries.
+const String _kPubMaxHttpRetriesEnvironmentKey = 'PUB_MAX_HTTP_RETRIES';
+
 typedef MessageFilter = String? Function(String message);
 
 /// globalCachePath is the directory in which the content of the localCachePath will be moved in
@@ -379,7 +382,8 @@ class _DefaultPub implements Pub {
   /// Uses [ProcessStartMode.normal] and [Pub._stdio] if [Pub.test] constructor
   /// was used.
   ///
-  /// Prints the stdout and stderr of the whole run.
+  /// Prints the stdout and stderr of the whole run, unless silenced using
+  /// [printProgress].
   ///
   /// Sends an analytics event.
   Future<void> _runWithStdioInherited(
@@ -393,34 +397,43 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
   }) async {
     int exitCode;
+    if (printProgress) {
+      _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
+    }
 
-    _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    if (!retry) {
+      pubEnvironment[_kPubMaxHttpRetriesEnvironmentKey] = '1';
+    }
+
     try {
       final io.Process process;
-      final io.Stdio? stdio = _stdio;
 
-      if (stdio != null) {
-        // Omit mode parameter and direct pub output to [Pub._stdio] for tests.
+      if (_stdio != null || !printProgress) {
+        // Omit [mode] parameter if testing or if silent operation is requesteds.
         process = await _processUtils.start(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
           environment: pubEnvironment,
         );
 
-        final StreamSubscription<List<int>> stdoutSubscription =
-          process.stdout.listen(stdio.stdout.add);
-        final StreamSubscription<List<int>> stderrSubscription =
-          process.stderr.listen(stdio.stderr.add);
+        final io.Stdio? stdio = _stdio;
+        if (stdio != null) {
+          // Direct pub output to [Pub._stdio] for tests.
+          final StreamSubscription<List<int>> stdoutSubscription =
+            process.stdout.listen(stdio.stdout.add);
+          final StreamSubscription<List<int>> stderrSubscription =
+            process.stderr.listen(stdio.stderr.add);
 
-        await Future.wait<void>(<Future<void>>[
-          stdoutSubscription.asFuture<void>(),
-          stderrSubscription.asFuture<void>(),
-        ]);
+          await Future.wait<void>(<Future<void>>[
+            stdoutSubscription.asFuture<void>(),
+            stderrSubscription.asFuture<void>(),
+          ]);
 
-        unawaited(stdoutSubscription.cancel());
-        unawaited(stderrSubscription.cancel());
+          unawaited(stdoutSubscription.cancel());
+          unawaited(stderrSubscription.cancel());
+        }
       } else {
         // Let pub inherit stdio for normal operation.
         process = await _processUtils.start(
