@@ -351,7 +351,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 240));
     expect(
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))).dx,
-      moreOrLessEquals(798, epsilon: 1),
+      moreOrLessEquals(799, epsilon: 1),
     );
 
     // Use the navigator to push a route instead of tapping the 'push' button.
@@ -368,6 +368,72 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      false,
+    );
+  });
+
+  testWidgets('Back swipe dismiss does not block user gesture when animation visibly stops', (WidgetTester tester) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: CupertinoButton(
+              onPressed: () {
+                Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return const CupertinoPageScaffold(
+                      child: Center(child: Text('route')),
+                    );
+                  },
+                ));
+              },
+              child: const Text('push'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(400, 0)); // Drag halfway.
+    await gesture.up();
+    // Trigger the snapping animation.
+    // Since the back swipe drag was brought to >=50% of the screen, it will
+    // self snap to finish the pop transition as the gesture is lifted.
+    //
+    // This drag drop animation is 400ms when dropped exactly halfway
+    // (800 / [pixel distance remaining], see
+    // _CupertinoBackGestureController.dragEnd).
+    //
+    // Further gestures should be blocked during the majority of the animation,
+    // but unblocked near the end when it is visibly done.
+    await tester.pump();
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(400, 0),
+    );
+    // Let the dismissing snapping animation go 25%. Further gestures should
+    // be blocked.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      true,
+    );
+
+    // Continue the animation another 50%. Because the snap goes quickly then
+    // sharply levels out, there is a long period where the animation is visibly
+    // still settling. At this point, gestures should be unblocked.
+    await tester.pump(const Duration(milliseconds: 200));
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       false,
@@ -790,8 +856,8 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     // Rate of change is slowing down.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-4, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(787, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-1.01, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(798.9, epsilon: 1));
 
     await tester.pumpAndSettle();
     expect(

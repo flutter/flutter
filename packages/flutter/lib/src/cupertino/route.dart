@@ -765,7 +765,6 @@ class _CupertinoBackGestureController<T> {
     } else {
       animateForward = controller.value > 0.5;
     }
-
     if (animateForward) {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
@@ -788,13 +787,40 @@ class _CupertinoBackGestureController<T> {
     }
 
     if (controller.isAnimating) {
+      late VoidCallback animationValueCallback;
+      late AnimationStatusListener animationStatusCallback;
+
+      // Keep the userGestureInProgress in true state so we don't change the
+      // curve of the page transition mid-flight since CupertinoPageTransition
+      // depends on userGestureInProgress. Switch the userGestureInProgress to
+      // false near the end, but just before so the app can be interacted with
+      // when the animation visibly ends.
+      animationValueCallback = () {
+        if (controller.value < 0.02) {
+          if (navigator.userGestureInProgress) {
+            navigator.didStopUserGesture();
+          }
+          controller.removeListener(animationValueCallback);
+          controller.removeStatusListener(animationStatusCallback);
+        }
+      };
+      // Only apply the value listener if going back to the previous route, as
+      // allowing clicks on the top route while in motion may trigger errors
+      // while the route is not fully in the Widget tree.
+      if (!animateForward) {
+        controller.addListener(animationValueCallback);
+      }
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition
       // depends on userGestureInProgress.
-      late AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
-        navigator.didStopUserGesture();
+        if (navigator.userGestureInProgress) {
+          navigator.didStopUserGesture();
+        }
         controller.removeStatusListener(animationStatusCallback);
+        if (animationValueCallback != null) {
+          controller.removeListener(animationValueCallback);
+        }
       };
       controller.addStatusListener(animationStatusCallback);
     } else {
