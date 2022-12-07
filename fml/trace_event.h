@@ -139,6 +139,13 @@
 #endif  // TRACE_EVENT_HIDE_MACROS
 #endif  // !defined(OS_FUCHSIA)
 
+#define TRACE_EVENT2_INT(category_group, name, arg1_name, arg1_val, arg2_name, \
+                         arg2_val)                                             \
+  const auto __arg1_val_str = std::to_string(arg1_val);                        \
+  const auto __arg2_val_str = std::to_string(arg2_val);                        \
+  TRACE_EVENT2(category_group, name, arg1_name, __arg1_val_str.c_str(),        \
+               arg2_name, __arg2_val_str.c_str());
+
 namespace fml {
 namespace tracing {
 
