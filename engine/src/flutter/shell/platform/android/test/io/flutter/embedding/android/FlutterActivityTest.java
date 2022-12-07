@@ -193,6 +193,31 @@ public class FlutterActivityTest {
   }
 
   @Test
+  public void itCreatesNewEngineInGroupIntentWithRequestedSettings() {
+    Intent intent =
+        FlutterActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("custom_entrypoint")
+            .initialRoute("/custom/route")
+            .backgroundMode(BackgroundMode.transparent)
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+    flutterActivity.setDelegate(new FlutterActivityAndFragmentDelegate(flutterActivity));
+
+    assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
+    assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
+    assertEquals("/custom/route", flutterActivity.getInitialRoute());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertTrue(flutterActivity.shouldAttachEngineToActivity());
+    assertTrue(flutterActivity.shouldDestroyEngineWithHost());
+    assertNull(flutterActivity.getCachedEngineId());
+    assertEquals(BackgroundMode.transparent, flutterActivity.getBackgroundMode());
+    assertEquals(RenderMode.texture, flutterActivity.getRenderMode());
+    assertEquals(TransparencyMode.transparent, flutterActivity.getTransparencyMode());
+  }
+
+  @Test
   public void itReturnsValueFromMetaDataWhenCallsShouldHandleDeepLinkingCase1()
       throws PackageManager.NameNotFoundException {
     Intent intent =

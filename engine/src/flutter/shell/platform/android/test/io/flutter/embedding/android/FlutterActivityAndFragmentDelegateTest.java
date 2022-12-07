@@ -30,6 +30,8 @@ import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityAndFragmentDelegate.Host;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
+import io.flutter.embedding.engine.FlutterEngineGroup;
+import io.flutter.embedding.engine.FlutterEngineGroupCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -224,6 +226,57 @@ public class FlutterActivityAndFragmentDelegateTest {
     // ---- Test setup ----
     // Adjust fake host to request cached engine that does not exist.
     when(mockHost.getCachedEngineId()).thenReturn("my_flutter_engine");
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine existence is verified in onAttach()
+    delegate.onAttach(ctx);
+
+    // Expect IllegalStateException.
+  }
+
+  @Test
+  public void itUsesNewEngineInGroupWhenProvided() {
+    // ---- Test setup ----
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    when(mockFlutterLoader.findAppBundlePath()).thenReturn("default_flutter_assets/path");
+    FlutterInjector.setInstance(
+        new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
+    FlutterEngineGroup flutterEngineGroup = mock(FlutterEngineGroup.class);
+    FlutterEngineGroupCache.getInstance().put("my_flutter_engine_group", flutterEngineGroup);
+
+    // Adjust fake host to request cached engine group.
+    when(mockHost.getCachedEngineGroupId()).thenReturn("my_flutter_engine_group");
+    when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(null);
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is obtained in onAttach().
+    delegate.onAttach(ctx);
+
+    // If the engine in FlutterEngineGroup is being used, it should have sent a resumed lifecycle
+    // event.
+    // Note: "/fake/path" and "main" come from `setUp()`.
+    DartExecutor.DartEntrypoint entrypoint = new DartExecutor.DartEntrypoint("/fake/path", "main");
+    verify(flutterEngineGroup, times(1))
+        .createAndRunEngine(mockHost.getContext(), entrypoint, mockHost.getInitialRoute());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void itThrowsExceptionIfNewEngineInGroupNotExist() {
+    // ---- Test setup ----
+    FlutterEngineGroupCache.getInstance().clear();
+
+    // Adjust fake host to request cached engine group that does not exist.
+    when(mockHost.getCachedEngineGroupId()).thenReturn("my_flutter_engine_group");
+    when(mockHost.getCachedEngineId()).thenReturn(null);
+    when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(null);
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
