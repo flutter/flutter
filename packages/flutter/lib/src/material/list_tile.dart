@@ -626,9 +626,7 @@ class ListTile extends StatelessWidget {
     return isDense;
   }
 
-  // TODO(TahaTesser): Refactor this to support list tile states
-  // similar to `effectiveColor` and `effectiveIconColor` without
-  // other list tile widgets that depend on this implementation.
+  // TODO(TahaTesser): Refactor this to support list tile states.
   Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme, ListTileThemeData defaults) {
     final Color? color = selected
       ? selectedTileColor ?? tileTheme.selectedTileColor ?? theme.listTileTheme.selectedTileColor
@@ -653,49 +651,23 @@ class ListTile extends StatelessWidget {
       if (selected) MaterialState.selected,
     };
 
-    Color? resolveColor(Color? color) {
-      if (color is MaterialStateColor) {
-        return MaterialStateProperty.resolveAs<Color?>(color, states);
-      }
-      return null;
+    Color? resolveColor(Color? explicitColor, Color? selectedColor, Color? enabledColor, [Color? disabledColor]) {
+      return _IndividualOverrides(
+        explicitColor: explicitColor,
+        selectedColor: selectedColor,
+        enabledColor: enabledColor,
+        disabledColor: disabledColor,
+      ).resolve(states);
     }
 
-    final Color? effectiveIconColor = resolveColor(iconColor)
-      ?? _IndividualOverrides(
-           selectedColor: selectedColor,
-           enabledColor: iconColor,
-         ).resolve(states)
-      ?? resolveColor(tileTheme.iconColor)
-      ?? _IndividualOverrides(
-           selectedColor: tileTheme.selectedColor,
-           enabledColor: tileTheme.iconColor,
-         ).resolve(states)
-      ?? resolveColor(theme.listTileTheme.iconColor)
-      ?? _IndividualOverrides(
-           selectedColor: theme.listTileTheme.selectedColor,
-           enabledColor: theme.listTileTheme.iconColor,
-         ).resolve(states)
-      ?? _IndividualOverrides(
-           selectedColor: defaults.selectedColor,
-           enabledColor: defaults.iconColor,
-           disabledColor: theme.disabledColor,
-         ).resolve(states);
-    final Color? effectiveColor = resolveColor(textColor)
-      ?? _IndividualOverrides(
-           selectedColor: selectedColor,
-           enabledColor: textColor,
-         ).resolve(states)
-      ?? resolveColor(tileTheme.textColor)
-      ?? _IndividualOverrides(
-           selectedColor: tileTheme.selectedColor,
-           enabledColor: tileTheme.textColor,
-         ).resolve(states)
-      ?? resolveColor(theme.listTileTheme.textColor)
-      ?? _IndividualOverrides(
-           selectedColor: theme.listTileTheme.selectedColor,
-           enabledColor: theme.listTileTheme.textColor,
-         ).resolve(states)
-      ?? _IndividualOverrides(selectedColor: defaults.selectedColor, disabledColor: theme.disabledColor).resolve(states);
+    final Color? effectiveIconColor = resolveColor(iconColor, selectedColor, iconColor)
+      ?? resolveColor(tileTheme.iconColor, tileTheme.selectedColor, tileTheme.iconColor)
+      ?? resolveColor(theme.listTileTheme.iconColor, theme.listTileTheme.selectedColor, theme.listTileTheme.iconColor)
+      ?? resolveColor(defaults.iconColor, defaults.selectedColor, defaults.iconColor, theme.disabledColor);
+    final Color? effectiveColor = resolveColor(textColor, selectedColor, textColor)
+      ?? resolveColor(tileTheme.textColor, tileTheme.selectedColor, tileTheme.textColor)
+      ?? resolveColor(theme.listTileTheme.textColor, theme.listTileTheme.selectedColor, theme.listTileTheme.textColor)
+      ?? resolveColor(defaults.textColor, defaults.selectedColor, defaults.textColor, theme.disabledColor);
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
 
     TextStyle? leadingAndTrailingStyle;
@@ -855,17 +827,23 @@ class ListTile extends StatelessWidget {
 
 class _IndividualOverrides extends MaterialStateProperty<Color?> {
   _IndividualOverrides({
-    this.disabledColor,
-    this.selectedColor,
+    this.explicitColor,
     this.enabledColor,
+    this.selectedColor,
+    this.disabledColor,
   });
 
-  final Color? disabledColor;
-  final Color? selectedColor;
+  final Color? explicitColor;
   final Color? enabledColor;
+  final Color? selectedColor;
+  final Color? disabledColor;
 
   @override
   Color? resolve(Set<MaterialState> states) {
+    if (explicitColor is MaterialStateColor) {
+      return MaterialStateProperty.resolveAs<Color?>(explicitColor, states);
+    }
+
     if (states.contains(MaterialState.disabled)) {
       return disabledColor;
     }
