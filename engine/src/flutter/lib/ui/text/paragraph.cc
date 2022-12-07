@@ -65,13 +65,8 @@ void Paragraph::paint(Canvas* canvas, double x, double y) {
   }
 
   DisplayListBuilder* builder = canvas->builder();
-  if (builder && m_paragraph->Paint(builder, x, y)) {
-    return;
-  }
-  // Fall back to SkCanvas if painting to DisplayListBuilder is not supported.
-  SkCanvas* sk_canvas = canvas->canvas();
-  if (sk_canvas) {
-    m_paragraph->Paint(sk_canvas, x, y);
+  if (builder) {
+    m_paragraph->Paint(builder, x, y);
   }
 }
 
