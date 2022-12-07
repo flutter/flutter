@@ -292,6 +292,12 @@ public class FlutterAndroidComponentTest {
       return "my_flutter_engine";
     }
 
+    @Nullable
+    @Override
+    public String getCachedEngineGroupId() {
+      return "my_flutter_engine_group";
+    }
+
     @Override
     public boolean shouldDestroyEngineWithHost() {
       return shouldDestroyEngineWithHost;

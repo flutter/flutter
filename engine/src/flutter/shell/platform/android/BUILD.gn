@@ -203,6 +203,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/FlutterEngineCache.java",
   "io/flutter/embedding/engine/FlutterEngineConnectionRegistry.java",
   "io/flutter/embedding/engine/FlutterEngineGroup.java",
+  "io/flutter/embedding/engine/FlutterEngineGroupCache.java",
   "io/flutter/embedding/engine/FlutterJNI.java",
   "io/flutter/embedding/engine/FlutterOverlaySurface.java",
   "io/flutter/embedding/engine/FlutterShellArgs.java",
