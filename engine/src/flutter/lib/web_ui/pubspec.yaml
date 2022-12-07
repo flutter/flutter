@@ -15,6 +15,7 @@ dependencies:
     path: ../../third_party/web_unicode
 
 dev_dependencies:
+  analyzer: 5.2.0
   archive: 3.1.2
   args: any
   async: any
