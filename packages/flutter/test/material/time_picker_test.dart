@@ -364,6 +364,9 @@ void main() {
         find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
       );
       expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
+
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('builder parameter', (WidgetTester tester) async {
