@@ -61,8 +61,14 @@ static NSString* const kInitiateSpellCheck = @"SpellCheck.initiateSpellCheck";
 // Returns an empty array if no spell check suggestions.
 - (NSArray<NSDictionary<NSString*, id>*>*)findAllSpellCheckSuggestionsForText:(NSString*)text
                                                                    inLanguage:(NSString*)language {
-  // Transform Dart Locale format to iOS language format.
-  language = [language stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
+  // Transform Dart Locale format to iOS language format if necessary.
+  if ([language containsString:@"-"]) {
+    NSArray<NSString*>* languageCodes = [language componentsSeparatedByString:@"-"];
+    FML_DCHECK(languageCodes.count == 2);
+    NSString* lastCode = [[languageCodes lastObject] uppercaseString];
+    language = [NSString stringWithFormat:@"%@_%@", [languageCodes firstObject], lastCode];
+  }
+
   if (![UITextChecker.availableLanguages containsObject:language]) {
     return nil;
   }

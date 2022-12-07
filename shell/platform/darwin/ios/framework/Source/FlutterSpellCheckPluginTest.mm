@@ -274,7 +274,7 @@
   self.partialMockPlugin = OCMPartialMock(self.plugin);
   OCMStub([self.partialMockPlugin textChecker]).andReturn(self.mockTextChecker);
   id textCheckerClassMock = OCMClassMock([UITextChecker class]);
-  [[[textCheckerClassMock stub] andReturn:@[ @"en_us" ]] availableLanguages];
+  [[[textCheckerClassMock stub] andReturn:@[ @"en_US" ]] availableLanguages];
   NSArray* suggestions1 = @[ @"suggestion 1", @"suggestion 2" ];
 
   [self mockUITextCheckerWithExpectedMisspelledWordRange:NSMakeRange(0, 5)
