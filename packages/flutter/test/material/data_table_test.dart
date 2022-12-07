@@ -2016,7 +2016,7 @@ void main() {
 
     expect(tester.getSemantics(find.byType(DataTable)), matchesSemantics(
       label: 'Table, Sorted by column Dessert Name, Ascending',
-      children: [
+      children: <Matcher>[
         matchesSemantics(
           label: 'Dessert',
           hasTapAction: true,
