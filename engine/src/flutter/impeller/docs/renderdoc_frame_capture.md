@@ -9,7 +9,7 @@
 # In your $ENGINE_SRC folder, do:
 
 ./flutter/tools/gn --unopt --no-lto --enable-impeller-playground\
-   --enable-impeller-vulkan --target-dir host_debug_impeller_vulkan
+   --target-dir host_debug_impeller_vulkan
 autoninja -C out/host_debug_impeller_vulkan/
 ```
 

@@ -964,21 +964,13 @@ def parse_args(args):
       action='store_true',
       help='Whether impeller unit tests run in playground mode.'
   )
+
   parser.add_argument(
       '--prebuilt-impellerc',
       default=None,
       type=str,
       help='Absolute path to a prebuilt impellerc. ' +
       'Do not use this outside of CI or with impellerc from a different engine version.'
-  )
-
-  # This is currently a no-op, will be removed shortly.
-  parser.add_argument(
-      '--enable-impeller-vulkan',
-      default=False,
-      action='store_true',
-      help='Enables WIP impeller support for vulkan. ' +
-      'https://github.com/flutter/flutter/issues/107357'
   )
 
   parser.add_argument(
