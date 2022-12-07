@@ -182,12 +182,13 @@ class AssetVariant {
   /// Creates an object containing information about an asset variant.
   AssetVariant({
     required this.key,
-    required this.targetDevicePixelRatio,
+    this.targetDevicePixelRatio,
   });
 
-  /// The device pixel ratio that the images are intended for.
-  final double targetDevicePixelRatio;
+  /// The device pixel ratio that the asset is most ideal for, if any.
+  final double? targetDevicePixelRatio;
 
-  /// The asset's key. This can also be thought of as the logical name of an asset.
+  /// The asset's key. This can also be thought of as the logical name of an asset,
+  /// and it typically resembles a file location.
   final String key;
 }
