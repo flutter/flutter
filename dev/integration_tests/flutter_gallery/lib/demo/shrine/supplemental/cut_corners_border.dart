@@ -17,7 +17,7 @@ class CutCornersBorder extends OutlineInputBorder {
   @override
   CutCornersBorder copyWith({
     BorderSide? borderSide,
-    BorderRadiusGeometry? borderRadius,
+    BorderRadius? borderRadius,
     double? gapPadding,
     double? cut,
   }) {
@@ -36,7 +36,7 @@ class CutCornersBorder extends OutlineInputBorder {
     if (a is CutCornersBorder) {
       final CutCornersBorder outline = a;
       return CutCornersBorder(
-        borderRadius: BorderRadiusGeometry.lerp(outline.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t)!,
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         cut: cut,
         gapPadding: outline.gapPadding,
@@ -50,7 +50,7 @@ class CutCornersBorder extends OutlineInputBorder {
     if (b is CutCornersBorder) {
       final CutCornersBorder outline = b;
       return CutCornersBorder(
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, outline.borderRadius, t)!,
+        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t)!,
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         cut: cut,
         gapPadding: outline.gapPadding,
