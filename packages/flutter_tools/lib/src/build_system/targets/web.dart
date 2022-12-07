@@ -22,6 +22,7 @@ import '../../web/compile.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
+import '../../web/file_generators/wasm_bootstrap.dart' as wasm_bootstrap;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -174,7 +175,6 @@ abstract class Dart2WebTarget extends Target {
         : result.stderr as String;
     return stdout + stderr;
   }
-
 }
 
 class Dart2JSTarget extends Dart2WebTarget {
@@ -331,14 +331,21 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @override
   String get name => 'dart2wasm';
 
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/main.dart.wasm'),
+  ];  
 }
 
-/// Unpacks the dart2js compilation and resources to a given output directory.
+/// Unpacks the dart2js or dart2wasm compilation and resources to a given
+/// output directory.
 class WebReleaseBundle extends Target {
   const WebReleaseBundle(this.webRenderer, this.isWasm);
 
   final WebRendererMode webRenderer;
   final bool isWasm;
+
+  String get outputFileName => isWasm ? 'main.dart.wasm' : 'main.dart.js';
 
   @override
   String get name => 'web_release_bundle';
@@ -349,14 +356,14 @@ class WebReleaseBundle extends Target {
   ];
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.dart.js'),
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+  List<Source> get inputs => <Source>[
+    Source.pattern('{BUILD_DIR}/$outputFileName'),
+    const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/main.dart.js'),
+  List<Source> get outputs => <Source>[
+    Source.pattern('{OUTPUT_DIR}/$outputFileName'),
   ];
 
   @override
@@ -370,7 +377,7 @@ class WebReleaseBundle extends Target {
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
       final String basename = globals.fs.path.basename(outputFile.path);
-      if (!basename.contains('main.dart.js')) {
+      if (!basename.contains(outputFileName)) {
         continue;
       }
       // Do not copy the deps file.
@@ -477,10 +484,11 @@ class WebReleaseBundle extends Target {
 /// These assets can be cached forever and are only invalidated when the
 /// Flutter SDK is upgraded to a new version.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem, this.cache);
+  const WebBuiltInAssets(this.fileSystem, this.cache, this.isWasm);
 
   final FileSystem fileSystem;
   final Cache cache;
+  final bool isWasm;
 
   @override
   String get name => 'web_static_assets';
@@ -515,6 +523,21 @@ class WebBuiltInAssets extends Target {
       file.copySync(targetPath);
     }
 
+    if (isWasm) {
+      final String dartSdkPath = 
+        globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath);
+      final File dart2wasmRuntime = fileSystem.directory(dartSdkPath)
+        .childDirectory('bin')
+        .childFile('dart2wasm_runtime.mjs');
+      final String targetPath = fileSystem.path.join(
+        environment.outputDir.path, 
+        'dart2wasm_runtime.mjs');
+      dart2wasmRuntime.copySync(targetPath);
+
+      final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
+      bootstrapFile.writeAsStringSync(wasm_bootstrap.generateWasmBootstrapFile());
+    }
+
     // Write the flutter.js file
     final File flutterJsFile = environment.outputDir.childFile('flutter.js');
     flutterJsFile.writeAsStringSync(flutter_js.generateFlutterJsFile());
@@ -537,7 +560,7 @@ class WebServiceWorker extends Target {
   List<Target> get dependencies => <Target>[
     if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
     WebReleaseBundle(webRenderer, isWasm),
-    WebBuiltInAssets(fileSystem, cache),
+    WebBuiltInAssets(fileSystem, cache, isWasm),
   ];
 
   @override
