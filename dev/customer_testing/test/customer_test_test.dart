@@ -40,7 +40,7 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
     } else if (Platform.isWindows) {
       expect(test.tests, containsAllInOrder(<String>['.\test_utilities\bin\flutter_test_runner.bat repo_dashboard']));
     }
-    expect(test.update, isEmtpy);
+    expect(test.update, isEmpty);
   });
 
   test('throws exception when unknown field is passed', () async {
