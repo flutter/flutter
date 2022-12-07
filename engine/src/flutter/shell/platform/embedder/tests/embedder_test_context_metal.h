@@ -23,6 +23,8 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
   using NextDrawableCallback =
       std::function<FlutterMetalTexture(const FlutterFrameInfo* frame_info)>;
 
+  using PresentCallback = std::function<bool(int64_t texture_id)>;
+
   explicit EmbedderTestContextMetal(std::string assets_path = "");
 
   ~EmbedderTestContextMetal() override;
@@ -38,6 +40,9 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
 
   void SetExternalTextureCallback(
       TestExternalTextureCallback external_texture_frame_callback);
+
+  // Override the default handling for Present.
+  void SetPresentCallback(PresentCallback present_callback);
 
   bool Present(int64_t texture_id);
 
@@ -65,6 +70,7 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
   std::unique_ptr<TestMetalContext> metal_context_;
   std::unique_ptr<TestMetalSurface> metal_surface_;
   size_t present_count_ = 0;
+  PresentCallback present_callback_ = nullptr;
   NextDrawableCallback next_drawable_callback_ = nullptr;
 
   void SetupSurface(SkISize surface_size) override;

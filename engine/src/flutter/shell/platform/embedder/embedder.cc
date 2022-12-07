@@ -463,6 +463,8 @@ InferMetalPlatformViewCreationCallback(
         embedder_texture.struct_size = sizeof(FlutterMetalTexture);
         embedder_texture.texture = texture.texture;
         embedder_texture.texture_id = texture.texture_id;
+        embedder_texture.user_data = texture.destruction_context;
+        embedder_texture.destruction_callback = texture.destruction_callback;
         return ptr(user_data, &embedder_texture);
       };
   auto metal_get_texture =
