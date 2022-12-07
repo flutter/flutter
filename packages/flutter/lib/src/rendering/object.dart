@@ -1016,8 +1016,13 @@ class PipelineOwner {
             }
           }
           final RenderObject node = dirtyNodes[i];
-          if (node._needsLayout && node.owner == this) {
-            node._layoutWithoutResize();
+          if (node.owner == this) {
+            final RenderLayoutBuilderMixin<Constraints, RenderObject>? pendingLayoutBuilder = node._pendingLayoutBuilder;
+            node._pendingLayoutBuilder = null;
+            pendingLayoutBuilder?._invokeLayoutBuilderFrom(node);
+            if (node._needsLayout || node._subtreeHasPendingLayoutCallback) {
+              node._layoutWithoutResize();
+            }
           }
         }
         // No need to merge dirty nodes generated from processing the last
@@ -1661,7 +1666,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         // - a different part of the render tree is doing a layout callback,
         //   and this subtree is being reparented to that subtree, as a result
         //   of global key reparenting.
-        if (doingLayoutWithCallback || mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout) {
+        if (doingLayoutWithCallback || mutationsToDirtySubtreesAllowed && (activeLayoutRoot._needsLayout || activeLayoutRoot._subtreeHasPendingLayoutCallback)) {
           result = true;
           return true;
         }
@@ -1755,12 +1760,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     super.attach(owner);
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout && _relayoutBoundary != null) {
+    if (_relayoutBoundary != null) {
       // Don't enter this block if we've never laid out at all;
       // scheduleInitialLayout() will handle it
-      _needsLayout = false;
-      markNeedsLayout();
+      if (_needsLayout) {
+        _needsLayout = false;
+        markNeedsLayout();
+      } else if (_subtreeHasPendingLayoutCallback) {
+        _subtreeHasPendingLayoutCallback = false;
+      }
     }
+
     if (_needsCompositingBitsUpdate) {
       _needsCompositingBitsUpdate = false;
       markNeedsCompositingBitsUpdate();
@@ -1796,6 +1806,38 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     return result;
   }
   bool _needsLayout = true;
+
+  // Whether there is a RenderLayoutBuilderMixin descendant with a pending
+  // callback, between this node and the next relayout boundary. If this flag or
+  // _needsLayout is set, this render object typically needs to be processed in
+  // `PipelineOwner.flushLayout`.
+  //
+  // Layout builder callbacks may indirectly set _needsLayout to true for some
+  // descendant render objects, so much like _needsLayout, its relayout boundary
+  // must visit its descendants in performLayout, to update the layout of the
+  // relayout boundary in response to potential size changes.
+  //
+  // Unlike _needsLayout, this flag does not imply _needsPaint, as it's very
+  // common for a layout builder callback to not mark any descendants as needing
+  // layout in a particular invocation at all (but we don't know that until the
+  // it is called so the callbacks are invoked excessively).
+  //
+  // It's guaranteed that _subtreeHasPendingLayoutCallback and _needsLayout will
+  // not both be true, since _needsLayout is the stronger condition of the two.
+  bool _subtreeHasPendingLayoutCallback = false;
+
+  // Reference to a RenderLayoutBuilderMixin with a pending layout callback,
+  // whose `_relayoutBoundary` is this render object.
+  //
+  // When this render object (the relayout boundary) is ready to be processed by
+  // `flushLayout`, if this render object's `_needsLayout` or `_subtreeHasPendingLayoutCallback`
+  // flags are not set, this is used as a shortcut to re-run the layout builder
+  // callback without having to walk the tree. When the above condition is not
+  // met, the relayout boundary must fallback to setting
+  // `_subtreeHasPendingLayoutCallback` to true (which results in a layout
+  // tree-walk) to invoke the pending layout builder callbacks in the correct
+  // order.
+  RenderLayoutBuilderMixin<Constraints, RenderObject>? _pendingLayoutBuilder;
 
   RenderObject? _relayoutBoundary;
 
@@ -1894,33 +1936,37 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(_debugCanPerformMutations);
     if (_needsLayout) {
       assert(_debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout());
+      assert(!_subtreeHasPendingLayoutCallback);
       return;
     }
-    if (_relayoutBoundary == null) {
-      _needsLayout = true;
-      if (parent != null) {
-        // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
-        // Conservatively mark everything dirty until it reaches the closest
-        // known relayout boundary.
-        markParentNeedsLayout();
-      }
-      return;
-    }
-    if (_relayoutBoundary != this) {
+    _needsLayout = true;
+
+    if (_relayoutBoundary != this && parent != null) {
+      // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
+      // Conservatively mark everything dirty until it reaches the closest
+      // known relayout boundary.
+      _subtreeHasPendingLayoutCallback = false;
+      assert(_pendingLayoutBuilder == null);
       markParentNeedsLayout();
-    } else {
-      _needsLayout = true;
-      if (owner != null) {
-        assert(() {
-          if (debugPrintMarkNeedsLayoutStacks) {
-            debugPrintStack(label: 'markNeedsLayout() called for $this');
-          }
-          return true;
-        }());
-        owner!._nodesNeedingLayout.add(this);
-        owner!.requestVisualUpdate();
-      }
+      return;
     }
+
+    final PipelineOwner? owner = this.owner;
+    if (owner != null) {
+      // If _subtreeHasPendingLayoutCallback is true the node should be already
+      // in the dirty list.
+      if (!_subtreeHasPendingLayoutCallback) {
+        owner._nodesNeedingLayout.add(this);
+        owner.requestVisualUpdate();
+      }
+      assert(() {
+        if (debugPrintMarkNeedsLayoutStacks) {
+          debugPrintStack(label: 'markNeedsLayout() called for $this');
+        }
+        return true;
+      }());
+    }
+    _subtreeHasPendingLayoutCallback = false;
   }
 
   /// Mark this render object's layout information as dirty, and then defer to
@@ -1936,12 +1982,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void markParentNeedsLayout() {
     assert(_debugCanPerformMutations);
     _needsLayout = true;
+    _subtreeHasPendingLayoutCallback = false;
     assert(this.parent != null);
     final RenderObject parent = this.parent! as RenderObject;
-    if (!_doingThisLayoutWithCallback) {
-      parent.markNeedsLayout();
-    } else {
+    if (_doingThisLayoutWithCallback && !_subtreeHasPendingLayoutCallback) {
       assert(parent._debugDoingThisLayout);
+    } else {
+      parent.markNeedsLayout();
     }
     assert(parent == this.parent);
   }
@@ -1961,6 +2008,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _cleanRelayoutBoundary() {
     if (_relayoutBoundary != this) {
       _relayoutBoundary = null;
+      assert(_pendingLayoutBuilder == null);
       visitChildren(_cleanChildRelayoutBoundary);
     }
   }
@@ -2035,8 +2083,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugMutationsLocked = false;
       return true;
     }());
-    _needsLayout = false;
-    markNeedsPaint();
+    _subtreeHasPendingLayoutCallback = false;
+    if (_needsLayout) {
+      _needsLayout = false;
+      markNeedsPaint();
+    }
   }
 
   /// Compute the layout for this render object.
@@ -2117,7 +2168,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
 
-    if (!_needsLayout && constraints == _constraints) {
+    if (!_needsLayout && !_subtreeHasPendingLayoutCallback && constraints == _constraints) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
         // to itself, so it has the right internal debug values.
@@ -2142,6 +2193,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
       return;
     }
+
+    final RenderLayoutBuilderMixin<Constraints, RenderObject>? existingCallback = _pendingLayoutBuilder;
+    _pendingLayoutBuilder = null;
+    assert(existingCallback == null || _relayoutBoundary == this);
+    if (existingCallback != null && existingCallback._relayoutBoundary == this && existingCallback.owner == owner) {
+      assert(existingCallback._needsLayoutCallbackInvocation);
+      existingCallback._markSubtreeHasPendingLayoutCallback(owner!);
+    }
+    final bool constraintsChanged = _constraints != constraints;
     _constraints = constraints;
     if (_relayoutBoundary != null && relayoutBoundary != _relayoutBoundary) {
       // The local relayout boundary has changed, must notify children in case
@@ -2201,8 +2261,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugMutationsLocked = false;
       return true;
     }());
-    _needsLayout = false;
-    markNeedsPaint();
+    _subtreeHasPendingLayoutCallback = false;
+    if (_needsLayout || constraintsChanged) {
+      _needsLayout = false;
+      markNeedsPaint();
+    }
 
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       Timeline.finishSync();
@@ -3580,17 +3643,13 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_child != null) {
-      _child!.attach(owner);
-    }
+    _child?.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    if (_child != null) {
-      _child!.detach();
-    }
+    _child?.detach();
   }
 
   @override
@@ -3939,6 +3998,166 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
       }
     }
     return children;
+  }
+}
+
+/// Generic mixin for [RenderObject]s created by [ConstrainedLayoutBuilder].
+///
+/// [setLayoutCallback]
+mixin RenderLayoutBuilderMixin<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
+  LayoutCallback<ConstraintType>? _callback;
+
+  /// Sets the layout callback.
+  void setLayoutCallback(LayoutCallback<ConstraintType>? value) {
+    if (value == _callback) {
+      return;
+    }
+    _callback = value;
+    markNeedsBuild();
+  }
+
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_needsLayoutCallbackInvocation) {
+      markNeedsBuild();
+    }
+  }
+
+  // Whether the callback set by `setLayoutCallback` needs to be re-run, even
+  // when the incoming constraints are unchanged.
+  bool _needsLayoutCallbackInvocation = true;
+
+  /// Indicates the layout callback in this widget needs to be re-run during the
+  /// next layout phase.
+  ///
+  /// See also:
+  ///
+  ///  * [ConstrainedLayoutBuilder.builder], which is called during the rebuild.
+  ///
+  // Instead of just calling markNeedsLayout or
+  // _markSubtreeHasPendingLayoutCallback, markNeedsBuild tries to reduce the
+  // amount of layout/paint, by identifying if the following conditions are true
+  // and optimize accordingly:
+  //
+  //  * If the relayout boundary is not in the dirty list, register this
+  //    RenderLayoutBuilderMixin to the relayout boundary, and add the relayout
+  //    boundary to the dirty list. If the relayout boundary is still clean
+  //    (except that there's a registered RenderLayoutBuilderMixin) by the time
+  //    the relayout boundary is processed in `flushLayout`, invoke the callback
+  //    directly. The relayout boundary can be marked as needing layout or has
+  //    pending layout callbacks by the callback.
+  //
+  //  * If the relayout boundary is already dirty, call
+  //    _markSubtreeHasPendingLayoutCallback to schedule a treewalk from the
+  //    closest known relayout boundary.
+  void markNeedsBuild() {
+    final PipelineOwner? owner = this.owner;
+    _needsLayoutCallbackInvocation = true;
+    final bool alreadyMarked = owner == null // markNeedsBuild will be called when this node re-attaches.
+                            || _needsLayout
+                            || _subtreeHasPendingLayoutCallback
+                            || _relayoutBoundary?._pendingLayoutBuilder == this;
+    if (alreadyMarked) {
+      // _needsLayout is the strongest condition: the render object needs
+      // relayout and repaint. So when _needsLayout is set, there's no need to
+      // set _subtreeHasPendingLayoutCallback.
+      // When attached is false, _needsLayout will be set to true if the node
+      // ever re-attaches.
+      return;
+    }
+    final RenderObject? relayoutBoundary = _relayoutBoundary;
+    final bool relayoutBoundaryClean = relayoutBoundary != null
+                                    && !relayoutBoundary._needsLayout
+                                    && !relayoutBoundary._subtreeHasPendingLayoutCallback
+    // If unfortunately our relayout boundary already has a valid registered
+    // layout callback, we won't be able to avoid the tree-walk, since we don't
+    // know in which order these layout callbacks should be invoked (as they may
+    // change the relayout boundary's layout).
+                                      && relayoutBoundary._pendingLayoutBuilder?._relayoutBoundary != relayoutBoundary;
+    if (relayoutBoundaryClean) {
+      // If we know what our layout boundary is, and it's clean, add it to the
+      // dirty list and register the ourselves to it.
+      relayoutBoundary._pendingLayoutBuilder = this;
+      owner._nodesNeedingLayout.add(relayoutBoundary);
+    } else {
+      _markSubtreeHasPendingLayoutCallback(owner);
+    }
+    assert(_needsLayoutCallbackInvocation);
+  }
+
+  void _markSubtreeHasPendingLayoutCallback(PipelineOwner owner) {
+    assert(this.owner == owner);
+    _needsLayoutCallbackInvocation = true;
+    RenderObject? node = this;
+    RenderObject? relayoutBoundary = _relayoutBoundary;
+    while (node != null && !node._needsLayout && !node._subtreeHasPendingLayoutCallback) {
+      assert(node.owner == owner);
+      relayoutBoundary ??= node._relayoutBoundary;
+      node._subtreeHasPendingLayoutCallback = true;
+      if (node == relayoutBoundary) {
+        final RenderLayoutBuilderMixin<Constraints, RenderObject>? existingCallback = _pendingLayoutBuilder;
+        _pendingLayoutBuilder = null;
+        if (existingCallback == null) {
+          owner._nodesNeedingLayout.add(node);
+          owner.requestVisualUpdate();
+        } else if (existingCallback._relayoutBoundary == this && existingCallback.owner == owner) {
+          assert(existingCallback._needsLayoutCallbackInvocation);
+          existingCallback._markSubtreeHasPendingLayoutCallback(owner);
+        }
+        return;
+      }
+      assert(node._pendingLayoutBuilder == null);
+      final AbstractNode? parent = node.parent;
+      node = parent is RenderObject ? parent : null;
+    }
+  }
+
+  // Invoke the layout builder callback directly from the associated relayout
+  // boundary without walking the tree.
+  //
+  // The associated relayout boundary is the relayout boundary found during
+  // markNeedsRebuild.
+  @pragma('vm:prefer-inline')
+  void _invokeLayoutBuilderFrom(RenderObject registeredRelayoutBoundary) {
+    final LayoutCallback<ConstraintType>? callback = _callback;
+    final PipelineOwner? owner = this.owner;
+    if (callback == null || owner == null) {
+      return;
+    }
+    if (registeredRelayoutBoundary._needsLayout || registeredRelayoutBoundary._subtreeHasPendingLayoutCallback) {
+      _markSubtreeHasPendingLayoutCallback(owner);
+      return;
+    }
+    // `registeredRelayoutBoundary` wouldn't be clean if either node has changed owner.
+    assert(owner == registeredRelayoutBoundary.owner);
+    // For the same reason, _relayoutBoundary should be the same too.
+    assert(_relayoutBoundary == registeredRelayoutBoundary);
+    assert(_needsLayoutCallbackInvocation);
+    assert(!registeredRelayoutBoundary._doingThisLayoutWithCallback);
+    registeredRelayoutBoundary._doingThisLayoutWithCallback = true;
+    try {
+      owner._enableMutationsToDirtySubtrees(() { callback(constraints as ConstraintType); });
+    } finally {
+      registeredRelayoutBoundary._doingThisLayoutWithCallback = false;
+      _previousConstraints = constraints;
+      _needsLayoutCallbackInvocation = false;
+    }
+  }
+
+  Constraints? _previousConstraints;
+  @override
+  @mustCallSuper
+  void performLayout() {
+    if (constraints != _previousConstraints || _needsLayoutCallbackInvocation) {
+      final LayoutCallback<ConstraintType>? callback = _callback;
+      if (callback != null) {
+        invokeLayoutCallback(callback);
+        _previousConstraints = constraints;
+      }
+      _needsLayoutCallbackInvocation = false;
+    }
   }
 }
 

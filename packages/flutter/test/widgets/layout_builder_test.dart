@@ -613,7 +613,6 @@ void main() {
 
     // The child is laid out once the first time.
     expect(spy.performLayoutCount, 1);
-    expect(spy.performResizeCount, 1);
 
     // The initial `pumpWidget` will trigger `performRebuild`, asking for
     // builder invocation.
@@ -628,7 +627,6 @@ void main() {
     await tester.pump();
     expect(builderInvocationCount, 1);
     expect(spy.performLayoutCount, 1);
-    expect(spy.performResizeCount, 1);
 
     // Cause the `update` to be called (but not `performRebuild`), triggering
     // builder invocation.
@@ -638,7 +636,6 @@ void main() {
     // The spy does not invalidate its layout on widget update, so no
     // layout-related methods should be called.
     expect(spy.performLayoutCount, 1);
-    expect(spy.performResizeCount, 1);
 
     // Have the child request layout and verify that the child gets laid out
     // despite layout constraints remaining constant.
@@ -652,17 +649,12 @@ void main() {
     // Expect performLayout to be called.
     expect(spy.performLayoutCount, 2);
 
-    // performResize should not be called because the spy sets sizedByParent,
-    // and the constraints did not change.
-    expect(spy.performResizeCount, 1);
-
     // Change the parent size, triggering constraint change.
     await pumpTestWidget(const Size(20, 20));
 
     // We should see everything invoked once.
     expect(builderInvocationCount, 3);
     expect(spy.performLayoutCount, 3);
-    expect(spy.performResizeCount, 2);
   });
 
   testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
@@ -696,42 +688,101 @@ void main() {
     await pumpTestWidget(const Size(10.0, 10.0));
     expect(childSize, const Size(10.0, 10.0));
   });
+
+  testWidgets('LayoutBuilder does not request repaint by itself', (WidgetTester tester) async {
+    int callbackInvocationCount = 0;
+    final LayoutBuilder layoutBuilder = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      callbackInvocationCount += 1;
+      return const ColoredBox(color: Color(0xFFFFFFFF));
+    });
+    await tester.pumpWidget(
+      // The Center widget makes sure the layout builder's render object is not
+      // a relayout boundary.
+      Center(child: _LayoutSpy(child: layoutBuilder)),
+    );
+
+    final _RenderLayoutSpy layoutSpy = tester.renderObject(find.byType(_LayoutSpy));
+    expect(layoutSpy.performLayoutCount, 1);
+    expect(layoutSpy.paintCount, 1);
+
+    final Element layoutBuilderElement = tester.element(find.byWidget(layoutBuilder));
+    layoutBuilderElement.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(callbackInvocationCount, 2);
+    // layoutSpy shouldn't repaint.
+    expect(layoutSpy.paintCount, 1);
+  });
+
+  testWidgets('LayoutBuilder can skip unnecessary relayout', (WidgetTester tester) async {
+    int innerInvocationCount = 0;
+    int outerInvocationCount = 0;
+    Widget widget = const ColoredBox(color: Color(0xFFFFFFFF));
+    final LayoutBuilder layoutBuilder = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      innerInvocationCount += 1;
+      return widget;
+    });
+    await tester.pumpWidget(
+      // The Center widget makes sure the layout builder's render object is not
+      // a relayout boundary.
+      Center(child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        outerInvocationCount += 1;
+        return _LayoutSpy(child: layoutBuilder);
+      })),
+    );
+
+    final _RenderLayoutSpy layoutSpy = tester.renderObject(find.byType(_LayoutSpy));
+    expect(layoutSpy.performLayoutCount, 1);
+    expect(layoutSpy.paintCount, 1);
+
+    final Element layoutBuilderElement = tester.element(find.byWidget(layoutBuilder));
+    layoutBuilderElement.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(innerInvocationCount, 2);
+    expect(outerInvocationCount, 1);
+    expect(layoutSpy.performLayoutCount, 1);
+    expect(layoutSpy.paintCount, 1);
+
+    // Doesn't skip necessary layout.
+    widget = const SizedBox.shrink();
+    layoutBuilderElement.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(innerInvocationCount, 3);
+    expect(outerInvocationCount, 1);
+    expect(layoutSpy.performLayoutCount, 2);
+    expect(layoutSpy.paintCount, 2);
+  });
 }
 
-class _LayoutSpy extends LeafRenderObjectWidget {
-  const _LayoutSpy();
+class _LayoutSpy extends SingleChildRenderObjectWidget {
+  const _LayoutSpy({ super.child });
 
   @override
-  LeafRenderObjectElement createElement() => _LayoutSpyElement(this);
+  SingleChildRenderObjectElement createElement() => _LayoutSpyElement(this);
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutSpy();
 }
 
-class _LayoutSpyElement extends LeafRenderObjectElement {
+class _LayoutSpyElement extends SingleChildRenderObjectElement {
   _LayoutSpyElement(super.widget);
 }
 
-class _RenderLayoutSpy extends RenderBox {
+class _RenderLayoutSpy extends RenderProxyBox {
   int performLayoutCount = 0;
-  int performResizeCount = 0;
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performResize() {
-    performResizeCount += 1;
-    size = constraints.biggest;
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.biggest;
-  }
+  int paintCount = 0;
 
   @override
   void performLayout() {
     performLayoutCount += 1;
+    super.performLayout();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    paintCount += 1;
+    super.paint(context, offset);
   }
 }

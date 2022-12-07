@@ -31,7 +31,7 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// {@endtemplate}
 ///
 /// Subclasses must return a [RenderObject] that mixes in
-/// [RenderConstrainedLayoutBuilder].
+/// [RenderLayoutBuilderMixin].
 abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
@@ -57,7 +57,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> super.widget);
 
   @override
-  RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
+  RenderLayoutBuilderMixin<ConstraintType, RenderObject> get renderObject => super.renderObject as RenderLayoutBuilderMixin<ConstraintType, RenderObject>;
 
   Element? _child;
 
@@ -78,7 +78,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot); // Creates the renderObject.
-    renderObject.updateCallback(_layout);
+    renderObject.setLayoutCallback(_layout);
   }
 
   @override
@@ -87,7 +87,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.update(newWidget);
     assert(widget == newWidget);
 
-    renderObject.updateCallback(_layout);
+    renderObject.setLayoutCallback(_layout);
     // Force the callback to be called, even if the layout constraints are the
     // same, because the logic in the callback might have changed.
     renderObject.markNeedsBuild();
@@ -107,7 +107,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void unmount() {
-    renderObject.updateCallback(null);
+    renderObject.setLayoutCallback(null);
     super.unmount();
   }
 
@@ -169,64 +169,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void removeRenderObjectChild(RenderObject child, Object? slot) {
-    final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> renderObject = this.renderObject;
+    final RenderLayoutBuilderMixin<ConstraintType, RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
-  }
-}
-
-/// Generic mixin for [RenderObject]s created by [ConstrainedLayoutBuilder].
-///
-/// Provides a callback that should be called at layout time, typically in
-/// [RenderObject.performLayout].
-mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
-  LayoutCallback<ConstraintType>? _callback;
-  /// Change the layout callback.
-  void updateCallback(LayoutCallback<ConstraintType>? value) {
-    if (value == _callback) {
-      return;
-    }
-    _callback = value;
-    markNeedsLayout();
-  }
-
-  bool _needsBuild = true;
-
-  /// Marks this layout builder as needing to rebuild.
-  ///
-  /// The layout build rebuilds automatically when layout constraints change.
-  /// However, we must also rebuild when the widget updates, e.g. after
-  /// [State.setState], or [State.didChangeDependencies], even when the layout
-  /// constraints remain unchanged.
-  ///
-  /// See also:
-  ///
-  ///  * [ConstrainedLayoutBuilder.builder], which is called during the rebuild.
-  void markNeedsBuild() {
-    // Do not call the callback directly. It must be called during the layout
-    // phase, when parent constraints are available. Calling `markNeedsLayout`
-    // will cause it to be called at the right time.
-    _needsBuild = true;
-    markNeedsLayout();
-  }
-
-  // The constraints that were passed to this class last time it was laid out.
-  // These constraints are compared to the new constraints to determine whether
-  // [ConstrainedLayoutBuilder.builder] needs to be called.
-  Constraints? _previousConstraints;
-
-  /// Invoke the callback supplied via [updateCallback].
-  ///
-  /// Typically this results in [ConstrainedLayoutBuilder.builder] being called
-  /// during layout.
-  void rebuildIfNecessary() {
-    assert(_callback != null);
-    if (_needsBuild || constraints != _previousConstraints) {
-      _previousConstraints = constraints;
-      _needsBuild = false;
-      invokeLayoutCallback(_callback!);
-    }
   }
 }
 
@@ -273,7 +219,7 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 }
 
-class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
+class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderLayoutBuilderMixin<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
@@ -309,11 +255,11 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    rebuildIfNecessary();
+    super.performLayout();
+    final RenderBox? child = this.child;
     if (child != null) {
-      child!.layout(constraints, parentUsesSize: true);
-      size = constraints.constrain(child!.size);
+      child.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
     } else {
       size = constraints.biggest;
     }
@@ -321,10 +267,8 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (child != null) {
-      return child!.getDistanceToActualBaseline(baseline);
-    }
-    return super.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline)
+        ?? super.computeDistanceToActualBaseline(baseline);
   }
 
   @override
@@ -334,8 +278,9 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
     if (child != null) {
-      context.paintChild(child!, offset);
+      context.paintChild(child, offset);
     }
   }
 
