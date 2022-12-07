@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -284,16 +283,16 @@ class AssetImage extends AssetBundleImageProvider {
 
     AssetManifest.loadFromAssetBundle(chosenBundle)
       .then((AssetManifest manifest) {
-        final Iterable<_AssetVariant> candidateVariants = _getVariantsFromManifest(keyName, manifest);
-        final _AssetVariant chosenVariant = _chooseVariant(
+        final Iterable<AssetVariant> candidateVariants = manifest.getAssetVariants(keyName);
+        final AssetVariant chosenVariant = _chooseVariant(
           keyName,
           configuration,
           candidateVariants,
         );
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
-          name: chosenVariant.asset,
-          scale: chosenVariant.devicePixelRatio,
+          name: chosenVariant.key,
+          scale: chosenVariant.targetDevicePixelRatio,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
@@ -327,16 +326,16 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  _AssetVariant _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<_AssetVariant> candidateVariants) {
-    final _AssetVariant mainAsset = _AssetVariant(asset: mainAssetKey,
-      devicePixelRatio: _naturalResolution);
+  AssetVariant _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetVariant> candidateVariants) {
+    final AssetVariant mainAsset = AssetVariant(key: mainAssetKey,
+      targetDevicePixelRatio: _naturalResolution);
     if (config.devicePixelRatio == null || candidateVariants.isEmpty) {
       return mainAsset;
     }
-    final SplayTreeMap<double, _AssetVariant> candidatesByDevicePixelRatio =
-      SplayTreeMap<double, _AssetVariant>();
-    for (final _AssetVariant candidate in candidateVariants) {
-      candidatesByDevicePixelRatio[candidate.devicePixelRatio] = candidate;
+    final SplayTreeMap<double, AssetVariant> candidatesByDevicePixelRatio =
+      SplayTreeMap<double, AssetVariant>();
+    for (final AssetVariant candidate in candidateVariants) {
+      candidatesByDevicePixelRatio[candidate.targetDevicePixelRatio] = candidate;
     }
     candidatesByDevicePixelRatio.putIfAbsent(_naturalResolution, () => mainAsset);
     // TODO(ianh): implement support for config.locale, config.textDirection,
@@ -357,7 +356,7 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  _AssetVariant _findBestVariant(SplayTreeMap<double, _AssetVariant> candidatesByDpr, double value) {
+  AssetVariant _findBestVariant(SplayTreeMap<double, AssetVariant> candidatesByDpr, double value) {
     if (candidatesByDpr.containsKey(value)) {
       return candidatesByDpr[value]!;
     }
@@ -396,26 +395,4 @@ class AssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
-}
-
-Iterable<_AssetVariant> _getVariantsFromManifest(String key, AssetManifest manifest) {
-  return ((manifest.getAssetMetadata(key) ?? <Object?>[]) as Iterable<Object?>)
-    .whereType<Object>()
-    .map(_AssetVariant.fromManifestData);
-}
-
-class _AssetVariant {
-  _AssetVariant({
-    required this.asset,
-    required this.devicePixelRatio,
-  });
-
-  factory _AssetVariant.fromManifestData(Object data) {
-    final Map<Object?, Object?> asStructuredData = data as Map<Object?, Object?>;
-    return _AssetVariant(asset: asStructuredData['asset']! as String,
-      devicePixelRatio: asStructuredData['dpr']! as double);
-  }
-
-  final double devicePixelRatio;
-  final String asset;
 }

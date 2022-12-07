@@ -35,24 +35,22 @@ abstract class AssetManifest {
       onError: (Object? error, StackTrace? stack) => loadJsonAssetManifest(bundle));
   }
 
-
   /// Loads asset manifest data from the root bundle and creates an
   /// [AssetManifest] from that data.
   static Future<AssetManifest> loadFromRootBundle() {
     return loadFromAssetBundle(rootBundle);
   }
 
-  /// Lists the keys of all known assets.
+  /// Lists the keys of all known assets, not including asset variants.
   Iterable<String> listAssets() {
     throw UnimplementedError();
   }
 
-  /// Gets metadata from an asset.
-  Object? getAssetMetadata(String key) {
+  /// Gets available variants of an asset.
+  Iterable<AssetVariant> getAssetVariants(String key) {
     throw UnimplementedError();
   }
 }
-
 
 /// Parses the binary asset manifest into a data structure that's easier to work with.
 ///
@@ -66,35 +64,60 @@ abstract class AssetManifest {
 ///
 /// New fields could be added to this object schema to support new asset variation
 /// features, such as themes, locale/region support, reading directions, and so on.
+
+/// Parses the binary asset manifest into a data structure that's easier to work with.
+///
+/// The asset manifest is a map of asset files to a list of objects containing
+/// information about variants of that asset.
+///
+/// The entries with each variant object are:
+///  - "asset": the location of this variant to load it from.
+///  - "dpr": The device-pixel-ratio that the asset is best-suited for.
+///
+/// New fields could be added to this object schema to support new asset variation
+/// features, such as themes, locale/region support, reading directions, and so on.
 class _AssetManifestBin implements AssetManifest {
-  _AssetManifestBin(Map<Object?, Object?> standardMessageData): _data = standardMessageData;
+  _AssetManifestBin(Map<String, Object?> standardMessageData): _data = standardMessageData;
 
   factory _AssetManifestBin.fromStandardMessageCodecMessage(ByteData message) {
     final Object? data = const StandardMessageCodec().decodeMessage(message);
-    return _AssetManifestBin(data! as Map<Object?, Object?>);
+    return _AssetManifestBin(data! as Map<String, Object?>);
   }
 
-  final Map<Object?, Object?> _data;
+  final Map<String, Object?> _data;
+  final Map<String, Iterable<AssetVariant>> _typeCastedData = <String, Iterable<AssetVariant>>{};
 
   @override
-  Object? getAssetMetadata(String key) {
-    return _data[key];
+  Iterable<AssetVariant> getAssetVariants(String key) {
+    // We lazily delay typecasting to prevent a performance hiccup when parsing
+    // large asset manifests.
+    if (!_typeCastedData.containsKey(key)) {
+      _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as List<Object?>)
+        .cast<Map<String, Object?>>()
+        .map((Map<String, Object?> data) => AssetVariant(
+            key: data['asset']! as String,
+            targetDevicePixelRatio: data['dpr']! as double,
+        ));
+
+      _data.remove(key);
+    }
+    return _typeCastedData[key]!;
   }
 
   @override
   Iterable<String> listAssets() {
-    return _data.keys.cast<String>();
+    return <String>[..._data.keys, ..._typeCastedData.keys];
   }
 }
 
 class _LegacyAssetManifest implements AssetManifest {
 
   _LegacyAssetManifest({
-    required Map<String, List<Object>> manifest,
+    required Map<String, Iterable<AssetVariant>> manifest,
   }) : _manifest = manifest;
 
   factory _LegacyAssetManifest.fromJsonString(String jsonString) {
-    List<Map<Object, Object>> adaptLegacyVariantList(String mainAsset, List<String> variants) {
+    List<AssetVariant> adaptLegacyVariantList(String mainAsset, List<String> variants) {
 
     double parseScale(String mainAsset, String variant) {
       // The legacy asset manifest includes the main asset within its variant list.
@@ -117,43 +140,54 @@ class _LegacyAssetManifest implements AssetManifest {
     }
 
     return variants
-      .map((String variant) {
-        final Map<String, Object> result = <String, Object>{};
-        result['asset'] = variant;
-        result['dpr'] = parseScale(mainAsset, variant);
-        return result;
-      })
+      .map((String variant) =>
+        AssetVariant(key: variant, targetDevicePixelRatio: parseScale(mainAsset, variant)))
       .toList();
     }
 
     if (jsonString == null) {
-      return _LegacyAssetManifest(manifest: <String, List<Object>>{});
+      return _LegacyAssetManifest(manifest: <String, List<AssetVariant>>{});
     }
     final Map<String, Object?> parsedJson = json.decode(jsonString) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest = <String, List<String>> {
       for (final String key in keys) key: List<String>.from(parsedJson[key]! as List<dynamic>),
     };
-    final Map<String, List<Object>> manifestWithParsedVariants =
+    final Map<String, List<AssetVariant>> manifestWithParsedVariants =
       parsedManifest.map((String asset, List<String> variants) =>
-        MapEntry<String, List<Object>>(asset, adaptLegacyVariantList(asset, variants)));
+        MapEntry<String, List<AssetVariant>>(asset, adaptLegacyVariantList(asset, variants)));
 
     return _LegacyAssetManifest(manifest: manifestWithParsedVariants);
   }
   // We assume the main asset is designed for a device pixel ratio of 1.0
   static const double _naturalResolution = 1.0;
 
-  final Map<String, List<Object>> _manifest;
+  final Map<String, Iterable<AssetVariant>> _manifest;
 
   static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
   @override
-  Object? getAssetMetadata(String key) {
-    return _manifest[key];
+  Iterable<AssetVariant> getAssetVariants(String key) {
+    return _manifest[key] ?? <AssetVariant>[];
   }
 
   @override
   Iterable<String> listAssets() {
     return _manifest.keys;
   }
+}
+
+/// Contains information about an asset that is a variant of another asset.
+class AssetVariant {
+  /// Creates an object containing information about an asset variant.
+  AssetVariant({
+    required this.key,
+    required this.targetDevicePixelRatio,
+  });
+
+  /// The device pixel ratio that the images are intended for.
+  final double targetDevicePixelRatio;
+
+  /// The asset's key. This can also be thought of as the logical name of an asset.
+  final String key;
 }
