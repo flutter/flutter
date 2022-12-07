@@ -20,7 +20,7 @@ dependencies:
     git:
       url: https://github.com/kevmoo/scoped_model.git
       ref: null_safety
-  shrine_images: 1.1.2
+  shrine_images: 2.0.1
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   # and dev/benchmarks/macrobenchmarks/pubspec.yaml
