@@ -395,12 +395,12 @@
 
   "sortOrderAscendingLabel": "Ascending",
   "@sortOrderAscendingLabel": {
-    "description": "Label indicating ascending sort order, used in onTapHint for column headings in a table."
+    "description": "Label indicating ascending sort order."
   },
 
   "sortOrderDescendingLabel": "Descending",
   "@sortOrderDescendingLabel": {
-    "description": "Label indicating descending sort order, used in onTapHint for column headings in a table."
+    "description": "Label indicating descending sort order."
   },
 
   "tableCellOnTapHint": "Select row",

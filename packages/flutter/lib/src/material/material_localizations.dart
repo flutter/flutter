@@ -160,12 +160,10 @@ abstract class MaterialLocalizations {
   /// as a hint text in the text field.
   String get searchFieldLabel;
 
-  /// Label indicating ascending sort order, used in onTapHint for column headings
-  /// in a table.
+  /// Label indicating ascending sort order.
   String get sortOrderAscendingLabel;
 
-  /// Label indicating descending sort order, used in onTapHint for column headings
-  /// in a table.
+  /// Label indicating descending sort order.
   String get sortOrderDescendingLabel;
 
   /// Used as onTapHint for an individual cell in a table, indicating tapping

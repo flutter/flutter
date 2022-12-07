@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,6 +17,7 @@ import 'dropdown.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
@@ -68,7 +68,11 @@ class DataColumn {
 
   /// {@template flutter.material.dataColumn.heading}
   /// The heading string used for screen reader announcements.
+  ///
+  /// Announced by screen readers to help make sense of the information
+  /// in a [DataCell].
   /// {@endtemplate}
+  ///
   /// Summarizes the information displayed in this [DataColumn].
   final String? heading;
 
@@ -185,6 +189,7 @@ class DataRow {
   final List<DataCell> cells;
 
   /// {@macro flutter.material.dataColumn.heading}
+  ///
   /// Summarizes the information displayed in this [DataRow].
   final String? heading;
 
@@ -900,6 +905,9 @@ class DataTable extends StatelessWidget {
     }
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String tableCoordinatesLabel = localizations.tableCoordinatesLabel('$rowNumber', '$totalRows', '$columnNumber', '$totalColumns');
+    // Each cell should have it own SemanticsNode, which I found is not always
+    // the case through data_table_test.dart. Thus added the outer Semantics
+    // widget with container = true.
     label = Semantics(
       container: true,
       child: Container(
@@ -908,6 +916,9 @@ class DataTable extends StatelessWidget {
         alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
         child: Stack(
           children: <Widget>[
+            // This Semantics widget is for announcing [rowHeading] and [columnHeading]
+            // (wrapped in [semanticsLabel]) before the actual content of the [DataCell],
+            // which is wrapped in [DefaultTextStyle]
             Semantics(
               label: semanticsLabel,
               onTapHint: localizations.tableCellOnTapHint,
@@ -918,6 +929,8 @@ class DataTable extends StatelessWidget {
                 child: DropdownButtonHideUnderline(child: label),
               ),
             ),
+            // This Semantics widget is added to announce 'Row i of #totalRows,
+            // Column j of #totalColumns after the actual content of the [DataCell].
             Semantics(
               label: ', $tableCoordinatesLabel',
             ),
@@ -1099,6 +1112,8 @@ class DataTable extends StatelessWidget {
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
+        // if the column heading is present, we want it to be announced as 'Column $columnHeading'
+        // Otherwise, we want it to be announced for example as 'Column 1' for the column with index 0.
         semanticsHeadingLabel: column.heading != null ? column.heading! : '${dataColumnIndex + 1}',
       );
       rowIndex = 1;
@@ -1138,7 +1153,10 @@ class DataTable extends StatelessWidget {
     }
     else {
       final DataColumn sortColumn = columns[sortColumnIndex!];
+      // the intuitive column index, e.g. columns[0] is actually column 1 for users
       final int visualSortColumnIndex = sortColumnIndex! + 1;
+      // if the column heading is present, we want it to be announced as 'Column $columnHeading'
+      // Otherwise, we want it to be announced for example as 'Column 1' for the column with index 0.
       final String sortColumnLabel = sortColumn.heading == null ? '$visualSortColumnIndex' : sortColumn.heading!;
       final String sortOrder = sortAscending ? localizations.sortOrderAscendingLabel : localizations.sortOrderDescendingLabel;
       tableSortStatus = localizations.tableSortedAnnouncement(sortColumnLabel, sortOrder);
