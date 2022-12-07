@@ -55,6 +55,9 @@ const char* kDartVMArgs[] = {
 #if !defined(DART_PRODUCT) && (!defined(FLUTTER_PROFILE) || !defined(NDEBUG))
     "--enable_asserts",
 #endif
+    // Run in unsound null safety mode as some packages used in Integration
+    // testing have not been migrated yet.
+    "--no-sound-null-safety",
     // clang-format on
 };
 
