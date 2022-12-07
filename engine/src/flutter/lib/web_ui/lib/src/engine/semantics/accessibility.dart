@@ -29,6 +29,10 @@ AccessibilityAnnouncements get accessibilityAnnouncements {
 }
 AccessibilityAnnouncements? _accessibilityAnnouncements;
 
+void debugOverrideAccessibilityAnnouncements(AccessibilityAnnouncements override) {
+  _accessibilityAnnouncements = override;
+}
+
 /// Initializes the [accessibilityAnnouncements] singleton.
 ///
 /// It is an error to attempt to initialize the singleton more than once. Call
