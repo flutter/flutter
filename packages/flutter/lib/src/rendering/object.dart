@@ -4002,8 +4002,6 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
 }
 
 /// Generic mixin for [RenderObject]s created by [ConstrainedLayoutBuilder].
-///
-/// [setLayoutCallback]
 mixin RenderLayoutBuilderMixin<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
   LayoutCallback<ConstraintType>? _callback;
 
@@ -4077,8 +4075,8 @@ mixin RenderLayoutBuilderMixin<ConstraintType extends Constraints, ChildType ext
     // change the relayout boundary's layout).
                                       && relayoutBoundary._pendingLayoutBuilder?._relayoutBoundary != relayoutBoundary;
     if (relayoutBoundaryClean) {
-      // If we know what our layout boundary is, and it's clean, add it to the
-      // dirty list and register the ourselves to it.
+      // If we know who our layout boundary is, and it's clean, add it to the
+      // dirty list and register ourselves to it.
       relayoutBoundary._pendingLayoutBuilder = this;
       owner._nodesNeedingLayout.add(relayoutBoundary);
     } else {
@@ -4102,9 +4100,9 @@ mixin RenderLayoutBuilderMixin<ConstraintType extends Constraints, ChildType ext
         if (existingCallback == null) {
           owner._nodesNeedingLayout.add(node);
           owner.requestVisualUpdate();
-        } else if (existingCallback._relayoutBoundary == this && existingCallback.owner == owner) {
-          assert(existingCallback._needsLayoutCallbackInvocation);
-          existingCallback._markSubtreeHasPendingLayoutCallback(owner);
+        //} else if (existingCallback._relayoutBoundary == this && existingCallback.owner == owner) {
+        //  assert(existingCallback._needsLayoutCallbackInvocation);
+        //  existingCallback._markSubtreeHasPendingLayoutCallback(owner);
         }
         return;
       }

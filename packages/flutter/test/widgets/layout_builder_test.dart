@@ -313,14 +313,14 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(MediaQuery(
-        data: const MediaQueryData(size: Size(400.0, 300.0)),
-        child: target,
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
+      child: target,
     ));
     expect(built, 1);
 
     await tester.pumpWidget(MediaQuery(
-        data: const MediaQueryData(size: Size(300.0, 400.0)),
-        child: target,
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
+      child: target,
     ));
     expect(built, 1);
   });
@@ -347,14 +347,14 @@ void main() {
       expect(built, 0);
 
       await tester.pumpWidget(MediaQuery(
-          data: const MediaQueryData(size: Size(400.0, 300.0)),
-          child: target,
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
       ));
       expect(built, 1);
 
       await tester.pumpWidget(MediaQuery(
-          data: const MediaQueryData(size: Size(300.0, 400.0)),
-          child: target,
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
       ));
       expect(built, 2);
     },
@@ -754,10 +754,137 @@ void main() {
     expect(layoutSpy.performLayoutCount, 2);
     expect(layoutSpy.paintCount, 2);
   });
+
+  testWidgets('SliverLayoutBuilder can skip unnecessary relayout', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    int innerInvocationCount1 = 0;
+    int innerInvocationCount2 = 0;
+
+    Widget widget1 = const SizedBox(height: 100);
+    final GlobalKey key1 = GlobalKey();
+    Widget widget2 = const SizedBox(height: 100);
+    final GlobalKey key2 = GlobalKey();
+    final GlobalKey layoutBuilder1Key = GlobalKey(debugLabel: 'SliverLayoutBuilder 1');
+    final GlobalKey layoutBuilder2Key = GlobalKey(debugLabel: 'SliverLayoutBuilder 2');
+
+    await tester.pumpWidget(
+      // The Center widget makes sure the layout builder's render object is not
+      // a relayout boundary.
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              const _SliverLayoutSpy(),
+              SliverLayoutBuilder(
+                key: layoutBuilder1Key,
+                builder: (BuildContext context, SliverConstraints constraint) {
+                  innerInvocationCount1 += 1;
+                  return SliverToBoxAdapter(child: _LayoutSpy(key: key1, child: widget1));
+                },
+              ),
+              SliverLayoutBuilder(
+                key: layoutBuilder2Key,
+                builder: (BuildContext context, SliverConstraints constraint) {
+                  innerInvocationCount2 += 1;
+                  return SliverToBoxAdapter(child: _LayoutSpy(key: key2, child: widget2));
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final _RenderSliverLayoutSpy viewportLayoutSpy = tester.renderObject(find.byType(_SliverLayoutSpy));
+    final _RenderLayoutSpy layoutSpy1 = tester.renderObject(find.byKey(key1));
+    final _RenderLayoutSpy layoutSpy2 = tester.renderObject(find.byKey(key2));
+
+    final Element sliverLayoutBuilderElement1 = tester.element(find.byKey(layoutBuilder1Key));
+    final Element sliverLayoutBuilderElement2 = tester.element(find.byKey(layoutBuilder2Key));
+
+    // First frame:
+    expect(viewportLayoutSpy.layoutCount, 1);
+    expect(layoutSpy1.performLayoutCount, 1);
+    expect(layoutSpy2.performLayoutCount, 1);
+    expect(innerInvocationCount1, 1);
+    expect(innerInvocationCount2, 1);
+
+    // Mark the first SliverLayoutBuilder dirty:
+    sliverLayoutBuilderElement1.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(viewportLayoutSpy.layoutCount, 1);
+    expect(layoutSpy1.performLayoutCount, 1);
+    expect(layoutSpy2.performLayoutCount, 1);
+    expect(innerInvocationCount1, 2);
+    expect(innerInvocationCount2, 1);
+
+    // Mark the second SliverLayoutBuilder dirty:
+    sliverLayoutBuilderElement2.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(viewportLayoutSpy.layoutCount, 1);
+    expect(layoutSpy1.performLayoutCount, 1);
+    expect(layoutSpy2.performLayoutCount, 1);
+    expect(innerInvocationCount1, 2);
+    expect(innerInvocationCount2, 2);
+
+    // Now mark both dirty in the same frame:
+    // The viewport has to redo its layout.
+    sliverLayoutBuilderElement1.markNeedsBuild();
+    sliverLayoutBuilderElement2.markNeedsBuild();
+    await tester.pumpAndSettle();
+
+    expect(viewportLayoutSpy.layoutCount, 2);
+    expect(layoutSpy1.performLayoutCount, 1);
+    expect(layoutSpy2.performLayoutCount, 1);
+    expect(innerInvocationCount1, 3);
+    expect(innerInvocationCount2, 3);
+
+    // Mark the first SliverLayoutBuilder dirty but also changes the size of the
+    // child. The viewport has to redo its layout.
+    sliverLayoutBuilderElement1.markNeedsBuild();
+    widget1 = const SizedBox(height: 200);
+    await tester.pumpAndSettle();
+
+    expect(viewportLayoutSpy.layoutCount, 3);
+    expect(layoutSpy1.performLayoutCount, 2);
+    expect(layoutSpy2.performLayoutCount, 1);
+    expect(innerInvocationCount1, 4);
+    expect(innerInvocationCount2, 4);
+
+    // Mark both SliverLayoutBuilders dirty but also changes the size of child1.
+    // The viewport has to redo its layout.
+    sliverLayoutBuilderElement1.markNeedsBuild();
+    sliverLayoutBuilderElement2.markNeedsBuild();
+    widget1 = const SizedBox(height: 300);
+    await tester.pumpAndSettle();
+
+    expect(viewportLayoutSpy.layoutCount, 4);
+    expect(layoutSpy1.performLayoutCount, 3);
+    expect(layoutSpy2.performLayoutCount, 1);
+    expect(innerInvocationCount1, 5);
+    expect(innerInvocationCount2, 5);
+
+    // Change everything. Make sure rebuild/relayout is only done once.
+    sliverLayoutBuilderElement1.markNeedsBuild();
+    sliverLayoutBuilderElement2.markNeedsBuild();
+    widget1 = const SizedBox(height: 1);
+    widget2 = const SizedBox(height: 1);
+    await tester.pumpAndSettle();
+
+    expect(viewportLayoutSpy.layoutCount, 5);
+    expect(layoutSpy1.performLayoutCount, 4);
+    expect(layoutSpy2.performLayoutCount, 2);
+    expect(innerInvocationCount1, 6);
+    expect(innerInvocationCount2, 6);
+  });
 }
 
 class _LayoutSpy extends SingleChildRenderObjectWidget {
-  const _LayoutSpy({ super.child });
+  const _LayoutSpy({ super.child, super.key, });
 
   @override
   SingleChildRenderObjectElement createElement() => _LayoutSpyElement(this);
@@ -784,5 +911,26 @@ class _RenderLayoutSpy extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     paintCount += 1;
     super.paint(context, offset);
+  }
+}
+
+class _SliverLayoutSpy extends SingleChildRenderObjectWidget {
+  const _SliverLayoutSpy();
+
+  @override
+  SingleChildRenderObjectElement createElement() => _LayoutSpyElement(this);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutSpy();
+}
+
+class _RenderSliverLayoutSpy extends RenderSliverPadding {
+  _RenderSliverLayoutSpy() : super(padding: const EdgeInsets.all(1), textDirection: TextDirection.ltr, child: null);
+
+  int layoutCount = 0;
+  @override
+  void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    layoutCount += 1;
+    super.layout(constraints, parentUsesSize: parentUsesSize);
   }
 }
