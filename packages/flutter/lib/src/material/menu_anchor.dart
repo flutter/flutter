@@ -1974,9 +1974,6 @@ class _LocalizedShortcutLabeler {
     LogicalKeyboardKey.arrowUp: '↑',
     LogicalKeyboardKey.arrowDown: '↓',
     LogicalKeyboardKey.enter: '↵',
-    LogicalKeyboardKey.shift: '⇧',
-    LogicalKeyboardKey.shiftLeft: '⇧',
-    LogicalKeyboardKey.shiftRight: '⇧',
   };
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -2007,15 +2004,32 @@ class _LocalizedShortcutLabeler {
   /// Returns the label to be shown to the user in the UI when a
   /// [MenuSerializableShortcut] is used as a keyboard shortcut.
   ///
-  /// To keep the representation short, this will return graphical key
-  /// representations when it can. For instance, the default
-  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
-  /// arrows. When [defaultTargetPlatform] is [TargetPlatform.macOS] or
-  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
-  /// [LogicalKeyboardKey.control] will show as '˄', and
-  /// [LogicalKeyboardKey.alt] will show as '⌥'.
+  /// When [defaultTargetPlatform] is [TargetPlatform.macOS] or
+  /// [TargetPlatform.iOS], this will return graphical key representations when
+  /// it can. For instance, the default [LogicalKeyboardKey.shift] will return
+  /// '⇧', and the arrow keys will return arrows. The key
+  /// [LogicalKeyboardKey.meta] will show as '⌘', [LogicalKeyboardKey.control]
+  /// will show as '˄', and [LogicalKeyboardKey.alt] will show as '⌥'.
+  ///
+  /// The keys are joined by spaces on macOS and iOS, and by "+" on other
+  /// platforms.
   String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
     final ShortcutSerialization serialized = shortcut.serializeForMenu();
+    final String keySeparator;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // Use "⌃ ⇧ A" style on macOS and iOS.
+        keySeparator = ' ';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Use "Ctrl+Shift+A" style.
+        keySeparator = '+';
+        break;
+    }
     if (serialized.trigger != null) {
       final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
@@ -2051,7 +2065,7 @@ class _LocalizedShortcutLabeler {
       return <String>[
         ...modifiers,
         if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
-      ].join(' ');
+      ].join(keySeparator);
     } else if (serialized.character != null) {
       return serialized.character!;
     }
@@ -2166,7 +2180,17 @@ class _LocalizedShortcutLabeler {
     if (modifier == LogicalKeyboardKey.shift ||
         modifier == LogicalKeyboardKey.shiftLeft ||
         modifier == LogicalKeyboardKey.shiftRight) {
-      return _shortcutGraphicEquivalents[LogicalKeyboardKey.shift]!;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return localizations.keyboardKeyShift;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return '⇧';
+      }
+
     }
     throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
   }
