@@ -149,15 +149,21 @@ RenderTarget& RenderTarget::SetColorAttachment(
   return *this;
 }
 
-RenderTarget& RenderTarget::SetDepthAttachment(DepthAttachment attachment) {
-  if (attachment.IsValid()) {
+RenderTarget& RenderTarget::SetDepthAttachment(
+    std::optional<DepthAttachment> attachment) {
+  if (!attachment.has_value()) {
+    depth_ = std::nullopt;
+  } else if (attachment->IsValid()) {
     depth_ = std::move(attachment);
   }
   return *this;
 }
 
-RenderTarget& RenderTarget::SetStencilAttachment(StencilAttachment attachment) {
-  if (attachment.IsValid()) {
+RenderTarget& RenderTarget::SetStencilAttachment(
+    std::optional<StencilAttachment> attachment) {
+  if (!attachment.has_value()) {
+    stencil_ = std::nullopt;
+  } else if (attachment->IsValid()) {
     stencil_ = std::move(attachment);
   }
   return *this;

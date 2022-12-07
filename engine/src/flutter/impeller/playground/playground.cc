@@ -263,35 +263,8 @@ bool Playground::OpenPlaygroundHere(
         }
         render_target.SetColorAttachment(color0, 0);
 
-#ifndef IMPELLER_ENABLE_VULKAN
-        {
-          TextureDescriptor stencil0_tex;
-          stencil0_tex.storage_mode = StorageMode::kDeviceTransient;
-          stencil0_tex.type = TextureType::kTexture2D;
-          stencil0_tex.sample_count = SampleCount::kCount1;
-          stencil0_tex.format = PixelFormat::kDefaultStencil;
-          stencil0_tex.size = color0.texture->GetSize();
-          stencil0_tex.usage =
-              static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-          auto stencil_texture =
-              renderer->GetContext()->GetResourceAllocator()->CreateTexture(
-                  stencil0_tex);
-
-          if (!stencil_texture) {
-            VALIDATION_LOG << "Could not create stencil texture.";
-            return false;
-          }
-          stencil_texture->SetLabel("ImguiStencil");
-
-          StencilAttachment stencil0;
-          stencil0.texture = stencil_texture;
-          stencil0.clear_stencil = 0;
-          stencil0.load_action = LoadAction::kClear;
-          stencil0.store_action = StoreAction::kDontCare;
-
-          render_target.SetStencilAttachment(stencil0);
-        }
-#endif
+        render_target.SetStencilAttachment(std::nullopt);
+        render_target.SetDepthAttachment(std::nullopt);
 
         auto pass = buffer->CreateRenderPass(render_target);
         if (!pass) {

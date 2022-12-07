@@ -55,6 +55,10 @@ void UnlitMaterial::SetColorTexture(std::shared_ptr<Texture> color_texture) {
   color_texture_ = std::move(color_texture);
 }
 
+void UnlitMaterial::SetVertexColorWeight(Scalar weight) {
+  vertex_color_weight_ = weight;
+}
+
 // |Material|
 std::shared_ptr<Pipeline<PipelineDescriptor>> UnlitMaterial::GetPipeline(
     const SceneContext& scene_context,
@@ -69,6 +73,7 @@ void UnlitMaterial::BindToCommand(const SceneContext& scene_context,
   // Uniform buffer.
   UnlitPipeline::FragmentShader::FragInfo info;
   info.color = color_;
+  info.vertex_color_weight = vertex_color_weight_;
   UnlitPipeline::FragmentShader::BindFragInfo(command,
                                               buffer.EmplaceUniform(info));
 

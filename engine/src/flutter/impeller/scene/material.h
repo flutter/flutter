@@ -66,6 +66,8 @@ class UnlitMaterial final : public Material {
 
   void SetColorTexture(std::shared_ptr<Texture> color_texture);
 
+  void SetVertexColorWeight(Scalar weight);
+
   // |Material|
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
       const SceneContext& scene_context,
@@ -79,6 +81,7 @@ class UnlitMaterial final : public Material {
  private:
   Color color_ = Color::White();
   std::shared_ptr<Texture> color_texture_;
+  Scalar vertex_color_weight_ = 1;
 };
 
 class StandardMaterial final : public Material {
