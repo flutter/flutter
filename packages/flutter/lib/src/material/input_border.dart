@@ -517,11 +517,10 @@ class OutlineInputBorder extends InputBorder {
   }) {
     assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
-    final BorderRadius resolvedRadius = borderRadius.resolve(textDirection);
-    assert(_cornersAreCircular(resolvedRadius));
+    assert(_cornersAreCircular(borderRadius));
 
     final Paint paint = borderSide.toPaint();
-    final RRect outer = resolvedRadius.toRRect(rect);
+    final RRect outer = borderRadius.toRRect(rect);
     final RRect center = outer.deflate(borderSide.width / 2.0);
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawRRect(center, paint);
