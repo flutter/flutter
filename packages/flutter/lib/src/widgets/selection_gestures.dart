@@ -394,6 +394,12 @@ class TapDragEndDetails {
   String toString() => '${objectRuntimeType(this, 'TapDragEndDetails')}($velocity)';
 }
 
+/// Signature for when the pointer that previously triggered a
+/// [GestureTapDragDownCallback] did not complete.
+///
+/// Used by [TapAndDragGestureRecognizer.onCancel].
+typedef GestureCancelCallback = void Function();
+
 // A mixin for [OneSequenceGestureRecognizer] that tracks the number of taps
 // that occur in a series of [PointerEvent]s and the most recent set of
 // [LogicalKeyboardKey]s pressed on the most recent tap down.
@@ -764,19 +770,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///  * [TapDragUpDetails], which is passed as an argument to this callback.
   GestureTapDragUpCallback? onTapUp;
 
-  /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
-  ///
-  /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.onTapCancel}
-  /// This is called if a [PointerMoveEvent] has moved a sufficient global distance
-  /// from the initial [PointerDownEvent] to be considered a drag.
-  ///
-  /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
-  /// due to it not meeting the global distance necessary to be considered a drag, and drifting
-  /// too far from the initial [PointerDownEvent] to be considered a tap.
-  /// {@endtemplate}
-  /// In this case both [onTapCancel] and [onDragCancel] will be called.
-  GestureTapCancelCallback? onTapCancel;
-
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.onStart}
   ///
   /// The position of the pointer is provided in the callback's `details`
@@ -819,20 +812,17 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   /// The pointer that previously triggered [onTapDown] did not complete.
   ///
-  /// This is called when a [PointerUpEvent] is tracked before the recognizer has accepted
-  /// the gesture as a drag. This can happen if none of the [PointerMoveEvent]s received
-  /// drift far enough to exceed the tap tolerance, and do not meet the global distance specifications
-  /// to be considered a drag.
+  /// This is called when a [PointerCancelEvent] is tracked when the [onTapDown] callback
+  /// was previously called.
   ///
-  /// It may also be called if the pointer tracked is deemed neither a drag, nor a tap,
-  /// due to it not meeting the global distance necessary to be considered a drag, and drifting
-  /// too far from the initial [PointerDownEvent] to be considered a tap. In this case both [onTapCancel]
-  /// and [onDragCancel] will be called.
+  /// It may also be called if a [PointerUpEvent] is tracked after the pointer has moved
+  /// past the tap tolerance but not past the drag tolerance, and the recognizer has not
+  /// yet won the arena.
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  GestureDragCancelCallback? onDragCancel;
+  GestureCancelCallback? onCancel;
 
   // Tap related state.
   bool _pastSlopTolerance = false;
@@ -888,8 +878,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
               onDragUpdate == null &&
               onDragEnd == null &&
               onTapUp == null &&
-              onTapCancel == null &&
-              onDragCancel == null) {
+              onCancel == null) {
             return false;
           }
           break;
@@ -944,9 +933,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _checkTapDown(currentDown!);
     }
     _wonArenaForPrimaryPointer = true;
-    if (currentUp != null) {
-      _checkTapUp(currentUp!);
-    }
 
     // resolve(GestureDisposition.accepted) may be called when the [PointerMoveEvent] has
     // moved a sufficient global distance.
@@ -954,6 +940,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       if (_start != null) {
         _acceptDrag(_start!);
       }
+    }
+
+    if (currentUp != null) {
+      _checkTapUp(currentUp!);
     }
   }
 
@@ -983,7 +973,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           }
         } else {
           // The pointer is accepted as a tap.
-          _checkDragCancel();
           if (currentUp != null) {
             _checkTapUp(currentUp!);
           }
@@ -1239,32 +1228,21 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkCancel() {
-    _checkTapCancel();
-    _checkDragCancel();
-    _resetTaps();
-  }
-
-  void _checkTapCancel() {
     if (!_sentTapDown) {
       // Do not fire tap cancel if [onTapDown] was never called.
       return;
     }
     switch (_initialButtons) {
       case kPrimaryButton:
-        if (onTapCancel != null) {
-          invokeCallback('onTapCancel', onTapCancel!);
+        if (onCancel != null) {
+          invokeCallback('onCancel', onCancel!);
         }
         break;
       default:
         assert(_initialButtons != null);
     }
-  }
-
-  void _checkDragCancel() {
-    if (onDragCancel != null) {
-      invokeCallback<void>('onDragCancel', onDragCancel!);
-    }
     _resetDragUpdateThrottle();
+    _resetTaps();
   }
 
   void _didExceedDeadlineWithEvent(PointerDownEvent event) {
@@ -1300,6 +1278,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _resetDragUpdateThrottle() {
+    if (dragUpdateThrottleFrequency == null) {
+      return;
+    }
     _lastDragUpdateDetails = null;
     if (_dragUpdateThrottleTimer != null) {
       _dragUpdateThrottleTimer!.cancel();

@@ -28,9 +28,6 @@ void main() {
       ..onTapUp = (TapDragUpDetails details) {
         events.add('up#${details.consecutiveTapCount}');
       }
-      ..onTapCancel = () {
-        events.add('tapcancel');
-      }
       ..onDragStart = (TapDragStartDetails details) {
         events.add('dragstart#${details.consecutiveTapCount}');
       }
@@ -40,8 +37,8 @@ void main() {
       ..onDragEnd = (TapDragEndDetails details) {
         events.add('dragend#${details.consecutiveTapCount}');
       }
-      ..onDragCancel = () {
-        events.add('dragcancel');
+      ..onCancel = () {
+        events.add('cancel');
       };
   });
 
@@ -115,7 +112,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
 
     events.clear();
     tester.async.elapse(kConsecutiveTapDelay);
@@ -124,7 +121,7 @@ void main() {
     tester.route(down2);
     tester.route(up2);
     GestureBinding.instance.gestureArena.sweep(2);
-    expect(events, <String>['down#2', 'dragcancel', 'up#2']);
+    expect(events, <String>['down#2', 'up#2']);
 
     events.clear();
     tester.async.elapse(kConsecutiveTapDelay);
@@ -133,7 +130,7 @@ void main() {
     tester.route(down3);
     tester.route(up3);
     GestureBinding.instance.gestureArena.sweep(3);
-    expect(events, <String>['down#3', 'dragcancel', 'up#3']);
+    expect(events, <String>['down#3', 'up#3']);
   });
 
   testGesture('Resets if times out in between taps', (GestureTester tester) {
@@ -142,7 +139,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
 
     events.clear();
     tester.async.elapse(const Duration(milliseconds: 1000));
@@ -151,7 +148,7 @@ void main() {
     tester.route(down2);
     tester.route(up2);
     GestureBinding.instance.gestureArena.sweep(2);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Resets if taps are far apart', (GestureTester tester) {
@@ -160,7 +157,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
 
     events.clear();
     tester.async.elapse(const Duration(milliseconds: 100));
@@ -169,7 +166,7 @@ void main() {
     tester.route(down4);
     tester.route(up4);
     GestureBinding.instance.gestureArena.sweep(4);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Resets if consecutiveTapCount reaches maxConsecutiveTap', (GestureTester tester) {
@@ -179,7 +176,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
 
     // Second tap.
     events.clear();
@@ -188,7 +185,7 @@ void main() {
     tester.route(down2);
     tester.route(up2);
     GestureBinding.instance.gestureArena.sweep(2);
-    expect(events, <String>['down#2', 'dragcancel', 'up#2']);
+    expect(events, <String>['down#2', 'up#2']);
 
     // Third tap.
     events.clear();
@@ -197,7 +194,7 @@ void main() {
     tester.route(down3);
     tester.route(up3);
     GestureBinding.instance.gestureArena.sweep(3);
-    expect(events, <String>['down#3', 'dragcancel', 'up#3']);
+    expect(events, <String>['down#3', 'up#3']);
 
     // Fourth tap. Here we arrived at the `maxConsecutiveTap` for `consecutiveTapCount`
     // so our count should reset and our new count should be `1`.
@@ -207,7 +204,7 @@ void main() {
     tester.route(down3);
     tester.route(up3);
     GestureBinding.instance.gestureArena.sweep(3);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
@@ -250,10 +247,8 @@ void main() {
     tester.route(pointer.up());
     expect(events, <String>[
       'down#1',
-      'dragcancel',
       'up#1',
       'down#2',
-      'dragcancel',
       'up#2',
       'down#3',
       'dragstart#3',
@@ -275,7 +270,7 @@ void main() {
 
     tester.route(up2);
     GestureBinding.instance.gestureArena.sweep(2);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Recognizer rejects pointer that is not the primary one (FILO) - before acceptance', (GestureTester tester) {
@@ -292,7 +287,7 @@ void main() {
 
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Recognizer rejects pointer that is not the primary one (FIFO) - after acceptance', (GestureTester tester) {
@@ -310,7 +305,7 @@ void main() {
     tester.route(up2);
     GestureBinding.instance.gestureArena.sweep(2);
 
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Recognizer rejects pointer that is not the primary one (FILO) - after acceptance', (GestureTester tester) {
@@ -327,7 +322,7 @@ void main() {
 
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Recognizer detects tap gesture when pointer does not move past tap tolerance', (GestureTester tester) {
@@ -339,7 +334,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Recognizer detects drag gesture when pointer moves past tap tolerance but not the drag minimum', (GestureTester tester) {
@@ -425,7 +420,6 @@ void main() {
     tester.route(pointer.move(const Offset(40.0, 45.0)));
     tester.route(pointer.up());
     expect(events, <String>[
-      'dragcancel',
       'longpresscancel',
       'down#1',
       'up#1',
@@ -453,7 +447,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['dragcancel', 'down#1', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Beats TapGestureRecognizer when the pointer has exceeded the slop tolerance', (GestureTester tester) {
@@ -485,7 +479,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['dragcancel', 'tapdown', 'tapup']);
+    expect(events, <String>['tapdown', 'tapup']);
   });
 
   testGesture('Ties with PanGestureRecognizer when pointer has not met sufficient global distance to be a drag', (GestureTester tester) {
@@ -510,10 +504,10 @@ void main() {
     tester.route(move5);
     tester.route(up5);
     GestureBinding.instance.gestureArena.sweep(5);
-    expect(events, <String>['dragcancel', 'pancancel']);
+    expect(events, <String>['pancancel']);
   });
 
-  testGesture('Fires cancel and resets when pointer dragged past slop tolerance', (GestureTester tester) {
+  testGesture('Defaults to drag when pointer dragged past slop tolerance', (GestureTester tester) {
     tapAndDrag.addPointer(down5);
     tester.closeArena(5);
     tester.route(down5);
@@ -529,7 +523,7 @@ void main() {
     tester.route(down1);
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
 
   testGesture('Fires cancel and resets for PointerCancelEvent', (GestureTester tester) {
@@ -538,7 +532,7 @@ void main() {
     tester.route(down1);
     tester.route(cancel1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['down#1', 'tapcancel', 'dragcancel']);
+    expect(events, <String>['down#1', 'cancel']);
 
     events.clear();
     tester.async.elapse(const Duration(milliseconds: 100));
@@ -547,27 +541,6 @@ void main() {
     tester.route(down2);
     tester.route(up2);
     GestureBinding.instance.gestureArena.sweep(2);
-    expect(events, <String>['down#1', 'dragcancel', 'up#1']);
+    expect(events, <String>['down#1', 'up#1']);
   });
-
-  testGesture('Fires drag cancel if competing recognizer declares victory before on tap down is fired', (GestureTester tester) {
-    final WinningGestureRecognizer winner = WinningGestureRecognizer();
-    winner.addPointer(down1);
-    tapAndDrag.addPointer(down1);
-    tester.closeArena(1);
-    tester.route(down1);
-    tester.route(up1);
-    GestureBinding.instance.gestureArena.sweep(1);
-    expect(events, <String>['dragcancel']);
-  });
-}
-
-class WinningGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  @override
-  String get debugDescription => 'winner';
-
-  @override
-  void handlePrimaryPointer(PointerEvent event) {
-    resolve(GestureDisposition.accepted);
-  }
 }

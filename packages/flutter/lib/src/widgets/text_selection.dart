@@ -2766,7 +2766,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for each touch that becomes recognized as a gesture that is not a
   /// short tap, such as a long tap or drag. It is called at the moment when
   /// another gesture from the touch is recognized.
-  final GestureTapCancelCallback? onSingleTapCancel;
+  final GestureCancelCallback? onSingleTapCancel;
 
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
@@ -2932,7 +2932,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             ..onDragUpdate = _handleDragUpdate
             ..onDragEnd = _handleDragEnd
             ..onTapUp = _handleTapUp
-            ..onTapCancel = _handleTapCancel;
+            ..onCancel = _handleTapCancel;
         },
       );
     }
