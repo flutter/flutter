@@ -675,4 +675,8 @@ void FlutterWindowsView::NotifyWinEventWrapper(DWORD event,
   }
 }
 
+ui::AXFragmentRootDelegateWin* FlutterWindowsView::GetAxFragmentRootDelegate() {
+  return engine_->accessibility_bridge().lock().get();
+}
+
 }  // namespace flutter

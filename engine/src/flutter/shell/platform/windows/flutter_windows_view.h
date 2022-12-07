@@ -5,8 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 
-#include <windowsx.h>
-
 #include <memory>
 #include <mutex>
 #include <string>
@@ -196,6 +194,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
 
   // |TextInputPluginDelegate|
   void OnResetImeComposing() override;
+
+  // |WindowBindingHandlerDelegate|
+  virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() override;
 
  protected:
   // Called to create keyboard key handler.

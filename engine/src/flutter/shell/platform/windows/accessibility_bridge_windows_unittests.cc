@@ -29,7 +29,7 @@ namespace {
 // A structure representing a Win32 MSAA event targeting a specified node.
 struct MsaaEvent {
   std::shared_ptr<FlutterPlatformNodeDelegateWindows> node_delegate;
-  DWORD event_type;
+  ax::mojom::Event event_type;
 };
 
 // Accessibility bridge delegate that captures events dispatched to the OS.
@@ -43,7 +43,7 @@ class AccessibilityBridgeWindowsSpy : public AccessibilityBridgeWindows {
 
   void DispatchWinAccessibilityEvent(
       std::shared_ptr<FlutterPlatformNodeDelegateWindows> node_delegate,
-      DWORD event_type) override {
+      ax::mojom::Event event_type) override {
     dispatched_events_.push_back({node_delegate, event_type});
   }
 
@@ -76,7 +76,7 @@ class FlutterWindowsEngineSpy : public FlutterWindowsEngine {
       : FlutterWindowsEngine(project) {}
 
  protected:
-  virtual std::shared_ptr<AccessibilityBridge> CreateAccessibilityBridge(
+  virtual std::shared_ptr<AccessibilityBridgeWindows> CreateAccessibilityBridge(
       FlutterWindowsEngine* engine,
       FlutterWindowsView* view) override {
     return std::make_shared<AccessibilityBridgeWindowsSpy>(engine, view);
@@ -169,7 +169,7 @@ std::shared_ptr<AccessibilityBridgeWindowsSpy> GetAccessibilityBridgeSpy(
 
 void ExpectWinEventFromAXEvent(int32_t node_id,
                                ui::AXEventGenerator::Event ax_event,
-                               DWORD expected_event) {
+                               ax::mojom::Event expected_event) {
   auto window_binding_handler =
       std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
   FlutterWindowsView view(std::move(window_binding_handler));
@@ -246,12 +246,12 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityEventAlert) {
   ExpectWinEventFromAXEvent(0, ui::AXEventGenerator::Event::ALERT,
-                            EVENT_SYSTEM_ALERT);
+                            ax::mojom::Event::kAlert);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityEventChildrenChanged) {
   ExpectWinEventFromAXEvent(0, ui::AXEventGenerator::Event::CHILDREN_CHANGED,
-                            EVENT_OBJECT_REORDER);
+                            ax::mojom::Event::kChildrenChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityEventFocusChanged) {
@@ -270,7 +270,8 @@ TEST(AccessibilityBridgeWindows, OnAccessibilityEventFocusChanged) {
                                  ax::mojom::EventFrom::kNone,
                                  {}}});
   ASSERT_EQ(bridge->dispatched_events().size(), 1);
-  EXPECT_EQ(bridge->dispatched_events()[0].event_type, EVENT_OBJECT_FOCUS);
+  EXPECT_EQ(bridge->dispatched_events()[0].event_type,
+            ax::mojom::Event::kFocus);
 
   ASSERT_EQ(bridge->focused_nodes().size(), 1);
   EXPECT_EQ(bridge->focused_nodes()[0], 1);
@@ -279,62 +280,62 @@ TEST(AccessibilityBridgeWindows, OnAccessibilityEventFocusChanged) {
 TEST(AccessibilityBridgeWindows, OnAccessibilityEventIgnoredChanged) {
   // Static test nodes with no text, hint, or scrollability are ignored.
   ExpectWinEventFromAXEvent(4, ui::AXEventGenerator::Event::IGNORED_CHANGED,
-                            EVENT_OBJECT_HIDE);
+                            ax::mojom::Event::kHide);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityImageAnnotationChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::IMAGE_ANNOTATION_CHANGED,
-      EVENT_OBJECT_NAMECHANGE);
+      ax::mojom::Event::kTextChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityLiveRegionChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::LIVE_REGION_CHANGED,
-                            EVENT_OBJECT_LIVEREGIONCHANGED);
+                            ax::mojom::Event::kLiveRegionChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityNameChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::NAME_CHANGED,
-                            EVENT_OBJECT_NAMECHANGE);
+                            ax::mojom::Event::kTextChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityHScrollPosChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::SCROLL_HORIZONTAL_POSITION_CHANGED,
-      EVENT_SYSTEM_SCROLLINGEND);
+      ax::mojom::Event::kScrollPositionChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityVScrollPosChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::SCROLL_VERTICAL_POSITION_CHANGED,
-      EVENT_SYSTEM_SCROLLINGEND);
+      ax::mojom::Event::kScrollPositionChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilitySelectedChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::SELECTED_CHANGED,
-                            EVENT_OBJECT_VALUECHANGE);
+                            ax::mojom::Event::kValueChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilitySelectedChildrenChanged) {
   ExpectWinEventFromAXEvent(
       2, ui::AXEventGenerator::Event::SELECTED_CHILDREN_CHANGED,
-      EVENT_OBJECT_SELECTIONWITHIN);
+      ax::mojom::Event::kSelectedChildrenChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilitySubtreeCreated) {
   ExpectWinEventFromAXEvent(0, ui::AXEventGenerator::Event::SUBTREE_CREATED,
-                            EVENT_OBJECT_SHOW);
+                            ax::mojom::Event::kShow);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityValueChanged) {
   ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::VALUE_CHANGED,
-                            EVENT_OBJECT_VALUECHANGE);
+                            ax::mojom::Event::kValueChanged);
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityStateChanged) {
   ExpectWinEventFromAXEvent(
       1, ui::AXEventGenerator::Event::WIN_IACCESSIBLE_STATE_CHANGED,
-      EVENT_OBJECT_STATECHANGE);
+      ax::mojom::Event::kStateChanged);
 }
 
 }  // namespace testing
