@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -153,21 +152,9 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
 
     await tester.pumpAndSettle();
-    final String? expectedLabel;
-    switch(defaultTargetPlatform) {
-      case TargetPlatform.android:
-        expectedLabel = 'Back';
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expectedLabel = null;
-    }
+
     expect(tester.getSemantics(find.byType(BackButton)), matchesSemantics(
       tooltip: 'Back',
-      label: expectedLabel,
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -175,51 +162,7 @@ void main() {
       isFocusable: true,
     ));
     handle.dispose();
-  }, variant: TargetPlatformVariant.all());
-
-  testWidgets('CloseButton semantics', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(child: Text('Home')),
-        routes: <String, WidgetBuilder>{
-          '/next': (BuildContext context) {
-            return const Material(
-              child: Center(
-                child: CloseButton(),
-              ),
-            );
-          },
-        },
-      ),
-    );
-
-    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-
-    await tester.pumpAndSettle();
-    final String? expectedLabel;
-    switch(defaultTargetPlatform) {
-      case TargetPlatform.android:
-        expectedLabel = 'Close';
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expectedLabel = null;
-    }
-    expect(tester.getSemantics(find.byType(CloseButton)), matchesSemantics(
-      tooltip: 'Close',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      isFocusable: true,
-    ));
-    handle.dispose();
-  }, variant: TargetPlatformVariant.all());
+  });
 
   testWidgets('CloseButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
