@@ -806,7 +806,7 @@ class _CupertinoBackGestureController<T> {
       };
       // Only apply the value listener if going back to the previous route, as
       // allowing clicks on the top route while in motion may trigger errors
-      // while the route is not fully in the Widget tree.
+      // for going to a route that is already being moved to.
       if (!animateForward) {
         controller.addListener(animationValueCallback);
       }
@@ -818,9 +818,7 @@ class _CupertinoBackGestureController<T> {
           navigator.didStopUserGesture();
         }
         controller.removeStatusListener(animationStatusCallback);
-        if (animationValueCallback != null) {
-          controller.removeListener(animationValueCallback);
-        }
+        controller.removeListener(animationValueCallback);
       };
       controller.addStatusListener(animationStatusCallback);
     } else {
