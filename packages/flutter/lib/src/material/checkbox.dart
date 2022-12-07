@@ -353,7 +353,7 @@ class Checkbox extends StatefulWidget {
   /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
-  /// Defaults to [labelText], if specified.
+  /// Defaults to labelText, if specified.
   final String? semanticLabel;
 
   /// The width of a checkbox widget.
