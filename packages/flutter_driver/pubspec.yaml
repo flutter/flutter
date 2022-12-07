@@ -3,7 +3,7 @@ description: Integration and performance test API for Flutter applications
 homepage: https://flutter.dev
 
 environment:
-  sdk: ">=2.17.0-0 <3.0.0"
+  sdk: ">=2.17.0-0 <4.0.0"
 
 dependencies:
   file: 6.1.4
