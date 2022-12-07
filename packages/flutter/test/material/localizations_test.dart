@@ -120,6 +120,7 @@ void main() {
     expect(localizations.keyboardKeyPrintScreen, isNotNull);
     expect(localizations.keyboardKeyScrollLock, isNotNull);
     expect(localizations.keyboardKeySelect, isNotNull);
+    expect(localizations.keyboardKeyShift, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
     expect(localizations.currentDateLabel, isNotNull);
 
