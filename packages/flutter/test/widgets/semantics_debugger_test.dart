@@ -294,26 +294,28 @@ void main() {
     double value = 0.75;
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: SemanticsDebugger(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-              child: Material(
-                child: Center(
-                  child: Slider(
-                    value: value,
-                    onChanged: (double newValue) {
-                      value = newValue;
-                    },
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SemanticsDebugger(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+                child: Material(
+                  child: Center(
+                    child: Slider(
+                      value: value,
+                      onChanged: (double newValue) {
+                        value = newValue;
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+        )
       ),
     );
 
@@ -323,8 +325,19 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0, warnIfMissed: false); // hitting the debugger
-    expect(value, equals(0.70));
-  });
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(value, equals(0.65));
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        expect(value, equals(0.70));
+        break;
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
     final Key keyTop = UniqueKey();
