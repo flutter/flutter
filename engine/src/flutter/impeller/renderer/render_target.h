@@ -61,9 +61,10 @@ class RenderTarget {
   RenderTarget& SetColorAttachment(const ColorAttachment& attachment,
                                    size_t index);
 
-  RenderTarget& SetDepthAttachment(DepthAttachment attachment);
+  RenderTarget& SetDepthAttachment(std::optional<DepthAttachment> attachment);
 
-  RenderTarget& SetStencilAttachment(StencilAttachment attachment);
+  RenderTarget& SetStencilAttachment(
+      std::optional<StencilAttachment> attachment);
 
   const std::map<size_t, ColorAttachment>& GetColorAttachments() const;
 

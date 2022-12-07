@@ -68,7 +68,7 @@ PlaygroundImplGLES::PlaygroundImplGLES()
   ::glfwWindowHint(GLFW_GREEN_BITS, 8);
   ::glfwWindowHint(GLFW_BLUE_BITS, 8);
   ::glfwWindowHint(GLFW_ALPHA_BITS, 8);
-  ::glfwWindowHint(GLFW_DEPTH_BITS, 0);    // no depth buffer
+  ::glfwWindowHint(GLFW_DEPTH_BITS, 32);   // 32 bit depth buffer
   ::glfwWindowHint(GLFW_STENCIL_BITS, 8);  // 8 bit stencil buffer
   ::glfwWindowHint(GLFW_SAMPLES, 4);       // 4xMSAA
 

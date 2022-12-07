@@ -59,6 +59,7 @@ test_fixtures("file_fixtures") {
     "boston.jpg",
     "embarcadero.jpg",
     "flutter_logo.glb",
+    "flutter_logo_baked.png",
     "kalimba.jpg",
     "multiple_stages.hlsl",
     "resources_limit.vert",
