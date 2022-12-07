@@ -411,7 +411,7 @@ class _DefaultPub implements Pub {
       final io.Process process;
 
       if (_stdio != null || !printProgress) {
-        // Omit [mode] parameter if testing or if silent operation is requesteds.
+        // Omit [mode] parameter if testing or if silent operation is requested.
         process = await _processUtils.start(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
