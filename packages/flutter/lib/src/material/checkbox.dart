@@ -88,7 +88,6 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
-    this.labelText,
     this.semanticLabel,
   }) : assert(tristate != null),
        assert(tristate || value != null),
@@ -346,13 +345,15 @@ class Checkbox extends StatefulWidget {
   /// The label text that will be rendered side by side with the [Checkbox].
   /// Serves as default semantics label for the [Checkbox] if provided.
   ///
-  // TODO(harperl-lgtm): Actually render the labelText in build method.
+  // TODO(harperl-lgtm): Add to constructor parameters and actually render it.
   final String? labelText;
 
-  /// The semantics label that will be announced by a screen reader.
+  /// The semantic label for the checkobox that will be announced by screen readers.
   ///
-  /// Overrides labelText in terms of semantic labeling of the [Checkbox]
-  /// if they are provided at the same time.
+  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// This label does not show in the UI.
+  ///
+  /// Defaults to [labelText], if specified.
   final String? semanticLabel;
 
   /// The width of a checkbox widget.
