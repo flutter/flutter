@@ -422,5 +422,11 @@ public class FlutterFragmentActivityTest {
       return new CachedEngineIntentBuilder(
           FlutterFragmentActivityWithIntentBuilders.class, cachedEngineId);
     }
+
+    public static NewEngineInGroupIntentBuilder withNewEngineInGroup(
+        @NonNull String engineGroupId) {
+      return new NewEngineInGroupIntentBuilder(
+          FlutterFragmentActivityWithIntentBuilders.class, engineGroupId);
+    }
   }
 }

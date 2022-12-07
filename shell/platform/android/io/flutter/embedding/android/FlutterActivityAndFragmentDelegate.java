@@ -24,6 +24,8 @@ import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
+import io.flutter.embedding.engine.FlutterEngineGroup;
+import io.flutter.embedding.engine.FlutterEngineGroupCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
@@ -230,6 +232,10 @@ import java.util.List;
    * <p>Second, the {@code host} is given an opportunity to provide a {@link
    * io.flutter.embedding.engine.FlutterEngine} via {@link Host#provideFlutterEngine(Context)}.
    *
+   * <p>Third, the {@code host} is asked if it would like to use a cached {@link
+   * io.flutter.embedding.engine.FlutterEngineGroup} to create a new {@link FlutterEngine} by {@link
+   * FlutterEngineGroup#createAndRunEngine}
+   *
    * <p>If the {@code host} does not provide a {@link io.flutter.embedding.engine.FlutterEngine},
    * then a new {@link FlutterEngine} is instantiated.
    */
@@ -255,6 +261,34 @@ import java.util.List;
     flutterEngine = host.provideFlutterEngine(host.getContext());
     if (flutterEngine != null) {
       isFlutterEngineFromHost = true;
+      return;
+    }
+
+    // Third, check if the host wants to use a cached FlutterEngineGroup
+    // and create new FlutterEngine using FlutterEngineGroup#createAndRunEngine
+    String cachedEngineGroupId = host.getCachedEngineGroupId();
+    if (cachedEngineGroupId != null) {
+      FlutterEngineGroup flutterEngineGroup =
+          FlutterEngineGroupCache.getInstance().get(cachedEngineGroupId);
+      if (flutterEngineGroup == null) {
+        throw new IllegalStateException(
+            "The requested cached FlutterEngineGroup did not exist in the FlutterEngineGroupCache: '"
+                + cachedEngineGroupId
+                + "'");
+      }
+
+      String appBundlePathOverride = host.getAppBundlePath();
+      if (appBundlePathOverride == null || appBundlePathOverride.isEmpty()) {
+        appBundlePathOverride = FlutterInjector.instance().flutterLoader().findAppBundlePath();
+      }
+
+      DartExecutor.DartEntrypoint dartEntrypoint =
+          new DartExecutor.DartEntrypoint(
+              appBundlePathOverride, host.getDartEntrypointFunctionName());
+      flutterEngine =
+          flutterEngineGroup.createAndRunEngine(
+              host.getContext(), dartEntrypoint, host.getInitialRoute());
+      isFlutterEngineFromHost = false;
       return;
     }
 
@@ -914,6 +948,9 @@ import java.util.List;
      */
     @Nullable
     String getCachedEngineId();
+
+    @Nullable
+    String getCachedEngineGroupId();
 
     /**
      * Returns true if the {@link io.flutter.embedding.engine.FlutterEngine} used in this delegate

@@ -103,6 +103,35 @@ public class FlutterFragmentTest {
   }
 
   @Test
+  public void itCreatesNewEngineInGroupFragmentWithRequestedSettings() {
+    FlutterFragment fragment =
+        FlutterFragment.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("custom_entrypoint")
+            .initialRoute("/custom/route")
+            .shouldAttachEngineToActivity(false)
+            .handleDeeplinking(true)
+            .renderMode(RenderMode.texture)
+            .transparencyMode(TransparencyMode.opaque)
+            .build();
+
+    TestDelegateFactory delegateFactory =
+        new TestDelegateFactory(new FlutterActivityAndFragmentDelegate(fragment));
+
+    fragment.setDelegateFactory(delegateFactory);
+
+    assertEquals("my_cached_engine_group", fragment.getCachedEngineGroupId());
+    assertEquals("custom_entrypoint", fragment.getDartEntrypointFunctionName());
+    assertEquals("/custom/route", fragment.getInitialRoute());
+    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
+    assertFalse(fragment.shouldAttachEngineToActivity());
+    assertTrue(fragment.shouldHandleDeeplinking());
+    assertNull(fragment.getCachedEngineId());
+    assertTrue(fragment.shouldDestroyEngineWithHost());
+    assertEquals(RenderMode.texture, fragment.getRenderMode());
+    assertEquals(TransparencyMode.opaque, fragment.getTransparencyMode());
+  }
+
+  @Test
   public void itCreatesNewEngineFragmentThatDelaysFirstDrawWhenRequested() {
     FlutterFragment fragment =
         FlutterFragment.withNewEngine().shouldDelayFirstAndroidViewDraw(true).build();
