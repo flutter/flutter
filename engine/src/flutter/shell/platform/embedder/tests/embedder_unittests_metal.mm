@@ -235,6 +235,7 @@ TEST_F(EmbedderTest, TextureDestructionCallbackCalledWithoutCustomCompositorMeta
   builder.SetDartEntrypoint("texture_destruction_callback_called_without_custom_compositor");
 
   struct CollectContext {
+    int present_count = 0;
     int collect_count = 0;
     fml::AutoResetWaitableEvent latch;
   };
@@ -249,10 +250,15 @@ TEST_F(EmbedderTest, TextureDestructionCallbackCalledWithoutCustomCompositorMeta
     texture.user_data = collect_context.get();
     texture.destruction_callback = [](void* user_data) {
       CollectContext* callback_collect_context = reinterpret_cast<CollectContext*>(user_data);
+      ASSERT_TRUE(callback_collect_context->present_count > 0);
       callback_collect_context->collect_count++;
       callback_collect_context->latch.Signal();
     };
     return texture;
+  });
+  context.SetPresentCallback([&context, &collect_context](int64_t texture_id) {
+    collect_context->present_count++;
+    return context.GetTestMetalContext()->Present(texture_id);
   });
 
   auto engine = builder.LaunchEngine();
