@@ -88,6 +88,9 @@ enum MaxLengthEnforcement {
 ///  * [FilteringTextInputFormatter], a provided formatter for filtering
 ///    characters.
 abstract class TextInputFormatter {
+  /// Allows subclasses to have const constructor
+  const TextInputFormatter();
+
   /// Called when text is being typed or cut/copy/pasted in the [EditableText].
   ///
   /// You can override the resulting text based on the previous text value and
