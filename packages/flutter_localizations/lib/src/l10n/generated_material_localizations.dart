@@ -72,6 +72,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopieer';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Knip';
 
   @override
@@ -512,6 +515,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'ቅዳ';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ቁረጥ';
@@ -956,6 +962,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'نسخ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'قص';
 
   @override
@@ -1396,6 +1405,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'কাট কৰক';
@@ -1840,6 +1852,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopyalayın';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kəsin';
 
   @override
@@ -2280,6 +2295,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Капіраваць';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Выразаць';
@@ -2724,6 +2742,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Копиране';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Изрязване';
 
   @override
@@ -3164,6 +3185,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'কপি করুন';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'কাট করুন';
@@ -3608,6 +3632,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiraj';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Izreži';
 
   @override
@@ -4048,6 +4075,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copia';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Retalla';
@@ -4492,6 +4522,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopírovat';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Vyjmout';
 
   @override
@@ -4934,6 +4967,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiér';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klip';
 
   @override
@@ -5374,6 +5410,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopieren';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
@@ -5855,6 +5894,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Αντιγραφή';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Αποκοπή';
 
   @override
@@ -6295,6 +6337,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copy';
+
+  @override
+  String get currentDateLabel => 'Today';
 
   @override
   String get cutButtonLabel => 'Cut';
@@ -7594,6 +7639,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copiar';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
@@ -11241,6 +11289,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopeeri';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Lõika';
 
   @override
@@ -11681,6 +11732,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiatu';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ebaki';
@@ -12125,6 +12179,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کپی';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'برش';
 
   @override
@@ -12565,6 +12622,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopioi';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Leikkaa';
@@ -13009,6 +13069,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopyahin';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'I-cut';
 
   @override
@@ -13449,6 +13512,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copier';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Couper';
@@ -14029,6 +14095,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copiar';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Cortar';
 
   @override
@@ -14469,6 +14538,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopieren';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
@@ -14913,6 +14985,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'કૉપિ કરો';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'કાપો';
 
   @override
@@ -15353,6 +15428,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'העתקה';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'גזירה';
@@ -15797,6 +15875,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'कॉपी करें';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'काटें';
 
   @override
@@ -16237,6 +16318,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiraj';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izreži';
@@ -16681,6 +16765,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Másolás';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kivágás';
 
   @override
@@ -17121,6 +17208,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Պատճենել';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Կտրել';
@@ -17565,6 +17655,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Salin';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Potong';
 
   @override
@@ -18005,6 +18098,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Afrita';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klippa';
@@ -18449,6 +18545,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copia';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Taglia';
 
   @override
@@ -18889,6 +18988,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'コピー';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '切り取り';
@@ -19333,6 +19435,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'კოპირება';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ამოჭრა';
 
   @override
@@ -19773,6 +19878,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Көшіру';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Қию';
@@ -20217,6 +20325,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ចម្លង';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'កាត់';
 
   @override
@@ -20657,6 +20768,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -21101,6 +21215,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => '복사';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => '잘라냄';
 
   @override
@@ -21541,6 +21658,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Көчүрүү';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Кесүү';
@@ -21985,6 +22105,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ສຳເນົາ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ຕັດ';
 
   @override
@@ -22425,6 +22548,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopijuoti';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Iškirpti';
@@ -22869,6 +22995,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopēt';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Izgriezt';
 
   @override
@@ -23309,6 +23438,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копирај';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Исечи';
@@ -23753,6 +23885,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'പകർത്തുക';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'മുറിക്കുക';
 
   @override
@@ -24193,6 +24328,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Хуулах';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Таслах';
@@ -24637,6 +24775,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'कॉपी करा';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'कट करा';
 
   @override
@@ -25077,6 +25218,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Salin';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Potong';
@@ -25521,6 +25665,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
 
   @override
@@ -25961,6 +26108,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiér';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
@@ -26405,6 +26555,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'प्रतिलिपि गर्नुहोस्';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'काट्नुहोस्';
 
   @override
@@ -26845,6 +26998,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiëren';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Knippen';
@@ -27289,6 +27445,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiér';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
@@ -27729,6 +27888,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
@@ -28173,6 +28335,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ਕੱਟ ਕਰੋ';
 
   @override
@@ -28613,6 +28778,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiuj';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Wytnij';
@@ -29057,6 +29225,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کاپی';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'کم کړئ';
 
   @override
@@ -29497,6 +29668,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copiar';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
@@ -30080,6 +30254,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copiați';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Decupați';
 
   @override
@@ -30520,6 +30697,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копировать';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Вырезать';
@@ -30964,6 +31144,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'පිටපත් කරන්න';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'කපන්න';
 
   @override
@@ -31404,6 +31587,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopírovať';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Vystrihnúť';
@@ -31848,6 +32034,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiraj';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Izreži';
 
   @override
@@ -32290,6 +32479,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopjo';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Prit';
 
   @override
@@ -32730,6 +32922,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копирај';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Исеци';
@@ -33476,6 +33671,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiera';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
@@ -33916,6 +34114,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Nakili';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kata';
@@ -34360,6 +34561,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'நகலெடு';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'வெட்டு';
 
   @override
@@ -34800,6 +35004,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'కాపీ చేయి';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'కత్తిరించు';
@@ -35244,6 +35451,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'คัดลอก';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ตัด';
 
   @override
@@ -35684,6 +35894,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopyahin';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'I-cut';
@@ -36128,6 +36341,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopyala';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kes';
 
   @override
@@ -36568,6 +36784,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копіювати';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Вирізати';
@@ -37012,6 +37231,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کاپی کریں';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'کٹ کریں';
 
   @override
@@ -37452,6 +37674,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Nusxa olish';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kesib olish';
@@ -37896,6 +38121,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Sao chép';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Cắt';
 
   @override
@@ -38336,6 +38564,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => '复制';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '剪切';
@@ -39241,6 +39472,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopisha';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Sika';

@@ -59,6 +59,17 @@ TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
   ).run;
 }
 
+TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool enableImpeller = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf_non_intersecting.dart',
+    'platform_views_scroll_perf_non_intersecting',
+    testDriver: 'test_driver/scroll_perf_non_intersecting_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
 TaskFunction createAndroidTextureScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
@@ -1339,8 +1350,17 @@ class WebCompileTest {
         '--no-pub',
       ]);
       watch?.stop();
-      final String outputFileName = path.join(directory, 'build/web/main.dart.js');
-      metrics.addAll(await getSize(outputFileName, metric: metric));
+      final String buildDir = path.join(directory, 'build', 'web');
+      metrics.addAll(await getSize(
+        directories: <String, String>{'web_build_dir': buildDir},
+        files: <String, String>{
+          'dart2js': path.join(buildDir, 'main.dart.js'),
+          'canvaskit_wasm': path.join(buildDir, 'canvaskit', 'canvaskit.wasm'),
+          'canvaskit_js': path.join(buildDir, 'canvaskit', 'canvaskit.js'),
+          'flutter_js': path.join(buildDir, 'flutter.js'),
+        },
+        metric: metric,
+      ));
 
       if (measureBuildTime) {
         metrics['${metric}_dart2js_millis'] = watch!.elapsedMilliseconds;
@@ -1350,22 +1370,57 @@ class WebCompileTest {
     });
   }
 
-  /// Obtains the size and gzipped size of a file given by [fileName].
-  static Future<Map<String, int>> getSize(String fileName, {required String metric}) async {
+  /// Obtains the size and gzipped size of both [dartBundleFile] and [buildDir].
+  static Future<Map<String, int>> getSize({
+    /// Mapping of metric key name to file system path for directories to measure
+    Map<String, String> directories = const <String, String>{},
+    /// Mapping of metric key name to file system path for files to measure
+    Map<String, String> files = const <String, String>{},
+    required String metric,
+  }) async {
+    const String kGzipCompressionLevel = '-9';
     final Map<String, int> sizeMetrics = <String, int>{};
 
-    final ProcessResult result = await Process.run('du', <String>['-k', fileName]);
-    sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
+    final Directory tempDir = Directory.systemTemp.createTempSync('perf_tests_gzips');
+    try {
+      for (final MapEntry<String, String> entry in files.entries) {
+        final String key = entry.key;
+        final String filePath = entry.value;
+        sizeMetrics['${metric}_${key}_uncompressed_bytes'] = File(filePath).lengthSync();
 
-    await Process.run('gzip',<String>['-k', '9', fileName]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', '$fileName.gz']);
-    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+        await Process.run('gzip',<String>['--keep', kGzipCompressionLevel, filePath]);
+        // gzip does not provide a CLI option to specify an output file, so
+        // instead just move the output file to the temp dir
+        final File compressedFile = File('$filePath.gz')
+            .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
+        sizeMetrics['${metric}_${key}_compressed_bytes'] = compressedFile.lengthSync();
+      }
 
+      for (final MapEntry<String, String> entry in directories.entries) {
+        final String key = entry.key;
+        final String dirPath = entry.value;
+
+        final String tarball = path.join(tempDir.absolute.path, '$key.tar');
+        await Process.run('tar', <String>[
+          '--create',
+          '--verbose',
+          '--file=$tarball',
+          dirPath,
+        ]);
+        sizeMetrics['${metric}_${key}_uncompressed_bytes'] = File(tarball).lengthSync();
+
+        // get size of compressed build directory
+        await Process.run('gzip',<String>['--keep', kGzipCompressionLevel, tarball]);
+        sizeMetrics['${metric}_${key}_compressed_bytes'] = File('$tarball.gz').lengthSync();
+      }
+    } finally {
+      try {
+        tempDir.deleteSync(recursive: true);
+      } on FileSystemException {
+        print('Failed to delete ${tempDir.path}.');
+      }
+    }
     return sizeMetrics;
-  }
-
-  static int _parseDu(String source) {
-    return int.parse(source.split(RegExp(r'\s+')).first.trim());
   }
 }
 

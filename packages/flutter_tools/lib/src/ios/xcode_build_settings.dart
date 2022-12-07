@@ -170,13 +170,12 @@ Future<List<String>> _xcodeBuildSettingsLines({
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  final Artifacts? artifacts = globals.artifacts;
-  if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    final String engineOutPath = localEngineArtifacts.engineOutPath;
+  final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
+  if (localEngineInfo != null) {
+    final String engineOutPath = localEngineInfo.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 
-    final String localEngineName = localEngineArtifacts.localEngineName;
+    final String localEngineName = localEngineInfo.localEngineName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
 
     // Tell Xcode not to build universal binaries for local engines, which are

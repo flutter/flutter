@@ -1429,6 +1429,6 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
 TextStyle _m3CounterErrorStyle(BuildContext context) =>
-  Theme.of(context).textTheme.bodySmall!.copyWith(color:Theme.of(context).colorScheme.error);
+  Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
