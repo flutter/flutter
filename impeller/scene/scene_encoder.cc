@@ -49,7 +49,37 @@ static void EncodeCommand(const SceneContext& scene_context,
 std::shared_ptr<CommandBuffer> SceneEncoder::BuildSceneCommandBuffer(
     const SceneContext& scene_context,
     const Camera& camera,
-    const RenderTarget& render_target) const {
+    RenderTarget render_target) const {
+  {
+    TextureDescriptor ds_texture;
+    ds_texture.type = TextureType::kTexture2DMultisample;
+    ds_texture.format = PixelFormat::kD32FloatS8UInt;
+    ds_texture.size = render_target.GetRenderTargetSize();
+    ds_texture.usage =
+        static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
+    ds_texture.sample_count = SampleCount::kCount4;
+    ds_texture.storage_mode = StorageMode::kDeviceTransient;
+    auto texture =
+        scene_context.GetContext()->GetResourceAllocator()->CreateTexture(
+            ds_texture);
+
+    DepthAttachment depth;
+    depth.load_action = LoadAction::kClear;
+    depth.store_action = StoreAction::kDontCare;
+    depth.clear_depth = 1.0;
+    depth.texture = texture;
+    render_target.SetDepthAttachment(depth);
+
+    // The stencil and depth buffers must be the same texture for MacOS ARM
+    // and Vulkan.
+    StencilAttachment stencil;
+    stencil.load_action = LoadAction::kClear;
+    stencil.store_action = StoreAction::kDontCare;
+    stencil.clear_stencil = 0u;
+    stencil.texture = texture;
+    render_target.SetStencilAttachment(stencil);
+  }
+
   auto command_buffer = scene_context.GetContext()->CreateCommandBuffer();
   if (!command_buffer) {
     FML_LOG(ERROR) << "Failed to create command buffer.";

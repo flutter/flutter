@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cmath>
+#include <memory>
+
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/scene/camera.h"
 #include "impeller/scene/geometry.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
@@ -80,18 +85,27 @@ TEST_P(SceneTest, GLTFScene) {
   auto geometry = Geometry::MakeFromFBMesh(*fb_mesh, *allocator);
   ASSERT_NE(geometry, nullptr);
 
+  std::shared_ptr<UnlitMaterial> material = Material::MakeUnlit();
+  auto bridge = CreateTextureForFixture("flutter_logo_baked.png");
+  material->SetColorTexture(bridge);
+  material->SetVertexColorWeight(0);
+
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
     auto scene = Scene(GetContext());
 
     auto mesh = SceneEntity::MakeStaticMesh();
-    mesh->SetMaterial(Material::MakeUnlit());
+    mesh->SetMaterial(material);
     mesh->SetGeometry(geometry);
+    mesh->SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
     scene.Add(mesh);
+
+    Quaternion rotation({0, 1, 0}, -GetSecondsElapsed() * 0.5);
+    Vector3 start_position(-1, -1.5, -5);
 
     // Face towards the +Z direction (+X right, +Y up).
     auto camera = Camera::MakePerspective(
-                      /* fov */ Radians(kPiOver4),
-                      /* position */ {2, 2, -5})
+                      /* fov */ Degrees(60),
+                      /* position */ rotation * start_position)
                       .LookAt(
                           /* target */ Vector3(),
                           /* up */ {0, 1, 0});

@@ -10,6 +10,18 @@ namespace scene {
 
 void SceneContextOptions::ApplyToPipelineDescriptor(
     PipelineDescriptor& desc) const {
+  DepthAttachmentDescriptor depth;
+  depth.depth_compare = CompareFunction::kLess;
+  depth.depth_write_enabled = true;
+  desc.SetDepthStencilAttachmentDescriptor(depth);
+  desc.SetDepthPixelFormat(PixelFormat::kD32FloatS8UInt);
+
+  StencilAttachmentDescriptor stencil;
+  stencil.stencil_compare = CompareFunction::kAlways;
+  stencil.depth_stencil_pass = StencilOperation::kKeep;
+  desc.SetStencilAttachmentDescriptors(stencil);
+  desc.SetStencilPixelFormat(PixelFormat::kD32FloatS8UInt);
+
   desc.SetSampleCount(sample_count);
   desc.SetPrimitiveType(primitive_type);
 }
