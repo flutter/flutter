@@ -425,6 +425,10 @@ ComponentV1::ComponentV1(
 
   settings_.dart_flags = {};
 
+  // Run in unsound null safety mode as some packages used in Integration
+  // testing have not been migrated yet.
+  settings_.dart_flags.push_back("--no-sound-null-safety");
+
   // Don't collect CPU samples from Dart VM C++ code.
   settings_.dart_flags.push_back("--no_profile_vm");
 
