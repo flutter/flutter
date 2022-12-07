@@ -12,9 +12,11 @@ uniform sampler2D base_color_texture;
 in vec3 v_position;
 in mat3 v_tangent_space;
 in vec2 v_texture_coords;
+in vec4 v_color;
 
 out vec4 frag_color;
 
 void main() {
-  frag_color = texture(base_color_texture, v_texture_coords) * frag_info.color;
+  frag_color =
+      texture(base_color_texture, v_texture_coords) * v_color * frag_info.color;
 }
