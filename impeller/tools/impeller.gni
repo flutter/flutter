@@ -656,7 +656,7 @@ template("scenec") {
       "--input-type=$input_type",
     ]
 
-    output = "$generated_dir/{{source_file_part}}.ipmesh"
+    output = "$generated_dir/{{source_file_part}}.ipscene"
     output_path = rebase_path(output, root_build_dir)
 
     args += [ "--output=$output_path" ]
