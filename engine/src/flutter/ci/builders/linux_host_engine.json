@@ -39,7 +39,6 @@
               "debug",
               "--unoptimized",
               "--prebuilt-dart-sdk",
-              "--enable-impeller-vulkan",
               "--target-dir",
               "host_debug_impeller_vulkan"
           ],
