@@ -2,41 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../dom.dart';
+import 'accessibility.dart';
 import 'semantics.dart';
 
 /// Manages semantics configurations that represent live regions.
 ///
-/// "aria-live" attribute is added to communicate the live region to the
-/// assistive technology.
+/// Assistive technologies treat "aria-live" attribute differently. To keep
+/// the behavior consistent, [accessibilityAnnouncements.announce] is used.
 ///
-/// The usage of "aria-live" is browser-dependent.
-///
-/// VoiceOver only supports "aria-live" with "polite" politeness setting. When
-/// the inner html content is changed. It doesn't read the "aria-label".
-///
-/// When there is an aria-live attribute added, assistive technologies read the
+/// When there is an update to [LiveRegion], assistive technologies read the
 /// label of the element. See [LabelAndValue]. If there is no label provided
-/// no content will be read, therefore DOM is cleaned.
+/// no content will be read.
 class LiveRegion extends RoleManager {
   LiveRegion(SemanticsObject semanticsObject)
       : super(Role.labelAndValue, semanticsObject);
 
+  String? _lastAnnouncement;
+
   @override
   void update() {
-    if (semanticsObject.hasLabel) {
-      semanticsObject.element.setAttribute('aria-live', 'polite');
-    } else {
-      _cleanupDom();
+    // Avoid announcing the same message over and over.
+    if (_lastAnnouncement != semanticsObject.label) {
+      _lastAnnouncement = semanticsObject.label;
+      if (semanticsObject.hasLabel) {
+        accessibilityAnnouncements.announce(
+          _lastAnnouncement! , Assertiveness.polite
+        );
+      }
     }
-  }
-
-  void _cleanupDom() {
-    semanticsObject.element.removeAttribute('aria-live');
   }
 
   @override
   void dispose() {
-    _cleanupDom();
   }
 }
