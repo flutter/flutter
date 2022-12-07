@@ -24,6 +24,9 @@ class CustomerTest {
         contacts.add(line.substring(8));
       } else if (line.startsWith('fetch=')) {
         fetch.add(line.substring(6));
+      } else if (line.startsWith('update=')) {
+        // Add once https://github.com/flutter/tests/blob/main/scripts/update_tests.dart
+        // is implemented
       } else if (line.startsWith('test=')) {
         hasTests = true;
         test.add(line.substring(5));
