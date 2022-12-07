@@ -1947,7 +1947,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// These results will be updated via calls to spell check through a
   /// [SpellCheckService] and used by this widget to build the [TextSpan] tree
   /// for text input and menus for replacement suggestions of misspelled words.
-  @visibleForTesting
   SpellCheckResults? spellCheckResults;
 
   bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && spellCheckResults!.suggestionSpans.isNotEmpty;
