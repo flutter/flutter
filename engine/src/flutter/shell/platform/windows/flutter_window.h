@@ -5,8 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 
-#include <windowsx.h>
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -153,6 +151,9 @@ class FlutterWindow : public Window, public WindowBindingHandler {
 
   // |WindowBindingHandler|
   AccessibilityRootNode* GetAccessibilityRootNode() override;
+
+  // |Window|
+  ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() override;
 
  private:
   // A pointer to a FlutterWindowsView that can be used to update engine

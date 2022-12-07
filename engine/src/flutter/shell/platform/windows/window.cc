@@ -59,7 +59,8 @@ Window::Window(std::unique_ptr<WindowsProcTable> windows_proc_table,
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
       windows_proc_table_(std::move(windows_proc_table)),
       text_input_manager_(std::move(text_input_manager)),
-      accessibility_root_(nullptr) {
+      accessibility_root_(nullptr),
+      ax_fragment_root_(nullptr) {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
   // supported, |current_dpi_| should be updated in the
   // kWmDpiChangedBeforeParent message.
@@ -200,9 +201,27 @@ LRESULT Window::OnGetObject(UINT const message,
   }
 
   gfx::NativeViewAccessible root_view = GetNativeViewAccessible();
+  // TODO(schectman): UIA is currently disabled by default.
+  // https://github.com/flutter/flutter/issues/114547
   if (is_uia_request && root_view) {
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/94782
-    // Implement when we adopt UIA support.
+#ifdef FLUTTER_ENGINE_USE_UIA
+    if (!ax_fragment_root_) {
+      ax_fragment_root_ = std::make_unique<ui::AXFragmentRootWin>(
+          window_handle_, GetAxFragmentRootDelegate());
+    }
+
+    // Retrieve UIA object for the root view.
+    Microsoft::WRL::ComPtr<IRawElementProviderSimple> root;
+    if (SUCCEEDED(ax_fragment_root_->GetNativeViewAccessible()->QueryInterface(
+            IID_PPV_ARGS(&root)))) {
+      // Return the UIA object via UiaReturnRawElementProvider(). See:
+      // https://docs.microsoft.com/en-us/windows/win32/winauto/wm-getobject
+      reference_result = UiaReturnRawElementProvider(window_handle_, wparam,
+                                                     lparam, root.Get());
+    } else {
+      FML_LOG(ERROR) << "Failed to query AX fragment root.";
+    }
+#endif  // FLUTTER_ENGINE_USE_UIA
   } else if (is_msaa_request && root_view) {
     // Create the accessibility root if it does not already exist.
     if (!accessibility_root_) {
@@ -212,10 +231,9 @@ LRESULT Window::OnGetObject(UINT const message,
     // Microsoft::WRL::ComPtr<IAccessible> root(root_view);
     accessibility_root_->SetWindow(root_view);
     Microsoft::WRL::ComPtr<IAccessible> root(accessibility_root_);
-    LRESULT lresult = LresultFromObject(IID_IAccessible, wparam, root.Get());
-    return lresult;
+    reference_result = LresultFromObject(IID_IAccessible, wparam, root.Get());
   }
-  return 0;
+  return reference_result;
 }
 
 void Window::OnImeSetContext(UINT const message,
