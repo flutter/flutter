@@ -1164,6 +1164,7 @@ class LocalizationsGenerator {
             if (!pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
               final String pluralPartExpression = generateVariables(pluralMessage);
               final String? transformedPluralCase = pluralCases[pluralCase];
+              // A valid plural case is one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other".
               if (transformedPluralCase == null) {
                 throw L10nParserException(
                   'The plural case $pluralCase is not a valid plural case.',
