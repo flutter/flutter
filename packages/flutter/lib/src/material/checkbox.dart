@@ -342,11 +342,11 @@ class Checkbox extends StatefulWidget {
   /// Must not be null. Defaults to false.
   final bool isError;
 
-  /// The label text that will be rendered side by side with the [Checkbox].
-  /// Serves as default semantics label for the [Checkbox] if provided.
-  ///
+  // The label text that will be rendered side by side with the [Checkbox].
+  // Serves as default semantics label for the [Checkbox] if provided.
+  //
   // TODO(harperl-lgtm): Add to constructor parameters and actually render it.
-  final String? labelText;
+  // final String? labelText;
 
   /// The semantic label for the checkobox that will be announced by screen readers.
   ///
