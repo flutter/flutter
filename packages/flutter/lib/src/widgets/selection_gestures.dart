@@ -643,8 +643,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 ///
 /// If this recognizer loses the arena (either by declaring defeat or by
 /// another recognizer declaring victory) while the pointer is contacting the
-/// screen, it will fire [onTapCancel], and [onDragCancel] instead of [onTapUp]
-/// or [onDragEnd].
+/// screen, it will fire [onCancel] instead of [onTapUp] or [onDragEnd].
 ///
 /// ### When competing with `TapGestureRecognizer` and `DragGestureRecognizer`
 ///
