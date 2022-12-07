@@ -2190,7 +2190,6 @@ class _LocalizedShortcutLabeler {
         case TargetPlatform.macOS:
           return '⇧';
       }
-
     }
     throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
   }
