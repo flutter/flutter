@@ -73,9 +73,6 @@ class CustomerTest {
     if (!fetch[1].contains(_fetch2)) {
       throw FormatException('${errorPrefix}Second "fetch" directive does not match expected pattern (expected "git -C tests checkout HASH").');
     }
-    if (update.isEmpty) {
-      throw FormatException('${errorPrefix}No "update" directives specified. At least one directory must be specified. (It can be "." to just upgrade the root of the repository.)');
-    }
     if (!hasTests) {
       throw FormatException('${errorPrefix}No "test" directives specified. At least one command must be specified to run tests.');
     }

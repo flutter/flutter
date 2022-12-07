@@ -16,7 +16,6 @@ void main() {
 contact=abc@gmail.com
 fetch=git clone https://github.com/flutter/cocoon.git tests
 fetch=git -C tests checkout abc123
-update=.
 # Runs flutter analyze, flutter test, and builds web platform
 test.posix=./test_utilities/bin/flutter_test_runner.sh app_flutter
 test.posix=./test_utilities/bin/flutter_test_runner.sh repo_dashboard
@@ -41,6 +40,7 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
     } else if (Platform.isWindows) {
       expect(test.tests, containsAllInOrder(<String>['.\test_utilities\bin\flutter_test_runner.bat repo_dashboard']));
     }
+    expect(test.update, isEmtpy);
   });
 
   test('throws exception when unknown field is passed', () async {
