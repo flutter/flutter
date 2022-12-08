@@ -163,7 +163,7 @@ void main() {
     expect(localizations.licensesPackageDetailText(1).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(2).contains(r'$licensesCount'), isFalse);
     expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
-  
+
     expect(localizations.sortOrderAscendingLabel, isNotNull);
     expect(localizations.sortOrderDescendingLabel, isNotNull);
     expect(localizations.tableCellOnTapHint, isNotNull);
