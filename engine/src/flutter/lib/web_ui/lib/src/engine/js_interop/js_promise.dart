@@ -9,6 +9,7 @@ import 'package:js/js.dart';
 
 /// Type-safe JS Promises
 @JS('Promise')
+@staticInterop
 abstract class Promise<T> {
   /// A constructor for a JS promise
   external factory Promise(PromiseExecutor<T> executor);
