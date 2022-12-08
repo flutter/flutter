@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'text_theme.dart';
 
@@ -166,6 +167,7 @@ class Typography with Diagnosticable {
   ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
     TargetPlatform? platform = TargetPlatform.android,
+    ColorScheme colorScheme = const ColorScheme.light(),
     TextTheme? black,
     TextTheme? white,
     TextTheme? englishLike,
@@ -173,12 +175,30 @@ class Typography with Diagnosticable {
     TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
-    return Typography._withPlatform(
+    final Typography base = Typography._withPlatform(
       platform,
       black, white,
       englishLike ?? englishLike2021,
       dense ?? dense2021,
       tall ?? tall2021,
+    );
+
+    // Ensure they are all uniformly dark or light, with
+    // no color variation based on style as it was in previous
+    // versions of Material Design.
+    final Color dark = colorScheme.brightness == Brightness.light ? colorScheme.onSurface : colorScheme.surface;
+    final Color light = colorScheme.brightness == Brightness.light ? colorScheme.surface : colorScheme.onSurface;
+    return base.copyWith(
+      black: base.black.apply(
+        displayColor: dark,
+        bodyColor: dark,
+        decorationColor: dark
+      ),
+      white: base.white.apply(
+        displayColor: light,
+        bodyColor: light,
+        decorationColor: light
+      ),
     );
   }
 
@@ -739,7 +759,7 @@ class Typography with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_143
 
 class _M3Typography {
   _M3Typography._();

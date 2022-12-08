@@ -128,5 +128,6 @@
   "keyboardKeySpace": "Boşluq",
   "keyboardKeyMetaMacOs": "Əmr",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menyu paneli menyusu"
+  "menuBarMenuLabel": "Menyu paneli menyusu",
+  "currentDateLabel": "Date of today"
 }

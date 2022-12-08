@@ -134,5 +134,6 @@
   "keyboardKeySpace": "Բացատ",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Ընտրացանկի գոտու ընտրացանկ"
+  "menuBarMenuLabel": "Ընտրացանկի գոտու ընտրացանկ",
+  "currentDateLabel": "Date of today"
 }
