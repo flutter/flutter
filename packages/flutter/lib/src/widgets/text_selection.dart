@@ -1908,7 +1908,7 @@ class TextSelectionGestureDetectorBuilder {
   }
 
   /// Returns true if shift left or right is contained in the given set.
-  bool _containsShift(Set<LogicalKeyboardKey> keysPressed) {
+  static bool _containsShift(Set<LogicalKeyboardKey> keysPressed) {
     return keysPressed.any(<LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight }.contains);
   }
 
@@ -2057,6 +2057,8 @@ class TextSelectionGestureDetectorBuilder {
 
     // Handle shift + click selection if needed.
     final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    // When the renderEditable.selection is invalid, we are unable to extend the selection when
+    // the shift key is pressed.
     final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -2154,6 +2156,8 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       // Handle shift + click selection if needed.
       final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+      // When the renderEditable.selection is invalid, we are unable to extend the selection when
+      // the shift key is pressed.
       final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
         case TargetPlatform.linux:

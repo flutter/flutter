@@ -39,10 +39,10 @@ enum _DragState {
   ready,
 
   // The sequence of pointer events seen thus far is consistent with a drag but
-  // it has not been accepted definitevely.
+  // it has not been accepted definitively.
   possible,
 
-  // The sequence of pointer events has been accepted definitevely as a drag.
+  // The sequence of pointer events has been accepted definitively as a drag.
   accepted,
 }
 
@@ -68,14 +68,15 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 class TapDragDownDetails {
   /// Creates details for a [GestureTapDragDownCallback].
   ///
-  /// The [globalPosition] argument must be provided and must not be null.
+  /// The [globalPosition], [localPosition], [consecutiveTapCount], and
+  /// [keysPressedOnDown] arguments must be provided and must not be null.
   TapDragDownDetails({
-    this.globalPosition = Offset.zero,
+    required this.globalPosition,
     required this.localPosition,
     this.kind,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
-  }) : assert(globalPosition != null);
+  });
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -119,7 +120,8 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 class TapDragUpDetails {
   /// Creates details for a [GestureTapDragUpCallback].
   ///
-  /// The [globalPosition] argument must be provided and must not be null.
+  /// The [kind], [globalPosition], [localPosition], [consecutiveTapCount], and
+  /// [keysPressedOnDown] arguments must be provided and must not be null.
   TapDragUpDetails({
     required this.kind,
     required this.globalPosition,
@@ -170,7 +172,8 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 class TapDragStartDetails {
   /// Creates details for a [GestureTapDragStartCallback].
   ///
-  /// The [globalPosition] argument must be provided and must not be null.
+  /// The [globalPosition], [localPosition], [consecutiveTapCount], and
+  /// [keysPressedOnDown] arguments must be provided and must not be null.
   TapDragStartDetails({
     this.sourceTimeStamp,
     required this.globalPosition,
@@ -239,7 +242,9 @@ class TapDragUpdateDetails {
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
   ///
-  /// The [globalPosition] argument must be provided and must not be null.
+  /// The [globalPosition], [localPosition], [offsetFromOrigin], [localOffsetFromOrigin],
+  /// [consecutiveTapCount], and [keysPressedOnDown] arguments must be provided and must
+  /// not be null.
   TapDragUpdateDetails({
     this.sourceTimeStamp,
     this.delta = Offset.zero,
@@ -354,6 +359,9 @@ class TapDragEndDetails {
   /// Creates details for a [GestureTapDragEndCallback].
   ///
   /// The [velocity] argument must not be null.
+  ///
+  /// The [consecutiveTapCount], and [keysPressedOnDown] arguments must
+  /// be provided and must not be null.
   TapDragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
@@ -655,7 +663,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// When competing against [TapGestureRecognizer], if the pointer does not move past the tap
 /// tolerance, then the recognizer that entered the arena first will win. In this case the
 /// gesture detected is a tap. If the pointer does travel past the tap tolerance then this
-/// recognizer will declared winner by default. The gesture detected in this case is a drag.
+/// recognizer will be declared winner by default. The gesture detected in this case is a drag.
 ///
 /// When competing against [DragGestureRecognizer], if the pointer does not move a sufficient
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
