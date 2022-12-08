@@ -1085,6 +1085,24 @@ void main() {
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(390.0, 600.0));
     });
   });
+
+group('Semantics', () {
+  testWidgets('calendar mode', (WidgetTester tester) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    currentDate = DateTime(2016, DateTime.january, 30);
+    addTearDown(semantics.dispose);
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(
+        tester.getSemantics(find.text('30')),
+        matchesSemantics(
+          label: '30, Saturday, January 30, 2016, Today',
+          hasTapAction: true,
+          isFocusable: true,
+        ),
+      );
+    });
+    });
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {

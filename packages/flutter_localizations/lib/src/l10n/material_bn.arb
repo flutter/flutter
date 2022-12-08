@@ -128,5 +128,6 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "মেনু বার মেনু"
+  "menuBarMenuLabel": "মেনু বার মেনু",
+  "currentDateLabel": "Date of today"
 }

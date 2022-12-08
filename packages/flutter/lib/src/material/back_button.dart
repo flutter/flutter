@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -27,22 +28,39 @@ class BackButtonIcon extends StatelessWidget {
   /// the current platform (as obtained from the [Theme]).
   const BackButtonIcon({ super.key });
 
-  /// Returns the appropriate "back" icon for the given `platform`.
-  static IconData _getIconData(TargetPlatform platform) {
-    switch (platform) {
+  @override
+  Widget build(BuildContext context) {
+    final String? semanticsLabel;
+    final IconData data;
+    switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return Icons.arrow_back;
+        data = Icons.arrow_back;
+        break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return Icons.arrow_back_ios;
+        data = Icons.arrow_back_ios;
+        break;
     }
-  }
+    // This can't use the platform from Theme because it is the Android OS that
+    // expects the duplicated tooltip and label.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        semanticsLabel = MaterialLocalizations.of(context).backButtonTooltip;
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsLabel = null;
+        break;
+    }
 
-  @override
-  Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context).platform));
+    return Icon(data, semanticLabel: semanticsLabel);
+  }
 }
 
 /// A Material Design back button.
@@ -149,8 +167,23 @@ class CloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    final String? semanticsLabel;
+    // This can't use the platform from Theme because it is the Android OS that
+    // expects the duplicated tooltip and label.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        semanticsLabel = MaterialLocalizations.of(context).closeButtonTooltip;
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsLabel = null;
+        break;
+    }
     return IconButton(
-      icon: const Icon(Icons.close),
+      icon: Icon(Icons.close, semanticLabel: semanticsLabel),
       color: color,
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
