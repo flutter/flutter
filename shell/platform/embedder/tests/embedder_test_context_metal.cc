@@ -47,6 +47,10 @@ TestMetalContext* EmbedderTestContextMetal::GetTestMetalContext() {
   return metal_context_.get();
 }
 
+TestMetalSurface* EmbedderTestContextMetal::GetTestMetalSurface() {
+  return metal_surface_.get();
+}
+
 void EmbedderTestContextMetal::SetPresentCallback(
     PresentCallback present_callback) {
   present_callback_ = std::move(present_callback);
@@ -77,10 +81,6 @@ bool EmbedderTestContextMetal::PopulateExternalTexture(
   } else {
     return false;
   }
-}
-
-TestMetalContext::TextureInfo EmbedderTestContextMetal::GetTextureInfo() {
-  return metal_surface_->GetTextureInfo();
 }
 
 void EmbedderTestContextMetal::SetNextDrawableCallback(
