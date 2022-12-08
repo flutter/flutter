@@ -242,7 +242,8 @@ TEST_F(EmbedderTest, TextureDestructionCallbackCalledWithoutCustomCompositorMeta
 
   auto collect_context = std::make_unique<CollectContext>();
   context.SetNextDrawableCallback([&context, &collect_context](const FlutterFrameInfo* frame_info) {
-    auto texture_info = context.GetTextureInfo();
+    auto texture_info = context.GetTestMetalSurface()->GetTextureInfo();
+
     FlutterMetalTexture texture;
     texture.struct_size = sizeof(FlutterMetalTexture);
     texture.texture_id = texture_info.texture_id;

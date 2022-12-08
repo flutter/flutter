@@ -53,8 +53,7 @@ class EmbedderTestContextMetal : public EmbedderTestContext {
 
   TestMetalContext* GetTestMetalContext();
 
-  // Returns the TextureInfo for the test Metal surface.
-  TestMetalContext::TextureInfo GetTextureInfo();
+  TestMetalSurface* GetTestMetalSurface();
 
   // Override the default handling for GetNextDrawable.
   void SetNextDrawableCallback(NextDrawableCallback next_drawable_callback);
