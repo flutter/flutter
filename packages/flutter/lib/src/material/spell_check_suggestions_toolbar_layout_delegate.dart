@@ -35,6 +35,8 @@ class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelega
         childSize.width,
         size.width,
       ),
+      // Positions child (of childSize) just enough upwards to fit within size
+      // if it otherwise does not fit below the anchor.
       anchor.dy + childSize.height > size.height
           ? size.height - childSize.height
           : anchor.dy,
