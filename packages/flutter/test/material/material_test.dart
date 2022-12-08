@@ -1077,12 +1077,13 @@ void main() {
         'FlutterError\n'
         '   Material.of() was called with a context that does not have access\n'
         '   to a Material widget.\n'
-        '   While there is a Material widget ancestor, it was hidden by a\n'
-        '   LookupBoundary. This can happen because you are using a widget\n'
-        '   that looks for a Material ancestor, but no such ancestor exists\n'
-        '   within the closest LookupBoundary.\n'
+        '   The context provided to Material.of() does have a Material widget\n'
+        '   ancestor, but it is hidden by a LookupBoundary. This can happen\n'
+        '   because you are using a widget that looks for a Material\n'
+        '   ancestor, but no such ancestor exists within the closest\n'
+        '   LookupBoundary.\n'
         '   The context used was:\n'
-        '     Builder(dirty)\n',
+        '     Builder(dirty)\n'
       );
     });
 

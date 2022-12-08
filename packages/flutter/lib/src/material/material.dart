@@ -386,9 +386,9 @@ class Material extends StatefulWidget {
         if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<_RenderInkFeatures>(context)) {
           throw FlutterError(
             'Material.of() was called with a context that does not have access to a Material widget.\n'
-            'While there is a Material widget ancestor, it was hidden by a LookupBoundary. '
-            'This can happen because you are using a widget that looks for a Material '
-            'ancestor, but no such ancestor exists within the closest LookupBoundary.\n'
+            'The context provided to Material.of() does have a Material widget ancestor, but it is '
+            'hidden by a LookupBoundary. This can happen because you are using a widget that looks '
+            'for a Material ancestor, but no such ancestor exists within the closest LookupBoundary.\n'
             'The context used was:\n'
             '  $context',
           );
