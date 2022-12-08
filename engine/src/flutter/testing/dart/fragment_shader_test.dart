@@ -332,6 +332,47 @@ void main() async {
     shader.dispose();
   });
 
+  // This test can't rely on actual pixels rendered since it needs to run on a
+  // metal shader on iOS. instead parse the source code.
+  test('impellerc orders samplers in metal shader according to declaration and not usage', () async {
+    if (!Platform.isMacOS) {
+      return;
+    }
+    final Directory directory = shaderDirectory('iplr-remap');
+    final String data = readAsStringLossy(File(path.join(directory.path, 'shader_with_samplers.frag.iplr')));
+
+    const String expected = 'texture2d<float> textureA [[texture(0)]],'
+      ' texture2d<float> textureB [[texture(1)]]';
+
+    expect(data, contains(expected));
+  });
+
+  test('impellerc orders floats in metal shader according to declaration and not usage', () async {
+    if (!Platform.isMacOS) {
+      return;
+    }
+    final Directory directory = shaderDirectory('iplr-remap');
+    final String data = readAsStringLossy(File(path.join(directory.path, 'shader_with_ordered_floats.frag.iplr')));
+
+    const String expected = 'constant float& floatA [[buffer(0)]], '
+      'constant float& floatB [[buffer(1)]]';
+
+    expect(data, contains(expected));
+  });
+
+  test('impellerc orders floats/matrix in metal shader according to declaration and not usage', () async {
+    if (!Platform.isMacOS) {
+      return;
+    }
+    final Directory directory = shaderDirectory('iplr-remap');
+    final String data = readAsStringLossy(File(path.join(directory.path, 'shader_with_matrix.frag.iplr')));
+
+    const String expected = 'constant float4x4& matrix [[buffer(0)]], '
+      'constant float& floatB [[buffer(1)]]';
+
+    expect(data, contains(expected));
+  });
+
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
   final Map<String, FragmentProgram> iplrSupportedGLSLOpShaders = await _loadShaderAssets(
     path.join('supported_glsl_op_shaders', 'iplr'),
@@ -483,4 +524,9 @@ Image _createBlueGreenImageSync() {
   } finally {
     picture.dispose();
   }
+}
+
+// Ignore invalid utf8 since file is not actually text.
+String readAsStringLossy(File file) {
+  return convert.utf8.decode(file.readAsBytesSync(), allowMalformed: true);
 }

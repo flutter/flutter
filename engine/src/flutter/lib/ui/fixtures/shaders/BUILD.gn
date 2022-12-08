@@ -33,10 +33,24 @@ if (enable_unittests) {
     json = true
   }
 
+  impellerc("sampler_order_fixture") {
+    shaders = [
+      "//flutter/impeller/fixtures/ordering/shader_with_samplers.frag",
+      "//flutter/impeller/fixtures/ordering/shader_with_ordered_floats.frag",
+      "//flutter/impeller/fixtures/ordering/shader_with_matrix.frag",
+    ]
+    shader_target_flag = "--runtime-stage-metal"
+    intermediates_subdir = "iplr-remap"
+    sl_file_extension = "iplr"
+    iplr = true
+    remap_samplers = true
+  }
+
   test_fixtures("fixtures") {
     deps = [
       ":ink_sparkle",
       ":ink_sparkle_web",
+      ":sampler_order_fixture",
     ]
     fixtures = get_target_outputs(":ink_sparkle")
     dest = "$root_gen_dir/flutter/lib/ui"
