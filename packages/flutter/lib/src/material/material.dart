@@ -343,7 +343,7 @@ class Material extends StatefulWidget {
   final BorderRadiusGeometry? borderRadius;
 
   /// The ink controller from the closest instance of this class that
-  /// encloses the given context.
+  /// encloses the given context within the closest [LookupBoundary].
   ///
   /// Typical usage is as follows:
   ///
@@ -358,11 +358,11 @@ class Material extends StatefulWidget {
   /// * [Material.of], which is similar to this method, but asserts if
   ///   no [Material] ancestor is found.
   static MaterialInkController? maybeOf(BuildContext context) {
-    return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
+    return LookupBoundary.findAncestorRenderObjectOfType<_RenderInkFeatures>(context);
   }
 
   /// The ink controller from the closest instance of [Material] that encloses
-  /// the given context.
+  /// the given context within the closest [LookupBoundary].
   ///
   /// If no [Material] widget ancestor can be found then this method will assert
   /// in debug mode, and throw an exception in release mode.
@@ -383,6 +383,16 @@ class Material extends StatefulWidget {
     final MaterialInkController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
+        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<_RenderInkFeatures>(context)) {
+          throw FlutterError(
+            'Material.of() was called with a context that does not have access to a Material widget.\n'
+            'While there is a Material widget ancestor, it was hidden by a LookupBoundary. '
+            'This can happen because you are using a widget that looks for a Material '
+            'ancestor, but no such ancestor exists within the closest LookupBoundary.\n'
+            'The context used was:\n'
+            '  $context',
+          );
+        }
         throw FlutterError(
           'Material.of() was called with a context that does not contain a Material widget.\n'
           'No Material widget ancestor could be found starting from the context that was passed to '

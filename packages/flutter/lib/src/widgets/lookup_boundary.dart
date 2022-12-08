@@ -250,6 +250,53 @@ class LookupBoundary extends InheritedWidget {
     });
   }
 
+  /// Returns true if a [LookupBoundary] is hiding the nearest
+  /// [Widget] of the specified type `T` from the provided [BuildContext].
+  ///
+  /// This method throws when asserts are disabled.
+  static bool debugIsHidingAncestorWidgetOfExactType<T extends Widget>(BuildContext context) {
+    bool? result;
+    assert(() {
+      bool hiddenByBoundary = false;
+      bool ancestorFound = false;
+      context.visitAncestorElements((Element ancestor) {
+        if (ancestor.widget.runtimeType == T) {
+          ancestorFound = true;
+          return false;
+        }
+        hiddenByBoundary = hiddenByBoundary || ancestor.widget.runtimeType == LookupBoundary;
+        return true;
+      });
+      result = ancestorFound & hiddenByBoundary;
+      return true;
+    } ());
+    return result!;
+  }
+
+  /// Returns true if a [LookupBoundary] is hiding the nearest
+  /// [RenderObjectWidget] with the [RenderObject] of the specified type `T`
+  /// from the provided [BuildContext].
+  ///
+  /// This method throws when asserts are disabled.
+  static bool debugIsHidingAncestorRenderObjectOfType<T extends RenderObject>(BuildContext context) {
+    bool? result;
+    assert(() {
+      bool hiddenByBoundary = false;
+      bool ancestorFound = false;
+      context.visitAncestorElements((Element ancestor) {
+        if (ancestor is RenderObjectElement && ancestor.renderObject is T) {
+          ancestorFound = true;
+          return false;
+        }
+        hiddenByBoundary = hiddenByBoundary || ancestor.widget.runtimeType == LookupBoundary;
+        return true;
+      });
+      result = ancestorFound & hiddenByBoundary;
+      return true;
+    } ());
+    return result!;
+  }
+
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
 }

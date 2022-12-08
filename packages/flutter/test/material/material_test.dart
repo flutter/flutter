@@ -1034,6 +1034,102 @@ void main() {
     materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
     expect(tracker.paintCount, 2);
   });
+
+  group('LookupBoundary', () {
+    testWidgets('hides Material from Material.maybeOf', (WidgetTester tester) async {
+      MaterialInkController? material;
+
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                material = Material.maybeOf(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(material, isNull);
+    });
+
+    testWidgets('hides Material from Material.of', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                Material.of(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   Material.of() was called with a context that does not have access\n'
+        '   to a Material widget.\n'
+        '   While there is a Material widget ancestor, it was hidden by a\n'
+        '   LookupBoundary. This can happen because you are using a widget\n'
+        '   that looks for a Material ancestor, but no such ancestor exists\n'
+        '   within the closest LookupBoundary.\n'
+        '   The context used was:\n'
+        '     Builder(dirty)\n',
+      );
+    });
+
+    testWidgets('hides Material from debugCheckHasMaterial', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                debugCheckHasMaterial(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(), startsWith(
+          'FlutterError\n'
+          '   No Material widget found within the closest LookupBoundary.\n'
+          '   There is an ancestor Material widget, but it is hidden by a\n'
+          '   LookupBoundary.\n'
+          '   Builder widgets require a Material widget ancestor within the\n'
+          '   closest LookupBoundary.\n'
+          '   In Material Design, most widgets are conceptually "printed" on a\n'
+          "   sheet of material. In Flutter's material library, that material\n"
+          '   is represented by the Material widget. It is the Material widget\n'
+          '   that renders ink splashes, for instance. Because of this, many\n'
+          '   material library widgets require that there be a Material widget\n'
+          '   in the tree above them.\n'
+          '   To introduce a Material widget, you can either directly include\n'
+          '   one, or use a widget that contains Material itself, such as a\n'
+          '   Card, Dialog, Drawer, or Scaffold.\n'
+          '   The specific widget that could not find a Material ancestor was:\n'
+          '     Builder\n'
+          '   The ancestors of this widget were:\n'
+          '     LookupBoundary\n'
+        ),
+      );
+    });
+  });
+
+
 }
 
 class TrackPaintInkFeature extends InkFeature {
