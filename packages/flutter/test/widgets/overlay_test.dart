@@ -1236,7 +1236,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
-            initialEntries: [
+            initialEntries: <OverlayEntry>[
               OverlayEntry(
                 builder: (BuildContext context) {
                   return LookupBoundary(
@@ -1262,7 +1262,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
-            initialEntries: [
+            initialEntries: <OverlayEntry>[
               OverlayEntry(
                 builder: (BuildContext context) {
                   return LookupBoundary(
@@ -1305,7 +1305,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
-            initialEntries: [
+            initialEntries: <OverlayEntry>[
               OverlayEntry(
                 builder: (BuildContext context) {
                   return LookupBoundary(
