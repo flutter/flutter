@@ -1083,7 +1083,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     String totalColumns
   ) => 'Row $rowNumber of $totalRows, Column $columnNumber of $totalColumns';
 
-
   @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';
 
