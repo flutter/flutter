@@ -195,7 +195,7 @@ void main() {
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           'format',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
@@ -241,7 +241,7 @@ format: true
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           'format',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',

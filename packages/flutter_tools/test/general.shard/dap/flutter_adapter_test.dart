@@ -121,7 +121,7 @@ void main() {
         await adapter.terminateRequest(MockRequest(), TerminateArguments(restart: false), terminateCompleter.complete);
         await terminateCompleter.future;
 
-        expect(adapter.flutterRequests, contains('app.stop'));
+        expect(adapter.dapToFlutterRequests, contains('app.stop'));
       });
 
       test('does not call "app.stop" on terminateRequest if app was not started', () async {
@@ -145,7 +145,7 @@ void main() {
         await adapter.terminateRequest(MockRequest(), TerminateArguments(restart: false), terminateCompleter.complete);
         await terminateCompleter.future;
 
-        expect(adapter.flutterRequests, isNot(contains('app.stop')));
+        expect(adapter.dapToFlutterRequests, isNot(contains('app.stop')));
       });
     });
 
@@ -210,7 +210,39 @@ void main() {
         await adapter.terminateRequest(MockRequest(), TerminateArguments(restart: false), terminateCompleter.complete);
         await terminateCompleter.future;
 
-        expect(adapter.flutterRequests, contains('app.detach'));
+        expect(adapter.dapToFlutterRequests, contains('app.detach'));
+      });
+    });
+
+    group('forwards events', () {
+      test('app.webLaunchUrl', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+
+        // Simulate Flutter asking for a URL to be launched.
+        adapter.simulateStdoutMessage(<String, Object?>{
+          'event': 'app.webLaunchUrl',
+          'params': <String, Object?>{
+            'url': 'http://localhost:123/',
+            'launched': false,
+          }
+        });
+
+        // Allow the handler to be processed.
+        await pumpEventQueue(times: 5000);
+
+        // Find the forwarded event.
+        final Map<String, Object?> message = adapter.dapToClientMessages.singleWhere((Map<String, Object?> data) => data['event'] == 'flutter.forwardedEvent');
+        // Ensure the body of the event matches the original event sent by Flutter.
+        expect(message['body'], <String, Object?>{
+          'event': 'app.webLaunchUrl',
+          'params': <String, Object?>{
+            'url': 'http://localhost:123/',
+            'launched': false,
+          }
+        });
       });
     });
 
@@ -238,7 +270,7 @@ void main() {
         // Allow the handler to be processed.
         await pumpEventQueue(times: 5000);
 
-        final Map<String, Object?> message = adapter.flutterMessages.singleWhere((Map<String, Object?> data) => data['id'] == requestId);
+        final Map<String, Object?> message = adapter.dapToFlutterMessages.singleWhere((Map<String, Object?> data) => data['id'] == requestId);
         expect(message['result'], 'http://mapped-host:123/');
       });
     });

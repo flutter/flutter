@@ -142,7 +142,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
@@ -177,7 +177,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
