@@ -1128,8 +1128,6 @@ void main() {
       );
     });
   });
-
-
 }
 
 class TrackPaintInkFeature extends InkFeature {
