@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/update_packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -88,9 +89,11 @@ void main() {
     late Directory flutter;
     late FakePub pub;
     late FakeProcessManager processManager;
+    late BufferLogger logger;
 
     setUpAll(() {
       Cache.disableLocking();
+      logger = BufferLogger.test();
     });
 
     setUp(() {
@@ -172,6 +175,35 @@ void main() {
       Cache: () => Cache.test(
         processManager: processManager,
       ),
+    });
+
+    testUsingContext('--transitive-closure --consumer-only', () async {
+      final UpdatePackagesCommand command = UpdatePackagesCommand();
+      await createTestCommandRunner(command).run(<String>[
+        'update-packages',
+        '--transitive-closure',
+        '--consumer-only',
+      ]);
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+      ]));
+      expect(pub.pubBatchDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+      ]));
+      // Expecting a line like:
+      //   'flutter -> {collection, meta, typed_data, vector_math}'
+      expect(
+        logger.statusText,
+        contains(RegExp(r'flutter -> {([a-z_]+, )*([a-z_]+)+}')),
+      );
+    }, overrides: <Type, Generator>{
+      Pub: () => pub,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Cache: () => Cache.test(
+        processManager: processManager,
+      ),
+      Logger: () => logger,
     });
 
     testUsingContext('force updates packages --synthetic-package-path', () async {
