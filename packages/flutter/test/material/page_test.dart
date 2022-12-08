@@ -763,7 +763,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 240));
     expect(
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))).dx,
-      moreOrLessEquals(798, epsilon: 1),
+      moreOrLessEquals(799, epsilon: 1),
     );
 
     // Use the navigator to push a route instead of tapping the 'push' button.
