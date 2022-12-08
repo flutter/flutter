@@ -52,6 +52,7 @@ void main() {
     expect(theme.brightness, isNull);
     expect(theme.primaryColor, CupertinoColors.activeBlue);
     expect(theme.textTheme.textStyle.fontSize, 17.0);
+    expect(theme.applyThemeToAll, false);
   });
 
   testWidgets('Theme attributes cascade', (WidgetTester tester) async {
@@ -122,10 +123,12 @@ void main() {
     (WidgetTester tester) async {
       const CupertinoThemeData originalTheme = CupertinoThemeData(
         brightness: Brightness.dark,
+        applyThemeToAll: true,
       );
 
       final CupertinoThemeData theme = await testTheme(tester, originalTheme.copyWith(
         primaryColor: CupertinoColors.systemGreen,
+        applyThemeToAll: false,
       ));
 
       expect(theme.brightness, Brightness.dark);
@@ -133,6 +136,8 @@ void main() {
       // Now check calculated derivatives.
       expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemGreen.darkColor));
       expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
+
+      expect(theme.applyThemeToAll, false);
     },
   );
 
@@ -181,6 +186,7 @@ void main() {
           'primaryContrastingColor',
           'barBackgroundColor',
           'scaffoldBackgroundColor',
+          'applyThemeToAll',
           'textStyle',
           'actionTextStyle',
           'tabLabelTextStyle',

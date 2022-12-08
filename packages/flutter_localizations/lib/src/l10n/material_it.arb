@@ -129,5 +129,6 @@
   "keyboardKeySpace": "Barra spaziatrice",
   "keyboardKeyMetaMacOs": "Comando",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu barra dei menu"
+  "menuBarMenuLabel": "Menu barra dei menu",
+  "currentDateLabel": "Date of today"
 }
