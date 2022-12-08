@@ -14,6 +14,8 @@
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/lib/ui/painting/vertices.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/utils/SkShadowUtils.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
@@ -185,12 +187,21 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                   double elevation,
                   bool transparentOccluder);
 
+  SkCanvas* canvas() const { return canvas_; }
   void Invalidate();
 
-  DisplayListBuilder* builder() { return display_list_builder_.get(); }
+  DisplayListBuilder* builder() {
+    return display_list_recorder_ ? display_list_recorder_->builder().get()
+                                  : nullptr;
+  }
 
  private:
-  explicit Canvas(sk_sp<DisplayListBuilder> canvas);
+  explicit Canvas(SkCanvas* canvas);
+
+  // The SkCanvas is supplied by a call to SkPictureRecorder::beginRecording,
+  // which does not transfer ownership.  For this reason, we hold a raw
+  // pointer and manually set to null in Clear.
+  SkCanvas* canvas_;
 
   // A copy of the recorder used by the SkCanvas->DisplayList adapter for cases
   // where we cannot record the SkCanvas method call through the various OnOp()
@@ -198,7 +209,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   // the DisplayList operation lexicon. The recorder has a method for recording
   // paint attributes from an SkPaint and an operation type as well as access
   // to the raw DisplayListBuilder for emitting custom rendering operations.
-  sk_sp<DisplayListBuilder> display_list_builder_;
+  sk_sp<DisplayListCanvasRecorder> display_list_recorder_;
 };
 
 }  // namespace flutter
