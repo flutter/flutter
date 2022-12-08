@@ -679,7 +679,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     this.dragStartBehavior = DragStartBehavior.start,
     this.dragUpdateThrottleFrequency,
     this.maxConsecutiveTap,
-    this.slopTolerance = kTouchSlop,
     super.debugOwner,
     super.kind,
     super.supportedDevices,
@@ -720,22 +719,22 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   int? maxConsecutiveTap;
 
-  /// The maximum distance in logical pixels the gesture is allowed to drift
-  /// to still be considered a tap.
-  ///
-  /// Drifting past the allowed slop amount causes the recognizer to reset
-  /// the tap series it is currently tracking, stopping the consecutive tap
-  /// count from increasing. The consecutive tap count and the set of hardware
-  /// keys that were pressed on tap down will retain their pre-past slop
-  /// tolerance values until the next [PointerDownEvent] is tracked.
-  ///
-  /// If the gesture exceeds this value, then it can only be accepted as a drag
-  /// gesture.
-  ///
-  /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
+  // The maximum distance in logical pixels the gesture is allowed to drift
+  // to still be considered a tap.
+  //
+  // Drifting past the allowed slop amount causes the recognizer to reset
+  // the tap series it is currently tracking, stopping the consecutive tap
+  // count from increasing. The consecutive tap count and the set of hardware
+  // keys that were pressed on tap down will retain their pre-past slop
+  // tolerance values until the next [PointerDownEvent] is tracked.
+  //
+  // If the gesture exceeds this value, then it can only be accepted as a drag
+  // gesture.
+  //
+  // Can be null to indicate that the gesture can drift for any distance.
+  // Defaults to 18 logical pixels.
   @override
-  final double? slopTolerance;
+  final double? slopTolerance = kTouchSlop;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -823,13 +822,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureCancelCallback? onCancel;
 
-  // If non-null, the recognizer will call [onTapDown] after this
-  // amount of time has elapsed since starting to track the primary pointer.
-  //
-  // [onTapDown] will not be called if the primary pointer is
-  // accepted, rejected, or all pointers are up or canceled before [_deadline].
-  final Duration _deadline = kPressTimeout;
-
   // Tap related state.
   bool _pastSlopTolerance = false;
   bool _sentTapDown = false;
@@ -838,6 +830,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   // Primary pointer being tracked by this recognizer.
   int? _primaryPointer;
   Timer? _deadlineTimer;
+  // The recognizer will call [onTapDown] after this amount of time has elapsed
+  // since starting to track the primary pointer.
+  //
+  // [onTapDown] will not be called if the primary pointer is
+  // accepted, rejected, or all pointers are up or canceled before [_deadline].
+  final Duration _deadline = kPressTimeout;
 
   // Drag related state.
   _DragState _dragState = _DragState.ready;
