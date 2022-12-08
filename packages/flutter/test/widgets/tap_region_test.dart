@@ -375,4 +375,55 @@ void main() {
         ]));
     tappedOutside.clear();
   });
+
+  group('LookupBoundary', () {
+    testWidgets('hides TapRegionRegistry from TapRegionRegistry.maybeOf', (WidgetTester tester) async {
+      TapRegionRegistry? registry;
+
+      await tester.pumpWidget(
+        TapRegionSurface(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                registry = TapRegionRegistry.maybeOf(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(registry, isNull);
+    });
+
+    testWidgets('hides TapRegionRegistry from TapRegionRegistry.of', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TapRegionSurface(
+          child: LookupBoundary(
+            child: Builder(
+              builder: (BuildContext context) {
+                TapRegionRegistry.of(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   TapRegionRegistry.of() was called with a context that does not\n'
+        '   have access to a TapRegionSurface widget.\n'
+        '   The context provided to TapRegionRegistry.of() does have a\n'
+        '   TapRegionSurface widget ancestor, but it is hidden by a\n'
+        '   LookupBoundary.\n'
+        '   The context used was:\n'
+        '     Builder(dirty)\n'
+      );
+    });
+  });
 }

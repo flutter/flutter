@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 
 import 'editable_text.dart';
 import 'framework.dart';
+import 'lookup_boundary.dart';
 
 // Enable if you want verbose logging about tap region changes.
 const bool _kDebugTapRegion = false;
@@ -42,14 +43,23 @@ abstract class TapRegionRegistry {
   /// Unregister the given [RenderTapRegion] with the registry.
   void unregisterTapRegion(RenderTapRegion region);
 
-  /// Allows finding of the nearest [TapRegionRegistry], such as a
-  /// [RenderTapRegionSurface].
+  /// Allows finding of the nearest [TapRegionRegistry] within the closest
+  /// [LookupBoundary], such as a [RenderTapRegionSurface].
   ///
   /// Will throw if a [TapRegionRegistry] isn't found.
   static TapRegionRegistry of(BuildContext context) {
     final TapRegionRegistry? registry = maybeOf(context);
     assert(() {
       if (registry == null) {
+        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderTapRegionSurface>(context)) {
+          throw FlutterError(
+            'TapRegionRegistry.of() was called with a context that does not have access to a TapRegionSurface widget.\n'
+            'The context provided to TapRegionRegistry.of() does have a TapRegionSurface widget ancestor, but it is '
+            'hidden by a LookupBoundary.\n'
+            'The context used was:\n'
+            '  $context',
+          );
+        }
         throw FlutterError(
           'TapRegionRegistry.of() was called with a context that does not contain a TapRegionSurface widget.\n'
           'No TapRegionSurface widget ancestor could be found starting from the context that was passed to '
@@ -63,10 +73,10 @@ abstract class TapRegionRegistry {
     return registry!;
   }
 
-  /// Allows finding of the nearest [TapRegionRegistry], such as a
-  /// [RenderTapRegionSurface].
+  /// Allows finding of the nearest [TapRegionRegistry] within the closest
+  /// [LookupBoundary], such as a [RenderTapRegionSurface].
   static TapRegionRegistry? maybeOf(BuildContext context) {
-    return context.findAncestorRenderObjectOfType<RenderTapRegionSurface>();
+    return LookupBoundary.findAncestorRenderObjectOfType<RenderTapRegionSurface>(context);
   }
 }
 
