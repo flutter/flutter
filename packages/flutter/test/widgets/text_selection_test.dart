@@ -1299,6 +1299,80 @@ void main() {
       expect(endDragEndDetails, isNotNull);
     });
 
+    testWidgets('can trigger haptic feedback on handle drag',
+        (WidgetTester tester) async {
+      // Platform call setup.
+      final List<MethodCall> platformCallLog = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform, (MethodCall methodCall) async {
+        platformCallLog.add(methodCall);
+        return null;
+      });
+
+      // Drag handle setup and execution.
+      DragStartDetails? startDragStartDetails;
+      DragUpdateDetails? startDragUpdateDetails;
+      DragEndDetails? startDragEndDetails;
+      DragStartDetails? endDragStartDetails;
+      DragUpdateDetails? endDragUpdateDetails;
+      DragEndDetails? endDragEndDetails;
+      void startDragStart(DragStartDetails details) =>
+          startDragStartDetails = details;
+      void startDragUpdate(DragUpdateDetails details) =>
+          startDragUpdateDetails = details;
+      void startDragEnd(DragEndDetails details) =>
+          startDragEndDetails = details;
+      void endDragStart(DragStartDetails details) =>
+          endDragStartDetails = details;
+      void endDragUpdate(DragUpdateDetails details) =>
+          endDragUpdateDetails = details;
+      void endDragEnd(DragEndDetails details) => endDragEndDetails = details;
+      final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        onStartDragStart: startDragStart,
+        onStartDragUpdate: startDragUpdate,
+        onStartDragEnd: startDragEnd,
+        onEndDragStart: endDragStart,
+        onEndDragUpdate: endDragUpdate,
+        onEndDragEnd: endDragEnd,
+        selectionControls: spy,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..lineHeightAtStart = 10.0
+        ..endHandleType = TextSelectionHandleType.right
+        ..lineHeightAtEnd = 11.0
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+      selectionOverlay.showHandles();
+      await tester.pump();
+      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
+      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
+      expect(startDragStartDetails, isNull);
+      expect(startDragUpdateDetails, isNull);
+      expect(startDragEndDetails, isNull);
+      expect(endDragStartDetails, isNull);
+      expect(endDragUpdateDetails, isNull);
+      expect(endDragEndDetails, isNull);
+
+      final TestGesture gesture = await tester
+          .startGesture(tester.getCenter(find.byKey(spy.leftHandleKey)));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(startDragStartDetails!.globalPosition,
+          tester.getCenter(find.byKey(spy.leftHandleKey)));
+
+      // While in a test env the default platform is android this test
+      // does not mock the response for isHapticEnabled so only validate the
+      // check call and not that haptics were sent.
+      expect(
+          platformCallLog.last,
+          isMethodCall(HapticFeedback.isHapticEnabledMethodName,
+              arguments: null));
+    });
+
     testWidgets('can show magnifier when no handles exist', (WidgetTester tester) async {
       final GlobalKey magnifierKey = GlobalKey();
       final SelectionOverlay selectionOverlay = await pumpApp(

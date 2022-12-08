@@ -953,7 +953,11 @@ class SelectionOverlay {
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
-       assert(debugCheckHasOverlay(context));
+        hapticFeedbackEnabled = true,
+        assert(debugCheckHasOverlay(context)) {
+    HapticFeedback.isHapticFeedbackEnabled().then((bool? enabled) =>
+        hapticFeedbackEnabled = enabled ?? hapticFeedbackEnabled);
+  }
 
   /// {@macro flutter.widgets.SelectionOverlay.context}
   final BuildContext context;
@@ -975,6 +979,11 @@ class SelectionOverlay {
   ///
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
+
+
+  @visibleForTesting
+  // ignore: public_member_api_docs
+  bool hapticFeedbackEnabled;
 
   /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
   /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]
@@ -1164,9 +1173,12 @@ class SelectionOverlay {
     if (!listEquals(_selectionEndpoints, value)) {
       markNeedsBuild();
       if (_isDraggingEndHandle || _isDraggingStartHandle) {
+
         switch(defaultTargetPlatform) {
           case TargetPlatform.android:
-            HapticFeedback.selectionClick();
+            if (hapticFeedbackEnabled) {
+              HapticFeedback.selectionClick();
+            }
             break;
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:

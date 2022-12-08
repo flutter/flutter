@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 
+import 'package:meta/meta.dart';
+
 import 'system_channels.dart';
 
 /// Allows access to the haptic feedback interface on the device.
@@ -78,6 +80,20 @@ class HapticFeedback {
     await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
       'HapticFeedbackType.selectionClick',
+    );
+  }
+
+  @visibleForTesting
+  // ignore: public_member_api_docs
+  static const String isHapticEnabledMethodName = 'HapticFeedback.isEnabled';
+
+  /// Provides value for haptic feedback user setting.
+  ///
+  /// {@code false} indicates the user has opted out of haptic feedback.
+  /// If user preference is unknown or unknowable defaults to {@code true}.
+  static Future<bool?> isHapticFeedbackEnabled() async {
+    return SystemChannels.platform.invokeMethod<bool>(
+      isHapticEnabledMethodName,
     );
   }
 }
