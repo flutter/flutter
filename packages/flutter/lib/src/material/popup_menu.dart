@@ -695,8 +695,6 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
 
-    final double y = position.top;
-
     // Find the ideal horizontal position.
     double x;
     if (position.left > position.right) {
@@ -717,7 +715,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
           break;
       }
     }
-    final Offset wantedPosition = Offset(x, y);
+    final Offset wantedPosition = Offset(x, position.top);
     final Offset originCenter = position.toRect(Offset.zero & size).center;
     final Iterable<Rect> subScreens = DisplayFeatureSubScreen.subScreensInBounds(Offset.zero & size, avoidBounds);
     final Rect subScreen = _closestScreen(subScreens, originCenter);
