@@ -39,8 +39,7 @@
                 "targets": [
                     "flutter/shell/platform/darwin/ios:flutter_framework",
                     "flutter/lib/snapshot:generate_snapshot_bin"
-                ],
-                "tool": "autoninja"
+                ]
             },
             "tests": []
         },
@@ -63,8 +62,7 @@
             "name": "ios_debug_sim_arm64",
             "ninja": {
                 "config": "ios_debug_sim_arm64",
-                "targets": [],
-                "tool": "autoninja"
+                "targets": []
             },
             "tests": []
         }
