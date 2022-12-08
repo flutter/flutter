@@ -1439,7 +1439,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// ```dart
   /// Transform.flip(
   ///   flipX: true,
-  ///   child: Text('Horizontal Flip'),
+  ///   child: const Text('Horizontal Flip'),
   /// )
   /// ```
   /// {@end-tool}
