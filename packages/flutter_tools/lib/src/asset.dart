@@ -412,7 +412,8 @@ class ManifestAssetBundle implements AssetBundle {
       // For all platforms, include the shaders unconditionally. They are
       // small, and whether they're used is determined only by the app source
       // code and not by the Flutter manifest.
-      ..._getMaterialShaders(),
+      if (targetPlatform != TargetPlatform.web_javascript)
+        ..._getMaterialShaders(),
     ];
     for (final _Asset asset in materialAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
@@ -753,19 +754,24 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    for (final Uri shaderUri in flutterManifest.shaders) {
-      _parseAssetFromFile(
-        packageConfig,
-        flutterManifest,
-        assetBase,
-        cache,
-        result,
-        shaderUri,
-        packageName: packageName,
-        attributedPackage: attributedPackage,
-        assetKind: AssetKind.shader,
-      );
+    // TODO(jonahwilliams): re-enable this feature once
+    // flutter web is using engine compiled canvaskit.
+    if (targetPlatform != TargetPlatform.web_javascript) {
+      for (final Uri shaderUri in flutterManifest.shaders) {
+        _parseAssetFromFile(
+          packageConfig,
+          flutterManifest,
+          assetBase,
+          cache,
+          result,
+          shaderUri,
+          packageName: packageName,
+          attributedPackage: attributedPackage,
+          assetKind: AssetKind.shader,
+        );
+      }
     }
+
     // Add assets referenced in the fonts section of the manifest.
     for (final Font font in flutterManifest.fonts) {
       for (final FontAsset fontAsset in font.fontAssets) {

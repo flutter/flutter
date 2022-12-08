@@ -142,7 +142,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
@@ -177,7 +177,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
@@ -511,22 +511,14 @@ abstract class IosAssetBundle extends Target {
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
 
-    bool isImpellerEnabled() {
-      if (!flutterProject.ios.infoPlist.existsSync()) {
-        return false;
-      }
-      final Map<String, Object> info = globals.plistParser.parseFile(flutterProject.ios.infoPlist.path);
-
-      final Object? enableImpeller = info['FLTEnableImpeller'];
-      return enableImpeller is bool && enableImpeller;
-    }
-
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      shaderTarget: isImpellerEnabled() ? ShaderTarget.impelleriOS : ShaderTarget.sksl,
+      // Always specify an impeller shader target so that we support runtime toggling and
+      // the --enable-impeller debug flag.
+      shaderTarget: ShaderTarget.impelleriOS,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
@@ -719,6 +711,16 @@ void _signFramework(Environment environment, String binaryPath, BuildMode buildM
     binaryPath,
   ]);
   if (result.exitCode != 0) {
-    throw Exception('Failed to codesign $binaryPath with identity $codesignIdentity.\n${result.stderr}');
+    final String stdout = (result.stdout as String).trim();
+    final String stderr = (result.stderr as String).trim();
+    final StringBuffer output = StringBuffer();
+    output.writeln('Failed to codesign $binaryPath with identity $codesignIdentity.');
+    if (stdout.isNotEmpty) {
+      output.writeln(stdout);
+    }
+    if (stderr.isNotEmpty) {
+      output.writeln(stderr);
+    }
+    throw Exception(output.toString());
   }
 }

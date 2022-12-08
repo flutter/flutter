@@ -53,6 +53,19 @@ class TextSelectionPoint {
   final TextDirection? direction;
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextSelectionPoint
+        && other.point == point
+        && other.direction == direction;
+  }
+
+  @override
   String toString() {
     switch (direction) {
       case TextDirection.ltr:
@@ -63,6 +76,10 @@ class TextSelectionPoint {
         return '$point';
     }
   }
+
+  @override
+  int get hashCode => Object.hash(point, direction);
+
 }
 
 /// The consecutive sequence of [TextPosition]s that the caret should move to
@@ -2121,7 +2138,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
     final TextRange word = _textPainter.getWordBoundary(position);
     late TextSelection newSelection;
-    if (position.offset - word.start <= 1) {
+    if (position.offset <= word.start) {
       newSelection = TextSelection.collapsed(offset: word.start);
     } else {
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);

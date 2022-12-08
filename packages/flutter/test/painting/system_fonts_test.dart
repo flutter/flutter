@@ -283,8 +283,8 @@ void main() {
     final RenderObject renderObject = tester.renderObject(
       find.descendant(
         of: find.byKey(const Key('parent')),
-        matching: find.byType(CustomPaint),
-      ).first,
+        matching: find.byKey(const ValueKey<String>('time-picker-dial')),
+      ),
     );
     expect(renderObject.debugNeedsPaint, isTrue);
   });

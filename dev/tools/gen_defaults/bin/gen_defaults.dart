@@ -19,7 +19,9 @@ import 'dart:io';
 
 import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
+import 'package:gen_defaults/badge_template.dart';
 import 'package:gen_defaults/banner_template.dart';
+import 'package:gen_defaults/bottom_app_bar_template.dart';
 import 'package:gen_defaults/bottom_sheet_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
@@ -27,6 +29,7 @@ import 'package:gen_defaults/checkbox_template.dart';
 import 'package:gen_defaults/color_scheme_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/divider_template.dart';
+import 'package:gen_defaults/drawer_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
@@ -34,12 +37,17 @@ import 'package:gen_defaults/input_chip_template.dart';
 import 'package:gen_defaults/input_decorator_template.dart';
 import 'package:gen_defaults/menu_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
+import 'package:gen_defaults/navigation_drawer_template.dart';
 import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/popup_menu_template.dart';
 import 'package:gen_defaults/progress_indicator_template.dart';
 import 'package:gen_defaults/radio_template.dart';
+import 'package:gen_defaults/segmented_button_template.dart';
+import 'package:gen_defaults/slider_template.dart';
+import 'package:gen_defaults/snackbar_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/switch_template.dart';
+import 'package:gen_defaults/tabs_template.dart';
 import 'package:gen_defaults/text_field_template.dart';
 import 'package:gen_defaults/typography_template.dart';
 
@@ -50,7 +58,9 @@ Map<String, dynamic> _readTokenFile(String fileName) {
 Future<void> main(List<String> args) async {
   const String materialLib = 'packages/flutter/lib/src/material';
   const List<String> tokenFiles = <String>[
+    'badge.json',
     'banner.json',
+    'badge.json',
     'bottom_app_bar.json',
     'button_elevated.json',
     'button_filled.json',
@@ -70,8 +80,8 @@ Future<void> main(List<String> args) async {
     'date_picker_docked.json',
     'date_picker_modal.json',
     'dialog.json',
-    'divider.json',
     'dialog_fullscreen.json',
+    'divider.json',
     'elevation.json',
     'fab_extended_primary.json',
     'fab_large_primary.json',
@@ -81,11 +91,13 @@ Future<void> main(List<String> args) async {
     'icon_button_filled.json',
     'icon_button_filled_tonal.json',
     'icon_button_outlined.json',
+    'list.json',
     'menu.json',
     'motion.json',
     'navigation_bar.json',
     'navigation_drawer.json',
     'navigation_rail.json',
+    'navigation_tab_primary.json',
     'palette.json',
     'progress_indicator_circular.json',
     'progress_indicator_linear.json',
@@ -94,6 +106,7 @@ Future<void> main(List<String> args) async {
     'shape.json',
     'sheet_bottom.json',
     'slider.json',
+    'snackbar.json',
     'state.json',
     'switch.json',
     'text_field_filled.json',
@@ -119,7 +132,10 @@ Future<void> main(List<String> args) async {
   ActionChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
+  BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
+  BadgeTemplate('Badge', '$materialLib/badge.dart', tokens).updateFile();
   BannerTemplate('Banner', '$materialLib/banner.dart', tokens).updateFile();
+  BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
   BottomSheetTemplate('BottomSheet', '$materialLib/bottom_sheet.dart', tokens).updateFile();
   ButtonTemplate('md.comp.elevated-button', 'ElevatedButton', '$materialLib/elevated_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-button', 'FilledButton', '$materialLib/filled_button.dart', tokens).updateFile();
@@ -132,6 +148,7 @@ Future<void> main(List<String> args) async {
   DialogFullscreenTemplate('DialogFullscreen', '$materialLib/dialog.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   DividerTemplate('Divider', '$materialLib/divider.dart', tokens).updateFile();
+  DrawerTemplate('Drawer', '$materialLib/drawer.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   FilterChipTemplate('ChoiceChip', '$materialLib/choice_chip.dart', tokens).updateFile();
   FilterChipTemplate('FilterChip', '$materialLib/filter_chip.dart', tokens).updateFile();
@@ -140,12 +157,17 @@ Future<void> main(List<String> args) async {
   InputDecoratorTemplate('InputDecorator', '$materialLib/input_decorator.dart', tokens).updateFile();
   MenuTemplate('Menu', '$materialLib/menu_anchor.dart', tokens).updateFile();
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();
+  NavigationDrawerTemplate('NavigationDrawer', '$materialLib/navigation_drawer.dart', tokens).updateFile();
   NavigationRailTemplate('NavigationRail', '$materialLib/navigation_rail.dart', tokens).updateFile();
   PopupMenuTemplate('PopupMenu', '$materialLib/popup_menu.dart', tokens).updateFile();
   ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
+  SegmentedButtonTemplate('SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
+  SnackbarTemplate('md.comp.snackbar', 'Snackbar', '$materialLib/snack_bar.dart', tokens).updateFile();
+  SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
   SwitchTemplate('Switch', '$materialLib/switch.dart', tokens).updateFile();
   TextFieldTemplate('TextField', '$materialLib/text_field.dart', tokens).updateFile();
+  TabsTemplate('Tabs', '$materialLib/tabs.dart', tokens).updateFile();
   TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();
 }

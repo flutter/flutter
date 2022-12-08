@@ -30,13 +30,13 @@ import org.gradle.util.VersionNumber
 /** For apps only. Provides the flutter extension used in app/build.gradle. */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 31
+    static int compileSdkVersion = 33
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 16
 
     /** Sets the targetSdkVersion used by default in Flutter app projects. */
-    static int targetSdkVersion = 31
+    static int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
@@ -237,15 +237,10 @@ class FlutterPlugin implements Plugin<Project> {
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
         if (project.hasProperty("multidex-enabled") &&
-            project.property("multidex-enabled").toBoolean() &&
-            project.android.defaultConfig.minSdkVersion <= 20) {
+            project.property("multidex-enabled").toBoolean()) {
             String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_multidex_keepfile.txt")
             project.android {
-                defaultConfig {
-                    multiDexEnabled true
-                    manifestPlaceholders.applicationName = "io.flutter.app.FlutterMultiDexApplication"
-                }
                 buildTypes {
                     release {
                         multiDexKeepFile project.file(flutterMultidexKeepfile)
@@ -255,18 +250,9 @@ class FlutterPlugin implements Plugin<Project> {
             project.dependencies {
                 implementation "androidx.multidex:multidex:2.0.1"
             }
-        } else {
-            String baseApplicationName = "android.app.Application"
-            if (project.hasProperty("base-application-name")) {
-                baseApplicationName = project.property("base-application-name")
-            }
-            project.android {
-                defaultConfig {
-                    // Setting to android.app.Application is the same as omitting the attribute.
-                    manifestPlaceholders.applicationName = baseApplicationName
-                }
-            }
         }
+        // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
+        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "flutter.gradle.kts")
 
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")

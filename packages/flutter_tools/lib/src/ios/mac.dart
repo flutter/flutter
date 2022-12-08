@@ -250,17 +250,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
-  for (final FileSystemEntity entity in contents) {
-    if (globals.fs.path.extension(entity.path) == '.xcworkspace') {
-      buildCommands.addAll(<String>[
-        '-workspace', globals.fs.path.basename(entity.path),
-        '-scheme', scheme,
-        if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-          'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
-      ]);
-      break;
-    }
+  final Directory? workspacePath = app.project.xcodeWorkspace;
+  if (workspacePath != null) {
+    buildCommands.addAll(<String>[
+      '-workspace', workspacePath.basename,
+      '-scheme', scheme,
+      if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+    ]);
   }
 
   // Check if the project contains a watchOS companion app.
@@ -743,13 +740,6 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   }
 
-  if (!issueDetected && _needUpdateSigningIdentifier(xcodeBuildExecution)) {
-    issueDetected = true;
-    logger.printError('');
-    logger.printError('It appears that your application still contains the default signing identifier.');
-    logger.printError("Try replacing 'com.example' with your signing id in Xcode:");
-    logger.printError('  open ios/Runner.xcworkspace');
-  }
   return issueDetected;
 }
 
@@ -761,13 +751,6 @@ bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
   return xcodeBuildExecution != null && xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
         xcodeBuildExecution.buildSettings.containsKey);
-}
-
-// Return `true` if the signing identifier needs to be updated.
-bool _needUpdateSigningIdentifier(XcodeBuildExecution? xcodeBuildExecution) {
-  return xcodeBuildExecution != null
-      && xcodeBuildExecution.environmentType == EnvironmentType.physical
-      && (xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') ?? false);
 }
 
 // Detects and handles errors from stdout.

@@ -120,7 +120,6 @@ Future<T> runInContext<T>(
       AndroidWorkflow: () => AndroidWorkflow(
         androidSdk: globals.androidSdk,
         featureFlags: featureFlags,
-        operatingSystemUtils: globals.os,
       ),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
@@ -209,7 +208,7 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
@@ -312,7 +311,6 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        stdio: globals.stdio,
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),

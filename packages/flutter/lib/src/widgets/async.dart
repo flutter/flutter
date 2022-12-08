@@ -447,6 +447,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zEdw_1B7JHY}
+///
 /// The [future] must have been obtained earlier, e.g. during [State.initState],
 /// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be
 /// created during the [State.build] or [StatelessWidget.build] method call when
@@ -645,7 +647,11 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
         }());
 
       });
-      _snapshot = _snapshot.inState(ConnectionState.waiting);
+      // An implementation like `SynchronousFuture` may have already called the
+      // .then closure. Do not overwrite it in that case.
+      if (_snapshot.connectionState != ConnectionState.done) {
+        _snapshot = _snapshot.inState(ConnectionState.waiting);
+      }
     }
   }
 

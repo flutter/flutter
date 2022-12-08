@@ -150,7 +150,12 @@ class DriveCommand extends RunCommandBase {
           'Dart VM running The test script.')
       ..addOption('profile-memory', help: 'Launch devtools and profile application memory, writing '
           'The output data to the file path provided to this argument as JSON.',
-          valueHelp: 'profile_memory.json');
+          valueHelp: 'profile_memory.json')
+      ..addOption('timeout',
+        help: 'Timeout the test after the given number of seconds. If the '
+              '"--screenshot" option is provided, a screenshot will be taken '
+              'before exiting. Defaults to no timeout.',
+        valueHelp: '360');
   }
 
   final Signals signals;
@@ -173,6 +178,8 @@ class DriveCommand extends RunCommandBase {
   final FileSystem _fileSystem;
   final Logger _logger;
   final FileSystemUtils _fsUtils;
+  Timer? timeoutTimer;
+  Map<ProcessSignal, Object>? screenshotTokens;
 
   @override
   final String name = 'drive';
@@ -230,7 +237,7 @@ class DriveCommand extends RunCommandBase {
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
       processUtils: globals.processUtils,
-      dartSdkPath: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -295,13 +302,17 @@ class DriveCommand extends RunCommandBase {
         androidEmulator: boolArgDeprecated('android-emulator'),
         profileMemory: stringArgDeprecated('profile-memory'),
       );
-      // If the test is sent a signal, take a screenshot before exiting
-      final Map<ProcessSignal, Object> screenshotTokens = _registerScreenshotCallbacks((ProcessSignal signal) async {
-        _logger.printError('Caught $signal');
-        await _takeScreenshot(device);
-      });
+
+      // If the test is sent a signal or times out, take a screenshot
+      _registerScreenshotCallbacks(device);
+
       final int testResult = await testResultFuture;
-      _unregisterScreenshotCallbacks(screenshotTokens);
+
+      if (timeoutTimer != null) {
+        timeoutTimer!.cancel();
+      }
+      _unregisterScreenshotCallbacks();
+
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
         await _takeScreenshot(device);
@@ -331,21 +342,59 @@ class DriveCommand extends RunCommandBase {
     return FlutterCommandResult.success();
   }
 
-  Map<ProcessSignal, Object> _registerScreenshotCallbacks(Function(ProcessSignal) callback) {
+  int? get _timeoutSeconds {
+    final String? timeoutString = stringArg('timeout');
+    if (timeoutString == null) {
+      return null;
+    }
+    final int? timeoutSeconds = int.tryParse(timeoutString);
+    if (timeoutSeconds == null || timeoutSeconds <= 0) {
+      throwToolExit(
+        'Invalid value "$timeoutString" provided to the option --timeout: '
+        'expected a positive integer representing seconds.',
+      );
+    }
+    return timeoutSeconds;
+  }
+
+  void _registerScreenshotCallbacks(Device device) {
     _logger.printTrace('Registering signal handlers...');
     final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
-      tokens[signal] = signals.addHandler(signal, callback);
+      tokens[signal] = signals.addHandler(
+        signal,
+        (ProcessSignal signal) {
+          _unregisterScreenshotCallbacks();
+          _logger.printError('Caught $signal');
+          return _takeScreenshot(device);
+        },
+      );
     }
-    return tokens;
+    screenshotTokens = tokens;
+
+    final int? timeoutSeconds = _timeoutSeconds;
+    if (timeoutSeconds != null) {
+      timeoutTimer = Timer(
+        Duration(seconds: timeoutSeconds),
+        () {
+          _unregisterScreenshotCallbacks();
+          _takeScreenshot(device);
+          throwToolExit('Timed out after $timeoutSeconds seconds');
+        }
+      );
+    }
   }
 
-  void _unregisterScreenshotCallbacks(Map<ProcessSignal, Object> tokens) {
-    _logger.printTrace('Unregistering signal handlers...');
-    for (final MapEntry<ProcessSignal, Object> entry in tokens.entries) {
-      signals.removeHandler(entry.key, entry.value);
+  void _unregisterScreenshotCallbacks() {
+    if (screenshotTokens != null) {
+      _logger.printTrace('Unregistering signal handlers...');
+      for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
+        signals.removeHandler(entry.key, entry.value);
+      }
     }
+    timeoutTimer?.cancel();
   }
+
   String? _getTestFile() {
     if (argResults!['driver'] != null) {
       return stringArgDeprecated('driver');
