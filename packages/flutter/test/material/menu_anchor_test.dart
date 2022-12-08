@@ -2146,24 +2146,26 @@ void main() {
       String expectedMeta;
       String expectedCtrl;
       String expectedAlt;
+      String expectedSeparator;
+      String expectedShift;
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
-          expectedCtrl = 'Ctrl';
-          expectedMeta = 'Meta';
-          expectedAlt = 'Alt';
-          break;
         case TargetPlatform.windows:
           expectedCtrl = 'Ctrl';
-          expectedMeta = 'Win';
+          expectedMeta = defaultTargetPlatform == TargetPlatform.windows ? 'Win' : 'Meta';
           expectedAlt = 'Alt';
+          expectedShift = 'Shift';
+          expectedSeparator = '+';
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           expectedCtrl = '⌃';
           expectedMeta = '⌘';
           expectedAlt = '⌥';
+          expectedShift = '⇧';
+          expectedSeparator = ' ';
           break;
       }
 
@@ -2174,7 +2176,7 @@ void main() {
         shift: true,
         alt: true,
       );
-      final String allExpected = '$expectedAlt $expectedCtrl $expectedMeta ⇧ A';
+      final String allExpected = <String>[expectedAlt, expectedCtrl, expectedMeta, expectedShift, 'A'].join(expectedSeparator);
       const CharacterActivator charShortcuts = CharacterActivator('ñ');
       const String charExpected = 'ñ';
       await tester.pumpWidget(
