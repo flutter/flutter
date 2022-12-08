@@ -955,8 +955,11 @@ class SelectionOverlay {
        _toolbarLocation = toolbarLocation,
         hapticFeedbackEnabled = true,
         assert(debugCheckHasOverlay(context)) {
-    HapticFeedback.isHapticFeedbackEnabled().then((bool? enabled) =>
-        hapticFeedbackEnabled = enabled ?? hapticFeedbackEnabled);
+    unawaited(() async {
+      // Overrite the default value with the actual value when it is available.
+      final bool? newValue = await HapticFeedback.isHapticFeedbackEnabled();
+      hapticFeedbackEnabled = newValue ?? hapticFeedbackEnabled;
+    }());
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.context}

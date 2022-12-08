@@ -1309,7 +1309,7 @@ void main() {
         return null;
       });
 
-      // Drag handle setup and execution.
+      // Drag handle setup.
       DragStartDetails? startDragStartDetails;
       DragUpdateDetails? startDragUpdateDetails;
       DragEndDetails? startDragEndDetails;
@@ -1349,15 +1349,8 @@ void main() {
         ];
       selectionOverlay.showHandles();
       await tester.pump();
-      expect(find.byKey(spy.leftHandleKey), findsOneWidget);
-      expect(find.byKey(spy.rightHandleKey), findsOneWidget);
-      expect(startDragStartDetails, isNull);
-      expect(startDragUpdateDetails, isNull);
-      expect(startDragEndDetails, isNull);
-      expect(endDragStartDetails, isNull);
-      expect(endDragUpdateDetails, isNull);
-      expect(endDragEndDetails, isNull);
 
+      // Drag handle execution.
       final TestGesture gesture = await tester
           .startGesture(tester.getCenter(find.byKey(spy.leftHandleKey)));
       await tester.pump(const Duration(milliseconds: 200));
