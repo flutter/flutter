@@ -645,7 +645,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// recognizes, but it will declare victory for every drag it recognizes.
 ///
 /// The recognizer will declare victory when all other recognizer's in
-/// the arena have lost, if the timeout ([deadline]) elapsed and a tap
+/// the arena have lost, if the timer of [kPressTimeout] elapses and a tap
 /// series greater than 1 is being tracked, or until the pointer has moved
 /// a sufficient global distance from the origin to be considered a drag.
 ///
@@ -676,7 +676,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapAndDragGestureRecognizer({
-    this.deadline = kPressTimeout,
     this.dragStartBehavior = DragStartBehavior.start,
     this.dragUpdateThrottleFrequency,
     this.maxConsecutiveTap,
@@ -685,13 +684,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     super.kind,
     super.supportedDevices,
   }) : assert(dragStartBehavior != null);
-
-  /// If non-null, the recognizer will call [onTapDown] after this
-  /// amount of time has elapsed since starting to track the primary pointer.
-  ///
-  /// [onTapDown] will not be called if the primary pointer is
-  /// accepted, rejected, or all pointers are up or canceled before [deadline].
-  final Duration? deadline;
 
   /// Configure the behavior of offsets passed to [onDragStart].
   ///
@@ -743,7 +735,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// Can be null to indicate that the gesture can drift for any distance.
   /// Defaults to 18 logical pixels.
   @override
-  double? slopTolerance;
+  final double? slopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -831,6 +823,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureCancelCallback? onCancel;
 
+  // If non-null, the recognizer will call [onTapDown] after this
+  // amount of time has elapsed since starting to track the primary pointer.
+  //
+  // [onTapDown] will not be called if the primary pointer is
+  // accepted, rejected, or all pointers are up or canceled before [_deadline].
+  final Duration _deadline = kPressTimeout;
+
   // Tap related state.
   bool _pastSlopTolerance = false;
   bool _sentTapDown = false;
@@ -910,9 +909,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _initialButtons = event.buttons;
       _dragState = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-      if (deadline != null) {
-        _deadlineTimer = Timer(deadline!, () => _didExceedDeadlineWithEvent(event));
-      }
+      _deadlineTimer = Timer(_deadline!, () => _didExceedDeadlineWithEvent(event));
     }
   }
 
