@@ -1982,7 +1982,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           expect(error.message, contains('Found syntax errors.'));
           expect(logger.hadErrorOutput, isTrue);
           expect(logger.errorText, contains('''
-[app_en.arb:count] The plural case 3 is not a valid plural case.
+[app_en.arb:count] The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other.
+    3 is not a valid plural case.
     {count,plural, =0{None} =1{One} =2{Two} =3{Undefined Behavior!} other{Hmm...}}
                                             ^'''));
         }

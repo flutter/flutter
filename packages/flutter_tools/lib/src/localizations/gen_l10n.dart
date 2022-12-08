@@ -1167,7 +1167,9 @@ class LocalizationsGenerator {
               // A valid plural case is one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other".
               if (transformedPluralCase == null) {
                 throw L10nParserException(
-                  'The plural case $pluralCase is not a valid plural case.',
+                  '''
+The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other.
+    $pluralCase is not a valid plural case.''',
                   _inputFileNames[locale]!,
                   message.resourceId,
                   translationForMessage,
