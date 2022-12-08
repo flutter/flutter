@@ -317,11 +317,11 @@ if (enable_unittests) {
     deps = [ ":embedder_unittests_library" ]
 
     if (test_enable_gl) {
-      sources += [ "tests/embedder_unittests_gl.cc" ]
+      sources += [ "tests/embedder_gl_unittests.cc" ]
     }
 
     if (test_enable_metal) {
-      sources += [ "tests/embedder_unittests_metal.mm" ]
+      sources += [ "tests/embedder_metal_unittests.mm" ]
     }
   }
 
