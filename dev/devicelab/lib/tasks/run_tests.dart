@@ -26,6 +26,14 @@ TaskFunction createMacOSRunReleaseTest() {
   );
 }
 
+TaskFunction createWindowsRunReleaseTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: true,
+  );
+}
+
 class AndroidRunOutputTest extends RunOutputTask {
   AndroidRunOutputTest({required super.release}) : super(
     '${flutterDirectory.path}/dev/integration_tests/ui',
@@ -130,9 +138,9 @@ class DesktopRunOutputTest extends RunOutputTask {
   TaskResult verify(List<String> stdout, List<String> stderr) {
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Launching lib/main.dart on ') &&
+      (String line) => line.startsWith('Launching $testTarget on ') &&
         line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
-      'Launching lib/main.dart on',
+      'Launching $testTarget on',
     );
 
     _findNextMatcherInList(
