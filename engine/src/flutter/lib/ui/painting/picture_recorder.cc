@@ -26,9 +26,9 @@ PictureRecorder::PictureRecorder() {}
 
 PictureRecorder::~PictureRecorder() {}
 
-sk_sp<DisplayListBuilder> PictureRecorder::BeginRecording(SkRect bounds) {
-  display_list_builder_ = sk_make_sp<DisplayListBuilder>(bounds);
-  return display_list_builder_;
+SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
+  display_list_recorder_ = sk_make_sp<DisplayListCanvasRecorder>(bounds);
+  return display_list_recorder_.get();
 }
 
 fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
@@ -39,8 +39,8 @@ fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
   fml::RefPtr<Picture> picture;
 
   picture = Picture::Create(dart_picture, UIDartState::CreateGPUObject(
-                                              display_list_builder_->Build()));
-  display_list_builder_ = nullptr;
+                                              display_list_recorder_->Build()));
+  display_list_recorder_ = nullptr;
 
   canvas_->Invalidate();
   canvas_ = nullptr;
