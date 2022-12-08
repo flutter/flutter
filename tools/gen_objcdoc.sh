@@ -49,7 +49,6 @@ jazzy \
   --author_url 'https://flutter.io'\
   --github_url 'https://github.com/flutter'\
   --github-file-prefix 'http://github.com/flutter/engine/blob/main'\
-  --module-version 1.0.0\
   --xcodebuild-arguments --objc,"$FLUTTER_UMBRELLA_HEADER",--,-x,objective-c,-isysroot,"$(xcrun --show-sdk-path --sdk iphonesimulator)",-I,"$(pwd)"\
   --module Flutter\
   --root-url https://api.flutter.dev/objc/\
