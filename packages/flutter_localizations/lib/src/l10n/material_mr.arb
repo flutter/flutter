@@ -131,7 +131,7 @@
   "keyboardKeyMetaMacOs": "कमांड",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "मेनू बार मेनू",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName"

@@ -129,7 +129,7 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menyja e shiritit të menysë",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName"

@@ -130,7 +130,7 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "मेन्यू बार का मेन्यू",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName"

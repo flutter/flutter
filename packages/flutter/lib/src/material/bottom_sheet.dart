@@ -792,7 +792,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
-  /// the barrier for this [ModalRoute] should be clipped.
+  /// the barrier for this [ModalBottomSheetRoute] should be clipped.
   ///
   /// returns true if the clipDetails did change and false otherwise.
   bool didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
