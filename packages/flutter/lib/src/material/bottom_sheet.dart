@@ -581,7 +581,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           child: ClipRect(
             child: _BottomSheetLayoutWithSizeListener(
               onChildSizeChanged: (Size size) {
-                widget.route.didChangeBarrierSemanticsClip(_getNewClipDetails(size));
+                widget.route.didChangeBarrierSemanticsClip(
+                  _getNewClipDetails(size),
+                );
               },
               animationValue: animationValue,
               isScrollControlled: widget.isScrollControlled,
@@ -787,6 +789,20 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Default is false.
   final bool useSafeArea;
 
+  final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
+
+  /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
+  /// the barrier for this [ModalRoute] should be clipped.
+  ///
+  /// returns true if the clipDetails did change and false otherwise.
+  bool didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
+    if (_clipDetailsNotifier.value == newClipDetails) {
+      return false;
+    }
+    _clipDetailsNotifier.value = newClipDetails;
+    return true;
+  }
+
   @override
   Duration get transitionDuration => _bottomSheetEnterDuration;
 
@@ -853,6 +869,38 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         );
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
+  }
+
+  @override
+  Widget buildModalBarrier() {
+    Widget barrier;
+    if (barrierColor != null && barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
+      assert(barrierColor != barrierColor.withOpacity(0.0));
+      final Animation<Color?> color = animation!.drive(
+        ColorTween(
+          begin: barrierColor.withOpacity(0.0),
+          end: barrierColor, // changedInternalState is called if barrierColor updates
+        ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
+      );
+      barrier = AnimatedModalBarrier(
+        color: color,
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+        barrierSemanticsDismissible: semanticsDismissible,
+        clipDetailsNotifier: _clipDetailsNotifier,
+        semanticsOnTapHint: barrierOnTapHint,
+      );
+    } else {
+      barrier = ModalBarrier(
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+        barrierSemanticsDismissible: semanticsDismissible,
+        clipDetailsNotifier: _clipDetailsNotifier,
+        semanticsOnTapHint: barrierOnTapHint,
+      );
+    }
+
+    return barrier;
   }
 }
 

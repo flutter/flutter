@@ -230,34 +230,41 @@ class ModalBarrier extends StatelessWidget {
       }
     }
 
+    Widget barrier = Semantics(
+      onTapHint: semanticsOnTapHint,
+      onTap: handleDismiss,
+      label: semanticsDismissible ? semanticsLabel : null,
+      textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: ConstrainedBox(
+        constraints: const BoxConstraints.expand(),
+        child: color == null ? null : ColoredBox(
+          color: color!,
+          ),
+        ),
+      ),
+    );
+
+    // Developers can set [dismissible: true] and [barrierSemanticsDismissible: true]
+    // to allow assistive technology users to dismiss a modal BottomSheet by
+    // tapping on the Scrim focus.
+    // On iOS, some modal barriers are not dismissible in accessibility mode.
+    final bool excluding = !semanticsDismissible || !modalBarrierSemanticsDismissible;
+
+    if (!excluding && clipDetailsNotifier != null) {
+      barrier = _SemanticsClipper(
+        clipDetailsNotifier: clipDetailsNotifier,
+        child: barrier,
+      );
+    }
+
     return BlockSemantics(
       child: ExcludeSemantics(
-        // Developers can set [dismissible: true] and
-        // [barrierSemanticsDismissible: true]
-        // to allow assistive technology users to dismiss a modal BottomSheet by
-        // tapping on the Scrim focus.
-        // On iOS, some modal barriers are not dismissible in accessibility mode.
-        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
+        excluding: excluding,
         child: _ModalBarrierGestureDetector(
           onDismiss: handleDismiss,
-          child: _SemanticsClipper(
-           clipDetailsNotifier: clipDetailsNotifier,
-           child: Semantics(
-              onTapHint: semanticsOnTapHint,
-              onTap: handleDismiss,
-              label: semanticsDismissible ? semanticsLabel : null,
-              textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.basic,
-                child: ConstrainedBox(
-                constraints: const BoxConstraints.expand(),
-                child: color == null ? null : ColoredBox(
-                  color: color!,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          child: barrier,
         ),
       ),
     );
