@@ -1861,22 +1861,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return math.max(estimatedHeight, minHeight);
     }
 
-    // TODO(LongCatIsLooong): this is a workaround for
-    // https://github.com/flutter/flutter/issues/112123.
-    // Use preferredLineHeight since SkParagraph currently returns an incorrect
-    // height.
-    final TextHeightBehavior? textHeightBehavior = this.textHeightBehavior;
-    final bool usePreferredLineHeightHack = kIsWeb
-                                         && maxLines == 1
-                                         && text?.codeUnitAt(0) == null
-                                         && strutStyle != null && strutStyle != StrutStyle.disabled
-                                         && textHeightBehavior != null
-                                         && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
-
     // Special case maxLines == 1 since it forces the scrollable direction
     // to be horizontal. Report the real height to prevent the text from being
     // clipped.
-    if (maxLines == 1 && !usePreferredLineHeightHack) {
+    if (maxLines == 1) {
       // The _layoutText call lays out the paragraph using infinite width when
       // maxLines == 1. Also _textPainter.maxLines will be set to 1 so should
       // there be any line breaks only the first line is shown.

@@ -1246,7 +1246,7 @@ void main() {
       expect(painter.height, height, reason: '$span is expected to have a height of $height');
       expect(painter.preferredLineHeight, height, reason: '$span is expected to have a height of $height');
     }
-  }, skip: isBrowser);
+  });
 
   test('TextPainter plainText getter', () {
     final TextPainter painter = TextPainter()
