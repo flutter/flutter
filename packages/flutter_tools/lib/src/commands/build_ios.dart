@@ -15,6 +15,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../doctor_validator.dart';
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
@@ -277,7 +278,30 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     .toList();
   }
 
-  Future<void> _validateIconAssetsAfterArchive(StringBuffer messageBuffer) async {
+  ValidationResult? _createValidationResult(String title, List<ValidationMessage> messages) {
+    if (messages.isEmpty) {
+      return null;
+    }
+    final bool anyInvalid = messages.any((ValidationMessage message) => message.type != ValidationMessageType.information);
+    return ValidationResult(
+      anyInvalid ? ValidationType.partial : ValidationType.installed,
+      messages,
+      statusInfo: title,
+    );
+  }
+
+  ValidationMessage? _createValidationMessage({
+    required bool isValid,
+    required String? messageIfValid,
+    required String messageIfInvalid,
+  }) {
+    // Use "information" type for valid message, and "hint" type for invalid message.
+    return isValid
+      ? (messageIfValid == null ? null : ValidationMessage(messageIfValid))
+      : ValidationMessage.hint(messageIfInvalid);
+  }
+
+  Future<List<ValidationMessage>> _validateIconAssetsAfterArchive() async {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final Map<_ImageAssetFileKey, String> templateInfoMap = _parseImageAssetContentsJson(
@@ -292,19 +316,28 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       projectImageInfoMap: projectInfoMap,
       templateImageDirName: await app.templateAppIconDirNameForImages,
       projectImageDirName: app.projectAppIconDirName);
-    if (usesTemplate) {
-      messageBuffer.writeln('\nWarning: App icon is set to the default placeholder icon. Replace with unique icons.');
-    }
+
+    final ValidationMessage? templateValidationMessage = _createValidationMessage(
+      isValid: !usesTemplate,
+        messageIfValid: 'App icon is not set to the default placeholder image.',
+      messageIfInvalid: 'App icon is set to the default placeholder icon. Replace with unique icons.');
 
     final List<String> filesWithWrongSize = _imageFilesWithWrongSize(
       imageInfoMap: projectInfoMap,
       imageDirName: app.projectAppIconDirName);
-    if (filesWithWrongSize.isNotEmpty) {
-      messageBuffer.writeln('\nWarning: App icon is using the wrong size (e.g. ${filesWithWrongSize.first}).');
-    }
+
+    final ValidationMessage? sizeValidationMessage = _createValidationMessage(
+      isValid: filesWithWrongSize.isEmpty,
+      messageIfValid: 'You do not have incorrectly sized icons.',
+      messageIfInvalid: filesWithWrongSize.isEmpty ? '' : 'App icon is using the incorrect size (e.g. ${filesWithWrongSize.first}).');
+
+    return <ValidationMessage?>[
+      templateValidationMessage,
+      sizeValidationMessage,
+    ].whereType<ValidationMessage>().toList();
   }
 
-  Future<void> _validateLaunchImageAssetsAfterArchive(StringBuffer messageBuffer) async {
+  Future<List<ValidationMessage>> _validateLaunchImageAssetsAfterArchive() async {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final Map<_ImageAssetFileKey, String> templateInfoMap = _parseImageAssetContentsJson(
@@ -320,19 +353,25 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       templateImageDirName: await app.templateLaunchImageDirNameForImages,
       projectImageDirName: app.projectLaunchImageDirName);
 
-    if (usesTemplate) {
-      messageBuffer.writeln('\nWarning: Launch image is set to the default placeholder. Replace with unique launch images.');
-    }
+
+    final ValidationMessage? templateValidationMessage = _createValidationMessage(
+        isValid: !usesTemplate,
+        messageIfValid: 'Launch image is not set to the default placeholder image.',
+        messageIfInvalid: 'Launch image is set to the default placeholder icon. Replace with unique launch image.');
+
+    return <ValidationMessage?>[
+      templateValidationMessage,
+    ].whereType<ValidationMessage>().toList();
   }
 
-  Future<void> _validateXcodeBuildSettingsAfterArchive(StringBuffer messageBuffer) async {
+  Future<List<ValidationMessage>> _validateXcodeBuildSettingsAfterArchive() async {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
 
     if (!globals.fs.file(plistPath).existsSync()) {
       globals.printError('Invalid iOS archive. Does not contain Info.plist.');
-      return;
+      return <ValidationMessage>[];
     }
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
@@ -343,17 +382,30 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-    xcodeProjectSettingsMap.forEach((String title, String? info) {
-      messageBuffer.writeln('$title: ${info ?? "Missing"}');
-    });
+    final List<ValidationMessage?> validationMessages = xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
+      final String title = entry.key;
+      final String? info = entry.value;
+      // message for both valid and invalid case.
+      final String message = '$title: ${info ?? "Missing"}';
+      return _createValidationMessage(
+        isValid: info != null,
+        messageIfValid: message,
+        messageIfInvalid: message);
+    }).toList();
 
-    if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      messageBuffer.writeln('\nYou must set up the missing settings.');
-    }
+    final bool hasMissingSettings = xcodeProjectSettingsMap.values.any((String? element) => element == null);
+    validationMessages.add(_createValidationMessage(
+      isValid: !hasMissingSettings,
+      messageIfValid: null, // do not print out for the valid case.
+      messageIfInvalid: 'You must set up the missing app settings.'));
 
-    if (xcodeProjectSettingsMap['Bundle Identifier']?.startsWith('com.example') ?? false) {
-      messageBuffer.writeln('\nWarning: Your application still contains the default "com.example" bundle identifier.');
-    }
+    final bool usesDefaultBundleIdentifier = xcodeProjectSettingsMap['Bundle Identifier']?.startsWith('com.example') ?? false;
+    validationMessages.add(_createValidationMessage(
+      isValid: !usesDefaultBundleIdentifier,
+      messageIfValid: 'Your application does not contain the default "com.example" bundle identifier.',
+      messageIfInvalid: 'Your application still contains the default "com.example" bundle identifier.',
+    ));
+    return validationMessages.whereType<ValidationMessage>().toList();
   }
 
   @override
@@ -362,13 +414,26 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
-    final StringBuffer validationMessageBuffer = StringBuffer();
-    await _validateXcodeBuildSettingsAfterArchive(validationMessageBuffer);
-    await _validateIconAssetsAfterArchive(validationMessageBuffer);
-    await _validateLaunchImageAssetsAfterArchive(validationMessageBuffer);
+    final List<ValidationResult?> validationResults = <ValidationResult?>[];
+    validationResults.add(_createValidationResult(
+      'App Settings Validation',
+      await _validateXcodeBuildSettingsAfterArchive(),
+    ));
+    validationResults.add(_createValidationResult(
+      'Image Assets Validation',
+      await _validateIconAssetsAfterArchive() + await _validateLaunchImageAssetsAfterArchive(),
+    ));
 
-    validationMessageBuffer.write('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios');
-    globals.printBox(validationMessageBuffer.toString(), title: 'App Settings');
+    for (final ValidationResult result in validationResults.whereType<ValidationResult>()) {
+      globals.printStatus('\n${result.coloredLeadingBox} ${result.statusInfo}');
+      for (final ValidationMessage message in result.messages) {
+        globals.printStatus(
+            '${message.coloredIndicator} ${message.message}',
+            indent: result.leadingBox.length + 1
+        );
+      }
+    }
+    globals.printStatus('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios\n');
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {

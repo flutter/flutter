@@ -918,18 +918,18 @@ void main() {
     expect(
       testLogger.statusText,
       contains(
-        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
-        '│ Version Number: Missing                                                         │\n'
-        '│ Build Number: Missing                                                           │\n'
-        '│ Display Name: Missing                                                           │\n'
-        '│ Deployment Target: Missing                                                      │\n'
-        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
-        '│                                                                                 │\n'
-        '│ You must set up the missing settings.                                           │\n'
-        '│                                                                                 │\n'
-        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
-        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+        '[!] App Settings Validation\n'
+        '    ! Version Number: Missing\n'
+        '    ! Build Number: Missing\n'
+        '    ! Display Name: Missing\n'
+        '    ! Deployment Target: Missing\n'
+        '    • Bundle Identifier: io.flutter.someProject\n'
+        '    ! You must set up the missing app settings.\n'
     ));
+    expect(
+      testLogger.statusText,
+      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -972,16 +972,17 @@ void main() {
     expect(
       testLogger.statusText,
       contains(
-        '┌─ App Settings ──────────────────────────────────────────────────────────────────┐\n'
-        '│ Version Number: 12.34.56                                                        │\n'
-        '│ Build Number: 666                                                               │\n'
-        '│ Display Name: Awesome Gallery                                                   │\n'
-        '│ Deployment Target: 11.0                                                         │\n'
-        '│ Bundle Identifier: io.flutter.someProject                                       │\n'
-        '│                                                                                 │\n'
-        '│ To update the settings, please refer to https://docs.flutter.dev/deployment/ios │\n'
-        '└─────────────────────────────────────────────────────────────────────────────────┘\n'
+        '[✓] App Settings Validation\n'
+        '    • Version Number: 12.34.56\n'
+        '    • Build Number: 666\n'
+        '    • Display Name: Awesome Gallery\n'
+        '    • Deployment Target: 11.0\n'
+        '    • Bundle Identifier: io.flutter.someProject\n'
       )
+    );
+    expect(
+      testLogger.statusText,
+      contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1019,8 +1020,12 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        contains('Warning: Your application still contains the default "com.example" bundle identifier.')
+      testLogger.statusText,
+      contains('    ! Your application still contains the default "com.example" bundle identifier.')
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    • Your application does not contain the default "com.example" bundle identifier.'))
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1058,8 +1063,12 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     expect(
-        testLogger.statusText,
-        isNot(contains('Warning: Your application still contains the default "com.example" bundle identifier.'))
+      testLogger.statusText,
+      contains('    • Your application does not contain the default "com.example" bundle identifier.')
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    ! Your application still contains the default "com.example" bundle identifier.'))
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1140,7 +1149,11 @@ void main() {
 
     expect(
       testLogger.statusText,
-      contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.'),
+      contains('    ! App icon is set to the default placeholder icon. Replace with unique icons.'),
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    • App icon is not set to the default placeholder image.'))
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1217,7 +1230,14 @@ void main() {
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
-    expect(testLogger.statusText, isNot(contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')));
+    expect(
+      testLogger.statusText,
+      contains('    • App icon is not set to the default placeholder image.')
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    ! App icon is set to the default placeholder icon. Replace with unique icons.'))
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -1273,7 +1293,14 @@ void main() {
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
-    expect(testLogger.statusText, contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).'));
+    expect(
+      testLogger.statusText,
+      contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    • You do not have incorrectly sized icons.'))
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -1329,7 +1356,14 @@ void main() {
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
-    expect(testLogger.statusText, contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).'));
+    expect(
+      testLogger.statusText,
+      contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    • You do not have incorrectly sized icons.'))
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -1385,7 +1419,14 @@ void main() {
     await createTestCommandRunner(command).run(
         <String>['build', 'ipa', '--no-pub']);
 
-    expect(testLogger.statusText, isNot(contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).')));
+    expect(
+      testLogger.statusText,
+      contains('    • You do not have incorrectly sized icons.')
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'))
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -1443,7 +1484,10 @@ void main() {
         <String>['build', 'ipa', '--no-pub']);
 
     // The validation should be skipped, even when the icon size is incorrect.
-    expect(testLogger.statusText, isNot(contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@2x.png).')));
+    expect(
+      testLogger.statusText,
+      isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -1545,9 +1589,15 @@ void main() {
 
     // The validation should be skipped, even when the image size is incorrect.
     for (final String imageFileName in imageFileNames) {
-      expect(testLogger.statusText, isNot(contains(
-          'Warning: App icon is using the wrong size (e.g. $imageFileName).')));
+      expect(
+        testLogger.statusText,
+        isNot(contains('    ! App icon is using the incorrect size (e.g. $imageFileName).'))
+      );
     }
+    expect(
+      testLogger.statusText,
+      contains('    • You do not have incorrectly sized icons.')
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
@@ -1623,7 +1673,11 @@ void main() {
 
     expect(
       testLogger.statusText,
-      contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.'),
+      contains('    ! Launch image is set to the default placeholder icon. Replace with unique launch image.'),
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    • Launch image is not set to the default placeholder image.'))
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -1701,7 +1755,11 @@ void main() {
 
     expect(
       testLogger.statusText,
-      isNot(contains('Warning: Launch image is set to the default placeholder. Replace with unique launch images.')),
+      contains('    • Launch image is not set to the default placeholder image.')
+    );
+    expect(
+      testLogger.statusText,
+      isNot(contains('    ! Launch image is set to the default placeholder icon. Replace with unique launch image.')),
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
