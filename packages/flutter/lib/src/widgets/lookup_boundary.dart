@@ -273,6 +273,29 @@ class LookupBoundary extends InheritedWidget {
     return result!;
   }
 
+  /// Returns true if a [LookupBoundary] is hiding the nearest [StatefulWidget]
+  /// with a [State] of the specified type `T` from the provided [BuildContext].
+  ///
+  /// This method throws when asserts are disabled.
+  static bool debugIsHidingAncestorStateOfType<T extends State>(BuildContext context) {
+    bool? result;
+    assert(() {
+      bool hiddenByBoundary = false;
+      bool ancestorFound = false;
+      context.visitAncestorElements((Element ancestor) {
+        if (ancestor is StatefulElement && ancestor.state is T) {
+          ancestorFound = true;
+          return false;
+        }
+        hiddenByBoundary = hiddenByBoundary || ancestor.widget.runtimeType == LookupBoundary;
+        return true;
+      });
+      result = ancestorFound & hiddenByBoundary;
+      return true;
+    } ());
+    return result!;
+  }
+
   /// Returns true if a [LookupBoundary] is hiding the nearest
   /// [RenderObjectWidget] with a [RenderObject] of the specified type `T`
   /// from the provided [BuildContext].
