@@ -800,17 +800,17 @@ void main() {
       const Widget square = SizedBox.square(dimension: 40);
       final Widget child = Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(mainAxisSize: MainAxisSize.min, children: [
+        children: <Widget> [
+          Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
             GestureDetector(
               onTap: () => tappedRed = true,
-              child: const ColoredBox(color: Colors.red, child: square),
+              child: const ColoredBox(color: Color(0xffff0000), child: square),
             ),
-            const ColoredBox(color: Colors.green, child: square),
+            const ColoredBox(color: Color(0xff00ff00), child: square),
           ]),
-          Row(mainAxisSize: MainAxisSize.min, children: const [
-            ColoredBox(color: Colors.blue, child: square),
-            ColoredBox(color: Colors.yellow, child: square),
+          Row(mainAxisSize: MainAxisSize.min, children: const <Widget>[
+            ColoredBox(color: Color(0xff0000ff), child: square),
+            ColoredBox(color: Color(0xffeeff00), child: square),
           ]),
         ],
       );
