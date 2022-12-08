@@ -226,10 +226,8 @@ class _TimePickerHeader extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                if (hourDialType == _HourDialType.twelveHour &&
-                    timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
+                if (hourDialType == _HourDialType.twelveHour && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm)
                   const _DayPeriodControl(),
-                ],
                 Expanded(
                   child: Row(
                     // Hour/minutes should not change positions in RTL locales.
@@ -241,11 +239,11 @@ class _TimePickerHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (hourDialType == _HourDialType.twelveHour &&
-                    timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
-                  const SizedBox(width: 12),
-                  const _DayPeriodControl(),
-                ],
+                if (hourDialType == _HourDialType.twelveHour && timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm)
+                  ...<Widget>[
+                    const SizedBox(width: 12),
+                    const _DayPeriodControl(),
+                  ],
               ],
             ),
           ],
@@ -2346,27 +2344,14 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         break;
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
-        final _TimePickerDefaults defaultTheme;
-        final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
-        if (theme.useMaterial3) {
-          defaultTheme = _TimePickerDefaultsM3(context);
-          double timePickerWidth;
-          if (alwaysUse24HourFormat) {
-            timePickerWidth = _kTimePickerInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
-          } else {
-            timePickerWidth = _kTimePickerInputSize.width;
-          }
-          timePickerSize = Size(timePickerWidth, _kTimePickerInputSize.height);
+        final double timePickerWidth;
+        if (MediaQuery.of(context).alwaysUse24HourFormat) {
+          final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
+          timePickerWidth = _kTimePickerInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
         } else {
-          defaultTheme = _TimePickerDefaultsM2(context);
-          double timePickerWidth;
-          if (alwaysUse24HourFormat) {
-            timePickerWidth = _kTimePickerInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
-          } else {
-            timePickerWidth = _kTimePickerInputSize.width;
-          }
-          timePickerSize = Size(timePickerWidth, _kTimePickerInputSize.height);
+          timePickerWidth = _kTimePickerInputSize.width;
         }
+        timePickerSize = Size(timePickerWidth, _kTimePickerInputSize.height);
         break;
     }
     return Size(timePickerSize.width, timePickerSize.height * textScaleFactor);

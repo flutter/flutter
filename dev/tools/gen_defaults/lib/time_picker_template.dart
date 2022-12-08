@@ -346,18 +346,4 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   }
 }
 ''';
-
-  /// Generate a [BorderSide] for the given components.
-  String mergedBorder(String componentToken1, String componentToken2) {
-    final String borderColor = componentColor(componentToken1)!= 'null'
-        ? componentColor(componentToken1)
-        : componentColor(componentToken2);
-    final double width = (
-        tokens['$componentToken1.width'] ??
-        tokens['$componentToken1.height'] ??
-        tokens['$componentToken2.width'] ??
-        tokens['$componentToken2.height'] ??
-        1) as double;
-    return 'BorderSide(color: $borderColor${width != 1 ? ", width: $width" : ""})';
-  }
 }

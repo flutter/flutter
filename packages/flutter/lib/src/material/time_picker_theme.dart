@@ -53,12 +53,7 @@ class TimePickerThemeData with Diagnosticable {
     this.dialTextStyle,
     this.elevation,
     this.entryModeIconColor,
-    @Deprecated(
-      'Use headlineTextStyle instead. '
-      'This feature was deprecated after v3.6.0-0.0.pre.',
-    )
     this.helpTextStyle,
-    this.headlineTextStyle,
     this.hourMinuteColor,
     this.hourMinuteShape,
     this.hourMinuteTextColor,
@@ -187,18 +182,11 @@ class TimePickerThemeData with Diagnosticable {
   /// ```
   final Color? entryModeIconColor;
 
-  /// Deprecated. Use [headlineTextStyle] instead.
-  @Deprecated(
-    'Use headlineTextStyle instead. '
-    'This feature was deprecated after v3.6.0-0.0.pre.',
-  )
-  final TextStyle? helpTextStyle;
-
   /// Used to configure the [TextStyle]s for the helper text in the header.
   ///
   /// If this is null, the time picker defaults to the overall theme's
   /// [TextTheme.labelSmall].
-  final MaterialStateProperty<TextStyle?>? headlineTextStyle;
+  final TextStyle? helpTextStyle;
 
   /// The background color of the hour and minute header segments.
   ///
@@ -271,7 +259,6 @@ class TimePickerThemeData with Diagnosticable {
     double? elevation,
     Color? entryModeIconColor,
     TextStyle? helpTextStyle,
-    MaterialStateProperty<TextStyle?>? headlineTextStyle,
     Color? hourMinuteColor,
     ShapeBorder? hourMinuteShape,
     Color? hourMinuteTextColor,
@@ -296,7 +283,6 @@ class TimePickerThemeData with Diagnosticable {
       elevation: elevation ?? this.elevation,
       entryModeIconColor: entryModeIconColor ?? this.entryModeIconColor,
       helpTextStyle: helpTextStyle ?? this.helpTextStyle,
-      headlineTextStyle: headlineTextStyle ?? this.headlineTextStyle,
       hourMinuteColor: hourMinuteColor ?? this.hourMinuteColor,
       hourMinuteShape: hourMinuteShape ?? this.hourMinuteShape,
       hourMinuteTextColor: hourMinuteTextColor ?? this.hourMinuteTextColor,
@@ -342,7 +328,6 @@ class TimePickerThemeData with Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       entryModeIconColor: Color.lerp(a?.entryModeIconColor, b?.entryModeIconColor, t),
       helpTextStyle: TextStyle.lerp(a?.helpTextStyle, b?.helpTextStyle, t),
-      headlineTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.headlineTextStyle, b?.headlineTextStyle, t, TextStyle.lerp),
       hourMinuteColor: Color.lerp(a?.hourMinuteColor, b?.hourMinuteColor, t),
       hourMinuteShape: ShapeBorder.lerp(a?.hourMinuteShape, b?.hourMinuteShape, t),
       hourMinuteTextColor: Color.lerp(a?.hourMinuteTextColor, b?.hourMinuteTextColor, t),
@@ -370,7 +355,6 @@ class TimePickerThemeData with Diagnosticable {
     elevation,
     entryModeIconColor,
     helpTextStyle,
-    headlineTextStyle,
     hourMinuteColor,
     hourMinuteShape,
     hourMinuteTextColor,
@@ -404,7 +388,6 @@ class TimePickerThemeData with Diagnosticable {
         && other.elevation == elevation
         && other.entryModeIconColor == entryModeIconColor
         && other.helpTextStyle == helpTextStyle
-        && other.headlineTextStyle == headlineTextStyle
         && other.hourMinuteColor == hourMinuteColor
         && other.hourMinuteShape == hourMinuteShape
         && other.hourMinuteTextColor == hourMinuteTextColor
@@ -432,7 +415,6 @@ class TimePickerThemeData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('entryModeIconColor', entryModeIconColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('helpTextStyle', helpTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('headlineTextStyle', headlineTextStyle, defaultValue: null));
     properties.add(ColorProperty('hourMinuteColor', hourMinuteColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('hourMinuteShape', hourMinuteShape, defaultValue: null));
     properties.add(ColorProperty('hourMinuteTextColor', hourMinuteTextColor, defaultValue: null));
