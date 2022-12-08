@@ -765,7 +765,7 @@ class _CupertinoBackGestureController<T> {
     } else {
       animateForward = controller.value > 0.5;
     }
-    
+
     if (animateForward) {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
