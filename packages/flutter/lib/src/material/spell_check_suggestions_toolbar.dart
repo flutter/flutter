@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/services.dart' show SuggestionSpan;
 import 'package:flutter/widgets.dart';
 
@@ -121,22 +119,6 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     }).toList();
   }
 
-  /// Calculates the height available to draw the toolbar below the anchor.
-  @visibleForTesting
-  double getAvailableHeightBelow(MediaQueryData mediaQueryData, Offset anchorPadded) {
-    final double paddingBelow =
-        math.max(mediaQueryData.viewPadding.bottom, mediaQueryData.viewInsets.bottom);
-    return mediaQueryData.size.height - anchorPadded.dy - paddingBelow;
-  }
-
-  /// Calculates the height available to draw the toolbar above the anchor.
-  @visibleForTesting
-  double getAvailableHeightAbove(MediaQueryData mediaQueryData, Offset anchorPadded, double heightOffset) {
-    final double paddingAbove =
-        math.max(mediaQueryData.viewPadding.top, mediaQueryData.viewInsets.top);
-    return anchorPadded.dy + heightOffset - paddingAbove;
-  }
-
   @override
   Widget build(BuildContext context) {
     // Adjust toolbar height if needed.
@@ -146,32 +128,21 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     final Offset anchorPadded =
         anchor + const Offset(0.0, _kToolbarContentDistanceBelow);
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
-    final double availableHeightBelow = getAvailableHeightBelow(mediaQueryData, anchorPadded);
-    final double heightSlack = availableHeightBelow - spellCheckSuggestionsToolbarHeight;
-    final bool fitsBelow = heightSlack >= 0;
-    // Makes up for any cases where the toolbar may overlap bottom padding.
-    final double heightOffset = fitsBelow? 0 : heightSlack;
-
-    if (!fitsBelow && getAvailableHeightAbove(mediaQueryData, anchorPadded, heightOffset) < 0) {
-        // Ensure that if toolbar is shifted up, it does not overlap top padding.
-        return const SizedBox(width: 0.0, height: 0.0);
-    }
-
+    final double softKeyboardViewInsetsBottom = mediaQueryData.viewInsets.bottom;
     final double paddingAbove = mediaQueryData.padding.top + _kToolbarScreenPadding;
     // Makes up for the Padding above the Stack.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         _kToolbarScreenPadding,
         _kToolbarContentDistanceBelow,
         _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
+        _kToolbarScreenPadding + softKeyboardViewInsetsBottom,
       ),
       child: CustomSingleChildLayout(
         delegate: SpellCheckSuggestionsToolbarLayoutDelegate(
           anchor: anchorPadded - localAdjustment,
-          heightOffset: heightOffset,
         ),
         child: AnimatedSize(
           // This duration was eyeballed on a Pixel 2 emulator running Android

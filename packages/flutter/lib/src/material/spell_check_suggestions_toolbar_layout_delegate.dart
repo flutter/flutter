@@ -15,17 +15,12 @@ class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelega
   /// Creates an instance of [SpellCheckSuggestionsToolbarLayoutDelegate].
   SpellCheckSuggestionsToolbarLayoutDelegate({
     required this.anchor,
-    required this.heightOffset,
   });
 
   /// {@macro flutter.material.MaterialSpellCheckSuggestionsToolbar.anchor}
   ///
   /// Should be provided in local coordinates.
   final Offset anchor;
-
-  /// The height to adjust the toolbar position by if it were to overlap with
-  /// the bottom view insets without adjustment.
-  final double heightOffset;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -40,7 +35,9 @@ class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelega
         childSize.width,
         size.width,
       ),
-      anchor.dy + heightOffset,
+      anchor.dy + childSize.height > size.height
+          ? size.height - childSize.height
+          : anchor.dy,
     );
   }
 
