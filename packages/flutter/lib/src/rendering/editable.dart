@@ -1326,6 +1326,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
+    final bool isValidSelection = selection?.isValid ?? false;
     _semanticsInfo = _textPainter.text!.getSemanticsInformation();
     // TODO(chunhtai): the macOS does not provide a public API to support text
     // selections across multiple semantics nodes. Remove this platform check
@@ -1381,8 +1382,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       config.onSetText = _handleSetText;
     }
 
-    if (selectionEnabled && (selection?.isValid ?? false)) {
+    if (isValidSelection) {
       config.textSelection = selection;
+    }
+
+    if (selectionEnabled && isValidSelection) {
       if (_textPainter.getOffsetBefore(selection!.extentOffset) != null) {
         config
           ..onMoveCursorBackwardByWord = _handleMoveCursorBackwardByWord

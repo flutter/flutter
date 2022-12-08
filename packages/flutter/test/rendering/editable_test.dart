@@ -1725,6 +1725,31 @@ void main() {
     editable.forceLine = false;
     expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
   });
+
+  test(
+      'does not lose semantics config text selection state when interactive selection is disabled',
+      () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    final SemanticsConfiguration config = SemanticsConfiguration();
+    const TextSelection textSelection = TextSelection.collapsed(offset: 3);
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: 'A',
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.fixed(10.0),
+      textSelectionDelegate: delegate,
+      enableInteractiveSelection: false, // disabling interactive selection
+      selection: textSelection,
+    );
+
+    expect(config.textSelection, null);
+    editable.describeSemanticsConfiguration(config);
+    expect(config.textSelection, textSelection);
+  });
 }
 
 class _TestRenderEditable extends RenderEditable {
