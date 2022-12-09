@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -553,7 +555,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() {
-      binding.attachRootWidget(widget);
+      final Widget wrappedWidget = View(
+        view: binding.window,
+        child: widget,
+      );
+      binding.attachRootWidget(wrappedWidget);
       binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
@@ -697,7 +703,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     // The interval following the last frame doesn't have to be within the fullDuration.
     Duration elapsed = Duration.zero;
     return TestAsyncUtils.guard<void>(() async {
-      binding.attachRootWidget(target);
+      binding.attachRootWidget(
+        View(
+          view: binding.window,
+          child: target,
+        )
+      );
       binding.scheduleFrame();
       while (elapsed < maxDuration) {
         await binding.pump(interval);
@@ -725,7 +736,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     runApp(Container(key: UniqueKey()));
     await pump();
     binding.restorationManager.restoreFrom(restorationData);
-    return pumpWidget(widget);
+    return TestAsyncUtils.guard<void>(() {
+      binding.attachRootWidget(widget);
+      binding.scheduleFrame();
+      return binding.pump();
+    });
   }
 
   /// Retrieves the current restoration data from the [RestorationManager].

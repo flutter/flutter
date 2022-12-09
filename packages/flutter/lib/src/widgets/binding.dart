@@ -19,6 +19,7 @@ import 'framework.dart';
 import 'platform_menu_bar.dart';
 import 'router.dart';
 import 'service_extensions.dart';
+import 'view.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -1014,8 +1015,15 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
-  WidgetsFlutterBinding.ensureInitialized()
-    ..scheduleAttachRootWidget(app)
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+
+  final Widget wrappedApp = View(
+    view: binding.window,
+    child: app,
+  );
+
+  binding
+    ..scheduleAttachRootWidget(wrappedApp)
     ..scheduleWarmUpFrame();
 }
 
