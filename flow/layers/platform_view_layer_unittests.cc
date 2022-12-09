@@ -76,6 +76,11 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
            MockCanvas::DrawCall{
                1, MockCanvas::ClipRectData{parent_clip, SkClipOp::kIntersect,
                                            MockCanvas::kHard_ClipEdgeStyle}},
+           MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
+           MockCanvas::DrawCall{
+               2, MockCanvas::ClipRectData{child_clip, SkClipOp::kIntersect,
+                                           MockCanvas::kHard_ClipEdgeStyle}},
+           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
            MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
