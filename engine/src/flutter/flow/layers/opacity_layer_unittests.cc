@@ -7,10 +7,12 @@
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/image_filter_layer.h"
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/flow/raster_cache_util.h"
 #include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/flow/testing/layer_test.h"
+#include "flutter/flow/testing/mock_embedder.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/display_list_testing.h"
@@ -274,11 +276,16 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
       mock_layer->parent_mutators(),
       std::vector({Mutator(layer_transform), Mutator(SK_AlphaTRANSPARENT)}));
 
-  auto expected_draw_calls =
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
+  auto expected_draw_calls = std::vector(
+      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+       MockCanvas::DrawCall{
+           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
+       MockCanvas::DrawCall{1, MockCanvas::SaveData{2}},
+       MockCanvas::DrawCall{
+           2, MockCanvas::ClipRectData{kEmptyRect, SkClipOp::kIntersect,
+                                       MockCanvas::kHard_ClipEdgeStyle}},
+       MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
@@ -684,6 +691,31 @@ TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
        MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   layer->Paint(paint_context());
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
+}
+
+TEST_F(OpacityLayerTest, FullyTransparentDoesNotCullPlatformView) {
+  const SkPoint opacity_offset = SkPoint::Make(0.5f, 1.5f);
+  const SkPoint view_offset = SkPoint::Make(0.0f, 0.0f);
+  const SkSize view_size = SkSize::Make(8.0f, 8.0f);
+  const int64_t view_id = 42;
+  auto platform_view =
+      std::make_shared<PlatformViewLayer>(view_offset, view_size, view_id);
+
+  auto opacity =
+      std::make_shared<OpacityLayer>(SK_AlphaTRANSPARENT, opacity_offset);
+  opacity->Add(platform_view);
+
+  auto embedder = MockViewEmbedder();
+  SkCanvas fake_overlay_canvas;
+  embedder.AddCanvas(&fake_overlay_canvas);
+  preroll_context()->view_embedder = &embedder;
+  paint_context().view_embedder = &embedder;
+
+  opacity->Preroll(preroll_context());
+  EXPECT_EQ(embedder.prerolled_views(), std::vector<int64_t>({view_id}));
+
+  opacity->Paint(paint_context());
+  EXPECT_EQ(embedder.painted_views(), std::vector<int64_t>({view_id}));
 }
 
 }  // namespace testing
