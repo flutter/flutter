@@ -682,7 +682,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     super.debugOwner,
     super.kind,
     super.supportedDevices,
-  }) : assert(dragStartBehavior != null);
+  }) : assert(dragStartBehavior != null), 
+      _deadline = kPressTimeout,
+      slopTolerance = kTouchSlop;
 
   /// Configure the behavior of offsets passed to [onDragStart].
   ///
@@ -734,7 +736,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   // Can be null to indicate that the gesture can drift for any distance.
   // Defaults to 18 logical pixels.
   @override
-  final double? slopTolerance = kTouchSlop;
+  final double? slopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -835,7 +837,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   //
   // [onTapDown] will not be called if the primary pointer is
   // accepted, rejected, or all pointers are up or canceled before [_deadline].
-  final Duration _deadline = kPressTimeout;
+  final Duration _deadline;
 
   // Drag related state.
   _DragState _dragState = _DragState.ready;
