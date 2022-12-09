@@ -7,6 +7,12 @@ import 'target.dart';
 void main() {
   Targets.used1.hit();
   Targets.used2.hit();
+  final Target nonConstUsed3 = helper(Target.new);
+  nonConstUsed3.hit();
+}
+
+Target helper(Target Function(String, int, Target?) tearOff) {
+  return tearOff('from tear-off', 3, null);
 }
 
 @staticIconProvider
