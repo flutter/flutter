@@ -191,18 +191,18 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void didChangeDependencies() {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
     // completed its timer, dismiss that SnackBar. If the timer hasn't finished
     // yet, let it timeout as normal.
     if ((_accessibleNavigation ?? false)
-        && !mediaQuery.accessibleNavigation
+        && !accessibleNavigation
         && _snackBarTimer != null
         && !_snackBarTimer!.isActive) {
       hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
     }
-    _accessibleNavigation = mediaQuery.accessibleNavigation;
+    _accessibleNavigation = accessibleNavigation;
     super.didChangeDependencies();
   }
 
@@ -568,8 +568,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    _accessibleNavigation = mediaQuery.accessibleNavigation;
+    _accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic>? route = ModalRoute.of(context);
@@ -582,8 +581,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
                 _snackBarController!.status == AnimationStatus.completed,
             );
             // Look up MediaQuery again in case the setting changed.
-            final MediaQueryData mediaQuery = MediaQuery.of(context);
-            if (mediaQuery.accessibleNavigation && snackBar.action != null) {
+            if (snackBar.action != null && MediaQuery.accessibleNavigationOf(context)) {
               return;
             }
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
@@ -1824,11 +1822,11 @@ class Scaffold extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to the surrounding
+  /// `MediaQuery.paddingOf(context)` that corresponds to the surrounding
   /// [TextDirection]. This ensures that the drag area for notched devices is
   /// not obscured. For example, if `TextDirection.of(context)` is set to
   /// [TextDirection.ltr], 20.0 will be added to
-  /// `MediaQuery.of(context).padding.left`.
+  /// `MediaQuery.paddingOf(context).left`.
   final double? drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag
@@ -2761,7 +2759,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -2796,8 +2793,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
 
     if (widget.appBar != null) {
-      final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
+      final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
       _appBarMaxHeight = widget.appBar!.preferredSizeFor(context).height + topPadding;
+      final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
+      _appBarMaxHeight = AppBar.preferredHeightFor(context, widget.appBar!.preferredSize) + topPadding;
       assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
       _addIfNonNull(
         children,
@@ -2973,14 +2972,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
 
     // The minimum insets for contents of the Scaffold to keep visible.
-    final EdgeInsets minInsets = mediaQuery.padding.copyWith(
-      bottom: _resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0,
+    final EdgeInsets minInsets = MediaQuery.paddingOf(context).copyWith(
+      bottom: _resizeToAvoidBottomInset ? MediaQuery.viewInsetsOf(context).bottom : 0.0,
     );
 
     // The minimum viewPadding for interactive elements positioned by the
     // Scaffold to keep within safe interactive areas.
-    final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
-      bottom: _resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
+    final EdgeInsets minViewPadding = MediaQuery.viewPaddingOf(context).copyWith(
+      bottom: _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0 ? 0.0 : null,
     );
 
     // extendBody locked when keyboard is open

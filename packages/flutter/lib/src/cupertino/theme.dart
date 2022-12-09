@@ -87,7 +87,7 @@ class CupertinoTheme extends StatelessWidget {
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.of(context).platformBrightness;
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.platformBrightnessOf(context);
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -107,7 +107,7 @@ class CupertinoTheme extends StatelessWidget {
   ///   [MediaQuery] exists, instead of returning null.
   static Brightness? maybeBrightnessOf(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybeOf(context)?.platformBrightness;
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
   /// The widget below this widget in the tree.

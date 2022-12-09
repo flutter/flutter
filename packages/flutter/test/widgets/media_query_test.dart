@@ -5,7 +5,7 @@
 import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -686,21 +686,21 @@ void main() {
     expect(insideHighContrast, true);
   });
 
-  testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
+  testWidgets('MediaQuery.boldTextOf', (WidgetTester tester) async {
     late bool outsideBoldTextOverride;
     late bool insideBoldTextOverride;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          outsideBoldTextOverride = MediaQuery.boldTextOverride(context);
+          outsideBoldTextOverride = MediaQuery.boldTextOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               boldText: true,
             ),
             child: Builder(
               builder: (BuildContext context) {
-                insideBoldTextOverride = MediaQuery.boldTextOverride(context);
+                insideBoldTextOverride = MediaQuery.boldTextOf(context);
                 return Container();
               },
             ),
@@ -936,5 +936,81 @@ void main() {
 
     expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
+  });
+
+  testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
+    MediaQueryData data = const MediaQueryData(
+      size: Size(800, 600),
+      textScaleFactor: 1.1
+    );
+
+    int sizeBuildCount = 0;
+    int textScaleFactorBuildCount = 0;
+
+    final Widget showSize = Builder(
+      builder: (BuildContext context) {
+        sizeBuildCount++;
+        return Text('size: ${MediaQuery.sizeOf(context)}');
+      }
+    );
+
+    final Widget showTextScaleFactor = Builder(
+      builder: (BuildContext context) {
+        textScaleFactorBuildCount++;
+        return Text('textScaleFactor: ${MediaQuery.textScaleFactorOf(context).toStringAsFixed(1)}');
+      }
+    );
+
+    final Widget page = StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return MediaQuery(
+          data: data,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                showSize,
+                showTextScaleFactor,
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
+                    });
+                  },
+                  child: const Text('Increase width by 100')
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(textScaleFactor: data.textScaleFactor + 0.1);
+                    });
+                  },
+                  child: const Text('Increase textScaleFactor by 0.1')
+                )
+              ]
+            )
+          )
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(home: page));
+    expect(find.text('size: Size(800.0, 600.0)'), findsOneWidget);
+    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
+    expect(sizeBuildCount, 1);
+    expect(textScaleFactorBuildCount, 1);
+
+    await tester.tap(find.text('Increase width by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
+    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
+    expect(sizeBuildCount, 2);
+    expect(textScaleFactorBuildCount, 1);
+
+    await tester.tap(find.text('Increase textScaleFactor by 0.1'));
+    await tester.pumpAndSettle();
+    expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
+    expect(find.text('textScaleFactor: 1.2'), findsOneWidget);
+    expect(sizeBuildCount, 2);
+    expect(textScaleFactorBuildCount, 2);
   });
 }
