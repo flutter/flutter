@@ -147,7 +147,11 @@ extension CanvasKitExtension on CanvasKit {
 final bool isRuntimeEffectAvailable = windowFlutterCanvasKit?.RuntimeEffect != null;
 
 @JS('window.CanvasKitInit')
-external CanvasKitInitPromise CanvasKitInit(CanvasKitInitOptions options);
+external Object _CanvasKitInit(CanvasKitInitOptions options);
+
+Future<CanvasKit> CanvasKitInit(CanvasKitInitOptions options) {
+  return js_util.promiseToFuture<CanvasKit>(_CanvasKitInit(options));
+}
 
 typedef LocateFileCallback = String Function(String file, String unusedBase);
 
@@ -158,16 +162,6 @@ class CanvasKitInitOptions {
   external factory CanvasKitInitOptions({
     required LocateFileCallback locateFile,
   });
-}
-
-typedef CanvasKitInitCallback = void Function(CanvasKit canvasKit);
-
-@JS()
-@staticInterop
-class CanvasKitInitPromise {}
-
-extension CanvasKitInitPromiseExtension on CanvasKitInitPromise {
-  external void then(CanvasKitInitCallback callback);
 }
 
 @JS('window.flutterCanvasKit.ColorSpace.SRGB')
@@ -2638,16 +2632,11 @@ String canvasKitWasmModuleUrl(String canvasKitBase, String file) =>
 /// and intialize the CanvasKit wasm.
 Future<CanvasKit> downloadCanvasKit() async {
   await _downloadCanvasKitJs();
-  final Completer<CanvasKit> canvasKitInitCompleter = Completer<CanvasKit>();
-  final CanvasKitInitPromise canvasKitInitPromise =
-      CanvasKitInit(CanvasKitInitOptions(
+
+  return CanvasKitInit(CanvasKitInitOptions(
     locateFile: allowInterop((String file, String unusedBase) =>
         canvasKitWasmModuleUrl(canvasKitBuildUrl, file)),
   ));
-  canvasKitInitPromise.then(allowInterop((CanvasKit ck) {
-    canvasKitInitCompleter.complete(ck);
-  }));
-  return canvasKitInitCompleter.future;
 }
 
 /// Downloads the CanvasKit JavaScript file at [canvasKitBase].
