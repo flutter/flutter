@@ -518,7 +518,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     // `_down` must be assigned in this method instead of [handleEvent],
     // because [acceptGesture] might be called before [handleEvent],
     // which may rely on `_down` to initiate a callback.
-    _trackTrap(event);
+    _trackTap(event);
   }
 
   @override
@@ -564,7 +564,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     super.dispose();
   }
 
-  void _trackTrap(PointerDownEvent event) {
+  void _trackTap(PointerDownEvent event) {
     _down = event;
     _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
     _previousButtons = event.buttons;
