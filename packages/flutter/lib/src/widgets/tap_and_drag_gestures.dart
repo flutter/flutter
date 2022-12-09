@@ -1024,11 +1024,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _giveUpPointer(event.pointer);
       }
 
-      final bool isSlopPastTolerance = slopTolerance != null && _getGlobalDistance(event, _initialPosition) > slopTolerance!;
-
-      if (isSlopPastTolerance) {
-        _pastSlopTolerance = true;
-      }
+      _pastSlopTolerance = _pastSlopTolerance || slopTolerance != null && _getGlobalDistance(event, _initialPosition) > slopTolerance!;
 
       if (_dragState == _DragState.accepted) {
         _checkDragUpdate(event);
