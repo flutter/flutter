@@ -682,7 +682,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     super.debugOwner,
     super.kind,
     super.supportedDevices,
-  }) : assert(dragStartBehavior != null), 
+  }) : assert(dragStartBehavior != null),
       _deadline = kPressTimeout,
       slopTolerance = kTouchSlop;
 
@@ -850,10 +850,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   TapDragUpdateDetails? _lastDragUpdateDetails;
   Timer? _dragUpdateThrottleTimer;
 
-  // The buttons sent by [PointerDownEvent]. If a [PointerMoveEvent] comes with a
-  // different set of buttons, the gesture is canceled.
-  int? _initialButtons;
-
   final Set<int> _acceptedActivePointers = <int>{};
 
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
@@ -876,7 +872,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   @override
   bool isPointerAllowed(PointerEvent event) {
-    if (_initialButtons == null) {
+    if (_primaryPointer == null) {
       switch (event.buttons) {
         case kPrimaryButton:
           if (onTapDown == null &&
@@ -893,10 +889,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       }
     } else {
       // There can be multiple drags simultaneously. Their effects are combined.
-      if (event.buttons != _initialButtons) {
+      if (event.pointer != _primaryPointer) {
         return false;
       }
     }
+
     return super.isPointerAllowed(event as PointerDownEvent);
   }
 
@@ -906,17 +903,19 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       super.addAllowedPointer(event);
       _primaryPointer = event.pointer;
       _globalDistanceMoved = 0.0;
-      _initialButtons = event.buttons;
       _dragState = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
-      _deadlineTimer = Timer(_deadline!, () => _didExceedDeadlineWithEvent(event));
+      _deadlineTimer = Timer(_deadline, () => _didExceedDeadlineWithEvent(event));
     }
   }
 
   @override
   void handleNonAllowedPointer(PointerDownEvent event) {
-    if (!_wonArenaForPrimaryPointer) {
-      super.handleNonAllowedPointer(event);
+    // There can be multiple drags simultaneously. Their effects are combined.
+    if (event.buttons != kPrimaryButton) {
+      if (!_wonArenaForPrimaryPointer) {
+        super.handleNonAllowedPointer(event);
+      }
     }
   }
 
@@ -1018,12 +1017,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // a sufficient global distance from the initial position to be considered a drag.
       // In this case since the gesture cannot be a tap, it defaults to a drag.
 
-      // If the buttons differ from the [PointerDownEvent]s buttons then stop tracking
-      // the pointer.
-      if (event.buttons != _initialButtons) {
-        _giveUpPointer(event.pointer);
-      }
-
       _pastSlopTolerance = _pastSlopTolerance || slopTolerance != null && _getGlobalDistance(event, _initialPosition) > slopTolerance!;
 
       if (_dragState == _DragState.accepted) {
@@ -1121,15 +1114,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       keysPressedOnDown: keysPressedOnDown,
     );
 
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onTapDown != null) {
-          invokeCallback('onTapDown', () => onTapDown!(details));
-        }
-        break;
-      default:
-        assert(_initialButtons != null);
+    if (onTapDown != null) {
+      invokeCallback('onTapDown', () => onTapDown!(details));
     }
+
     _sentTapDown = true;
   }
 
@@ -1146,14 +1134,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       keysPressedOnDown: keysPressedOnDown,
     );
 
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onTapUp != null) {
-          invokeCallback('onTapUp', () => onTapUp!(upDetails));
-        }
-        break;
-      default:
-        assert(_initialButtons != null);
+    if (onTapUp != null) {
+      invokeCallback('onTapUp', () => onTapUp!(upDetails));
     }
 
     _resetTaps();
@@ -1232,14 +1214,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // Do not fire tap cancel if [onTapDown] was never called.
       return;
     }
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onCancel != null) {
-          invokeCallback('onCancel', onCancel!);
-        }
-        break;
-      default:
-        assert(_initialButtons != null);
+    if (onCancel != null) {
+      invokeCallback('onCancel', onCancel!);
     }
     _resetDragUpdateThrottle();
     _resetTaps();
@@ -1274,7 +1250,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   void _resetTaps() {
     _sentTapDown = false;
     _wonArenaForPrimaryPointer = false;
-    _initialButtons = null;
+    _primaryPointer = null;
   }
 
   void _resetDragUpdateThrottle() {
