@@ -31,10 +31,6 @@ void expectInstances(dynamic value, dynamic expected, Compiler compiler) {
 
   final Equality<Object?> equality;
   if (compiler == Compiler.dart2js) {
-    // Ignore comparing nonConstantLocations in web dills because it will have
-    // extra fields.
-    (value as Map<String, Object?>).remove('nonConstantLocations');
-    (expected as Map<String, Object?>).remove('nonConstantLocations');
     equality = const Dart2JSDeepCollectionEquality();
   } else {
     equality = const DeepCollectionEquality();
@@ -69,9 +65,7 @@ void _checkConsts(String dillPath, Compiler compiler) {
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'Target',
   );
-  expectInstances(
-    finder.findInstances(),
-    <String, dynamic>{
+  final Map<String, Object?> expectation = <String, dynamic>{
       'constantInstances': <Map<String, dynamic>>[
         <String, dynamic>{'stringValue': '100', 'intValue': 100, 'targetValue': null},
         <String, dynamic>{'stringValue': '102', 'intValue': 102, 'targetValue': null},
@@ -95,7 +89,27 @@ void _checkConsts(String dillPath, Compiler compiler) {
         <String, dynamic>{'stringValue': 'package', 'intValue':-1, 'targetValue': null},
       ],
       'nonConstantLocations': <dynamic>[],
-    },
+    };
+  if (compiler == Compiler.aot) {
+    expectation['nonConstantLocations'] = <Object?>[];
+  } else {
+    final String fixturesUrl = Platform.isWindows
+      ? '/$fixtures'.replaceAll(Platform.pathSeparator, '/')
+      : fixtures;
+
+    // Without true tree-shaking, there is a non-const reference in a
+    // never-invoked function that will be present in the dill.
+    expectation['nonConstantLocations'] = <Object?>[
+      <String, dynamic>{
+        'file': 'file://$fixturesUrl/pkg/package.dart',
+        'line': 14,
+        'column': 25,
+      },
+    ];
+  }
+  expectInstances(
+    finder.findInstances(),
+    expectation,
     compiler,
   );
 
@@ -125,8 +139,9 @@ void _checkAnnotation(String dillPath, Compiler compiler) {
     annotationClassName: 'StaticIconProvider',
     annotationClassLibraryUri: 'package:const_finder_fixtures/static_icon_provider.dart',
   );
+  final Map<String, dynamic> instances = finder.findInstances();
   expectInstances(
-    finder.findInstances(),
+    instances,
     <String, dynamic>{
       'constantInstances': <Map<String, Object?>>[
         <String, Object?>{
@@ -140,6 +155,8 @@ void _checkAnnotation(String dillPath, Compiler compiler) {
           'targetValue': null,
         },
       ],
+      // TODO(fujino): This should have non-constant locations from the use of
+      // a tear-off, see https://github.com/flutter/flutter/issues/116797
       'nonConstantLocations': <Object?>[],
     },
     compiler,
@@ -212,6 +229,9 @@ void _checkNonConstsWeb(String dillPath, Compiler compiler) {
     className: 'Target',
   );
 
+  final String fixturesUrl = Platform.isWindows
+    ? '/$fixtures'.replaceAll(Platform.pathSeparator, '/')
+    : fixtures;
   expectInstances(
     finder.findInstances(),
     <String, dynamic>{
@@ -225,7 +245,33 @@ void _checkNonConstsWeb(String dillPath, Compiler compiler) {
         <String, dynamic>{'stringValue': '7', 'intValue': 7, 'targetValue': null},
         <String, dynamic>{'stringValue': 'package', 'intValue': -1, 'targetValue': null},
       ],
-      'nonConstantLocations': <dynamic>[]
+      'nonConstantLocations': <dynamic>[
+        <String, dynamic>{
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
+          'line': 14,
+          'column': 26,
+        },
+        <String, dynamic>{
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
+          'line': 16,
+          'column': 26,
+        },
+        <String, dynamic>{
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
+          'line': 16,
+          'column': 41,
+        },
+        <String, dynamic>{
+          'file': 'file://$fixturesUrl/lib/consts_and_non.dart',
+          'line': 17,
+          'column': 26,
+        },
+        <String, dynamic>{
+          'file': 'file://$fixturesUrl/pkg/package.dart',
+          'line': 14,
+          'column': 25,
+        }
+      ],
     },
     compiler,
   );

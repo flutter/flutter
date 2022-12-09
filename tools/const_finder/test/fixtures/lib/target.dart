@@ -15,8 +15,7 @@ class Target {
 }
 
 class ExtendsTarget extends Target {
-  const ExtendsTarget(String stringValue, int intValue, Target? targetValue)
-      : super(stringValue, intValue, targetValue);
+  const ExtendsTarget(super.stringValue, super.intValue, super.targetValue);
 }
 
 class ImplementsTarget implements Target {
