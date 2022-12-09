@@ -4656,6 +4656,7 @@ targets:
     enabled_branches:
       - beta
       - stable
+      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4669,6 +4670,7 @@ targets:
     enabled_branches:
       - beta
       - stable
+      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4683,10 +4685,13 @@ targets:
     enabled_branches:
       - beta
       - stable
+      - main
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      drone_dimensions: >
+        ["cpu=arm64"]
 
 
   - name: Windows flutter_packaging
@@ -4697,16 +4702,20 @@ targets:
     enabled_branches:
       - beta
       - stable
+      - main
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
 
-  - name: Linux docs_deploy
+  - name: Linux docs_deploy_beta
     recipe: flutter/flutter
     scheduler: release
     bringup: true
+    enabled_branches:
+      - beta
+      - main
     presubmit: false
     timeout: 60
     properties:
@@ -4720,5 +4729,25 @@ targets:
         ["framework", "hostonly", "linux"]
       validation: docs_deploy
       validation_name: Docs_deploy
-      # TODO(godofredoc): Update to docs-flutter-dev before release.
       firebase_project: master-docs-flutter-dev
+
+  - name: Linux docs_deploy_stable
+    recipe: flutter/flutter
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - stable
+    presubmit: false
+    timeout: 60
+    properties:
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"},
+          {"dependency": "firebase", "version": "v11.0.1"}
+        ]
+      tags: >
+        ["framework", "hostonly", "linux"]
+      validation: docs_deploy
+      validation_name: Docs_deploy
+      firebase_project: docs-flutter-dev
