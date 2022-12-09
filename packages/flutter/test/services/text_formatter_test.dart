@@ -7,15 +7,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestTextInputFormatter extends TextInputFormatter {
+  const TextInputFormatter();
   const TestTextInputFormatter();
 }
 
 void main() {
   test('test const constructor', () {
-    const testValue1 = TestTextInputFormatter();
-    const testValue2 = TestTextInputFormatter();
+    const TestTextInputFormatter testValue1 = TestTextInputFormatter();
+    const TestTextInputFormatter testValue2 = TestTextInputFormatter();
 
-    expect(testValue1, equals(testValue2));
+    expect(testValue1, same(testValue2));
   });
 
   TextEditingValue testOldValue = TextEditingValue.empty;
