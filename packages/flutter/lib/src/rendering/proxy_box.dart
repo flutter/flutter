@@ -2431,7 +2431,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     }
     _origin = value;
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
@@ -2453,7 +2453,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     }
     _alignment = value;
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
@@ -2468,9 +2468,12 @@ class RenderTransform extends RenderProxyBox {
       return;
     }
     _textDirection = value;
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
+
+  @override
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   @override
   bool get alwaysNeedsCompositing => child != null && _filterQuality != null;
@@ -2496,7 +2499,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     }
     _transform = Matrix4.copy(value);
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
@@ -2514,48 +2517,48 @@ class RenderTransform extends RenderProxyBox {
     if (didNeedCompositing != alwaysNeedsCompositing) {
       markNeedsCompositingBitsUpdate();
     }
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
   }
 
   /// Sets the transform to the identity matrix.
   void setIdentity() {
     _transform!.setIdentity();
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the x axis into the transform.
   void rotateX(double radians) {
     _transform!.rotateX(radians);
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the y axis into the transform.
   void rotateY(double radians) {
     _transform!.rotateY(radians);
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the z axis into the transform.
   void rotateZ(double radians) {
     _transform!.rotateZ(radians);
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a translation by (x, y, z) into the transform.
   void translate(double x, [ double y = 0.0, double z = 0.0 ]) {
     _transform!.translate(x, y, z);
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a scale into the transform.
   void scale(double x, [ double? y, double? z ]) {
     _transform!.scale(x, y, z);
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     markNeedsSemanticsUpdate();
   }
 
@@ -2605,49 +2608,44 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
+  OffsetLayer updateCompositedLayer({required covariant ImageFilterLayer? oldLayer}) {
+    final ImageFilterLayer layer = oldLayer ?? ImageFilterLayer();
+    layer.imageFilter = ui.ImageFilter.matrix(
+      _effectiveTransform!.storage,
+      filterQuality: filterQuality!
+    );
+    return layer;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      final Matrix4 transform = _effectiveTransform!;
-      if (filterQuality == null) {
-        final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
-        if (childOffset == null) {
-          // if the matrix is singular the children would be compressed to a line or
-          // single point, instead short-circuit and paint nothing.
-          final double det = transform.determinant();
-          if (det == 0 || !det.isFinite) {
-            layer = null;
-            return;
-          }
-          layer = context.pushTransform(
-            needsCompositing,
-            offset,
-            transform,
-            super.paint,
-            oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
-          );
-        } else {
-          super.paint(context, offset + childOffset);
-          layer = null;
-        }
-      } else {
-        final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-          ..multiply(transform)..translate(-offset.dx, -offset.dy);
-        final ui.ImageFilter filter = ui.ImageFilter.matrix(
-          effectiveTransform.storage,
-          filterQuality: filterQuality!,
-        );
-        if (layer is ImageFilterLayer) {
-          final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
-          filterLayer.imageFilter = filter;
-        } else {
-          layer = ImageFilterLayer(imageFilter: filter);
-        }
-        context.pushLayer(layer!, super.paint, offset);
-        assert(() {
-          layer!.debugCreator = debugCreator;
-          return true;
-        }());
+    if (child == null) {
+      return;
+    }
+    if (isRepaintBoundary) {
+      return super.paint(context, offset);
+    }
+
+    final Matrix4 transform = _effectiveTransform!;
+    final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
+    if (childOffset == null) {
+      // if the matrix is singular the children would be compressed to a line or
+      // single point, instead short-circuit and paint nothing.
+      final double det = transform.determinant();
+      if (det == 0 || !det.isFinite) {
+        layer = null;
+        return;
       }
+      layer = context.pushTransform(
+        needsCompositing,
+        offset,
+        transform,
+        super.paint,
+        oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+      );
+    } else {
+      super.paint(context, offset + childOffset);
+      layer = null;
     }
   }
 
