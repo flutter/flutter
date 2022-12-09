@@ -59,6 +59,9 @@ function create_docset() {
   dashing_pid=$!
   wait $dashing_pid && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
+  DART_VERSION=$("$DART --version")
+  echo "Dart path: $DART"
+  echo "Dart version: $DART_VERSION"
   "$DART" --disable-dart-dev --enable-asserts ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
   if [[ $? -ne 0 ]]; then
