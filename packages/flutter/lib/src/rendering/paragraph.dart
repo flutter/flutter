@@ -119,7 +119,9 @@ class RenderParagraph extends RenderBox
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
-  AttributedString? _cachedAttributedLabel;
+
+  List<AttributedString>? _cachedAttributedLabels;
+
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
@@ -135,7 +137,7 @@ class RenderParagraph extends RenderBox
         break;
       case RenderComparison.paint:
         _textPainter.text = value;
-        _cachedAttributedLabel = null;
+        _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsPaint();
@@ -144,7 +146,7 @@ class RenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
-        _cachedAttributedLabel = null;
+        _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         _extractPlaceholderSpans(value);
         markNeedsLayout();
@@ -1035,12 +1037,109 @@ class RenderParagraph extends RenderBox
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
+    bool needsAssembleSemanticsNode = false;
+    bool needsCustomMerger = false;
+    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+      if (info.recognizer != null) {
+        needsAssembleSemanticsNode = true;
+        break;
+      }
+      needsCustomMerger = needsCustomMerger || info.isPlaceholder;
+    }
 
-    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
+    if (needsAssembleSemanticsNode) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
+    } else if(needsCustomMerger) {
+      config.childConfigurationsDelegate = (List<SemanticsConfiguration> childConfigs) {
+        final List<AttributedString> cachedStrings = _cachedAttributedLabels ??=  <AttributedString>[];
+        final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
+        final Iterator<SemanticsConfiguration> iterator = childConfigs.iterator;
+        if (!iterator.moveNext()) {
+          // TODO: implements.
+          throw UnimplementedError();
+        }
+        int placeholderIndex = 0;
+        if (cachedStrings.isNotEmpty) {
+          int textSpanLabelIndex = 0;
+          bool seenTextSpan = false;
+          for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+            if (info.isPlaceholder) {
+              if (seenTextSpan) {
+                final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+                textSpanConfig.attributedLabel = cachedStrings[textSpanLabelIndex];
+                builder.markAsMergeUp(textSpanConfig);
+                textSpanLabelIndex += 1;
+              }
+              while (iterator.current.tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+                builder.markAsMergeUp(iterator.current);
+                if (!iterator.moveNext()) {
+                  break;
+                }
+              }
+              placeholderIndex += 1;
+              continue;
+            }
+            seenTextSpan = true;
+          }
+          assert(seenTextSpan && textSpanLabelIndex == cachedStrings.length - 1);
+          assert(!seenTextSpan && textSpanLabelIndex == cachedStrings.length);
+          if (seenTextSpan) {
+            final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+            textSpanConfig.attributedLabel = cachedStrings.last;
+            builder.markAsMergeUp(textSpanConfig);
+          }
+        } else {
+          int offset = 0;
+          StringBuffer? buffer;
+          List<StringAttribute>? attributes;
+          for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+            if (info.isPlaceholder) {
+              // The label can be null if there is no text span in between
+              // placeholder spans.
+              if (buffer != null) {
+                final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+                textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
+                builder.markAsMergeUp(textSpanConfig);
+                cachedStrings.add(textSpanConfig.attributedLabel);
+                buffer = null;
+                offset = 0;
+                attributes = null;
+              }
+              while (iterator.current.tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+                builder.markAsMergeUp(iterator.current);
+                if (!iterator.moveNext()) {
+                  break;
+                }
+              }
+              placeholderIndex += 1;
+              continue;
+            }
+            buffer ??= StringBuffer();
+            attributes ??= <StringAttribute>[];
+            final String label = info.semanticsLabel ?? info.text;
+            for (final StringAttribute infoAttribute in info.stringAttributes) {
+              final TextRange originalRange = infoAttribute.range;
+              attributes.add(
+                infoAttribute.copy(
+                  range: TextRange(start: offset + originalRange.start, end: offset + originalRange.end),
+                ),
+              );
+            }
+            buffer.write(label);
+            offset += label.length;
+          }
+          if (buffer != null) {
+            final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+            textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
+            builder.markAsMergeUp(textSpanConfig);
+            cachedStrings.add(textSpanConfig.attributedLabel);
+          }
+        }
+        return builder.build();
+      };
     } else {
-      if (_cachedAttributedLabel == null) {
+      if (_cachedAttributedLabels == null) {
         final StringBuffer buffer = StringBuffer();
         int offset = 0;
         final List<StringAttribute> attributes = <StringAttribute>[];
@@ -1058,10 +1157,10 @@ class RenderParagraph extends RenderBox
           buffer.write(label);
           offset += label.length;
         }
-        _cachedAttributedLabel = AttributedString(buffer.toString(), attributes: attributes);
+        _cachedAttributedLabels = <AttributedString>[AttributedString(buffer.toString(), attributes: attributes)];
       }
-      config.attributedLabel = _cachedAttributedLabel!;
-      config.textDirection = textDirection;
+    config.attributedLabel = _cachedAttributedLabels![0];
+    config.textDirection = textDirection;
     }
   }
 

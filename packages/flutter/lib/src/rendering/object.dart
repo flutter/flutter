@@ -3244,7 +3244,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final SemanticsConfiguration config = _semanticsConfiguration;
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
 
-    final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
+    bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
     final List<SemanticsConfiguration> childConfigurations = <SemanticsConfiguration>[];
     final bool explicitChildNode = config.explicitChildNodes || parent is! RenderObject;
@@ -3299,11 +3299,22 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     } else if (hasChildConfigurationsDelegate && childConfigurations.isNotEmpty) {
       final ChildSemanticsConfigurationsResult result = config.childConfigurationsDelegate!(childConfigurations);
       mergeUpFragments.addAll(
-        result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) => configToFragment[config]!),
+        result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) {
+          final _InterestingSemanticsFragment? fragment = configToFragment[config];
+          if (fragment == null) {
+            // Incomplete fragment can't be fork since it always needs to be
+            // merged.
+            producesForkingFragment = false;
+            return _IncompleteSemanticsFragment(config: config, owner: this);
+          }
+          return fragment;
+        }),
       );
       for (final Iterable<SemanticsConfiguration> group in result.siblingMergeGroups) {
         siblingMergeFragmentGroups.add(
-          group.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) => configToFragment[config]!).toList()
+          group.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) {
+            return configToFragment[config] ?? _IncompleteSemanticsFragment(config: config, owner: this);
+          }).toList(),
         );
       }
     }
@@ -4278,6 +4289,43 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
     _children.addAll(fragments);
+  }
+}
+
+class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
+  _IncompleteSemanticsFragment({
+    required this.config,
+    required super.owner,
+  }) : super(dropsSemanticsOfPreviousSiblings: false);
+
+
+  @override
+  void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
+    // This fragment must be a leaf node.
+    assert(false);
+  }
+
+  @override
+  void compileChildren({
+    required Rect? parentSemanticsClipRect,
+    required Rect? parentPaintClipRect,
+    required double elevationAdjustment,
+    required List<SemanticsNode> result,
+    required List<SemanticsNode> siblingNodes}) {
+    // There is nothing to do because this fragment must be a leaf node and
+    // must not be explicit.
+  }
+
+  @override
+  final SemanticsConfiguration config;
+
+  @override
+  void markAsExplicit() {
+    assert((){
+      throw FlutterError(
+        'SemanticsConfiguration created in SemanticsConfiguration.merger must be not be explicit',
+      );
+    }());
   }
 }
 

@@ -310,6 +310,29 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('semantics label not in order when uses widget span', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              const TextSpan(text: 'before '),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: Semantics(label: 'foo'),
+              ),
+              const TextSpan(text: ' after'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSemantics(find.byType(Text)),
+        matchesSemantics(label: 'before \nfoo\n after'));
+  });
+
   testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Directionality(
