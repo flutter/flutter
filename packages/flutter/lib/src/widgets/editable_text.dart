@@ -2706,7 +2706,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // selection may have been modified using the iOS keyboard selection gesture.
       if (_lastTextPosition!.offset < renderEditable.selection!.start || _lastTextPosition!.offset >= renderEditable.selection!.end) {
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset, affinity: _lastTextPosition!.affinity), SelectionChangedCause.forcePress);
+        _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
       }
       _startCaretRect = null;
       _lastTextPosition = null;
