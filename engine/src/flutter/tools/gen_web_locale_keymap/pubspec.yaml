@@ -1,4 +1,4 @@
-name: gen_web_keyboard_layouts
+name: gen_web_keyboard_keymap
 description: Generates keyboard layouts for Web from external sources.
 
 environment:
