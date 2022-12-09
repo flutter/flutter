@@ -25,6 +25,17 @@
 #     * ThemeData: fix_theme_data.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/114459
+  - title: "Migrate to 'boldTextOf'"
+    date: 2022-10-28
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      method: 'boldTextOverride'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'boldTextOf'
+
   # Changes made in https://github.com/flutter/flutter/pull/15303
   - title: "Replace 'child' with 'builder'"
     date: 2020-12-17
