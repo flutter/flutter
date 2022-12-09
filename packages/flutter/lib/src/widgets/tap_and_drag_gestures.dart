@@ -741,7 +741,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
   /// This triggers after the down event, once a short timeout ([kPressTimeout]) has
-  /// elapsed, or once the gestures has won the arena, whichever comes first. 
+  /// elapsed, or once the gestures has won the arena, whichever comes first.
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [TapDragDownDetails] object.
