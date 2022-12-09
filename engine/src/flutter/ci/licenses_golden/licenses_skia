@@ -1,4 +1,4 @@
-Signature: 7e82a8f97f6f5b4d40531b2133d98475
+Signature: 4118ae012068876fc64823d8b5664ce3
 
 UNUSED LICENSES:
 
@@ -7525,6 +7525,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
+FILE: ../../../third_party/skia/gm/mirrortile.cpp
 FILE: ../../../third_party/skia/gm/nearesthalfpixelimage.cpp
 FILE: ../../../third_party/skia/gm/palette.cpp
 FILE: ../../../third_party/skia/include/core/SkOpenTypeSVGDecoder.h
@@ -7537,6 +7538,9 @@ FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.h
+FILE: ../../../third_party/skia/src/codec/SkJpegRCodec.cpp
+FILE: ../../../third_party/skia/src/codec/SkJpegRCodec.h
+FILE: ../../../third_party/skia/src/codec/SkStubJpegRDecoderAPI.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputeCommandEncoder.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineBuilder.cpp
@@ -7749,6 +7753,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/render/VerticesRenderStep.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/render/VerticesRenderStep.h
 FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/text/AtlasManager.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanBuffer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.cpp
