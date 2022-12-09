@@ -59,7 +59,7 @@ function create_docset() {
   dashing_pid=$!
   wait $dashing_pid && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
-  "$DART" --no-sound-null-safety --disable-dart-dev --enable-asserts ./dashing_postprocess.dart && \
+  "$DART" --disable-dart-dev --enable-asserts ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
   if [[ $? -ne 0 ]]; then
       >&2 echo "Dashing docset generation failed"

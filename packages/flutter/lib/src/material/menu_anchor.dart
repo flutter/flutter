@@ -315,7 +315,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _position?.isScrollingNotifier.removeListener(_handleScroll);
     _position = Scrollable.maybeOf(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
-    final Size newSize = MediaQuery.of(context).size;
+    final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
       _root._close();
@@ -3746,7 +3746,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       const EdgeInsets.symmetric(horizontal: 12),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
 }
