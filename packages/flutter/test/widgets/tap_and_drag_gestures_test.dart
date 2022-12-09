@@ -273,6 +273,15 @@ void main() {
     expect(events, <String>['down#1', 'up#1']);
   });
 
+  testGesture('Calls tap up when the recognizer accepts before handleEvent is called', (GestureTester tester) {
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    tester.route(down1);
+    tester.route(up1);
+    expect(events, <String>['down#1', 'up#1']);
+  });
+
   testGesture('Recognizer rejects pointer that is not the primary one (FILO) - before acceptance', (GestureTester tester) {
     tapAndDrag.addPointer(down1);
     tapAndDrag.addPointer(down2);
