@@ -87,9 +87,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
     }
   }
 
-  if (!context.state_stack.painting_is_nop()) {
-    PaintChildren(context);
-  }
+  PaintChildren(context);
 }
 
 }  // namespace flutter

@@ -6,8 +6,10 @@
 
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/opacity_layer.h"
+#include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/testing/layer_test.h"
+#include "flutter/flow/testing/mock_embedder.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
@@ -531,6 +533,31 @@ TEST_F(ClipPathLayerTest, LayerCached) {
   SkPaint paint;
   EXPECT_TRUE(raster_cache()->Draw(clip_cache_item->GetId().value(),
                                    cache_canvas, &paint));
+}
+
+TEST_F(ClipPathLayerTest, EmptyClipDoesNotCullPlatformView) {
+  const SkPoint view_offset = SkPoint::Make(0.0f, 0.0f);
+  const SkSize view_size = SkSize::Make(8.0f, 8.0f);
+  const int64_t view_id = 42;
+  auto platform_view =
+      std::make_shared<PlatformViewLayer>(view_offset, view_size, view_id);
+
+  auto layer_clip = SkPath().addRect(kEmptyRect);
+  auto clip =
+      std::make_shared<ClipPathLayer>(layer_clip, Clip::antiAliasWithSaveLayer);
+  clip->Add(platform_view);
+
+  auto embedder = MockViewEmbedder();
+  SkCanvas fake_overlay_canvas;
+  embedder.AddCanvas(&fake_overlay_canvas);
+  preroll_context()->view_embedder = &embedder;
+  paint_context().view_embedder = &embedder;
+
+  clip->Preroll(preroll_context());
+  EXPECT_EQ(embedder.prerolled_views(), std::vector<int64_t>({view_id}));
+
+  clip->Paint(paint_context());
+  EXPECT_EQ(embedder.painted_views(), std::vector<int64_t>({view_id}));
 }
 
 }  // namespace testing

@@ -46,8 +46,13 @@ class MockViewEmbedder : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   EmbedderPaintContext CompositeEmbeddedView(int view_id) override;
 
+  std::vector<int64_t> prerolled_views() const { return prerolled_views_; }
+  std::vector<int64_t> painted_views() const { return painted_views_; }
+
  private:
   std::deque<EmbedderPaintContext> contexts_;
+  std::vector<int64_t> prerolled_views_;
+  std::vector<int64_t> painted_views_;
 };
 
 }  // namespace testing

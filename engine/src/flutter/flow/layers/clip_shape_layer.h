@@ -78,9 +78,6 @@ class ClipShapeLayer : public CacheableContainerLayer {
 
     auto mutator = context.state_stack.save();
     ApplyClip(mutator);
-    if (context.state_stack.content_culled(child_paint_bounds())) {
-      return;
-    }
 
     if (!UsesSaveLayer()) {
       PaintChildren(context);
