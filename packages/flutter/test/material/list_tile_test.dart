@@ -2407,6 +2407,7 @@ void main() {
         ListTileStyle? style,
       }) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Center(
               child: Builder(
@@ -2484,6 +2485,7 @@ void main() {
         ListTileStyle? style,
       }) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Center(
               child: Builder(
@@ -2543,8 +2545,8 @@ void main() {
 
       Widget buildFrame({ required Brightness brightness, required bool selected }) {
         final ThemeData theme = brightness == Brightness.light
-          ? ThemeData.from(colorScheme: const ColorScheme.light())
-          : ThemeData.from(colorScheme: const ColorScheme.dark());
+          ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false)
+          : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
         return MaterialApp(
           theme: theme,
           home: Material(
@@ -2597,6 +2599,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Center(
               child: StatefulBuilder(
