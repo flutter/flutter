@@ -873,7 +873,6 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildModalBarrier() {
-    Widget barrier;
     if (barrierColor != null && barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != barrierColor.withOpacity(0.0));
       final Animation<Color?> color = animation!.drive(
@@ -882,7 +881,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
-      barrier = AnimatedModalBarrier(
+      return AnimatedModalBarrier(
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
@@ -891,7 +890,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         semanticsOnTapHint: barrierOnTapHint,
       );
     } else {
-      barrier = ModalBarrier(
+      return ModalBarrier(
         dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
         semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
@@ -899,8 +898,6 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         semanticsOnTapHint: barrierOnTapHint,
       );
     }
-
-    return barrier;
   }
 }
 

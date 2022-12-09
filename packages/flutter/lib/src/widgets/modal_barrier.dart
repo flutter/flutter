@@ -14,15 +14,14 @@ import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
-/// A widget that modifies the size of the [SemanticsNode.rect] (focus) of its
-/// child widget. It clips the focus in possibily four directions based on the
+/// A widget that modifies the size of the [SemanticsNode.rect] created by its
+/// child widget.
+///
+/// It clips the focus in potentially four directions based on the
 /// specified [EdgeInsets].
 ///
-/// If a [ValueNotifier] is provided, the size of the focus is adjusted based on
-/// value changes inside the [ValueNotifier].
-///
-/// If no [ValueNotifier] is provided, the [SemanticsClipper] applies a default
-/// value of [EdgeInsets.zero], which preserves the default size of the focus.
+/// The size of the accessibility focus is adjusted based on value changes
+/// inside the given [ValueNotifier].
 ///
 /// See also:
 ///
@@ -34,12 +33,12 @@ class _SemanticsClipper extends SingleChildRenderObjectWidget{
   /// [ValueNotifier], or a default value of [EdgeInsets.zero].
   const _SemanticsClipper({
     super.child,
-    this.clipDetailsNotifier,
+    required this.clipDetailsNotifier,
   });
 
   /// The [ValueNotifier] whose value determines how the child's
   /// [SemanticsNode.rect] should be clipped in four directions.
-  final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
+  final ValueNotifier<EdgeInsets> clipDetailsNotifier;
 
   @override
   _RenderSemanticsClipper createRenderObject(BuildContext context) {
@@ -53,38 +52,41 @@ class _SemanticsClipper extends SingleChildRenderObjectWidget{
 }
 /// Updates the [SemanticsNode.rect] of its child based on the value inside
 /// provided [ValueNotifier].
-/// If no [ValueNotifier] is provided a value of [EdgeInsets.zero] is used
-/// to clip the [SemanticsNode.rect], which essentially uses its default size.
 class _RenderSemanticsClipper extends RenderProxyBox {
-/// Creats a [RenderProxyBox] that Updates the [SemanticsNode.rect] of its child
-/// based on the value inside provided [ValueNotifier].
+  /// Creats a [RenderProxyBox] that Updates the [SemanticsNode.rect] of its child
+  /// based on the value inside provided [ValueNotifier].
   _RenderSemanticsClipper({
-    ValueNotifier<EdgeInsets>? clipDetailsNotifier,
+    required ValueNotifier<EdgeInsets> clipDetailsNotifier,
     RenderBox? child,
   }) : _clipDetailsNotifier = clipDetailsNotifier,
-       super(child);
+      super(child);
 
-  ValueNotifier<EdgeInsets>? _clipDetailsNotifier;
+  ValueNotifier<EdgeInsets> _clipDetailsNotifier;
+
   /// The getter and setter retrieves / updates the [ValueNotifier] associated
   /// with this clipper.
-  ValueNotifier<EdgeInsets>? get clipDetailsNotifier => _clipDetailsNotifier;
-  set clipDetailsNotifier (ValueNotifier<EdgeInsets>? newNotifier) {
+  ValueNotifier<EdgeInsets> get clipDetailsNotifier => _clipDetailsNotifier;
+  set clipDetailsNotifier (ValueNotifier<EdgeInsets> newNotifier) {
     if (_clipDetailsNotifier == newNotifier) {
       return;
     }
+    if(attached) {
+      _clipDetailsNotifier.removeListener(markNeedsSemanticsUpdate);
+    }
     _clipDetailsNotifier = newNotifier;
+    _clipDetailsNotifier.addListener(markNeedsSemanticsUpdate);
     markNeedsSemanticsUpdate();
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    clipDetailsNotifier?.addListener(markNeedsSemanticsUpdate);
+    clipDetailsNotifier.addListener(markNeedsSemanticsUpdate);
   }
 
   @override
   void detach() {
-    clipDetailsNotifier?.removeListener(markNeedsSemanticsUpdate);
+    clipDetailsNotifier.removeListener(markNeedsSemanticsUpdate);
     super.detach();
   }
 
@@ -97,7 +99,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
 
-    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier!.value;
+    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier.value;
     final Rect oldRect = node.rect;
     node.rect = Rect.fromLTRB(oldRect.left + clipDetails.left, oldRect.top + clipDetails.top, oldRect.right - clipDetails.right, oldRect.bottom - clipDetails.bottom);
 
@@ -254,7 +256,7 @@ class ModalBarrier extends StatelessWidget {
 
     if (!excluding && clipDetailsNotifier != null) {
       barrier = _SemanticsClipper(
-        clipDetailsNotifier: clipDetailsNotifier,
+        clipDetailsNotifier: clipDetailsNotifier!,
         child: barrier,
       );
     }
@@ -340,9 +342,11 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// {@macro flutter.widgets.ModalBarrier.clipDetailsNotifier}
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
-  /// This hint text instructs user what they are able to do when they tap on
-  /// the [ModalBarrier], annouced in the format of 'Double tap to
-  /// $[semanticsOnTapHint].'
+  /// This hint text instructs users what they are able to do when they tap on
+  /// the [ModalBarrier]
+  ///
+  /// E.g. If the hint text is 'close bottom sheet", it will be announced as
+  /// "Double tap to close bottom sheet".
   ///
   /// If this value is null, the default onTapHint will be applied, resulting
   /// in the annoucement of 'Double tap to activate'.

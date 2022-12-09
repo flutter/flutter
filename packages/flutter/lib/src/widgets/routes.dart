@@ -1701,15 +1701,15 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return barrier;
   }
 
-  /// Build the [ModalBarrier] for this [ModalRoute], subclasses can override
-  /// this method to create [ModalBarrier] with customized features such as
+  /// Build the barrier for this [ModalRoute], subclasses can override
+  /// this method to create their own barrier with customized features such as
   /// color or accessibility focus size.
   ///
   /// See also:
-  /// * [ModalBarrier], which is the class that renders a barrier.
+  /// * [ModalBarrier], which is the class that is typically used to render a barrier.
   /// * [ModalBottomSheetRoute], which is the subclass of [ModalRoute]
   /// that overrides this method to change the accessibility focus size of its
-  /// [ModalBarrier]
+  /// barrier.
   Widget buildModalBarrier() {
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
