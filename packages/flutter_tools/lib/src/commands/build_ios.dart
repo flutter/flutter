@@ -290,15 +290,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     );
   }
 
-  ValidationMessage? _createValidationMessage({
+  ValidationMessage _createValidationMessage({
     required bool isValid,
-    required String? messageIfValid,
-    required String messageIfInvalid,
-  }) {
+    required String message})
+  {
     // Use "information" type for valid message, and "hint" type for invalid message.
-    return isValid
-      ? (messageIfValid == null ? null : ValidationMessage(messageIfValid))
-      : ValidationMessage.hint(messageIfInvalid);
+    return isValid ? ValidationMessage(message) : ValidationMessage.hint(message);
   }
 
   Future<List<ValidationMessage>> _validateIconAssetsAfterArchive() async {
@@ -311,30 +308,32 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       app.projectAppIconDirName,
       requiresSize: true);
 
+    final List<ValidationMessage> validationMessages = <ValidationMessage>[];
+
     final bool usesTemplate = _isAssetStillUsingTemplateFiles(
       templateImageInfoMap: templateInfoMap,
       projectImageInfoMap: projectInfoMap,
       templateImageDirName: await app.templateAppIconDirNameForImages,
       projectImageDirName: app.projectAppIconDirName);
 
-    final ValidationMessage? templateValidationMessage = _createValidationMessage(
-      isValid: !usesTemplate,
-        messageIfValid: 'App icon is not set to the default placeholder image.',
-      messageIfInvalid: 'App icon is set to the default placeholder icon. Replace with unique icons.');
+    if (usesTemplate) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'App icon is set to the default placeholder icon. Replace with unique icons.',
+      ));
+    }
 
     final List<String> filesWithWrongSize = _imageFilesWithWrongSize(
       imageInfoMap: projectInfoMap,
       imageDirName: app.projectAppIconDirName);
 
-    final ValidationMessage? sizeValidationMessage = _createValidationMessage(
-      isValid: filesWithWrongSize.isEmpty,
-      messageIfValid: 'You do not have incorrectly sized icons.',
-      messageIfInvalid: filesWithWrongSize.isEmpty ? '' : 'App icon is using the incorrect size (e.g. ${filesWithWrongSize.first}).');
-
-    return <ValidationMessage?>[
-      templateValidationMessage,
-      sizeValidationMessage,
-    ].whereType<ValidationMessage>().toList();
+    if (filesWithWrongSize.isNotEmpty) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'App icon is using the incorrect size (e.g. ${filesWithWrongSize.first}).',
+      ));
+    }
+    return validationMessages;
   }
 
   Future<List<ValidationMessage>> _validateLaunchImageAssetsAfterArchive() async {
@@ -347,21 +346,22 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       app.projectLaunchImageDirName,
       requiresSize: false);
 
+    final List<ValidationMessage> validationMessages = <ValidationMessage>[];
+
     final bool usesTemplate = _isAssetStillUsingTemplateFiles(
       templateImageInfoMap: templateInfoMap,
       projectImageInfoMap: projectInfoMap,
       templateImageDirName: await app.templateLaunchImageDirNameForImages,
       projectImageDirName: app.projectLaunchImageDirName);
 
+    if (usesTemplate) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'Launch image is set to the default placeholder icon. Replace with unique launch image.',
+      ));
+    }
 
-    final ValidationMessage? templateValidationMessage = _createValidationMessage(
-        isValid: !usesTemplate,
-        messageIfValid: 'Launch image is not set to the default placeholder image.',
-        messageIfInvalid: 'Launch image is set to the default placeholder icon. Replace with unique launch image.');
-
-    return <ValidationMessage?>[
-      templateValidationMessage,
-    ].whereType<ValidationMessage>().toList();
+    return validationMessages;
   }
 
   Future<List<ValidationMessage>> _validateXcodeBuildSettingsAfterArchive() async {
@@ -382,30 +382,32 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-    final List<ValidationMessage?> validationMessages = xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
+    final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
       final String title = entry.key;
       final String? info = entry.value;
-      // message for both valid and invalid case.
-      final String message = '$title: ${info ?? "Missing"}';
       return _createValidationMessage(
         isValid: info != null,
-        messageIfValid: message,
-        messageIfInvalid: message);
+        message: '$title: ${info ?? "Missing"}',
+      );
     }).toList();
 
     final bool hasMissingSettings = xcodeProjectSettingsMap.values.any((String? element) => element == null);
-    validationMessages.add(_createValidationMessage(
-      isValid: !hasMissingSettings,
-      messageIfValid: null, // do not print out for the valid case.
-      messageIfInvalid: 'You must set up the missing app settings.'));
+    if (hasMissingSettings) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'You must set up the missing app settings.'),
+      );
+    }
 
     final bool usesDefaultBundleIdentifier = xcodeProjectSettingsMap['Bundle Identifier']?.startsWith('com.example') ?? false;
-    validationMessages.add(_createValidationMessage(
-      isValid: !usesDefaultBundleIdentifier,
-      messageIfValid: 'Your application does not contain the default "com.example" bundle identifier.',
-      messageIfInvalid: 'Your application still contains the default "com.example" bundle identifier.',
-    ));
-    return validationMessages.whereType<ValidationMessage>().toList();
+    if (usesDefaultBundleIdentifier) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'Your application still contains the default "com.example" bundle identifier.'),
+      );
+    }
+
+    return validationMessages;
   }
 
   @override
@@ -420,7 +422,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       await _validateXcodeBuildSettingsAfterArchive(),
     ));
     validationResults.add(_createValidationResult(
-      'Image Assets Validation',
+      'App Icon and Launch Image Assets Validation',
       await _validateIconAssetsAfterArchive() + await _validateLaunchImageAssetsAfterArchive(),
     ));
 
@@ -428,8 +430,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       globals.printStatus('\n${result.coloredLeadingBox} ${result.statusInfo}');
       for (final ValidationMessage message in result.messages) {
         globals.printStatus(
-            '${message.coloredIndicator} ${message.message}',
-            indent: result.leadingBox.length + 1
+          '${message.coloredIndicator} ${message.message}',
+          indent: result.leadingBox.length + 1,
         );
       }
     }

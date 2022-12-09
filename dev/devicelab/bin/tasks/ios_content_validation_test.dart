@@ -51,7 +51,7 @@ Future<void> main() async {
             '    • Deployment Target: 11.0\n',
             '    • Bundle Identifier: com.example.hello\n',
             '    ! Your application still contains the default "com.example" bundle identifier.\n',
-            '[!] Image Assets Validation\n',
+            '[!] App Icon and Launch Image Assets Validation\n',
             '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
             '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
             '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
