@@ -764,6 +764,66 @@ void main() {
     );
   });
 
+  testWidgets('Switch can apply the ambient theme and be opted out', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      CupertinoTheme(
+        data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: Column(
+                    children: <Widget>[
+                      CupertinoSwitch(
+                        key: switchKey,
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: true,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                      CupertinoSwitch(
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: false,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.off.themed.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.on.themed.png'),
+    );
+  });
+
   testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (WidgetTester tester) async {
     const bool value = false;
     // Disabled CupertinoSwitch does not update cursor on Web.

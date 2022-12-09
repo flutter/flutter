@@ -250,6 +250,7 @@
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @jmagman @flutter/ios
 /dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
+/dev/devicelab/bin/tasks/run_release_test_windows.dart @loic-sharma @flutter/tool
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_html.dart @yjbanov @flutter/web
@@ -302,3 +303,4 @@
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # verify_binaries_codesigned @christopherfujino @flutter/releases
+# flutter_packaging @godofredoc @flutter/infra

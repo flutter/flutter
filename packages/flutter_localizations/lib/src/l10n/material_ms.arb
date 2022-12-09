@@ -130,5 +130,6 @@
   "keyboardKeySpace": "Ruang",
   "keyboardKeyMetaMacOs": "Perintah",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Menu bar menu",
+  "currentDateLabel": "Date of today"
 }

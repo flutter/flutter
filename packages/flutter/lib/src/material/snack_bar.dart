@@ -883,10 +883,6 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 
   @override
   bool get showCloseIcon => false;
-
-  @override
-  Color get closeIconColor => _colors.onInverseSurface;
-  }
-
+}
 
 // END GENERATED TOKEN PROPERTIES - Snackbar

@@ -1812,9 +1812,21 @@ void main() {
   });
 
   group('Layout', () {
-    List<Rect> collectMenuRects() {
+    List<Rect> collectMenuItemRects() {
       final List<Rect> menuRects = <Rect>[];
       final List<Element> candidates = find.byType(SubmenuButton).evaluate().toList();
+      for (final Element candidate in candidates) {
+        final RenderBox box = candidate.renderObject! as RenderBox;
+        final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
+        final Offset bottomRight = box.localToGlobal(box.size.bottomRight(Offset.zero));
+        menuRects.add(Rect.fromPoints(topLeft, bottomRight));
+      }
+      return menuRects;
+    }
+
+    List<Rect> collectSubmenuRects() {
+      final List<Rect> menuRects = <Rect>[];
+      final List<Element> candidates = findMenuPanels().evaluate().toList();
       for (final Element candidate in candidates) {
         final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -1855,12 +1867,16 @@ void main() {
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
       expect(find.byType(SubmenuButton), findsNWidgets(5));
-      final List<Rect> menuRects = collectMenuRects();
-      expect(menuRects[0], equals(const Rect.fromLTRB(4.0, 0.0, 112.0, 48.0)));
-      expect(menuRects[1], equals(const Rect.fromLTRB(112.0, 0.0, 220.0, 48.0)));
-      expect(menuRects[2], equals(const Rect.fromLTRB(220.0, 0.0, 328.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)));
-      expect(menuRects[4], equals(const Rect.fromLTRB(112.0, 104.0, 326.0, 152.0)));
+      expect(
+        collectMenuItemRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(4.0, 0.0, 112.0, 48.0),
+          Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
+          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
+          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
+          Rect.fromLTRB(112.0, 104.0, 326.0, 152.0),
+        ]),
+      );
     });
 
     testWidgets('unconstrained menus show up in the right place in RTL', (WidgetTester tester) async {
@@ -1897,12 +1913,16 @@ void main() {
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
       expect(find.byType(SubmenuButton), findsNWidgets(5));
-      final List<Rect> menuRects = collectMenuRects();
-      expect(menuRects[0], equals(const Rect.fromLTRB(688.0, 0.0, 796.0, 48.0)));
-      expect(menuRects[1], equals(const Rect.fromLTRB(580.0, 0.0, 688.0, 48.0)));
-      expect(menuRects[2], equals(const Rect.fromLTRB(472.0, 0.0, 580.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(294.0, 0.0, 472.0, 48.0)));
-      expect(menuRects[4], equals(const Rect.fromLTRB(474.0, 104.0, 688.0, 152.0)));
+      expect(
+        collectMenuItemRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(688.0, 0.0, 796.0, 48.0),
+          Rect.fromLTRB(580.0, 0.0, 688.0, 48.0),
+          Rect.fromLTRB(472.0, 0.0, 580.0, 48.0),
+          Rect.fromLTRB(294.0, 0.0, 472.0, 48.0),
+          Rect.fromLTRB(474.0, 104.0, 688.0, 152.0),
+        ]),
+      );
     });
 
     testWidgets('constrained menus show up in the right place in LTR', (WidgetTester tester) async {
@@ -1937,12 +1957,16 @@ void main() {
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
       expect(find.byType(SubmenuButton), findsNWidgets(5));
-      final List<Rect> menuRects = collectMenuRects();
-      expect(menuRects[0], equals(const Rect.fromLTRB(4.0, 0.0, 112.0, 48.0)));
-      expect(menuRects[1], equals(const Rect.fromLTRB(112.0, 0.0, 220.0, 48.0)));
-      expect(menuRects[2], equals(const Rect.fromLTRB(220.0, 0.0, 328.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)));
-      expect(menuRects[4], equals(const Rect.fromLTRB(86.0, 104.0, 300.0, 152.0)));
+      expect(
+        collectMenuItemRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(4.0, 0.0, 112.0, 48.0),
+          Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
+          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
+          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
+          Rect.fromLTRB(86.0, 104.0, 300.0, 152.0),
+        ]),
+      );
     });
 
     testWidgets('constrained menus show up in the right place in RTL', (WidgetTester tester) async {
@@ -1977,12 +2001,143 @@ void main() {
 
       expect(find.byType(MenuItemButton), findsNWidgets(6));
       expect(find.byType(SubmenuButton), findsNWidgets(5));
-      final List<Rect> menuRects = collectMenuRects();
-      expect(menuRects[0], equals(const Rect.fromLTRB(188.0, 0.0, 296.0, 48.0)));
-      expect(menuRects[1], equals(const Rect.fromLTRB(80.0, 0.0, 188.0, 48.0)));
-      expect(menuRects[2], equals(const Rect.fromLTRB(-28.0, 0.0, 80.0, 48.0)));
-      expect(menuRects[3], equals(const Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0)));
-      expect(menuRects[4], equals(const Rect.fromLTRB(0.0, 104.0, 214.0, 152.0)));
+      expect(
+        collectMenuItemRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(188.0, 0.0, 296.0, 48.0),
+          Rect.fromLTRB(80.0, 0.0, 188.0, 48.0),
+          Rect.fromLTRB(-28.0, 0.0, 80.0, 48.0),
+          Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0),
+          Rect.fromLTRB(0.0, 104.0, 214.0, 152.0)
+        ]),
+      );
+    });
+
+    Future<void> buildDensityPaddingApp(WidgetTester tester, {
+      required TextDirection textDirection,
+      VisualDensity visualDensity = VisualDensity.standard,
+      EdgeInsetsGeometry? menuPadding,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light().copyWith(visualDensity: visualDensity),
+          home: Directionality(
+            textDirection: textDirection,
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  MenuBar(
+                    style: menuPadding != null
+                      ? MenuStyle(padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding))
+                      : null,
+                    children: createTestMenus(onPressed: onPressed),
+                  ),
+                  const Expanded(child: Placeholder()),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text(TestMenu.mainMenu1.label));
+      await tester.pump();
+      await tester.tap(find.text(TestMenu.subMenu11.label));
+      await tester.pump();
+    }
+
+    testWidgets('submenus account for density in LTR', (WidgetTester tester) async {
+      await buildDensityPaddingApp(
+        tester,
+        textDirection: TextDirection.ltr,
+      );
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(145.0, 0.0, 655.0, 48.0),
+          Rect.fromLTRB(257.0, 48.0, 471.0, 208.0),
+          Rect.fromLTRB(471.0, 96.0, 719.0, 304.0),
+        ]),
+      );
+    });
+
+    testWidgets('submenus account for menu density in RTL', (WidgetTester tester) async {
+      await buildDensityPaddingApp(
+        tester,
+        textDirection: TextDirection.rtl,
+      );
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(145.0, 0.0, 655.0, 48.0),
+          Rect.fromLTRB(329.0, 48.0, 543.0, 208.0),
+          Rect.fromLTRB(81.0, 96.0, 329.0, 304.0),
+        ]),
+      );
+    });
+
+    testWidgets('submenus account for compact menu density in LTR', (WidgetTester tester) async {
+      await buildDensityPaddingApp(
+        tester,
+        visualDensity: VisualDensity.compact,
+        textDirection: TextDirection.ltr,
+      );
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(145.0, 0.0, 655.0, 40.0),
+          Rect.fromLTRB(257.0, 40.0, 467.0, 176.0),
+          Rect.fromLTRB(467.0, 80.0, 715.0, 256.0),
+        ]),
+      );
+    });
+
+    testWidgets('submenus account for compact menu density in RTL', (WidgetTester tester) async {
+      await buildDensityPaddingApp(
+        tester,
+        visualDensity: VisualDensity.compact,
+        textDirection: TextDirection.rtl,
+      );
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(145.0, 0.0, 655.0, 40.0),
+          Rect.fromLTRB(333.0, 40.0, 543.0, 176.0),
+          Rect.fromLTRB(85.0, 80.0, 333.0, 256.0),
+        ]),
+      );
+    });
+
+    testWidgets('submenus account for padding in LTR', (WidgetTester tester) async {
+      await buildDensityPaddingApp(
+        tester,
+        menuPadding: const EdgeInsetsDirectional.only(start: 10, end: 11, top: 12, bottom: 13),
+        textDirection: TextDirection.ltr,
+      );
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(138.5, 0.0, 661.5, 73.0),
+          Rect.fromLTRB(256.5, 60.0, 470.5, 220.0),
+          Rect.fromLTRB(470.5, 108.0, 718.5, 316.0),
+        ]),
+      );
+    });
+
+    testWidgets('submenus account for padding in RTL', (WidgetTester tester) async {
+      await buildDensityPaddingApp(
+        tester,
+        menuPadding: const EdgeInsetsDirectional.only(start: 10, end: 11, top: 12, bottom: 13),
+        textDirection: TextDirection.rtl,
+      );
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(138.5, 0.0, 661.5, 73.0),
+          Rect.fromLTRB(329.5, 60.0, 543.5, 220.0),
+          Rect.fromLTRB(81.5, 108.0, 329.5, 316.0),
+        ]),
+      );
     });
   });
 
