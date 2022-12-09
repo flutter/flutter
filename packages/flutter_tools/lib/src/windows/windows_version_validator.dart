@@ -17,7 +17,7 @@ const List<String> kUnsupportedVersions = <String>[
 /// Regex pattern for identifying line from systeminfo stdout with windows version
 /// (ie. 10.5.4123)
 const String kWindowsOSVersionSemVerPattern =
-    r'^(OS Version:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$';
+    r'^(OS )([^:]*:\s*)([0-9]+\.[0-9]+\.[0-9]+)(.*)$';
 
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
@@ -52,7 +52,7 @@ class WindowsVersionValidator extends DoctorValidator {
     final String statusInfo;
     if (matches.length == 1 &&
         !kUnsupportedVersions
-            .contains(matches.elementAt(0).group(2)?.split('.').elementAt(0))) {
+            .contains(matches.elementAt(0).group(3)?.split('.').elementAt(0))) {
       windowsVersionStatus = ValidationType.installed;
       statusInfo = 'Installed version of Windows is version 10 or higher';
     } else {

@@ -128,5 +128,6 @@
   "keyboardKeySpace": "Spasie",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Kieslysbalkkieslys"
+  "menuBarMenuLabel": "Kieslysbalkkieslys",
+  "currentDateLabel": "Date of today"
 }

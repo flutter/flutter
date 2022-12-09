@@ -131,6 +131,7 @@ class MenuAnchor extends StatefulWidget {
     this.anchorTapClosesMenu = false,
     this.onOpen,
     this.onClose,
+    this.crossAxisUnconstrained = true,
     required this.menuChildren,
     this.builder,
     this.child,
@@ -213,10 +214,18 @@ class MenuAnchor extends StatefulWidget {
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
 
+  /// Determine if the menu panel can be wrapped by a [UnconstrainedBox] which allows
+  /// the panel to render at its "natural" size.
+  ///
+  /// Defaults to true as it allows developers to render the menu panel at the
+  /// size it should be. When it is set to false, it can be useful when the menu should
+  /// be constrained in both main axis and cross axis, such as a [DropdownMenu].
+  final bool crossAxisUnconstrained;
+
   /// A list of children containing the menu items that are the contents of the
   /// menu surrounded by this [MenuAnchor].
   ///
-  /// {@macro flutter.material.menu_bar.shortcuts_note}
+  /// {@macro flutter.material.MenuBar.shortcuts_note}
   final List<Widget> menuChildren;
 
   /// The widget that this [MenuAnchor] surrounds.
@@ -263,7 +272,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
   // view's edges.
   final GlobalKey _anchorKey = GlobalKey(debugLabel: kReleaseMode ? null : 'MenuAnchor');
   _MenuAnchorState? _parent;
-  bool _childIsOpen = false;
   final FocusScopeNode _menuScopeNode = FocusScopeNode(debugLabel: kReleaseMode ? null : 'MenuAnchor sub menu');
   MenuController? _internalMenuController;
   final List<_MenuAnchorState> _anchorChildren = <_MenuAnchorState>[];
@@ -357,6 +365,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     return _MenuAnchorMarker(
       anchorKey: _anchorKey,
       anchor: this,
+      isOpen: _isOpen,
       child: child,
     );
   }
@@ -436,14 +445,12 @@ class _MenuAnchorState extends State<MenuAnchor> {
     return handle;
   }
 
-  void _childChangedOpenState(bool value) {
-    if (_childIsOpen != value) {
-      _parent?._childChangedOpenState(_childIsOpen || _isOpen);
-      if (mounted) {
-        setState(() {
-          _childIsOpen = value;
-        });
-      }
+  void _childChangedOpenState() {
+    if (mounted) {
+      _parent?._childChangedOpenState();
+      setState(() {
+        // Mark dirty, but only if mounted.
+      });
     }
   }
 
@@ -483,13 +490,14 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // close it first.
       _close();
     }
-    assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
+    assert(_debugMenuInfo(
+        'Opening $this at ${position ?? Offset.zero} with alignment offset ${widget.alignmentOffset ?? Offset.zero}'));
     _parent?._closeChildren(); // Close all siblings.
     assert(_overlayEntry == null);
 
     final BuildContext outerContext = context;
+    _parent?._childChangedOpenState();
     setState(() {
-      _parent?._childChangedOpenState(true);
       _overlayEntry = OverlayEntry(
         builder: (BuildContext context) {
           final OverlayState overlay = Overlay.of(outerContext);
@@ -509,6 +517,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                   // it.
                   anchorKey: _anchorKey,
                   anchor: this,
+                  isOpen: _isOpen,
                   child: _Submenu(
                     anchor: this,
                     menuStyle: widget.style,
@@ -516,6 +525,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                     menuPosition: position,
                     clipBehavior: widget.clipBehavior,
                     menuChildren: widget.menuChildren,
+                    crossAxisUnconstrained: widget.crossAxisUnconstrained,
                   ),
                 ),
                 to: overlay.context,
@@ -542,12 +552,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _closeChildren(inDispose: inDispose);
     _overlayEntry?.remove();
     _overlayEntry = null;
-    if (!inDispose && mounted) {
-      setState(() {
-        // Notify that _isOpen may have changed state, but only if not currently
-        // disposing or unmounted.
-        _parent?._childChangedOpenState(false);
-      });
+    if (!inDispose) {
+      // Notify that _childIsOpen changed state, but only if not
+      // currently disposing.
+      _parent?._childChangedOpenState();
     }
     widget.onClose?.call();
   }
@@ -651,11 +659,11 @@ class MenuController {
 /// When a menu item with a submenu is clicked on, it toggles the visibility of
 /// the submenu. When the menu item is hovered over, the submenu will open, and
 /// hovering over other items will close the previous menu and open the newly
-/// hovered one. When those open/close transitions occur, [SubmenuButton.onOpen],
-/// and [SubmenuButton.onClose] are called on the corresponding [SubmenuButton] child
-/// of the menu bar.
+/// hovered one. When those open/close transitions occur,
+/// [SubmenuButton.onOpen], and [SubmenuButton.onClose] are called on the
+/// corresponding [SubmenuButton] child of the menu bar.
 ///
-/// {@template flutter.material.menu_bar.shortcuts_note}
+/// {@template flutter.material.MenuBar.shortcuts_note}
 /// Menus using [MenuItemButton] can have a [SingleActivator] or
 /// [CharacterActivator] assigned to them as their [MenuItemButton.shortcut],
 /// which will display an appropriate shortcut hint. Even though the shortcut
@@ -670,15 +678,16 @@ class MenuController {
 /// sure that selecting a menu item and triggering the shortcut do the same
 /// thing, it is recommended that they call the same callback.
 ///
-/// {@tool dartpad}
-/// This example shows a [MenuBar] that contains a single top level menu,
-/// containing three items: "About", a checkbox menu item for showing a
-/// message, and "Quit". The items are identified with an enum value, and the
-/// shortcuts are registered globally with the [ShortcutRegistry].
+/// {@tool dartpad} This example shows a [MenuBar] that contains a single top
+/// level menu, containing three items: "About", a checkbox menu item for
+/// showing a message, and "Quit". The items are identified with an enum value,
+/// and the shortcuts are registered globally with the [ShortcutRegistry].
 ///
 /// ** See code in examples/api/lib/material/menu_anchor/menu_bar.0.dart **
 /// {@end-tool}
 /// {@endtemplate}
+///
+/// {@macro flutter.material.MenuAcceleratorLabel.accelerator_sample}
 ///
 /// See also:
 ///
@@ -729,7 +738,7 @@ class MenuBar extends StatelessWidget {
   /// incorrect behaviors. Whenever the menus list is modified, a new list
   /// object must be provided.
   ///
-  /// {@macro flutter.material.menu_bar.shortcuts_note}
+  /// {@macro flutter.material.MenuBar.shortcuts_note}
   final List<Widget> children;
 
   @override
@@ -747,7 +756,7 @@ class MenuBar extends StatelessWidget {
   List<DiagnosticsNode> debugDescribeChildren() {
     return <DiagnosticsNode>[
       ...children.map<DiagnosticsNode>(
-            (Widget item) => item.toDiagnosticsNode(),
+        (Widget item) => item.toDiagnosticsNode(),
       ),
     ];
   }
@@ -767,7 +776,7 @@ class MenuBar extends StatelessWidget {
 /// part of a [MenuBar], but may be used independently, or as part of a menu
 /// created with a [MenuAnchor].
 ///
-/// {@macro flutter.material.menu_bar.shortcuts_note}
+/// {@macro flutter.material.MenuBar.shortcuts_note}
 ///
 /// See also:
 ///
@@ -792,6 +801,7 @@ class MenuItemButton extends StatefulWidget {
     super.key,
     this.onPressed,
     this.onHover,
+    this.requestFocusOnHover = true,
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
@@ -818,6 +828,11 @@ class MenuItemButton extends StatefulWidget {
   /// area and false if a pointer has exited.
   final ValueChanged<bool>? onHover;
 
+  /// Determine if hovering can request focus.
+  ///
+  /// Defaults to true.
+  final bool requestFocusOnHover;
+
   /// Handler called when the focus changes.
   ///
   /// Called with true if this widget's node gains focus, and false if it loses
@@ -829,7 +844,7 @@ class MenuItemButton extends StatefulWidget {
 
   /// The optional shortcut that selects this [MenuItemButton].
   ///
-  /// {@macro flutter.material.menu_bar.shortcuts_note}
+  /// {@macro flutter.material.MenuBar.shortcuts_note}
   final MenuSerializableShortcut? shortcut;
 
   /// Customizes this button's appearance.
@@ -1029,7 +1044,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       mergedStyle = widget.style!.merge(mergedStyle);
     }
 
-    return TextButton(
+    Widget child = TextButton(
       onPressed: widget.enabled ? _handleSelect : null,
       onHover: widget.enabled ? _handleHover : null,
       onFocusChange: widget.enabled ? widget.onFocusChange : null,
@@ -1045,6 +1060,15 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         child: widget.child!,
       ),
     );
+
+    if (_platformSupportsAccelerators() && widget.enabled) {
+      child = MenuAcceleratorCallbackBinding(
+        onInvoke: _handleSelect,
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   void _handleFocusChange() {
@@ -1056,7 +1080,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
-    if (hovering) {
+    if (hovering && widget.requestFocusOnHover) {
       assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
       _focusNode.requestFocus();
     }
@@ -1193,7 +1217,7 @@ class CheckboxMenuButton extends StatelessWidget {
 
   /// The optional shortcut that selects this [MenuItemButton].
   ///
-  /// {@macro flutter.material.menu_bar.shortcuts_note}
+  /// {@macro flutter.material.MenuBar.shortcuts_note}
   final MenuSerializableShortcut? shortcut;
 
   /// Customizes this button's appearance.
@@ -1390,7 +1414,7 @@ class RadioMenuButton<T> extends StatelessWidget {
 
   /// The optional shortcut that selects this [MenuItemButton].
   ///
-  /// {@macro flutter.material.menu_bar.shortcuts_note}
+  /// {@macro flutter.material.MenuBar.shortcuts_note}
   final MenuSerializableShortcut? shortcut;
 
   /// Customizes this button's appearance.
@@ -1466,7 +1490,6 @@ class RadioMenuButton<T> extends StatelessWidget {
     );
   }
 }
-
 
 /// A menu button that displays a cascading menu.
 ///
@@ -1773,21 +1796,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Offset menuPaddingOffset;
+    Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
-    switch (_anchor?._root._orientation ?? Axis.vertical) {
+    // Move the submenu over by the size of the menu padding, so that
+    // the first menu item aligns with the submenu button that opens it.
+    switch (_anchor?._orientation ?? Axis.vertical) {
       case Axis.horizontal:
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.right, 0);
+            menuPaddingOffset += Offset(menuPadding.right, 0);
             break;
           case TextDirection.ltr:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.left, 0);
+            menuPaddingOffset += Offset(-menuPadding.left, 0);
             break;
         }
         break;
       case Axis.vertical:
-        menuPaddingOffset = widget.alignmentOffset ?? Offset(0, -menuPadding.top);
+        menuPaddingOffset += Offset(0, -menuPadding.top);
         break;
     }
 
@@ -1811,6 +1836,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         }
 
         void toggleShowMenu(BuildContext context) {
+          if (controller._anchor == null) {
+            return;
+          }
           if (controller.isOpen) {
             controller.close();
           } else {
@@ -1835,7 +1863,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           // is already open. This means that the user has to first click to
           // open a menu on the menu bar before hovering allows them to traverse
           // it.
-          if (controller._anchor!._root._orientation == Axis.horizontal && !controller._anchor!._root._childIsOpen) {
+          if (controller._anchor!._root._orientation == Axis.horizontal && !controller._anchor!._root._isOpen) {
             return;
           }
 
@@ -1845,7 +1873,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           }
         }
 
-        return TextButton(
+        child = TextButton(
           style: mergedStyle,
           focusNode: _buttonFocusNode,
           onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
@@ -1858,6 +1886,15 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             child: child ?? const SizedBox(),
           ),
         );
+
+        if (_enabled && _platformSupportsAccelerators()) {
+          return MenuAcceleratorCallbackBinding(
+            onInvoke: () => toggleShowMenu(context),
+            hasSubmenu: true,
+            child: child,
+          );
+        }
+        return child;
       },
       menuChildren: widget.menuChildren,
       child: widget.child,
@@ -1865,27 +1902,13 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   EdgeInsets _computeMenuPadding(BuildContext context) {
-    final MenuStyle? themeStyle = MenuTheme.of(context).style;
-    final MenuStyle defaultStyle = _MenuDefaultsM3(context);
-
-    T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
-      return getProperty(widget.menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
-    }
-
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
-      return effectiveValue(
-            (MenuStyle? style) {
-          return getProperty(style)?.resolve(widget.statesController?.value ?? const <MaterialState>{});
-        },
-      );
-    }
-
-    return resolve<EdgeInsetsGeometry?>(
-          (MenuStyle? style) => style?.padding,
-    )?.resolve(
-      Directionality.of(context),
-    ) ??
-        EdgeInsets.zero;
+    final MaterialStateProperty<EdgeInsetsGeometry?> insets =
+      widget.menuStyle?.padding ??
+      MenuTheme.of(context).style?.padding ??
+      _MenuDefaultsM3(context).padding!;
+    return insets
+      .resolve(widget.statesController?.value ?? const <MaterialState>{})!
+      .resolve(Directionality.of(context));
   }
 
   void _handleFocusChange() {
@@ -2154,14 +2177,18 @@ class _MenuAnchorMarker extends InheritedWidget {
     required super.child,
     required this.anchorKey,
     required this.anchor,
+    required this.isOpen,
   });
 
   final GlobalKey anchorKey;
   final _MenuAnchorState anchor;
+  final bool isOpen;
 
   @override
   bool updateShouldNotify(_MenuAnchorMarker oldWidget) {
-    return anchorKey != oldWidget.anchorKey || anchor != anchor;
+    return anchorKey != oldWidget.anchorKey
+        || anchor != oldWidget.anchor
+        || isOpen != oldWidget.isOpen;
   }
 }
 
@@ -2183,7 +2210,12 @@ class _MenuBarAnchorState extends _MenuAnchorState {
   @override
   bool get _isOpen {
     // If it's a bar, then it's "open" if any of its children are open.
-    return _childIsOpen;
+    for (final _MenuAnchorState child in _anchorChildren) {
+      if (child._isOpen) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -2399,7 +2431,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }
@@ -2430,7 +2465,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }
@@ -2461,6 +2499,427 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       }
       return true;
     }
+  }
+}
+
+/// An [InheritedWidget] that provides a descendant [MenuAcceleratorLabel] with
+/// the function to invoke when the accelerator is pressed.
+///
+/// This is used when creating your own custom menu item for use with
+/// [MenuAnchor] or [MenuBar]. Provided menu items such as [MenuItemButton] and
+/// [SubmenuButton] already supply this wrapper internally.
+class MenuAcceleratorCallbackBinding extends InheritedWidget {
+  /// Create a const [MenuAcceleratorCallbackBinding].
+  ///
+  /// The [child] parameter is required.
+  const MenuAcceleratorCallbackBinding({
+    super.key,
+    this.onInvoke,
+    this.hasSubmenu = false,
+    required super.child,
+  });
+
+  /// The function that pressing the accelerator defined in a descendant
+  /// [MenuAcceleratorLabel] will invoke.
+  ///
+  /// If set to null, then the accelerator won't be enabled.
+  final VoidCallback? onInvoke;
+
+  /// Whether or not the associated label will host its own submenu or not.
+  ///
+  /// This setting determines when accelerators are active, since accelerators
+  /// for menu items that open submenus shouldn't be active when the submenu is
+  /// open.
+  final bool hasSubmenu;
+
+  @override
+  bool updateShouldNotify(MenuAcceleratorCallbackBinding oldWidget) {
+    return onInvoke != oldWidget.onInvoke || hasSubmenu != oldWidget.hasSubmenu;
+  }
+
+  /// Returns the active [MenuAcceleratorCallbackBinding] in the given context, if any,
+  /// and creates a dependency relationship that will rebuild the context when
+  /// [onInvoke] changes.
+  ///
+  /// If no [MenuAcceleratorCallbackBinding] is found, returns null.
+  ///
+  /// See also:
+  ///
+  /// * [of], which is similar, but asserts if no [MenuAcceleratorCallbackBinding]
+  ///   is found.
+  static MenuAcceleratorCallbackBinding? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<MenuAcceleratorCallbackBinding>();
+  }
+
+  /// Returns the active [MenuAcceleratorCallbackBinding] in the given context, and
+  /// creates a dependency relationship that will rebuild the context when
+  /// [onInvoke] changes.
+  ///
+  /// If no [MenuAcceleratorCallbackBinding] is found, returns will assert in debug mode
+  /// and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  /// * [maybeOf], which is similar, but returns null if no
+  ///   [MenuAcceleratorCallbackBinding] is found.
+  static MenuAcceleratorCallbackBinding of(BuildContext context) {
+    final MenuAcceleratorCallbackBinding? result = maybeOf(context);
+    assert(() {
+      if (result == null) {
+        throw FlutterError(
+          'MenuAcceleratorWrapper.of() was called with a context that does not '
+          'contain a MenuAcceleratorWrapper in the given context.\n'
+          'No MenuAcceleratorWrapper ancestor could be found in the context that '
+          'was passed to MenuAcceleratorWrapper.of(). This can happen because '
+          'you are using a widget that looks for a MenuAcceleratorWrapper '
+          'ancestor, and do not have a MenuAcceleratorWrapper widget ancestor.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return result!;
+  }
+}
+
+/// The type of builder function used for building a [MenuAcceleratorLabel]'s
+/// [MenuAcceleratorLabel.builder] function.
+///
+/// {@template flutter.material.menu_anchor.menu_accelerator_child_builder.args}
+/// The arguments to the function are as follows:
+///
+/// * The `context` supplies the [BuildContext] to use.
+/// * The `label` is the [MenuAcceleratorLabel.label] attribute for the relevant
+///   [MenuAcceleratorLabel] with the accelerator markers stripped out of it.
+/// * The `index` is the index of the accelerator character within the
+///   `label.characters` that applies to this accelerator. If it is -1, then the
+///   accelerator should not be highlighted. Otherwise, the given character
+///   should be highlighted somehow in the rendered label (typically with an
+///   underscore). Importantly, `index` is not an index into the [String]
+///   `label`, it is an index into the [Characters] iterable returned by
+///   `label.characters`, so that it is in terms of user-visible characters
+///   (a.k.a. grapheme clusters), not Unicode code points.
+/// {@endtemplate}
+///
+/// See also:
+///
+/// * [MenuAcceleratorLabel.defaultLabelBuilder], which is the implementation
+///   used as the default value for [MenuAcceleratorLabel.builder].
+typedef MenuAcceleratorChildBuilder = Widget Function(
+  BuildContext context,
+  String label,
+  int index,
+);
+
+/// A widget that draws the label text for a menu item (typically a
+/// [MenuItemButton] or [SubmenuButton]) and renders its child with information
+/// about the currently active keyboard accelerator.
+///
+/// On platforms other than macOS and iOS, this widget listens for the Alt key
+/// to be pressed, and when it is down, will update the label by calling the
+/// builder again with the position of the accelerator in the label string.
+/// While the Alt key is pressed, it registers a shortcut with the
+/// [ShortcutRegistry] mapped to a [VoidCallbackIntent] containing the callback
+/// defined by the nearest [MenuAcceleratorCallbackBinding].
+///
+/// Because the accelerators are registered with the [ShortcutRegistry], any
+/// other shortcuts in the widget tree between the [primaryFocus] and the
+/// [ShortcutRegistry] that define Alt-based shortcuts using the same keys will
+/// take precedence over the accelerators.
+///
+/// Because accelerators aren't used on macOS and iOS, the label ignores the Alt
+/// key on those platforms, and the [builder] is always given -1 as an
+/// accelerator index. Accelerator labels are still stripped of their
+/// accelerator markers.
+///
+/// The built-in menu items [MenuItemButton] and [SubmenuButton] already provide
+/// the appropriate [MenuAcceleratorCallbackBinding], so unless you are creating
+/// your own custom menu item type that takes a [MenuAcceleratorLabel], it is
+/// not necessary to provide one.
+///
+/// {@template flutter.material.MenuAcceleratorLabel.accelerator_sample}
+/// {@tool dartpad} This example shows a [MenuBar] that handles keyboard
+/// accelerators using [MenuAcceleratorLabel]. To use the accelerators, press
+/// the Alt key to see which letters are underlined in the menu bar, and then
+/// press the appropriate letter. Accelerators are not supported on macOS or iOS
+/// since those platforms don't support them natively, so this demo will only
+/// show a regular Material menu bar on those platforms.
+///
+/// ** See code in examples/api/lib/material/menu_anchor/menu_accelerator_label.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
+class MenuAcceleratorLabel extends StatefulWidget {
+  /// Creates a const [MenuAcceleratorLabel].
+  ///
+  /// The [label] parameter is required.
+  const MenuAcceleratorLabel(
+    this.label, {
+    super.key,
+    this.builder = defaultLabelBuilder,
+  });
+
+  /// The label string that should be displayed.
+  ///
+  /// The label string provides the label text, as well as the possible
+  /// characters which could be used as accelerators in the menu system.
+  ///
+  /// {@template flutter.material.menu_anchor.menu_accelerator_label.label}
+  /// To indicate which letters in the label are to be used as accelerators, add
+  /// an "&" character before the character in the string. If more than one
+  /// character has an "&" in front of it, then the characters appearing earlier
+  /// in the string are preferred. To represent a literal "&", insert "&&" into
+  /// the string. All other ampersands will be removed from the string before
+  /// calling [MenuAcceleratorLabel.builder]. Bare ampersands at the end of the
+  /// string or before whitespace are stripped and ignored.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  /// * [displayLabel], which returns the [label] with all of the ampersands
+  ///   stripped out of it, and double ampersands converted to ampersands.
+  /// * [stripAcceleratorMarkers], which returns the supplied string with all of
+  ///   the ampersands stripped out of it, and double ampersands converted to
+  ///   ampersands, and optionally calls a callback with the index of the
+  ///   accelerator character found.
+  final String label;
+
+  /// Returns the [label] with any accelerator markers removed.
+  ///
+  /// This getter just calls [stripAcceleratorMarkers] with the [label].
+  String get displayLabel => stripAcceleratorMarkers(label);
+
+  /// The optional [MenuAcceleratorChildBuilder] which is used to build the
+  /// widget that displays the label itself.
+  ///
+  /// The [defaultLabelBuilder] function serves as the default value for
+  /// [builder], rendering the label as a [RichText] widget with appropriate
+  /// [TextSpan]s for rendering the label with an underscore under the selected
+  /// accelerator for the label when accelerators have been activated.
+  ///
+  /// {@macro flutter.material.menu_anchor.menu_accelerator_child_builder.args}
+  ///
+  /// When writing the builder function, it's not necessary to take the current
+  /// platform into account. On platforms which don't support accelerators (e.g.
+  /// macOS and iOS), the passed accelerator index will always be -1, and the
+  /// accelerator markers will already be stripped.
+  final MenuAcceleratorChildBuilder builder;
+
+  /// Whether [label] contains an accelerator definition.
+  ///
+  /// {@macro flutter.material.menu_anchor.menu_accelerator_label.label}
+  bool get hasAccelerator => RegExp(r'&(?!([&\s]|$))').hasMatch(label);
+
+  /// Serves as the default value for [builder], rendering the label as a
+  /// [RichText] widget with appropriate [TextSpan]s for rendering the label
+  /// with an underscore under the selected accelerator for the label when the
+  /// [index] is non-negative, and a [Text] widget when the [index] is negative.
+  ///
+  /// {@macro flutter.material.menu_anchor.menu_accelerator_child_builder.args}
+  static Widget defaultLabelBuilder(
+    BuildContext context,
+    String label,
+    int index,
+  ) {
+    if (index < 0) {
+      return Text(label);
+    }
+    final TextStyle defaultStyle = DefaultTextStyle.of(context).style;
+    final Characters characters = label.characters;
+    return RichText(
+      text: TextSpan(
+        children: <TextSpan>[
+          if (index > 0)
+            TextSpan(text: characters.getRange(0, index).toString(), style: defaultStyle),
+          TextSpan(
+            text: characters.getRange(index, index + 1).toString(),
+            style: defaultStyle.copyWith(decoration: TextDecoration.underline),
+          ),
+          if (index < characters.length - 1)
+            TextSpan(text: characters.getRange(index + 1).toString(), style: defaultStyle),
+        ],
+      ),
+    );
+  }
+
+  /// Strips out any accelerator markers from the given [label], and unescapes
+  /// any escaped ampersands.
+  ///
+  /// If [setIndex] is supplied, it will be called before this function returns
+  /// with the index in the returned string of the accelerator character.
+  ///
+  /// {@macro flutter.material.menu_anchor.menu_accelerator_label.label}
+  static String stripAcceleratorMarkers(String label, {void Function(int index)? setIndex}) {
+    int quotedAmpersands = 0;
+    final StringBuffer displayLabel = StringBuffer();
+    int acceleratorIndex = -1;
+    // Use characters so that we don't split up surrogate pairs and interpret
+    // them incorrectly.
+    final Characters labelChars = label.characters;
+    final Characters ampersand = '&'.characters;
+    bool lastWasAmpersand = false;
+    for (int i = 0; i < labelChars.length; i += 1) {
+      // Stop looking one before the end, since a single ampersand at the end is
+      // just treated as a quoted ampersand.
+      final Characters character = labelChars.characterAt(i);
+      if (lastWasAmpersand) {
+        lastWasAmpersand = false;
+        displayLabel.write(character);
+        continue;
+      }
+      if (character != ampersand) {
+        displayLabel.write(character);
+        continue;
+      }
+      if (i == labelChars.length - 1) {
+        // Strip bare ampersands at the end of a string.
+        break;
+      }
+      lastWasAmpersand = true;
+      final Characters acceleratorCharacter = labelChars.characterAt(i + 1);
+      if (acceleratorIndex == -1 && acceleratorCharacter != ampersand &&
+          acceleratorCharacter.toString().trim().isNotEmpty) {
+        // Don't set the accelerator index if the character is an ampersand,
+        // or whitespace.
+        acceleratorIndex = i - quotedAmpersands;
+      }
+      // As we encounter '&<character>' pairs, the following indices must be
+      // adjusted so that they correspond with indices in the stripped string.
+      quotedAmpersands += 1;
+    }
+    setIndex?.call(acceleratorIndex);
+    return displayLabel.toString();
+  }
+
+  @override
+  State<MenuAcceleratorLabel> createState() => _MenuAcceleratorLabelState();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return '$MenuAcceleratorLabel("$label")';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('label', label));
+  }
+}
+
+class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
+  late String _displayLabel;
+  int _acceleratorIndex = -1;
+  MenuAcceleratorCallbackBinding? _binding;
+  _MenuAnchorState? _anchor;
+  ShortcutRegistry? _shortcutRegistry;
+  ShortcutRegistryEntry? _shortcutRegistryEntry;
+  bool _showAccelerators = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_platformSupportsAccelerators()) {
+      _showAccelerators = _altIsPressed();
+      HardwareKeyboard.instance.addHandler(_handleKeyEvent);
+    }
+    _updateDisplayLabel();
+  }
+
+  @override
+  void dispose() {
+    assert(_platformSupportsAccelerators() || _shortcutRegistryEntry == null);
+    _displayLabel = '';
+    if (_platformSupportsAccelerators()) {
+      _shortcutRegistryEntry?.dispose();
+      _shortcutRegistryEntry = null;
+      _shortcutRegistry = null;
+      _anchor = null;
+      HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_platformSupportsAccelerators()) {
+      return;
+    }
+    _binding = MenuAcceleratorCallbackBinding.maybeOf(context);
+    _anchor = _MenuAnchorState._maybeOf(context);
+    _shortcutRegistry = ShortcutRegistry.maybeOf(context);
+    _updateAcceleratorShortcut();
+  }
+
+  @override
+  void didUpdateWidget(MenuAcceleratorLabel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.label != oldWidget.label) {
+      _updateDisplayLabel();
+    }
+  }
+
+  static bool _altIsPressed() {
+    return HardwareKeyboard.instance.logicalKeysPressed.intersection(
+      <LogicalKeyboardKey>{
+        LogicalKeyboardKey.altLeft,
+        LogicalKeyboardKey.altRight,
+        LogicalKeyboardKey.alt,
+      },
+    ).isNotEmpty;
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    assert(_platformSupportsAccelerators());
+    final bool altIsPressed = _altIsPressed();
+    if (altIsPressed != _showAccelerators) {
+      setState(() {
+        _showAccelerators = altIsPressed;
+        _updateAcceleratorShortcut();
+      });
+    }
+    // Just listening, does't ever handle a key.
+    return false;
+  }
+
+  void _updateAcceleratorShortcut() {
+    assert(_platformSupportsAccelerators());
+    _shortcutRegistryEntry?.dispose();
+    _shortcutRegistryEntry = null;
+    // Before registering an accelerator as a shortcut it should meet these
+    // conditions:
+    //
+    // 1) Is showing accelerators (i.e. Alt key is down).
+    // 2) Has an accelerator marker in the label.
+    // 3) Has an associated action callback for the label (from the
+    //    MenuAcceleratorCallbackBinding).
+    // 4) Is part of an anchor that either doesn't have a submenu, or doesn't
+    //    have any submenus currently open (only the "deepest" open menu should
+    //    have accelerator shortcuts registered).
+    assert(_displayLabel != null);
+    if (_showAccelerators && _acceleratorIndex != -1 && _binding?.onInvoke != null && !(_binding!.hasSubmenu && (_anchor?._isOpen ?? false))) {
+      final String acceleratorCharacter = _displayLabel[_acceleratorIndex].toLowerCase();
+      _shortcutRegistryEntry = _shortcutRegistry?.addAll(
+        <ShortcutActivator, Intent>{
+          CharacterActivator(acceleratorCharacter, alt: true): VoidCallbackIntent(_binding!.onInvoke!),
+        },
+      );
+    }
+  }
+
+  void _updateDisplayLabel() {
+    _displayLabel = MenuAcceleratorLabel.stripAcceleratorMarkers(
+      widget.label,
+      setIndex: (int index) {
+        _acceleratorIndex = index;
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int index = _showAccelerators ? _acceleratorIndex : -1;
+    return widget.builder(context, _displayLabel, index);
   }
 }
 
@@ -2722,14 +3181,15 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_MenuLayout oldDelegate) {
-    return anchorRect != oldDelegate.anchorRect ||
-        textDirection != oldDelegate.textDirection ||
-        alignment != oldDelegate.alignment ||
-        alignmentOffset != oldDelegate.alignmentOffset ||
-        menuPosition != oldDelegate.menuPosition ||
-        orientation != oldDelegate.orientation ||
-        parentOrientation != oldDelegate.parentOrientation ||
-        !setEquals(avoidBounds, oldDelegate.avoidBounds);
+    return anchorRect != oldDelegate.anchorRect
+        || textDirection != oldDelegate.textDirection
+        || alignment != oldDelegate.alignment
+        || alignmentOffset != oldDelegate.alignmentOffset
+        || menuPosition != oldDelegate.menuPosition
+        || menuPadding != oldDelegate.menuPadding
+        || orientation != oldDelegate.orientation
+        || parentOrientation != oldDelegate.parentOrientation
+        || !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
@@ -2752,6 +3212,7 @@ class _MenuPanel extends StatefulWidget {
     required this.menuStyle,
     this.clipBehavior = Clip.none,
     required this.orientation,
+    this.crossAxisUnconstrained = true,
     required this.children,
   });
 
@@ -2762,6 +3223,13 @@ class _MenuPanel extends StatefulWidget {
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
+
+  /// Determine if a [UnconstrainedBox] can be applied to the menu panel to allow it to render
+  /// at its "natural" size.
+  ///
+  /// Defaults to true. When it is set to false, it can be useful when the menu should
+  /// be constrained in both main-axis and cross-axis, such as a [DropdownMenu].
+  final bool crossAxisUnconstrained;
 
   /// The layout orientation of this panel.
   final Axis orientation;
@@ -2825,7 +3293,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final double dy = densityAdjustment.dy;
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
-        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+        .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
@@ -2851,37 +3319,44 @@ class _MenuPanelState extends State<_MenuPanel> {
         );
       }
     }
-    return ConstrainedBox(
-      constraints: effectiveConstraints,
-      child: UnconstrainedBox(
-        constrainedAxis: widget.orientation,
+
+    Widget menuPanel = _intrinsicCrossSize(
+      child: Material(
+        elevation: elevation,
+        shape: shape,
+        color: backgroundColor,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
         clipBehavior: Clip.hardEdge,
-        alignment: AlignmentDirectional.centerStart,
-      child: _intrinsicCrossSize(
-        child: Material(
-          elevation: elevation,
-          shape: shape,
-          color: backgroundColor,
-          shadowColor: shadowColor,
-          surfaceTintColor: surfaceTintColor,
-          type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-            clipBehavior: Clip.hardEdge,
-          child: Padding(
-            padding: resolvedPadding,
-            child: SingleChildScrollView(
-              scrollDirection: widget.orientation,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: Directionality.of(context),
-                direction: widget.orientation,
-                mainAxisSize: MainAxisSize.min,
-                children: widget.children,
-                ),
-              ),
+        child: Padding(
+          padding: resolvedPadding,
+          child: SingleChildScrollView(
+            scrollDirection: widget.orientation,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              textDirection: Directionality.of(context),
+              direction: widget.orientation,
+              mainAxisSize: MainAxisSize.min,
+              children: widget.children,
             ),
           ),
         ),
       ),
+    );
+
+    if (widget.crossAxisUnconstrained) {
+      menuPanel = UnconstrainedBox(
+        constrainedAxis: widget.orientation,
+        clipBehavior: Clip.hardEdge,
+        alignment: AlignmentDirectional.centerStart,
+        child: menuPanel,
+      );
+    }
+
+    return ConstrainedBox(
+      constraints: effectiveConstraints,
+      child: menuPanel,
     );
   }
 
@@ -2903,6 +3378,7 @@ class _Submenu extends StatelessWidget {
     required this.menuPosition,
     required this.alignmentOffset,
     required this.clipBehavior,
+    this.crossAxisUnconstrained = true,
     required this.menuChildren,
   });
 
@@ -2911,6 +3387,7 @@ class _Submenu extends StatelessWidget {
   final Offset? menuPosition;
   final Offset alignmentOffset;
   final Clip clipBehavior;
+  final bool crossAxisUnconstrained;
   final List<Widget> menuChildren;
 
   @override
@@ -2945,7 +3422,7 @@ class _Submenu extends StatelessWidget {
     );
 
     final VisualDensity visualDensity =
-        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? VisualDensity.standard;
+        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? Theme.of(context).visualDensity;
     final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
@@ -3008,6 +3485,7 @@ class _Submenu extends StatelessWidget {
                         menuStyle: menuStyle,
                         clipBehavior: clipBehavior,
                         orientation: anchor._orientation,
+                        crossAxisUnconstrained: crossAxisUnconstrained,
                         children: menuChildren,
                       ),
                     ),
@@ -3061,6 +3539,23 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
   return true;
 }
 
+bool _platformSupportsAccelerators() {
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
+      return true;
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      // On iOS and macOS, pressing the Option key (a.k.a. the Alt key) causes a
+      // different set of characters to be generated, and the native menus don't
+      // support accelerators anyhow, so we just disable accelerators on these
+      // platforms.
+      return false;
+  }
+}
+
 // BEGIN GENERATED TOKEN PROPERTIES - Menu
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
@@ -3068,7 +3563,7 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_143
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
@@ -3077,6 +3572,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.bottomStart,
     );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
@@ -3119,6 +3615,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       enableFeedback: true,
       alignment: AlignmentDirectional.centerStart,
     );
+
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -3261,6 +3758,7 @@ class _MenuDefaultsM3 extends MenuStyle {
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.topEnd,
     );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 

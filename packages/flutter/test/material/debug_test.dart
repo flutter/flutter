@@ -192,11 +192,11 @@ void main() {
       '     Localizations\n'
       '     MediaQuery\n'
       '     _MediaQueryFromWindow\n'
-      '     _ShortcutRegistrarMarker\n'
       '     Semantics\n'
       '     _FocusMarker\n'
       '     Focus\n'
       '     Shortcuts\n'
+      '     _ShortcutRegistrarMarker\n'
       '     ShortcutRegistrar\n'
       '     TapRegionSurface\n'
       '     _FocusMarker\n'
@@ -317,6 +317,7 @@ void main() {
       '     TextButtonTheme\n'
       '     Padding\n'
       '     Row\n'
+      '     Wrap\n'
       '     Padding\n'
       '     MediaQuery\n'
       '     Padding\n'
@@ -378,7 +379,7 @@ void main() {
       '     Directionality\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-      '   MaterialApp at the top of your application widget tree.\n',
+      '   MaterialApp at the top of your application widget tree.\n'
     ));
   });
 }

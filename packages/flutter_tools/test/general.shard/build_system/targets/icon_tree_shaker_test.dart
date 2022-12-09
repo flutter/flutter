@@ -79,7 +79,7 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    dartPath = artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    dartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     constFinderPath = artifacts.getArtifactPath(Artifact.constFinder);
     fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
 

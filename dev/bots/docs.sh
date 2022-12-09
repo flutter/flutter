@@ -20,7 +20,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # NOTE: When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 6.1.2
+    "$DART" pub global activate dartdoc 6.1.4
 
     # Install and activate the snippets tool, which resides in the
     # assets-for-api-docs repo:
@@ -59,7 +59,7 @@ function create_docset() {
   dashing_pid=$!
   wait $dashing_pid && \
   cp ./doc/flutter/static-assets/favicon.png ./flutter.docset/icon.png && \
-  "$DART" --disable-dart-dev --enable-asserts ./dashing_postprocess.dart && \
+  "$DART" --no-sound-null-safety --disable-dart-dev --enable-asserts ./dashing_postprocess.dart && \
   tar cf flutter.docset.tar.gz --use-compress-program="gzip --best" flutter.docset
   if [[ $? -ne 0 ]]; then
       >&2 echo "Dashing docset generation failed"
@@ -148,3 +148,7 @@ if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
   (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
   deploy_docs
 fi
+
+# Zip docs
+cd "$FLUTTER_ROOT/dev/docs"
+zip api_docs.zip doc
