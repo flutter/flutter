@@ -1376,12 +1376,12 @@ class OverlayPortalController {
   }
 }
 
-/// A widget that renders its overlay child on the closest [Overlay].
+/// A widget that renders its overlay child on an [Overlay].
 ///
 /// The overlay child is initially hidden until [OverlayPortalController.show]
 /// is called on the associated [controller]. The [OverlayPortal] uses
 /// [overlayChildBuilder] to build its overlay child and renders it on the
-/// closest [Overlay] as if it was inserted using an [OverlayEntry], while it
+/// specified [Overlay] as if it was inserted using an [OverlayEntry], while it
 /// can depend on the same set of [InheritedWidget]s (such as [Theme]) that this
 /// widget can depend on.
 ///
@@ -1447,7 +1447,17 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
-  });
+  }) : _targetRootOverlay = false;
+
+  /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
+  /// builds on the root [Overlay] when [OverlayPortalController.show] is
+  /// called.
+  const OverlayPortal.targetsRootOverlay({
+    super.key,
+    required this.controller,
+    required this.overlayChildBuilder,
+    this.child,
+  }) : _targetRootOverlay = true;
 
   /// The controller to show, hide and bring to top the overlay child.
   final OverlayPortalController controller;
@@ -1473,6 +1483,8 @@ class OverlayPortal extends StatefulWidget {
   /// A widget below this widget in the tree.
   final Widget? child;
 
+  final bool _targetRootOverlay;
+
   @override
   State<OverlayPortal> createState() => _OverlayPortalState();
 }
@@ -1490,14 +1502,14 @@ class _OverlayPortalState extends State<OverlayPortal> {
   // it's mutable.
   bool _childModelMayHaveChanged = true;
   _OverlayEntryLocation? _locationCache;
-  _OverlayEntryLocation _getLocation(int zOrderIndex) {
+  _OverlayEntryLocation _getLocation(int zOrderIndex, bool targetRootOverlay) {
     final _OverlayEntryLocation? cachedLocation = _locationCache;
     if (cachedLocation != null && !_childModelMayHaveChanged) {
       assert(cachedLocation._zOrderIndex == zOrderIndex);
       return cachedLocation;
     }
     _childModelMayHaveChanged = false;
-    final _RenderTheaterMarker? marker = _RenderTheaterMarker.maybeOf(context);
+    final _RenderTheaterMarker? marker = _RenderTheaterMarker.maybeOf(context, targetRootOverlay: targetRootOverlay);
     if (marker == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Overlay widget found.'),
@@ -1557,6 +1569,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   void didUpdateWidget(OverlayPortal oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _childModelMayHaveChanged = _childModelMayHaveChanged || oldWidget._targetRootOverlay != widget._targetRootOverlay;
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._attachTarget = null;
       _setupController(widget.controller);
@@ -1599,7 +1612,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
       );
     }
     return _OverlayPortal(
-      overlayLocation: _getLocation(zOrderIndex),
+      overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
       overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
       child: widget.child,
     );
@@ -1746,7 +1759,27 @@ class _RenderTheaterMarker extends InheritedWidget {
         || oldWidget.overlayEntryWidgetState != overlayEntryWidgetState;
   }
 
-  static _RenderTheaterMarker? maybeOf(BuildContext context) => context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
+  static _RenderTheaterMarker? maybeOf(BuildContext context, { bool targetRootOverlay = false }) {
+    if (targetRootOverlay) {
+      final InheritedElement? ancestor = _rootRenderTheaterMarkerOf(context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>());
+      assert(ancestor == null || ancestor.widget is _RenderTheaterMarker);
+      return ancestor != null ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker? : null;
+    }
+    return context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
+  }
+
+  static InheritedElement? _rootRenderTheaterMarkerOf(InheritedElement? theaterMarkerElement) {
+    assert(theaterMarkerElement == null || theaterMarkerElement.widget is _RenderTheaterMarker);
+    if (theaterMarkerElement == null) {
+      return null;
+    }
+    InheritedElement? ancestor;
+    theaterMarkerElement.visitAncestorElements((Element element) {
+      ancestor = element.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
+      return false;
+    });
+    return ancestor == null ? theaterMarkerElement : _rootRenderTheaterMarkerOf(ancestor);
+  }
 }
 
 class _OverlayPortal extends RenderObjectWidget {

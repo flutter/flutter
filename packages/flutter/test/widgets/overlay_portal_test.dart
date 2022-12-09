@@ -67,6 +67,19 @@ void verifyOverlayChildReadyForLayout(GlobalKey overlayWidgetKey) {
   expect(!layoutSurrogate.debugNeedsLayout || layoutSurrogate.debugDoingThisLayout, true);
 }
 
+List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
+  final List<RenderObject> results = <RenderObject>[];
+  RenderObject? node = child;
+  while (node != null) {
+    if (node.runtimeType.toString() == '_RenderTheater') {
+      results.add(node);
+    }
+    final AbstractNode? parent = node.parent;
+    node = parent is RenderObject? parent : null;
+  }
+  return results;
+}
+
 
 void main() {
   final OverlayPortalController controller1 = OverlayPortalController(debugLabel: 'controller1');
@@ -618,6 +631,89 @@ void main() {
     verifyTreeIsClean();
   });
 
+  testWidgets('Can target the root overlay', (WidgetTester tester) async {
+    final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget outer');
+    final GlobalKey rootOverlayKey = GlobalKey(debugLabel: 'root overlay');
+    final GlobalKey localOverlayKey = GlobalKey(debugLabel: 'local overlay');
+    final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+    final RenderBox overlayChildBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+    final _RenderLayoutCounter overlayLayoutCounter = _RenderLayoutCounter();
+    int layoutCount = 0;
+    OverlayPortal Function({ Widget? child, required OverlayPortalController controller, Key? key, required WidgetBuilder overlayChildBuilder, }) constructorToUse = OverlayPortal.new;
+    late StateSetter setState;
+
+    // This tree has 3 nested Overlays.
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return Center(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Overlay(
+                key: rootOverlayKey,
+                initialEntries: <OverlayEntry>[
+                  OverlayEntry(builder: (BuildContext context) {
+                    return Overlay(
+                      initialEntries: <OverlayEntry>[
+                        OverlayEntry(builder: (BuildContext context) {
+                          return Overlay(
+                            key: localOverlayKey,
+                            initialEntries: <OverlayEntry>[
+                              // Overlay.performLayout calls layoutCounter.layout.
+                              OverlayEntry(builder: (BuildContext context) => WidgetToRenderBoxAdapter(renderBox: overlayLayoutCounter)),
+                              OverlayEntry(builder: (BuildContext outerEntryContext) {
+                                return Center(
+                                  child: Builder(builder: (BuildContext context) {
+                                    return constructorToUse(
+                                      key: widgetKey,
+                                      controller: controller1,
+                                      overlayChildBuilder: (BuildContext context) {
+                                        return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                                          layoutCount += 1;
+                                          // Both overlays need to be clean at this point.
+                                          expect(
+                                            tester.renderObjectList(find.byType(Overlay)),
+                                            everyElement(wrapMatcher((RenderObject object) => !object.debugNeedsLayout || object.debugDoingThisLayout)),
+                                          );
+                                          return WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
+                                        });
+                                      },
+                                      child: WidgetToRenderBoxAdapter(renderBox: childBox),
+                                    );
+                                  }),
+                                );
+                              }),
+                            ],
+                          );
+                        }),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        }
+      ),
+    );
+
+    expect(layoutCount, 1);
+    expect(overlayLayoutCounter.layoutCount, 1);
+    expect(_ancestorRenderTheaters(overlayChildBox).length, 3);
+
+    verifyTreeIsClean();
+
+    // Now targets the root overlay.
+    setState(() { constructorToUse = OverlayPortal.targetsRootOverlay; });
+    await tester.pump();
+
+    expect(layoutCount, 2);
+    expect(overlayLayoutCounter.layoutCount, 1);
+    expect(_ancestorRenderTheaters(overlayChildBox).single, tester.renderObject(find.byKey(rootOverlayKey)));
+    verifyTreeIsClean();
+  });
+
   group('GlobalKey Reparenting', () {
     testWidgets('child is laid out before overlay child after OverlayEntry shuffle', (WidgetTester tester) async {
       int layoutCount = 0;
@@ -851,7 +947,7 @@ void main() {
       verifyTreeIsClean();
     });
 
-    testWidgets('Nested OverlayWidget: swap inner and outer', (WidgetTester tester) async {
+    testWidgets('Nested overlay children: swap inner and outer', (WidgetTester tester) async {
       final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
       final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
 
