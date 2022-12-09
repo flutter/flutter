@@ -12,8 +12,8 @@ String generateWasmBootstrapFile() {
   let dart2wasm_runtime;
   let moduleInstance;
   try {
-    dart2wasm_runtime = await import('./dart2wasm_runtime.mjs');
     const dartModulePromise = WebAssembly.compileStreaming(fetch("main.dart.wasm"));
+    dart2wasm_runtime = await import('./dart2wasm_runtime.mjs');
     moduleInstance = await dart2wasm_runtime.instantiate(dartModulePromise, {});
   } catch (exception) {
     console.error(`Failed to fetch and instantiate wasm module: ${exception}`);
