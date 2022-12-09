@@ -4,7 +4,7 @@ description: A module that is embedded in the multiple_flutters benchmark test.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.17.0-0 <3.0.0"
+  sdk: ">=2.17.0-0 <4.0.0"
 
 dependencies:
   flutter:
