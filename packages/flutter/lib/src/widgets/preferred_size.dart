@@ -33,7 +33,22 @@ abstract class PreferredSizeWidget implements Widget {
   /// For example the [Scaffold] only depends on its app bar's preferred
   /// height. In that case implementations of this method can just return
   /// `Size.fromHeight(myAppBarHeight)`.
-  Size get preferredSize;
+  ///
+  /// Defaults to null.
+  ///
+  /// See also:
+  ///
+  ///   * [preferredSizeFor], a method similar to this that provides a
+  ///     [BuildContext] for incorporating inherited preferred sizing, such as
+  ///     through theming.
+  Size? get preferredSize;
+
+  /// The size this widget would prefer if it were otherwise unconstrained,
+  /// provided a given BuildContext for inherited values such as from a [Theme].
+  ///
+  /// Returns the value of [preferredSize] by default. If it is null, will
+  /// return [Size.zero].
+  Size preferredSizeFor(BuildContext context) => preferredSize!;
 }
 
 /// A widget with a preferred size.
@@ -80,6 +95,9 @@ class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   final Size preferredSize;
+
+  @override
+  Size preferredSizeFor(BuildContext context) => preferredSize;
 
   @override
   Widget build(BuildContext context) => child;

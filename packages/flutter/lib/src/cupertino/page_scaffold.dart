@@ -111,7 +111,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double topPadding =
-          widget.navigationBar!.preferredSize.height + existingMediaQuery.padding.top;
+          widget.navigationBar!.preferredSizeFor(context).height + existingMediaQuery.padding.top;
 
       // Propagate bottom padding and include viewInsets if appropriate
       final double bottomPadding = widget.resizeToAvoidBottomInset

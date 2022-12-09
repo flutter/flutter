@@ -26,7 +26,9 @@ import 'text_theme.dart';
 import 'theme.dart';
 
 const double _kTabHeight = 46.0;
+const double _kTabM3Height = 48.0;
 const double _kTextAndIconTabHeight = 72.0;
+const double _kTextAndIconTabM3Height = 64.0;
 
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
@@ -100,9 +102,10 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
 
   /// The height of the [Tab].
   ///
-  /// If null, the height will be calculated based on the content of the [Tab]. When `icon` is not
-  /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
-  /// height is 46.0 pixels.
+  /// If null, the height will be calculated based on the content of the [Tab].
+  ///
+  /// When `icon` is not null along with `child` or `text`, the default height
+  /// is 72.0 pixels. Without an `icon`, the height is 46.0 pixels.
   final double? height;
 
   Widget _buildLabelText() {
@@ -156,10 +159,28 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
     if (height != null) {
       return Size.fromHeight(height!);
     } else if ((text != null || child != null) && icon != null) {
+      // TODO(Piinks): Migrate these to M3 default values when useMaterial3
+      //  becomes default.
       return const Size.fromHeight(_kTextAndIconTabHeight);
     } else {
       return const Size.fromHeight(_kTabHeight);
     }
+  }
+
+  @override
+  Size preferredSizeFor(BuildContext context) {
+    if (height != null) {
+      return Size.fromHeight(height!);
+    }
+    final ThemeData theme = Theme.of(context);
+    if (theme.useMaterial3) {
+      if ((text != null || child != null) && icon != null) {
+        return const Size.fromHeight(_kTextAndIconTabM3Height);
+      } else {
+        return const Size.fromHeight(_kTabM3Height);
+      }
+    }
+    return preferredSize;
   }
 }
 
@@ -659,6 +680,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
+    this.preferredSize,
   }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(dragStartBehavior != null),
@@ -914,15 +936,25 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? splashBorderRadius;
 
-  /// A size whose height depends on if the tabs have both icons and text.
+  /// A custom preferred size for the tabs.
   ///
-  /// [AppBar] uses this size to compute its own preferred size.
+  /// Defaults to null. When null, [preferredSizeFor] will use the default
+  /// preferred sizes based on the current theme, or the preferred sizes of the
+  /// provided [tabs], whichever is larger.
   @override
-  Size get preferredSize {
-    double maxHeight = _kTabHeight;
+  final Size? preferredSize;
+
+  @override
+  Size preferredSizeFor(BuildContext context) {
+    if (preferredSize != null) {
+      return preferredSize!;
+    }
+
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    double maxHeight = useMaterial3 ? _kTabM3Height : _kTabHeight;
     for (final Widget item in tabs) {
       if (item is PreferredSizeWidget) {
-        final double itemHeight = item.preferredSize.height;
+        final double itemHeight = item.preferredSizeFor(context).height;
         maxHeight = math.max(itemHeight, maxHeight);
       }
     }
@@ -934,15 +966,41 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [TabBar] uses this to give uniform padding to all tabs in cases where
   /// there are some tabs with both text and icon and some which contain only
   /// text or icon.
+  @Deprecated(
+    'Migrate to tabHasTextAndIconFor. '
+    'This change was made to support a BuildContext to incorporate theme values. '
+    'This feature was deprecated after v3.7.0-4.0.pre.',
+  )
   bool get tabHasTextAndIcon {
     for (final Widget item in tabs) {
       if (item is PreferredSizeWidget) {
-        if (item.preferredSize.height == _kTextAndIconTabHeight) {
+        if (item.preferredSize?.height == _kTextAndIconTabHeight) {
           return true;
         }
       }
     }
     return false;
+  }
+
+  /// Returns whether the [TabBar] contains a tab with both text and icon.
+  ///
+  /// The provided [BuildContext] can be used to incorporate inherited values,
+  /// for example like those from a [ThemeData].
+  ///
+  /// By default, the value of [tabHasTextAndIcon] is returned.
+  bool tabHasTextAndIconFor(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final double textAndIconTabHeight = useMaterial3
+      ? _kTextAndIconTabM3Height
+      : _kTextAndIconTabHeight;
+    for (final Widget item in tabs) {
+      if (item is PreferredSizeWidget) {
+        if (item.preferredSizeFor(context).height == textAndIconTabHeight) {
+          return true;
+        }
+      }
+    }
+    return tabHasTextAndIcon;
   }
 
   @override
@@ -1273,7 +1331,8 @@ class _TabBarState extends State<TabBar> {
 
       if (widget.tabs[index] is PreferredSizeWidget) {
         final PreferredSizeWidget tab = widget.tabs[index] as PreferredSizeWidget;
-        if (widget.tabHasTextAndIcon && tab.preferredSize.height == _kTabHeight) {
+        final double tabHeight = theme.useMaterial3 ? _kTabM3Height : _kTabHeight;
+        if (widget.tabHasTextAndIconFor(context) && tab.preferredSizeFor(context).height == tabHeight) {
           if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
             adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
           }

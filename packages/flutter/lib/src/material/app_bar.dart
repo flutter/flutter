@@ -59,14 +59,6 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
       toolbarHeight != oldDelegate.toolbarHeight;
 }
 
-class _PreferredAppBarSize extends Size {
-  _PreferredAppBarSize(this.toolbarHeight, this.bottomHeight)
-    : super.fromHeight((toolbarHeight ?? kToolbarHeight) + (bottomHeight ?? 0));
-
-  final double? toolbarHeight;
-  final double? bottomHeight;
-}
-
 /// A Material Design app bar.
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
@@ -176,7 +168,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// be non-negative.
   ///
   /// Typically used in the [Scaffold.appBar] property.
-  AppBar({
+  const AppBar({
     super.key,
     this.leading,
     this.automaticallyImplyLeading = true,
@@ -220,24 +212,42 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    this.preferredSize,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(notificationPredicate != null),
        assert(primary != null),
        assert(toolbarOpacity != null),
-       assert(bottomOpacity != null),
-       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
+       assert(bottomOpacity != null);
 
   /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
   /// the same `preferredSize.height` unless [AppBar.toolbarHeight] was null and
   /// `AppBarTheme.of(context).toolbarHeight` is non-null. In that case the
   /// return value is the sum of the theme's toolbar height and the height of
   /// the app bar's [AppBar.bottom] widget.
-  static double preferredHeightFor(BuildContext context, Size preferredSize) {
-    if (preferredSize is _PreferredAppBarSize && preferredSize.toolbarHeight == null) {
-      return (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + (preferredSize.bottomHeight ?? 0);
+  @Deprecated(
+    'Migrate to preferredSizeFor. '
+    'This change was made to support preferred size with a BuildContext for all PreferredSize widgets, not just AppBars. '
+    'This feature was deprecated after v3.7.0-4.0.pre.',
+  )
+  static double preferredHeightFor(BuildContext context, Size preferredSize) => preferredSize.height;
+
+  /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
+  /// the same `preferredSize.height` unless [AppBar.toolbarHeight] was null and
+  /// `AppBarTheme.of(context).toolbarHeight` is non-null. In that case the
+  /// return value is the sum of the theme's toolbar height and the height of
+  /// the app bar's [AppBar.bottom] widget.
+  @override
+  Size preferredSizeFor(BuildContext context) {
+    if (preferredSize != null) {
+      return preferredSize!;
     }
-    return preferredSize.height;
+    final double bottomHeight = bottom?.preferredSizeFor(context).height ?? 0;
+    if (toolbarHeight == null) {
+      final double mergedHeight = (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + bottomHeight;
+      return Size.fromHeight(mergedHeight);
+    }
+    return Size.fromHeight((toolbarHeight ?? kToolbarHeight) + bottomHeight);
   }
 
   /// {@template flutter.material.appbar.leading}
@@ -690,13 +700,17 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final double bottomOpacity;
 
   /// {@template flutter.material.appbar.preferredSize}
-  /// A size whose height is the sum of [toolbarHeight] and the [bottom] widget's
-  /// preferred height.
+  /// The custom preferred size of the AppBar.
   ///
-  /// [Scaffold] uses this size to set its app bar's height.
+  /// [Scaffold] uses this size to set its app bar's height by calling
+  /// [preferredSizeFor].
+  ///
+  /// Defaults to null. When null, the preferred height is the sum of
+  /// [toolbarHeight] (or [AppBarTheme.toolbarHeight]) and the [bottom] widget's
+  /// preferred height.
   /// {@endtemplate}
   @override
-  final Size preferredSize;
+  final Size? preferredSize;
 
   /// {@template flutter.material.appbar.toolbarHeight}
   /// Defines the height of the toolbar component of an [AppBar].
@@ -1218,6 +1232,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.actions,
     required this.flexibleSpace,
     required this.bottom,
+    required this.bottomHeight,
     required this.elevation,
     required this.scrolledUnderElevation,
     required this.shadowColor,
@@ -1253,8 +1268,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
        assert(
          !floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
          'vsync cannot be null when snapConfiguration or showOnScreenConfiguration is not null, and floating is true',
-       ),
-       _bottomHeight = bottom?.preferredSize.height ?? 0.0;
+       );
 
   final Widget? leading;
   final bool automaticallyImplyLeading;
@@ -1262,6 +1276,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final List<Widget>? actions;
   final Widget? flexibleSpace;
   final PreferredSizeWidget? bottom;
+  final double bottomHeight;
   final double? elevation;
   final double? scrolledUnderElevation;
   final Color? shadowColor;
@@ -1289,13 +1304,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final TextStyle? toolbarTextStyle;
   final TextStyle? titleTextStyle;
   final SystemUiOverlayStyle? systemOverlayStyle;
-  final double _bottomHeight;
 
   @override
   double get minExtent => collapsedHeight;
 
   @override
-  double get maxExtent => math.max(topPadding + (expandedHeight ?? (toolbarHeight ?? kToolbarHeight) + _bottomHeight), minExtent);
+  double get maxExtent => math.max(topPadding + (expandedHeight ?? (toolbarHeight ?? kToolbarHeight) + bottomHeight), minExtent);
 
   @override
   final TickerProvider vsync;
@@ -1312,8 +1326,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight), 0.0);
-    final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
+    final double extraToolbarHeight = math.max(minExtent - bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight), 0.0);
+    final double visibleToolbarHeight = visibleMainHeight - bottomHeight - extraToolbarHeight;
 
     final bool isScrolledUnder = overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
@@ -1355,7 +1369,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         titleSpacing: titleSpacing,
         shape: shape,
         toolbarOpacity: toolbarOpacity,
-        bottomOpacity: pinned ? 1.0 : clampDouble(visibleMainHeight / _bottomHeight, 0.0, 1.0),
+        bottomOpacity: pinned ? 1.0 : clampDouble(visibleMainHeight / bottomHeight, 0.0, 1.0),
         toolbarHeight: toolbarHeight,
         leadingWidth: leadingWidth,
         backwardsCompatibility: backwardsCompatibility,
@@ -1375,7 +1389,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || actions != oldDelegate.actions
         || flexibleSpace != oldDelegate.flexibleSpace
         || bottom != oldDelegate.bottom
-        || _bottomHeight != oldDelegate._bottomHeight
+        || bottomHeight != oldDelegate.bottomHeight
         || elevation != oldDelegate.elevation
         || shadowColor != oldDelegate.shadowColor
         || backgroundColor != oldDelegate.backgroundColor
@@ -1406,7 +1420,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}(topPadding: ${topPadding.toStringAsFixed(1)}, bottomHeight: ${_bottomHeight.toStringAsFixed(1)}, ...)';
+    return '${describeIdentity(this)}(topPadding: ${topPadding.toStringAsFixed(1)}, bottomHeight: ${bottomHeight.toStringAsFixed(1)}, ...)';
   }
 }
 
@@ -2096,7 +2110,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
-    final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
+    final double bottomHeight = widget.bottom?.preferredSizeFor(context).height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
@@ -2116,6 +2130,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           actions: widget.actions,
           flexibleSpace: widget.flexibleSpace,
           bottom: widget.bottom,
+          bottomHeight: widget.bottom?.preferredSizeFor(context).height ?? 0.0,
           elevation: widget.elevation,
           scrolledUnderElevation: widget.scrolledUnderElevation,
           shadowColor: widget.shadowColor,

@@ -431,6 +431,9 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   }
 
   @override
+  Size preferredSizeFor(BuildContext context) => preferredSize;
+
+  @override
   State<CupertinoNavigationBar> createState() => _CupertinoNavigationBarState();
 }
 

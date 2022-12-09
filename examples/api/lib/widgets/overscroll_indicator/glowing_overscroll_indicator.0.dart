@@ -15,11 +15,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: Text(_title)),
+        body: MyStatelessWidget(),
       ),
     );
   }
@@ -31,7 +31,7 @@ class MyStatelessWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double leadingPaintOffset =
-        MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
+        MediaQuery.of(context).padding.top + const AppBar().preferredSizeFor(context).height;
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification notification) {
         if (notification.leading) {

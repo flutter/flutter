@@ -329,11 +329,11 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
         // isn't already entirely obstructed by a keyboard or other view insets.
         // Don't double pad.
         (!widget.resizeToAvoidBottomInset ||
-            widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
+            widget.tabBar.preferredSizeFor(context).height > existingMediaQuery.viewInsets.bottom)) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double bottomPadding =
-          widget.tabBar.preferredSize.height + existingMediaQuery.padding.bottom;
+          widget.tabBar.preferredSizeFor(context).height + existingMediaQuery.padding.bottom;
 
       // If tab bar opaque, directly stop the main content higher. If
       // translucent, let main content draw behind the tab bar but hint the
