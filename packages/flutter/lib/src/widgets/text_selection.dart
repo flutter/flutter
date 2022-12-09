@@ -2862,8 +2862,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     widget.onDragSelectionUpdate?.call(details);
   }
 
-  void _handleDragEnd(TapDragEndDetails endDetails) {
-    widget.onDragSelectionEnd?.call(endDetails);
+  void _handleDragEnd(TapDragEndDetails details) {
+    widget.onDragSelectionEnd?.call(details);
   }
 
   void _forcePressStarted(ForcePressDetails details) {

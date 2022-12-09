@@ -65,7 +65,7 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragDownDetails {
+class TapDragDownDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragDownCallback].
   ///
   /// The [globalPosition], [localPosition], [consecutiveTapCount], and
@@ -81,11 +81,11 @@ class TapDragDownDetails {
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
-
   /// The local position at which the pointer contacted the screen.
   final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
 
   /// If this tap is in a series of taps, then this value represents
   /// the number in the series this tap is.
@@ -95,7 +95,14 @@ class TapDragDownDetails {
   final Set<LogicalKeyboardKey> keysPressedOnDown;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TapDragDownDetails')}($globalPosition)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+  }
 }
 
 /// {@macro flutter.gestures.tap.GestureTapUpCallback}
@@ -117,7 +124,7 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpDetails {
+class TapDragUpDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragUpCallback].
   ///
   /// The [kind], [globalPosition], [localPosition], [consecutiveTapCount], and
@@ -147,7 +154,14 @@ class TapDragUpDetails {
   final Set<LogicalKeyboardKey> keysPressedOnDown;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TapDragUpDetails')}($globalPosition)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+  }
 }
 
 /// {@macro flutter.gestures.dragdetails.GestureDragStartCallback}
@@ -169,7 +183,7 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragStartDetails {
+class TapDragStartDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragStartCallback].
   ///
   /// The [globalPosition], [localPosition], [consecutiveTapCount], and
@@ -212,7 +226,15 @@ class TapDragStartDetails {
   final Set<LogicalKeyboardKey> keysPressedOnDown;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TapDragStartDetails')}($globalPosition)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+  }
 }
 
 /// {@macro flutter.gestures.dragdetails.GestureDragUpdateCallback}
@@ -234,7 +256,7 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpdateDetails {
+class TapDragUpdateDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragUpdateCallback].
   ///
   /// The [delta] argument must not be null.
@@ -300,14 +322,14 @@ class TapDragUpdateDetails {
   ///    coordinate space of the event receiver.
   final Offset globalPosition;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
-
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer contacted the screen.
   ///
   /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
 
   /// A delta offset from the point where the drag initially contacted
   /// the screen to the point where the pointer is currently located in global
@@ -333,7 +355,19 @@ class TapDragUpdateDetails {
   final Set<LogicalKeyboardKey> keysPressedOnDown;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TapDragUpdateDetails')}($delta)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta));
+    properties.add(DiagnosticsProperty<double?>('primaryDelta', primaryDelta));  
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
+    properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
+    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+  }
 }
 
 /// {@macro flutter.gestures.monodrag.GestureDragEndCallback}
@@ -355,7 +389,7 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
-class TapDragEndDetails {
+class TapDragEndDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragEndCallback].
   ///
   /// The [velocity] argument must not be null.
@@ -399,7 +433,13 @@ class TapDragEndDetails {
   final Set<LogicalKeyboardKey> keysPressedOnDown;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TapDragEndDetails')}($velocity)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
+    properties.add(DiagnosticsProperty<double?>('primaryVelocity', primaryVelocity));
+    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+  }
 }
 
 /// Signature for when the pointer that previously triggered a
@@ -891,7 +931,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
           return false;
       }
     } else {
-      // There can be multiple drags simultaneously. Their effects are combined.
       if (event.pointer != _primaryPointer) {
         return false;
       }
