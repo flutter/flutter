@@ -245,7 +245,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The primary content of the list tile.
