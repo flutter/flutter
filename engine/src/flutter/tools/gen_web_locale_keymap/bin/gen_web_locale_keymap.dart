@@ -5,10 +5,10 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:gen_web_keyboard_layouts/benchmark_planner.dart';
-import 'package:gen_web_keyboard_layouts/common.dart';
-import 'package:gen_web_keyboard_layouts/github.dart';
-import 'package:gen_web_keyboard_layouts/layout_types.dart';
+import 'package:gen_web_keyboard_keymap/benchmark_planner.dart';
+import 'package:gen_web_keyboard_keymap/common.dart';
+import 'package:gen_web_keyboard_keymap/github.dart';
+import 'package:gen_web_keyboard_keymap/layout_types.dart';
 import 'package:path/path.dart' as path;
 
 const String kEnvGithubToken = 'GITHUB_TOKEN';
