@@ -13,6 +13,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
+import 'web/compile.dart';
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -35,6 +36,7 @@ class BuildInfo {
     List<String>? dartDefines,
     this.bundleSkSLPath,
     List<String>? dartExperiments,
+    this.webRenderer = WebRendererMode.autoDetect,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     this.dartDefineConfigJsonMap,
@@ -123,6 +125,9 @@ class BuildInfo {
 
   /// A list of Dart experiments.
   final List<String> dartExperiments;
+
+  /// When compiling to web, which web renderer mode we are using (html, canvaskit, auto)
+  final WebRendererMode webRenderer;
 
   /// The name of a file where flutter assemble will output performance
   /// information in a JSON format.
@@ -333,18 +338,16 @@ class BuildInfo {
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
-    if(dartDefineConfigJsonMap != null) {
-      final List<String> items = <String>[];
-      for (final String gradleConf in result) {
-        final String key = gradleConf.split('=')[0].substring(2);
-        if (dartDefineConfigJsonMap!.containsKey(key)) {
+    if (dartDefineConfigJsonMap != null) {
+      final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
+      dartDefineConfigJsonMap!.forEach((String key, Object value) {
+        if (gradleConfKeys.contains(key)) {
           globals.printWarning(
               'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
         } else {
-          items.add('-P$key=${dartDefineConfigJsonMap?[key]}');
+          result.add('-P$key=$value');
         }
-      }
-      result.addAll(items);
+      });
     }
     return result;
   }
@@ -608,8 +611,9 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   Artifacts artifacts,
 ) {
   // Handle single-arch local engines.
-  if (artifacts is LocalEngineArtifacts) {
-    final String localEngineName = artifacts.localEngineName;
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    final String localEngineName = localEngineInfo.localEngineName;
     if (localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
@@ -630,8 +634,9 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
 /// The default set of macOS device architectures to build for.
 List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   // Handle single-arch local engines.
-  if (artifacts is LocalEngineArtifacts) {
-    if (artifacts.localEngineName.contains('_arm64')) {
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    if (localEngineInfo.localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
     return <DarwinArch>[ DarwinArch.x86_64 ];
@@ -855,6 +860,10 @@ HostPlatform getCurrentHostPlatform() {
   globals.printWarning('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
+}
+
+FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
+  return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
 }
 
 /// Returns the top-level build output directory.

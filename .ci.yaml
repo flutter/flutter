@@ -73,30 +73,33 @@ platform_properties:
   mac:
     properties:
       dependencies: >-
-        []
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
       os: Mac-12
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_arm64:
     properties:
       dependencies: >-
-        []
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
       os: Mac-12
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_x64:
     properties:
       dependencies: >-
-        []
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
       os: Mac-12
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_android:
     properties:
       dependencies: >-
@@ -124,7 +127,7 @@ platform_properties:
         [
           {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "none"}
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       cpu: x86
@@ -301,6 +304,7 @@ targets:
       validation_name: Docs
       firebase_project: master-docs-flutter-dev
       release_ref: refs/heads/master
+      release_build: "true"
 
   - name: Linux docs_test
     recipe: flutter/flutter
@@ -1387,6 +1391,15 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: animated_complex_opacity_perf__e2e_summary
 
+  - name: Linux_android animated_complex_image_filtered_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: animated_complex_image_filtered_perf__e2e_summary
+
   - name: Linux_android animated_placeholder_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1690,6 +1703,7 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_android flavors_test
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1915,15 +1929,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: integration_ui_keyboard_resize
 
-  - name: Linux_android integration_ui_screenshot
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: integration_ui_screenshot
-
   - name: Linux_android integration_ui_textfield
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1998,7 +2003,6 @@ targets:
 
   - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/114025
     presubmit: false
     timeout: 60
     properties:
@@ -2015,6 +2019,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf
       artifact: gallery__transition_perf
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
@@ -2025,6 +2031,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_e2e
       artifact: gallery__transition_perf_e2e
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
@@ -2035,6 +2043,8 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_hybrid
       artifact: gallery__transition_perf_hybrid
+      drone_dimensions: >
+        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
 
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
@@ -3495,15 +3505,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_keyboard_resize
 
-  - name: Mac_ios integration_ui_ios_screenshot
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: integration_ui_ios_screenshot
-
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3713,6 +3714,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_impeller_ios__timeline_summary
 
+  - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
+
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3820,6 +3831,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios_sksl_warmup__transition_perf
+
+  - name: Mac_ios spell_check_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: spell_check_test
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -4172,6 +4193,24 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows run_release_test_windows
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: run_release_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Windows tool_integration_tests_1_6
     recipe: flutter/flutter_drone
     timeout: 60
@@ -4511,7 +4550,6 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/113706
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4541,7 +4579,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "windows"]
-      task_name: flavors_test_win
+      task_name: flavors_test
 
   - name: Windows_android flutter_gallery_win__compile
     recipe: devicelab/devicelab_drone
@@ -4609,3 +4647,78 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
+
+  - name: Linux flutter_packaging
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+  - name: Mac flutter_packaging
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Mac_arm64 flutter_packaging
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Windows flutter_packaging
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
+
+  - name: Linux docs_deploy
+    recipe: flutter/flutter
+    scheduler: release
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"},
+          {"dependency": "firebase", "version": "v11.0.1"}
+        ]
+      tags: >
+        ["framework", "hostonly", "linux"]
+      validation: docs_deploy
+      validation_name: Docs_deploy
+      # TODO(godofredoc): Update to docs-flutter-dev before release.
+      firebase_project: master-docs-flutter-dev

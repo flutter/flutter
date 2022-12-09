@@ -133,5 +133,6 @@
   "keyboardKeySpace": "Spațiu",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Bară de meniu"
+  "menuBarMenuLabel": "Bară de meniu",
+  "currentDateLabel": "Date of today"
 }

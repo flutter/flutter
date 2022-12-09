@@ -1650,6 +1650,22 @@ void main() {
       expect(scaleHighZoomedIn - scaleHighZoomedOut, lessThan(scaleZoomedIn - scaleZoomedOut));
     });
 
+    testWidgets('alignment argument is used properly', (WidgetTester tester) async {
+      const Alignment alignment = Alignment.center;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: InteractiveViewer(
+            alignment: alignment,
+            child: Container(),
+          ),
+        ),
+      ));
+
+      final Transform transform = tester.firstWidget(find.byType(Transform));
+      expect(transform.alignment, alignment);
+    });
+
     testWidgets('interactionEndFrictionCoefficient', (WidgetTester tester) async {
       // Use the default interactionEndFrictionCoefficient.
       final TransformationController transformationController1 = TransformationController();

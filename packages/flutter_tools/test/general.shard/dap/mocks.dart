@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dds/dap.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -21,11 +22,11 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
     final ByteStreamServerChannel channel = ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
+    final ByteStreamServerChannel clientChannel = ByteStreamServerChannel(stdoutController.stream, stdinController.sink, null);
 
     return MockFlutterDebugAdapter._(
-      stdinController.sink,
-      stdoutController.stream,
       channel,
+      clientChannel: clientChannel,
       fileSystem: fileSystem,
       platform: platform,
       simulateAppStarted: simulateAppStarted,
@@ -33,22 +34,40 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   }
 
   MockFlutterDebugAdapter._(
-    this.stdin,
-    this.stdout,
-    ByteStreamServerChannel channel, {
-    required FileSystem fileSystem,
-    required Platform platform,
+    super.channel, {
+    required this.clientChannel,
+    required super.fileSystem,
+    required super.platform,
     this.simulateAppStarted = true,
-  }) : super(channel, fileSystem: fileSystem, platform: platform);
+  }) {
+    clientChannel.listen((ProtocolMessage message) {
+      _handleDapToClientMessage(message);
+    });
+  }
 
-  final StreamSink<List<int>> stdin;
-  final Stream<List<int>> stdout;
+  int _seq = 1;
+  final ByteStreamServerChannel clientChannel;
   final bool simulateAppStarted;
 
   late String executable;
   late List<String> processArgs;
   late Map<String, String>? env;
-  final List<String> flutterRequests = <String>[];
+
+  /// A list of all messages sent from the adapter back to the client.
+  final List<Map<String, Object?>> dapToClientMessages = <Map<String, Object?>>[];
+
+  /// A list of all messages sent from the adapter to the `flutter run` processes `stdin`.
+  final List<Map<String, Object?>> dapToFlutterMessages = <Map<String, Object?>>[];
+
+  /// The `method`s of all mesages sent to the `flutter run` processes `stdin`
+  /// by the debug adapter.
+  List<String> get dapToFlutterRequests => dapToFlutterMessages
+      .map((Map<String, Object?> message) => message['method'] as String?)
+      .whereNotNull()
+      .toList();
+
+  /// A handler for the 'app.exposeUrl' reverse-request.
+  String Function(String)? exposeUrlHandler;
 
   @override
   Future<void> launchAsProcess({
@@ -75,6 +94,41 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     }
   }
 
+  /// Handles messages sent from the debug adapter back to the client.
+  void _handleDapToClientMessage(ProtocolMessage message) {
+    dapToClientMessages.add(message.toJson());
+
+    // Pretend to be the client, delegating any reverse-requests to the relevant
+    // handler that is provided by the test.
+    if (message is Event && message.event == 'flutter.forwardedRequest') {
+      final Map<String, Object?> body = (message.body as Map<String, Object?>?)!;
+      final String method = (body['method'] as String?)!;
+      final Map<String, Object?>? params = body['params'] as Map<String, Object?>?;
+
+      final Object? result = _handleReverseRequest(method, params);
+
+      // Send the result back in the same way the client would.
+      clientChannel.sendRequest(Request(
+        seq: _seq++,
+        command: 'flutter.sendForwardedRequestResponse',
+        arguments: <String, Object?>{
+          'id': body['id'],
+          'result': result,
+        },
+      ));
+    }
+  }
+
+  Object? _handleReverseRequest(String method, Map<String, Object?>? params) {
+    switch (method) {
+      case 'app.exposeUrl':
+        final String url = (params!['url'] as String?)!;
+        return exposeUrlHandler!(url);
+      default:
+        throw ArgumentError('Reverse-request $method is unknown');
+    }
+  }
+
   /// Simulates a message emitted by the `flutter run` process by directly
   /// calling the debug adapters [handleStdout] method.
   void simulateStdoutMessage(Map<String, Object?> message) {
@@ -84,13 +138,10 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   }
 
   @override
-  Future<Object?> sendFlutterRequest(
-    String method,
-    Map<String, Object?>? params, {
-    bool failSilently = true,
-  }) {
-    flutterRequests.add(method);
-    return super.sendFlutterRequest(method, params, failSilently: failSilently);
+  void sendFlutterMessage(Map<String, Object?> message) {
+    dapToFlutterMessages.add(message);
+    // Don't call super because it will try to write to the process that we
+    // didn't actually spawn.
   }
 
   @override

@@ -323,8 +323,7 @@ class CreateCommand extends CreateBase {
       linux: includeLinux,
       macos: includeMacos,
       windows: includeWindows,
-      // Enable null safety everywhere.
-      dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
+      dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
       implementationTests: boolArgDeprecated('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
@@ -434,7 +433,7 @@ class CreateCommand extends CreateBase {
     globals.printStatus('Wrote $generatedFileCount files.');
     globals.printStatus('\nAll done!');
     final String application =
-      '${emptyArgument ? 'empty' : ''}${sampleCode != null ? 'sample' : ''} application';
+      '${emptyArgument ? 'empty ' : ''}${sampleCode != null ? 'sample ' : ''}application';
     if (generatePackage) {
       final String relativeMainPath = globals.fs.path.normalize(globals.fs.path.join(
         relativeDirPath,
@@ -476,6 +475,10 @@ class CreateCommand extends CreateBase {
 
       // Let them know a summary of the state of their tooling.
       globals.printStatus('''
+You can find general documentation for Flutter at: https://docs.flutter.dev/
+Detailed API documentation is available at: https://api.flutter.dev/
+If you prefer video documentation, consider: https://www.youtube.com/c/flutterdev
+
 In order to run your $application, type:
 
   \$ cd $relativeAppPath

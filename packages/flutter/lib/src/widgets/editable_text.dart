@@ -33,6 +33,7 @@ import 'media_query.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
+import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'shortcuts.dart';
 import 'spell_check.dart';
@@ -1637,7 +1638,7 @@ class EditableText extends StatefulWidget {
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
-  /// it is used. It is currently supported only on Android.
+  /// it is used. It is currently supported only on Android and iOS.
   ///
   /// If this configuration is left null, then spell check is disabled by default.
   /// {@endtemplate}
@@ -1907,6 +1908,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextSelectionOverlay? _selectionOverlay;
 
+  final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
   ScrollController get _scrollController => widget.scrollController ?? (_internalScrollController ??= ScrollController());
 
@@ -2558,12 +2560,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
-      _handleSelectionChanged(
-        value.selection,
-        Scribble.scribbleInProgress
-            ? SelectionChangedCause.scribble
-            : SelectionChangedCause.keyboard,
-      );
+      _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
       // Only hide the toolbar overlay, the selection handle's visibility will be handled
       // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
@@ -3522,7 +3519,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       graphemeStart = graphemeEnd;
     }
-    Scribble.setSelectionRects(rects);
+    _textInputConnection!.setSelectionRects(rects);
   }
 
   void _updateSizeAndTransform() {
@@ -3533,7 +3530,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _updateSelectionRects();
       SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     } else if (_placeholderLocation != -1) {
-      _removeTextPlaceholder();
+      removeTextPlaceholder();
     }
   }
 
@@ -3626,6 +3623,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
+  @override
   bool showToolbar() {
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
@@ -3694,6 +3692,39 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay!.magnifierIsVisible) {
       _selectionOverlay!.hideMagnifier();
     }
+  }
+
+  // Tracks the location a [_ScribblePlaceholder] should be rendered in the
+  // text.
+  //
+  // A value of -1 indicates there should be no placeholder, otherwise the
+  // value should be between 0 and the length of the text, inclusive.
+  int _placeholderLocation = -1;
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    if (!widget.scribbleEnabled) {
+      return;
+    }
+
+    if (!widget.controller.selection.isValid) {
+      return;
+    }
+
+    setState(() {
+      _placeholderLocation = _value.text.length - widget.controller.selection.end;
+    });
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    if (!widget.scribbleEnabled) {
+      return;
+    }
+
+    setState(() {
+      _placeholderLocation = -1;
+    });
   }
 
   @override
@@ -3924,6 +3955,96 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  /// Handles [ScrollIntent] by scrolling the [Scrollable] inside of
+  /// [EditableText].
+  void _scroll(ScrollIntent intent) {
+    if (intent.type != ScrollIncrementType.page) {
+      return;
+    }
+
+    final ScrollPosition position = _scrollController.position;
+    if (widget.maxLines == 1) {
+      _scrollController.jumpTo(position.maxScrollExtent);
+      return;
+    }
+
+    // If the field isn't scrollable, do nothing. For example, when the lines of
+    // text is less than maxLines, the field has nothing to scroll.
+    if (position.maxScrollExtent == 0.0 && position.minScrollExtent == 0.0) {
+      return;
+    }
+
+    final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
+    final double increment = ScrollAction.getDirectionalIncrement(state!, intent);
+    final double destination = clampDouble(
+      position.pixels + increment,
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (destination == position.pixels) {
+      return;
+    }
+    _scrollController.jumpTo(destination);
+  }
+
+  /// Extend the selection down by page if the `forward` parameter is true, or
+  /// up by page otherwise.
+  void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
+    if (widget.maxLines == 1) {
+      return;
+    }
+
+    final TextSelection nextSelection;
+    final Rect extentRect = renderEditable.getLocalRectForCaret(
+      _value.selection.extent,
+    );
+    final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
+    final double increment = ScrollAction.getDirectionalIncrement(
+      state!,
+      ScrollIntent(
+        direction: intent.forward ? AxisDirection.down : AxisDirection.up,
+        type: ScrollIncrementType.page,
+      ),
+    );
+    final ScrollPosition position = _scrollController.position;
+    if (intent.forward) {
+      if (_value.selection.extentOffset >= _value.text.length) {
+        return;
+      }
+      final Offset nextExtentOffset =
+          Offset(extentRect.left, extentRect.top + increment);
+      final double height = position.maxScrollExtent + renderEditable.size.height;
+      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
+          ? TextPosition(offset: _value.text.length)
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
+            );
+      nextSelection = _value.selection.copyWith(
+        extentOffset: nextExtent.offset,
+      );
+    } else {
+      if (_value.selection.extentOffset <= 0) {
+        return;
+      }
+      final Offset nextExtentOffset =
+          Offset(extentRect.left, extentRect.top + increment);
+      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
+          ? const TextPosition(offset: 0)
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
+            );
+      nextSelection = _value.selection.copyWith(
+        extentOffset: nextExtent.offset,
+      );
+    }
+
+    bringIntoView(nextSelection.extent);
+    userUpdateTextEditingValue(
+      _value.copyWith(selection: nextSelection),
+      SelectionChangedCause.keyboard,
+    );
+  }
+
   void _updateSelection(UpdateSelectionIntent intent) {
     bringIntoView(intent.newSelection.extent);
     userUpdateTextEditingValue(
@@ -3978,35 +4099,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return Actions.invoke(context, intent);
   }
 
-  // Tracks the location a [_ScribblePlaceholder] should be rendered in the
-  // text.
-  //
-  // A value of -1 indicates there should be no placeholder, otherwise the
-  // value should be between 0 and the length of the text, inclusive.
-  int _placeholderLocation = -1;
-
-  void _onPlaceholderLocationChanged(int location) {
-    setState(() {
-      _placeholderLocation = location;
-    });
-  }
-
-  void _onScribbleFocus(Offset offset) {
-    widget.focusNode.requestFocus();
-    renderEditable.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
-    _openInputConnection();
-    _updateSelectionRects(force: true);
-  }
-
-  void _removeTextPlaceholder() {
-    if (!widget.scribbleEnabled) {
-      return;
-    }
-
-    setState(() {
-      _placeholderLocation = -1;
-    });
-  }
 
   /// The default behavior used if [onTapOutside] is null.
   ///
@@ -4058,6 +4150,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // Extend/Move Selection
     ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary)),
+    ExtendSelectionByPageIntent: _makeOverridable(CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
     ExpandSelectionToLineBreakIntent: _makeOverridable(CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
@@ -4067,6 +4160,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
+    ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
 
     // Copy Paste
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
@@ -4099,6 +4193,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               includeSemantics: false,
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: Scrollable(
+                key: _scrollableKey,
                 excludeFromSemantics: true,
                 axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
                 controller: _scrollController,
@@ -4121,12 +4216,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                       onPaste: _semanticsOnPaste(controls),
                       child: _ScribbleFocusable(
                         focusNode: widget.focusNode,
+                        editableKey: _editableKey,
                         enabled: widget.scribbleEnabled,
-                        onPlaceholderLocationChanged: _onPlaceholderLocationChanged,
-                        onScribbleFocus: _onScribbleFocus,
-                        onShowToolbar: showToolbar,
-                        readOnly: widget.readOnly,
-                        value: _value,
+                        updateSelectionRects: () {
+                          _openInputConnection();
+                          _updateSelectionRects(force: true);
+                        },
                         child: _Editable(
                           key: _editableKey,
                           startHandleLayerLink: _startHandleLayerLink,
@@ -4441,13 +4536,6 @@ class _Editable extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A function that that takes a placeholder location as an int offset into some
-/// text.
-typedef _PlaceholderLocationCallback = void Function(int location);
-
-/// A function that takes the Offset at which focus is requested.
-typedef _ScribbleFocusCallback = void Function(Offset offset);
-
 @immutable
 class _ScribbleCacheKey  {
   const _ScribbleCacheKey({
@@ -4488,88 +4576,55 @@ class _ScribbleCacheKey  {
   }
 }
 
-/// A widget that provides the ability to receive handwriting input from
-/// [Scribble].
 class _ScribbleFocusable extends StatefulWidget {
   const _ScribbleFocusable({
     required this.child,
-    required this.enabled,
     required this.focusNode,
-    required this.onPlaceholderLocationChanged,
-    required this.onScribbleFocus,
-    required this.onShowToolbar,
-    required this.readOnly,
-    required this.value,
+    required this.editableKey,
+    required this.updateSelectionRects,
+    required this.enabled,
   });
 
   final Widget child;
-  final bool enabled;
   final FocusNode focusNode;
-  final _PlaceholderLocationCallback onPlaceholderLocationChanged;
-  final _ScribbleFocusCallback onScribbleFocus;
-  final VoidCallback onShowToolbar;
-  final bool readOnly;
-  final TextEditingValue value;
+  final GlobalKey editableKey;
+  final VoidCallback updateSelectionRects;
+  final bool enabled;
 
   @override
   _ScribbleFocusableState createState() => _ScribbleFocusableState();
 }
 
-class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleClient {
+class _ScribbleFocusableState extends State<_ScribbleFocusable> implements ScribbleClient {
   _ScribbleFocusableState(): _elementIdentifier = (_nextElementIdentifier++).toString();
-
-  void _onFocusChange() {
-    _updateClient(widget.focusNode.hasFocus);
-  }
-
-  void _updateClient(bool hasFocus) {
-    if (hasFocus) {
-      if (Scribble.client != this) {
-        Scribble.client = this;
-      }
-    } else if (Scribble.client == this) {
-      Scribble.client = null;
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    _updateClient(widget.focusNode.hasFocus);
-    widget.focusNode.addListener(_onFocusChange);
     if (widget.enabled) {
-      Scribble.registerScribbleElement(elementIdentifier, this);
+      TextInput.registerScribbleElement(elementIdentifier, this);
     }
   }
 
   @override
   void didUpdateWidget(_ScribbleFocusable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.focusNode != widget.focusNode) {
-      oldWidget.focusNode.removeListener(_onFocusChange);
-      widget.focusNode.addListener(_onFocusChange);
-      _updateClient(widget.focusNode.hasFocus);
-    }
     if (!oldWidget.enabled && widget.enabled) {
-      Scribble.registerScribbleElement(elementIdentifier, this);
+      TextInput.registerScribbleElement(elementIdentifier, this);
     }
 
     if (oldWidget.enabled && !widget.enabled) {
-      Scribble.unregisterScribbleElement(elementIdentifier);
+      TextInput.unregisterScribbleElement(elementIdentifier);
     }
   }
 
   @override
   void dispose() {
-    Scribble.unregisterScribbleElement(elementIdentifier);
-    widget.focusNode.removeListener(_onFocusChange);
-    if (Scribble.client == this) {
-      Scribble.client = null;
-    }
+    TextInput.unregisterScribbleElement(elementIdentifier);
     super.dispose();
   }
 
-  // Start ScribbleClient.
+  RenderEditable? get renderEditable => widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;
 
   static int _nextElementIdentifier = 1;
   final String _elementIdentifier;
@@ -4579,38 +4634,15 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
 
   @override
   void onScribbleFocus(Offset offset) {
-    return widget.onScribbleFocus(offset);
-  }
-
-  @override
-  void insertTextPlaceholder(Size size) {
-    if (!widget.enabled || !widget.value.selection.isValid || widget.readOnly) {
-      return;
-    }
-
-    widget.onPlaceholderLocationChanged(
-      widget.value.text.length - widget.value.selection.end,
-    );
-  }
-
-  @override
-  void removeTextPlaceholder() {
-    if (!widget.enabled) {
-      return;
-    }
-
-    widget.onPlaceholderLocationChanged(-1);
-  }
-
-  @override
-  void showToolbar() {
-    widget.onShowToolbar();
+    widget.focusNode.requestFocus();
+    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
+    widget.updateSelectionRects();
   }
 
   @override
   bool isInScribbleRect(Rect rect) {
     final Rect calculatedBounds = bounds;
-    if (widget.readOnly) {
+    if (renderEditable?.readOnly ?? false) {
       return false;
     }
     if (calculatedBounds == Rect.zero) {
@@ -4622,8 +4654,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
     final Rect intersection = calculatedBounds.intersect(rect);
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTest(result, intersection.center);
-    final RenderObject? renderObject = context.findRenderObject();
-    return result.path.any((HitTestEntry entry) => entry.target == renderObject);
+    return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
   }
 
   @override
@@ -4635,8 +4666,6 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> with ScribbleCli
     final Matrix4 transform = box.getTransformTo(null);
     return MatrixUtils.transformRect(transform, Rect.fromLTWH(0, 0, box.size.width, box.size.height));
   }
-
-  // End ScribbleClient.
 
   @override
   Widget build(BuildContext context) {
