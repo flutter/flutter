@@ -38,7 +38,7 @@ TEST(ImporterTest, CanParseGLTF) {
   auto& vertex = mesh.vertices[0];
 
   Vector3 position = ToVector3(vertex.position());
-  ASSERT_VECTOR3_NEAR(position, Vector3(-0.0100185, -0.522907, 0.133178));
+  ASSERT_VECTOR3_NEAR(position, Vector3(-0.0100185, -0.522907, -0.133178));
 
   Vector3 normal = ToVector3(vertex.normal());
   ASSERT_VECTOR3_NEAR(normal, Vector3(0.556997, -0.810833, 0.179733));
