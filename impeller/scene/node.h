@@ -12,19 +12,16 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/scene/camera.h"
+#include "impeller/scene/mesh.h"
 #include "impeller/scene/scene_encoder.h"
 
 namespace impeller {
 namespace scene {
 
-class StaticMeshEntity;
-
-class SceneEntity {
+class Node final {
  public:
-  SceneEntity();
-  virtual ~SceneEntity();
-
-  static std::shared_ptr<StaticMeshEntity> MakeStaticMesh();
+  Node();
+  ~Node();
 
   void SetLocalTransform(Matrix transform);
   Matrix GetLocalTransform() const;
@@ -32,20 +29,19 @@ class SceneEntity {
   void SetGlobalTransform(Matrix transform);
   Matrix GetGlobalTransform() const;
 
-  bool Add(const std::shared_ptr<SceneEntity>& child);
+  void AddChild(Node child);
 
-  bool Render(SceneEncoder& encoder) const;
+  void SetMesh(const Mesh& mesh);
+
+  bool Render(SceneEncoder& encoder, const Matrix& parent_transform) const;
 
  protected:
   Matrix local_transform_;
 
  private:
-  virtual bool OnRender(SceneEncoder& encoder) const;
-
-  SceneEntity* parent_ = nullptr;
-  std::vector<std::shared_ptr<SceneEntity>> children_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(SceneEntity);
+  Node* parent_ = nullptr;
+  std::vector<Node> children_;
+  Mesh mesh_;
 };
 
 }  // namespace scene
