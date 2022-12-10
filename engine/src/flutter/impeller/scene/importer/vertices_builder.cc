@@ -8,6 +8,7 @@
 #include <limits>
 #include <type_traits>
 
+#include "flutter/fml/logging.h"
 #include "impeller/scene/importer/conversions.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 
@@ -16,29 +17,6 @@ namespace scene {
 namespace importer {
 
 VerticesBuilder::VerticesBuilder() = default;
-
-std::map<VerticesBuilder::Attribute, VerticesBuilder::AttributeProperties>
-    VerticesBuilder::kAttributes = {
-        {VerticesBuilder::Attribute::kPosition,
-         {.offset_bytes = offsetof(Vertex, position),
-          .size_bytes = sizeof(Vertex::position),
-          .component_count = 3}},
-        {VerticesBuilder::Attribute::kNormal,
-         {.offset_bytes = offsetof(Vertex, normal),
-          .size_bytes = sizeof(Vertex::normal),
-          .component_count = 3}},
-        {VerticesBuilder::Attribute::kTangent,
-         {.offset_bytes = offsetof(Vertex, tangent),
-          .size_bytes = sizeof(Vertex::tangent),
-          .component_count = 4}},
-        {VerticesBuilder::Attribute::kTextureCoords,
-         {.offset_bytes = offsetof(Vertex, texture_coords),
-          .size_bytes = sizeof(Vertex::texture_coords),
-          .component_count = 2}},
-        {VerticesBuilder::Attribute::kColor,
-         {.offset_bytes = offsetof(Vertex, color),
-          .size_bytes = sizeof(Vertex::color),
-          .component_count = 4}}};
 
 void VerticesBuilder::WriteFBVertices(std::vector<fb::Vertex>& vertices) const {
   vertices.resize(0);
@@ -49,64 +27,119 @@ void VerticesBuilder::WriteFBVertices(std::vector<fb::Vertex>& vertices) const {
   }
 }
 
-/// @brief  Reads a contiguous sequence of numeric components from `source` and
-///         writes them to `destination` as 32bit floats. Signed SourceTypes
-///         convert to a range of -1 to 1, and unsigned SourceTypes convert to a
-///         range of 0 to 1.
+/// @brief  Reads a numeric component from `source` and returns a 32bit float.
+///         Signed SourceTypes convert to a range of -1 to 1, and unsigned
+///         SourceTypes convert to a range of 0 to 1.
 template <typename SourceType>
-static void WriteComponentsAsScalars(void* destination,
-                                     const void* source,
-                                     size_t component_count) {
+static Scalar ToNormalizedScalar(const void* source, size_t index) {
   constexpr SourceType divisor = std::is_integral_v<SourceType>
                                      ? std::numeric_limits<SourceType>::max()
                                      : 1;
-  for (size_t i = 0; i < component_count; i++) {
-    const SourceType* s = reinterpret_cast<const SourceType*>(source) + i;
-    Scalar v = static_cast<Scalar>(*s) / static_cast<Scalar>(divisor);
-    Scalar* dest = reinterpret_cast<Scalar*>(destination) + i;
-    *dest = v;
+  const SourceType* s = reinterpret_cast<const SourceType*>(source) + index;
+  return static_cast<Scalar>(*s) / static_cast<Scalar>(divisor);
+}
+
+/// @brief  A ComponentWriter which simply converts all of an attribute's
+///         components to normalized scalar form.
+static void PassthroughAttributeWriter(
+    Scalar* destination,
+    const void* source,
+    const VerticesBuilder::ComponentProperties& component,
+    const VerticesBuilder::AttributeProperties& attribute) {
+  FML_DCHECK(attribute.size_bytes ==
+             attribute.component_count * sizeof(Scalar));
+  for (size_t component_i = 0; component_i < attribute.component_count;
+       component_i++) {
+    *(destination + component_i) = component.convert_proc(source, component_i);
   }
 }
 
-static std::map<
-    VerticesBuilder::ComponentType,
-    std::function<
-        void(void* destination, const void* source, size_t component_count)>>
-    kAttributeWriters = {
+/// @brief  A ComponentWriter which converts a Vector3 position from
+///         right-handed GLTF space to left-handed Impeller space.
+static void PositionAttributeWriter(
+    Scalar* destination,
+    const void* source,
+    const VerticesBuilder::ComponentProperties& component,
+    const VerticesBuilder::AttributeProperties& attribute) {
+  FML_DCHECK(attribute.component_count == 3);
+  *(destination + 0) = component.convert_proc(source, 0);
+  *(destination + 1) = component.convert_proc(source, 1);
+  *(destination + 2) = -component.convert_proc(source, 2);
+}
+
+std::map<VerticesBuilder::AttributeType, VerticesBuilder::AttributeProperties>
+    VerticesBuilder::kAttributeTypes = {
+        {VerticesBuilder::AttributeType::kPosition,
+         {.offset_bytes = offsetof(Vertex, position),
+          .size_bytes = sizeof(Vertex::position),
+          .component_count = 3,
+          .write_proc = PositionAttributeWriter}},
+        {VerticesBuilder::AttributeType::kNormal,
+         {.offset_bytes = offsetof(Vertex, normal),
+          .size_bytes = sizeof(Vertex::normal),
+          .component_count = 3,
+          .write_proc = PassthroughAttributeWriter}},
+        {VerticesBuilder::AttributeType::kTangent,
+         {.offset_bytes = offsetof(Vertex, tangent),
+          .size_bytes = sizeof(Vertex::tangent),
+          .component_count = 4,
+          .write_proc = PassthroughAttributeWriter}},
+        {VerticesBuilder::AttributeType::kTextureCoords,
+         {.offset_bytes = offsetof(Vertex, texture_coords),
+          .size_bytes = sizeof(Vertex::texture_coords),
+          .component_count = 2,
+          .write_proc = PassthroughAttributeWriter}},
+        {VerticesBuilder::AttributeType::kColor,
+         {.offset_bytes = offsetof(Vertex, color),
+          .size_bytes = sizeof(Vertex::color),
+          .component_count = 4,
+          .write_proc = PassthroughAttributeWriter}}};
+
+static std::map<VerticesBuilder::ComponentType,
+                VerticesBuilder::ComponentProperties>
+    kComponentTypes = {
         {VerticesBuilder::ComponentType::kSignedByte,
-         WriteComponentsAsScalars<int8_t>},
+         {.size_bytes = sizeof(int8_t),
+          .convert_proc = ToNormalizedScalar<int8_t>}},
         {VerticesBuilder::ComponentType::kUnsignedByte,
-         WriteComponentsAsScalars<uint8_t>},
+         {.size_bytes = sizeof(int8_t),
+          .convert_proc = ToNormalizedScalar<uint8_t>}},
         {VerticesBuilder::ComponentType::kSignedShort,
-         WriteComponentsAsScalars<int16_t>},
+         {.size_bytes = sizeof(int16_t),
+          .convert_proc = ToNormalizedScalar<int16_t>}},
         {VerticesBuilder::ComponentType::kUnsignedShort,
-         WriteComponentsAsScalars<uint16_t>},
+         {.size_bytes = sizeof(int16_t),
+          .convert_proc = ToNormalizedScalar<uint16_t>}},
         {VerticesBuilder::ComponentType::kSignedInt,
-         WriteComponentsAsScalars<int32_t>},
+         {.size_bytes = sizeof(int32_t),
+          .convert_proc = ToNormalizedScalar<int32_t>}},
         {VerticesBuilder::ComponentType::kUnsignedInt,
-         WriteComponentsAsScalars<uint32_t>},
+         {.size_bytes = sizeof(int32_t),
+          .convert_proc = ToNormalizedScalar<uint32_t>}},
         {VerticesBuilder::ComponentType::kFloat,
-         WriteComponentsAsScalars<float>},
+         {.size_bytes = sizeof(float),
+          .convert_proc = ToNormalizedScalar<float>}},
 };
 
-void VerticesBuilder::SetAttributeFromBuffer(Attribute attribute,
+void VerticesBuilder::SetAttributeFromBuffer(AttributeType attribute,
                                              ComponentType component_type,
                                              const void* buffer_start,
-                                             size_t stride_bytes,
-                                             size_t count) {
-  if (count > vertices_.size()) {
-    vertices_.resize(count, Vertex());
+                                             size_t attribute_stride_bytes,
+                                             size_t attribute_count) {
+  if (attribute_count > vertices_.size()) {
+    vertices_.resize(attribute_count, Vertex());
   }
 
-  const auto& properties = kAttributes[attribute];
-  const auto& writer = kAttributeWriters[component_type];
-  for (size_t i = 0; i < count; i++) {
-    const char* source =
-        reinterpret_cast<const char*>(buffer_start) + stride_bytes * i;
-    char* destination =
-        reinterpret_cast<char*>(&vertices_.data()[i]) + properties.offset_bytes;
+  const ComponentProperties& component_props = kComponentTypes[component_type];
+  const AttributeProperties& attribute_props = kAttributeTypes[attribute];
+  for (size_t i = 0; i < attribute_count; i++) {
+    const uint8_t* source = reinterpret_cast<const uint8_t*>(buffer_start) +
+                            attribute_stride_bytes * i;
+    uint8_t* destination = reinterpret_cast<uint8_t*>(&vertices_.data()[i]) +
+                           attribute_props.offset_bytes;
 
-    writer(destination, source, properties.component_count);
+    attribute_props.write_proc(reinterpret_cast<Scalar*>(destination), source,
+                               component_props, attribute_props);
   }
 }
 

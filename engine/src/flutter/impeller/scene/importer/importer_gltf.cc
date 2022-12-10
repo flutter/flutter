@@ -22,13 +22,12 @@ namespace impeller {
 namespace scene {
 namespace importer {
 
-static const std::map<std::string, VerticesBuilder::Attribute> kAttributes = {
-    {"POSITION", VerticesBuilder::Attribute::kPosition},
-    {"NORMAL", VerticesBuilder::Attribute::kNormal},
-    {"TANGENT", VerticesBuilder::Attribute::kTangent},
-    {"TEXCOORD_0", VerticesBuilder::Attribute::kTextureCoords},
-    {"COLOR_0", VerticesBuilder::Attribute::kColor},
-};
+static const std::map<std::string, VerticesBuilder::AttributeType> kAttributes =
+    {{"POSITION", VerticesBuilder::AttributeType::kPosition},
+     {"NORMAL", VerticesBuilder::AttributeType::kNormal},
+     {"TANGENT", VerticesBuilder::AttributeType::kTangent},
+     {"TEXCOORD_0", VerticesBuilder::AttributeType::kTextureCoords},
+     {"COLOR_0", VerticesBuilder::AttributeType::kColor}};
 
 static bool WithinRange(int index, size_t size) {
   return index >= 0 && static_cast<size_t>(index) < size;

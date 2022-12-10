@@ -17,14 +17,6 @@ namespace importer {
 
 class VerticesBuilder {
  public:
-  enum class Attribute {
-    kPosition,
-    kNormal,
-    kTangent,
-    kTextureCoords,
-    kColor,
-  };
-
   enum class ComponentType {
     kSignedByte = 5120,
     kUnsignedByte,
@@ -35,26 +27,48 @@ class VerticesBuilder {
     kFloat,
   };
 
+  enum class AttributeType {
+    kPosition,
+    kNormal,
+    kTangent,
+    kTextureCoords,
+    kColor,
+  };
+
+  using ComponentConverter =
+      std::function<Scalar(const void* source, size_t byte_offset)>;
+  struct ComponentProperties {
+    size_t size_bytes = 0;
+    ComponentConverter convert_proc;
+  };
+
+  struct AttributeProperties;
+  using AttributeWriter =
+      std::function<void(Scalar* destination,
+                         const void* source,
+                         const ComponentProperties& component_props,
+                         const AttributeProperties& attribute_props)>;
+  struct AttributeProperties {
+    size_t offset_bytes = 0;
+    size_t size_bytes = 0;
+    size_t component_count = 0;
+    AttributeWriter write_proc;
+  };
+
   VerticesBuilder();
 
   void WriteFBVertices(std::vector<fb::Vertex>& vertices) const;
 
-  void SetAttributeFromBuffer(Attribute attribute,
+  void SetAttributeFromBuffer(AttributeType attribute,
                               ComponentType component_type,
                               const void* buffer_start,
-                              size_t stride_bytes,
-                              size_t count);
+                              size_t attribute_stride_bytes,
+                              size_t attribute_count);
 
  private:
-  struct AttributeProperties {
-    size_t offset_bytes;
-    size_t size_bytes;
-    size_t component_count;
-  };
-
-  static std::map<VerticesBuilder::Attribute,
+  static std::map<VerticesBuilder::AttributeType,
                   VerticesBuilder::AttributeProperties>
-      kAttributes;
+      kAttributeTypes;
 
   struct Vertex {
     Vector3 position;
