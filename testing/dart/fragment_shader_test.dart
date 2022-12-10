@@ -347,28 +347,15 @@ void main() async {
     expect(data, contains(expected));
   });
 
-  test('impellerc orders floats in metal shader according to declaration and not usage', () async {
+  test('impellerc orders samplers in metal shader according to declaration and not usage in glow', () async {
     if (!Platform.isMacOS) {
       return;
     }
     final Directory directory = shaderDirectory('iplr-remap');
-    final String data = readAsStringLossy(File(path.join(directory.path, 'shader_with_ordered_floats.frag.iplr')));
+    final String data = readAsStringLossy(File(path.join(directory.path, 'glow_shader.frag.iplr')));
 
-    const String expected = 'constant float& floatA [[buffer(0)]], '
-      'constant float& floatB [[buffer(1)]]';
-
-    expect(data, contains(expected));
-  });
-
-  test('impellerc orders floats/matrix in metal shader according to declaration and not usage', () async {
-    if (!Platform.isMacOS) {
-      return;
-    }
-    final Directory directory = shaderDirectory('iplr-remap');
-    final String data = readAsStringLossy(File(path.join(directory.path, 'shader_with_matrix.frag.iplr')));
-
-    const String expected = 'constant float4x4& matrix [[buffer(0)]], '
-      'constant float& floatB [[buffer(1)]]';
+    const String expected = 'texture2d<float> tInput [[texture(0)]], texture2d<float> tNoise [[texture(1)]], '
+      'sampler tInputSmplr [[sampler(0)]], sampler tNoiseSmplr [[sampler(1)]]';
 
     expect(data, contains(expected));
   });
