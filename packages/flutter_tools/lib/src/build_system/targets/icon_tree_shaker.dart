@@ -41,7 +41,6 @@ class IconTreeShaker {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-    required TargetPlatform targetPlatform,
   }) : assert(_environment != null),
        assert(processManager != null),
        assert(logger != null),
@@ -51,8 +50,7 @@ class IconTreeShaker {
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts,
-       _fontManifest = fontManifest?.string,
-       _targetPlatform = targetPlatform {
+       _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError('Font subsetting is not supported in debug mode. The '
@@ -88,7 +86,6 @@ class IconTreeShaker {
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
-  final TargetPlatform _targetPlatform;
 
   /// Whether font subsetting should be used for this [Environment].
   bool get enabled => _fontManifest != null
@@ -286,7 +283,7 @@ class IconTreeShaker {
         'got $constFinderMap.');
     }
     final _ConstFinderResult constFinderResult = _ConstFinderResult(constFinderMap);
-    if (constFinderResult.hasNonConstantLocations && _targetPlatform != TargetPlatform.web_javascript) {
+    if (constFinderResult.hasNonConstantLocations) {
       _logger.printError('This application cannot tree shake icons fonts. '
                          'It has non-constant instances of IconData at the '
                          'following locations:', emphasis: true);

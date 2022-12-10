@@ -123,7 +123,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -155,7 +154,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -179,7 +177,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -203,7 +200,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
     );
 
     expect(
@@ -232,7 +228,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
     );
     final CompleterIOSink stdinSink = CompleterIOSink();
     addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
@@ -272,7 +267,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm,
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink();
@@ -305,7 +299,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm,
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink();
@@ -323,72 +316,41 @@ void main() {
     expect(subsetted, false);
   });
 
-  testWithoutContext('Non-constant instances', () async {
-    final Environment environment = createEnvironment(<String, String>{
-      kIconTreeShakerFlag: 'true',
-      kBuildMode: 'release',
+  for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android_arm, TargetPlatform.web_javascript]) {
+    testWithoutContext('Non-constant instances $platform', () async {
+      final Environment environment = createEnvironment(<String, String>{
+        kIconTreeShakerFlag: 'true',
+        kBuildMode: 'release',
+      });
+      final File appDill = environment.buildDir.childFile('app.dill')
+        ..createSync(recursive: true);
+
+      final IconTreeShaker iconTreeShaker = IconTreeShaker(
+        environment,
+        fontManifestContent,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
+
+      await expectLater(
+        () => iconTreeShaker.subsetFont(
+          input: fileSystem.file(inputPath),
+          outputPath: outputPath,
+          relativePath: relativePath,
+        ),
+        throwsToolExit(
+          message:
+            'Avoid non-constant invocations of IconData or try to build'
+            ' again with --no-tree-shake-icons.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     });
-    final File appDill = environment.buildDir.childFile('app.dill')
-      ..createSync(recursive: true);
-
-    final IconTreeShaker iconTreeShaker = IconTreeShaker(
-      environment,
-      fontManifestContent,
-      logger: logger,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm,
-    );
-
-    addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
-
-    await expectLater(
-      () => iconTreeShaker.subsetFont(
-        input: fileSystem.file(inputPath),
-        outputPath: outputPath,
-        relativePath: relativePath,
-      ),
-      throwsToolExit(
-        message:
-          'Avoid non-constant invocations of IconData or try to build'
-          ' again with --no-tree-shake-icons.',
-      ),
-    );
-    expect(processManager, hasNoRemainingExpectations);
-  });
-
-  testWithoutContext('Non-constant instances on web ignored', () async {
-    final Environment environment = createEnvironment(<String, String>{
-      kIconTreeShakerFlag: 'true',
-      kBuildMode: 'release',
-    });
-    final File appDill = environment.buildDir.childFile('app.dill')
-      ..createSync(recursive: true);
-
-    final IconTreeShaker iconTreeShaker = IconTreeShaker(
-      environment,
-      fontManifestContent,
-      logger: logger,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-      targetPlatform: TargetPlatform.web_javascript,
-    );
-
-    final CompleterIOSink stdinSink = CompleterIOSink();
-    addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
-    resetFontSubsetInvocation(stdinSink: stdinSink);
-    final bool subsetted = await iconTreeShaker.subsetFont(
-      input: fileSystem.file(inputPath),
-      outputPath: outputPath,
-      relativePath: relativePath,
-    );
-    expect(subsetted, isTrue);
-    expect(stdinSink.getAndClear(), '59470\n');
-    expect(processManager, hasNoRemainingExpectations);
-  });
-
+  }
   testWithoutContext('Non-zero font-subset exit code', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
@@ -405,7 +367,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm,
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink();
@@ -438,7 +399,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm,
     );
 
     final CompleterIOSink stdinSink = CompleterIOSink(throwOnAdd: true);
@@ -473,7 +433,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm,
     );
 
     addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
@@ -506,7 +465,6 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm,
     );
 
     addConstFinderInvocation(appDill.path, exitCode: -1);

@@ -77,7 +77,6 @@ Future<Depfile> copyAssets(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
-    targetPlatform: targetPlatform,
   );
   final ShaderCompiler shaderCompiler = ShaderCompiler(
     processManager: environment.processManager,
