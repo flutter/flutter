@@ -2671,7 +2671,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // we cache the position.
         _pointOffsetOrigin = point.offset;
 
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset);
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
 
         _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
@@ -2702,9 +2702,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController!.isCompleted) {
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
-      if (_lastTextPosition!.offset != renderEditable.selection!.baseOffset) {
+      // Only change if new position is out of current selection range, as the
+      // selection may have been modified using the iOS keyboard selection gesture.
+      if (_lastTextPosition!.offset < renderEditable.selection!.start || _lastTextPosition!.offset >= renderEditable.selection!.end) {
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition!.offset), SelectionChangedCause.forcePress);
+        _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
       }
       _startCaretRect = null;
       _lastTextPosition = null;
