@@ -36,8 +36,7 @@ if (enable_unittests) {
   impellerc("sampler_order_fixture") {
     shaders = [
       "//flutter/impeller/fixtures/ordering/shader_with_samplers.frag",
-      "//flutter/impeller/fixtures/ordering/shader_with_ordered_floats.frag",
-      "//flutter/impeller/fixtures/ordering/shader_with_matrix.frag",
+      "//flutter/third_party/test_shaders/selman/glow_shader.frag",
     ]
     shader_target_flag = "--runtime-stage-metal"
     intermediates_subdir = "iplr-remap"

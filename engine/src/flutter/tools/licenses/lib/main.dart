@@ -1025,6 +1025,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
            !entry.fullName.endsWith('third_party/json/docs') &&
            !entry.fullName.endsWith('third_party/ninja') &&
            !entry.fullName.endsWith('third_party/tinygltf') &&
+           !entry.fullName.endsWith('third_party/test_shaders') &&
             entry.name != '.ccls-cache' &&
             entry.name != '.cipd' &&
             entry.name != '.git' &&
