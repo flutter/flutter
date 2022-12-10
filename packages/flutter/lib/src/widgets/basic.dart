@@ -1432,6 +1432,9 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// If both are true, the child widget will be flipped both vertically and horizontally.
   ///
+  /// The [alignment] controls the origin of the flip; by default, this is
+  /// the center of the box.
+  ///
   /// {@tool snippet}
   ///
   /// This example flips the text horizontally.

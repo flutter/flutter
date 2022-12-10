@@ -832,7 +832,7 @@ void main() {
 
       await tester.tapAt(topRight);
 
-      expect(tappedRed, true, reason: 'Transform.flip cannot flipX');
+      expect(tappedRed, isTrue, reason: 'Transform.flip cannot flipX');
 
       tappedRed = false;
 
@@ -853,7 +853,7 @@ void main() {
 
       await tester.tapAt(bottomLeft);
 
-      expect(tappedRed, true, reason: 'Transform.flip cannot flipY');
+      expect(tappedRed, isTrue, reason: 'Transform.flip cannot flipY');
 
       tappedRed = false;
 
@@ -877,7 +877,7 @@ void main() {
 
       expect(
         tappedRed,
-        true,
+        isTrue,
         reason: 'Transform.flip cannot flipX and flipY together',
       );
     },
