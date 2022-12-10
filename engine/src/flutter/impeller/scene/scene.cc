@@ -18,15 +18,15 @@ namespace scene {
 Scene::Scene(std::shared_ptr<Context> context)
     : scene_context_(std::make_unique<SceneContext>(std::move(context))){};
 
-void Scene::Add(const std::shared_ptr<SceneEntity>& child) {
-  root_.Add(child);
+Node& Scene::GetRoot() {
+  return root_;
 }
 
 bool Scene::Render(const RenderTarget& render_target,
                    const Camera& camera) const {
   // Collect the render commands from the scene.
   SceneEncoder encoder;
-  if (!root_.Render(encoder)) {
+  if (!root_.Render(encoder, Matrix())) {
     FML_LOG(ERROR) << "Failed to render frame.";
     return false;
   }

@@ -18,8 +18,8 @@
 #include "impeller/scene/geometry.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/material.h"
+#include "impeller/scene/mesh.h"
 #include "impeller/scene/scene.h"
-#include "impeller/scene/static_mesh_entity.h"
 #include "third_party/flatbuffers/include/flatbuffers/verifier.h"
 
 // #include "third_party/tinygltf/tiny_gltf.h"
@@ -37,18 +37,17 @@ TEST_P(SceneTest, CuboidUnlit) {
     auto scene = Scene(GetContext());
 
     {
-      auto mesh = SceneEntity::MakeStaticMesh();
+      Mesh mesh;
 
       auto material = Material::MakeUnlit();
       material->SetColor(Color::Red());
-      mesh->SetMaterial(std::move(material));
 
       Vector3 size(1, 1, 0);
-      mesh->SetGeometry(Geometry::MakeCuboid(size));
+      mesh.AddPrimitive({Geometry::MakeCuboid(size), std::move(material)});
 
-      mesh->SetLocalTransform(Matrix::MakeTranslation(-size / 2));
-
-      scene.Add(mesh);
+      Node& root = scene.GetRoot();
+      root.SetLocalTransform(Matrix::MakeTranslation(-size / 2));
+      root.SetMesh(mesh);
     }
 
     // Face towards the +Z direction (+X right, +Y up).
@@ -79,10 +78,10 @@ TEST_P(SceneTest, GLTFScene) {
   const auto* fb_scene = fb::GetScene(mapping->GetMapping());
   const auto fb_nodes = fb_scene->children();
   ASSERT_EQ(fb_nodes->size(), 1u);
-  const auto fb_meshes = fb_nodes->begin()->meshes();
+  const auto fb_meshes = fb_nodes->begin()->mesh_primitives();
   ASSERT_EQ(fb_meshes->size(), 1u);
   const auto* fb_mesh = fb_meshes->Get(0);
-  auto geometry = Geometry::MakeFromFBMesh(*fb_mesh, *allocator);
+  auto geometry = Geometry::MakeFromFBMeshPrimitive(*fb_mesh, *allocator);
   ASSERT_NE(geometry, nullptr);
 
   std::shared_ptr<UnlitMaterial> material = Material::MakeUnlit();
@@ -93,11 +92,11 @@ TEST_P(SceneTest, GLTFScene) {
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
     auto scene = Scene(GetContext());
 
-    auto mesh = SceneEntity::MakeStaticMesh();
-    mesh->SetMaterial(material);
-    mesh->SetGeometry(geometry);
-    mesh->SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
-    scene.Add(mesh);
+    Mesh mesh;
+    mesh.AddPrimitive({geometry, material});
+
+    scene.GetRoot().SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
+    scene.GetRoot().SetMesh(mesh);
 
     Quaternion rotation({0, 1, 0}, -GetSecondsElapsed() * 0.5);
     Vector3 start_position(-1, -1.5, -5);

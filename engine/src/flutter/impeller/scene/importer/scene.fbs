@@ -43,7 +43,7 @@ struct Vertex {
   color: Color;
 }
 
-enum IndicesType:byte {
+enum IndexType:byte {
   k16Bit,
   k32Bit,
 }
@@ -51,7 +51,7 @@ enum IndicesType:byte {
 table Indices {
   data: [ubyte];
   count: uint32;
-  type: IndicesType;
+  type: IndexType;
 }
 
 table Texture {
@@ -65,7 +65,7 @@ table Material {
   // TODO(bdero): PBR textures.
 }
 
-table StaticMesh {
+table MeshPrimitive {
   vertices: [Vertex];
   indices: Indices;
   material: Material;
@@ -74,7 +74,7 @@ table StaticMesh {
 table Node {
   children: [Node];
   transform: Matrix;
-  meshes: [StaticMesh];
+  mesh_primitives: [MeshPrimitive];
 }
 
 table Scene {

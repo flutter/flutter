@@ -26,8 +26,8 @@ TEST(ImporterTest, CanParseGLTF) {
   Matrix node_transform = ToMatrix(*node.transform);
   ASSERT_MATRIX_NEAR(node_transform, Matrix());
 
-  ASSERT_EQ(node.meshes.size(), 1u);
-  auto& mesh = *node.meshes[0];
+  ASSERT_EQ(node.mesh_primitives.size(), 1u);
+  auto& mesh = *node.mesh_primitives[0];
   ASSERT_EQ(mesh.indices->count, 918u);
 
   uint16_t first_index =

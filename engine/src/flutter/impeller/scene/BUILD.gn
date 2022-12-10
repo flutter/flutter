@@ -12,16 +12,16 @@ impeller_component("scene") {
     "geometry.h",
     "material.cc",
     "material.h",
+    "mesh.cc",
+    "mesh.h",
+    "node.cc",
+    "node.h",
     "scene.cc",
     "scene.h",
     "scene_context.cc",
     "scene_context.h",
     "scene_encoder.cc",
     "scene_encoder.h",
-    "scene_entity.cc",
-    "scene_entity.h",
-    "static_mesh_entity.cc",
-    "static_mesh_entity.h",
   ]
 
   public_deps = [

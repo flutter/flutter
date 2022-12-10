@@ -43,30 +43,28 @@ run_action.SetLoop(impeller::scene::AnimationAction::kLoopForever);
 run_action.SetWeight(0.3f);
 run_action.Play();
 
-scene.Add(
+scene.GetRoot().AddChild(
     impeller::scene::DirectionalLight(
         /* color */ impeller::Color::AntiqueWhite(),
         /* intensity */ 5,
         /* direction */ {2, 3, 4}));
 
-impeller::scene::StaticMeshEntity sphere_entity;
-sphere_entity.SetGlobalTransform(
+Node sphere_node;
+Mesh sphere_mesh;
+sphere_node.SetGlobalTransform(
     Matrix::MakeRotationEuler({kPiOver4, kPiOver4, 0}));
-sphere_entity.SetCullingMode(impeller::scene::CullingMode::kFrustum);
 
-std::unique_ptr<impeller::scene::SphereGeometry> sphere =
+auto sphere_geometry =
     impeller::scene::Geometry::MakeSphere(allocator, /* radius */ 2);
 
-sphere_entity.SetGeometry(sphere);
-
 auto material = impeller::scene::Material::MakeStandard();
-material.SetAlbedo(impeller::Color::Red());
-material.SetRoughness(0.4);
-material.SetMetallic(0.2);
+material->SetAlbedo(impeller::Color::Red());
+material->SetRoughness(0.4);
+material->SetMetallic(0.2);
 // Common properties shared by all materials.
-material.SetEnvironmentMap(environment_hdri);
-material.SetFlatShaded(true);
-material.SetBlendConfig({
+material->SetEnvironmentMap(environment_hdri);
+material->SetFlatShaded(true);
+material->SetBlendConfig({
   impeller::BlendOperation::kAdd,               // color_op
   impeller::BlendFactor::kOne,                  // source_color_factor
   impeller::BlendFactor::kOneMinusSourceAlpha,  // destination_color_factor
@@ -74,23 +72,23 @@ material.SetBlendConfig({
   impeller::BlendFactor::kOne,                  // source_alpha_factor
   impeller::BlendFactor::kOneMinusSourceAlpha,  // destination_alpha_factor
 });
-material.SetStencilConfig({
+material->SetStencilConfig({
   impeller::StencilOperation::kIncrementClamp,  // operation
   impeller::CompareFunction::kAlways,           // compare
 });
+sphere_mesh.AddPrimitive({sphere_geometry, material});
+sphere_node.SetMesh(sphere_mesh);
 
-sphere_entity->SetMaterials({material});
+Node cube_node;
+cube_node.SetLocalTransform(Matrix::MakeTranslation({4, 0, 0}));
+Mesh cube_mesh;
+auto cube_geometry = impeller::scene::Geometry::MakeCuboid(
+    allocator, {4, 4, 4});
+cube_mesh.AddPrimitive({cube_geometry, material});
+cube_node.SetMesh(cube_mesh);
 
-
-impeller::scene::StaticMeshEntity cube_entity;
-cube_entity.GetGeometry(
-    impeller::scene::Geometry::MakeCube(allocator, {4, 4, 4}));
-cube_entity.SetMaterials({material});
-
-cube_entity.SetLocalTransform(Matrix::MakeTranslation({4, 0, 0}));
-
-sphere_entity->Add(sube_entity);
-scene.Add(sphere_entity);
+sphere_node.AddChild(cube_node);
+scene.GetRoot().AddChild(sphere_node);
 
 /// Post processing.
 
