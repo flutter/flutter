@@ -40,8 +40,8 @@ void main() {
     '--kernel-file', appDillPath,
     '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
     '--class-name', 'IconData',
-    '--annotation-class-name', 'StaticIconProvider',
-    '--annotation-class-library-uri', 'package:flutter/src/material/icons.dart',
+    '--annotation-class-name', '_StaticIconProvider',
+    '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
   ];
 
   void addConstFinderInvocation(
