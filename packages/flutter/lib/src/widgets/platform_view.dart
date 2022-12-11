@@ -485,7 +485,7 @@ class _AndroidViewState extends State<AndroidView> {
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
-      _controller.dispose();
+      _controller.disposePostFrame();
       _createNewAndroidView();
       return;
     }
@@ -890,7 +890,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.viewType != oldWidget.viewType) {
-      _controller?.dispose();
+      _controller?.disposePostFrame();
       // The _surface has to be recreated as its controller is disposed.
       // Setting _surface to null will trigger its creation in build().
       _surface = null;
@@ -1209,5 +1209,15 @@ class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _PlatformViewPlaceholderBox renderObject) {
     renderObject.onLayout = onLayout;
+  }
+}
+
+extension on PlatformViewController {
+  /// Disposes the controller in a post-frame callback, to allow other widgets to
+  /// remove their listeners before the controller is disposed.
+  void disposePostFrame() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      dispose();
+    });
   }
 }

@@ -863,7 +863,7 @@ abstract class AndroidViewController extends PlatformViewController {
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     assert(
       _state != _AndroidViewState.disposed,
-      'trying to set a layout direction for a disposed UIView. View id: $viewId',
+      'trying to set a layout direction for a disposed Android view. View id: $viewId',
     );
 
     if (layoutDirection == _layoutDirection) {
@@ -938,6 +938,7 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   @override
   Future<void> dispose() async {
+    assert(_state != _AndroidViewState.disposed);
     final _AndroidViewState state = _state;
     _state = _AndroidViewState.disposed;
     _platformViewCreatedCallbacks.clear();
