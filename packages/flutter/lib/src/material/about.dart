@@ -571,6 +571,17 @@ class _PackagesViewState extends State<_PackagesView> {
           builder: (BuildContext context, BoxConstraints constraints) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
+                if (snapshot.hasError) {
+                  assert(() {
+                    FlutterError.reportError(FlutterErrorDetails(
+                      exception: snapshot.error!,
+                      stack: snapshot.stackTrace,
+                      context: ErrorDescription('while decoding the license file'),
+                    ));
+                    return true;
+                  }());
+                  return Center(child: Text(snapshot.error.toString()));
+                }
                 _initDefaultDetailPage(snapshot.data!, context);
                 return ValueListenableBuilder<int?>(
                   valueListenable: widget.selectedId,

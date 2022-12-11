@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/services/text_input.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'mock_canvas.dart';
@@ -1724,6 +1725,79 @@ void main() {
     // Turn off forceLine. Now the width should be significantly smaller.
     editable.forceLine = false;
     expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
+  });
+
+  test('Floating cursor position is independent of viewport offset', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
+    EditableText.debugDeterministicCursor = true;
+
+    const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      textDirection: TextDirection.ltr,
+      cursorColor: cursorColor,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      maxLines: 3,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    // Prepare for painting after layout.
+    pumpFrame(phase: EnginePhase.compositingBits);
+
+    expect(
+      editable,
+      // Draw no cursor by default.
+      paintsExactlyCountTimes(#drawRect, 0),
+    );
+
+    editable.showCursor = showCursor;
+    editable.setFloatingCursor(FloatingCursorDragState.Start, const Offset(50, 50), const TextPosition(
+      offset: 4,
+      affinity: TextAffinity.upstream,
+    ));
+    pumpFrame(phase: EnginePhase.compositingBits);
+
+    final RRect expectedRRect = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(49.5, 51, 2, 8),
+      const Radius.circular(1)
+    );
+
+    expect(editable, paints..rrect(
+      color: cursorColor.withOpacity(0.75),
+      rrect: expectedRRect
+    ));
+
+    // Change the text viewport offset.
+    editable.offset = ViewportOffset.fixed(200);
+
+    // Floating cursor should be drawn in the same position.
+    editable.setFloatingCursor(FloatingCursorDragState.Start, const Offset(50, 50), const TextPosition(
+      offset: 4,
+      affinity: TextAffinity.upstream,
+    ));
+    pumpFrame(phase: EnginePhase.compositingBits);
+
+    expect(editable, paints..rrect(
+      color: cursorColor.withOpacity(0.75),
+      rrect: expectedRRect
+    ));
   });
 }
 
