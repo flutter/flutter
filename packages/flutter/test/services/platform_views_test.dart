@@ -268,6 +268,19 @@ void main() {
       await controller2.create(size: const Size(100.0, 200.0));
       expect(createdViews, orderedEquals(<int>[0, 5]));
 
+      final AndroidViewController controller3 = PlatformViewsService.initAndroidView(
+        id: 10,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      )..addOnPlatformViewCreatedListener(callback);
+      expect(createdViews, orderedEquals(<int>[0, 5]));
+
+      await Future.wait(<Future<void>>[
+        controller3.create(size: const Size(100.0, 200.0)),
+        controller3.dispose(),
+      ]);
+
+      expect(createdViews, orderedEquals(<int>[0, 5]));
     });
 
     test("change Android view's directionality before creation", () async {

@@ -938,12 +938,13 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   @override
   Future<void> dispose() async {
-    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created) {
+    final _AndroidViewState state = _state;
+    _state = _AndroidViewState.disposed;
+    _platformViewCreatedCallbacks.clear();
+    PlatformViewsService._instance._focusCallbacks.remove(viewId);
+    if (state == _AndroidViewState.creating || state == _AndroidViewState.created) {
       await _sendDisposeMessage();
     }
-    _platformViewCreatedCallbacks.clear();
-    _state = _AndroidViewState.disposed;
-    PlatformViewsService._instance._focusCallbacks.remove(viewId);
   }
 }
 

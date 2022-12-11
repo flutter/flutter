@@ -2718,6 +2718,30 @@ void main() {
       expect(disposedController.disposed, true);
     });
 
+    testWidgets('PlatformViewLink handles onPlatformViewCreated when disposed', (WidgetTester tester) async {
+      late PlatformViewCreationParams creationParams;
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          creationParams = params;
+          return FakePlatformViewController(params.id);
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+
+      await tester.pumpWidget(platformViewLink);
+
+      await tester.pumpWidget(Container());
+
+      creationParams.onPlatformViewCreated(creationParams.id);
+    });
+
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
