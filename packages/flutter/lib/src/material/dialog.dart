@@ -1238,8 +1238,11 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// {@macro flutter.widgets.RestorationManager}
 ///
-/// The `traversalEdgeBehavior` argument controls the transfer of focus
-/// beyond the first and the last items of the dialog route.
+/// If not null, `traversalEdgeBehavior` argument specifies the transfer of
+/// focus beyond the first and the last items of the dialog route. By default,
+/// uses [TraversalEdgeBehavior.closedLoop], because it's typical for dialogs
+/// to allow users to cycle through widgets inside it without leaving the
+/// dialog.
 ///
 /// ** See code in examples/api/lib/material/dialog/show_dialog.2.dart **
 /// {@end-tool}
@@ -1293,7 +1296,7 @@ Future<T?> showDialog<T>({
     settings: routeSettings,
     themes: themes,
     anchorPoint: anchorPoint,
-    traversalEdgeBehavior: traversalEdgeBehavior,
+    traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
   ));
 }
 
