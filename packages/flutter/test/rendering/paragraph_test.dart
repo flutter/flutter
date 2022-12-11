@@ -1299,6 +1299,20 @@ void main() {
       expect(selection.end, 31);
     });
   });
+
+  test('can just update the gesture recognizer', () async {
+    final TapGestureRecognizer recognizerBefore = TapGestureRecognizer();
+    final RenderParagraph paragraph = RenderParagraph(
+         TextSpan(text: 'How are you \n', recognizer: recognizerBefore),
+         textDirection: TextDirection.ltr,
+      );
+      layout(paragraph);
+      expect(recognizerBefore, (paragraph.text as TextSpan).recognizer);
+      final TapGestureRecognizer recognizerAfter = TapGestureRecognizer();
+      paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
+      pumpFrame(phase: EnginePhase.paint);
+      expect(recognizerAfter, (paragraph.text as TextSpan).recognizer);
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {
