@@ -280,7 +280,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// The [Overlay] widget uses a custom stack implementation, which is very
 /// similar to the [Stack] widget. The main use case of [Overlay] is related to
 /// navigation and being able to insert widgets on top of the pages in an app.
-/// To simply display a stack of widgets, consider using [Stack] instead.
+/// For layout purposes unrelated to navigation, consider using [Stack] instead.
 ///
 /// An [Overlay] widget requires a [Directionality] widget to be in scope, so
 /// that it can resolve direction-sensitive coordinates of any

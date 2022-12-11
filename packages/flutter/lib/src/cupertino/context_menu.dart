@@ -99,10 +99,10 @@ enum _ContextMenuLocation {
 /// [Expanded] widget so that it will grow to fill the Overlay if its size is
 /// unconstrained.
 ///
-/// When closed, the CupertinoContextMenu simply displays the child as if the
-/// CupertinoContextMenu were not there. Sizing and positioning is unaffected.
+/// When closed, the [CupertinoContextMenu] displays the child as if the
+/// [CupertinoContextMenu] were not there. Sizing and positioning is unaffected.
 /// The menu can be closed like other [PopupRoute]s, such as by tapping the
-/// background or by calling `Navigator.pop(context)`. Unlike PopupRoute, it can
+/// background or by calling `Navigator.pop(context)`. Unlike [PopupRoute], it can
 /// also be closed by swiping downwards.
 ///
 /// The [previewBuilder] parameter is most commonly used to display a slight
@@ -111,8 +111,8 @@ enum _ContextMenuLocation {
 /// Photos app on iOS.
 ///
 /// {@tool dartpad}
-/// This sample shows a very simple CupertinoContextMenu for the Flutter logo.
-/// Simply long press on it to open.
+/// This sample shows a very simple [CupertinoContextMenu] for the Flutter logo.
+/// Long press on it to open.
 ///
 /// ** See code in examples/api/lib/cupertino/context_menu/cupertino_context_menu.0.dart **
 /// {@end-tool}
@@ -256,10 +256,9 @@ class CupertinoContextMenu extends StatefulWidget {
   /// and when it is fully open. This will overwrite the default animation that
   /// matches the behavior of an iOS 16.0 context menu.
   ///
-  /// This builder can be used instead of the child when either the intended
-  /// child has a property that would conflict with the default animation, like
-  /// a border radius or a shadow, or if simply a more custom animation is
-  /// needed.
+  /// This builder can be used instead of the child when the intended child has
+  /// a property that would conflict with the default animation, such as a
+  /// border radius or a shadow, or if a more custom animation is needed.
   ///
   /// In addition to the current [BuildContext], the function is also called
   /// with an [Animation]. The complete animation goes from 0 to 1 when

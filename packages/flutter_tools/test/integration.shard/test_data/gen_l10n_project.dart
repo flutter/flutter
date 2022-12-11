@@ -700,9 +700,9 @@ void main() {
 }
 ''';
 
-  /// All messages are simply the template language's message with 'ES - '
-  /// appended. This makes validating test behavior easier. The interpolated
-  /// messages are different where applicable.
+  // All these messages are the template language's message with 'ES - '
+  // appended. This makes validating test behavior easier. The interpolated
+  // messages are different where applicable.
   final String appEs = r'''
 {
   "@@locale": "es",

@@ -1141,7 +1141,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   }
 }
 
-// This widget simply allows us to easily swap in and out the LayoutBuilder in
+// This widget allows us to easily swap in and out the LayoutBuilder in
 // InteractiveViewer's depending on if it's using a builder or a child.
 class _InteractiveViewerBuilt extends StatelessWidget {
   const _InteractiveViewerBuilt({
