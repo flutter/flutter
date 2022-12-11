@@ -1,4 +1,4 @@
-Signature: 849b54362fec2170c5801c1c838b3af4
+Signature: bbed4848080f583e902b9c35c163678b
 
 UNUSED LICENSES:
 
@@ -14311,6 +14311,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_util_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/list.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/math_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/named_parameters.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/object_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/print_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/regexp_helper.dart
