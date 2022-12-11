@@ -938,7 +938,6 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   @override
   Future<void> dispose() async {
-    assert(_state != _AndroidViewState.disposed);
     final _AndroidViewState state = _state;
     _state = _AndroidViewState.disposed;
     _platformViewCreatedCallbacks.clear();
