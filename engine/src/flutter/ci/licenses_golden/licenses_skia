@@ -1,4 +1,4 @@
-Signature: 6003106c15950ee0218ed485e6158b60
+Signature: b4f39ae9ce5bfa6887c8babed07ae3e5
 
 UNUSED LICENSES:
 
@@ -7614,7 +7614,6 @@ FILE: ../../../third_party/skia/infra/bots/task_drivers/check_generated_files/ch
 FILE: ../../../third_party/skia/infra/bots/task_drivers/cpu_tests/cpu_tests.go
 FILE: ../../../third_party/skia/infra/bots/task_drivers/toolchain_layering_check/toolchain_layering_check.go
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode.cpp
-FILE: ../../../third_party/skia/src/core/SkBuiltInCodeSnippetID.h
 FILE: ../../../third_party/skia/src/core/SkCapabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
 FILE: ../../../third_party/skia/src/core/SkRuntimeEffectDictionary.h
@@ -7636,6 +7635,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/StrokeTessellator.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/StrokeTessellator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/tessellate/VertexChunkPatchAllocator.h
 FILE: ../../../third_party/skia/src/gpu/graphite/AttachmentTypes.h
+FILE: ../../../third_party/skia/src/gpu/graphite/BuiltInCodeSnippetID.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ClientMappedBufferManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/ClientMappedBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/ClipStack.cpp
