@@ -890,6 +890,9 @@ class RenderOpacity extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null && _alpha > 0;
 
+  @override
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
+
   int _alpha;
 
   /// The fraction to scale the child's alpha value.
@@ -917,7 +920,7 @@ class RenderOpacity extends RenderProxyBox {
     if (didNeedCompositing != alwaysNeedsCompositing) {
       markNeedsCompositingBitsUpdate();
     }
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics) {
       markNeedsSemanticsUpdate();
     }
@@ -945,22 +948,18 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child == null) {
-      return;
-    }
-    if (_alpha == 0) {
-      // No need to keep the layer. We'll create a new one if necessary.
-      layer = null;
-      return;
-    }
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer layer = oldLayer ?? OpacityLayer();
+    layer.alpha = _alpha;
+    return layer;
+  }
 
-    assert(needsCompositing);
-    layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
-    assert(() {
-      layer!.debugCreator = debugCreator;
-      return true;
-    }());
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null || _alpha == 0) {
+      return;
+    }
+    super.paint(context, offset);
   }
 
   @override
