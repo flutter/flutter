@@ -43,5 +43,23 @@ std::string ConvertToCamelCase(std::string_view string) {
   return stream.str();
 }
 
+std::string ConvertToEntrypointName(std::string_view string) {
+  if (string.empty()) {
+    return "";
+  }
+  std::stringstream stream;
+  // Append a prefix if the first character is not a letter.
+  if (!std::isalpha(string.data()[0])) {
+    stream << "i_";
+  }
+  for (size_t i = 0, count = string.length(); i < count; i++) {
+    auto ch = string.data()[i];
+    if (std::isalnum(ch) || ch == '_') {
+      stream << ch;
+    }
+  }
+  return stream.str();
+}
+
 }  // namespace compiler
 }  // namespace impeller
