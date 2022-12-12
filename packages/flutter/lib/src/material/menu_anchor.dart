@@ -315,7 +315,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _position?.isScrollingNotifier.removeListener(_handleScroll);
     _position = Scrollable.maybeOf(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
-    final Size newSize = MediaQuery.of(context).size;
+    final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
       _root._close();
@@ -700,10 +700,10 @@ class MenuController {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts], to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuBar extends StatelessWidget {
   /// Creates a const [MenuBar].
   ///
@@ -789,10 +789,10 @@ class MenuBar extends StatelessWidget {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts] to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuItemButton extends StatefulWidget {
   /// Creates a const [MenuItemButton].
   ///
@@ -1796,21 +1796,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Offset menuPaddingOffset;
+    Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
-    switch (_anchor?._root._orientation ?? Axis.vertical) {
+    // Move the submenu over by the size of the menu padding, so that
+    // the first menu item aligns with the submenu button that opens it.
+    switch (_anchor?._orientation ?? Axis.vertical) {
       case Axis.horizontal:
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.right, 0);
+            menuPaddingOffset += Offset(menuPadding.right, 0);
             break;
           case TextDirection.ltr:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.left, 0);
+            menuPaddingOffset += Offset(-menuPadding.left, 0);
             break;
         }
         break;
       case Axis.vertical:
-        menuPaddingOffset = widget.alignmentOffset ?? Offset(0, -menuPadding.top);
+        menuPaddingOffset += Offset(0, -menuPadding.top);
         break;
     }
 
@@ -1900,24 +1902,13 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   EdgeInsets _computeMenuPadding(BuildContext context) {
-    final MenuStyle? themeStyle = MenuTheme.of(context).style;
-    final MenuStyle defaultStyle = _MenuDefaultsM3(context);
-
-    T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
-      return getProperty(widget.menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
-    }
-
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
-      return effectiveValue(
-        (MenuStyle? style) {
-          return getProperty(style)?.resolve(widget.statesController?.value ?? const <MaterialState>{});
-        },
-      );
-    }
-
-    return resolve<EdgeInsetsGeometry?>(
-          (MenuStyle? style) => style?.padding,
-        )?.resolve(Directionality.of(context)) ?? EdgeInsets.zero;
+    final MaterialStateProperty<EdgeInsetsGeometry?> insets =
+      widget.menuStyle?.padding ??
+      MenuTheme.of(context).style?.padding ??
+      _MenuDefaultsM3(context).padding!;
+    return insets
+      .resolve(widget.statesController?.value ?? const <MaterialState>{})!
+      .resolve(Directionality.of(context));
   }
 
   void _handleFocusChange() {
@@ -3190,14 +3181,15 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_MenuLayout oldDelegate) {
-    return anchorRect != oldDelegate.anchorRect ||
-        textDirection != oldDelegate.textDirection ||
-        alignment != oldDelegate.alignment ||
-        alignmentOffset != oldDelegate.alignmentOffset ||
-        menuPosition != oldDelegate.menuPosition ||
-        orientation != oldDelegate.orientation ||
-        parentOrientation != oldDelegate.parentOrientation ||
-        !setEquals(avoidBounds, oldDelegate.avoidBounds);
+    return anchorRect != oldDelegate.anchorRect
+        || textDirection != oldDelegate.textDirection
+        || alignment != oldDelegate.alignment
+        || alignmentOffset != oldDelegate.alignmentOffset
+        || menuPosition != oldDelegate.menuPosition
+        || menuPadding != oldDelegate.menuPadding
+        || orientation != oldDelegate.orientation
+        || parentOrientation != oldDelegate.parentOrientation
+        || !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
@@ -3301,7 +3293,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final double dy = densityAdjustment.dy;
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
-        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+        .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
@@ -3430,7 +3422,7 @@ class _Submenu extends StatelessWidget {
     );
 
     final VisualDensity visualDensity =
-        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? VisualDensity.standard;
+        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? Theme.of(context).visualDensity;
     final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
@@ -3575,13 +3567,14 @@ bool _platformSupportsAccelerators() {
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.bottomStart,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.bottomStart,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -3617,11 +3610,12 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-      : super(
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: AlignmentDirectional.centerStart,
-        );
+    : super(
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: AlignmentDirectional.centerStart,
+    );
+
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -3752,20 +3746,21 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       const EdgeInsets.symmetric(horizontal: 12),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
 }
 
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.topEnd,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.topEnd,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 

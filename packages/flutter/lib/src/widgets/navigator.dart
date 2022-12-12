@@ -611,15 +611,15 @@ class NavigatorObserver {
   /// The navigator that the observer is observing, if any.
   NavigatorState? get navigator => _navigators[this];
 
-  /// Expando mapping instances of NavigatorObserver to their associated
-  /// NavigatorState (or `null`, if there is no associated NavigatorState). The
-  /// reason we don't simply use a private instance field of type
-  /// `NavigatorState?` is because as part of implementing
-  /// https://github.com/dart-lang/language/issues/2020, it will soon become a
-  /// runtime error to invoke a private member that is mocked in another
-  /// library. By using an expando rather than an instance field, we ensure
-  /// that a mocked NavigatorObserver can still properly keep track of its
-  /// associated NavigatorState.
+  // Expando mapping instances of NavigatorObserver to their associated
+  // NavigatorState (or `null`, if there is no associated NavigatorState). The
+  // reason we don't use a private instance field of type
+  // `NavigatorState?` is because as part of implementing
+  // https://github.com/dart-lang/language/issues/2020, it will soon become a
+  // runtime error to invoke a private member that is mocked in another
+  // library. By using an expando rather than an instance field, we ensure
+  // that a mocked NavigatorObserver can still properly keep track of its
+  // associated NavigatorState.
   static final Expando<NavigatorState> _navigators = Expando<NavigatorState>();
 
   /// The [Navigator] pushed `route`.

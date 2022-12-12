@@ -150,4 +150,7 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/78588
   final ScrollBehavior scrollBehavior = ScrollBehavior();
   scrollBehavior.buildViewportChrome(context, child, axisDirection);
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOverride(context);
 }

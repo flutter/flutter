@@ -1,7 +1,7 @@
 name: flutter_gallery
 
 environment:
-  sdk: ">=2.17.0-0 <3.0.0"
+  sdk: ">=2.17.0-0 <4.0.0"
 
 dependencies:
   flutter:
@@ -20,7 +20,7 @@ dependencies:
     git:
       url: https://github.com/kevmoo/scoped_model.git
       ref: null_safety
-  shrine_images: 1.1.2
+  shrine_images: 2.0.1
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   # and dev/benchmarks/macrobenchmarks/pubspec.yaml
