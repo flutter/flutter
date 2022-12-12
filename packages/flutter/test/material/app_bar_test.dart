@@ -3770,32 +3770,37 @@ void main() {
 
     // Generates a MaterialApp with an AppBar with a TextButton beneath it
     // (via extendBodyBehindAppBar = true).
-    Widget buildWidget(
-        {required bool forceMaterialTransparency,
-          required VoidCallback onPressed}) =>
-        MaterialApp(
-          home: Scaffold(
-              extendBodyBehindAppBar: true,
-              appBar: AppBar(
-                forceMaterialTransparency: forceMaterialTransparency,
-                elevation: 3,
-                backgroundColor: Colors.red,
-                title: const Text('AppBar'),
-              ),
-              body: Align(
-                  alignment: Alignment.topCenter,
-                  child:
-                  TextButton(
-                      onPressed: onPressed,
-                      child: const Text('press me')))),
-        );
+    Widget buildWidget({
+      required bool forceMaterialTransparency,
+      required VoidCallback onPressed
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            forceMaterialTransparency: forceMaterialTransparency,
+            elevation: 3,
+            backgroundColor: Colors.red,
+            title: const Text('AppBar'),
+          ),
+          body: Align(
+              alignment: Alignment.topCenter,
+              child: TextButton(
+                onPressed: onPressed,
+                child: const Text('press me'),
+             ),
+          ),
+        ),
+      );
+    }
 
     testWidgets(
         'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
       bool buttonWasPressed = false;
       final Widget widget = buildWidget(
           forceMaterialTransparency:true,
-          onPressed:() => buttonWasPressed = true);
+          onPressed:() { buttonWasPressed = true; },
+      );
       await tester.pumpWidget(widget);
 
       final Material material = getAppBarMaterial(tester);
@@ -3815,8 +3820,9 @@ void main() {
 
       bool buttonWasPressed = false;
       final Widget widget = buildWidget(
-          forceMaterialTransparency:false,
-          onPressed:() => buttonWasPressed = true);
+        forceMaterialTransparency:false,
+        onPressed:() { buttonWasPressed = true; },
+      );
       await tester.pumpWidget(widget);
 
       final Material material = getAppBarMaterial(tester);
