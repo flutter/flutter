@@ -18,6 +18,11 @@ import '_isolates_io.dart'
 /// {@macro flutter.foundation.compute.types}
 typedef ComputeCallback<M, R> = FutureOr<R> Function(M message);
 
+/// The signature of [compute], which spawns an isolate, runs `callback` on
+/// that isolate, passes it `message`, and (eventually) returns the value
+/// returned by `callback`.
+typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
+
 /// Asynchronously runs the given [callback] - with the provided [message] -
 /// in the background and completes with the result.
 ///
@@ -54,16 +59,20 @@ typedef ComputeCallback<M, R> = FutureOr<R> Function(M message);
 ///
 /// On web platforms this will run [callback] on the current eventloop.
 ///
-/// On native platforms this will run [callback] in a separate isolate. The 
+/// On native platforms this will run [callback] in a separate isolate. The
 /// provided [callback], the [message] given to it as well as the result have
 /// to be objects that can be sent across isolates (as they may be transitively
 /// copied if needed). The majority of objects can be sent across isolates.
 ///
 /// See [SendPort.send] for more information about exceptions as well as a note
-/// of warning when sending closures, which can capture more state than needed.
+/// of warning about sending closures, which can capture more state than needed.
 ///
-/// On native platforms `await compute(fun, message)` is equivalent to 
+/// On native platforms `await compute(fun, message)` is equivalent to
 /// `await Isolate.run(() => fun(message))`. See also [Isolate.run].
+///
+/// The `debugLabel` - if provided - is used as name for the isolate that
+/// executes `callback`. [Timeline] events produced by that isolate will have
+/// the name associated with them. This is useful when profiling an application.
 Future<R> compute<M, R>(ComputeCallback<M, R> callback, M message, {String? debugLabel}) {
   return isolates.compute<M, R>(callback, message, debugLabel: debugLabel);
 }
