@@ -954,11 +954,57 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     _controller.forward();
   }
 
-  // Handle mousewheel scroll events.
+  // Handle mousewheel and web trackpad scroll events.
   void _receivedPointerSignal(PointerSignalEvent event) {
     final double scaleChange;
     if (event is PointerScrollEvent) {
-      // Ignore left and right scroll.
+      if (event.kind == PointerDeviceKind.trackpad) {
+        // Trackpad scroll, so treat it as a pan.
+        widget.onInteractionStart?.call(
+          ScaleStartDetails(
+            focalPoint: event.position,
+            localFocalPoint: event.localPosition,
+          ),
+        );
+
+        final Offset localDelta = PointerEvent.transformDeltaViaPositions(
+          untransformedEndPosition: event.position + event.scrollDelta,
+          untransformedDelta: event.scrollDelta,
+          transform: event.transform,
+        );
+
+        if (!_gestureIsSupported(_GestureType.pan)) {
+          widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+            focalPoint: event.position - event.scrollDelta,
+            localFocalPoint: event.localPosition - event.scrollDelta,
+            focalPointDelta: -localDelta,
+          ));
+          widget.onInteractionEnd?.call(ScaleEndDetails());
+          return;
+        }
+
+        final Offset focalPointScene = _transformationController!.toScene(
+          event.localPosition,
+        );
+
+        final Offset newFocalPointScene = _transformationController!.toScene(
+          event.localPosition - localDelta,
+        );
+
+        _transformationController!.value = _matrixTranslate(
+          _transformationController!.value,
+          newFocalPointScene - focalPointScene
+        );
+
+        widget.onInteractionUpdate?.call(ScaleUpdateDetails(
+          focalPoint: event.position - event.scrollDelta,
+          localFocalPoint: event.localPosition - localDelta,
+          focalPointDelta: -localDelta
+        ));
+        widget.onInteractionEnd?.call(ScaleEndDetails());
+        return;
+      }
+      // Ignore left and right mouse wheel scroll.
       if (event.scrollDelta.dy == 0.0) {
         return;
       }
