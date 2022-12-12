@@ -692,7 +692,7 @@ class _AmPmButton extends StatelessWidget {
     final Color resolvedBackgroundColor = MaterialStateProperty.resolveAs<Color>(timePickerTheme.dayPeriodColor ?? defaultTheme.dayPeriodColor, states);
     final Color resolvedTextColor = MaterialStateProperty.resolveAs<Color>(timePickerTheme.dayPeriodTextColor ?? defaultTheme.dayPeriodTextColor, states);
     final TextStyle? resolvedTextStyle = MaterialStateProperty.resolveAs<TextStyle?>(timePickerTheme.dayPeriodTextStyle ?? defaultTheme.dayPeriodTextStyle, states)?.copyWith(color: resolvedTextColor);
-    final double buttonTextScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2);
+    final double buttonTextScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 2);
 
     return Material(
       color: resolvedBackgroundColor,
@@ -1037,7 +1037,6 @@ class _Dial extends StatefulWidget {
 class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   late ThemeData themeData;
   late MaterialLocalizations localizations;
-  late MediaQueryData media;
   _DialPainter? painter;
   late AnimationController _animationController;
   late Tween<double> _thetaTween;
@@ -1071,7 +1070,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
     themeData = Theme.of(context);
     localizations = MaterialLocalizations.of(context);
-    alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
   }
 
   @override
@@ -1469,7 +1467,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           selectedValue: selectedValue,
           inner: false,
           value: timeOfDay.hour,
-          label: localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
+          label: localizations.formatHour(timeOfDay, alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context)),
           onTap: () {
             _selectHour(timeOfDay.hour);
           },
@@ -2026,7 +2024,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     final ThemeData theme = Theme.of(context);
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
-    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
+    final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
 
     final InputDecorationTheme inputDecorationTheme = timePickerTheme.inputDecorationTheme ?? defaultTheme.inputDecorationTheme;
     InputDecoration inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
@@ -2296,8 +2294,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     Navigator.pop(context, _selectedTime.value);
   }
 
-  Size _minDialogSize(BuildContext context, MediaQueryData mediaQuery) {
-    final Orientation orientation = _orientation.value ?? mediaQuery.orientation;
+  Size _minDialogSize(BuildContext context) {
+    final Orientation orientation = _orientation.value ?? MediaQuery.orientationOf(context);
 
     switch (_entryMode.value) {
       case TimePickerEntryMode.dial:
@@ -2314,12 +2312,12 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     }
   }
 
-  Size _dialogSize(BuildContext context, MediaQueryData mediaQuery, ThemeData theme) {
-    final Orientation orientation = _orientation.value ?? mediaQuery.orientation;
+  Size _dialogSize(BuildContext context, ThemeData theme) {
+    final Orientation orientation = _orientation.value ?? MediaQuery.orientationOf(context);
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
     // to 1.1 as that provides enough space to reasonably fit all the content.
-    final double textScaleFactor = math.min(mediaQuery.textScaleFactor, 1.1);
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.1);
 
     final Size timePickerSize;
     switch (_entryMode.value) {
@@ -2345,7 +2343,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         final double timePickerWidth;
-        if (MediaQuery.of(context).alwaysUse24HourFormat) {
+        if (MediaQuery.alwaysUse24HourFormatOf(context)) {
           final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
           timePickerWidth = _kTimePickerInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
         } else {
@@ -2361,7 +2359,6 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final TimePickerThemeData pickerTheme = TimePickerTheme.of(context);
     final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
     final ShapeBorder shape = pickerTheme.shape ?? defaultTheme.shape;
@@ -2437,8 +2434,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         : localizations.timePickerInputHelpText.toUpperCase();
         break;
     }
-    final Size dialogSize = _dialogSize(context, mediaQuery, theme);
-    final Size minDialogSize = _minDialogSize(context, mediaQuery);
+    final Size dialogSize = _dialogSize(context, theme);
+    final Size minDialogSize = _minDialogSize(context);
     return Dialog(
       shape: shape,
       elevation: pickerTheme.elevation ?? defaultTheme.elevation,
@@ -2752,11 +2749,10 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: mediaQuery.alwaysUse24HourFormat);
+    final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
     final ThemeData theme = Theme.of(context);
     final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
-    final Orientation orientation = _orientation.value ?? mediaQuery.orientation;
+    final Orientation orientation = _orientation.value ?? MediaQuery.orientationOf(context);
     final HourFormat timeOfDayHour = hourFormat(of: timeOfDayFormat);
     final _HourDialType hourMode;
     switch (timeOfDayHour) {
@@ -2885,7 +2881,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
       hourDialType: hourMode,
       onSelectedTimeChanged: _handleTimeChanged,
       useMaterial3: theme.useMaterial3,
-      use24HourFormat: mediaQuery.alwaysUse24HourFormat,
+      use24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
       theme: TimePickerTheme.of(context),
       defaultTheme: defaultTheme,
       child: picker,
