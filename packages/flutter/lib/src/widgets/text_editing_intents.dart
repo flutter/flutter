@@ -222,11 +222,10 @@ class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMove
 }
 
 /// Extends, or moves the current selection from the current
-/// [TextSelection.extent] position to the closest position on the adjacent
-/// paragraph.
-class ExtendSelectionVerticallyToAdjacentParagraphIntent extends DirectionalCaretMovementIntent {
-  /// Creates an [ExtendSelectionVerticallyToAdjacentParagraphIntent].
-  const ExtendSelectionVerticallyToAdjacentParagraphIntent({
+/// [TextSelection.extent] position to the closest paragraph boundary.
+class ExtendSelectionToParagraphBoundaryIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionToParagraphBoundaryIntent].
+  const ExtendSelectionToParagraphBoundaryIntent({
     required bool forward,
     required bool collapseSelection,
     required bool collapseAtReversal,
