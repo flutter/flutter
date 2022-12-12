@@ -159,7 +159,6 @@ class ParagraphBoundary extends TextBoundary {
   // direction then the bound extends to the start/end of the document in that
   // direction. The returning range includes the line terminator.
   TextRange _getParagraphAtOffset(TextPosition textPosition) {
-    print('searching for $textPosition');
     final CharacterRange charIter = _text.characters.iterator;
     final int tappedTextOffset = textPosition.offset;
 
