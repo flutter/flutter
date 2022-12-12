@@ -145,7 +145,12 @@ bool FlutterDesktopEngineDestroy(FlutterDesktopEngineRef engine_ref) {
 
 bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
                              const char* entry_point) {
-  return EngineFromHandle(engine)->Run(entry_point);
+  std::string_view entry_point_view{""};
+  if (entry_point != nullptr) {
+    entry_point_view = entry_point;
+  }
+
+  return EngineFromHandle(engine)->Run(entry_point_view);
 }
 
 uint64_t FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine) {

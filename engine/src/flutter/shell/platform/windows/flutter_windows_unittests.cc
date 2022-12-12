@@ -89,6 +89,16 @@ TEST_F(WindowsTest, LaunchCustomEntrypointInEngineRunInvocation) {
   ASSERT_TRUE(FlutterDesktopEngineRun(engine.get(), "customEntrypoint"));
 }
 
+// Verify that the engine can launch in headless mode.
+TEST_F(WindowsTest, LaunchHeadlessEngine) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.InitializeEngine()};
+  ASSERT_NE(engine, nullptr);
+
+  ASSERT_TRUE(FlutterDesktopEngineRun(engine.get(), nullptr));
+}
+
 // Verify that engine fails to launch when a conflicting entrypoint in
 // FlutterDesktopEngineProperties.dart_entrypoint and the
 // FlutterDesktopEngineRun parameter.
