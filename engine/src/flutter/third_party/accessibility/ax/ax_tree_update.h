@@ -50,9 +50,6 @@ namespace ui {
 //        before or after an AXTreeUpdate.
 template <typename AXNodeData, typename AXTreeData>
 struct AXTreeUpdateBase {
-  AXTreeUpdateBase() = default;
-  ~AXTreeUpdateBase() = default;
-
   // If |has_tree_data| is true, the value of |tree_data| should be used
   // to update the tree data, otherwise it should be ignored.
   bool has_tree_data = false;
