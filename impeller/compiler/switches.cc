@@ -48,7 +48,7 @@ void Switches::PrintHelp(std::ostream& stream) {
   }
   stream << " ]" << std::endl;
   stream << "--input=<source_file>" << std::endl;
-  stream << "[optional] --input-kind={";
+  stream << "[optional] --input-type={";
   for (const auto& source_type : kKnownSourceTypes) {
     stream << source_type.first << ", ";
   }
