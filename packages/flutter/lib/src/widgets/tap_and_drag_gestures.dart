@@ -529,7 +529,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   int _consecutiveTapCount = 0;
   Set<LogicalKeyboardKey>? _keysPressedOnDown;
 
-  bool _wonArena = false;
   OffsetPair? _originPosition;
   int? _previousButtons;
 
@@ -546,7 +545,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       _tapTrackerReset();
     }
     _up = null;
-    _wonArena = false;
     if (_down != null && !_representsSameSeries(event)) {
       // The given tap does not match the specifications of the series of taps being tracked,
       // reset the tap count and related state.
@@ -562,16 +560,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
-    _wonArena = true;
-    if (_up != null && _down != null) {
-      _consecutiveTapTimerStop();
-      _consecutiveTapTimerStart();
-      _wonArena = false;
-    }
-  }
-
-  @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
       final bool isSlopPastTolerance = slopTolerance != null && _getGlobalDistance(event, _originPosition) > slopTolerance!;
@@ -583,10 +571,9 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
       }
     } else if (event is PointerUpEvent) {
       _up = event;
-      if (_wonArena && _down != null) {
+      if (_down != null) {
         _consecutiveTapTimerStop();
         _consecutiveTapTimerStart();
-        _wonArena = false;
       }
     } else if (event is PointerCancelEvent) {
       _tapTrackerReset();
@@ -656,7 +643,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _consecutiveTapTimerStop();
     _previousButtons = null;
     _originPosition = null;
-    _wonArena = false;
     _lastTapOffset = null;
     _consecutiveTapCount = 0;
     _keysPressedOnDown = null;
