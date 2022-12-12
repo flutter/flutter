@@ -8,5 +8,5 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createBackdropFilterPerfTest(enableImpeller: true));
+  await task(createBackdropFilterPerfTest(testSkiaAndImpeller: true));
 }

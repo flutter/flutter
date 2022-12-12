@@ -10,5 +10,5 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createColorFilterAndFadePerfE2ETest(enableImpeller: true));
+  await task(createColorFilterAndFadePerfE2ETest(testSkiaAndImpeller: true));
 }

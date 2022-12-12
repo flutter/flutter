@@ -17,7 +17,7 @@ Future<void> main() async {
   final Directory galleryDir = Directory(path.join(galleryParentDir.path, 'gallery'));
 
   try {
-    await task(NewGalleryPerfTest(galleryDir, enableImpeller: true).run);
+    await task(NewGalleryPerfTest(galleryDir, testSkiaAndImpeller: true).run);
   } finally {
     rmTree(galleryParentDir);
   }

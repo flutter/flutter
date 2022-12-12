@@ -8,5 +8,5 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createComplexLayoutScrollPerfTest(enableImpeller: true));
+  await task(createComplexLayoutScrollPerfTest(testSkiaAndImpeller: true));
 }

@@ -8,5 +8,5 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createImageFilteredTransformAnimationPerfTest(enableImpeller: true));
+  await task(createImageFilteredTransformAnimationPerfTest(testSkiaAndImpeller: true));
 }

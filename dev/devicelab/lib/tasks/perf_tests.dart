@@ -26,7 +26,7 @@ String _testOutputDirectory(String testDirectory) {
 TaskFunction createComplexLayoutScrollPerfTest({
   bool measureCpuGpu = true,
   bool badScroll = false,
-  bool enableImpeller = false,
+  bool testSkiaAndImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -35,38 +35,38 @@ TaskFunction createComplexLayoutScrollPerfTest({
       : 'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
     measureCpuGpu: measureCpuGpu,
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
-TaskFunction createTilesScrollPerfTest({bool enableImpeller = false}) {
+TaskFunction createTilesScrollPerfTest({bool testSkiaAndImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'tiles_scroll_perf',
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
+TaskFunction createUiKitViewScrollPerfTest({bool testSkiaAndImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool enableImpeller = false}) {
+TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool testSkiaAndImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf_non_intersecting.dart',
     'platform_views_scroll_perf_non_intersecting',
     testDriver: 'test_driver/scroll_perf_non_intersecting_test.dart',
     needsFullTimeline: false,
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
@@ -138,7 +138,7 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
 
 TaskFunction createBackdropFilterPerfTest({
     bool measureCpuGpu = true,
-    bool enableImpeller = false,
+    bool testSkiaAndImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -147,7 +147,7 @@ TaskFunction createBackdropFilterPerfTest({
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/backdrop_filter_perf_test.dart',
     saveTraceFile: true,
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
@@ -182,7 +182,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
 
 TaskFunction createSimpleAnimationPerfTest({
   bool measureCpuGpu = true,
-  bool enableImpeller = false,
+  bool testSkiaAndImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -191,7 +191,7 @@ TaskFunction createSimpleAnimationPerfTest({
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/simple_animation_perf_test.dart',
     saveTraceFile: true,
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
@@ -363,12 +363,12 @@ TaskFunction createFullscreenTextfieldPerfTest() {
 }
 
 TaskFunction createFullscreenTextfieldPerfE2ETest({
-  bool enableImpeller = false,
+  bool testSkiaAndImpeller = false,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/fullscreen_textfield_perf_e2e.dart',
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
@@ -389,11 +389,11 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
-TaskFunction createColorFilterAndFadePerfE2ETest({bool enableImpeller = false}) {
+TaskFunction createColorFilterAndFadePerfE2ETest({bool testSkiaAndImpeller = false}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_and_fade_perf_e2e.dart',
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
@@ -436,7 +436,7 @@ TaskFunction createFadingChildAnimationPerfTest() {
 }
 
 TaskFunction createImageFilteredTransformAnimationPerfTest({
-  bool enableImpeller = false,
+  bool testSkiaAndImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -444,7 +444,7 @@ TaskFunction createImageFilteredTransformAnimationPerfTest({
     'imagefiltered_transform_animation_perf',
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
     saveTraceFile: true,
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
@@ -455,11 +455,11 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createListTextLayoutPerfE2ETest({bool enableImpeller = false}) {
+TaskFunction createListTextLayoutPerfE2ETest({bool testSkiaAndImpeller = false}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/list_text_layout_perf_e2e.dart',
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
@@ -629,22 +629,19 @@ TaskFunction createGradientStaticPerfE2ETest() {
 }
 
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
-  bool enableImpeller = false,
+  bool testSkiaAndImpeller = false,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/animated_complex_opacity_perf_e2e.dart',
-    enableImpeller: enableImpeller,
+    testSkiaAndImpeller: testSkiaAndImpeller,
   ).run;
 }
 
-TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({
-  bool enableImpeller = false,
-}) {
+TaskFunction createAnimatedComplexImageFilteredPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/animated_complex_image_filtered_perf_e2e.dart',
-    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -935,7 +932,7 @@ class PerfTest {
     String? resultFilename,
     this.device,
     this.flutterDriveCallback,
-    this.enableImpeller = false,
+    this.testSkiaAndImpeller = false,
     this.timeoutSeconds,
   }): _resultFilename = resultFilename;
 
@@ -951,7 +948,7 @@ class PerfTest {
     String resultFilename = 'e2e_perf_summary',
     this.device,
     this.flutterDriveCallback,
-    this.enableImpeller = false,
+    this.testSkiaAndImpeller = false,
     this.timeoutSeconds,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
@@ -984,8 +981,8 @@ class PerfTest {
   /// If it is not `null`, `flutter drive` will not happen in the PerfTests.
   final FlutterDriveCallback? flutterDriveCallback;
 
-  /// Whether the perf test should enable Impeller.
-  final bool enableImpeller;
+  /// Run the perf test using Skia and then the same test again with Impeller.
+  final bool testSkiaAndImpeller;
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
@@ -1114,7 +1111,7 @@ class PerfTest {
       );
 
       Map<String, dynamic> impellerData = <String, dynamic>{};
-      if (enableImpeller) {
+      if (testSkiaAndImpeller) {
         section('Run perf test with impeller enabled');
         impellerData = await dataFromDrive(
           driveOptions: options,
@@ -1154,7 +1151,7 @@ class PerfTest {
       final Map<String, Object?> adjustedData = skiaData;
       final List<String> adjustedBenchmarks = benchmarkKeys(skiaData);
 
-      if (enableImpeller) {
+      if (testSkiaAndImpeller) {
         String impellerKey(String key) => 'impeller_$key';
 
         // Prepend "impeller_" to the impeller benchmarks, then combine with the Skia data.

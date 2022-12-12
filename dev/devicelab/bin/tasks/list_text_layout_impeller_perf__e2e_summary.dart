@@ -8,5 +8,5 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(createListTextLayoutPerfE2ETest(enableImpeller: true));
+  await task(createListTextLayoutPerfE2ETest(testSkiaAndImpeller: true));
 }
