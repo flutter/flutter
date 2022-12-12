@@ -4,7 +4,7 @@ description: Provides an API to test/debug Flutter applications on remote Fuchsi
 homepage: https://flutter.dev
 
 environment:
-  sdk: '>=2.12.0-0 <3.0.0'
+  sdk: '>=2.12.0-0 <4.0.0'
 
 dependencies:
   process: 4.2.4

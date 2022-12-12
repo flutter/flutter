@@ -362,7 +362,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          screenHeight = MediaQuery.of(context).size.height;
+          screenHeight = MediaQuery.sizeOf(context).height;
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(

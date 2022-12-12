@@ -24,7 +24,7 @@ export 'package:flutter/gestures.dart' show
 
 /// A base class for render boxes that resemble their children.
 ///
-/// A proxy box has a single child and simply mimics all the properties of that
+/// A proxy box has a single child and mimics all the properties of that
 /// child by calling through to the child for each function in the render box
 /// protocol. For example, a proxy box determines its size by asking its child
 /// to layout with the same constraints and then matching the size.
@@ -41,7 +41,7 @@ export 'package:flutter/gestures.dart' show
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   /// Creates a proxy render box.
   ///
-  /// Proxy render boxes are rarely created directly because they simply proxy
+  /// Proxy render boxes are rarely created directly because they proxy
   /// the render box protocol to [child]. Instead, consider using one of the
   /// subclasses.
   RenderProxyBox([RenderBox? child]) {
@@ -869,7 +869,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive because it requires painting the child into an intermediate
-/// buffer. For the value 0.0, the child is simply not painted at all. For the
+/// buffer. For the value 0.0, the child is not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
   /// Creates a partially transparent render object.
