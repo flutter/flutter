@@ -136,21 +136,16 @@ class ParagraphBoundary extends TextBoundary {
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     return TextPosition(
-      offset: _getParagraphAtOffset(position).start,
+      offset: getTextBoundaryAt(position).start,
     );
   }
 
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return TextPosition(
-      offset: _getParagraphAtOffset(position).end,
+      offset: getTextBoundaryAt(position).end,
       affinity: TextAffinity.upstream,
     );
-  }
-
-  @override
-  TextRange getTextBoundaryAt(TextPosition position) {
-    return _getParagraphAtOffset(position);
   }
 
   // Returns the [TextRange] representing a paragraph that bounds the given
@@ -158,9 +153,10 @@ class ParagraphBoundary extends TextBoundary {
   // in each direction of the text, or if there is no line terminator in a given
   // direction then the bound extends to the start/end of the document in that
   // direction. The returning range includes the line terminator.
-  TextRange _getParagraphAtOffset(TextPosition textPosition) {
+  @override
+  TextRange getTextBoundaryAt(TextPosition position) {
     final CharacterRange charIter = _text.characters.iterator;
-    final int tappedTextOffset = textPosition.offset;
+    final int tappedTextOffset = position.offset;
 
     int graphemeStart = 0;
     int graphemeEnd = 0;
@@ -168,7 +164,7 @@ class ParagraphBoundary extends TextBoundary {
     while(charIter.moveNext()) {
       graphemeEnd += charIter.current.length;
       if (charIter.current == '\n') {
-        if (graphemeEnd - charIter.current.length == textPosition.offset) {
+        if (graphemeEnd - charIter.current.length == position.offset) {
           continue;
         }
         if (graphemeEnd < tappedTextOffset) {
