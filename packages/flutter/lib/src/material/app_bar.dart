@@ -240,7 +240,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   )
   static double preferredHeightFor(BuildContext context, Size preferredSize) {
     if (preferredSize is _PreferredAppBarSize && preferredSize.toolbarHeight == null) {
-      return (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + (preferredSize.bottom?.preferredSize.height ?? 0);
+      return (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + (preferredSize.bottom?.preferredSizeFor(context).height ?? 0);
     }
     return preferredSize.height;
   }
