@@ -146,6 +146,18 @@ void main() {
     expect(boundary.getTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3);
   });
 
+  test('paragraph boundary works', () {
+    const String text = 'abcd efg hi\njklmno\npqrstuv';
+    const ParagraphBoundary boundary = ParagraphBoundary(text);
+
+    // Position enclosed inside of paragraph, 'abcd efg h|i\n'.
+    const TextPosition position = TextPosition(offset: 10);
+
+    // The range includes the line terminator.
+    expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
+    expect(boundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: 12, affinity: TextAffinity.upstream));
+  });
+
   test('document boundary works', () {
     const String text = 'abcd efg hi\njklmno\npqrstuv';
     const DocumentBoundary boundary = DocumentBoundary(text);
