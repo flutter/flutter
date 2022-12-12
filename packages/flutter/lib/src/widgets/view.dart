@@ -72,8 +72,7 @@ class View extends InheritedWidget {
     final FlutterView? result = maybeOf(context);
     assert(() {
       if (result == null) {
-        // final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<View>(context);
-        const bool hiddenByBoundary = bool.fromEnvironment('foo');
+        final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<View>(context);
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
           if (hiddenByBoundary) ...<DiagnosticsNode>[
             ErrorSummary('View.of() was called with a context that does not have access to a View widget.'),
