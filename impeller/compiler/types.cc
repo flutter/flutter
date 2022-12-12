@@ -96,7 +96,7 @@ std::string EntryPointFunctionNameFromSourceName(
 
   std::stringstream stream;
   std::filesystem::path file_path(file_name);
-  stream << Utf8FromPath(file_path.stem()) << "_";
+  stream << ConvertToEntrypointName(Utf8FromPath(file_path.stem())) << "_";
   switch (type) {
     case SourceType::kUnknown:
       stream << "unknown";
