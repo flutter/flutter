@@ -54,7 +54,9 @@ class PreparePackageException implements Exception {
 
 enum Branch {
   beta,
-  stable;
+  stable,
+  master,
+  main;
 }
 
 /// A helper class for classes that want to run a process, optionally have the
@@ -637,6 +639,12 @@ class ArchivePublisher {
       dest: destGsPath,
     );
     assert(tempDir.existsSync());
+    final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
+    await _publishMetadata(gcsPath);
+  }
+
+  /// Downloads and updates the metadata file without publishing it.
+  Future<void> generateLocalMetadata() async {
     await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
@@ -705,6 +713,13 @@ class ArchivePublisher {
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
+  }
+
+  /// Publishes the metadata file to GCS.
+  Future<void> _publishMetadata(String gsPath) async {
+    final File metadataFile = File(
+      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
+    );
     await _cloudCopy(
       src: metadataFile.absolute.path,
       dest: gsPath,
@@ -899,15 +914,16 @@ Future<void> main(List<String> rawArguments) async {
   try {
     final Map<String, String> version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
+    final ArchivePublisher publisher = ArchivePublisher(
+      tempDir,
+      revision,
+      branch,
+      version,
+      outputFile,
+      dryRun,
+    );
+    await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {
-      final ArchivePublisher publisher = ArchivePublisher(
-        tempDir,
-        revision,
-        branch,
-        version,
-        outputFile,
-        dryRun,
-      );
       await publisher.publishArchive(parsedArguments['force'] as bool);
     }
   } on PreparePackageException catch (e) {

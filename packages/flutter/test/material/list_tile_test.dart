@@ -1476,6 +1476,34 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
+  testWidgets('ListTile onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'ListTile Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTile(
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
@@ -1550,10 +1578,11 @@ void main() {
 
   testWidgets('ListTile default tile color', (WidgetTester tester) async {
     bool isSelected = false;
-    const Color defaultColor = Colors.transparent;
+    final ThemeData theme =  ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: theme,
         home: Material(
           child: Center(
             child: StatefulBuilder(
@@ -1572,13 +1601,13 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(find.byType(Material), paints..rect(color: theme.colorScheme.surface));
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(find.byType(Material), paints..rect(color: theme.colorScheme.surface));
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
@@ -2036,18 +2065,15 @@ void main() {
     expect(textColor(trailingKey), theme.disabledColor);
   });
 
-  testWidgets('selected, enabled ListTile default icon color, light and dark themes', (WidgetTester tester) async {
-    const ColorScheme lightColorScheme = ColorScheme.light();
-    const ColorScheme darkColorScheme = ColorScheme.dark();
+  testWidgets('selected, enabled ListTile default icon color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ColorScheme colorScheme = theme.colorScheme;
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key subtitleKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
-    Widget buildFrame({ required Brightness brightness, required bool selected }) {
-      final ThemeData theme = brightness == Brightness.light
-        ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true)
-        : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: true);
+    Widget buildFrame({required bool selected }) {
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -2066,56 +2092,32 @@ void main() {
 
     Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
 
-    await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: true));
-    expect(iconColor(leadingKey), lightColorScheme.primary);
-    expect(iconColor(titleKey), lightColorScheme.primary);
-    expect(iconColor(subtitleKey), lightColorScheme.primary);
-    expect(iconColor(trailingKey), lightColorScheme.primary);
+    await tester.pumpWidget(buildFrame(selected: true));
+    expect(iconColor(leadingKey), colorScheme.primary);
+    expect(iconColor(titleKey), colorScheme.primary);
+    expect(iconColor(subtitleKey), colorScheme.primary);
+    expect(iconColor(trailingKey), colorScheme.primary);
 
-    await tester.pumpWidget(buildFrame(brightness: Brightness.light, selected: false));
-    expect(iconColor(leadingKey), lightColorScheme.onSurface.withOpacity(0.38));
-    expect(iconColor(titleKey), lightColorScheme.onSurface.withOpacity(0.38));
-    expect(iconColor(subtitleKey), lightColorScheme.onSurface.withOpacity(0.38));
-    expect(iconColor(trailingKey), lightColorScheme.onSurface.withOpacity(0.38));
-
-    await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: true));
-    await tester.pumpAndSettle(); // Animated theme change
-    expect(iconColor(leadingKey), darkColorScheme.primary);
-    expect(iconColor(titleKey), darkColorScheme.primary);
-    expect(iconColor(subtitleKey), darkColorScheme.primary);
-    expect(iconColor(trailingKey), darkColorScheme.primary);
-
-    // For this configuration, ListTile defers to the default IconTheme.
-    // The default dark theme's IconTheme has color:white
-    await tester.pumpWidget(buildFrame(brightness: Brightness.dark, selected: false));
-    expect(iconColor(leadingKey), darkColorScheme.onSurface.withOpacity(0.38));
-    expect(iconColor(titleKey), darkColorScheme.onSurface.withOpacity(0.38));
-    expect(iconColor(subtitleKey), darkColorScheme.onSurface.withOpacity(0.38));
-    expect(iconColor(trailingKey), darkColorScheme.onSurface.withOpacity(0.38));
+    await tester.pumpWidget(buildFrame(selected: false));
+    expect(iconColor(leadingKey), colorScheme.onSurface);
+    expect(iconColor(titleKey), colorScheme.onSurface);
+    expect(iconColor(subtitleKey), colorScheme.onSurface);
+    expect(iconColor(trailingKey), colorScheme.onSurface);
   });
 
   testWidgets('ListTile font size', (WidgetTester tester) async {
-    Widget buildFrame({
-      bool dense = false,
-      bool enabled = true,
-      bool selected = false,
-      ListTileStyle? style,
-    }) {
+    Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: Material(
           child: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return ListTile(
-                  dense: dense,
-                  enabled: enabled,
-                  selected: selected,
-                  style: style,
-                  leading: const TestText('leading'),
-                  title: const TestText('title'),
-                  subtitle: const TestText('subtitle') ,
-                  trailing: const TestText('trailing'),
+                return const ListTile(
+                  leading: TestText('leading'),
+                  title: TestText('title'),
+                  subtitle: TestText('subtitle') ,
+                  trailing: TestText('trailing'),
                 );
               },
             ),
@@ -2124,76 +2126,31 @@ void main() {
       );
     }
 
-    // ListTile - ListTileStyle.list (default).
+    // ListTile default text sizes.
     await tester.pumpWidget(buildFrame());
-    RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.fontSize, 14.0);
-    RenderParagraph title = _getTextRenderObject(tester, 'title');
+    final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.fontSize, 11.0);
+    final RenderParagraph title = _getTextRenderObject(tester, 'title');
     expect(title.text.style!.fontSize, 16.0);
-    RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
     expect(subtitle.text.style!.fontSize, 14.0);
-    RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.fontSize, 14.0);
-
-    // ListTile - Densed - ListTileStyle.list (default).
-    await tester.pumpWidget(buildFrame(dense: true));
-    await tester.pumpAndSettle();
-    leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.fontSize, 14.0);
-    title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.fontSize, 13.0);
-    subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.fontSize, 12.0);
-    trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.fontSize, 14.0);
-
-    // ListTile - ListTileStyle.drawer.
-    await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
-    await tester.pumpAndSettle();
-    leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.fontSize, 14.0);
-    title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.fontSize, 14.0);
-    subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.fontSize, 14.0);
-    trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.fontSize, 14.0);
-
-    // ListTile - Densed - ListTileStyle.drawer.
-    await tester.pumpWidget(buildFrame(dense: true, style: ListTileStyle.drawer));
-    await tester.pumpAndSettle();
-    leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.fontSize, 14.0);
-    title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.fontSize, 13.0);
-    subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.fontSize, 12.0);
-    trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.fontSize, 14.0);
+    final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.fontSize, 11.0);
   });
 
   testWidgets('ListTile text color', (WidgetTester tester) async {
-    Widget buildFrame({
-      bool dense = false,
-      bool enabled = true,
-      bool selected = false,
-      ListTileStyle? style,
-    }) {
+    Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: Material(
           child: Center(
             child: Builder(
               builder: (BuildContext context) {
-                return ListTile(
-                  dense: dense,
-                  enabled: enabled,
-                  selected: selected,
-                  style: style,
-                  leading: const TestText('leading'),
-                  title: const TestText('title'),
-                  subtitle: const TestText('subtitle') ,
-                  trailing: const TestText('trailing'),
+                return const ListTile(
+                  leading: TestText('leading'),
+                  title: TestText('title'),
+                  subtitle: TestText('subtitle') ,
+                  trailing: TestText('trailing'),
                 );
               },
             ),
@@ -2202,30 +2159,18 @@ void main() {
       );
     }
 
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
-    // ListTile - ListTileStyle.list (default).
+    // ListTile default text colors.
     await tester.pumpWidget(buildFrame());
-    RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
-    RenderParagraph title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
-    RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
-    RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
-
-    // ListTile - ListTileStyle.drawer.
-    await tester.pumpWidget(buildFrame(style: ListTileStyle.drawer));
-    await tester.pumpAndSettle();
-    leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.color, theme.textTheme.bodyMedium!.color);
-    title = _getTextRenderObject(tester, 'title');
+    final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+    expect(leading.text.style!.color, theme.textTheme.labelSmall!.color);
+    final RenderParagraph title = _getTextRenderObject(tester, 'title');
     expect(title.text.style!.color, theme.textTheme.bodyLarge!.color);
-    subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
-    trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
+    final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+    expect(subtitle.text.style!.color, theme.textTheme.bodyMedium!.color);
+    final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+    expect(trailing.text.style!.color, theme.textTheme.labelSmall!.color);
   });
 
   testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
@@ -2305,6 +2250,151 @@ void main() {
     );
   });
 
+  testWidgets('ListTile throws assertion when useMaterial3 and dense are true', (WidgetTester tester) async {
+    Widget buildFrame({required bool useMaterial3}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: useMaterial3),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return const ListTile(
+                  dense: true,
+                  title: Text('Title'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(useMaterial3: true));
+    final AssertionError exception = tester.takeException() as AssertionError;
+    expect(
+      exception.message,
+      'ListTile.dense cannot be true while Theme.useMaterial3 is true.',
+    );
+
+    await tester.pumpWidget(buildFrame(useMaterial3: false));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ListTile.textColor respects MaterialStateColor', (WidgetTester tester) async {
+    bool enabled = false;
+    bool selected = false;
+    const Color defaultColor = Colors.blue;
+    const Color selectedColor = Colors.green;
+    const Color disabledColor = Colors.red;
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  enabled: enabled,
+                  selected: selected,
+                  textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return disabledColor;
+                    }
+
+                    if (states.contains(MaterialState.selected)) {
+                      return selectedColor;
+                    }
+
+                    return defaultColor;
+                  }),
+                  title: const TestText('title'),
+                  subtitle: const TestText('subtitle') ,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test disabled state.
+    await tester.pumpWidget(buildFrame());
+    RenderParagraph title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, disabledColor);
+
+    // Test enabled state.
+    enabled = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, defaultColor);
+
+    // Test selected state.
+    selected = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    title = _getTextRenderObject(tester, 'title');
+    expect(title.text.style!.color, selectedColor);
+  });
+
+  testWidgets('ListTile.iconColor respects MaterialStateColor', (WidgetTester tester) async {
+    bool enabled = false;
+    bool selected = false;
+    const Color defaultColor = Colors.blue;
+    const Color selectedColor = Colors.green;
+    const Color disabledColor = Colors.red;
+    final Key leadingKey = UniqueKey();
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  enabled: enabled,
+                  selected: selected,
+                  iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return disabledColor;
+                    }
+
+                    if (states.contains(MaterialState.selected)) {
+                      return selectedColor;
+                    }
+
+                    return defaultColor;
+                  }),
+                  leading: TestIcon(key: leadingKey),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+
+    // Test disabled state.
+    await tester.pumpWidget(buildFrame());
+    expect(iconColor(leadingKey), disabledColor);
+
+    // Test enabled state.
+    enabled = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(iconColor(leadingKey), defaultColor);
+
+    // Test selected state.
+    selected = true;
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(iconColor(leadingKey), selectedColor);
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
@@ -2317,6 +2407,7 @@ void main() {
         ListTileStyle? style,
       }) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Center(
               child: Builder(
@@ -2394,6 +2485,7 @@ void main() {
         ListTileStyle? style,
       }) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Center(
               child: Builder(
@@ -2453,8 +2545,8 @@ void main() {
 
       Widget buildFrame({ required Brightness brightness, required bool selected }) {
         final ThemeData theme = brightness == Brightness.light
-          ? ThemeData.from(colorScheme: const ColorScheme.light())
-          : ThemeData.from(colorScheme: const ColorScheme.dark());
+          ? ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false)
+          : ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
         return MaterialApp(
           theme: theme,
           home: Material(
@@ -2499,6 +2591,40 @@ void main() {
       expect(iconColor(titleKey),  Colors.white);
       expect(iconColor(subtitleKey),  Colors.white);
       expect(iconColor(trailingKey), Colors.white);
+    });
+
+    testWidgets('ListTile default tile color', (WidgetTester tester) async {
+      bool isSelected = false;
+      const Color defaultColor = Colors.transparent;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return ListTile(
+                    selected: isSelected,
+                    onTap: () {
+                      setState(()=> isSelected = !isSelected);
+                    },
+                    title: const Text('Title'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Material), paints..rect(color: defaultColor));
+
+      // Tap on tile to change isSelected.
+      await tester.tap(find.byType(ListTile));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Material), paints..rect(color: defaultColor));
     });
   });
 }

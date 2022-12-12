@@ -475,7 +475,7 @@ void main() {
     double? textScaleFactor;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
-        textScaleFactor = MediaQuery.of(context).textScaleFactor;
+        textScaleFactor = MediaQuery.textScaleFactorOf(context);
         return Container();
       }),
     ));

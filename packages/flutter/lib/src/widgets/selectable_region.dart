@@ -350,7 +350,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
 
     // Hide the text selection toolbar on mobile when orientation changes.
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     if (_lastOrientation == null) {
       _lastOrientation = orientation;
       return;
@@ -467,6 +467,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
+    HapticFeedback.selectionClick();
     widget.focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
     _showToolbar();
@@ -537,6 +538,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
        },
      );
    }
+  _stopSelectionStartEdgeUpdate();
   _stopSelectionEndEdgeUpdate();
   _updateSelectedContentIfNeeded();
  }

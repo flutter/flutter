@@ -50,7 +50,7 @@ class DeferredComponent {
 
   /// Indicates if the component has loading units assigned.
   ///
-  /// Unassigned components simply reflect the pubspec.yaml configuration directly,
+  /// Unassigned components reflect the pubspec.yaml configuration directly,
   /// contain no loading unit data, and [loadingUnits] is null. Once assigned, the component
   /// will contain a set of [loadingUnits] which contains the [LoadingUnit]s that the
   /// component needs to include. Loading units can be assigned with the [assignLoadingUnits]

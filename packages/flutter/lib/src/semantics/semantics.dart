@@ -4733,7 +4733,7 @@ abstract class SemanticsSortKey with Diagnosticable implements Comparable<Semant
   }
 }
 
-/// A [SemanticsSortKey] that sorts simply based on the `double` value it is
+/// A [SemanticsSortKey] that sorts based on the `double` value it is
 /// given.
 ///
 /// The [OrdinalSortKey] compares itself with other [OrdinalSortKey]s
@@ -4759,7 +4759,6 @@ class OrdinalSortKey extends SemanticsSortKey {
     this.order, {
     super.name,
   }) : assert(order != null),
-       assert(order != double.nan),
        assert(order > double.negativeInfinity),
        assert(order < double.infinity);
 

@@ -110,6 +110,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     super.key,
     this.mode = SnapshotMode.normal,
     this.painter = const _DefaultSnapshotPainter(),
+    this.autoresize = false,
     required this.controller,
     required super.child
   });
@@ -125,6 +126,12 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   /// See [SnapshotMode] for more information.
   final SnapshotMode mode;
 
+  /// Whether or not changes in render object size should automatically re-create
+  /// the snapshot.
+  ///
+  /// Defaults to false.
+  final bool autoresize;
+
   /// The painter used to paint the child snapshot or child widgets.
   final SnapshotPainter painter;
 
@@ -134,8 +141,9 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     return _RenderSnapshotWidget(
       controller: controller,
       mode: mode,
-      devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
+      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
       painter: painter,
+      autoresize: autoresize,
     );
   }
 
@@ -145,8 +153,9 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     (renderObject as _RenderSnapshotWidget)
       ..controller = controller
       ..mode = mode
-      ..devicePixelRatio = MediaQuery.of(context).devicePixelRatio
-      ..painter = painter;
+      ..devicePixelRatio = MediaQuery.devicePixelRatioOf(context)
+      ..painter = painter
+      ..autoresize = autoresize;
   }
 }
 
@@ -159,10 +168,12 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     required SnapshotController controller,
     required SnapshotMode mode,
     required SnapshotPainter painter,
+    required bool autoresize,
   }) : _devicePixelRatio = devicePixelRatio,
        _controller = controller,
        _mode = mode,
-       _painter = painter;
+       _painter = painter,
+       _autoresize = autoresize;
 
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
@@ -230,6 +241,17 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// Whether or not changes in render object size should automatically re-rasterize.
+  bool get autoresize => _autoresize;
+  bool _autoresize;
+  set autoresize(bool value) {
+    if (value == autoresize) {
+      return;
+    }
+    _autoresize = value;
+    markNeedsPaint();
+  }
+
   ui.Image? _childRaster;
   Size? _childRasterSize;
   // Set to true if the snapshot mode was not forced and a platform view
@@ -292,8 +314,11 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     }
     final ui.Image image = offsetLayer.toImageSync(Offset.zero & size, pixelRatio: devicePixelRatio);
     offsetLayer.dispose();
+    _lastCachedSize = size;
     return image;
   }
+
+  Size? _lastCachedSize;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -310,6 +335,12 @@ class _RenderSnapshotWidget extends RenderProxyBox {
       painter.paint(context, offset, size, super.paint);
       return;
     }
+
+    if (autoresize && size != _lastCachedSize && _lastCachedSize != null) {
+      _childRaster?.dispose();
+      _childRaster = null;
+    }
+
     if (_childRaster == null) {
       _childRaster = _paintAndDetachToImage();
       _childRasterSize = size * devicePixelRatio;

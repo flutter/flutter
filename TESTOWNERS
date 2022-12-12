@@ -85,6 +85,7 @@
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf__e2e_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/animated_complex_image_filtered_perf__e2e_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/spell_check_test.dart @camsim99 @flutter/android
 
 ## Windows Android DeviceLab tests
@@ -125,7 +126,6 @@
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_frame_number.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/integration_ui_screenshot.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @zanderso @flutter/engine
@@ -177,7 +177,6 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @iskakaushik @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @zanderso @flutter/engine
-/dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @jmagman @flutter/tool
 /dev/devicelab/bin/tasks/ios_content_validation_test.dart @jmagman @flutter/tool
@@ -197,6 +196,7 @@
 /dev/devicelab/bin/tasks/platform_interaction_test_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_impeller_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/route_test_ios.dart @jasguerrero @flutter/tool
@@ -250,6 +250,7 @@
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @jmagman @flutter/ios
 /dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
+/dev/devicelab/bin/tasks/run_release_test_windows.dart @loic-sharma @flutter/tool
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_html.dart @yjbanov @flutter/web
@@ -302,3 +303,4 @@
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # verify_binaries_codesigned @christopherfujino @flutter/releases
+# flutter_packaging @godofredoc @flutter/infra

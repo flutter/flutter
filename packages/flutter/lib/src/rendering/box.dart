@@ -2022,7 +2022,7 @@ abstract class RenderBox extends RenderObject {
   /// may depend on the baseline of a child (which is not available without
   /// doing a full layout), it may be computed by a callback about which the
   /// render object cannot reason, or the layout is so complex that it
-  /// is simply impractical to calculate the size in an efficient way.
+  /// is impractical to calculate the size in an efficient way.
   ///
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
@@ -2051,7 +2051,7 @@ abstract class RenderBox extends RenderObject {
   /// When asserts are enabled and [debugCheckingIntrinsics] is not true, this
   /// method will either throw the provided [FlutterError] or it will create and
   /// throw a [FlutterError] with the provided `reason`. Otherwise, it will
-  /// simply return true.
+  /// return true.
   ///
   /// One of the arguments has to be provided.
   ///

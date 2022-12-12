@@ -18,6 +18,7 @@ import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
+import '../../web/compile.dart';
 import '../../web/file_generators/flutter_js.dart' as flutter_js;
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
@@ -35,6 +36,12 @@ const String kHasWebPlugins = 'HasWebPlugins';
 ///
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
+
+/// If `--dump-info` should be passed to dart2js.
+const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
+
+// If `--no-frequency-based-minification` should be based to dart2js
+const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
 
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
@@ -135,7 +142,9 @@ class WebEntrypointTarget extends Target {
 
 /// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Target {
-  const Dart2JSTarget();
+  const Dart2JSTarget(this.webRenderer);
+
+  final WebRendererMode webRenderer;
 
   @override
   String get name => 'dart2js';
@@ -149,8 +158,8 @@ class Dart2JSTarget extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.hostArtifact(HostArtifact.flutterWebSdk),
-    Source.hostArtifact(HostArtifact.dart2jsSnapshot),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.dart2jsSnapshot),
+    Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
   ];
@@ -183,12 +192,12 @@ class Dart2JSTarget extends Target {
     final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
     final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
     final Artifacts artifacts = globals.artifacts!;
-    final String librariesSpec = (artifacts.getHostArtifact(HostArtifact.flutterWebSdk) as Directory).childFile('libraries.json').path;
+    final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
     final List<String> sharedCommandOptions = <String>[
-      artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       '--disable-dart-dev',
-      artifacts.getHostArtifact(HostArtifact.dart2jsSnapshot).path,
-      '--libraries-spec=$librariesSpec',
+      artifacts.getArtifactPath(Artifact.dart2jsSnapshot, platform: TargetPlatform.web_javascript),
+      '--platform-binaries=$platformBinariesPath',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (nativeNullAssertions)
         '--native-null-assertions',
@@ -202,21 +211,26 @@ class Dart2JSTarget extends Target {
         '--no-source-maps',
     ];
 
-    // Run the dart2js compilation in two stages, so that icon tree shaking can
-    // parse the kernel file for web builds.
-    final ProcessResult kernelResult = await globals.processManager.run(<String>[
+    final List<String> compilationArgs = <String>[
       ...sharedCommandOptions,
       '-o',
       environment.buildDir.childFile('app.dill').path,
       '--packages=.dart_tool/package_config.json',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path, // dartfile
-    ]);
+    ];
+    globals.printTrace('compiling dart code to kernel with command "${compilationArgs.join(' ')}"');
+
+    // Run the dart2js compilation in two stages, so that icon tree shaking can
+    // parse the kernel file for web builds.
+    final ProcessResult kernelResult = await globals.processManager.run(compilationArgs);
     if (kernelResult.exitCode != 0) {
       throw Exception(_collectOutput(kernelResult));
     }
 
     final String? dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final bool dumpInfo = environment.defines[kDart2jsDumpInfo] == 'true';
+    final bool noFrequencyBasedMinification = environment.defines[kDart2jsNoFrequencyBasedMinification] == 'true';
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
     final bool csp = environment.defines[kCspMode] == 'true';
 
@@ -224,6 +238,8 @@ class Dart2JSTarget extends Target {
       ...sharedCommandOptions,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
+      if (dumpInfo) '--dump-info',
+      if (noFrequencyBasedMinification) '--no-frequency-based-minification',
       if (csp) '--csp',
       '-o',
       outputJSFile.path,
@@ -256,14 +272,16 @@ class Dart2JSTarget extends Target {
 
 /// Unpacks the dart2js compilation and resources to a given output directory.
 class WebReleaseBundle extends Target {
-  const WebReleaseBundle();
+  const WebReleaseBundle(this.webRenderer);
+
+  final WebRendererMode webRenderer;
 
   @override
   String get name => 'web_release_bundle';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    Dart2JSTarget(),
+  List<Target> get dependencies => <Target>[
+    Dart2JSTarget(webRenderer),
   ];
 
   @override
@@ -441,18 +459,19 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.cache);
+  const WebServiceWorker(this.fileSystem, this.cache, this.webRenderer);
 
   final FileSystem fileSystem;
   final Cache cache;
+  final WebRendererMode webRenderer;
 
   @override
   String get name => 'web_service_worker';
 
   @override
   List<Target> get dependencies => <Target>[
-    const Dart2JSTarget(),
-    const WebReleaseBundle(),
+    Dart2JSTarget(webRenderer),
+    WebReleaseBundle(webRenderer),
     WebBuiltInAssets(fileSystem, cache),
   ];
 
