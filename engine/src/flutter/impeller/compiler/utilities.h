@@ -25,5 +25,9 @@ std::string InferShaderNameFromPath(std::string_view path);
 
 std::string ConvertToCamelCase(std::string_view string);
 
+/// @brief  Ensure that the entrypoint name is a valid identifier in the target
+///         language.
+std::string ConvertToEntrypointName(std::string_view string);
+
 }  // namespace compiler
 }  // namespace impeller
