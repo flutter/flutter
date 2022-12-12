@@ -105,15 +105,6 @@ void main() {
             }
           }
           expect(pass, true);
-          /*for (final String val in stack) {
-            if (val == name) {
-              expect(name, val);
-              pass = true;
-            }
-          }
-          if (!pass) {
-            throwToolExit('$name not found in ${stack}');
-          }*/
         }
       }
     }
