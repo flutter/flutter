@@ -18,17 +18,6 @@
 # * Fixes in this file are from the Cupertino library. *
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/114459
-  - title: "Migrate to 'boldTextOf'"
-    date: 2022-10-28
-    element:
-      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
-      method: 'boldTextOverride'
-      inClass: 'MediaQuery'
-    changes:
-      - kind: 'rename'
-        newName: 'boldTextOf'
-
   # Change made in https://github.com/flutter/flutter/pull/20649
   # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
   - title: "Replace with 'CupertinoPopupSurface'"
