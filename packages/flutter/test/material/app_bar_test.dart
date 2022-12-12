@@ -3760,4 +3760,72 @@ void main() {
     expect(tester.getTopLeft(find.byKey(titleKey)).dx, leadingWidth + 16.0);
     expect(tester.getSize(find.byKey(leadingKey)).width, leadingWidth);
   });
+
+  group('AppBar.forceMaterialTransparency', () {
+    Material getAppBarMaterial(WidgetTester tester) {
+      return tester.widget<Material>(find
+          .descendant(of: find.byType(AppBar), matching: find.byType(Material))
+          .first);
+    }
+
+    // Generates a MaterialApp with an AppBar with a TextButton beneath it
+    // (via extendBodyBehindAppBar = true).
+    Widget buildWidget(
+        {required bool forceMaterialTransparency,
+          required VoidCallback onPressed}) =>
+        MaterialApp(
+          home: Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: AppBar(
+                forceMaterialTransparency: forceMaterialTransparency,
+                elevation: 3,
+                backgroundColor: Colors.red,
+                title: const Text('AppBar'),
+              ),
+              body: Align(
+                  alignment: Alignment.topCenter,
+                  child:
+                  TextButton(
+                      onPressed: onPressed,
+                      child: const Text('press me')))),
+        );
+
+    testWidgets(
+        'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+          forceMaterialTransparency:true,
+          onPressed:() => buttonWasPressed = true);
+      await tester.pumpWidget(widget);
+
+      final Material material = getAppBarMaterial(tester);
+      expect(material.type, MaterialType.transparency);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(buttonWasPressed, isTrue);
+    });
+
+    testWidgets(
+        'forceMaterialTransparency == false does not allow gestures beneath the app bar', (WidgetTester tester) async {
+      // Set this, and tester.tap(warnIfMissed:false), to suppress
+      // errors/warning that the button is not hittable (which is expected).
+      WidgetController.hitTestWarningShouldBeFatal = false;
+
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+          forceMaterialTransparency:false,
+          onPressed:() => buttonWasPressed = true);
+      await tester.pumpWidget(widget);
+
+      final Material material = getAppBarMaterial(tester);
+      expect(material.type, MaterialType.canvas);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder, warnIfMissed:false);
+      await tester.pump();
+      expect(buttonWasPressed, isFalse);
+    });
+  });
 }
