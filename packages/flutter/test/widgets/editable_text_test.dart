@@ -6365,7 +6365,7 @@ void main() {
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
 
-    final bool platformCanSelectByParagraph = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS; 
+    final bool platformCanSelectByParagraph = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
     // Move down one paragraph.
     await sendKeys(
       tester,
