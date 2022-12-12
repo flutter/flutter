@@ -96,7 +96,24 @@ void main() {
         // The downloaded part of the timeline may contain an end event whose
         // corresponding begin event happened before the start of the timeline.
         if (stack.isNotEmpty) {
-          expect(stack, contains(name));
+          bool pass = false;
+          while (stack.isNotEmpty) {
+            final String value = stack.removeLast();
+            if (value == name) {
+              pass = true;
+              break;
+            }
+          }
+          expect(pass, true);
+          /*for (final String val in stack) {
+            if (val == name) {
+              expect(name, val);
+              pass = true;
+            }
+          }
+          if (!pass) {
+            throwToolExit('$name not found in ${stack}');
+          }*/
         }
       }
     }
