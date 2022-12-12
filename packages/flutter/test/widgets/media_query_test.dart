@@ -1055,8 +1055,9 @@ void main() {
 
     final Widget builder = Builder(
       builder: (BuildContext context) {
+        _MediaQueryAspectVariant.aspect!.method(context);
         buildCount++;
-        return Text('data: ${_MediaQueryAspectVariant.aspect!.method(context)}');
+        return const SizedBox.shrink();
       }
     );
 
@@ -1064,28 +1065,26 @@ void main() {
       builder: (BuildContext context, StateSetter setState) {
         return MediaQuery(
           data: data,
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                builder,
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      data = _MediaQueryAspectVariant.aspect!.data;
-                    });
-                  },
-                  child: const Text('Change data')
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      data = data.copyWith();
-                    });
-                  },
-                  child: const Text('Copy data')
-                )
-              ]
-            )
+          child: ListView(
+            children: <Widget>[
+              builder,
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    data = _MediaQueryAspectVariant.aspect!.data;
+                  });
+                },
+                child: const Text('Change data')
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    data = data.copyWith();
+                  });
+                },
+                child: const Text('Copy data')
+              )
+            ]
           )
         );
       },
