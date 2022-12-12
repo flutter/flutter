@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -555,14 +553,22 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() {
-      final Widget wrappedWidget = View(
-        view: binding.window,
-        child: widget,
+      return _pumpWidget(
+        binding.wrapWithDefaultView(widget),
+        duration,
+        phase,
       );
-      binding.attachRootWidget(wrappedWidget);
-      binding.scheduleFrame();
-      return binding.pump(duration, phase);
     });
+  }
+
+  Future<void> _pumpWidget(
+    Widget widget, [
+    Duration? duration,
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+  ]) {
+    binding.attachRootWidget(widget);
+    binding.scheduleFrame();
+    return binding.pump(duration, phase);
   }
 
   @override
@@ -703,12 +709,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     // The interval following the last frame doesn't have to be within the fullDuration.
     Duration elapsed = Duration.zero;
     return TestAsyncUtils.guard<void>(() async {
-      binding.attachRootWidget(
-        View(
-          view: binding.window,
-          child: target,
-        )
-      );
+      binding.attachRootWidget(binding.wrapWithDefaultView(target));
       binding.scheduleFrame();
       while (elapsed < maxDuration) {
         await binding.pump(interval);
@@ -731,15 +732,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'therefore no restoration data has been collected to restore from. Did you forget to wrap '
       'your widget tree in a RootRestorationScope?',
     );
-    final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
-    final TestRestorationData restorationData = binding.restorationManager.restorationData;
-    runApp(Container(key: UniqueKey()));
-    await pump();
-    binding.restorationManager.restoreFrom(restorationData);
-    return TestAsyncUtils.guard<void>(() {
-      binding.attachRootWidget(widget);
-      binding.scheduleFrame();
-      return binding.pump();
+    return TestAsyncUtils.guard<void>(() async {
+      final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+      final TestRestorationData restorationData = binding.restorationManager.restorationData;
+      runApp(Container(key: UniqueKey()));
+      await pump();
+      binding.restorationManager.restoreFrom(restorationData);
+      return _pumpWidget(widget);
     });
   }
 
