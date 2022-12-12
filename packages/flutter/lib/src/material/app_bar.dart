@@ -60,11 +60,11 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 }
 
 class _PreferredAppBarSize extends Size {
-  _PreferredAppBarSize(this.toolbarHeight, this.bottomHeight)
-    : super.fromHeight((toolbarHeight ?? kToolbarHeight) + (bottomHeight ?? 0));
+  _PreferredAppBarSize(this.toolbarHeight, this.bottom)
+    : super.fromHeight((toolbarHeight ?? kToolbarHeight) + (bottom?.preferredSize.height ?? 0));
 
   final double? toolbarHeight;
-  final double? bottomHeight;
+  final PreferredSizeWidget? bottom;
 }
 
 /// A Material Design app bar.
@@ -226,18 +226,37 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
+       preferredSize = _PreferredAppBarSize(toolbarHeight, bottom);
 
   /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
   /// the same `preferredSize.height` unless [AppBar.toolbarHeight] was null and
   /// `AppBarTheme.of(context).toolbarHeight` is non-null. In that case the
   /// return value is the sum of the theme's toolbar height and the height of
   /// the app bar's [AppBar.bottom] widget.
+  @Deprecated(
+    'Migrate to preferredSizeFor. '
+    'This change was made so that all PreferredSizeWidgets have the option to use a BuildContext. '
+    'This feature was deprecated after v3.7.0-6.0.pre.',
+  )
   static double preferredHeightFor(BuildContext context, Size preferredSize) {
     if (preferredSize is _PreferredAppBarSize && preferredSize.toolbarHeight == null) {
-      return (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + (preferredSize.bottomHeight ?? 0);
+      return (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + (preferredSize.bottom?.preferredSize.height ?? 0);
     }
     return preferredSize.height;
+  }
+
+  @override
+  Size preferredSizeFor(BuildContext context){
+    if (preferredSize is _PreferredAppBarSize) {
+      final Size bottomSize = (preferredSize as _PreferredAppBarSize).bottom?.preferredSizeFor(context) ?? Size.zero;
+      if (toolbarHeight == null) {
+        final double mergedHeight = (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + bottomSize.height;
+        return Size.fromHeight(mergedHeight);
+      } else {
+        return Size.fromHeight(toolbarHeight! + bottomSize.height);
+      }
+    }
+    return Size.fromHeight(preferredSize.height);
   }
 
   /// {@template flutter.material.appbar.leading}
@@ -2096,7 +2115,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
-    final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
+    final double bottomHeight = widget.bottom?.preferredSizeFor(context).height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding

@@ -25,8 +25,13 @@ import 'tab_indicator.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
+// M2 Defaults
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
+
+// M3 Defaults
+const double _kM3TabHeight = 48.0;
+const double _kM3TextAndIconTabHeight = 64.0;
 
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
@@ -112,17 +117,20 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final double tabHeight = useMaterial3 ? _kM3TabHeight : _kTabHeight;
+    final double textAndIconHeight = useMaterial3 ? _kM3TextAndIconTabHeight : _kTextAndIconTabHeight;
 
     final double calculatedHeight;
     final Widget label;
     if (icon == null) {
-      calculatedHeight = _kTabHeight;
+      calculatedHeight = tabHeight;
       label = _buildLabelText();
     } else if (text == null && child == null) {
-      calculatedHeight = _kTabHeight;
+      calculatedHeight = tabHeight;
       label = icon!;
     } else {
-      calculatedHeight = _kTextAndIconTabHeight;
+      calculatedHeight = textAndIconHeight;
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -156,9 +164,28 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
     if (height != null) {
       return Size.fromHeight(height!);
     } else if ((text != null || child != null) && icon != null) {
+      // TODO(Piinks): Change these default values to M3 once
+      //  ThemeData.useMaterial3 is true by default.
       return const Size.fromHeight(_kTextAndIconTabHeight);
     } else {
       return const Size.fromHeight(_kTabHeight);
+    }
+  }
+
+  @override
+  Size preferredSizeFor(BuildContext context) {
+    if (height != null) {
+      return Size.fromHeight(height!);
+    }
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+
+    if ((text != null || child != null) && icon != null) {
+      return Size.fromHeight(useMaterial3
+        ? _kM3TextAndIconTabHeight
+        : _kTextAndIconTabHeight
+      );
+    } else {
+      return Size.fromHeight(useMaterial3 ? _kM3TabHeight : _kTabHeight);
     }
   }
 }
@@ -919,10 +946,25 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [AppBar] uses this size to compute its own preferred size.
   @override
   Size get preferredSize {
+    // TODO(Piinks): Change this default value to M3 once
+    //  ThemeData.useMaterial3 is true by default.
     double maxHeight = _kTabHeight;
     for (final Widget item in tabs) {
       if (item is PreferredSizeWidget) {
         final double itemHeight = item.preferredSize.height;
+        maxHeight = math.max(itemHeight, maxHeight);
+      }
+    }
+    return Size.fromHeight(maxHeight + indicatorWeight);
+  }
+
+  @override
+  Size preferredSizeFor(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    double maxHeight = useMaterial3 ? _kM3TabHeight : _kTabHeight;
+    for (final Widget item in tabs) {
+      if (item is PreferredSizeWidget) {
+        final double itemHeight = item.preferredSizeFor(context).height;
         maxHeight = math.max(itemHeight, maxHeight);
       }
     }
@@ -934,10 +976,34 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [TabBar] uses this to give uniform padding to all tabs in cases where
   /// there are some tabs with both text and icon and some which contain only
   /// text or icon.
+  @Deprecated(
+    'Migrate to tabHasTextAndIconFor. '
+    'This change was made so that a BuildContext can be used for inherited values. '
+    'This feature was deprecated after v3.7.0-6.0pre.',
+  )
   bool get tabHasTextAndIcon {
     for (final Widget item in tabs) {
       if (item is PreferredSizeWidget) {
         if (item.preferredSize.height == _kTextAndIconTabHeight) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /// Returns whether the [TabBar] contains a tab with both text and icon.
+  ///
+  /// [TabBar] uses this to give uniform padding to all tabs in cases where
+  /// there are some tabs with both text and icon and some which contain only
+  /// text or icon.
+  bool tabHasTextAndIconFor(BuildContext context) {
+    final double textAndIconHeight = Theme.of(context).useMaterial3
+      ? _kM3TextAndIconTabHeight
+      : _kTextAndIconTabHeight;
+    for (final Widget item in tabs) {
+      if (item is PreferredSizeWidget) {
+        if (item.preferredSize.height == textAndIconHeight) {
           return true;
         }
       }
@@ -1257,28 +1323,30 @@ class _TabBarState extends State<TabBar> {
     assert(_debugScheduleCheckHasValidTabsCount());
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    if (_controller!.length == 0) {
-      return Container(
-        height: _kTabHeight + widget.indicatorWeight,
-      );
-    }
-
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
     final TabBarTheme defaults = theme.useMaterial3 ? _TabsDefaultsM3(context) : _TabsDefaultsM2(context);
+    final double tabHeight = theme.useMaterial3 ? _kM3TabHeight : _kTabHeight;
+    final double textAndIconHeight = theme.useMaterial3 ? _kM3TextAndIconTabHeight : _kTextAndIconTabHeight;
+
+    if (_controller!.length == 0) {
+      return Container(
+        height: tabHeight + widget.indicatorWeight,
+      );
+    }
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
-      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
+      final double verticalAdjustment = (textAndIconHeight - tabHeight)/2.0;
       EdgeInsetsGeometry? adjustedPadding;
 
       if (widget.tabs[index] is PreferredSizeWidget) {
         final PreferredSizeWidget tab = widget.tabs[index] as PreferredSizeWidget;
-        if (widget.tabHasTextAndIcon && tab.preferredSize.height == _kTabHeight) {
+        if (widget.tabHasTextAndIconFor(context) && tab.preferredSizeFor(context).height == tabHeight) {
           if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
-            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
+            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(EdgeInsets.symmetric(vertical: verticalAdjustment));
           }
           else {
-            adjustedPadding = const EdgeInsets.symmetric(vertical: verticalAdjustment, horizontal: 16.0);
+            adjustedPadding = EdgeInsets.symmetric(vertical: verticalAdjustment, horizontal: 16.0);
           }
         }
       }

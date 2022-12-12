@@ -4514,53 +4514,98 @@ void main() {
   });
 
   testWidgets('Tab preferredSize gives correct value', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
+    late BuildContext buildContext;
+    Widget buildFrame(bool useMaterial3) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: useMaterial3),
         home: Material(
-          child: Row(
-            children: const <Tab>[
-              Tab(icon: Icon(Icons.message)),
-              Tab(text: 'Two'),
-              Tab(text: 'Three', icon: Icon(Icons.chat)),
-            ],
+          child: Builder(
+            builder: (BuildContext context) {
+              buildContext = context;
+              return Row(
+                children: const <Tab>[
+                  Tab(icon: Icon(Icons.message)),
+                  Tab(text: 'Two'),
+                  Tab(text: 'Three', icon: Icon(Icons.chat)),
+                ],
+              );
+            },
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    final Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.message));
-    final Tab secondTab = tester.widget(find.widgetWithText(Tab, 'Two'));
-    final Tab thirdTab = tester.widget(find.widgetWithText(Tab, 'Three'));
+    await tester.pumpWidget(buildFrame(false));
+    Tab firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.message));
+    Tab secondTab = tester.widget(find.widgetWithText(Tab, 'Two'));
+    Tab thirdTab = tester.widget(find.widgetWithText(Tab, 'Three'));
 
     expect(firstTab.preferredSize, const Size.fromHeight(46.0));
     expect(secondTab.preferredSize, const Size.fromHeight(46.0));
     expect(thirdTab.preferredSize, const Size.fromHeight(72.0));
+    expect(firstTab.preferredSizeFor(buildContext), const Size.fromHeight(46.0));
+    expect(secondTab.preferredSizeFor(buildContext), const Size.fromHeight(46.0));
+    expect(thirdTab.preferredSizeFor(buildContext), const Size.fromHeight(72.0));
+
+    // Pumping a container to subvert the animated transition of themes.
+    await tester.pumpWidget(Container());
+
+    await tester.pumpWidget(buildFrame(true));
+    firstTab = tester.widget(find.widgetWithIcon(Tab, Icons.message));
+    secondTab = tester.widget(find.widgetWithText(Tab, 'Two'));
+    thirdTab = tester.widget(find.widgetWithText(Tab, 'Three'));
+
+    expect(firstTab.preferredSize, const Size.fromHeight(46.0));
+    expect(secondTab.preferredSize, const Size.fromHeight(46.0));
+    expect(thirdTab.preferredSize, const Size.fromHeight(72.0));
+    expect(firstTab.preferredSizeFor(buildContext), const Size.fromHeight(48.0));
+    expect(secondTab.preferredSizeFor(buildContext), const Size.fromHeight(48.0));
+    expect(thirdTab.preferredSizeFor(buildContext), const Size.fromHeight(64.0));
   });
 
   testWidgets('TabBar preferredSize gives correct value when there are both icon and text in tabs', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: DefaultTabController(
-        length: 5,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(text: 'car'),
-                Tab(text: 'transit'),
-                Tab(text: 'bike'),
-                Tab(text: 'boat', icon: Icon(Icons.message)),
-                Tab(text: 'bus'),
-              ],
-            ),
-            title: const Text('Tabs Test'),
+    late Size preferredContextSize;
+
+    Widget buildFrame(bool useMaterial3) {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: useMaterial3),
+        home: DefaultTabController(
+          length: 5,
+          child: Builder(
+            builder: (BuildContext context) {
+              const TabBar tabBar = TabBar(
+                tabs: <Widget>[
+                  Tab(text: 'car'),
+                  Tab(text: 'transit'),
+                  Tab(text: 'bike'),
+                  Tab(text: 'boat', icon: Icon(Icons.message)),
+                  Tab(text: 'bus'),
+                ],
+              );
+              preferredContextSize = tabBar.preferredSizeFor(context);
+              return Scaffold(
+                appBar: AppBar(
+                  bottom: tabBar,
+                  title: const Text('Tabs Test'),
+                ),
+              );
+            },
           ),
         ),
-      ),
-    ));
-
-    final TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
-
+      );
+    }
+    await tester.pumpWidget(buildFrame(false));
+    TabBar tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
     expect(tabBar.preferredSize, const Size.fromHeight(74.0));
+    expect(preferredContextSize.height, 74.0);
+
+    // Pumping a container to subvert the animated transition of themes.
+    await tester.pumpWidget(Container());
+
+    await tester.pumpWidget(buildFrame(true));
+    tabBar = tester.widget(find.widgetWithText(TabBar, 'car'));
+    expect(tabBar.preferredSize, const Size.fromHeight(74.0));
+    expect(preferredContextSize.height, 66.0);
   });
 
   testWidgets('TabBar preferredSize gives correct value when there is only icon or text in tabs', (WidgetTester tester) async {

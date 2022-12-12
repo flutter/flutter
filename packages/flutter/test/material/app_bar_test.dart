@@ -3651,6 +3651,7 @@ void main() {
   testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {
     late double preferredHeight;
     late Size preferredSize;
+    late Size preferredContextSize;
 
     Widget buildFrame({ double? themeToolbarHeight, double? appBarToolbarHeight }) {
       final AppBar appBar = AppBar(
@@ -3666,6 +3667,7 @@ void main() {
           builder: (BuildContext context) {
             preferredHeight = AppBar.preferredHeightFor(context, appBar.preferredSize);
             preferredSize = appBar.preferredSize;
+            preferredContextSize = appBar.preferredSizeFor(context);
             return Scaffold(
               appBar: appBar,
               body: const Placeholder(),
@@ -3679,6 +3681,7 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
     expect(preferredHeight, kToolbarHeight);
     expect(preferredSize.height, kToolbarHeight);
+    expect(preferredContextSize.height, kToolbarHeight);
 
     await tester.pumpWidget(buildFrame(themeToolbarHeight: 96));
     await tester.pumpAndSettle(); // Animate MaterialApp theme change.
@@ -3687,18 +3690,21 @@ void main() {
     // Special case: AppBarTheme.toolbarHeight specified,
     // AppBar.theme.toolbarHeight is null.
     expect(preferredSize.height, kToolbarHeight);
+    expect(preferredContextSize.height, 96);
 
     await tester.pumpWidget(buildFrame(appBarToolbarHeight: 64));
     await tester.pumpAndSettle(); // Animate MaterialApp theme change.
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
+    expect(preferredContextSize.height, 64);
 
     await tester.pumpWidget(buildFrame(appBarToolbarHeight: 64, themeToolbarHeight: 96));
     await tester.pumpAndSettle(); // Animate MaterialApp theme change.
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
+    expect(preferredContextSize.height, 64);
   });
 
   testWidgets('AppBar title with actions should have the same position regardless of centerTitle', (WidgetTester tester) async {

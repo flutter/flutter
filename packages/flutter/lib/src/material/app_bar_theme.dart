@@ -194,7 +194,7 @@ class AppBarTheme with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [AppBar.preferredHeightFor], which computes the overall
+  ///  * [AppBar.preferredSizeFor], which computes the overall
   ///    height of an AppBar widget, taking this value into account.
   final double? toolbarHeight;
 

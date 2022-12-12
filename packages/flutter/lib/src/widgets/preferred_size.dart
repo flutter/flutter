@@ -34,6 +34,16 @@ abstract class PreferredSizeWidget implements Widget {
   /// height. In that case implementations of this method can just return
   /// `Size.fromHeight(myAppBarHeight)`.
   Size get preferredSize;
+
+  /// Allows subclasses to return a preferred size with access to the current
+  /// [BuildContext].
+  ///
+  /// This method allows for inherited widgets to influence the preferred size
+  /// of the widget. For example, the [AppBar] uses this method to allow the
+  /// [AppBarTheme] to designate the preferred size.
+  ///
+  /// By default, this will return the current [preferredSize].
+  Size preferredSizeFor(BuildContext context) => preferredSize;
 }
 
 /// A widget with a preferred size.
@@ -80,6 +90,9 @@ class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   final Size preferredSize;
+
+  @override
+  Size preferredSizeFor(BuildContext context) => preferredSize;
 
   @override
   Widget build(BuildContext context) => child;
