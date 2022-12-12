@@ -2628,25 +2628,25 @@ class RenderTransform extends RenderProxyBox {
 
     final Matrix4 transform = _effectiveTransform!;
     final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
-    if (childOffset == null) {
-      // if the matrix is singular the children would be compressed to a line or
-      // single point, instead short-circuit and paint nothing.
-      final double det = transform.determinant();
-      if (det == 0 || !det.isFinite) {
-        layer = null;
-        return;
-      }
-      layer = context.pushTransform(
-        needsCompositing,
-        offset,
-        transform,
-        super.paint,
-        oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
-      );
-    } else {
+    if (childOffset != null) {
       super.paint(context, offset + childOffset);
       layer = null;
+      return;
     }
+    // if the matrix is singular the children would be compressed to a line or
+    // single point, instead short-circuit and paint nothing.
+    final double det = transform.determinant();
+    if (det == 0 || !det.isFinite) {
+      layer = null;
+      return;
+    }
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+    );
   }
 
   @override
