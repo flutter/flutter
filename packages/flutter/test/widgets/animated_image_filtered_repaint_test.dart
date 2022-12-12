@@ -35,6 +35,35 @@ void main() {
 
     expect(RenderTestObject.paintCount, 1);
   });
+
+  testWidgets('Transform with FilterQuality avoids repainting child as it animates', (WidgetTester tester) async {
+    RenderTestObject.paintCount = 0;
+    await tester.pumpWidget(
+      Container(
+        color: Colors.red,
+        child: Transform.translate(
+          offset: const Offset(5.0, 10.0),
+          filterQuality: FilterQuality.low,
+          child: const TestWidget(),
+        ),
+      )
+    );
+
+    expect(RenderTestObject.paintCount, 1);
+
+    await tester.pumpWidget(
+      Container(
+        color: Colors.red,
+        child: Transform.translate(
+          offset: const Offset(25.0, 0.0),
+          filterQuality: FilterQuality.low,
+          child: const TestWidget(),
+        ),
+      )
+    );
+
+    expect(RenderTestObject.paintCount, 1);
+  });
 }
 
 class TestWidget extends SingleChildRenderObjectWidget {
