@@ -951,7 +951,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     if (pointer != _primaryPointer) {
       return;
     }
-    super.acceptGesture(pointer);
 
     _stopDeadlineTimer();
 
