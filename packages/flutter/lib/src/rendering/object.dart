@@ -3165,20 +3165,29 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final bool wasSemanticsBoundary = _semantics != null && (_cachedSemanticsConfiguration?.isSemanticBoundary ?? false);
     _cachedSemanticsConfiguration = null;
-    // The childConfigurationsDelegate may produce sibling nodes to be attached
-    // to the parent of this semantics node, thus it can't be a semantics
-    // boundary.
-    bool isEffectiveSemanticsBoundary =
-      _semanticsConfiguration.childConfigurationsDelegate == null &&
-      _semanticsConfiguration.isSemanticBoundary &&
-      wasSemanticsBoundary;
+
+    bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
+
+    bool mayProduceSiblingNodes =
+      _cachedSemanticsConfiguration?.childConfigurationsDelegate != null ||
+      _semanticsConfiguration.childConfigurationsDelegate != null;
     RenderObject node = this;
 
-    while (!isEffectiveSemanticsBoundary && node.parent is RenderObject) {
+    // The sibling nodes will be attached to the parent of immediate semantics
+    // node, thus marking this semantics boundary dirty is not enough, it needs
+    // to find the first parent semantics boundary that does not have any
+    // possible sibling node.
+    while (node.parent is RenderObject && (mayProduceSiblingNodes || !isEffectiveSemanticsBoundary)) {
       if (node != this && node._needsSemanticsUpdate) {
         break;
       }
       node._needsSemanticsUpdate = true;
+      // Since this node is a semantics boundary, the produced sibling nodes will
+      // be attached to the parent semantics boundary. Thus, these sibling nodes
+      // will not be carried to the next loop.
+      if (isEffectiveSemanticsBoundary) {
+        mayProduceSiblingNodes = false;
+      }
 
       node = node.parent! as RenderObject;
       isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
@@ -3231,9 +3240,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       result: result,
       siblingNodes: siblingNodes,
     );
-    final SemanticsNode node = result.single;
-    // Fragment only wants to add this node's SemanticsNode to the parent.
-    assert(interestingFragment.config == null && node == _semantics);
+    // Result may contain sibling nodes that are irrelevant for this update.
+    assert(interestingFragment.config == null && result.any((SemanticsNode node) => node == _semantics));
   }
 
   /// Returns the semantics that this node would like to add to its parent.

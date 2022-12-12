@@ -221,6 +221,107 @@ void main() {
 
     expect(tester.takeException(), isAssertionError);
   });
+
+  testWidgets('RenderObject with semantics child delegate will mark correct boundary dirty', (WidgetTester tester) async {
+    final UniqueKey inner = UniqueKey();
+    final UniqueKey boundaryParent = UniqueKey();
+    final UniqueKey grandBoundaryParent = UniqueKey();
+    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+      final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
+      configs.forEach(builder.markAsMergeUp);
+      return builder.build();
+    }
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MarkSemanticsDirtySpy(
+          key: grandBoundaryParent,
+          child: MarkSemanticsDirtySpy(
+            key: boundaryParent,
+            child: TestConfigDelegate(
+              delegate: delegate,
+              child: Column(
+                children: <Widget>[
+                  Semantics(
+                    label: 'label',
+                    child: MarkSemanticsDirtySpy(
+                      key: inner,
+                      child: const Text('inner'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderMarkSemanticsDirtySpy innerObject = tester.renderObject<RenderMarkSemanticsDirtySpy>(find.byKey(inner));
+    final RenderTestConfigDelegate objectWithDelegate = tester.renderObject<RenderTestConfigDelegate>(find.byType(TestConfigDelegate));
+    final RenderMarkSemanticsDirtySpy boundaryParentObject = tester.renderObject<RenderMarkSemanticsDirtySpy>(find.byKey(boundaryParent));
+    final RenderMarkSemanticsDirtySpy grandBoundaryParentObject = tester.renderObject<RenderMarkSemanticsDirtySpy>(find.byKey(grandBoundaryParent));
+    void resetBuildState() {
+      innerObject.hasRebuildSemantics = false;
+      boundaryParentObject.hasRebuildSemantics = false;
+      grandBoundaryParentObject.hasRebuildSemantics = false;
+    }
+    // Sanity check
+    expect(innerObject.hasRebuildSemantics, isTrue);
+    expect(boundaryParentObject.hasRebuildSemantics, isTrue);
+    expect(grandBoundaryParentObject.hasRebuildSemantics, isTrue);
+    resetBuildState();
+
+    innerObject.markNeedsSemanticsUpdate();
+    await tester.pump();
+    // Inner boundary should not trigger rebuild above it.
+    expect(innerObject.hasRebuildSemantics, isTrue);
+    expect(boundaryParentObject.hasRebuildSemantics, isFalse);
+    expect(grandBoundaryParentObject.hasRebuildSemantics, isFalse);
+    resetBuildState();
+
+    objectWithDelegate.markNeedsSemanticsUpdate();
+    await tester.pump();
+    // object with delegate rebuilds up to grand parent boundary;
+    expect(innerObject.hasRebuildSemantics, isTrue);
+    expect(boundaryParentObject.hasRebuildSemantics, isTrue);
+    expect(grandBoundaryParentObject.hasRebuildSemantics, isTrue);
+    resetBuildState();
+
+    boundaryParentObject.markNeedsSemanticsUpdate();
+    await tester.pump();
+    // Render objects in between child delegate and grand boundary parent does
+    // not mark the grand boundary parent dirty because it should not change the
+    // generated sibling nodes.
+    expect(innerObject.hasRebuildSemantics, isTrue);
+    expect(boundaryParentObject.hasRebuildSemantics, isTrue);
+    expect(grandBoundaryParentObject.hasRebuildSemantics, isFalse);
+  });
+}
+
+class MarkSemanticsDirtySpy extends SingleChildRenderObjectWidget {
+  const MarkSemanticsDirtySpy({super.key, super.child});
+  @override
+  RenderMarkSemanticsDirtySpy createRenderObject(BuildContext context) => RenderMarkSemanticsDirtySpy();
+}
+
+class RenderMarkSemanticsDirtySpy extends RenderProxyBox {
+  RenderMarkSemanticsDirtySpy();
+  bool hasRebuildSemantics = false;
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.isSemanticBoundary = true;
+  }
+
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    hasRebuildSemantics = true;
+  }
 }
 
 class TestConfigDelegate extends SingleChildRenderObjectWidget {
