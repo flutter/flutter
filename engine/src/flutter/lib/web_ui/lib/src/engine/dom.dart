@@ -1127,6 +1127,8 @@ class DomWheelEvent extends DomMouseEvent {}
 extension DomWheelEventExtension on DomWheelEvent {
   external double get deltaX;
   external double get deltaY;
+  external double? get wheelDeltaX;
+  external double? get wheelDeltaY;
   external double get deltaMode;
 }
 
