@@ -219,6 +219,7 @@ abstract class RunOutputTask {
         '-d',
         deviceId,
         if (release) '--release',
+        '--verbose',
       ];
 
       final Process run = await startFlutter(
