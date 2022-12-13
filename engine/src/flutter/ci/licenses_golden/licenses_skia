@@ -1,4 +1,4 @@
-Signature: b1c69055420e97d4bd0f5d5d85ca9776
+Signature: 8b79c4a2ab30932c9a9986f375fe31aa
 
 UNUSED LICENSES:
 
@@ -7607,6 +7607,8 @@ FILE: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ImageProvider.h
 FILE: ../../../third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h
+FILE: ../../../third_party/skia/include/private/SkAlignedStorage.h
+FILE: ../../../third_party/skia/include/private/SkTypeTraits.h
 FILE: ../../../third_party/skia/include/private/SkUniquePaintParamsID.h
 FILE: ../../../third_party/skia/include/sksl/SkSLVersion.h
 FILE: ../../../third_party/skia/infra/bots/task_drivers/bazel_build/bazel_build.go
