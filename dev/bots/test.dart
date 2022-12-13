@@ -1177,6 +1177,9 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'profile', renderer: 'canvaskit'),
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'release', renderer: 'html'),
 
+    // This test only needs to test when renderer=auto
+    () => _runWebE2eTest('capabilities_integration', buildMode: 'debug', renderer: 'auto'),
+
     () => _runWebTreeshakeTest(),
 
     () => _runFlutterDriverWebTest(
