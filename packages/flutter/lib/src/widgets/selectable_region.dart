@@ -445,12 +445,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _startNewMouseSelectionGesture(DragDownDetails details) {
-    widget.focusNode.requestFocus();
     hideToolbar();
     _clearSelection();
   }
 
   void _handleMouseDragStart(DragStartDetails details) {
+    widget.focusNode.requestFocus();
     _selectStartTo(offset: details.globalPosition);
   }
 
