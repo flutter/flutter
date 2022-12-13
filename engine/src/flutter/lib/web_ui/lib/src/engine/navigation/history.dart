@@ -145,7 +145,7 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
     if (_hasSerialCount(currentState)) {
       final Map<dynamic, dynamic> stateMap =
           currentState! as Map<dynamic, dynamic>;
-      return stateMap['serialCount'] as int;
+      return (stateMap['serialCount'] as double).toInt();
     }
     return 0;
   }

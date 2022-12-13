@@ -40,30 +40,17 @@ class AppBootstrap {
       // This is a convenience method that lets the programmer call "autoStart"
       // from JavaScript immediately after the main.dart.js has loaded.
       // Returns a promise that resolves to the Flutter app that was started.
-      autoStart: allowInterop(() {
-        return Promise<FlutterApp>(allowInterop((
-          PromiseResolver<FlutterApp> resolve,
-          PromiseRejecter _,
-        ) async {
-          await autoStart();
-          // Return the App that was just started
-          resolve(_prepareFlutterApp());
-        }));
-      }),
+      autoStart: allowInterop(() => futureToPromise(() async {
+        await autoStart();
+        // Return the App that was just started
+        return _prepareFlutterApp();
+      }())),
       // Calls [_initEngine], and returns a JS Promise that resolves to an
       // app runner object.
-      initializeEngine: allowInterop(([JsFlutterConfiguration? configuration]) {
-        // `params` coming from Javascript may be used to configure the engine intialization.
-        // The internal `initEngine` function must accept those params.
-        return Promise<FlutterAppRunner>(allowInterop((
-          PromiseResolver<FlutterAppRunner> resolve,
-          PromiseRejecter _,
-        ) async {
-          await _initializeEngine(configuration);
-          // Return an app runner object
-          resolve(_prepareAppRunner());
-        }));
-      }),
+      initializeEngine: allowInterop(([JsFlutterConfiguration? configuration]) => futureToPromise(() async {
+        await _initializeEngine(configuration);
+        return _prepareAppRunner();
+      }()))
     );
   }
 
@@ -77,7 +64,7 @@ class AppBootstrap {
       ) async {
         await _runApp();
         // Return the App that was just started
-        resolve(_prepareFlutterApp());
+        resolve.resolve(_prepareFlutterApp());
       }));
     }));
   }

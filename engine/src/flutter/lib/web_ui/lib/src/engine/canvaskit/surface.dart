@@ -325,7 +325,7 @@ class Surface {
           // Default to no anti-aliasing. Paint commands can be explicitly
           // anti-aliased by setting their `Paint` object's `antialias` property.
           antialias: _kUsingMSAA ? 1 : 0,
-          majorVersion: webGLVersion,
+          majorVersion: webGLVersion.toDouble(),
         ),
       ).toInt();
 
