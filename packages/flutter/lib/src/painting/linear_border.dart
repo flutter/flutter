@@ -57,7 +57,7 @@ class LinearBorderEdge {
   /// If both `a` and `b` are null then null is returned. If `a` is null
   /// then we interpolate to `b` varying [size] from 0 to `b.size`. If `b`
   /// is null then we interpolate from `a` varying size from `a.size` to zero.
-  /// Otherwise both values are simply interpolated.
+  /// Otherwise both values are interpolated.
   static LinearBorderEdge? lerp(LinearBorderEdge? a, LinearBorderEdge? b, double t) {
     if (a == null && b == null) {
       return null;
@@ -88,7 +88,7 @@ class LinearBorderEdge {
 }
 
 /// An [OutlinedBorder] like [BoxBorder] that allows one to define a rectangular (box) border
-/// in terms of zero to four [LinearBorderEdges], each of which is rendered as a single line.
+/// in terms of zero to four [LinearBorderEdge]s, each of which is rendered as a single line.
 ///
 /// The color and width of each line are defined by [side]. When [LinearBorder] is used
 /// with a class whose border sides and shape are defined by a [ButtonStyle], then a non-null
