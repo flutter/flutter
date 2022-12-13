@@ -580,7 +580,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           child: ClipRect(
             child: _BottomSheetLayoutWithSizeListener(
               onChildSizeChanged: (Size size) {
-                widget.route.didChangeBarrierSemanticsClip(
+                widget.route._didChangeBarrierSemanticsClip(
                   _getNewClipDetails(size),
                 );
               },
@@ -800,8 +800,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   ///  * [barrierDismissible], which controls the behavior of the barrier when
   ///    tapped.
-  ///  * [ModalBarrier], the widget that optionally has an onTap action and uses
-  ///    this field as onTapHint.
+  ///  * [ModalBarrier], which uses this field as onTapHint when it has an onTap action.
   final String? barrierOnTapHint;
 
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
@@ -810,7 +809,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// the barrier for this [ModalBottomSheetRoute] should be clipped.
   ///
   /// returns true if the clipDetails did change and false otherwise.
-  bool didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
+  bool _didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
     if (_clipDetailsNotifier.value == newClipDetails) {
       return false;
     }
