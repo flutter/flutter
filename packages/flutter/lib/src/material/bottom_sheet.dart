@@ -789,6 +789,22 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Default is false.
   final bool useSafeArea;
 
+  /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
+  /// The semantic hint text that informs users what will happen if they
+  /// tap on the widget.annouced in the format of 'Double tap to ...'.
+  ///
+  /// If the field is null, the default hint will be used, which results in
+  /// announcement of 'Double tap to activate'.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that optionally has an onTap action and uses
+  ///    this field as onTapHint.
+  final String? barrierOnTapHint;
+
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
@@ -814,9 +830,6 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   final String? barrierLabel;
-
-  @override
-  final String? barrierOnTapHint;
 
   @override
   Color get barrierColor => modalBarrierColor ?? Colors.black54;

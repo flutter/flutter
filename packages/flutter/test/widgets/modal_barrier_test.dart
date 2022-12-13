@@ -448,16 +448,11 @@ void main() {
       final TestSemantics expectedSemantics = TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
+            id: 1,
             rect: TestSemantics.fullScreen,
-            actions: <SemanticsAction>[SemanticsAction.tap],
-            children: <TestSemantics>[
-              TestSemantics(
-                rect: TestSemantics.fullScreen,
-                actions: <SemanticsAction>[SemanticsAction.tap],
-                label: 'Dismiss',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+            label: 'Dismiss',
+            textDirection: TextDirection.ltr,
           ),
         ],
       );
@@ -872,15 +867,9 @@ void main() {
         children: <TestSemantics>[
           TestSemantics.rootChild(
             rect: TestSemantics.fullScreen,
-            actions: <SemanticsAction>[SemanticsAction.tap],
-            children: <TestSemantics>[
-              TestSemantics(
-                rect: TestSemantics.fullScreen,
-                actions: <SemanticsAction>[SemanticsAction.tap],
-                label: 'Dismiss',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+            label: 'Dismiss',
+            textDirection: TextDirection.ltr,
           ),
         ],
       );
@@ -906,18 +895,13 @@ void main() {
       final TestSemantics expectedSemantics = TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
-            rect: TestSemantics.fullScreen,
-            actions: <SemanticsAction>[SemanticsAction.tap],
-            children: <TestSemantics>[
-              TestSemantics(
-                rect: Rect.fromLTRB(fullScreen.left + 10, fullScreen.top + 20.0, fullScreen.right - 30, fullScreen.bottom - 40),
-                actions: <SemanticsAction>[SemanticsAction.tap],
-                label: 'Dismiss',
-                textDirection: TextDirection.ltr,
-              ),
-            ],
+            rect: Rect.fromLTRB(fullScreen.left + 10, fullScreen.top + 20.0, fullScreen.right - 30, fullScreen.bottom - 40),
+            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+            label: 'Dismiss',
+            textDirection: TextDirection.ltr,
           ),
         ],
+
       );
       expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 

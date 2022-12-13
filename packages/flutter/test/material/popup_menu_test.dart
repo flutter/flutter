@@ -1201,14 +1201,9 @@ void main() {
                 ],
               ),
               TestSemantics(
-                actions: <SemanticsAction>[SemanticsAction.tap],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Dismiss',
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,       
               ),
             ],
           ),
@@ -1294,14 +1289,9 @@ void main() {
                 ],
               ),
               TestSemantics(
-                actions: <SemanticsAction>[SemanticsAction.tap],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Dismiss',
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,       
               ),
             ],
           ),
@@ -1422,14 +1412,9 @@ void main() {
                 ],
               ),
               TestSemantics(
-                actions: <SemanticsAction>[SemanticsAction.tap],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Dismiss',
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,       
               ),
             ],
           ),

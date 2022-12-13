@@ -1378,21 +1378,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   String? get barrierLabel;
 
-  /// {@template flutter.widgets.ModalRoute.barrierOnTapHint}
-  /// The semantic hint text that informs users what will happen if they
-  /// tap on the widget.annouced in the format of 'Double tap to ...'.
-  ///
-  /// If the field is null, the default hint will be used, which results in
-  /// announcement of 'Double tap to activate'.
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///  * [barrierDismissible], which controls the behavior of the barrier when
-  ///    tapped.
-  ///  * [ModalBarrier], the widget that implements this feature.
-  String? get barrierOnTapHint => null;
-
   /// The curve that is used for animating the modal barrier in and out.
   ///
   /// The modal barrier is the scrim that is rendered behind each route, which
@@ -1706,10 +1691,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// color or accessibility focus size.
   ///
   /// See also:
-  /// * [ModalBarrier], which is the class that is typically used to render a barrier.
-  /// * [ModalBottomSheetRoute], which is a subclass of [ModalRoute]
-  /// that overrides this method to change the accessibility focus size of its
-  /// barrier.
+  /// * [ModalBarrier], which is typically used to build a barrier.
+  /// * [ModalBottomSheetRoute], which overrides this method to build a
+  ///   customized barrier.
   Widget buildModalBarrier() {
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates

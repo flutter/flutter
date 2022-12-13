@@ -234,7 +234,8 @@ class ModalBarrier extends StatelessWidget {
 
     Widget barrier = Semantics(
       onTapHint: semanticsOnTapHint,
-      onTap: handleDismiss,
+      onTap: semanticsDismissible ? handleDismiss : null,
+      onDismiss: semanticsDismissible ? handleDismiss : null,
       label: semanticsDismissible ? semanticsLabel : null,
       textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
       child: MouseRegion(
@@ -457,7 +458,8 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
     return RawGestureDetector(
       gestures: gestures,
       behavior: HitTestBehavior.opaque,
-      semantics: _ModalBarrierSemanticsDelegate(onDismiss: onDismiss),
+      //excludeFromSemantics: true,
+      //semantics: _ModalBarrierSemanticsDelegate(onDismiss: onDismiss),
       child: child,
     );
   }

@@ -1694,16 +1694,16 @@ void main() {
             rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
               TestSemantics(
-                id: 7,
+                id: 6,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 8,
+                    id: 7,
                     rect: TestSemantics.fullScreen,
                     flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 9,
+                        id: 8,
                         label: 'Hello World',
                         rect: TestSemantics.fullScreen,
                         textDirection: TextDirection.ltr,
@@ -1716,16 +1716,9 @@ void main() {
               TestSemantics(
                 id: 5,
                 rect: TestSemantics.fullScreen,
-                actions: <SemanticsAction>[SemanticsAction.tap],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 6,
-                    rect: TestSemantics.fullScreen,
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'test label',
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
+                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                label: 'test label',
+                textDirection: TextDirection.ltr,
               ),
             ],
           ),
