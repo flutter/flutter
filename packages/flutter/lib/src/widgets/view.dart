@@ -30,10 +30,7 @@ class View extends InheritedWidget {
   @override
   bool updateShouldNotify(View oldWidget) => view != oldWidget.view;
 
-  /// The [FlutterView] associated with the provided `context`.
-  ///
-  /// The [FlutterView] returned by this method is the one into which the
-  /// content defined by the provided [BuildContext] will render into.
+  /// Returns the [FlutterView] that the provided `context` will render into.
   ///
   /// Returns null if the `context` is not associated with a [FlutterView].
   ///
@@ -51,10 +48,7 @@ class View extends InheritedWidget {
     return LookupBoundary.dependOnInheritedWidgetOfExactType<View>(context)?.view;
   }
 
-  /// The [FlutterView] associated with the provided `context`.
-  ///
-  /// The [FlutterView] returned by this method is the one into which the
-  /// content defined by the provided [BuildContext] will render into.
+  /// Returns the [FlutterView] that the provided `context` will render into.
   ///
   /// Throws if the `context` is not associated with a [FlutterView].
   ///
