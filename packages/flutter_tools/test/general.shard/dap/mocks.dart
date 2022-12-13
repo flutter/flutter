@@ -101,8 +101,8 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     // Pretend to be the client, delegating any reverse-requests to the relevant
     // handler that is provided by the test.
     if (message is Event && message.event == 'flutter.forwardedRequest') {
-      final Map<String, Object?> body = (message.body as Map<String, Object?>?)!;
-      final String method = (body['method'] as String?)!;
+      final Map<String, Object?> body = message.body! as Map<String, Object?>;
+      final String method = body['method']! as String;
       final Map<String, Object?>? params = body['params'] as Map<String, Object?>?;
 
       final Object? result = _handleReverseRequest(method, params);
@@ -122,7 +122,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   Object? _handleReverseRequest(String method, Map<String, Object?>? params) {
     switch (method) {
       case 'app.exposeUrl':
-        final String url = (params!['url'] as String?)!;
+        final String url = params!['url']! as String;
         return exposeUrlHandler!(url);
       default:
         throw ArgumentError('Reverse-request $method is unknown');
