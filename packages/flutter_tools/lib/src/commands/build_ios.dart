@@ -284,7 +284,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
     final bool anyInvalid = messages.any((ValidationMessage message) => message.type != ValidationMessageType.information);
     return ValidationResult(
-      anyInvalid ? ValidationType.partial : ValidationType.installed,
+      anyInvalid ? ValidationType.partial : ValidationType.success,
       messages,
       statusInfo: title,
     );
