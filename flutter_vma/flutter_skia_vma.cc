@@ -259,16 +259,12 @@ VkResult FlutterSkiaVulkanMemoryAllocator::invalidateMemory(
   return vmaInvalidateAllocation(allocator_, allocation, offset, size);
 }
 
-uint64_t FlutterSkiaVulkanMemoryAllocator::totalUsedMemory() const {
+std::pair<uint64_t, uint64_t>
+FlutterSkiaVulkanMemoryAllocator::totalAllocatedAndUsedMemory() const {
   VmaTotalStatistics stats;
   vmaCalculateStatistics(allocator_, &stats);
-  return stats.total.statistics.allocationBytes;
-}
-
-uint64_t FlutterSkiaVulkanMemoryAllocator::totalAllocatedMemory() const {
-  VmaTotalStatistics stats;
-  vmaCalculateStatistics(allocator_, &stats);
-  return stats.total.statistics.blockBytes;
+  return {stats.total.statistics.blockBytes,
+          stats.total.statistics.allocationBytes};
 }
 
 }  // namespace flutter
