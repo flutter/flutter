@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection' show HashMap, SplayTreeMap;
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1090,6 +1091,89 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
+       ));
+
+  /// A sliver that places multiple box children, separated by box widgets, in a linear array along the main
+  /// axis.
+  ///
+  /// This constructor is appropriate for sliver lists with a large (or
+  /// infinite) number of children because the builder is called only for those
+  /// children that are actually visible.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  /// 
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  /// 
+  ///
+  /// The `separatorBuilder` is similar to `itemBuilder`, except it is the widget
+  /// that gets placed between itemBuilder(context, index) and itemBuilder(context, index + 1). 
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  /// {@tool snippet}
+  /// 
+  //  This example shows how to create [SliverList] whose [Container] items
+  /// are separated by [Divider]s.
+  ///
+  /// ```dart
+  /// SliverList.separated(
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Container(
+  ///       alignment: Alignment.center,
+  ///       color: Colors.lightBlue[100 * (index % 9)],
+  ///       child: Text('list item $index'),
+  ///     );
+  ///   },
+  ///   separatorBuilder: (BuildContext context, int index) => const Divider(),
+  /// )
+  /// ```
+  /// {@end-tool}
+  SliverList.separated({
+     super.key,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
+    required NullableIndexedWidgetBuilder separatorBuilder,
+    int? itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : assert(itemBuilder != null),
+       assert(separatorBuilder != null),
+       super(delegate: SliverChildBuilderDelegate(
+         (BuildContext context, int index) {
+           final int itemIndex = index ~/ 2;
+           final Widget? widget;
+           if (index.isEven) {
+             widget = itemBuilder(context, itemIndex);
+           } else {
+             widget = separatorBuilder(context, itemIndex);
+             assert(() {
+               if (widget == null) {
+                 throw FlutterError('separatorBuilder cannot return null.');
+               }
+               return true;
+             }());
+           }
+           return widget;
+         },
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount == null ? null : math.max(0, itemCount * 2 - 1),
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+         semanticIndexCallback: (Widget _, int index) {
+           return index.isEven ? index ~/ 2 : null;
+         },
        ));
 
   @override
