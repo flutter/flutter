@@ -1,4 +1,4 @@
-Signature: b4728e57adcfe2223a3018c836607217
+Signature: 734f452db823000268dff4a6e6d2e13e
 
 UNUSED LICENSES:
 
@@ -5316,6 +5316,8 @@ FILE: ../../../third_party/skia/docs/examples/Dst_Out.cpp
 FILE: ../../../third_party/skia/docs/examples/Dst_Over.cpp
 FILE: ../../../third_party/skia/docs/examples/Exclusion.cpp
 FILE: ../../../third_party/skia/docs/examples/Fake_Bold.cpp
+FILE: ../../../third_party/skia/docs/examples/FillPathWithPaint.cpp
+FILE: ../../../third_party/skia/docs/examples/FillPathWithPaint_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Font_breakText.cpp
 FILE: ../../../third_party/skia/docs/examples/HSVToColor.cpp
 FILE: ../../../third_party/skia/docs/examples/HSVToColor_2.cpp
@@ -5575,8 +5577,6 @@ FILE: ../../../third_party/skia/docs/examples/Paint_getAlpha.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColor.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColor4f.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getColorFilter.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_getFillPath.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_getFillPath_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFlags.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFontMetrics.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_getFontSpacing.cpp
@@ -7600,6 +7600,7 @@ FILE: ../../../third_party/skia/gm/crbug_1313579.cpp
 FILE: ../../../third_party/skia/include/core/SkAlphaType.h
 FILE: ../../../third_party/skia/include/core/SkCapabilities.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
+FILE: ../../../third_party/skia/include/core/SkPathUtils.h
 FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
 FILE: ../../../third_party/skia/include/gpu/graphite/CombinationBuilder.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h
@@ -7616,6 +7617,7 @@ FILE: ../../../third_party/skia/infra/bots/task_drivers/toolchain_layering_check
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode.cpp
 FILE: ../../../third_party/skia/src/core/SkCapabilities.cpp
 FILE: ../../../third_party/skia/src/core/SkDebugUtils.h
+FILE: ../../../third_party/skia/src/core/SkPathUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkRuntimeEffectDictionary.h
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.cpp
 FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
