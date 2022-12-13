@@ -891,13 +891,17 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockApplication = OCMClassMock([UIApplication class]);
   id mockWindowScene;
   id deviceMock;
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:self.mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
   if (@available(iOS 16.0, *)) {
     mockWindowScene = OCMClassMock([UIWindowScene class]);
-    OCMStub([mockWindowScene interfaceOrientation]).andReturn(currentOrientation);
-    if (!didChange) {
+    if (realVC.supportedInterfaceOrientations == mask) {
       OCMReject([mockWindowScene requestGeometryUpdateWithPreferences:[OCMArg any]
                                                          errorHandler:[OCMArg any]]);
     } else {
+      // iOS 16 will decide whether to rotate based on the new preference, so always set it
+      // when it changes.
       OCMExpect([mockWindowScene
           requestGeometryUpdateWithPreferences:[OCMArg checkWithBlock:^BOOL(
                                                            UIWindowSceneGeometryPreferencesIOS*
@@ -919,9 +923,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
     OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
   }
-  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:self.mockEngine
-                                                                        nibName:nil
-                                                                         bundle:nil];
 
   [realVC performOrientationUpdate:mask];
   if (@available(iOS 16.0, *)) {
