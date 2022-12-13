@@ -447,8 +447,6 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
     return RawGestureDetector(
       gestures: gestures,
       behavior: HitTestBehavior.opaque,
-      //excludeFromSemantics: true,
-      //semantics: _ModalBarrierSemanticsDelegate(onDismiss: onDismiss),
       child: child,
     );
   }
