@@ -585,17 +585,17 @@ void main() {
 
         switch (materialType) {
           case MaterialType.material2:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(124, 120)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(251, 130)));
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(154, 155)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(281, 165)));
             break;
           case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(108, 103)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(262, 117)));
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(292.0, 143.0)));
             break;
         }
-        expect(tester.getBottomRight(find.text(okString)).dx, 674);
-        expect(tester.getBottomLeft(find.text(okString)).dx, 646);
-        expect(tester.getBottomRight(find.text(cancelString)).dx, 612);
+        expect(tester.getBottomRight(find.text(okString)).dx, 644);
+        expect(tester.getBottomLeft(find.text(okString)).dx, 616);
+        expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
 
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
@@ -606,17 +606,17 @@ void main() {
 
         switch (materialType) {
           case MaterialType.material2:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(549, 120)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(676, 130)));
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(519, 155)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
             break;
           case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(538, 103)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(692, 117)));
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(508, 129)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 143)));
             break;
         }
-        expect(tester.getBottomLeft(find.text(okString)).dx, 126);
-        expect(tester.getBottomRight(find.text(okString)).dx, 154);
-        expect(tester.getBottomLeft(find.text(cancelString)).dx, 188);
+        expect(tester.getBottomLeft(find.text(okString)).dx, 156);
+        expect(tester.getBottomRight(find.text(okString)).dx, 184);
+        expect(tester.getBottomLeft(find.text(cancelString)).dx, 218);
 
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
