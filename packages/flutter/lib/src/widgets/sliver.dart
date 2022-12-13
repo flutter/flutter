@@ -1162,7 +1162,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// axis starting at offset zero and without gaps. Each child is forced to have
   /// the [itemExtent] in the main axis and the
   /// [SliverConstraints.crossAxisExtent] in the cross axis.
-  /// 
+  ///
   /// This constructor is appropriate for sliver lists with a large (or
   /// infinite) number of children whose extent is already determined.
   ///
