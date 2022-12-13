@@ -34,11 +34,13 @@ class View extends InheritedWidget {
   ///
   /// Returns null if the `context` is not associated with a [FlutterView].
   ///
-  /// The method creates a dependency on the context, which will be informed
-  /// when the identity of the [FlutterView] changes. However, the context will
-  /// not be informed when the property values exposed by the [FlutterView]
-  /// instance change. Consider using [MediaQuery.maybeOf] to query those
-  /// properties if the context must be informed when their values change.
+  /// The method creates a dependency on the `context`, which will be informed
+  /// when the identity of the [FlutterView] changes (i.e. the `context` is
+  /// moved to render into a different [FlutterView] then before). The context
+  /// will not be informed when the properties on the [FlutterView] itself
+  /// change their values. To access the property values of a [FlutterView] it
+  /// is best practise to use [MediaQuery.maybeOf] instead, which will ensure
+  /// that the `context` is informed when the view properties change.
   ///
   /// See also:
   ///
@@ -52,11 +54,13 @@ class View extends InheritedWidget {
   ///
   /// Throws if the `context` is not associated with a [FlutterView].
   ///
-  /// The method creates a dependency on the context, which will be informed
-  /// when the identity of the [FlutterView] changes. However, the context will
-  /// not be informed when the property values exposed by the [FlutterView]
-  /// instance change. Consider using [MediaQuery.of] to query those
-  /// properties if the context must be informed when their values change.
+  /// The method creates a dependency on the `context`, which will be informed
+  /// when the identity of the [FlutterView] changes (i.e. the `context` is
+  /// moved to render into a different [FlutterView] then before). The context
+  /// will not be informed when the properties on the [FlutterView] itself
+  /// change their values. To access the property values of a [FlutterView] it
+  /// is best practise to use [MediaQuery.of] instead, which will ensure that
+  /// the `context` is informed when the view properties change.
   ///
   /// See also:
   ///
