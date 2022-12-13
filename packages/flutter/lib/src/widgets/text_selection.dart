@@ -2492,10 +2492,44 @@ class TextSelectionGestureDetectorBuilder {
           break;
       }
     } else {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.drag,
-      );
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              renderEditable.selectPositionAt(
+                from: details.globalPosition,
+                cause: SelectionChangedCause.drag,
+              );
+              break;
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              // For Android, Fucshia, and iOS platforms, a touch drag
+              // does not initiate unless the editable has focus.
+              if (renderEditable.hasFocus) {
+                renderEditable.selectPositionAt(
+                  from: details.globalPosition,
+                  cause: SelectionChangedCause.drag,
+                );
+              }
+              break;
+            case null:
+              break;
+          }
+          break;
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.drag,
+          );
+          break;
+      }
     }
   }
 
