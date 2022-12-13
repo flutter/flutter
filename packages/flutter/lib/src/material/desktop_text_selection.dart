@@ -177,12 +177,11 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
       return const SizedBox.shrink();
     }
 
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
     final Offset midpointAnchor = Offset(
       clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
-        mediaQuery.padding.left,
-        mediaQuery.size.width - mediaQuery.padding.right,
+        mediaQueryPadding.left,
+        MediaQuery.sizeOf(context).width - mediaQueryPadding.right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );

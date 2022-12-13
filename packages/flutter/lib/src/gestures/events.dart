@@ -1788,8 +1788,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
        assert(kind != null),
        assert(device != null),
        assert(position != null),
-       assert(scrollDelta != null),
-       assert(!identical(kind, PointerDeviceKind.trackpad));
+       assert(scrollDelta != null);
 
   @override
   final Offset scrollDelta;

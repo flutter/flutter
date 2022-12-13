@@ -22,7 +22,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [ChangeNotifier] and [ValueNotifier].
 ///
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
-/// use [AnimatedWidget], simply subclass it and implement the build function.
+/// use [AnimatedWidget], subclass it and implement the build function.
 ///
 /// {@tool dartpad}
 /// This code defines a widget called `Spinner` that spins a green square
@@ -1003,7 +1003,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 /// [ListenableBuilder] is useful for more complex widgets that wish to listen
 /// to changes in other objects as part of a larger build function. To use
-/// [ListenableBuilder], simply construct the widget and pass it a [builder]
+/// [ListenableBuilder], construct the widget and pass it a [builder]
 /// function.
 ///
 /// Any subtype of [Listenable] (such as a [ChangeNotifier], [ValueNotifier], or
@@ -1100,7 +1100,7 @@ class ListenableBuilder extends AnimatedWidget {
 ///
 /// [AnimatedBuilder] is useful for more complex widgets that wish to include
 /// an animation as part of a larger build function. To use [AnimatedBuilder],
-/// simply construct the widget and pass it a builder function.
+/// construct the widget and pass it a builder function.
 ///
 /// For simple cases without additional state, consider using
 /// [AnimatedWidget].
