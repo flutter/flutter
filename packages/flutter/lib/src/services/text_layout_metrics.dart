@@ -54,6 +54,24 @@ abstract class TextLayoutMetrics {
     return true;
   }
 
+  /// Check if the given code unit is a line terminator character.
+  ///
+  /// Includes newline characters from ASCII
+  /// (https://www.unicode.org/standard/reports/tr13/tr13-5.html).
+  static bool isLineTerminator(int codeUnit) {
+    switch (codeUnit) {
+      case 0xA: // line feed
+      case 0xB: // vertical feed
+      case 0xC: // form feed
+      case 0xD: // carriage return
+      case 0x85: // new line
+        break;
+      default:
+        return false;
+    }
+    return true;
+  }
+
   /// {@template flutter.services.TextLayoutMetrics.getLineAtOffset}
   /// Return a [TextSelection] containing the line of the given [TextPosition].
   /// {@endtemplate}

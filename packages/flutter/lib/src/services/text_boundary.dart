@@ -163,7 +163,7 @@ class ParagraphBoundary extends TextBoundary {
 
     while(charIter.moveNext()) {
       graphemeEnd += charIter.current.length;
-      if (charIter.current == '\n') {
+      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(graphemeEnd - charIter.current.length))) {
         if (graphemeEnd - charIter.current.length == position.offset) {
           continue;
         }
