@@ -203,7 +203,7 @@ void main() {
     testUsingContext('suppresses pub progress output', () async {
       final UpdatePackagesCommand command = UpdatePackagesCommand();
       await createTestCommandRunner(command).run(<String>['update-packages']);
-      final int occurrencesCount = 'Running "flutter pub get" in affected'
+      final int occurrencesCount = 'Running "flutter pub get" in'
           .allMatches(testLogger.statusText)
           .length;
       expect(occurrencesCount, 1);
