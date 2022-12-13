@@ -370,8 +370,6 @@ targets:
     recipe: packaging_v2/packaging_v2
     timeout: 60
     bringup: true
-    enabled_branches:
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2601,8 +2599,6 @@ targets:
     recipe: packaging_v2/packaging_v2
     timeout: 60
     bringup: true
-    enabled_branches:
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2613,8 +2609,6 @@ targets:
     recipe: packaging_v2/packaging_v2
     timeout: 60
     bringup: true
-    enabled_branches:
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4726,8 +4720,6 @@ targets:
     recipe: packaging_v2/packaging_v2
     timeout: 60
     bringup: true
-    enabled_branches:
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
