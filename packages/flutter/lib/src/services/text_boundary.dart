@@ -4,7 +4,7 @@
 
 import 'dart:math';
 
-import 'package:characters/characters.dart';
+import 'package:characters/characters.dart' show CharacterRange;
 
 import 'text_layout_metrics.dart';
 
@@ -155,22 +155,23 @@ class ParagraphBoundary extends TextBoundary {
   // direction. The returning range includes the line terminator.
   @override
   TextRange getTextBoundaryAt(TextPosition position) {
-    final CharacterRange charIter = _text.characters.iterator;
+    final Iterator<int> codeUnitIter = _text.codeUnits.iterator;
     final int tappedTextOffset = position.offset;
 
     int graphemeStart = 0;
     int graphemeEnd = 0;
 
-    while(charIter.moveNext()) {
-      graphemeEnd += charIter.current.length;
-      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(graphemeEnd - charIter.current.length))) {
-        if (graphemeEnd - charIter.current.length == position.offset) {
+    while(codeUnitIter.moveNext()) {
+      final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
+      graphemeEnd += currentCodeUnit.length;
+      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(graphemeEnd - currentCodeUnit.length))) {
+        if (graphemeEnd - currentCodeUnit.length == position.offset) {
           continue;
         }
         if (graphemeEnd < tappedTextOffset) {
           // The target text position has not been passed yet but we arrived at a
           // line terminator.
-          graphemeStart = graphemeEnd - charIter.current.length;
+          graphemeStart = graphemeEnd - currentCodeUnit.length;
         } else if (graphemeEnd > tappedTextOffset) {
           // The target text position was passed. This means that the target position
           // is contained inside of a paragraph boundary.
