@@ -18,19 +18,25 @@ namespace scene {
 class Mesh final {
  public:
   struct Primitive {
-    std::shared_ptr<Geometry> geometry_;
-    std::shared_ptr<Material> material_;
+    std::shared_ptr<Geometry> geometry;
+    std::shared_ptr<Material> material;
   };
 
   Mesh();
   ~Mesh();
 
+  Mesh(Mesh&& mesh);
+  Mesh& operator=(Mesh&& mesh);
+
   void AddPrimitive(Primitive mesh_);
+  std::vector<Primitive>& GetPrimitives();
 
   bool Render(SceneEncoder& encoder, const Matrix& transform) const;
 
  private:
-  std::vector<Primitive> meshes_;
+  std::vector<Primitive> primitives_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(Mesh);
 };
 
 }  // namespace scene
