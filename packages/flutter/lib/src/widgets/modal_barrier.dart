@@ -407,17 +407,6 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   String get debugDescription => 'any tap';
 }
 
-class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
-  const _ModalBarrierSemanticsDelegate({this.onDismiss});
-
-  final VoidCallback? onDismiss;
-
-  @override
-  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
-    renderObject.onTap = onDismiss;
-  }
-}
-
 class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
   const _AnyTapGestureRecognizerFactory({this.onAnyTapUp});
 
