@@ -197,7 +197,7 @@ class ModalBarrier extends StatelessWidget {
   /// {@endtemplate}
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
 
-  /// {@macro flutter.widgets.ModalRoute.barrierOnTapHint}
+  /// {@macro flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
   final String? semanticsOnTapHint;
 
   @override
