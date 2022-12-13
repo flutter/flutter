@@ -146,15 +146,59 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor,
-        ThemeData().colorScheme.surfaceTint);
+    expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 1);
     expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
-  testWidgets('Navigation drawer is scrollable', (WidgetTester tester) async {
 
-  });
+  testWidgets('Navigation drawer is scrollable', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 500, windowHeight: 300);
+    await tester.pumpWidget(
+      _buildWidget(
+        scaffoldKey,
+        NavigationDrawer(
+          children: <Widget>[
+            for(int i = 0; i < 100; i++)
+              NavigationDrawerDestination(
+                icon: const Icon(Icons.ac_unit),
+                label: Text('Label$i'),
+              ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Label0'), findsOneWidget);
+    expect(find.text('Label1'), findsOneWidget);
+    expect(find.text('Label2'), findsOneWidget);
+    expect(find.text('Label3'), findsOneWidget);
+    expect(find.text('Label4'), findsOneWidget);
+    expect(find.text('Label5'), findsOneWidget);
+    expect(find.text('Label6'), findsNothing);
+    expect(find.text('Label7'), findsNothing);
+    expect(find.text('Label8'), findsNothing);
+
+    await tester.dragFrom(const Offset(0, 200), const Offset(0.0, -200));
+    await tester.pump();
+
+    expect(find.text('Label0'), findsNothing);
+    expect(find.text('Label1'), findsNothing);
+    expect(find.text('Label2'), findsNothing);
+    expect(find.text('Label3'), findsOneWidget);
+    expect(find.text('Label4'), findsOneWidget);
+    expect(find.text('Label5'), findsOneWidget);
+    expect(find.text('Label6'), findsOneWidget);
+    expect(find.text('Label7'), findsOneWidget);
+    expect(find.text('Label8'), findsOneWidget);
+    expect(find.text('Label9'), findsNothing);
+    expect(find.text('Label10'), findsNothing);
+   });
+
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
