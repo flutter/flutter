@@ -121,7 +121,7 @@ class AndroidRunOutputTest extends RunOutputTask {
     // Size information is only included in release builds.
     _findNextMatcherInList(
       stdout,
-      (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') && 
+      (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') &&
         (!release || line.contains('MB).')),
       'Built build/app/outputs/flutter-apk/$apk',
     );
