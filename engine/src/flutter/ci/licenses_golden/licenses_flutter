@@ -1020,6 +1020,7 @@ FILE: ../../../flutter/fml/platform/win/command_line_win.cc
 FILE: ../../../flutter/fml/platform/win/errors_win.cc
 FILE: ../../../flutter/fml/platform/win/errors_win.h
 FILE: ../../../flutter/fml/platform/win/file_win.cc
+FILE: ../../../flutter/fml/platform/win/file_win_unittests.cc
 FILE: ../../../flutter/fml/platform/win/mapping_win.cc
 FILE: ../../../flutter/fml/platform/win/message_loop_win.cc
 FILE: ../../../flutter/fml/platform/win/message_loop_win.h
