@@ -215,7 +215,6 @@ class _TimePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat(
       alwaysUse24HourFormat: _TimePickerModel.use24HourFormatOf(context),
     );
@@ -479,7 +478,7 @@ class _StringFragment extends StatelessWidget {
 
     return ExcludeSemantics(
       child: SizedBox(
-        width: 24,
+        width: timeOfDayFormat == TimeOfDayFormat.frenchCanadian ? 36 : 24,
         height: height,
         child: Text(
           _stringFragmentValue(timeOfDayFormat),
@@ -2234,13 +2233,13 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   static const Size _kTimePickerPortraitSize = Size(310, 468);
   static const Size _kTimePickerLandscapeSize = Size(524, 342);
   static const Size _kTimePickerLandscapeSizeM2 = Size(508, 300);
-  static const Size _kTimePickerInputSize = Size(276, 216);
+  static const Size _kTimePickerInputSize = Size(312, 216);
 
   // Absolute minimum dialog sizes, which is the point at which it begins
   // scrolling to fit everything in.
   static const Size _kTimePickerMinPortraitSize = Size(238, 326);
   static const Size _kTimePickerMinLandscapeSize = Size(416, 248);
-  static const Size _kTimePickerMinInputSize = Size(264, 196);
+  static const Size _kTimePickerMinInputSize = Size(312, 196);
 
   @override
   String? get restorationId => widget.restorationId;
@@ -2315,7 +2314,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     Navigator.pop(context, _selectedTime.value);
   }
 
-  Size _minDialogSize(BuildContext context) {
+  Size _minDialogSize(BuildContext context, {required bool useMaterial3}) {
     final Orientation orientation = _orientation.value ?? MediaQuery.orientationOf(context);
 
     switch (_entryMode.value) {
@@ -2329,11 +2328,27 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         }
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
-        return _kTimePickerMinInputSize;
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
+        final double timePickerWidth;
+        switch(timeOfDayFormat) {
+          case TimeOfDayFormat.HH_colon_mm:
+          case TimeOfDayFormat.HH_dot_mm:
+          case TimeOfDayFormat.frenchCanadian:
+          case TimeOfDayFormat.H_colon_mm:
+            final _TimePickerDefaults defaultTheme = useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
+            timePickerWidth = _kTimePickerMinInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
+            break;
+          case TimeOfDayFormat.a_space_h_colon_mm:
+          case TimeOfDayFormat.h_colon_mm_space_a:
+            timePickerWidth = _kTimePickerMinInputSize.width;
+            break;
+        }
+        return Size(timePickerWidth, _kTimePickerMinInputSize.height);
     }
   }
 
-  Size _dialogSize(BuildContext context, ThemeData theme) {
+  Size _dialogSize(BuildContext context, {required bool useMaterial3}) {
     final Orientation orientation = _orientation.value ?? MediaQuery.orientationOf(context);
     // Constrain the textScaleFactor to prevent layout issues. Since only some
     // parts of the time picker scale up with textScaleFactor, we cap the factor
@@ -2351,19 +2366,28 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
           case Orientation.landscape:
             timePickerSize = Size(
               _kTimePickerLandscapeSize.width * textScaleFactor,
-              theme.useMaterial3 ? _kTimePickerLandscapeSize.height : _kTimePickerLandscapeSizeM2.height
+              useMaterial3 ? _kTimePickerLandscapeSize.height : _kTimePickerLandscapeSizeM2.height
             );
             break;
         }
         break;
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
         final double timePickerWidth;
-        if (MediaQuery.alwaysUse24HourFormatOf(context)) {
-          final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
-          timePickerWidth = _kTimePickerInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
-        } else {
-          timePickerWidth = _kTimePickerInputSize.width;
+        switch(timeOfDayFormat) {
+          case TimeOfDayFormat.HH_colon_mm:
+          case TimeOfDayFormat.HH_dot_mm:
+          case TimeOfDayFormat.frenchCanadian:
+          case TimeOfDayFormat.H_colon_mm:
+            final _TimePickerDefaults defaultTheme = useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
+            timePickerWidth = _kTimePickerInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
+            break;
+          case TimeOfDayFormat.a_space_h_colon_mm:
+          case TimeOfDayFormat.h_colon_mm_space_a:
+            timePickerWidth = _kTimePickerInputSize.width;
+            break;
         }
         timePickerSize = Size(timePickerWidth, _kTimePickerInputSize.height);
         break;
@@ -2437,8 +2461,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         break;
     }
 
-    final Size dialogSize = _dialogSize(context, theme) + tapTargetSizeOffset;
-    final Size minDialogSize = _minDialogSize(context) + tapTargetSizeOffset;
+    final Size dialogSize = _dialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
+    final Size minDialogSize = _minDialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     return Dialog(
       shape: shape,
       elevation: pickerTheme.elevation ?? defaultTheme.elevation,
