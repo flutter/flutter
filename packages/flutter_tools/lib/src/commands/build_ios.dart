@@ -292,8 +292,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   ValidationMessage _createValidationMessage({
     required bool isValid,
-    required String message})
-  {
+    required String message,
+  }) {
     // Use "information" type for valid message, and "hint" type for invalid message.
     return isValid ? ValidationMessage(message) : ValidationMessage.hint(message);
   }
