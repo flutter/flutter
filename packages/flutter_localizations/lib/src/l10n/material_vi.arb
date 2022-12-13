@@ -129,5 +129,6 @@
   "keyboardKeySpace": "Phím cách",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Trình đơn của thanh trình đơn"
+  "menuBarMenuLabel": "Trình đơn của thanh trình đơn",
+  "currentDateLabel": "Date of today"
 }

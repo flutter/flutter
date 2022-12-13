@@ -11,6 +11,25 @@ import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
+TaskFunction createAndroidRunDebugTest() {
+  return AndroidRunOutputTest(release: false);
+}
+
+TaskFunction createAndroidRunReleaseTest() {
+  return AndroidRunOutputTest(release: true);
+}
+
+TaskFunction createMacOSRunDebugTest() {
+  return DesktopRunOutputTest(
+    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
+    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
+    '${flutterDirectory.path}/examples/hello_world',
+    'lib/main.dart',
+    release: false,
+    allowStderr: true,
+  );
+}
+
 TaskFunction createMacOSRunReleaseTest() {
   return DesktopRunOutputTest(
     // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
@@ -18,7 +37,109 @@ TaskFunction createMacOSRunReleaseTest() {
     '${flutterDirectory.path}/examples/hello_world',
     'lib/main.dart',
     release: true,
+    allowStderr: true,
   );
+}
+
+TaskFunction createWindowsRunDebugTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: false,
+  );
+}
+
+TaskFunction createWindowsRunReleaseTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: true,
+  );
+}
+
+class AndroidRunOutputTest extends RunOutputTask {
+  AndroidRunOutputTest({required super.release}) : super(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/main.dart',
+  );
+
+  @override
+  Future<void> prepare(String deviceId) async {
+    // Uninstall if the app is already installed on the device to get to a clean state.
+    final List<String> stderr = <String>[];
+    print('uninstalling...');
+    final Process uninstall = await startFlutter(
+      'install',
+      options:  <String>['--suppress-analytics', '--uninstall-only', '-d', deviceId],
+      isBot: false,
+    );
+    uninstall.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) {
+        print('uninstall:stdout: $line');
+      });
+    uninstall.stderr
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) {
+        print('uninstall:stderr: $line');
+        stderr.add(line);
+      });
+    if (await uninstall.exitCode != 0) {
+      throw 'flutter install --uninstall-only failed.';
+    }
+    if (stderr.isNotEmpty) {
+      throw 'flutter install --uninstall-only had output on standard error.';
+    }
+  }
+
+  @override
+  bool isExpectedStderr(String line) {
+    // TODO(egarciad): Remove once https://github.com/flutter/flutter/issues/95131 is fixed.
+    return line.contains('Mapping new ns');
+  }
+
+  @override
+  TaskResult verify(List<String> stdout, List<String> stderr) {
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line.startsWith('Launching lib/main.dart on ') && line.endsWith(' in release mode...'),
+      'Launching lib/main.dart on',
+    );
+
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line.startsWith("Running Gradle task 'assembleRelease'..."),
+      "Running Gradle task 'assembleRelease'...",
+    );
+
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line.contains('Built build/app/outputs/flutter-apk/app-release.apk (') && line.contains('MB).'),
+      'Built build/app/outputs/flutter-apk/app-release.apk',
+    );
+
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/app-release.apk...'),
+      'Installing build/app/outputs/flutter-apk/app-release.apk...',
+    );
+
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line.contains('Quit (terminate the application on the device).'),
+      'q Quit (terminate the application on the device)',
+    );
+
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line == 'Application finished.',
+      'Application finished.',
+    );
+
+    return TaskResult.success(null);
+  }
 }
 
 class DesktopRunOutputTest extends RunOutputTask {
@@ -26,16 +147,23 @@ class DesktopRunOutputTest extends RunOutputTask {
     super.testDirectory,
     super.testTarget, {
       required super.release,
+      this.allowStderr = false,
     }
   );
+
+  /// Whether `flutter run` is expected to produce output on stderr.
+  final bool allowStderr;
+
+  @override
+  bool isExpectedStderr(String line) => allowStderr;
 
   @override
   TaskResult verify(List<String> stdout, List<String> stderr) {
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Launching lib/main.dart on ') &&
+      (String line) => line.startsWith('Launching $testTarget on ') &&
         line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
-      'Launching lib/main.dart on',
+      'Launching $testTarget on',
     );
 
     _findNextMatcherInList(
@@ -63,6 +191,10 @@ abstract class RunOutputTask {
     }
   );
 
+  static final RegExp _engineLogRegex = RegExp(
+    r'\[(VERBOSE|INFO|WARNING|ERROR|FATAL):.+\(\d+\)\]',
+  );
+
   /// The directory where the app under test is defined.
   final String testDirectory;
   /// The main entry-point file of the application, as run on the device.
@@ -79,6 +211,8 @@ abstract class RunOutputTask {
       final Completer<void> ready = Completer<void>();
       final List<String> stdout = <String>[];
       final List<String> stderr = <String>[];
+
+      await prepare(deviceId);
 
       final List<String> options = <String>[
         testTarget,
@@ -107,6 +241,7 @@ abstract class RunOutputTask {
       run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
+        .skipWhile(isExpectedStderr)
         .listen((String line) {
           print('run:stderr: $line');
           stderr.add(line);
@@ -120,9 +255,26 @@ abstract class RunOutputTask {
 
       await run.exitCode;
 
+      if (stderr.isNotEmpty) {
+        throw 'flutter run ${release ? '--release' : ''} had unexpected output on standard error.';
+      }
+
+      final List<String> engineLogs = List<String>.from(
+        stdout.where(_engineLogRegex.hasMatch),
+      );
+      if (engineLogs.isNotEmpty) {
+        throw 'flutter run had unexpected Flutter engine logs $engineLogs';
+      }
+
       return verify(stdout, stderr);
     });
   }
+
+  /// Prepare the device for running the test app.
+  Future<void> prepare(String deviceId) => Future<void>.value();
+
+  /// Returns true if this stderr output line is expected.
+  bool isExpectedStderr(String line) => false;
 
   /// Verify the output of `flutter run`.
   TaskResult verify(List<String> stdout, List<String> stderr) => throw UnimplementedError('verify is not implemented');

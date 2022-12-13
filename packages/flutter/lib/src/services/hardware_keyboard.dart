@@ -115,10 +115,10 @@ abstract class KeyEvent with Diagnosticable {
   ///
   /// Also, even though physical keys are defined with USB HID codes, their
   /// values are not necessarily the same HID codes produced by the hardware and
-  /// presented to the driver, because on most platforms Flutter has to map the
-  /// platform representation back to an HID code since the original HID
-  /// code is not provided. USB HID is simply a conveniently well-defined
-  /// standard to list possible keys that a Flutter app can encounter.
+  /// presented to the driver. On most platforms, Flutter has to map the
+  /// platform representation back to a HID code because the original HID
+  /// code is not provided. USB HID was chosen because it is a well-defined
+  /// standard for referring to keys such as those a Flutter app may encounter.
   ///
   /// See also:
   ///

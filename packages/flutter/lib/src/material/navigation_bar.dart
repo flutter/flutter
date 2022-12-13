@@ -17,8 +17,8 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
-const double _kIndicatorHeight = 64;
-const double _kIndicatorWidth = 32;
+const double _kIndicatorHeight = 32;
+const double _kIndicatorWidth = 64;
 
 // Examples can assume:
 // late BuildContext context;
@@ -212,6 +212,7 @@ class NavigationBar extends StatelessWidget {
                     builder: (BuildContext context, Animation<double> animation) {
                       return _NavigationDestinationInfo(
                         index: i,
+                        selectedIndex: selectedIndex,
                         totalNumberOfDestinations: destinations.length,
                         selectedAnimation: animation,
                         labelBehavior: effectiveLabelBehavior,
@@ -435,10 +436,25 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
 
+    final bool selected = info.selectedIndex == info.index;
+    final double labelPadding;
+    switch (info.labelBehavior) {
+      case NavigationDestinationLabelBehavior.alwaysShow:
+        labelPadding = 10;
+        break;
+      case NavigationDestinationLabelBehavior.onlyShowSelected:
+        labelPadding = selected ? 10 : 0;
+        break;
+      case NavigationDestinationLabelBehavior.alwaysHide:
+        labelPadding = 0;
+        break;
+    }
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
         message: tooltip ?? label,
         child: _IndicatorInkWell(
+          key: UniqueKey(),
+          labelPadding: labelPadding,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
           onTap: info.onTap,
           child: Row(
@@ -459,24 +475,28 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
 class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
-    super.child,
-    super.onTap,
+    super.key,
+    required this.labelPadding,
     super.customBorder,
+    super.onTap,
+    super.child,
   }) : super(
     containedInkWell: true,
     highlightColor: Colors.transparent,
   );
 
+  final double labelPadding;
+
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
     final double indicatorOffsetX = referenceBox.size.width / 2;
-    const double indicatorOffsetY = 30.0;
+    final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
 
     return () {
       return Rect.fromCenter(
         center: Offset(indicatorOffsetX, indicatorOffsetY),
-        width: _kIndicatorHeight,
-        height: _kIndicatorWidth,
+        width: _kIndicatorWidth,
+        height: _kIndicatorHeight,
       );
     };
   }
@@ -492,6 +512,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// [child] and descendants.
   const _NavigationDestinationInfo({
     required this.index,
+    required this.selectedIndex,
     required this.totalNumberOfDestinations,
     required this.selectedAnimation,
     required this.labelBehavior,
@@ -528,6 +549,12 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// This is required for semantics, so that each destination can have a label
   /// "Tab 1 of 3", for example.
   final int index;
+
+  /// This is the index of the currently selected destination.
+  ///
+  /// This is required for `_IndicatorInkWell` to apply label padding to ripple animations
+  /// when label behavior is [NavigationDestinationLabelBehavior.onlyShowSelected].
+  final int selectedIndex;
 
   /// How many total destinations are are in this navigation bar.
   ///
@@ -593,8 +620,8 @@ class NavigationIndicator extends StatelessWidget {
     super.key,
     required this.animation,
     this.color,
-    this.width = _kIndicatorHeight,
-    this.height = _kIndicatorWidth,
+    this.width = _kIndicatorWidth,
+    this.height = _kIndicatorHeight,
     this.borderRadius = const BorderRadius.all(Radius.circular(16)),
     this.shape,
   });
@@ -994,7 +1021,7 @@ class _ClampTextScaleFactor extends StatelessWidget {
   Widget build(BuildContext context) {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        textScaleFactor: clampDouble(MediaQuery.of(context).textScaleFactor,
+        textScaleFactor: clampDouble(MediaQuery.textScaleFactorOf(context),
           0.0,
           upperLimit,
         ),

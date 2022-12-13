@@ -218,6 +218,14 @@ void main() {
     ]));
   });
 
+  testWithoutContext('lexer identifier names can be "select" or "plural"', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ select } { plural, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('select'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('plural'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser(
       'syntax',
@@ -242,9 +250,9 @@ void main() {
   testWithoutContext('lexer unmatched single quote', () {
     const String message = "here''s an unmatched single quote: '";
     const String expectedError = '''
-ICU Lexing Error: Unmatched single quotes.
-[app_en.arb:escaping] here''s an unmatched single quote: '
-                                                         ^''';
+[app_en.arb:escaping] ICU Lexing Error: Unmatched single quotes.
+    here''s an unmatched single quote: '
+                                       ^''';
     expect(
       () => Parser('escaping', 'app_en.arb', message, useEscaping: true).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
@@ -257,9 +265,9 @@ ICU Lexing Error: Unmatched single quotes.
   testWithoutContext('lexer unexpected character', () {
     const String message = '{ * }';
     const String expectedError = '''
-ICU Lexing Error: Unexpected character.
-[app_en.arb:lex] { * }
-                   ^''';
+[app_en.arb:lex] ICU Lexing Error: Unexpected character.
+    { * }
+      ^''';
     expect(
       () => Parser('lex', 'app_en.arb', message).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
@@ -460,11 +468,11 @@ ICU Lexing Error: Unexpected character.
   testWithoutContext('parser unexpected token', () {
     // unexpected token
     const String expectedError1 = '''
-ICU Syntax Error: Expected "}" but found "=".
-[app_en.arb:unexpectedToken] { placeholder =
-                                           ^''';
+[app_en.arb:unexpectedToken] ICU Syntax Error: Expected "}" but found "=".
+    { placeholder =
+                  ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -472,11 +480,11 @@ ICU Syntax Error: Expected "}" but found "=".
     )));
 
     const String expectedError2 = '''
-ICU Syntax Error: Expected "number" but found "}".
-[app_en.arb:unexpectedToken] { count, plural, = }
-                                                ^''';
+[app_en.arb:unexpectedToken] ICU Syntax Error: Expected "number" but found "}".
+    { count, plural, = }
+                       ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -484,11 +492,11 @@ ICU Syntax Error: Expected "number" but found "}".
     )));
 
     const String expectedError3 = '''
-ICU Syntax Error: Expected "identifier" but found ",".
-[app_en.arb:unexpectedToken] { , plural , = }
-                               ^''';
+[app_en.arb:unexpectedToken] ICU Syntax Error: Expected "identifier" but found ",".
+    { , plural , = }
+      ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',

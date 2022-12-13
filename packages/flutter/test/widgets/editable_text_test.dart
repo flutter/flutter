@@ -11701,6 +11701,163 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
+  testWidgets('Floating cursor affinity', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final FocusNode focusNode = FocusNode();
+    final GlobalKey key = GlobalKey();
+    // Set it up so that there will be word-wrap.
+    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 500,
+            ),
+            child: EditableText(
+              key: key,
+              autofocus: true,
+              maxLines: 2,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Select after the first word, with default affinity (downstream).
+    controller.selection = const TextSelection.collapsed(offset: 27);
+    await tester.pump();
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the end of the first line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 15, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    // Select after the first word, with upstream affinity.
+    controller.selection = const TextSelection.collapsed(offset: 27, affinity: TextAffinity.upstream);
+    await tester.pump();
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the beginning of the second line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(378.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    EditableText.debugDeterministicCursor = false;
+  });
+
+testWidgets('Floating cursor ending with selection', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final FocusNode focusNode = FocusNode();
+    final GlobalKey key = GlobalKey();
+    // Set it up so that there will be word-wrap.
+    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          autofocus: true,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the start of the line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(50, 0)));
+    await tester.pump();
+
+    // The floating cursor should be drawn somewhere in the middle of the line
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(50.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
+    await tester.pumpAndSettle(const Duration(milliseconds: 125)); // Floating cursor has an end animation.
+
+    // Selection should be updated based on the floating cursor location.
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 4);
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn near to the previous position.
+    // It's different because it's snapped to exactly between characters.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(56.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(-56, 0)));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the start of the line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    // Simulate UIKit setting the selection using keyboard selection.
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
+    await tester.pump();
+
+    // Selection should not be updated as the new position is within the selection range.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 4);
+
+    EditableText.debugDeterministicCursor = false;
+  });
+
+
   group('Selection changed scroll into view', () {
     final String text = List<int>.generate(64, (int index) => index).join('\n');
     final TextEditingController controller = TextEditingController(text: text);

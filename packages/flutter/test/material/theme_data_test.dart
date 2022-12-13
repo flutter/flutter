@@ -72,15 +72,15 @@ void main() {
   test('light, dark and fallback constructors support useMaterial3', () {
     final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
     expect(lightTheme.useMaterial3, true);
-    expect(lightTheme.typography, Typography.material2021());
+    expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     expect(darkTheme.useMaterial3, true);
-    expect(darkTheme.typography, Typography.material2021());
+    expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
     final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
     expect(fallbackTheme.useMaterial3, true);
-    expect(fallbackTheme.typography, Typography.material2021());
+    expect(fallbackTheme.typography, Typography.material2021(colorScheme: fallbackTheme.colorScheme));
   });
 
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
@@ -784,6 +784,7 @@ void main() {
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
       drawerTheme: const DrawerThemeData(),
+      dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(foregroundColor: Colors.green)),
@@ -904,6 +905,7 @@ void main() {
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       dividerTheme: const DividerThemeData(color: Colors.white),
       drawerTheme: const DrawerThemeData(),
+      dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       filledButtonTheme: const FilledButtonThemeData(),
@@ -1253,6 +1255,7 @@ void main() {
       'dialogTheme',
       'dividerTheme',
       'drawerTheme',
+      'dropdownMenuTheme',
       'elevatedButtonTheme',
       'expansionTileTheme',
       'filledButtonTheme',

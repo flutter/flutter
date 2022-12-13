@@ -1333,7 +1333,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
     final double scaledFontSize = textScaleFactor * fontSize;
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
@@ -1369,7 +1369,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   bool get _enabled => widget.items != null && widget.items!.isNotEmpty && widget.onChanged != null;
 
   Orientation _getOrientation(BuildContext context) {
-    Orientation? result = MediaQuery.maybeOf(context)?.orientation;
+    Orientation? result = MediaQuery.maybeOrientationOf(context);
     if (result == null) {
       // If there's no MediaQuery, then use the window aspect to determine
       // orientation.
@@ -1530,7 +1530,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 /// This is a convenience widget that wraps a [DropdownButton] widget in a
 /// [FormField].
 ///
-/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// A [Form] ancestor is not required. The [Form] allows one to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
