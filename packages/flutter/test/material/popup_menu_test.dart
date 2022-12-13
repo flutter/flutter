@@ -1203,7 +1203,7 @@ void main() {
               TestSemantics(
                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                   label: 'Dismiss',
-                  textDirection: TextDirection.ltr,       
+                  textDirection: TextDirection.ltr,
               ),
             ],
           ),
@@ -1291,7 +1291,7 @@ void main() {
               TestSemantics(
                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                   label: 'Dismiss',
-                  textDirection: TextDirection.ltr,       
+                  textDirection: TextDirection.ltr,
               ),
             ],
           ),
@@ -1414,7 +1414,7 @@ void main() {
               TestSemantics(
                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                   label: 'Dismiss',
-                  textDirection: TextDirection.ltr,       
+                  textDirection: TextDirection.ltr,
               ),
             ],
           ),
