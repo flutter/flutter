@@ -1007,7 +1007,7 @@ class DebuggingOptions {
       debuggingEnabled: (json['debuggingEnabled'] as bool?)!,
       startPaused: (json['startPaused'] as bool?)!,
       dartFlags: (json['dartFlags'] as String?)!,
-      dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
+      dartEntrypointArgs: (json['dartEntrypointArgs'] as List<dynamic>?)!.cast<String>(),
       disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
       enableDds: (json['enableDds'] as bool?)!,
       cacheStartupProfile: (json['cacheStartupProfile'] as bool?)!,
