@@ -3206,30 +3206,6 @@ targets:
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
 
-  - name: Mac_android run_debug_test_android
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    runIf:
-      - dev/**
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "mac"]
-      task_name: run_debug_test_android
-
-  - name: Mac_arm64_android run_debug_test_android
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    runIf:
-      - dev/**
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "mac", "arm64"]
-      task_name: run_debug_test_android
-
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3903,42 +3879,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac run_debug_test_macos
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: run_debug_test_macos
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Mac_arm64_ios run_debug_test_macos
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
-      task_name: run_debug_test_macos
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4251,29 +4193,9 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows run_debug_test_windows
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "windows"]
-      task_name: run_debug_test_windows
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Windows run_release_test_windows
-    recipe: devicelab/devicelab_drone
     bringup: true
-    presubmit: false
+    recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-

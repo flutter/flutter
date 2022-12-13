@@ -11,23 +11,8 @@ import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction createAndroidRunDebugTest() {
-  return AndroidRunOutputTest(release: false);
-}
-
 TaskFunction createAndroidRunReleaseTest() {
   return AndroidRunOutputTest(release: true);
-}
-
-TaskFunction createMacOSRunDebugTest() {
-  return DesktopRunOutputTest(
-    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
-    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
-    '${flutterDirectory.path}/examples/hello_world',
-    'lib/main.dart',
-    release: false,
-    allowStderr: true,
-  );
 }
 
 TaskFunction createMacOSRunReleaseTest() {
@@ -38,14 +23,6 @@ TaskFunction createMacOSRunReleaseTest() {
     'lib/main.dart',
     release: true,
     allowStderr: true,
-  );
-}
-
-TaskFunction createWindowsRunDebugTest() {
-  return DesktopRunOutputTest(
-    '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/empty.dart',
-    release: false,
   );
 }
 
@@ -191,10 +168,6 @@ abstract class RunOutputTask {
     }
   );
 
-  static final RegExp _engineLogRegex = RegExp(
-    r'\[(VERBOSE|INFO|WARNING|ERROR|FATAL):.+\(\d+\)\]',
-  );
-
   /// The directory where the app under test is defined.
   final String testDirectory;
   /// The main entry-point file of the application, as run on the device.
@@ -257,13 +230,6 @@ abstract class RunOutputTask {
 
       if (stderr.isNotEmpty) {
         throw 'flutter run ${release ? '--release' : ''} had unexpected output on standard error.';
-      }
-
-      final List<String> engineLogs = List<String>.from(
-        stdout.where(_engineLogRegex.hasMatch),
-      );
-      if (engineLogs.isNotEmpty) {
-        throw 'flutter run had unexpected Flutter engine logs $engineLogs';
       }
 
       return verify(stdout, stderr);
