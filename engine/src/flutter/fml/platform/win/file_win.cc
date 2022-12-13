@@ -85,11 +85,11 @@ static DWORD GetDesiredAccessFlags(FilePermission permission) {
 static DWORD GetShareFlags(FilePermission permission) {
   switch (permission) {
     case FilePermission::kRead:
-      return FILE_SHARE_READ;
+      return FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
     case FilePermission::kWrite:
-      return FILE_SHARE_WRITE;
+      return 0;
     case FilePermission::kReadWrite:
-      return FILE_SHARE_READ | FILE_SHARE_WRITE;
+      return 0;
   }
   return FILE_SHARE_READ;
 }

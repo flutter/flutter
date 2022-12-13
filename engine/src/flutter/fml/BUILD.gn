@@ -351,7 +351,10 @@ if (enable_unittests) {
     }
 
     if (is_win) {
-      sources += [ "platform/win/wstring_conversion_unittests.cc" ]
+      sources += [
+        "platform/win/file_win_unittests.cc",
+        "platform/win/wstring_conversion_unittests.cc",
+      ]
     }
 
     deps = [
