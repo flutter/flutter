@@ -1390,6 +1390,95 @@ void main() {
     });
   });
 
+  group('SliverAppBar.forceMaterialTransparency', () {
+    Material getSliverAppBarMaterial(WidgetTester tester) {
+      return tester.widget<Material>(find
+          .descendant(of: find.byType(SliverAppBar), matching: find.byType(Material))
+          .first);
+    }
+
+    // Generates a MaterialApp with a SliverAppBar in a CustomScrollView.
+    // The first cell of the scroll view contains a button at its top, and is
+    // initially scrolled so that it is beneath the SliverAppBar.
+    Widget buildWidget({
+      required bool forceMaterialTransparency,
+      required VoidCallback onPressed
+    }) {
+      const double appBarHeight = 120;
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            controller: ScrollController(initialScrollOffset:appBarHeight),
+            slivers: <Widget>[
+              SliverAppBar(
+                collapsedHeight: appBarHeight,
+                expandedHeight: appBarHeight,
+                pinned: true,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                forceMaterialTransparency: forceMaterialTransparency,
+                title: const Text('AppBar'),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  return SizedBox(
+                    height: appBarHeight,
+                    child: index == 0
+                      ? Align(
+                          alignment: Alignment.topCenter,
+                          child: TextButton(onPressed: onPressed, child: const Text('press')))
+                      : const SizedBox(),
+                  );
+                },
+                childCount: 20,
+              ),
+            ),
+          ]),
+        ),
+      );
+    }
+
+    testWidgets(
+        'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:true,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getSliverAppBarMaterial(tester);
+      expect(material.type, MaterialType.transparency);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(buttonWasPressed, isTrue);
+    });
+
+    testWidgets(
+        'forceMaterialTransparency == false does not allow gestures beneath the app bar', (WidgetTester tester) async {
+      // Set this, and tester.tap(warnIfMissed:false), to suppress
+      // errors/warning that the button is not hittable (which is expected).
+      WidgetController.hitTestWarningShouldBeFatal = false;
+
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:false,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getSliverAppBarMaterial(tester);
+      expect(material.type, MaterialType.canvas);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder, warnIfMissed:false);
+      await tester.pump();
+      expect(buttonWasPressed, isFalse);
+    });
+  });
+
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
@@ -3784,11 +3873,11 @@ void main() {
             title: const Text('AppBar'),
           ),
           body: Align(
-              alignment: Alignment.topCenter,
-              child: TextButton(
-                onPressed: onPressed,
-                child: const Text('press me'),
-             ),
+            alignment: Alignment.topCenter,
+            child: TextButton(
+              onPressed: onPressed,
+              child: const Text('press me'),
+            ),
           ),
         ),
       );
