@@ -94,6 +94,7 @@ class NavigationRail extends StatefulWidget {
     super.key,
     this.backgroundColor,
     this.extended = false,
+    this.collapsed = false,
     this.leading,
     this.trailing,
     required this.destinations,
@@ -117,7 +118,8 @@ class NavigationRail extends StatefulWidget {
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
         assert(extended != null),
-        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none)),
+        assert(!(extended && collapsed));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -140,6 +142,8 @@ class NavigationRail extends StatefulWidget {
   ///
   /// The default value is false.
   final bool extended;
+
+  final bool collapsed;
 
   /// The leading widget in the rail that is placed above the destinations.
   ///
@@ -335,7 +339,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   late List<AnimationController> _destinationControllers;
   late List<Animation<double>> _destinationAnimations;
   late AnimationController _extendedController;
+  late AnimationController _collapsedController;
   late Animation<double> _extendedAnimation;
+  late CurvedAnimation _collapsedAnimation;
 
   @override
   void initState() {
@@ -358,6 +364,14 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
         _extendedController.forward();
       } else {
         _extendedController.reverse();
+      }
+    }
+
+    if(widget.collapsed != oldWidget.collapsed) {
+      if(widget.collapsed) {
+        _collapsedController.reverse();
+      } else {
+        _collapsedController.forward();
       }
     }
 
@@ -409,15 +423,44 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
-      child: Semantics(
-        explicitChildNodes: true,
-        child: Material(
-          elevation: elevation,
-          color: backgroundColor,
-          child: SafeArea(
-            right: isRTLDirection,
-            left: !isRTLDirection,
-            child: Column(
+      child: _PartitionTransition(
+        animation: CurvedAnimation(
+          parent: _collapsedAnimation,
+          curve: const Interval(
+            0,
+            4 / 5,
+            curve: Curves.easeInOutCubicEmphasized,
+          ),
+          reverseCurve: Interval(
+            1 / 5,
+            1,
+            curve: Curves.easeInOutCubicEmphasized.flipped,
+          ),
+        ),
+        backgroundColor: widget.backgroundColor ?? const Color(0x00000000),
+        child: _SweepTransition(
+          animation: CurvedAnimation(
+            parent: _collapsedAnimation,
+            curve: const Interval(
+              1 / 5,
+              1,
+              curve: Curves.easeInOutCubicEmphasized,
+            ),
+            reverseCurve: Interval(
+              4 / 5,
+              1,
+              curve: Curves.easeInOutCubicEmphasized.flipped,
+            ),
+          ),
+          child: Semantics(
+          explicitChildNodes: true,
+          child: Material(
+            elevation: elevation,
+            color: backgroundColor,
+            child: SafeArea(
+              right: isRTLDirection,
+              left: !isRTLDirection,
+              child: Column(
               children: <Widget>[
                 _verticalSpacer,
                 if (widget.leading != null)
@@ -425,48 +468,58 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                     widget.leading!,
                     _verticalSpacer,
                   ],
-                Expanded(
-                  child: Align(
-                    alignment: Alignment(0, groupAlignment),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        for (int i = 0; i < widget.destinations.length; i += 1)
-                          _RailDestination(
-                            minWidth: minWidth,
-                            minExtendedWidth: minExtendedWidth,
-                            extendedTransitionAnimation: _extendedAnimation,
-                            selected: widget.selectedIndex == i,
-                            icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
-                            label: widget.destinations[i].label,
-                            destinationAnimation: _destinationAnimations[i],
-                            labelType: labelType,
-                            iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
-                            labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
-                            padding: widget.destinations[i].padding,
-                            useIndicator: useIndicator,
-                            indicatorColor: useIndicator ? indicatorColor : null,
-                            indicatorShape: useIndicator ? indicatorShape : null,
-                            onTap: () {
-                              if (widget.onDestinationSelected != null) {
-                                widget.onDestinationSelected!(i);
-                              }
-                            },
-                            indexLabel: localizations.tabLabel(
-                              tabIndex: i + 1,
-                              tabCount: widget.destinations.length,
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment(0, groupAlignment),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          for (int i = 0; i < widget.destinations.length; i += 1)
+                            _RailDestination(
+                              minWidth: minWidth,
+                              minExtendedWidth: minExtendedWidth,
+                              extendedTransitionAnimation: _extendedAnimation,
+                              collapsedTransitionAnimation: CurvedAnimation(
+                                parent: _collapsedAnimation,
+                                curve: Interval(
+                                  lerpDouble(4 / 5, 1 / 5, 1 - i / widget.destinations.length)!,
+                                  1,
+                                  curve: Curves.easeInOutCubicEmphasized
+                                ),
+                              ),
+                              selected: widget.selectedIndex == i,
+                              icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
+                              label: widget.destinations[i].label,
+                              destinationAnimation: _destinationAnimations[i],
+                              labelType: labelType,
+                              iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
+                              labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+                              padding: widget.destinations[i].padding,
+                              useIndicator: useIndicator,
+                              indicatorColor: useIndicator ? indicatorColor : null,
+                              indicatorShape: useIndicator ? indicatorShape : null,
+                              onTap: () {
+                                if (widget.onDestinationSelected != null) {
+                                  widget.onDestinationSelected!(i);
+                                }
+                              },
+                              indexLabel: localizations.tabLabel(
+                                tabIndex: i + 1,
+                                tabCount: widget.destinations.length,
+                              ),
                             ),
-                          ),
-                        if (widget.trailing != null)
-                          widget.trailing!,
-                      ],
+                          if (widget.trailing != null)
+                            widget.trailing!,
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
+        )
       ),
     );
   }
@@ -476,6 +529,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       controller.dispose();
     }
     _extendedController.dispose();
+    _collapsedController.dispose();
   }
 
   void _initControllers() {
@@ -501,6 +555,18 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _extendedController.addListener(() {
       _rebuild();
     });
+    _collapsedController = AnimationController(
+      duration: kThemeAnimationDuration,
+      vsync: this,
+      value: widget.collapsed ? 1.0 : 0.0,
+    );
+    _collapsedAnimation = CurvedAnimation(
+      parent: _collapsedController,
+      curve: Curves.easeInOut,
+    );
+    _collapsedController.addListener(() {
+      _rebuild();
+    });
   }
 
   void _resetState() {
@@ -524,6 +590,7 @@ class _RailDestination extends StatelessWidget {
     required this.label,
     required this.destinationAnimation,
     required this.extendedTransitionAnimation,
+    required this.collapsedTransitionAnimation,
     required this.labelType,
     required this.selected,
     required this.iconTheme,
@@ -569,6 +636,7 @@ class _RailDestination extends StatelessWidget {
   final Color? indicatorColor;
   final ShapeBorder? indicatorShape;
 
+  final Animation<double> collapsedTransitionAnimation;
   final Animation<double> _positionAnimation;
 
   @override
@@ -747,29 +815,32 @@ class _RailDestination extends StatelessWidget {
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
-    return Semantics(
-      container: true,
-      selected: selected,
-      child: Stack(
-        children: <Widget>[
-          Material(
-            type: MaterialType.transparency,
-            child: _IndicatorInkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
-              customBorder: indicatorShape,
-              splashColor: colors.primary.withOpacity(0.12),
-              hoverColor: colors.primary.withOpacity(0.04),
-              useMaterial3: material3,
-              indicatorOffsetY: indicatorInkOffsetY,
-              child: content,
+    return _SweepTransition(
+      animation: collapsedTransitionAnimation,
+      child: Semantics(
+        container: true,
+        selected: selected,
+        child: Stack(
+          children: <Widget>[
+            Material(
+              type: MaterialType.transparency,
+              child: _IndicatorInkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
+                customBorder: indicatorShape,
+                splashColor: colors.primary.withOpacity(0.12),
+                hoverColor: colors.primary.withOpacity(0.04),
+                useMaterial3: material3,
+                indicatorOffsetY: indicatorInkOffsetY,
+                child: content,
+              ),
             ),
-          ),
-          Semantics(
-            label: indexLabel,
-          ),
-        ],
-      ),
+            Semantics(
+              label: indexLabel,
+            ),
+          ],
+        ),
+      )
     );
   }
 }
@@ -955,6 +1026,83 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
+}
+
+class _PartitionTransition extends StatefulWidget {
+  const _PartitionTransition({
+    required this.animation,
+    required this.backgroundColor,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final Widget child;
+  final Color backgroundColor;
+
+  @override
+  State<_PartitionTransition> createState() => _PartitionTransitionState();
+}
+
+class _PartitionTransitionState extends State<_PartitionTransition> {
+  late Animation<double> widthAnimation;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    widthAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(widget.animation);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: widget.backgroundColor
+        ),
+        child: Align(
+          alignment: Alignment.topLeft,
+          widthFactor: widthAnimation.value,
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
+class _SweepTransition extends StatefulWidget {
+  const _SweepTransition({
+    required this.animation,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  State<_SweepTransition> createState() => _SweepTransitionState();
+}
+
+class _SweepTransitionState extends State<_SweepTransition> {
+  late final bool ltr =  Directionality.of(context) == TextDirection.ltr;
+
+  late final Animation<Offset> offsetAnimation = Tween<Offset>(
+    begin: ltr ? const Offset(-1, 0) : const Offset(1, 0),
+    end: Offset.zero,
+  ).animate(widget.animation);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: FractionalTranslation(
+        translation: offsetAnimation.value,
+        child: widget.child,
+      ),
+    );
+  }
 }
 
 // There don't appear to be tokens for these values, but they are
