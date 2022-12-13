@@ -49,7 +49,7 @@ SceneContext::SceneContext(std::shared_ptr<Context> context)
   {
     impeller::TextureDescriptor texture_descriptor;
     texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-    texture_descriptor.format = PixelFormat::kDefaultColor;
+    texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
     texture_descriptor.size = {1, 1};
     texture_descriptor.mip_count = 1u;
 

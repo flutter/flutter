@@ -28,7 +28,7 @@ class Geometry {
   static std::shared_ptr<VertexBufferGeometry> MakeVertexBuffer(
       VertexBuffer vertex_buffer);
 
-  static std::shared_ptr<VertexBufferGeometry> MakeFromFBMeshPrimitive(
+  static std::shared_ptr<VertexBufferGeometry> MakeFromFlatbuffer(
       const fb::MeshPrimitive& mesh,
       Allocator& allocator);
 

@@ -17,23 +17,27 @@ Mesh::Mesh() = default;
 Mesh::~Mesh() = default;
 
 void Mesh::AddPrimitive(Primitive mesh) {
-  if (mesh.geometry_ == nullptr) {
+  if (mesh.geometry == nullptr) {
     VALIDATION_LOG << "Mesh geometry cannot be null.";
   }
-  if (mesh.material_ == nullptr) {
+  if (mesh.material == nullptr) {
     VALIDATION_LOG << "Mesh material cannot be null.";
   }
 
-  meshes_.push_back(std::move(mesh));
+  primitives_.push_back(std::move(mesh));
+}
+
+std::vector<Mesh::Primitive>& Mesh::GetPrimitives() {
+  return primitives_;
 }
 
 bool Mesh::Render(SceneEncoder& encoder, const Matrix& transform) const {
-  for (const auto& mesh : meshes_) {
+  for (const auto& mesh : primitives_) {
     SceneCommand command = {
         .label = "Mesh Primitive",
         .transform = transform,
-        .geometry = mesh.geometry_.get(),
-        .material = mesh.material_.get(),
+        .geometry = mesh.geometry.get(),
+        .material = mesh.material.get(),
     };
     encoder.Add(command);
   }

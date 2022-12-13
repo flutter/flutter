@@ -18,6 +18,8 @@ namespace scene {
 /// Material
 ///
 
+Material::~Material() = default;
+
 std::unique_ptr<UnlitMaterial> Material::MakeUnlit() {
   return std::make_unique<UnlitMaterial>();
 }
@@ -46,6 +48,8 @@ SceneContextOptions Material::GetContextOptions(const RenderPass& pass) const {
 //------------------------------------------------------------------------------
 /// UnlitMaterial
 ///
+
+UnlitMaterial::~UnlitMaterial() = default;
 
 void UnlitMaterial::SetColor(Color color) {
   color_ = color;
@@ -93,6 +97,8 @@ void UnlitMaterial::BindToCommand(const SceneContext& scene_context,
 //------------------------------------------------------------------------------
 /// StandardMaterial
 ///
+
+StandardMaterial::~StandardMaterial() = default;
 
 void StandardMaterial::SetAlbedo(Color albedo) {
   albedo_ = albedo;
