@@ -1035,7 +1035,46 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
   });
 
-  /// Creates a sliver list from an item builder.
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// This constructor is appropriate for sliver lists with a large (or
+  /// infinite) number of children because the builder is called only for those
+  /// children that are actually visible.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  /// /// {@tool snippet}
+  ///
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverList.builder(
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Container(
+  ///       alignment: Alignment.center,
+  ///       color: Colors.lightBlue[100 * (index % 9)],
+  ///       child: Text('list item $index'),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  /// {@end-tool}
   SliverList.builder({
     super.key,
     required NullableIndexedWidgetBuilder itemBuilder,
@@ -1115,6 +1154,71 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.itemExtent,
   });
+
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// [SliverFixedExtentList] places its children in a linear array along the main
+  /// axis starting at offset zero and without gaps. Each child is forced to have
+  /// the [itemExtent] in the main axis and the
+  /// [SliverConstraints.crossAxisExtent] in the cross axis.
+  /// 
+  /// This constructor is appropriate for sliver lists with a large (or
+  /// infinite) number of children whose extent is already determined.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// The `itemExtent` argument is the extent of each item.
+  ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  /// {@tool snippet}
+  ///
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverFixedExtentList(
+  ///   itemExtent: 50.0,
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Container(
+  ///       alignment: Alignment.center,
+  ///       color: Colors.lightBlue[100 * (index % 9)],
+  ///       child: Text('list item $index'),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  /// {@end-tool}
+  SliverFixedExtentList.builder({
+    super.key,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    required this.itemExtent,
+    ChildIndexGetter? findChildIndexCallback,
+    int? itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(delegate: SliverChildBuilderDelegate(
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       ));
 
   /// The extent the children are forced to have in the main axis.
   final double itemExtent;

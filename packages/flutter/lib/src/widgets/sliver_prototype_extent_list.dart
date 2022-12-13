@@ -40,6 +40,71 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     required this.prototypeItem,
   }) : assert(prototypeItem != null);
 
+  /// A sliver that places its box children in a linear array and constrains them
+  /// to have the same extent as a prototype item along the main axis.
+  /// 
+  /// This constructor is appropriate for sliver lists with a large (or
+  /// infinite) number of children whose extent is already determined.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// The `prototypeItem` argument is used to determine the extent of each item.
+  ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  /// {@tool snippet}
+  ///
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverFixedExtentList(
+  ///   prototypeItem: Container(
+  ///     alignment: Alignment.center,
+  ///     child: Text('list item $index'),
+  ///   ),
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Container(
+  ///       alignment: Alignment.center,
+  ///       color: Colors.lightBlue[100 * (index % 9)],
+  ///       child: Text('list item $index'),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  /// {@end-tool}
+  SliverPrototypeExtentList.builder({
+    super.key,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    required this.prototypeItem,
+    ChildIndexGetter? findChildIndexCallback,
+    int? itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(
+         delegate: SliverChildBuilderDelegate(
+           itemBuilder,
+           findChildIndexCallback: findChildIndexCallback,
+           childCount: itemCount,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+         ),
+       );
+
   /// Defines the main axis extent of all of this sliver's children.
   ///
   /// The [prototypeItem] is laid out before the rest of the sliver's children
