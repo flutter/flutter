@@ -111,22 +111,28 @@ class GenerateFallbackFontDataCommand extends Command<bool>
     sb.writeln('// dev/generate_fallback_font_data.dart');
     sb.writeln("import 'noto_font.dart';");
     sb.writeln();
-    sb.writeln('final List<NotoFont> fallbackFonts = <NotoFont>[');
+    sb.writeln('const List<NotoFont> fallbackFonts = <NotoFont>[');
     for (final String family in fallbackFonts) {
-      sb.write("  NotoFont.fromFlatRanges('$family', '${urlForFamily[family]!}', "
-          '<int>[');
+      sb.write("  NotoFont('$family', '${urlForFamily[family]!}', ");
+      final List<String> starts = <String>[];
+      final List<String> ends = <String>[];
       for (final String range in charsetForFamily[family]!.split(' ')) {
-        String? start;
-        String? end;
         final List<String> parts = range.split('-');
         if (parts.length == 1) {
-          start = parts[0];
-          end = parts[0];
+          starts.add(parts[0]);
+          ends.add(parts[0]);
         } else {
-          start = parts[0];
-          end = parts[1];
+          starts.add(parts[0]);
+          ends.add(parts[1]);
         }
-        sb.write('0x$start,0x$end,');
+      }
+      sb.write('<int>[');
+      for (final String start in starts) {
+        sb.write('0x$start,');
+      }
+      sb.write('], <int>[');
+      for (final String end in ends) {
+        sb.write('0x$end,');
       }
       sb.writeln(']),');
     }
