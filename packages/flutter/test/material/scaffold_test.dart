@@ -2621,6 +2621,59 @@ void main() {
       matchesSemantics(label: 'BottomSheet', hasDismissAction: false),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/117004
+  testWidgets('bottomSheet is not built after being closed', (WidgetTester tester) async {
+    final Key bottomSheetKey = UniqueKey();
+    late StateSetter stateSetter;
+    bool showBottomSheet = true;
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return Scaffold(
+            bottomSheet: showBottomSheet
+                ? Container(
+                  key: bottomSheetKey,
+                  height: 44,
+                  color: Colors.blue,
+                  child: const Text('BottomSheet'),
+                )
+                : null,
+          );
+        },
+      ),
+    ));
+
+    expect(find.byKey(bottomSheetKey), findsOneWidget);
+    expect(find.byType(StatefulBuilder), findsNWidgets(2));
+
+    // Start removing the bottom sheet.
+    stateSetter(() {
+      showBottomSheet = false;
+    });
+    await tester.pump();
+
+    // For now the bottom sheet still exists, because it animates out.
+    expect(find.byKey(bottomSheetKey), findsOneWidget);
+    expect(find.byType(StatefulBuilder), findsNWidgets(2));
+
+    // Cause the bottom sheet to rebuild.
+    final StatefulBuilder statefulBuilder = tester.widget(find.byType(StatefulBuilder).last);
+    final GlobalKey<State<StatefulWidget>> statefulBuilderKey = statefulBuilder.key! as GlobalKey<State<StatefulWidget>>;
+    statefulBuilderKey.currentState!.setState(() {}); // ignore: invalid_use_of_protected_member
+    await tester.pump();
+
+    // The rebuild does not cause an error.
+    expect(tester.takeException(), isNull);
+
+    // Allowing bottom sheet to finish its exit animation results in its being
+    // removed from the widget tree.
+    await tester.pumpAndSettle();
+    expect(find.byKey(bottomSheetKey), findsNothing);
+    expect(find.byType(StatefulBuilder), findsOneWidget);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
