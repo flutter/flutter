@@ -297,7 +297,8 @@ String generateString(String value) {
 
 /// Given a list of strings, placeholders, or helper function calls, concatenate
 /// them into one expression to be returned.
-/// If isSingleStringVar is passed, then we want to convert "'$expr'" to simply "expr".
+///
+/// If `isSingleStringVar` is passed, then we want to convert "'$expr'" to "expr".
 String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
   if (expressions.isEmpty) {
     return "''";

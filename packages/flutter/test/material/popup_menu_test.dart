@@ -2455,7 +2455,7 @@ void main() {
                       value: 1,
                       child: Builder(
                         builder: (BuildContext context) {
-                          mediaQueryPadding = MediaQuery.of(context).padding;
+                          mediaQueryPadding = MediaQuery.paddingOf(context);
                           return Text('-1-' * 500); // A long long text string.
                         },
                       ),
