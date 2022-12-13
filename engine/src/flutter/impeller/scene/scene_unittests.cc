@@ -47,7 +47,7 @@ TEST_P(SceneTest, CuboidUnlit) {
 
       Node& root = scene.GetRoot();
       root.SetLocalTransform(Matrix::MakeTranslation(-size / 2));
-      root.SetMesh(mesh);
+      root.SetMesh(std::move(mesh));
     }
 
     // Face towards the +Z direction (+X right, +Y up).
@@ -70,34 +70,26 @@ TEST_P(SceneTest, GLTFScene) {
 
   auto mapping =
       flutter::testing::OpenFixtureAsMapping("flutter_logo.glb.ipscene");
+  ASSERT_NE(mapping, nullptr);
 
-  flatbuffers::Verifier verifier(mapping->GetMapping(), mapping->GetSize());
-  ASSERT_TRUE(fb::VerifySceneBuffer(verifier));
-
-  // TODO(bdero): Add full scene deserialization utilities.
-  const auto* fb_scene = fb::GetScene(mapping->GetMapping());
-  const auto fb_nodes = fb_scene->children();
-  ASSERT_EQ(fb_nodes->size(), 1u);
-  const auto fb_meshes = fb_nodes->begin()->mesh_primitives();
-  ASSERT_EQ(fb_meshes->size(), 1u);
-  const auto* fb_mesh = fb_meshes->Get(0);
-  auto geometry = Geometry::MakeFromFBMeshPrimitive(*fb_mesh, *allocator);
-  ASSERT_NE(geometry, nullptr);
+  std::optional<Node> gltf_scene =
+      Node::MakeFromFlatbuffer(*mapping, *allocator);
+  ASSERT_TRUE(gltf_scene.has_value());
 
   std::shared_ptr<UnlitMaterial> material = Material::MakeUnlit();
-  auto bridge = CreateTextureForFixture("flutter_logo_baked.png");
-  material->SetColorTexture(bridge);
+  auto color_baked = CreateTextureForFixture("flutter_logo_baked.png");
+  material->SetColorTexture(color_baked);
   material->SetVertexColorWeight(0);
 
+  ASSERT_EQ(gltf_scene->GetChildren().size(), 1u);
+  ASSERT_EQ(gltf_scene->GetChildren()[0].GetMesh().GetPrimitives().size(), 1u);
+  gltf_scene->GetChildren()[0].GetMesh().GetPrimitives()[0].material = material;
+
+  auto scene = Scene(GetContext());
+  scene.GetRoot().AddChild(std::move(gltf_scene.value()));
+  scene.GetRoot().SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
+
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
-    auto scene = Scene(GetContext());
-
-    Mesh mesh;
-    mesh.AddPrimitive({geometry, material});
-
-    scene.GetRoot().SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
-    scene.GetRoot().SetMesh(mesh);
-
     Quaternion rotation({0, 1, 0}, -GetSecondsElapsed() * 0.5);
     Vector3 start_position(-1, -1.5, -5);
 

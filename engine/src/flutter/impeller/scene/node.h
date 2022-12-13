@@ -20,8 +20,16 @@ namespace scene {
 
 class Node final {
  public:
+  static std::optional<Node> MakeFromFlatbuffer(fml::Mapping& mapping,
+                                                Allocator& allocator);
+  static Node MakeFromFlatbuffer(const fb::Scene& scene, Allocator& allocator);
+  static Node MakeFromFlatbuffer(const fb::Node& node, Allocator& allocator);
+
   Node();
   ~Node();
+
+  Node(Node&& node);
+  Node& operator=(Node&& node);
 
   void SetLocalTransform(Matrix transform);
   Matrix GetLocalTransform() const;
@@ -29,9 +37,11 @@ class Node final {
   void SetGlobalTransform(Matrix transform);
   Matrix GetGlobalTransform() const;
 
-  void AddChild(Node child);
+  bool AddChild(Node child);
+  std::vector<Node>& GetChildren();
 
-  void SetMesh(const Mesh& mesh);
+  void SetMesh(Mesh mesh);
+  Mesh& GetMesh();
 
   bool Render(SceneEncoder& encoder, const Matrix& parent_transform) const;
 
@@ -42,6 +52,8 @@ class Node final {
   Node* parent_ = nullptr;
   std::vector<Node> children_;
   Mesh mesh_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(Node);
 };
 
 }  // namespace scene

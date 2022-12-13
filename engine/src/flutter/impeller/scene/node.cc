@@ -8,6 +8,7 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/mesh.h"
 #include "impeller/scene/node.h"
 #include "impeller/scene/scene_encoder.h"
@@ -15,9 +16,61 @@
 namespace impeller {
 namespace scene {
 
+std::optional<Node> Node::MakeFromFlatbuffer(fml::Mapping& mapping,
+                                             Allocator& allocator) {
+  flatbuffers::Verifier verifier(mapping.GetMapping(), mapping.GetSize());
+  if (!fb::VerifySceneBuffer(verifier)) {
+    return std::nullopt;
+  }
+
+  return Node::MakeFromFlatbuffer(*fb::GetScene(mapping.GetMapping()),
+                                  allocator);
+}
+
+Node Node::MakeFromFlatbuffer(const fb::Scene& scene, Allocator& allocator) {
+  Node result;
+
+  if (!scene.children()) {
+    return result;
+  }
+  for (const auto* child : *scene.children()) {
+    result.AddChild(Node::MakeFromFlatbuffer(*child, allocator));
+  }
+
+  return result;
+}
+
+Node Node::MakeFromFlatbuffer(const fb::Node& node, Allocator& allocator) {
+  Node result;
+
+  Mesh mesh;
+  for (const auto* primitives : *node.mesh_primitives()) {
+    auto geometry = Geometry::MakeFromFlatbuffer(*primitives, allocator);
+    mesh.AddPrimitive({geometry, Material::MakeUnlit()});
+  }
+  result.SetMesh(std::move(mesh));
+
+  if (!node.children()) {
+    return result;
+  }
+  for (const auto* child : *node.children()) {
+    result.AddChild(Node::MakeFromFlatbuffer(*child, allocator));
+  }
+
+  return result;
+}
+
 Node::Node() = default;
 
 Node::~Node() = default;
+
+Mesh::Mesh(Mesh&& mesh) = default;
+
+Mesh& Mesh::operator=(Mesh&& mesh) = default;
+
+Node::Node(Node&& node) = default;
+
+Node& Node::operator=(Node&& node) = default;
 
 void Node::SetLocalTransform(Matrix transform) {
   local_transform_ = transform;
@@ -41,13 +94,33 @@ Matrix Node::GetGlobalTransform() const {
   return local_transform_;
 }
 
-void Node::AddChild(Node child) {
-  children_.push_back(child);
-  child.parent_ = this;
+bool Node::AddChild(Node node) {
+  if (node.parent_ != nullptr) {
+    VALIDATION_LOG
+        << "Cannot add a node as a child which already has a parent.";
+    return false;
+  }
+  node.parent_ = this;
+  children_.push_back(std::move(node));
+
+  Node& ref = children_.back();
+  for (Node& child : ref.children_) {
+    child.parent_ = &ref;
+  }
+
+  return true;
 }
 
-void Node::SetMesh(const Mesh& mesh) {
-  mesh_ = mesh;
+std::vector<Node>& Node::GetChildren() {
+  return children_;
+}
+
+void Node::SetMesh(Mesh mesh) {
+  mesh_ = std::move(mesh);
+}
+
+Mesh& Node::GetMesh() {
+  return mesh_;
 }
 
 bool Node::Render(SceneEncoder& encoder, const Matrix& parent_transform) const {
