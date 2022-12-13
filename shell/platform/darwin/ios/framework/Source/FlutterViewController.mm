@@ -1544,21 +1544,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
           continue;
         }
         UIWindowScene* windowScene = (UIWindowScene*)scene;
-        UIInterfaceOrientationMask currentInterfaceOrientation =
-            1 << windowScene.interfaceOrientation;
-        if (!(_orientationPreferences & currentInterfaceOrientation)) {
-          [self setNeedsUpdateOfSupportedInterfaceOrientations];
-          UIWindowSceneGeometryPreferencesIOS* preference =
-              [[UIWindowSceneGeometryPreferencesIOS alloc]
-                  initWithInterfaceOrientations:_orientationPreferences];
-          [windowScene
-              requestGeometryUpdateWithPreferences:preference
-                                      errorHandler:^(NSError* error) {
-                                        os_log_error(OS_LOG_DEFAULT,
-                                                     "Failed to change device orientation: %@",
-                                                     error);
-                                      }];
-        }
+        UIWindowSceneGeometryPreferencesIOS* preference =
+            [[UIWindowSceneGeometryPreferencesIOS alloc]
+                initWithInterfaceOrientations:_orientationPreferences];
+        [windowScene
+            requestGeometryUpdateWithPreferences:preference
+                                    errorHandler:^(NSError* error) {
+                                      os_log_error(OS_LOG_DEFAULT,
+                                                   "Failed to change device orientation: %@",
+                                                   error);
+                                    }];
+        [self setNeedsUpdateOfSupportedInterfaceOrientations];
       }
     } else {
       UIInterfaceOrientationMask currentInterfaceOrientation =
