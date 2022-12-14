@@ -116,6 +116,8 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///  * [debugProfilePaintsEnabled], which does something similar for painting.
 ///  * [debugProfileBuildsEnabledUserWidgets], which adds events for user-created
 ///    [Widget] build times and incurs less overhead.
+///  * [debugEnhanceBuildTimelineArguments], which enhances the trace with
+///    debugging information related to [Widget] builds.
 bool debugProfileBuildsEnabled = false;
 
 /// Adds [Timeline] events for every user-created [Widget] built.
@@ -130,7 +132,31 @@ bool debugProfileBuildsEnabled = false;
 ///
 ///  * [debugProfileBuildsEnabled], which functions similarly but shows events
 ///    for every widget and has a higher overhead cost.
+///  * [debugEnhanceBuildTimelineArguments], which enhances the trace with
+///    debugging information related to [Widget] builds.
 bool debugProfileBuildsEnabledUserWidgets = false;
+
+/// Adds debugging information to [Timeline] events related to [Widget] builds.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "BUILD" [Timeline] event and for
+/// all [Widget] build [Timeline] events, which are the [Timeline] events that
+/// are added when either of [debugProfileBuildsEnabled] and
+/// [debugProfileBuildsEnabledUserWidgets] are true. The debugging information
+/// that will be added in trace arguments includes stats around [Widget] dirty
+/// states and [Widget] diagnostic information (i.e. [Widget] properties).
+///
+/// See also:
+///
+///  * [debugProfileBuildsEnabled], which adds [Timeline] events for every
+///    [Widget] built.
+///  * [debugProfileBuildsEnabledUserWidgets], which adds [Timeline] events for
+///    every user-created [Widget] built.
+///  * [debugEnhanceLayoutTimelineArguments], which does something similar for
+///    events related to [RenderObject] layouts.
+///  * [debugEnhancePaintTimelineArguments], which does something similar for
+///    events related to [RenderObject] paints.
+bool debugEnhanceBuildTimelineArguments = false;
 
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
@@ -139,10 +165,12 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
   for (final Widget widget in widgets) {
     assert(widget != null);
-    if (widget.key == null)
+    if (widget.key == null) {
       continue;
-    if (!keySet.add(widget.key!))
+    }
+    if (!keySet.add(widget.key!)) {
       return widget.key;
+    }
   }
   return null;
 }
@@ -191,8 +219,9 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
 bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(items);
-    if (nonUniqueKey != null)
+    if (nonUniqueKey != null) {
       throw FlutterError('Duplicate key found: $nonUniqueKey.');
+    }
     return true;
   }());
   return false;

@@ -23,7 +23,7 @@ export 'package:flutter/services.dart' show KeyEvent;
 ///
 /// The [KeyboardListener] is different from [RawKeyboardListener] in that
 /// [KeyboardListener] uses the newer [HardwareKeyboard] API, which is
-/// preferrable.
+/// preferable.
 ///
 /// See also:
 ///
@@ -44,7 +44,7 @@ class KeyboardListener extends StatelessWidget {
   /// The `key` is an identifier for widgets, and is unrelated to keyboards.
   /// See [Widget.key].
   const KeyboardListener({
-    Key? key,
+    super.key,
     required this.focusNode,
     this.autofocus = false,
     this.includeSemantics = true,
@@ -53,8 +53,7 @@ class KeyboardListener extends StatelessWidget {
   }) : assert(focusNode != null),
        assert(autofocus != null),
        assert(includeSemantics != null),
-       assert(child != null),
-       super(key: key);
+       assert(child != null);
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;

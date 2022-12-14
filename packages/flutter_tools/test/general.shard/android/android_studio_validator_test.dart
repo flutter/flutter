@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -24,8 +22,8 @@ final Platform linuxPlatform = FakePlatform(
 );
 
 void main() {
-  FileSystem fileSystem;
-  FakeProcessManager fakeProcessManager;
+  late FileSystem fileSystem;
+  late FakeProcessManager fakeProcessManager;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();

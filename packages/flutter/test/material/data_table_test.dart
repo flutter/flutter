@@ -1354,7 +1354,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpAndSettle();
     expect(tester.renderObject(find.text('column1')).attached, true);
@@ -1412,9 +1411,9 @@ void main() {
     const Color checkColor = Color(0xFF0000FF);
 
     final ThemeData themeData = ThemeData(
-      checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.all(fillColor),
-        checkColor: MaterialStateProperty.all(checkColor),
+      checkboxTheme: const CheckboxThemeData(
+        fillColor: MaterialStatePropertyAll<Color?>(fillColor),
+        checkColor: MaterialStatePropertyAll<Color?>(checkColor),
       ),
     );
     Widget buildTable() {
@@ -1469,8 +1468,9 @@ void main() {
               selected: selected,
               color: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected))
+                  if (states.contains(MaterialState.selected)) {
                     return selectedColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1522,8 +1522,9 @@ void main() {
             DataRow(
               color: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled))
+                  if (states.contains(MaterialState.disabled)) {
                     return disabledColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1567,8 +1568,9 @@ void main() {
           DataRow(
             color: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed))
+                if (states.contains(MaterialState.pressed)) {
                   return pressedColor;
+                }
                 return Colors.transparent;
               },
             ),
@@ -1854,5 +1856,43 @@ void main() {
     tableBorder = table.border;
     expect(tableBorder?.bottom.width, null);
     expect(tableBorder?.top.color, null);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/100952
+  testWidgets('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 117.0,
+              child: DataTable(
+                border: TableBorder.all(width: 2, color: Colors.red),
+                columns: columns,
+                rows: rows,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Go without crashes.
+
   });
 }

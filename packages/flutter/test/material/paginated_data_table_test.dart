@@ -25,8 +25,9 @@ class TestDataSource extends DataTableSource {
   int get generation => _generation;
   int _generation = 0;
   set generation(int value) {
-    if (_generation == value)
+    if (_generation == value) {
       return;
+    }
     _generation = value;
     notifyListeners();
   }
@@ -398,6 +399,7 @@ void main() {
     expect(find.text('Rows per page:'), findsOneWidget);
     expect(tester.getTopLeft(find.text('Rows per page:')).dx, 18.0); // 14 padding in the footer row, 4 padding from the card
   });
+
   testWidgets('PaginatedDataTable custom row height', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
@@ -776,7 +778,7 @@ void main() {
     const double height = 400;
 
     // By default, the margin of a Card is 4 in all directions, so
-    // the size of the DataTable (inside the Card) is horizontically
+    // the size of the DataTable (inside the Card) is horizontally
     // reduced by 4 * 2; the left and right margins.
     const double cardMargin = 8;
 
@@ -1042,5 +1044,86 @@ void main() {
     );
     await tester.pumpWidget(buildFrame(overflowBar));
     expect(headerX, tester.getTopLeft(find.byType(ElevatedButton)).dx);
+  });
+
+  testWidgets('PaginatedDataTable can be scrolled using ScrollController', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+    final ScrollController scrollController = ScrollController();
+
+    Widget buildTable(TestDataSource source) {
+      return Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: PaginatedDataTable(
+            controller: scrollController,
+            header: const Text('Test table'),
+            source: source,
+            rowsPerPage: 2,
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Name'),
+                tooltip: 'Name',
+              ),
+              DataColumn(
+                label: Text('Calories'),
+                tooltip: 'Calories',
+                numeric: true,
+              ),
+              DataColumn(
+                label: Text('Generation'),
+                tooltip: 'Generation',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source),
+    ));
+
+    // DataTable uses provided ScrollController
+    final Scrollable bodyScrollView = tester.widget(find.byType(Scrollable).first);
+    expect(bodyScrollView.controller, scrollController);
+
+    expect(scrollController.offset, 0.0);
+    scrollController.jumpTo(50.0);
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 50.0);
+  });
+
+  testWidgets('PaginatedDataTable uses PrimaryScrollController when primary ', (WidgetTester tester) async {
+    final ScrollController primaryScrollController = ScrollController();
+    final TestDataSource source = TestDataSource();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrimaryScrollController(
+          controller: primaryScrollController,
+          child: PaginatedDataTable(
+            primary: true,
+            header: const Text('Test table'),
+            source: source,
+            rowsPerPage: 2,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Calories'), numeric: true),
+              DataColumn(label: Text('Generation')),
+            ],
+          ),
+        ),
+      )
+    );
+
+    // DataTable uses primaryScrollController
+    final Scrollable bodyScrollView = tester.widget(find.byType(Scrollable).first);
+    expect(bodyScrollView.controller, primaryScrollController);
+
+    // Footer does not use primaryScrollController
+    final Scrollable footerScrollView = tester.widget(find.byType(Scrollable).last);
+    expect(footerScrollView.controller, null);
   });
 }

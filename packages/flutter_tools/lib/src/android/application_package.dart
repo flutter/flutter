@@ -97,7 +97,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
-    required AndroidSdk androidSdk,
+    required AndroidSdk? androidSdk,
     required ProcessManager processManager,
     required UserMessages userMessages,
     required ProcessUtils processUtils,
@@ -113,7 +113,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
         // the application Id, so we need to look at what was actually built.
         return AndroidApk.fromApk(
           apkFile,
-          androidSdk: androidSdk,
+          androidSdk: androidSdk!,
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
@@ -139,7 +139,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     XmlDocument document;
     try {
       document = XmlDocument.parse(manifestString);
-    } on XmlParserException catch (exception) {
+    } on XmlException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
         manifestLocation = fileSystem.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
@@ -148,7 +148,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       }
       logger.printError('AndroidManifest.xml is not a valid XML document.');
       logger.printError('Please check $manifestLocation for errors.');
-      throwToolExit('XML Parser error message: ${exception.toString()}');
+      throwToolExit('XML Parser error message: $exception');
     }
 
     final Iterable<XmlElement> manifests = document.findElements('manifest');

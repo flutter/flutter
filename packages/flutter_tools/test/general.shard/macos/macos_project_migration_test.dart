@@ -5,7 +5,6 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/macos/migrations/remove_macos_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
@@ -158,20 +157,4 @@ keep this 2
 class FakeMacOSProject extends Fake implements MacOSProject {
   @override
   File xcodeProjectInfoFile = MemoryFileSystem.test().file('xcodeProjectInfoFile');
-}
-
-class FakeMacOSMigrator extends ProjectMigrator {
-  FakeMacOSMigrator({required this.succeeds}) : super(BufferLogger.test());
-
-  final bool succeeds;
-
-  @override
-  bool migrate() {
-    return succeeds;
-  }
-
-  @override
-  String migrateLine(String line) {
-    return line;
-  }
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -36,6 +34,7 @@ import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
+import 'package:test/fake.dart';
 
 import 'common.dart';
 import 'fake_http_client.dart';
@@ -48,12 +47,9 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
-BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
+BufferLogger get testLogger => context.get<Logger>()! as BufferLogger;
 
-FakeDeviceManager get testDeviceManager => context.get<DeviceManager>() as FakeDeviceManager;
-FakeDoctor get testDoctor => context.get<Doctor>() as FakeDoctor;
-
-typedef ContextInitializer = void Function(AppContext testContext);
+FakeDeviceManager get testDeviceManager => context.get<DeviceManager>()! as FakeDeviceManager;
 
 @isTest
 void testUsingContext(
@@ -61,8 +57,8 @@ void testUsingContext(
   dynamic Function() testMethod, {
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
-  String testOn,
-  bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  String? testOn,
+  bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
     throw StateError(
@@ -77,10 +73,10 @@ void testUsingContext(
 
   // Ensure we don't rely on the default [Config] constructor which will
   // leak a sticky $HOME/.flutter_settings behind!
-  Directory configDir;
+  Directory? configDir;
   tearDown(() {
     if (configDir != null) {
-      tryToDelete(configDir);
+      tryToDelete(configDir!);
       configDir = null;
     }
   });
@@ -95,7 +91,7 @@ void testUsingContext(
   PersistentToolState buildPersistentToolState(FileSystem fs) {
     configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return PersistentToolState.test(
-      directory: configDir,
+      directory: configDir!,
       logger: globals.logger,
     );
   }
@@ -175,7 +171,7 @@ void testUsingContext(
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
-    final BufferLogger bufferLogger = testContext.get<Logger>() as BufferLogger;
+    final BufferLogger bufferLogger = testContext.get<Logger>()! as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
       // This is where the logger outputting errors is implemented, so it has
       // to use `print`.
@@ -188,10 +184,10 @@ void _printBufferedErrors(AppContext testContext) {
 class FakeDeviceManager implements DeviceManager {
   List<Device> devices = <Device>[];
 
-  String _specifiedDeviceId;
+  String? _specifiedDeviceId;
 
   @override
-  String get specifiedDeviceId {
+  String? get specifiedDeviceId {
     if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
     }
@@ -199,7 +195,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  set specifiedDeviceId(String id) {
+  set specifiedDeviceId(String? id) {
     _specifiedDeviceId = id;
   }
 
@@ -215,7 +211,7 @@ class FakeDeviceManager implements DeviceManager {
   Future<List<Device>> getAllConnectedDevices() async => devices;
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async => devices;
+  Future<List<Device>> refreshAllConnectedDevices({ Duration? timeout }) async => devices;
 
   @override
   Future<List<Device>> getDevicesById(String deviceId) async {
@@ -225,7 +221,7 @@ class FakeDeviceManager implements DeviceManager {
   @override
   Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId)
+        ? getDevicesById(specifiedDeviceId!)
         : getAllConnectedDevices();
   }
 
@@ -241,17 +237,17 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
-    return device.isSupportedForProject(flutterProject);
+  bool isDeviceSupportedForProject(Device device, FlutterProject? flutterProject) {
+    return device.isSupportedForProject(flutterProject!);
   }
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject, { Duration timeout }) async {
+  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, { Duration? timeout }) async {
     return devices;
   }
 }
 
-class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
+class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
@@ -300,9 +296,12 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   Version get version => Version(13, null, null);
 
   @override
+  String get build => '13C100';
+
+  @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    XcodeProjectBuildContext buildContext,
+    XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -313,14 +312,14 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
       Directory podXcodeProject, {
         Duration timeout = const Duration(minutes: 1),
       }) async {
-    return null;
+    return '';
   }
 
   @override
   Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async { }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -358,7 +357,7 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 class FakeSignals implements Signals {
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    return null;
+    return Object();
   }
 
   @override

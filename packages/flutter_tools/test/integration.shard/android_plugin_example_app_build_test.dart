@@ -91,11 +91,14 @@ void main() {
     }
 
     // Clean
-    processManager.runSync(<String>[
+    result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'clean',
     ], workingDirectory: exampleAppDir.path);
+    if (result.exitCode != 0) {
+      throw Exception('flutter clean failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    }
 
     // Remove Gradle wrapper
     fileSystem
@@ -115,13 +118,16 @@ android.enableJetifier=true
 android.enableR8=true''');
 
     // Run flutter build apk using AGP 3.3.0
-    processManager.runSync(<String>[
+    result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
+    if (result.exitCode != 0) {
+      throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    }
     expect(exampleApk, exists);
   }
 

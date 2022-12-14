@@ -67,11 +67,11 @@ Widget buildTestWidgets({
 
 class TestWidget extends SingleChildRenderObjectWidget {
   const TestWidget({
-    Key? key,
-    required Widget child,
+    super.key,
+    required Widget super.child,
     required this.label,
     required this.isSemanticBoundary,
-  }) : super(key: key, child: child);
+  });
 
   final String label;
   final bool isSemanticBoundary;
@@ -96,8 +96,9 @@ class RenderTest extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (!_isSemanticBoundary)
+    if (!_isSemanticBoundary) {
       return;
+    }
 
     config
       ..isSemanticBoundary = _isSemanticBoundary
@@ -109,8 +110,9 @@ class RenderTest extends RenderProxyBox {
   String get label => _label;
   String _label = '<>';
   set label(String value) {
-    if (value == _label)
+    if (value == _label) {
       return;
+    }
     _label = value;
     markNeedsSemanticsUpdate();
   }
@@ -119,8 +121,9 @@ class RenderTest extends RenderProxyBox {
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
-    if (_isSemanticBoundary == value)
+    if (_isSemanticBoundary == value) {
       return;
+    }
     _isSemanticBoundary = value;
     markNeedsSemanticsUpdate();
   }

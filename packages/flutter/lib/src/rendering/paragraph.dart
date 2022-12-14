@@ -10,11 +10,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'debug.dart';
+import 'layer.dart';
 import 'object.dart';
+import 'selection.dart';
 
 const String _kEllipsis = '\u2026';
 
@@ -84,6 +84,8 @@ class RenderParagraph extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
     List<RenderBox>? children,
+    Color? selectionColor,
+    SelectionRegistrar? registrar,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -95,6 +97,7 @@ class RenderParagraph extends RenderBox
        assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
+       _selectionColor = selectionColor,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -109,14 +112,17 @@ class RenderParagraph extends RenderBox
        ) {
     addAll(children);
     _extractPlaceholderSpans(text);
+    this.registrar = registrar;
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! TextParentData)
+    if (child.parentData is! TextParentData) {
       child.parentData = TextParentData();
+    }
   }
 
+  static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
   final TextPainter _textPainter;
   AttributedString? _cachedAttributedLabel;
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
@@ -146,6 +152,110 @@ class RenderParagraph extends RenderBox
         markNeedsLayout();
         break;
     }
+    _removeSelectionRegistrarSubscription();
+    _disposeSelectableFragments();
+    _updateSelectionRegistrarSubscription();
+  }
+
+  /// The ongoing selections in this paragraph.
+  ///
+  /// The selection does not include selections in [PlaceholderSpan] if there
+  /// are any.
+  @visibleForTesting
+  List<TextSelection> get selections {
+    if (_lastSelectableFragments == null) {
+      return const <TextSelection>[];
+    }
+    final List<TextSelection> results = <TextSelection>[];
+    for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+      if (fragment._textSelectionStart != null &&
+          fragment._textSelectionEnd != null &&
+          fragment._textSelectionStart!.offset != fragment._textSelectionEnd!.offset) {
+        results.add(
+          TextSelection(
+            baseOffset: fragment._textSelectionStart!.offset,
+            extentOffset: fragment._textSelectionEnd!.offset
+          )
+        );
+      }
+    }
+    return results;
+  }
+
+  // Should be null if selection is not enabled, i.e. _registrar = null. The
+  // paragraph splits on [PlaceholderSpan.placeholderCodeUnit], and stores each
+  // fragment in this list.
+  List<_SelectableFragment>? _lastSelectableFragments;
+
+  /// The [SelectionRegistrar] this paragraph will be, or is, registered to.
+  SelectionRegistrar? get registrar => _registrar;
+  SelectionRegistrar? _registrar;
+  set registrar(SelectionRegistrar? value) {
+    if (value == _registrar) {
+      return;
+    }
+    _removeSelectionRegistrarSubscription();
+    _disposeSelectableFragments();
+    _registrar = value;
+    _updateSelectionRegistrarSubscription();
+  }
+
+  void _updateSelectionRegistrarSubscription() {
+    if (_registrar == null) {
+      return;
+    }
+    _lastSelectableFragments ??= _getSelectableFragments();
+    _lastSelectableFragments!.forEach(_registrar!.add);
+  }
+
+  void _removeSelectionRegistrarSubscription() {
+    if (_registrar == null || _lastSelectableFragments == null) {
+      return;
+    }
+    _lastSelectableFragments!.forEach(_registrar!.remove);
+  }
+
+  List<_SelectableFragment> _getSelectableFragments() {
+    final String plainText = text.toPlainText(includeSemanticsLabels: false);
+    final List<_SelectableFragment> result = <_SelectableFragment>[];
+    int start = 0;
+    while (start < plainText.length) {
+      int end = plainText.indexOf(_placeholderCharacter, start);
+      if (start != end) {
+        if (end == -1) {
+          end = plainText.length;
+        }
+        result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end)));
+        start = end;
+      }
+      start += 1;
+    }
+    return result;
+  }
+
+  void _disposeSelectableFragments() {
+    if (_lastSelectableFragments == null) {
+      return;
+    }
+    for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+      fragment.dispose();
+    }
+    _lastSelectableFragments = null;
+  }
+
+  @override
+  void markNeedsLayout() {
+    _lastSelectableFragments?.forEach((_SelectableFragment element) => element.didChangeParagraphLayout());
+    super.markNeedsLayout();
+  }
+
+  @override
+  void dispose() {
+    _removeSelectionRegistrarSubscription();
+    // _lastSelectableFragments may hold references to this RenderParagraph.
+    // Release them manually to avoid retain cycles.
+    _lastSelectableFragments = null;
+    super.dispose();
   }
 
   late List<PlaceholderSpan> _placeholderSpans;
@@ -163,8 +273,9 @@ class RenderParagraph extends RenderBox
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
     assert(value != null);
-    if (_textPainter.textAlign == value)
+    if (_textPainter.textAlign == value) {
       return;
+    }
     _textPainter.textAlign = value;
     markNeedsPaint();
   }
@@ -185,8 +296,9 @@ class RenderParagraph extends RenderBox
   TextDirection get textDirection => _textPainter.textDirection!;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textPainter.textDirection == value)
+    if (_textPainter.textDirection == value) {
       return;
+    }
     _textPainter.textDirection = value;
     markNeedsLayout();
   }
@@ -202,8 +314,9 @@ class RenderParagraph extends RenderBox
   bool _softWrap;
   set softWrap(bool value) {
     assert(value != null);
-    if (_softWrap == value)
+    if (_softWrap == value) {
       return;
+    }
     _softWrap = value;
     markNeedsLayout();
   }
@@ -213,8 +326,9 @@ class RenderParagraph extends RenderBox
   TextOverflow _overflow;
   set overflow(TextOverflow value) {
     assert(value != null);
-    if (_overflow == value)
+    if (_overflow == value) {
       return;
+    }
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
     markNeedsLayout();
@@ -227,8 +341,9 @@ class RenderParagraph extends RenderBox
   double get textScaleFactor => _textPainter.textScaleFactor;
   set textScaleFactor(double value) {
     assert(value != null);
-    if (_textPainter.textScaleFactor == value)
+    if (_textPainter.textScaleFactor == value) {
       return;
+    }
     _textPainter.textScaleFactor = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -242,8 +357,9 @@ class RenderParagraph extends RenderBox
   /// zero.
   set maxLines(int? value) {
     assert(value == null || value > 0);
-    if (_textPainter.maxLines == value)
+    if (_textPainter.maxLines == value) {
       return;
+    }
     _textPainter.maxLines = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -259,8 +375,9 @@ class RenderParagraph extends RenderBox
   Locale? get locale => _textPainter.locale;
   /// The value may be null.
   set locale(Locale? value) {
-    if (_textPainter.locale == value)
+    if (_textPainter.locale == value) {
       return;
+    }
     _textPainter.locale = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -270,8 +387,9 @@ class RenderParagraph extends RenderBox
   StrutStyle? get strutStyle => _textPainter.strutStyle;
   /// The value may be null.
   set strutStyle(StrutStyle? value) {
-    if (_textPainter.strutStyle == value)
+    if (_textPainter.strutStyle == value) {
       return;
+    }
     _textPainter.strutStyle = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -281,8 +399,9 @@ class RenderParagraph extends RenderBox
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
-    if (_textPainter.textWidthBasis == value)
+    if (_textPainter.textWidthBasis == value) {
       return;
+    }
     _textPainter.textWidthBasis = value;
     _overflowShader = null;
     markNeedsLayout();
@@ -291,11 +410,29 @@ class RenderParagraph extends RenderBox
   /// {@macro dart.ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior? value) {
-    if (_textPainter.textHeightBehavior == value)
+    if (_textPainter.textHeightBehavior == value) {
       return;
+    }
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
+  }
+
+  /// The color to use when painting the selection.
+  Color? get selectionColor => _selectionColor;
+  Color? _selectionColor;
+  set selectionColor(Color? value) {
+    if (_selectionColor == value) {
+      return;
+    }
+    _selectionColor = value;
+    if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
+      markNeedsPaint();
+    }
+  }
+
+  Offset _getOffsetForPosition(TextPosition position) {
+    return getOffsetForCaret(position, Rect.zero) + Offset(0, getFullHeightForCaret(position) ?? 0.0);
   }
 
   @override
@@ -775,6 +912,12 @@ class RenderParagraph extends RenderBox
       }
       context.canvas.restore();
     }
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paint(context, offset);
+      }
+    }
+    super.paint(context, offset);
   }
 
   /// Returns the offset at which to paint the caret.
@@ -1086,5 +1229,339 @@ class RenderParagraph extends RenderBox
       ),
     );
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+  }
+}
+
+/// A continuous, selectable piece of paragraph.
+///
+/// Since the selections in [PlaceHolderSpan] are handled independently in its
+/// subtree, a selection in [RenderParagraph] can't continue across a
+/// [PlaceHolderSpan]. The [RenderParagraph] splits itself on [PlaceHolderSpan]
+/// to create multiple `_SelectableFragment`s so that they can be selected
+/// separately.
+class _SelectableFragment with Selectable, ChangeNotifier {
+  _SelectableFragment({
+    required this.paragraph,
+    required this.range,
+  }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
+    _selectionGeometry = _getSelectionGeometry();
+  }
+
+  final TextRange range;
+  final RenderParagraph paragraph;
+
+  TextPosition? _textSelectionStart;
+  TextPosition? _textSelectionEnd;
+
+  LayerLink? _startHandleLayerLink;
+  LayerLink? _endHandleLayerLink;
+
+  @override
+  SelectionGeometry get value => _selectionGeometry;
+  late SelectionGeometry _selectionGeometry;
+  void _updateSelectionGeometry() {
+    final SelectionGeometry newValue = _getSelectionGeometry();
+    if (_selectionGeometry == newValue) {
+      return;
+    }
+    _selectionGeometry = newValue;
+    notifyListeners();
+  }
+
+  SelectionGeometry _getSelectionGeometry() {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return const SelectionGeometry(
+        status: SelectionStatus.none,
+        hasContent: true,
+      );
+    }
+
+    final int selectionStart = _textSelectionStart!.offset;
+    final int selectionEnd = _textSelectionEnd!.offset;
+    final bool isReversed = selectionStart > selectionEnd;
+    final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(TextPosition(offset: selectionStart));
+    final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
+      ? startOffsetInParagraphCoordinates
+      : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
+    final bool flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
+    final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()..invert();
+    return SelectionGeometry(
+      startSelectionPoint: SelectionPoint(
+        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
+        lineHeight: paragraph._textPainter.preferredLineHeight,
+        handleType: flipHandles ? TextSelectionHandleType.right : TextSelectionHandleType.left
+      ),
+      endSelectionPoint: SelectionPoint(
+        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, endOffsetInParagraphCoordinates),
+        lineHeight: paragraph._textPainter.preferredLineHeight,
+        handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
+      ),
+      status: _textSelectionStart!.offset == _textSelectionEnd!.offset
+        ? SelectionStatus.collapsed
+        : SelectionStatus.uncollapsed,
+      hasContent: true,
+    );
+  }
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    late final SelectionResult result;
+    final TextPosition? existingSelectionStart = _textSelectionStart;
+    final TextPosition? existingSelectionEnd = _textSelectionEnd;
+    switch (event.type) {
+      case SelectionEventType.startEdgeUpdate:
+      case SelectionEventType.endEdgeUpdate:
+        final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
+        result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+        break;
+      case SelectionEventType.clear:
+        result = _handleClearSelection();
+        break;
+      case SelectionEventType.selectAll:
+        result = _handleSelectAll();
+        break;
+      case SelectionEventType.selectWord:
+        final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
+        result = _handleSelectWord(selectWord.globalPosition);
+        break;
+    }
+
+    if (existingSelectionStart != _textSelectionStart ||
+        existingSelectionEnd != _textSelectionEnd) {
+      _didChangeSelection();
+    }
+    return result;
+  }
+
+  @override
+  SelectedContent? getSelectedContent() {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return null;
+    }
+    final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+    final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+    return SelectedContent(
+      plainText: paragraph.text.toPlainText(includeSemanticsLabels: false).substring(start, end),
+    );
+  }
+
+  void _didChangeSelection() {
+    paragraph.markNeedsPaint();
+    _updateSelectionGeometry();
+  }
+
+  SelectionResult _updateSelectionEdge(Offset globalPosition, {required bool isEnd}) {
+    _setSelectionPosition(null, isEnd: isEnd);
+    final Matrix4 transform = paragraph.getTransformTo(null);
+    transform.invert();
+    final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
+    if (_rect.isEmpty) {
+      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+    }
+    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
+      _rect,
+      localPosition,
+      direction: paragraph.textDirection,
+    );
+
+    final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
+    _setSelectionPosition(position, isEnd: isEnd);
+    if (position.offset == range.end) {
+      return SelectionResult.next;
+    }
+    if (position.offset == range.start) {
+      return SelectionResult.previous;
+    }
+    // TODO(chunhtai): The geometry information should not be used to determine
+    // selection result. This is a workaround to RenderParagraph, where it does
+    // not have a way to get accurate text length if its text is truncated due to
+    // layout constraint.
+    return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+  }
+
+  TextPosition _clampTextPosition(TextPosition position) {
+    // Affinity of range.end is upstream.
+    if (position.offset > range.end ||
+        (position.offset == range.end && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+    }
+    if (position.offset < range.start) {
+      return TextPosition(offset: range.start);
+    }
+    return position;
+  }
+
+  void _setSelectionPosition(TextPosition? position, {required bool isEnd}) {
+    if (isEnd) {
+      _textSelectionEnd = position;
+    } else {
+      _textSelectionStart = position;
+    }
+  }
+
+  SelectionResult _handleClearSelection() {
+    _textSelectionStart = null;
+    _textSelectionEnd = null;
+    return SelectionResult.none;
+  }
+
+  SelectionResult _handleSelectAll() {
+    _textSelectionStart = TextPosition(offset: range.start);
+    _textSelectionEnd = TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+    return SelectionResult.none;
+  }
+
+  SelectionResult _handleSelectWord(Offset globalPosition) {
+    final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
+    if (_positionIsWithinCurrentSelection(position)) {
+      return SelectionResult.end;
+    }
+    final TextRange word = paragraph.getWordBoundary(position);
+    assert(word.isNormalized);
+    // Fragments are separated by placeholder span, the word boundary shouldn't
+    // expand across fragments.
+    assert(word.start >= range.start && word.end <= range.end);
+    late TextPosition start;
+    late TextPosition end;
+    if (position.offset >= word.end) {
+      start = end = TextPosition(offset: position.offset);
+    } else {
+      start = TextPosition(offset: word.start);
+      end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
+    }
+    _textSelectionStart = start;
+    _textSelectionEnd = end;
+    return SelectionResult.end;
+  }
+
+  /// Whether the given text position is contained in current selection
+  /// range.
+  ///
+  /// The parameter `start` must be smaller than `end`.
+  bool _positionIsWithinCurrentSelection(TextPosition position) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return false;
+    }
+    // Normalize current selection.
+    late TextPosition currentStart;
+    late TextPosition currentEnd;
+    if (_compareTextPositions(_textSelectionStart!, _textSelectionEnd!) > 0) {
+      currentStart = _textSelectionStart!;
+      currentEnd = _textSelectionEnd!;
+    } else {
+      currentStart = _textSelectionEnd!;
+      currentEnd = _textSelectionStart!;
+    }
+    return _compareTextPositions(currentStart, position) >= 0 && _compareTextPositions(currentEnd, position) <= 0;
+  }
+
+  /// Compares two text positions.
+  ///
+  /// Returns 1 if `position` < `otherPosition`, -1 if `position` > `otherPosition`,
+  /// or 0 if they are equal.
+  static int _compareTextPositions(TextPosition position, TextPosition otherPosition) {
+    if (position.offset < otherPosition.offset) {
+      return 1;
+    } else if (position.offset > otherPosition.offset) {
+      return -1;
+    } else if (position.affinity == otherPosition.affinity){
+      return 0;
+    } else {
+      return position.affinity == TextAffinity.upstream ? 1 : -1;
+    }
+  }
+
+  Matrix4 getTransformToParagraph() {
+    return Matrix4.translationValues(_rect.left, _rect.top, 0.0);
+  }
+
+  @override
+  Matrix4 getTransformTo(RenderObject? ancestor) {
+    return getTransformToParagraph()..multiply(paragraph.getTransformTo(ancestor));
+  }
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
+    if (!paragraph.attached) {
+      assert(startHandle == null && endHandle == null, 'Only clean up can be called.');
+      return;
+    }
+    if (_startHandleLayerLink != startHandle) {
+      _startHandleLayerLink = startHandle;
+      paragraph.markNeedsPaint();
+    }
+    if (_endHandleLayerLink != endHandle) {
+      _endHandleLayerLink = endHandle;
+      paragraph.markNeedsPaint();
+    }
+  }
+
+  Rect get _rect {
+    if (_cachedRect == null) {
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(
+        TextSelection(baseOffset: range.start, extentOffset: range.end),
+      );
+      if (boxes.isNotEmpty) {
+        Rect result = boxes.first.toRect();
+        for (int index = 1; index < boxes.length; index += 1) {
+          result = result.expandToInclude(boxes[index].toRect());
+        }
+        _cachedRect = result;
+      } else {
+        final Offset offset = paragraph._getOffsetForPosition(TextPosition(offset: range.start));
+        _cachedRect = Rect.fromPoints(offset, offset.translate(0, - paragraph._textPainter.preferredLineHeight));
+      }
+    }
+    return _cachedRect!;
+  }
+  Rect? _cachedRect;
+
+  void didChangeParagraphLayout() {
+    _cachedRect = null;
+  }
+
+  @override
+  Size get size {
+    return _rect.size;
+  }
+
+  void paint(PaintingContext context, Offset offset) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return;
+    }
+    if (paragraph.selectionColor != null) {
+      final TextSelection selection = TextSelection(
+        baseOffset: _textSelectionStart!.offset,
+        extentOffset: _textSelectionEnd!.offset,
+      );
+      final Paint selectionPaint = Paint()
+        ..style = PaintingStyle.fill
+        ..color = paragraph.selectionColor!;
+      for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
+        context.canvas.drawRect(
+            textBox.toRect().shift(offset), selectionPaint);
+      }
+    }
+    final Matrix4 transform = getTransformToParagraph();
+    if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
+      context.pushLayer(
+        LeaderLayer(
+          link: _startHandleLayerLink!,
+          offset: offset + MatrixUtils.transformPoint(transform, value.startSelectionPoint!.localPosition),
+        ),
+        (PaintingContext context, Offset offset) { },
+        Offset.zero,
+      );
+    }
+    if (_endHandleLayerLink != null && value.endSelectionPoint != null) {
+      context.pushLayer(
+        LeaderLayer(
+          link: _endHandleLayerLink!,
+          offset: offset + MatrixUtils.transformPoint(transform, value.endSelectionPoint!.localPosition),
+        ),
+        (PaintingContext context, Offset offset) { },
+        Offset.zero,
+      );
+    }
   }
 }

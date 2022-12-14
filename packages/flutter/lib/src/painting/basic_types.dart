@@ -43,8 +43,8 @@ export 'dart:ui' show
   VertexMode,
   // TODO(werainkhatri): remove these after their deprecation period in engine
   // https://github.com/flutter/flutter/pull/99505
-  hashValues,
-  hashList;
+  hashValues, // ignore: deprecated_member_use
+  hashList; // ignore: deprecated_member_use
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 

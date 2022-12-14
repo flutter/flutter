@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 const double _defaultBorderWidth = 1.0;
 
@@ -1015,6 +1016,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1042,6 +1045,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1068,6 +1073,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: theme.colorScheme.onSurface.withOpacity(0.12),
@@ -1108,6 +1115,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -1137,6 +1146,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -1165,6 +1176,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,
@@ -1432,6 +1445,8 @@ void main() {
       expect(
         toggleButtonRenderObject[0],
         paints
+          // physical model
+          ..path()
           // leading side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
@@ -1445,6 +1460,8 @@ void main() {
       expect(
         toggleButtonRenderObject[1],
         paints
+          // physical model
+          ..path()
           // leading side - selected
           ..path(
             style: PaintingStyle.stroke,
@@ -1464,6 +1481,8 @@ void main() {
       expect(
         toggleButtonRenderObject[2],
         paints
+          // physical model
+          ..path()
           // leading side - selected, since previous button is selected
           ..path(
             style: PaintingStyle.stroke,
@@ -1515,6 +1534,8 @@ void main() {
       expect(
         toggleButtonRenderObject[0],
         paints
+        // physical model
+          ..path()
         // left side, top and right - enabled.
           ..path(
             style: PaintingStyle.stroke,
@@ -1528,6 +1549,8 @@ void main() {
       expect(
         toggleButtonRenderObject[1],
         paints
+        // physical model
+          ..path()
         // top side - selected.
           ..path(
             style: PaintingStyle.stroke,
@@ -1547,6 +1570,8 @@ void main() {
       expect(
         toggleButtonRenderObject[2],
         paints
+        // physical model
+          ..path()
         // top side - selected, since previous button is selected.
           ..path(
             style: PaintingStyle.stroke,
@@ -1712,6 +1737,8 @@ void main() {
     expect(
       toggleButtonRenderObject[0],
       paints
+      // physical model paints
+        ..path()
       // left side, top and right - enabled.
         ..path(
           style: PaintingStyle.stroke,
@@ -1815,7 +1842,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.text('First child')));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1910,4 +1936,180 @@ void main() {
 
     await hoverGesture.removePointer();
   });
+<<<<<<< HEAD
+=======
+
+  testWidgets('Toggle buttons height matches MaterialTapTargetSize.padded height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, false, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Icon(Icons.check),
+              Icon(Icons.access_alarm),
+              Icon(Icons.cake),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Rect firstRect = tester.getRect(find.byType(TextButton).at(0));
+    expect(firstRect.height, 48.0);
+    final Rect secondRect = tester.getRect(find.byType(TextButton).at(1));
+    expect(secondRect.height, 48.0);
+    final Rect thirdRect = tester.getRect(find.byType(TextButton).at(2));
+    expect(thirdRect.height, 48.0);
+  });
+
+  testWidgets('Toggle buttons constraints size does not affect minimum input padding', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/97302
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, false, false],
+            onPressed: (int index) {},
+            constraints: const BoxConstraints.tightFor(
+              width: 86,
+              height: 32,
+            ),
+            children: const <Widget>[
+              Icon(Icons.check),
+              Icon(Icons.access_alarm),
+              Icon(Icons.cake),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Button's height is constrained to `32.0`.
+    final Rect firstRect = tester.getRect(find.byType(TextButton).at(0));
+    expect(firstRect.height, 32.0);
+    final Rect secondRect = tester.getRect(find.byType(TextButton).at(1));
+    expect(secondRect.height, 32.0);
+    final Rect thirdRect = tester.getRect(find.byType(TextButton).at(2));
+    expect(thirdRect.height, 32.0);
+
+    // While button's height is constrained to `32.0`, semantic node height
+    // should remain `48.0`, matching `MaterialTapTargetSize.padded` height (default).
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasToggledState,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              rect: const Rect.fromLTRB(0.0, 0.0, 87.0, 48.0),
+            ),
+            TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasToggledState,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0)
+            ),
+            TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasToggledState,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+    testWidgets('Toggle buttons have correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Icon(Icons.check),
+              Icon(Icons.access_alarm),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasToggledState,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isToggled,
+                SemanticsFlag.hasToggledState,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
 }

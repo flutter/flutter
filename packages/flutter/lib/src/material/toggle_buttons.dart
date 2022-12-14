@@ -27,6 +27,12 @@ import 'toggle_buttons_theme.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
 ///
+/// {@tool dartpad}
+/// This example showcase [ToggleButtons] in various configurations.
+///
+/// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.0.dart **
+/// {@end-tool}
+///
 /// ## Customizing toggle buttons
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
@@ -167,7 +173,7 @@ class ToggleButtons extends StatelessWidget {
   /// list of non-null nodes. [renderBorder] and [direction] must not be null.
   /// If [direction] is [Axis.vertical], [verticalDirection] must not be null.
   const ToggleButtons({
-    Key? key,
+    super.key,
     required this.children,
     required this.isSelected,
     this.onPressed,
@@ -197,8 +203,7 @@ class ToggleButtons extends StatelessWidget {
     assert(isSelected != null),
     assert(children.length == isSelected.length),
     assert(direction != null),
-    assert(direction == Axis.horizontal || verticalDirection != null),
-    super(key: key);
+    assert(direction == Axis.horizontal || verticalDirection != null);
 
   static const double _defaultBorderWidth = 1.0;
 
@@ -529,8 +534,9 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsThemeData toggleButtonsTheme,
   ) {
-    if (!renderBorder)
+    if (!renderBorder) {
       return BorderSide.none;
+    }
 
     final double resultingBorderWidth = borderWidth
       ?? toggleButtonsTheme.borderWidth
@@ -564,8 +570,9 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsThemeData toggleButtonsTheme,
   ) {
-    if (!renderBorder)
+    if (!renderBorder) {
       return BorderSide.none;
+    }
 
     final double resultingBorderWidth = borderWidth
       ?? toggleButtonsTheme.borderWidth
@@ -599,11 +606,13 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsThemeData toggleButtonsTheme,
   ) {
-    if (!renderBorder)
+    if (!renderBorder) {
       return BorderSide.none;
+    }
 
-    if (index != children.length - 1)
+    if (index != children.length - 1) {
       return BorderSide.none;
+    }
 
     final double resultingBorderWidth = borderWidth
       ?? toggleButtonsTheme.borderWidth
@@ -648,8 +657,9 @@ class ToggleButtons extends StatelessWidget {
     );
     assert(
       () {
-        if (focusNodes != null)
+        if (focusNodes != null) {
           return focusNodes!.length == children.length;
+        }
         return true;
       }(),
       'focusNodes.length must match children.length.\n'
@@ -668,6 +678,7 @@ class ToggleButtons extends StatelessWidget {
       final BorderSide borderSide = _getBorderSide(index, theme, toggleButtonsTheme);
       final BorderSide trailingBorderSide = _getTrailingBorderSide(index, theme, toggleButtonsTheme);
 
+<<<<<<< HEAD
       return _ToggleButton(
         selected: isSelected[index],
         textStyle: textStyle,
@@ -685,6 +696,63 @@ class ToggleButtons extends StatelessWidget {
           ? () {onPressed!(index);}
           : null,
         mouseCursor: mouseCursor,
+=======
+      final Set<MaterialState> states = <MaterialState>{
+          if (isSelected[index] && onPressed != null) MaterialState.selected,
+          if (onPressed == null) MaterialState.disabled,
+      };
+      final Color effectiveFillColor = _ResolveFillColor(fillColor
+        ?? toggleButtonsTheme.fillColor).resolve(states)
+        ?? _DefaultFillColor(theme.colorScheme).resolve(states);
+      final Color currentColor;
+      if (onPressed != null && isSelected[index]) {
+        currentColor = selectedColor
+          ?? toggleButtonsTheme.selectedColor
+          ?? theme.colorScheme.primary;
+      } else if (onPressed != null && !isSelected[index]) {
+        currentColor = color
+          ?? toggleButtonsTheme.color
+          ?? theme.colorScheme.onSurface.withOpacity(0.87);
+      } else {
+        currentColor = disabledColor
+          ?? toggleButtonsTheme.disabledColor
+          ?? theme.colorScheme.onSurface.withOpacity(0.38);
+      }
+      final TextStyle currentTextStyle = textStyle
+        ?? toggleButtonsTheme.textStyle
+        ?? theme.textTheme.bodyText2!;
+      final BoxConstraints? currentConstraints = constraints
+        ?? toggleButtonsTheme.constraints;
+      final Size minimumSize = currentConstraints == null
+        ? const Size.square(kMinInteractiveDimension)
+        : Size(currentConstraints.minWidth, currentConstraints.minHeight);
+      final Size? maximumSize = currentConstraints == null
+        ? null
+        : Size(currentConstraints.maxWidth, currentConstraints.maxHeight);
+      final Size minPaddingSize;
+      switch (tapTargetSize ?? theme.materialTapTargetSize) {
+        case MaterialTapTargetSize.padded:
+          if (direction == Axis.horizontal) {
+            minPaddingSize = const Size(
+              0.0,
+              kMinInteractiveDimension,
+            );
+          } else {
+            minPaddingSize = const Size(
+              kMinInteractiveDimension,
+              0.0,
+            );
+          }
+          assert(minPaddingSize.width >= 0.0);
+          assert(minPaddingSize.height >= 0.0);
+          break;
+        case MaterialTapTargetSize.shrinkWrap:
+          minPaddingSize = Size.zero;
+          break;
+      }
+
+      Widget button = _SelectToggleButton(
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
         leadingBorderSide: leadingBorderSide,
         borderSide: borderSide,
         trailingBorderSide: trailingBorderSide,
@@ -694,19 +762,71 @@ class ToggleButtons extends StatelessWidget {
         isLastButton: index == children.length - 1,
         direction: direction,
         verticalDirection: verticalDirection,
+<<<<<<< HEAD
         child: children[index],
+=======
+        child: ClipRRect(
+          borderRadius: clipBorderRadius,
+          child: TextButton(
+            focusNode: focusNodes != null ? focusNodes![index] : null,
+            style: ButtonStyle(
+              backgroundColor: MaterialStatePropertyAll<Color?>(effectiveFillColor),
+              foregroundColor: MaterialStatePropertyAll<Color?>(currentColor),
+              overlayColor: _ToggleButtonDefaultOverlay(
+                selected:  onPressed != null && isSelected[index],
+                unselected: onPressed != null && !isSelected[index],
+                colorScheme: theme.colorScheme,
+                disabledColor: disabledColor ?? toggleButtonsTheme.disabledColor,
+                focusColor: focusColor ?? toggleButtonsTheme.focusColor,
+                highlightColor: highlightColor ?? toggleButtonsTheme.highlightColor,
+                hoverColor: hoverColor ?? toggleButtonsTheme.hoverColor,
+                splashColor: splashColor ?? toggleButtonsTheme.splashColor,
+              ),
+              elevation: const MaterialStatePropertyAll<double>(0),
+              textStyle: MaterialStatePropertyAll<TextStyle?>(currentTextStyle.copyWith(
+                color: currentColor,
+              )),
+              padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
+              minimumSize: MaterialStatePropertyAll<Size?>(minimumSize),
+              maximumSize: MaterialStatePropertyAll<Size?>(maximumSize),
+              shape: const MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
+              mouseCursor: MaterialStatePropertyAll<MouseCursor?>(mouseCursor),
+              visualDensity: VisualDensity.standard,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              animationDuration: kThemeChangeDuration,
+              enableFeedback: true,
+              alignment: Alignment.center,
+              splashFactory: InkRipple.splashFactory,
+            ),
+            onPressed: onPressed != null
+              ? () {onPressed!(index);}
+              : null,
+            child: children[index],
+          ),
+        ),
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
+      );
+
+      if (currentConstraints != null) {
+        button = Center(child: button);
+      }
+
+      return MergeSemantics(
+        child: Semantics(
+          container: true,
+          toggled: isSelected[index],
+          enabled: onPressed != null,
+          child: _InputPadding(
+            minSize: minPaddingSize,
+            direction: direction,
+            child: button,
+          ),
+        ),
       );
     });
 
-    final Widget result = direction == Axis.horizontal
-      ? IntrinsicHeight(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: buttons,
-        ),
-      )
-      : IntrinsicWidth(
+    if (direction == Axis.vertical) {
+      return IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -714,7 +834,9 @@ class ToggleButtons extends StatelessWidget {
           children: buttons,
         ),
       );
+    }
 
+<<<<<<< HEAD
     final MaterialTapTargetSize resolvedTapTargetSize = tapTargetSize ?? theme.materialTapTargetSize;
     switch (resolvedTapTargetSize) {
       case MaterialTapTargetSize.padded:
@@ -726,6 +848,15 @@ class ToggleButtons extends StatelessWidget {
       case MaterialTapTargetSize.shrinkWrap:
         return result;
     }
+=======
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: buttons,
+      ),
+    );
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
   }
 
   @override
@@ -1032,8 +1163,7 @@ class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable
 
 class _SelectToggleButton extends SingleChildRenderObjectWidget {
   const _SelectToggleButton({
-    Key? key,
-    required Widget child,
+    required Widget super.child,
     required this.leadingBorderSide,
     required this.borderSide,
     required this.trailingBorderSide,
@@ -1042,10 +1172,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     required this.isLastButton,
     required this.direction,
     required this.verticalDirection,
-  }) : super(
-    key: key,
-    child: child,
-  );
+  });
 
   // The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
@@ -1123,8 +1250,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   Axis get direction => _direction;
   Axis _direction;
   set direction(Axis value) {
-    if (_direction == value)
+    if (_direction == value) {
       return;
+    }
     _direction = value;
     markNeedsLayout();
   }
@@ -1132,8 +1260,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   VerticalDirection get verticalDirection => _verticalDirection;
   VerticalDirection _verticalDirection;
   set verticalDirection(VerticalDirection value) {
-    if (_verticalDirection == value)
+    if (_verticalDirection == value) {
       return;
+    }
     _verticalDirection = value;
     markNeedsLayout();
   }
@@ -1142,8 +1271,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderSide get leadingBorderSide => _leadingBorderSide;
   BorderSide _leadingBorderSide;
   set leadingBorderSide(BorderSide value) {
-    if (_leadingBorderSide == value)
+    if (_leadingBorderSide == value) {
       return;
+    }
     _leadingBorderSide = value;
     markNeedsLayout();
   }
@@ -1152,8 +1282,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderSide get borderSide  => _borderSide;
   BorderSide _borderSide;
   set borderSide(BorderSide value) {
-    if (_borderSide == value)
+    if (_borderSide == value) {
       return;
+    }
     _borderSide = value;
     markNeedsLayout();
   }
@@ -1162,8 +1293,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderSide get trailingBorderSide => _trailingBorderSide;
   BorderSide _trailingBorderSide;
   set trailingBorderSide(BorderSide value) {
-    if (_trailingBorderSide == value)
+    if (_trailingBorderSide == value) {
       return;
+    }
     _trailingBorderSide = value;
     markNeedsLayout();
   }
@@ -1172,8 +1304,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderRadius get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
   set borderRadius(BorderRadius value) {
-    if (_borderRadius == value)
+    if (_borderRadius == value) {
       return;
+    }
     _borderRadius = value;
     markNeedsLayout();
   }
@@ -1182,8 +1315,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   bool get isFirstButton => _isFirstButton;
   bool _isFirstButton;
   set isFirstButton(bool value) {
-    if (_isFirstButton == value)
+    if (_isFirstButton == value) {
       return;
+    }
     _isFirstButton = value;
     markNeedsLayout();
   }
@@ -1192,8 +1326,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   bool get isLastButton => _isLastButton;
   bool _isLastButton;
   set isLastButton(bool value) {
-    if (_isLastButton == value)
+    if (_isLastButton == value) {
       return;
+    }
     _isLastButton = value;
     markNeedsLayout();
   }
@@ -1202,8 +1337,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsLayout();
   }
@@ -1588,11 +1724,18 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 /// visually smaller to the user.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
+<<<<<<< HEAD
     Key? key,
     Widget? child,
     required this.minSize,
     required this.direction,
   }) : super(key: key, child: child);
+=======
+    super.child,
+    required this.minSize,
+    required this.direction,
+  });
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
 
   final Size minSize;
   final Axis direction;
@@ -1615,8 +1758,14 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
+<<<<<<< HEAD
     if (_minSize == value)
       return;
+=======
+    if (_minSize == value) {
+      return;
+    }
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
     _minSize = value;
     markNeedsLayout();
   }
@@ -1624,37 +1773,67 @@ class _RenderInputPadding extends RenderShiftedBox {
   Axis get direction => _direction;
   Axis _direction;
   set direction(Axis value) {
+<<<<<<< HEAD
     if (_direction == value)
       return;
+=======
+    if (_direction == value) {
+      return;
+    }
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
     _direction = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
+<<<<<<< HEAD
     if (child != null)
       return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+=======
+    if (child != null) {
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    }
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
+<<<<<<< HEAD
     if (child != null)
       return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+=======
+    if (child != null) {
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    }
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
+<<<<<<< HEAD
     if (child != null)
       return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+=======
+    if (child != null) {
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    }
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
+<<<<<<< HEAD
     if (child != null)
       return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+=======
+    if (child != null) {
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    }
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
     return 0.0;
   }
 

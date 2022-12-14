@@ -47,9 +47,6 @@ abstract class FeatureFlags {
   /// Whether fast single widget reloads are enabled.
   bool get isSingleWidgetReloadEnabled => false;
 
-  /// Whether the windows UWP embedding is enabled.
-  bool get isWindowsUwpEnabled => false;
-
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -62,7 +59,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  windowsUwpEmbedding,
   singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
@@ -94,7 +90,6 @@ const Feature flutterMacOSDesktopFeature = Feature(
   name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
-  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
@@ -114,7 +109,6 @@ const Feature flutterLinuxDesktopFeature = Feature(
   name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
-  extraHelpText: 'Newer beta versions are available on the beta channel.',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
@@ -202,6 +196,12 @@ const Feature flutterCustomDevicesFeature = Feature(
   master: FeatureChannelSetting(
     available: true,
   ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+  ),
 );
 
 /// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
@@ -214,16 +214,6 @@ const Feature singleWidgetReload = Feature(
     enabledByDefault: true,
   ),
   beta: FeatureChannelSetting(
-    available: true,
-  ),
-);
-
-/// The feature for enabling the Windows UWP embedding.
-const Feature windowsUwpEmbedding = Feature(
-  name: 'Flutter for Windows UWP',
-  configSetting: 'enable-windows-uwp-desktop',
-  extraHelpText: 'Warning: Windows UWP support is obsolete and will be removed.',
-  master: FeatureChannelSetting(
     available: true,
   ),
 );

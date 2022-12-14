@@ -260,8 +260,9 @@ mixin CommandHandlerFactory {
     'This feature was deprecated after v1.9.3.'
   )
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
-    if (SchedulerBinding.instance.transientCallbackCount != 0)
+    if (SchedulerBinding.instance.transientCallbackCount != 0) {
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
     return Result.empty;
   }
 
@@ -310,8 +311,9 @@ mixin CommandHandlerFactory {
       node = renderObject.debugSemantics;
       renderObject = renderObject.parent as RenderObject?;
     }
-    if (node == null)
+    if (node == null) {
       throw StateError('No semantics data found');
+    }
     return GetSemanticsIdResult(node.id);
   }
 
@@ -413,7 +415,7 @@ mixin CommandHandlerFactory {
     }
 
     if (text == null) {
-      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+      throw UnsupportedError('Type ${widget.runtimeType} is currently not supported by getText');
     }
 
     return GetTextResult(text);
@@ -464,26 +466,30 @@ mixin CommandHandlerFactory {
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> waitForElement(Finder finder) async {
-    if (_frameSync)
+    if (_frameSync) {
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     await _waitUntilFrame(() => finder.evaluate().isNotEmpty);
 
-    if (_frameSync)
+    if (_frameSync) {
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     return finder;
   }
 
   /// Runs `finder` repeatedly until it finds zero [Element]s.
   Future<Finder> waitForAbsentElement(Finder finder) async {
-    if (_frameSync)
+    if (_frameSync) {
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     await _waitUntilFrame(() => finder.evaluate().isEmpty);
 
-    if (_frameSync)
+    if (_frameSync) {
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    }
 
     return finder;
   }

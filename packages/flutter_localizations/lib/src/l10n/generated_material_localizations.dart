@@ -165,9 +165,6 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -180,34 +177,10 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -297,9 +270,6 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -307,12 +277,6 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Spasie';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Laaste bladsy';
@@ -337,6 +301,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisensies';
+
+  @override
+  String get menuBarMenuLabel => 'Kieslysbalkkieslys';
 
   @override
   String get modalBarrierDismissLabel => 'Maak toe';
@@ -640,9 +607,6 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'አስወጣ';
 
   @override
@@ -655,34 +619,10 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'የሃንጉል ሁነታ';
-
-  @override
-  String get keyboardKeyHanjaMode => 'የሃንጃ ሁነታ';
-
-  @override
-  String get keyboardKeyHankaku => 'ሃንካኩ';
-
-  @override
-  String get keyboardKeyHiragana => 'ሂራጋና';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'ሂራጋና ካታካና';
-
-  @override
   String get keyboardKeyHome => 'መነሻ';
 
   @override
   String get keyboardKeyInsert => 'አስገባ';
-
-  @override
-  String get keyboardKeyKanaMode => 'የካና ሁነታ';
-
-  @override
-  String get keyboardKeyKanjiMode => 'የካንጂ ሁነታ';
-
-  @override
-  String get keyboardKeyKatakana => 'ካታካና';
 
   @override
   String get keyboardKeyMeta => 'ሜታ';
@@ -772,9 +712,6 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'ሮማጂ';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -782,12 +719,6 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'ክፍተት';
-
-  @override
-  String get keyboardKeyZenkaku => 'ዜንካኩ';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'ዜንካኩ ሃንካኩ';
 
   @override
   String get lastPageTooltip => 'የመጨረሻው ገጽ';
@@ -812,6 +743,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ፈቃዶች';
+
+  @override
+  String get menuBarMenuLabel => 'የምናሌ አሞሌ ምናሌ';
 
   @override
   String get modalBarrierDismissLabel => 'አሰናብት';
@@ -1115,9 +1049,6 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -1130,34 +1061,10 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'وضع Hangul (هانغول)';
-
-  @override
-  String get keyboardKeyHanjaMode => 'وضع Hanja (هانجا)';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'وضع Kana (كانا)';
-
-  @override
-  String get keyboardKeyKanjiMode => 'وضع Kanji (كانجي)';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -1247,9 +1154,6 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -1257,12 +1161,6 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'مفتاح المسافة';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'الصفحة الأخيرة';
@@ -1287,6 +1185,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'التراخيص';
+
+  @override
+  String get menuBarMenuLabel => 'قائمة شريط القوائم';
 
   @override
   String get modalBarrierDismissLabel => 'رفض';
@@ -1590,9 +1491,6 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'ইজেক্ট';
 
   @override
@@ -1605,34 +1503,10 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'হাঙুল ম’ড';
-
-  @override
-  String get keyboardKeyHanjaMode => 'হাঞ্জা ম’ড';
-
-  @override
-  String get keyboardKeyHankaku => 'হানকাকু';
-
-  @override
-  String get keyboardKeyHiragana => 'হিৰাগানা';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'হিৰাগানা কাটাকানা';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'কানা ম’ড';
-
-  @override
-  String get keyboardKeyKanjiMode => 'কাঞ্জি ম’ড';
-
-  @override
-  String get keyboardKeyKatakana => 'কাটাকানা';
 
   @override
   String get keyboardKeyMeta => 'মেটা';
@@ -1722,9 +1596,6 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'প্ৰিণ্ট স্ক্ৰীন';
 
   @override
-  String get keyboardKeyRomaji => 'ৰ’মাজি';
-
-  @override
   String get keyboardKeyScrollLock => 'স্ক্ৰ’ল লক';
 
   @override
@@ -1732,12 +1603,6 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'স্পেচ';
-
-  @override
-  String get keyboardKeyZenkaku => 'জেনকাকু';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'জেনকাকু হানকাকু';
 
   @override
   String get lastPageTooltip => 'অন্তিম পৃষ্ঠা';
@@ -1762,6 +1627,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
+
+  @override
+  String get menuBarMenuLabel => 'মেনু বাৰ মেনু';
 
   @override
   String get modalBarrierDismissLabel => 'অগ্ৰাহ্য কৰক';
@@ -2065,9 +1933,6 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Çıxarın';
 
   @override
@@ -2080,34 +1945,10 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hanqıl rejimi';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja rejimi';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiraqana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiraqana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Əsas səhifə';
 
   @override
   String get keyboardKeyInsert => 'Daxil edin';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Rejimi';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Rejimi';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -2197,9 +2038,6 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Ekran Çapı';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Sürüşdürmə';
 
   @override
@@ -2207,12 +2045,6 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Boşluq';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Son səhifə';
@@ -2237,6 +2069,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisenziyalar';
+
+  @override
+  String get menuBarMenuLabel => 'Menyu paneli menyusu';
 
   @override
   String get modalBarrierDismissLabel => 'İmtina edin';
@@ -2540,9 +2375,6 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Выняць';
 
   @override
@@ -2555,34 +2387,10 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -2672,9 +2480,6 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Ромадзі';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -2682,12 +2487,6 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Прабел';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'На апошнюю старонку';
@@ -2712,6 +2511,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Ліцэнзіі';
+
+  @override
+  String get menuBarMenuLabel => 'Меню "Панэль меню"';
 
   @override
   String get modalBarrierDismissLabel => 'Адхіліць';
@@ -3015,9 +2817,6 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Ейсу';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -3030,34 +2829,10 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Режим за хангъл';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Режим за ханджа';
-
-  @override
-  String get keyboardKeyHankaku => 'Ханкаку';
-
-  @override
-  String get keyboardKeyHiragana => 'Хирагана';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Хирагана катакана';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Режим за кана';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Режим за канджи';
-
-  @override
-  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -3147,9 +2922,6 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Ромаджи';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -3157,12 +2929,6 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Зенкаку';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Зенкаку ханкаку';
 
   @override
   String get lastPageTooltip => 'Последна страница';
@@ -3187,6 +2953,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лицензи';
+
+  @override
+  String get menuBarMenuLabel => 'Меню на лентата с менюта';
 
   @override
   String get modalBarrierDismissLabel => 'Отхвърляне';
@@ -3490,9 +3259,6 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'ইজেক্ট করুন';
 
   @override
@@ -3505,34 +3271,10 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => "'হাঙ্গুল' মোড";
-
-  @override
-  String get keyboardKeyHanjaMode => "'হাঞ্জা' মোড";
-
-  @override
-  String get keyboardKeyHankaku => 'হানকাকু';
-
-  @override
-  String get keyboardKeyHiragana => 'হিরাগানা';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'হিরাগানা কাতাকানা';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => "'কানা' মোড";
-
-  @override
-  String get keyboardKeyKanjiMode => "'কাঞ্জি' মোড";
-
-  @override
-  String get keyboardKeyKatakana => 'কাতাকানা';
 
   @override
   String get keyboardKeyMeta => 'মেটা';
@@ -3622,9 +3364,6 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'রোমাজি';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -3632,12 +3371,6 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'জেনকাকু';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'জেনকাকু হানকাকু';
 
   @override
   String get lastPageTooltip => 'শেষ পৃষ্ঠা';
@@ -3662,6 +3395,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'লাইসেন্স';
+
+  @override
+  String get menuBarMenuLabel => 'মেনু বার মেনু';
 
   @override
   String get modalBarrierDismissLabel => 'খারিজ করুন';
@@ -3965,9 +3701,6 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -3980,34 +3713,10 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'način rada Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'način rada Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'način rada Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'način rada Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -4097,9 +3806,6 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Prt Sc';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -4107,12 +3813,6 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'tipka za razmak';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Posljednja stranica';
@@ -4137,6 +3837,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licence';
+
+  @override
+  String get menuBarMenuLabel => 'Meni trake menija';
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
@@ -4440,9 +4143,6 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Supr';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Expulsa';
 
   @override
@@ -4455,34 +4155,10 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Mode hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Mode hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Inici';
 
   @override
   String get keyboardKeyInsert => 'Inser';
-
-  @override
-  String get keyboardKeyKanaMode => 'Mode kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Mode kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -4572,9 +4248,6 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Impr Pant';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Bloq Despl';
 
   @override
@@ -4582,12 +4255,6 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Espai';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Darrera pàgina';
@@ -4612,6 +4279,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Llicències';
+
+  @override
+  String get menuBarMenuLabel => 'Menú de la barra de menú';
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
@@ -4915,9 +4585,6 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Odpojit';
 
   @override
@@ -4930,34 +4597,10 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Režim korejského písma';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Režim čínských znaků';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Režim kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Režim kandži';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -5047,9 +4690,6 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Rómadži';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -5057,12 +4697,6 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Mezera';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Poslední stránka';
@@ -5087,6 +4721,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licence';
+
+  @override
+  String get menuBarMenuLabel => 'Nabídka na liště s nabídkou';
 
   @override
   String get modalBarrierDismissLabel => 'Zavřít';
@@ -5390,9 +5027,6 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Skub ud';
 
   @override
@@ -5405,34 +5039,10 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-tilstand';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-tilstand';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-tilstand';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-tilstand';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -5522,9 +5132,6 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -5532,12 +5139,6 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Mellemrumstasten';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Sidste side';
@@ -5562,6 +5163,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenser';
+
+  @override
+  String get menuBarMenuLabel => 'Menuen for menulinjen';
 
   @override
   String get modalBarrierDismissLabel => 'Afvis';
@@ -5865,9 +5469,6 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Entf';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Auswerfen';
 
   @override
@@ -5880,34 +5481,10 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-Modus';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-Modus';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Pos1';
 
   @override
   String get keyboardKeyInsert => 'Einfg';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-Modus';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-Modus';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -5997,9 +5574,6 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Druck';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Rollen';
 
   @override
@@ -6007,12 +5581,6 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Leertaste';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Letzte Seite';
@@ -6037,6 +5605,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lizenzen';
+
+  @override
+  String get menuBarMenuLabel => 'Menü in der Menüleiste';
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
@@ -6377,9 +5948,6 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Εξαγωγή';
 
   @override
@@ -6392,34 +5960,10 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Λειτουργία Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Λειτουργία Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Λειτουργία Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Λειτουργία Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -6509,9 +6053,6 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -6519,12 +6060,6 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Διάστημα';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Τελευταία σελίδα';
@@ -6549,6 +6084,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Άδειες';
+
+  @override
+  String get menuBarMenuLabel => 'Μενού γραμμής μενού';
 
   @override
   String get modalBarrierDismissLabel => 'Παράβλεψη';
@@ -6852,9 +6390,6 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -6867,34 +6402,10 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -6984,9 +6495,6 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -6994,12 +6502,6 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Last page';
@@ -7024,6 +6526,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenses';
+
+  @override
+  String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
@@ -7204,22 +6709,10 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
   String get keyboardKeyChannelUp => 'Channel up';
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
 
   @override
   String get keyboardKeyNumLock => 'Num lock';
@@ -7298,22 +6791,10 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
   String get keyboardKeyChannelUp => 'Channel up';
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
 
   @override
   String get keyboardKeyNumLock => 'Num lock';
@@ -7392,22 +6873,10 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
   String get keyboardKeyChannelUp => 'Channel up';
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
 
   @override
   String get keyboardKeyNumLock => 'Num lock';
@@ -7489,22 +6958,10 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
   String get keyboardKeyChannelUp => 'Channel up';
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
 
   @override
   String get keyboardKeyNumLock => 'Num lock';
@@ -7586,22 +7043,10 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
   String get keyboardKeyChannelUp => 'Channel up';
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
 
   @override
   String get keyboardKeyNumLock => 'Num lock';
@@ -7678,18 +7123,6 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
 
   @override
   String get keyboardKeyChannelUp => 'Channel up';
@@ -7774,22 +7207,10 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
   String get keyboardKeyChannelUp => 'Channel up';
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
 
   @override
   String get keyboardKeyNumLock => 'Num lock';
@@ -7868,22 +7289,10 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
-  String get keyboardKeyKanaMode => 'Kana mode';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja mode';
-
-  @override
   String get keyboardKeyChannelUp => 'Channel up';
 
   @override
   String get keyboardKeyChannelDown => 'Channel down';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji mode';
 
   @override
   String get keyboardKeyNumLock => 'Num lock';
@@ -8088,9 +7497,6 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Supr';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Expulsar';
 
   @override
@@ -8103,34 +7509,10 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Modo Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Modo Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Inicio';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Modo Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Modo Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -8220,9 +7602,6 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Impr Pant';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Bloq Despl';
 
   @override
@@ -8230,12 +7609,6 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Espacio';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Última página';
@@ -8260,6 +7633,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencias';
+
+  @override
+  String get menuBarMenuLabel => 'Menú de la barra de menú';
 
   @override
   String get modalBarrierDismissLabel => 'Cerrar';
@@ -8440,9 +7816,6 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -8601,9 +7974,6 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -8766,9 +8136,6 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -8927,9 +8294,6 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -9092,9 +8456,6 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -9253,9 +8614,6 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -9418,9 +8776,6 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -9579,9 +8934,6 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -9744,9 +9096,6 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -9905,9 +9254,6 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -10070,9 +9416,6 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -10231,9 +9574,6 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -10396,9 +9736,6 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -10557,9 +9894,6 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -10722,9 +10056,6 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -10883,9 +10214,6 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -11048,9 +10376,6 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -11209,9 +10534,6 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -11377,9 +10699,6 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
-
-  @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
 
   @override
@@ -11538,9 +10857,6 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana y Katakana';
 
   @override
   String get keyboardKeyChannelUp => 'Canal siguiente';
@@ -11826,9 +11142,6 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Väljuta';
 
   @override
@@ -11841,34 +11154,10 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hanguli režiim';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja režiim';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana/Katakana';
-
-  @override
   String get keyboardKeyHome => 'Avaleht';
 
   @override
   String get keyboardKeyInsert => 'Sisesta';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana režiim';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji režiim';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -11958,9 +11247,6 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Jäädvusta ekraanikuva';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Kerimislukk';
 
   @override
@@ -11968,12 +11254,6 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Tühik';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku/Hankaku';
 
   @override
   String get lastPageTooltip => 'Viimane leht';
@@ -11998,6 +11278,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Litsentsid';
+
+  @override
+  String get menuBarMenuLabel => 'Menüüriba menüü';
 
   @override
   String get modalBarrierDismissLabel => 'Loobu';
@@ -12301,9 +11584,6 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Ezab';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Kanporatu';
 
   @override
@@ -12316,34 +11596,10 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul modua';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja modua';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana eta katakana';
-
-  @override
   String get keyboardKeyHome => 'Hasi';
 
   @override
   String get keyboardKeyInsert => 'Txertatu';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana modua';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji modua';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -12433,9 +11689,6 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Inp pant';
 
   @override
-  String get keyboardKeyRomaji => 'Rōmaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Blok Korr';
 
   @override
@@ -12443,12 +11696,6 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Zuriune-barra';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku eta hankaku';
 
   @override
   String get lastPageTooltip => 'Azken orria';
@@ -12473,6 +11720,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lizentziak';
+
+  @override
+  String get menuBarMenuLabel => 'Menu-barraren menua';
 
   @override
   String get modalBarrierDismissLabel => 'Baztertu';
@@ -12776,9 +12026,6 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'حذف';
 
   @override
-  String get keyboardKeyEisu => 'اِسو';
-
-  @override
   String get keyboardKeyEject => 'خارج کردن';
 
   @override
@@ -12791,34 +12038,10 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'عملکرد';
 
   @override
-  String get keyboardKeyHangulMode => 'حالت هانگول';
-
-  @override
-  String get keyboardKeyHanjaMode => 'حالت هانجا';
-
-  @override
-  String get keyboardKeyHankaku => 'هانکاکو';
-
-  @override
-  String get keyboardKeyHiragana => 'هیراگانا';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'هیراگانا کاتاکانا';
-
-  @override
   String get keyboardKeyHome => 'صفحه اصلی';
 
   @override
   String get keyboardKeyInsert => 'درج';
-
-  @override
-  String get keyboardKeyKanaMode => 'حالت کانا';
-
-  @override
-  String get keyboardKeyKanjiMode => 'حالت کانجی';
-
-  @override
-  String get keyboardKeyKatakana => 'کاتاکانا';
 
   @override
   String get keyboardKeyMeta => 'متا';
@@ -12908,9 +12131,6 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'چاپ صفحه';
 
   @override
-  String get keyboardKeyRomaji => 'روماجی';
-
-  @override
   String get keyboardKeyScrollLock => 'قفل پیمایش';
 
   @override
@@ -12918,12 +12138,6 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'فاصله';
-
-  @override
-  String get keyboardKeyZenkaku => 'زنکاکو';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'زنکاکو هانکاکو';
 
   @override
   String get lastPageTooltip => 'صفحه آخر';
@@ -12948,6 +12162,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'مجوزها';
+
+  @override
+  String get menuBarMenuLabel => 'منوی نوار منو';
 
   @override
   String get modalBarrierDismissLabel => 'نپذیرفتن';
@@ -13251,9 +12468,6 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Poista';
 
   @override
@@ -13266,34 +12480,10 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-tila';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-tila';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Etusivu';
 
   @override
   String get keyboardKeyInsert => 'Lisää';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-tila';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-tila';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -13383,9 +12573,6 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -13393,12 +12580,6 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Välilyönti';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Viimeinen sivu';
@@ -13423,6 +12604,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisenssit';
+
+  @override
+  String get menuBarMenuLabel => 'Valikkopalkki';
 
   @override
   String get modalBarrierDismissLabel => 'Ohita';
@@ -13726,9 +12910,6 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -13741,34 +12922,10 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -13858,9 +13015,6 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -13868,12 +13022,6 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Puwang';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Huling page';
@@ -13898,6 +13046,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
+
+  @override
+  String get menuBarMenuLabel => 'Menu sa menu bar';
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
@@ -14201,9 +13352,6 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Suppr';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Éjecter';
 
   @override
@@ -14216,34 +13364,10 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Mode hangûl';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Mode hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Accueil';
 
   @override
   String get keyboardKeyInsert => 'Insérer';
-
-  @override
-  String get keyboardKeyKanaMode => 'Mode Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Mode Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Méta';
@@ -14333,9 +13457,6 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Impr. écran';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Arrêt défil';
 
   @override
@@ -14343,12 +13464,6 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Espace';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Dernière page';
@@ -14373,6 +13488,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get menuBarMenuLabel => 'Menu de la barre de menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorer';
@@ -14566,12 +13684,6 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
 
   @override
   String get keyboardKeyInsert => 'Insér.';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Mode Hanja';
-
-  @override
-  String get keyboardKeyHangulMode => 'Mode Hangul';
 
   @override
   String get keyboardKeyEscape => 'Échapp.';
@@ -14818,9 +13930,6 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Supr';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Expulsar';
 
   @override
@@ -14833,34 +13942,10 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Modo hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Modo hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Inicio';
 
   @override
   String get keyboardKeyInsert => 'Inserir';
-
-  @override
-  String get keyboardKeyKanaMode => 'Modo kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Modo kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -14950,9 +14035,6 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Imprimir pantalla';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Bloq Despr';
 
   @override
@@ -14960,12 +14042,6 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Espazo';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Última páxina';
@@ -14990,6 +14066,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenzas';
+
+  @override
+  String get menuBarMenuLabel => 'Menú da barra de menú';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorar';
@@ -15293,9 +14372,6 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Entf';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Auswerfen';
 
   @override
@@ -15308,34 +14384,10 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-Modus';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-Modus';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Pos1';
 
   @override
   String get keyboardKeyInsert => 'Einfg';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-Modus';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-Modus';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -15425,9 +14477,6 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Druck';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Rollen';
 
   @override
@@ -15435,12 +14484,6 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Leertaste';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Letzte Seite';
@@ -15465,6 +14508,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lizenzen';
+
+  @override
+  String get menuBarMenuLabel => 'Menü in der Menüleiste';
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
@@ -15768,9 +14814,6 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -15783,34 +14826,10 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -15900,9 +14919,6 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -15910,12 +14926,6 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'છેલ્લું પેજ';
@@ -15940,6 +14950,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'લાઇસન્સ';
+
+  @override
+  String get menuBarMenuLabel => 'મેનૂ બાર મેનૂ';
 
   @override
   String get modalBarrierDismissLabel => 'છોડી દો';
@@ -16243,9 +15256,6 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -16258,34 +15268,10 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -16375,9 +15361,6 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -16385,12 +15368,6 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'רווח';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'לדף האחרון';
@@ -16415,6 +15392,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'רישיונות';
+
+  @override
+  String get menuBarMenuLabel => 'תפריט בסרגל התפריטים';
 
   @override
   String get modalBarrierDismissLabel => 'סגירה';
@@ -16718,9 +15698,6 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -16733,34 +15710,10 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -16850,9 +15803,6 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -16860,12 +15810,6 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'आखिरी पेज';
@@ -16890,6 +15834,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'लाइसेंस';
+
+  @override
+  String get menuBarMenuLabel => 'मेन्यू बार का मेन्यू';
 
   @override
   String get modalBarrierDismissLabel => 'खारिज करें';
@@ -17193,9 +16140,6 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Izbaci';
 
   @override
@@ -17208,34 +16152,10 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Način hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Način hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Umetni';
-
-  @override
-  String get keyboardKeyKanaMode => 'Način kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Način kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -17325,9 +16245,6 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -17335,12 +16252,6 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Razmaknica';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Posljednja stranica';
@@ -17365,6 +16276,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licence';
+
+  @override
+  String get menuBarMenuLabel => 'Izbornik trake izbornika';
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
@@ -17668,9 +16582,6 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Kiadás';
 
   @override
@@ -17683,34 +16594,10 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul mód';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Handzsa mód';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana mód';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kandzsi mód';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -17800,9 +16687,6 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -17810,12 +16694,6 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Szóköz';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Utolsó oldal';
@@ -17840,6 +16718,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencek';
+
+  @override
+  String get menuBarMenuLabel => 'Menüsor menüje';
 
   @override
   String get modalBarrierDismissLabel => 'Elvetés';
@@ -18143,9 +17024,6 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -18158,34 +17036,10 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul ռեժիմ';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja ռեժիմ';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana ռեժիմ';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji ռեժիմ';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -18275,9 +17129,6 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -18285,12 +17136,6 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Բացատ';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Վերջին էջ';
@@ -18315,6 +17160,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Արտոնագրեր';
+
+  @override
+  String get menuBarMenuLabel => 'Ընտրացանկի գոտու ընտրացանկ';
 
   @override
   String get modalBarrierDismissLabel => 'Փակել';
@@ -18618,9 +17466,6 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -18633,34 +17478,10 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -18750,9 +17571,6 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -18760,12 +17578,6 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Halaman terakhir';
@@ -18790,6 +17602,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisensi';
+
+  @override
+  String get menuBarMenuLabel => 'Menu panel menu';
 
   @override
   String get modalBarrierDismissLabel => 'Tutup';
@@ -18918,7 +17733,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'Tab $tabIndex dari $tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
   String get timePickerDialHelpText => 'PILIH WAKTU';
@@ -19093,9 +17908,6 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Fjarlægja';
 
   @override
@@ -19108,34 +17920,10 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-stilling';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-stilling';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-stilling';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-stilling';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -19225,9 +18013,6 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -19235,12 +18020,6 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Bil';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Síðasta síða';
@@ -19265,6 +18044,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Leyfi';
+
+  @override
+  String get menuBarMenuLabel => 'Valmyndarstika';
 
   @override
   String get modalBarrierDismissLabel => 'Hunsa';
@@ -19568,9 +18350,6 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Canc';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Espelli';
 
   @override
@@ -19583,34 +18362,10 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Modalità hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Modalità hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Ins';
-
-  @override
-  String get keyboardKeyKanaMode => 'Modalità kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Modalità kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -19700,9 +18455,6 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Stamp';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Bloc Scorr';
 
   @override
@@ -19710,12 +18462,6 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Barra spaziatrice';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Ultima pagina';
@@ -19740,6 +18486,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenze';
+
+  @override
+  String get menuBarMenuLabel => 'Menu barra dei menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
@@ -20043,9 +18792,6 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => '英数';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -20058,34 +18804,10 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'ハングルモード';
-
-  @override
-  String get keyboardKeyHanjaMode => '漢字（ハンジャ）モード';
-
-  @override
-  String get keyboardKeyHankaku => '半角';
-
-  @override
-  String get keyboardKeyHiragana => 'ひらがな';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'かな / カナ / ローマ字';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'かなモード';
-
-  @override
-  String get keyboardKeyKanjiMode => '漢字モード';
-
-  @override
-  String get keyboardKeyKatakana => 'カタカナ';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -20175,9 +18897,6 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Printscreen';
 
   @override
-  String get keyboardKeyRomaji => 'ローマ字';
-
-  @override
   String get keyboardKeyScrollLock => 'ScrollLock';
 
   @override
@@ -20185,12 +18904,6 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => '全角';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => '半 / 全 / 漢字';
 
   @override
   String get lastPageTooltip => '最後のページ';
@@ -20215,6 +18928,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ライセンス';
+
+  @override
+  String get menuBarMenuLabel => 'メニューバーのメニュー';
 
   @override
   String get modalBarrierDismissLabel => '閉じる';
@@ -20518,9 +19234,6 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -20533,34 +19246,10 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'ჰანგილის რეჟიმი';
-
-  @override
-  String get keyboardKeyHanjaMode => 'ჰანჯის რეჟიმი';
-
-  @override
-  String get keyboardKeyHankaku => 'ჰანკაკუ';
-
-  @override
-  String get keyboardKeyHiragana => 'ჰირაგანა';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'ჰირაგანა კატაკანა';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'კანას რეჟიმი';
-
-  @override
-  String get keyboardKeyKanjiMode => 'კანჯის რეჟიმი';
-
-  @override
-  String get keyboardKeyKatakana => 'კატაკანა';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -20650,9 +19339,6 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'რომაჯი';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -20660,12 +19346,6 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'ზენკაკუ';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'ზენკაკუ ჰანკაკუ';
 
   @override
   String get lastPageTooltip => 'ბოლო გვერდი';
@@ -20690,6 +19370,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ლიცენზიები';
+
+  @override
+  String get menuBarMenuLabel => 'მენიუს ზოლის მენიუ';
 
   @override
   String get modalBarrierDismissLabel => 'დახურვა';
@@ -20993,9 +19676,6 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -21008,34 +19688,10 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Ханғыл режимі';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Ханжа режимі';
-
-  @override
-  String get keyboardKeyHankaku => 'Ханкаку';
-
-  @override
-  String get keyboardKeyHiragana => 'Хирагана';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Хирагана Катакана';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Кана режимі';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Канжи режимі';
-
-  @override
-  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -21125,9 +19781,6 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Ромажи';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -21135,12 +19788,6 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Бос орын';
-
-  @override
-  String get keyboardKeyZenkaku => 'Зенкаку';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Зенкаку Ханкаку';
 
   @override
   String get lastPageTooltip => 'Соңғы бет';
@@ -21165,6 +19812,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лицензиялар';
+
+  @override
+  String get menuBarMenuLabel => 'Мәзір жолағының мәзірі';
 
   @override
   String get modalBarrierDismissLabel => 'Жабу';
@@ -21468,9 +20118,6 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -21483,34 +20130,10 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -21600,9 +20223,6 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -21610,12 +20230,6 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'ទំព័រ​ចុង​ក្រោយ';
@@ -21640,6 +20254,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'អាជ្ញាបណ្ណ';
+
+  @override
+  String get menuBarMenuLabel => 'ម៉ឺនុយរបារម៉ឺនុយ';
 
   @override
   String get modalBarrierDismissLabel => 'ច្រាន​ចោល';
@@ -21943,9 +20560,6 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => '\u{45}\u{69}\u{73}\u{16b}';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -21958,34 +20572,10 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -22075,9 +20665,6 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -22085,12 +20672,6 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{caf}\u{20}\u{caa}\u{cc1}\u{c9f}';
@@ -22115,6 +20696,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
+
+  @override
+  String get menuBarMenuLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{cac}\u{cbe}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
 
   @override
   String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
@@ -22418,9 +21002,6 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => '꺼내기';
 
   @override
@@ -22433,34 +21014,10 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => '한글 모드';
-
-  @override
-  String get keyboardKeyHanjaMode => '한자 모드';
-
-  @override
-  String get keyboardKeyHankaku => '반각';
-
-  @override
-  String get keyboardKeyHiragana => '히라가나';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => '히라가나 가타카나';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => '가나 모드';
-
-  @override
-  String get keyboardKeyKanjiMode => '칸지 모드';
-
-  @override
-  String get keyboardKeyKatakana => '가타카나';
 
   @override
   String get keyboardKeyMeta => '메타';
@@ -22550,9 +21107,6 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => '로마자';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -22560,12 +21114,6 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => '스페이스';
-
-  @override
-  String get keyboardKeyZenkaku => '전각';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => '전각 및 반각';
 
   @override
   String get lastPageTooltip => '마지막 페이지';
@@ -22590,6 +21138,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => '라이선스';
+
+  @override
+  String get menuBarMenuLabel => '메뉴 바 메뉴';
 
   @override
   String get modalBarrierDismissLabel => '닫기';
@@ -22893,9 +21444,6 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -22908,34 +21456,10 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Хангул режими';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Ханжа режими';
-
-  @override
-  String get keyboardKeyHankaku => 'Ханкаку';
-
-  @override
-  String get keyboardKeyHiragana => 'Хирагана';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Хирагана-катакана';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Кана режими';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Канжи режими';
-
-  @override
-  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Мета';
@@ -23025,9 +21549,6 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Ромажи';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -23035,12 +21556,6 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Боштук';
-
-  @override
-  String get keyboardKeyZenkaku => 'Зенкаку';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Зенкаку-ханкаку';
 
   @override
   String get lastPageTooltip => 'Акыркы бет';
@@ -23065,6 +21580,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Уруксаттамалар';
+
+  @override
+  String get menuBarMenuLabel => 'Меню тилкеси менюсу';
 
   @override
   String get modalBarrierDismissLabel => 'Жабуу';
@@ -23368,9 +21886,6 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -23383,34 +21898,10 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'ໂໝດ Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'ໂໝດ Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'ໂໝດ Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'ໂໝດ Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -23500,9 +21991,6 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -23510,12 +21998,6 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'ໜ້າສຸດທ້າຍ';
@@ -23540,6 +22022,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
+
+  @override
+  String get menuBarMenuLabel => 'ເມນູແຖບເມນູ';
 
   @override
   String get modalBarrierDismissLabel => 'ປິດໄວ້';
@@ -23843,9 +22328,6 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Išimti';
 
   @override
@@ -23858,34 +22340,10 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul režimas';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja režimas';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana režimas';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji režimas';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -23975,9 +22433,6 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -23985,12 +22440,6 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Tarpas';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Paskutinis puslapis';
@@ -24015,6 +22464,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencijos';
+
+  @override
+  String get menuBarMenuLabel => 'Meniu juostos meniu';
 
   @override
   String get modalBarrierDismissLabel => 'Atsisakyti';
@@ -24318,9 +22770,6 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Izstumt';
 
   @override
@@ -24333,34 +22782,10 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul režīms';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja režīms';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana režīms';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji režīms';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -24450,9 +22875,6 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -24460,12 +22882,6 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Atstarpes taustiņš';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Pēdējā lapa';
@@ -24490,6 +22906,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licences';
+
+  @override
+  String get menuBarMenuLabel => 'Izvēļņu joslas izvēlne';
 
   @override
   String get modalBarrierDismissLabel => 'Nerādīt';
@@ -24793,9 +23212,6 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -24808,34 +23224,10 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -24925,9 +23317,6 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -24935,12 +23324,6 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Последна страница';
@@ -24965,6 +23348,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лиценци';
+
+  @override
+  String get menuBarMenuLabel => 'Мени на лентата со мени';
 
   @override
   String get modalBarrierDismissLabel => 'Отфрли';
@@ -25268,9 +23654,6 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -25283,34 +23666,10 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -25400,9 +23759,6 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -25410,12 +23766,6 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'അവസാന പേജ്';
@@ -25440,6 +23790,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ലൈസൻസുകൾ';
+
+  @override
+  String get menuBarMenuLabel => 'മെനു ബാർ മെനു';
 
   @override
   String get modalBarrierDismissLabel => 'നിരസിക്കുക';
@@ -25743,9 +24096,6 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -25758,34 +24108,10 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Солонгос хэлний горим';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja горим';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Хирагана';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Хирагана Катакана';
-
-  @override
   String get keyboardKeyHome => 'Гэр';
 
   @override
   String get keyboardKeyInsert => 'Оруулах';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana горим';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji горим';
-
-  @override
-  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Мета';
@@ -25875,9 +24201,6 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -25885,12 +24208,6 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Сүүлийн хуудас';
@@ -25915,6 +24232,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лиценз';
+
+  @override
+  String get menuBarMenuLabel => 'Цэсний талбарын цэс';
 
   @override
   String get modalBarrierDismissLabel => 'Үл хэрэгсэх';
@@ -26218,9 +24538,6 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'इजेक्ट';
 
   @override
@@ -26233,34 +24550,10 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'हंगुल मोड';
-
-  @override
-  String get keyboardKeyHanjaMode => 'हांजा मोड';
-
-  @override
-  String get keyboardKeyHankaku => 'हानकाकू';
-
-  @override
-  String get keyboardKeyHiragana => 'हिरागाना';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'हिरागाना काताकाना';
-
-  @override
   String get keyboardKeyHome => 'होम';
 
   @override
   String get keyboardKeyInsert => 'इन्सर्ट';
-
-  @override
-  String get keyboardKeyKanaMode => 'काना मोड';
-
-  @override
-  String get keyboardKeyKanjiMode => 'कांजी मोड';
-
-  @override
-  String get keyboardKeyKatakana => 'काताकाना';
 
   @override
   String get keyboardKeyMeta => 'मेटा';
@@ -26350,9 +24643,6 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'प्रिंट स्क्रीन';
 
   @override
-  String get keyboardKeyRomaji => 'रोमाजी';
-
-  @override
   String get keyboardKeyScrollLock => 'स्क्रोल लॉक';
 
   @override
@@ -26360,12 +24650,6 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'स्पेस';
-
-  @override
-  String get keyboardKeyZenkaku => 'झेनकाकू';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'झेनकाकू हानकाकू';
 
   @override
   String get lastPageTooltip => 'शेवटचे पेज';
@@ -26390,6 +24674,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'परवाने';
+
+  @override
+  String get menuBarMenuLabel => 'मेनू बार मेनू';
 
   @override
   String get modalBarrierDismissLabel => 'डिसमिस करा';
@@ -26693,9 +24980,6 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Keluarkan';
 
   @override
@@ -26708,34 +24992,10 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Mod Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Mod Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Mod Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Mod Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -26825,9 +25085,6 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -26835,12 +25092,6 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Ruang';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Halaman terakhir';
@@ -26865,6 +25116,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lesen';
+
+  @override
+  String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
   String get modalBarrierDismissLabel => 'Tolak';
@@ -27168,9 +25422,6 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'ထုတ်ရန်';
 
   @override
@@ -27183,34 +25434,10 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul မုဒ်';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja မုဒ်';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'ပင်မခလုတ်';
 
   @override
   String get keyboardKeyInsert => 'ထည့်သွင်းခလုတ်';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana မုဒ်';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji မုဒ်';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -27300,9 +25527,6 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'ပရင့်စခရင်';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'လှိမ့်သည့်လော့ခ်';
 
   @override
@@ -27310,12 +25534,6 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'နေရာခြားခလုတ်';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'နောက်ဆုံး စာမျက်နှာ';
@@ -27340,6 +25558,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'လိုင်စင်များ';
+
+  @override
+  String get menuBarMenuLabel => 'မီနူးဘား မီနူး';
 
   @override
   String get modalBarrierDismissLabel => 'ပယ်ရန်';
@@ -27643,9 +25864,6 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Løs ut';
 
   @override
@@ -27658,34 +25876,10 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-modus';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-modus';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-modus';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-modus';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -27775,9 +25969,6 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'PrtScn';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'ScrLk';
 
   @override
@@ -27785,12 +25976,6 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Mellomrom';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Siste side';
@@ -27815,6 +26000,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisenser';
+
+  @override
+  String get menuBarMenuLabel => 'Meny med menylinje';
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
@@ -28118,9 +26306,6 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -28133,34 +26318,10 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -28250,9 +26411,6 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -28260,12 +26418,6 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'अन्तिम पेज';
@@ -28290,6 +26442,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'इजाजतपत्रहरू';
+
+  @override
+  String get menuBarMenuLabel => '"मेनु बार" मेनु';
 
   @override
   String get modalBarrierDismissLabel => 'खारेज गर्नुहोस्';
@@ -28593,9 +26748,6 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Uitwerpen';
 
   @override
@@ -28608,34 +26760,10 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-modus';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-modus';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-modus';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-modus';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -28725,9 +26853,6 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -28735,12 +26860,6 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Spatie';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Laatste pagina';
@@ -28765,6 +26884,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenties';
+
+  @override
+  String get menuBarMenuLabel => 'Menu van menubalk';
 
   @override
   String get modalBarrierDismissLabel => 'Sluiten';
@@ -29068,9 +27190,6 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Løs ut';
 
   @override
@@ -29083,34 +27202,10 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-modus';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-modus';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-modus';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-modus';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -29200,9 +27295,6 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'PrtScn';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'ScrLk';
 
   @override
@@ -29210,12 +27302,6 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Mellomrom';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Siste side';
@@ -29240,6 +27326,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisenser';
+
+  @override
+  String get menuBarMenuLabel => 'Meny med menylinje';
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
@@ -29543,9 +27632,6 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -29558,34 +27644,10 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -29675,9 +27737,6 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -29685,12 +27744,6 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'ଶେଷ ପୃଷ୍ଠା';
@@ -29715,6 +27768,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
+
+  @override
+  String get menuBarMenuLabel => 'ମେନୁ ବାର ମେନୁ';
 
   @override
   String get modalBarrierDismissLabel => 'ଖାରଜ କରନ୍ତୁ';
@@ -30018,9 +28074,6 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -30033,34 +28086,10 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -30150,9 +28179,6 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -30160,12 +28186,6 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'ਆਖਰੀ ਪੰਨਾ';
@@ -30190,6 +28210,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
+
+  @override
+  String get menuBarMenuLabel => 'ਮੀਨੂ ਬਾਰ ਮੀਨੂ';
 
   @override
   String get modalBarrierDismissLabel => 'ਖਾਰਜ ਕਰੋ';
@@ -30493,9 +28516,6 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Wysuń';
 
   @override
@@ -30508,34 +28528,10 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Tryb hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Tryb hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Tryb kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Tryb kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -30625,9 +28621,6 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Rōmaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -30635,12 +28628,6 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Spacja';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Ostatnia strona';
@@ -30665,6 +28652,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencje';
+
+  @override
+  String get menuBarMenuLabel => 'Pasek menu';
 
   @override
   String get modalBarrierDismissLabel => 'Zamknij';
@@ -30968,9 +28958,6 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -30983,34 +28970,10 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -31100,9 +29063,6 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -31110,12 +29070,6 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Last page';
@@ -31140,6 +29094,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'جوازونه';
+
+  @override
+  String get menuBarMenuLabel => 'Menu bar menu';
 
   @override
   String get modalBarrierDismissLabel => 'رد کړه';
@@ -31443,9 +29400,6 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Ejetar';
 
   @override
@@ -31458,34 +29412,10 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Modo Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Modo Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Modo Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Modo Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -31575,9 +29505,6 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -31585,12 +29512,6 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Espaço';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Última página';
@@ -31615,6 +29536,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenças';
+
+  @override
+  String get menuBarMenuLabel => 'Menu da barra de menus';
 
   @override
   String get modalBarrierDismissLabel => 'Dispensar';
@@ -31792,19 +29716,13 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   });
 
   @override
+  String get menuBarMenuLabel => 'Menu da barra de menu';
+
+  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
   String get keyboardKeyBackspace => 'Retrocesso';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Modo kanji';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Modo hanja';
-
-  @override
-  String get keyboardKeyKanaMode => 'Modo kana';
 
   @override
   String get keyboardKeyInsert => 'Inserir';
@@ -31814,9 +29732,6 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
 
   @override
   String get keyboardKeyEnd => 'Fim';
-
-  @override
-  String get keyboardKeyHangulMode => 'Modo hangul';
 
   @override
   String get keyboardKeyChannelUp => 'Canal seguinte';
@@ -32066,9 +29981,6 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -32081,34 +29993,10 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Modul Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Modul Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Modul Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Modul Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -32198,9 +30086,6 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -32208,12 +30093,6 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Spațiu';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Ultima pagină';
@@ -32238,6 +30117,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licențe';
+
+  @override
+  String get menuBarMenuLabel => 'Bară de meniu';
 
   @override
   String get modalBarrierDismissLabel => 'Închideți';
@@ -32541,9 +30423,6 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Эйсу';
-
-  @override
   String get keyboardKeyEject => 'Извлечь';
 
   @override
@@ -32556,34 +30435,10 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Хангыль';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Ханча';
-
-  @override
-  String get keyboardKeyHankaku => 'Ханкаку';
-
-  @override
-  String get keyboardKeyHiragana => 'Хирагана';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Хирагана Катакана';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Кана';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Кандзи';
-
-  @override
-  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -32673,9 +30528,6 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Ромадзи';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -32683,12 +30535,6 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Пробел';
-
-  @override
-  String get keyboardKeyZenkaku => 'Дзэнкаку';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Дзэнкаку Ханкаку';
 
   @override
   String get lastPageTooltip => 'Последняя страница';
@@ -32713,6 +30559,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лицензии';
+
+  @override
+  String get menuBarMenuLabel => 'Строка меню';
 
   @override
   String get modalBarrierDismissLabel => 'Закрыть';
@@ -33016,9 +30865,6 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -33031,34 +30877,10 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -33148,9 +30970,6 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -33158,12 +30977,6 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'අවසන් පිටුව';
@@ -33188,6 +31001,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'බලපත්‍ර';
+
+  @override
+  String get menuBarMenuLabel => 'මෙනු තීරු මෙනුව';
 
   @override
   String get modalBarrierDismissLabel => 'ඉවත ලන්න';
@@ -33491,9 +31307,6 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Odpojiť';
 
   @override
@@ -33506,34 +31319,10 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Režim Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Režim Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Režim Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Režim kandži';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -33623,9 +31412,6 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -33633,12 +31419,6 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Medzerník';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Posledná strana';
@@ -33663,6 +31443,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencie';
+
+  @override
+  String get menuBarMenuLabel => 'Ponuka panela s ponukami';
 
   @override
   String get modalBarrierDismissLabel => 'Odmietnuť';
@@ -33966,9 +31749,6 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Odstrani';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Izvrzi';
 
   @override
@@ -33981,34 +31761,10 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Način hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Način handža';
-
-  @override
-  String get keyboardKeyHankaku => 'hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'hiragana katakana';
-
-  @override
   String get keyboardKeyHome => 'Začetek';
 
   @override
   String get keyboardKeyInsert => 'Vstavi';
-
-  @override
-  String get keyboardKeyKanaMode => 'Način kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Način kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -34098,9 +31854,6 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Zajem zaslona';
 
   @override
-  String get keyboardKeyRomaji => 'Romadži';
-
-  @override
   String get keyboardKeyScrollLock => 'Vklopi drsenje';
 
   @override
@@ -34108,12 +31861,6 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Preslednica';
-
-  @override
-  String get keyboardKeyZenkaku => 'zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Zadnja stran';
@@ -34138,6 +31885,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licence';
+
+  @override
+  String get menuBarMenuLabel => 'Meni menijske vrstice';
 
   @override
   String get modalBarrierDismissLabel => 'Opusti';
@@ -34441,9 +32191,6 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Delete';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -34456,34 +32203,10 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -34573,9 +32296,6 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -34583,12 +32303,6 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Faqja e fundit';
@@ -34613,6 +32327,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licencat';
+
+  @override
+  String get menuBarMenuLabel => 'Menyja e shiritit të menysë';
 
   @override
   String get modalBarrierDismissLabel => 'Hiq';
@@ -34916,9 +32633,6 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Еису';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -34931,34 +32645,10 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Режим хангул';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Режим ханџа';
-
-  @override
-  String get keyboardKeyHankaku => 'Ханкаку';
-
-  @override
-  String get keyboardKeyHiragana => 'Хирагана';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Хирагана катакана';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Кана режим';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Канџи режим';
-
-  @override
-  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -35048,9 +32738,6 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Ромађи';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -35058,12 +32745,6 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Тастер за размак';
-
-  @override
-  String get keyboardKeyZenkaku => 'Зенкаку';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Зенкаку ханкаку';
 
   @override
   String get lastPageTooltip => 'Последња страница';
@@ -35088,6 +32769,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Лиценце';
+
+  @override
+  String get menuBarMenuLabel => 'Мени трака менија';
 
   @override
   String get modalBarrierDismissLabel => 'Одбаци';
@@ -35389,49 +33073,13 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get keyboardKeyChannelUp => 'Sledeći kanal';
 
   @override
-  String get keyboardKeyEisu => 'Eisu';
-
-  @override
-  String get keyboardKeyHangulMode => 'Režim hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Režim handža';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana katakana';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana režim';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kandži režim';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
-
-  @override
   String get keyboardKeyPower => 'Dugme za uključivanje';
 
   @override
   String get keyboardKeyPowerOff => 'Dugme za isključivanje';
 
   @override
-  String get keyboardKeyRomaji => 'Romađi';
-
-  @override
   String get keyboardKeySpace => 'Taster za razmak';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku hankaku';
 
   @override
   String get lastPageTooltip => 'Poslednja stranica';
@@ -35447,6 +33095,9 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
 
   @override
   String get licensesPageTitle => 'Licence';
+
+  @override
+  String get menuBarMenuLabel => 'Meni traka menija';
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
@@ -35726,9 +33377,6 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Mata ut';
 
   @override
@@ -35741,34 +33389,10 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul-läge';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja-läge';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Hem';
 
   @override
   String get keyboardKeyInsert => 'Infoga';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana-läge';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji-läge';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -35858,9 +33482,6 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -35868,12 +33489,6 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Blanksteg';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Sista sidan';
@@ -35898,6 +33513,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Licenser';
+
+  @override
+  String get menuBarMenuLabel => 'Menyrad';
 
   @override
   String get modalBarrierDismissLabel => 'Stäng';
@@ -36201,9 +33819,6 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -36216,34 +33831,10 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hali ya Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hali ya Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Hali ya Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Hali ya Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -36333,9 +33924,6 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -36343,12 +33931,6 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Ukurasa wa mwisho';
@@ -36373,6 +33955,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Leseni';
+
+  @override
+  String get menuBarMenuLabel => 'Menyu ya upau wa menyu';
 
   @override
   String get modalBarrierDismissLabel => 'Ondoa';
@@ -36676,9 +34261,6 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -36691,34 +34273,10 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -36808,9 +34366,6 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -36818,12 +34373,6 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'கடைசிப் பக்கத்திற்குச் செல்லும்';
@@ -36848,6 +34397,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'உரிமங்கள்';
+
+  @override
+  String get menuBarMenuLabel => 'மெனு பட்டியின் மெனு';
 
   @override
   String get modalBarrierDismissLabel => 'நிராகரிக்கும்';
@@ -37151,9 +34703,6 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -37166,34 +34715,10 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -37283,9 +34808,6 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -37293,12 +34815,6 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'చివరి పేజీ';
@@ -37323,6 +34839,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'లైసెన్స్‌లు';
+
+  @override
+  String get menuBarMenuLabel => 'మెనూ బార్ మెనూ';
 
   @override
   String get modalBarrierDismissLabel => 'విస్మరించు';
@@ -37626,9 +35145,6 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -37641,34 +35157,10 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'โหมดตัวอักษรฮันกึล';
-
-  @override
-  String get keyboardKeyHanjaMode => 'โหมดตัวอักษรฮันจา';
-
-  @override
-  String get keyboardKeyHankaku => 'ฮันคาคุ';
-
-  @override
-  String get keyboardKeyHiragana => 'ฮิรางานะ';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'ฮิรางานะ คาตาคานะ';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'โหมดตัวอักษรคานะ';
-
-  @override
-  String get keyboardKeyKanjiMode => 'โหมดตัวอักษรคันจิ';
-
-  @override
-  String get keyboardKeyKatakana => 'คาตาคานะ';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -37758,9 +35250,6 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'โรมาจิ';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -37768,12 +35257,6 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'เซ็นคาคุ';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'เซ็นคาคุ ฮันคาคุ';
 
   @override
   String get lastPageTooltip => 'หน้าสุดท้าย';
@@ -37798,6 +35281,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'ใบอนุญาต';
+
+  @override
+  String get menuBarMenuLabel => 'เมนูในแถบเมนู';
 
   @override
   String get modalBarrierDismissLabel => 'ปิด';
@@ -38101,9 +35587,6 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -38116,34 +35599,10 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -38233,9 +35692,6 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -38243,12 +35699,6 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Puwang';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Huling page';
@@ -38273,6 +35723,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Mga Lisensya';
+
+  @override
+  String get menuBarMenuLabel => 'Menu sa menu bar';
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
@@ -38576,9 +36029,6 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Çıkar';
 
   @override
@@ -38591,34 +36041,10 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Modu';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Modu';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Modu';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Modu';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -38708,9 +36134,6 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Ekranı Yazdır';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -38718,12 +36141,6 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Boşluk';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Son sayfa';
@@ -38748,6 +36165,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Lisanslar';
+
+  @override
+  String get menuBarMenuLabel => 'Menü çubuğu menüsü';
 
   @override
   String get modalBarrierDismissLabel => 'Kapat';
@@ -39051,9 +36471,6 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Вийняти';
 
   @override
@@ -39066,34 +36483,10 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Режим хангиль';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Режим ханча';
-
-  @override
-  String get keyboardKeyHankaku => 'Ханкаку';
-
-  @override
-  String get keyboardKeyHiragana => 'Хірагана';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Хірагана/Катакана';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Режим кана';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Режим канджі';
-
-  @override
-  String get keyboardKeyKatakana => 'Катакана';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -39183,9 +36576,6 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Ромадзі';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -39193,12 +36583,6 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Пробіл';
-
-  @override
-  String get keyboardKeyZenkaku => 'Зенкаку';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Зенкаку/Ханкаку';
 
   @override
   String get lastPageTooltip => 'Остання сторінка';
@@ -39223,6 +36607,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Ліцензії';
+
+  @override
+  String get menuBarMenuLabel => 'Панель меню';
 
   @override
   String get modalBarrierDismissLabel => 'Закрити';
@@ -39526,9 +36913,6 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -39541,34 +36925,10 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -39658,9 +37018,6 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -39668,12 +37025,6 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'آخری صفحہ';
@@ -39698,6 +37049,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'لائسنسز';
+
+  @override
+  String get menuBarMenuLabel => 'مینو بار کا مینو';
 
   @override
   String get modalBarrierDismissLabel => 'برخاست کریں';
@@ -40001,9 +37355,6 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -40016,34 +37367,10 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul rejimi';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja rejimi';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana rejimi';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji rejimi';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -40133,9 +37460,6 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -40143,12 +37467,6 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Boʻsh joy';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Oxirgi sahifa';
@@ -40173,6 +37491,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Litsenziyalar';
+
+  @override
+  String get menuBarMenuLabel => 'Menyu paneli';
 
   @override
   String get modalBarrierDismissLabel => 'Yopish';
@@ -40476,9 +37797,6 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -40491,34 +37809,10 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Chế độ Hangul';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Chế độ Hanja';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Chế độ Kana';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Chế độ Kanji';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -40608,9 +37902,6 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -40618,12 +37909,6 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Phím cách';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Trang cuối';
@@ -40648,6 +37933,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Giấy phép';
+
+  @override
+  String get menuBarMenuLabel => 'Trình đơn của thanh trình đơn';
 
   @override
   String get modalBarrierDismissLabel => 'Bỏ qua';
@@ -40951,9 +38239,6 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => '英数';
-
-  @override
   String get keyboardKeyEject => '弹出';
 
   @override
@@ -40966,34 +38251,10 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => '한글';
-
-  @override
-  String get keyboardKeyHanjaMode => '한자';
-
-  @override
-  String get keyboardKeyHankaku => '半角';
-
-  @override
-  String get keyboardKeyHiragana => 'ひらがな';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'ひらがな / カタカナ / ローマ字';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'かな';
-
-  @override
-  String get keyboardKeyKanjiMode => '漢字';
-
-  @override
-  String get keyboardKeyKatakana => 'カタカナ';
 
   @override
   String get keyboardKeyMeta => 'Meta';
@@ -41083,9 +38344,6 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'ローマ字';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -41093,12 +38351,6 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => '空格键';
-
-  @override
-  String get keyboardKeyZenkaku => '全角';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => '半角 / 全角 / 漢字';
 
   @override
   String get lastPageTooltip => '最后一页';
@@ -41123,6 +38375,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => '许可';
+
+  @override
+  String get menuBarMenuLabel => '菜单栏的菜单';
 
   @override
   String get modalBarrierDismissLabel => '关闭';
@@ -41418,34 +38673,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get keyboardKeyChannelUp => '上一個頻道';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
-
-  @override
-  String get keyboardKeyHangulMode => 'Hangul 模式';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja 模式';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana 模式';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji 模式';
-
-  @override
-  String get keyboardKeyKatakana => 'Katakana';
 
   @override
   String get keyboardKeyMetaMacOs => 'Command';
@@ -41520,19 +38748,10 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get keyboardKeyPowerOff => '關機';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeySelect => 'Select';
 
   @override
   String get keyboardKeySpace => '空格';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => '最後一頁';
@@ -41545,6 +38764,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
 
   @override
   String get licensesPageTitle => '授權';
+
+  @override
+  String get menuBarMenuLabel => '選單列選單';
 
   @override
   String get modalBarrierDismissLabel => '拒絕';
@@ -41922,9 +39144,6 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEisu => 'Eisū';
-
-  @override
   String get keyboardKeyEject => 'Eject';
 
   @override
@@ -41937,34 +39156,10 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeyFn => 'Fn';
 
   @override
-  String get keyboardKeyHangulMode => 'Hangul Mode';
-
-  @override
-  String get keyboardKeyHanjaMode => 'Hanja Mode';
-
-  @override
-  String get keyboardKeyHankaku => 'Hankaku';
-
-  @override
-  String get keyboardKeyHiragana => 'Hiragana';
-
-  @override
-  String get keyboardKeyHiraganaKatakana => 'Hiragana Katakana';
-
-  @override
   String get keyboardKeyHome => 'Home';
 
   @override
   String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyKanaMode => 'Kana Mode';
-
-  @override
-  String get keyboardKeyKanjiMode => 'Kanji Mode';
-
-  @override
-  String get keyboardKeyKatakana => 'I-Katakana';
 
   @override
   String get keyboardKeyMeta => 'I-Meta';
@@ -42054,9 +39249,6 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeyPrintScreen => '-Print Screen';
 
   @override
-  String get keyboardKeyRomaji => 'Romaji';
-
-  @override
   String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
@@ -42064,12 +39256,6 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySpace => 'Space';
-
-  @override
-  String get keyboardKeyZenkaku => 'Zenkaku';
-
-  @override
-  String get keyboardKeyZenkakuHankaku => 'Zenkaku Hankaku';
 
   @override
   String get lastPageTooltip => 'Ikhasi lokugcina';
@@ -42094,6 +39280,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get licensesPageTitle => 'Amalayisense';
+
+  @override
+  String get menuBarMenuLabel => 'Imenyu yebha yemenyu';
 
   @override
   String get modalBarrierDismissLabel => 'Cashisa';

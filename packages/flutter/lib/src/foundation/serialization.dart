@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+export 'dart:typed_data' show ByteData, Endian, Float32List, Float64List, Int32List, Int64List, Uint8List;
+
 /// Write-only buffer for incrementally building a [ByteData] instance.
 ///
 /// A WriteBuffer instance can be used only once. Attempts to reuse will result
@@ -13,10 +15,14 @@ import 'dart:typed_data';
 /// The byte order used is [Endian.host] throughout.
 class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
-  factory WriteBuffer() {
+  /// [startCapacity] determines the start size of the [WriteBuffer] in bytes.
+  /// The closer that value is to the real size used, the better the
+  /// performance.
+  factory WriteBuffer({int startCapacity = 8}) {
+    assert(startCapacity > 0);
     final ByteData eightBytes = ByteData(8);
     final Uint8List eightBytesAsList = eightBytes.buffer.asUint8List();
-    return WriteBuffer._(Uint8List(8), eightBytes, eightBytesAsList);
+    return WriteBuffer._(Uint8List(startCapacity), eightBytes, eightBytesAsList);
   }
 
   WriteBuffer._(this._buffer, this._eightBytes, this._eightBytesAsList);
@@ -258,7 +264,8 @@ class ReadBuffer {
 
   void _alignTo(int alignment) {
     final int mod = _position % alignment;
-    if (mod != 0)
+    if (mod != 0) {
       _position += alignment - mod;
+    }
   }
 }

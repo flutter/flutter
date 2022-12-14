@@ -10,8 +10,6 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
-import '../common.dart';
-
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
 ///

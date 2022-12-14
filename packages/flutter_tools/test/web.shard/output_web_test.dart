@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:vm_service/vm_service.dart';
@@ -15,15 +13,14 @@ import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
   final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
-  FlutterRunTestDriver flutter;
+  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
     await project.setUpIn(tempDir);
     flutter = FlutterRunTestDriver(tempDir);
-    //flutter.stdout.listen(print);
   });
 
   tearDown(() async {
@@ -37,7 +34,6 @@ void main() {
       await flutter.run(
         withDebugger: true,
         chrome: true,
-        expressionEvaluation: true,
         additionalCommandArgs: <String>[
           if (verbose) '--verbose',
           '--web-renderer=html',
@@ -77,6 +73,19 @@ void main() {
     await start();
     await sendEvent(<String, Object>{'type': 'DevtoolsEvent'});
     await warning;
+  }, skip: true); // Skipping for 'https://github.com/dart-lang/webdev/issues/1562'
+
+  testWithoutContext(
+      'flutter run output skips DartUri warning messages from dwds', () async {
+    bool containsDartUriWarning = false;
+    flutter.stderr.listen((String msg) {
+      if (msg.contains('DartUri')) {
+        containsDartUriWarning = true;
+      }
+    });
+    await start();
+    await flutter.stop();
+    expect(containsDartUriWarning, isFalse);
   });
 
   testWithoutContext(

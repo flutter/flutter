@@ -25,7 +25,7 @@ import 'windows/application_package.dart';
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
-    required AndroidSdk androidSdk,
+    required AndroidSdk? androidSdk,
     required ProcessManager processManager,
     required Logger logger,
     required UserMessages userMessages,
@@ -38,7 +38,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
 
-  final AndroidSdk _androidSdk;
+  final AndroidSdk? _androidSdk;
   final ProcessManager _processManager;
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -72,7 +72,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
           applicationBinary,
           processManager: _processManager,
           logger: _logger,
-          androidSdk: _androidSdk,
+          androidSdk: _androidSdk!,
           userMessages: _userMessages,
           processUtils: _processUtils,
         );
@@ -105,8 +105,6 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return applicationBinary == null
             ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
             : FuchsiaApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.windows_uwp_x64:
-        return BuildableUwpApp(project: FlutterProject.current().windowsUwp);
     }
   }
 }

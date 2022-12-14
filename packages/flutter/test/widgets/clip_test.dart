@@ -883,4 +883,90 @@ void main() {
       ..restore(),
     );
   });
+
+  testWidgets('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
+    const Radius startRadius = Radius.circular(15.0);
+    const Radius endRadius = Radius.circular(30.0);
+
+    Widget buildClipRRect(TextDirection textDirection) {
+      return Directionality(
+        textDirection: textDirection,
+        child: const ClipRRect(
+          borderRadius: BorderRadiusDirectional.horizontal(
+            start: startRadius,
+            end: endRadius,
+          ),
+        ),
+      );
+    }
+
+    for (final TextDirection textDirection in TextDirection.values) {
+      await tester.pumpWidget(buildClipRRect(textDirection));
+      final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+      final bool isRtl = textDirection == TextDirection.rtl;
+      expect(renderClip.borderRadius.resolve(textDirection).topLeft, isRtl ? endRadius : startRadius);
+      expect(renderClip.borderRadius.resolve(textDirection).topRight, isRtl ? startRadius : endRadius);
+      expect(renderClip.borderRadius.resolve(textDirection).bottomLeft, isRtl ? endRadius : startRadius);
+      expect(renderClip.borderRadius.resolve(textDirection).bottomRight, isRtl ? startRadius : endRadius);
+    }
+  });
+
+  testWidgets('ClipRRect is direction-aware', (WidgetTester tester) async {
+    const Radius startRadius = Radius.circular(15.0);
+    const Radius endRadius = Radius.circular(30.0);
+    TextDirection textDirection = TextDirection.ltr;
+
+    Widget buildClipRRect(TextDirection textDirection) {
+      return Directionality(
+        textDirection: textDirection,
+        child: const ClipRRect(
+          borderRadius: BorderRadiusDirectional.horizontal(
+            start: startRadius,
+            end: endRadius,
+          ),
+        ),
+      );
+    }
+
+    Widget buildStatefulClipRRect() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Directionality(
+            textDirection: textDirection,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: ClipRRect(
+                borderRadius: const BorderRadiusDirectional.horizontal(
+                  start: startRadius,
+                  end: endRadius,
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      textDirection = TextDirection.rtl;
+                    });
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    for (final TextDirection textDirection in TextDirection.values) {
+      await tester.pumpWidget(buildClipRRect(textDirection));
+      final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+      final bool isRtl = textDirection == TextDirection.rtl;
+      expect(renderClip.textDirection, isRtl ? TextDirection.rtl : TextDirection.ltr);
+    }
+
+    await tester.pumpWidget(buildStatefulClipRRect());
+    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+    expect(renderClip.textDirection, TextDirection.ltr);
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+    expect(renderClip.textDirection, TextDirection.rtl);
+  });
 }

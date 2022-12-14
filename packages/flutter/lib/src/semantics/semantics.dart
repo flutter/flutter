@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
        TextDirection, StringAttribute;
@@ -16,8 +15,13 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
-export 'dart:ui' show SemanticsAction, StringAttribute, SpellOutStringAttribute, LocaleStringAttribute;
-export 'semantics_event.dart';
+export 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, DiagnosticsTreeStyle, Key, TextTreeConfiguration;
+export 'package:flutter/services.dart' show TextSelection;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'semantics_event.dart' show SemanticsEvent;
 
 /// Signature for a function that is called for each [SemanticsNode].
 ///
@@ -134,8 +138,9 @@ class CustomSemanticsAction {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is CustomSemanticsAction
         && other.label == label
         && other.hint == hint
@@ -257,23 +262,15 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   ///
   /// Such properties are used with [SemanticsData] objects.
   AttributedStringProperty(
-    String name,
-    AttributedString? value, {
-    bool showName = true,
+    String super.name,
+    super.value, {
+    super.showName,
     this.showWhenEmpty = false,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
-    String? description,
+    super.defaultValue,
+    super.level,
+    super.description,
   }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-         description: description,
-       );
+       assert(level != null);
 
   /// Whether to show the property when the [value] is an [AttributedString]
   /// whose [AttributedString.string] is the empty string.
@@ -286,8 +283,9 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
-    if (value == null)
+    if (value == null) {
       return 'null';
+    }
     String text = value!.string;
     if (parentConfiguration != null &&
         !parentConfiguration.lineBreakProperties) {
@@ -324,6 +322,7 @@ class SemanticsData with Diagnosticable {
     required this.attributedIncreasedValue,
     required this.attributedDecreasedValue,
     required this.attributedHint,
+    required this.tooltip,
     required this.textDirection,
     required this.rect,
     required this.elevation,
@@ -347,6 +346,7 @@ class SemanticsData with Diagnosticable {
        assert(attributedDecreasedValue != null),
        assert(attributedIncreasedValue != null),
        assert(attributedHint != null),
+       assert(tooltip == '' || textDirection != null, 'A SemanticsData object with tooltip "$tooltip" had a null textDirection.'),
        assert(attributedLabel.string == '' || textDirection != null, 'A SemanticsData object with label "${attributedLabel.string}" had a null textDirection.'),
        assert(attributedValue.string == '' || textDirection != null, 'A SemanticsData object with value "${attributedValue.string}" had a null textDirection.'),
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
@@ -436,6 +436,11 @@ class SemanticsData with Diagnosticable {
   ///
   /// See also [hint], which exposes just the raw text.
   final AttributedString attributedHint;
+
+  /// A textual description of the widget's tooltip.
+  ///
+  /// The reading direction is given by [textDirection].
+  final String tooltip;
 
   /// The reading direction for the text in [label], [value],
   /// [increasedValue], [decreasedValue], and [hint].
@@ -595,9 +600,11 @@ class SemanticsData with Diagnosticable {
     properties.add(AttributedStringProperty('increasedValue', attributedIncreasedValue));
     properties.add(AttributedStringProperty('decreasedValue', attributedDecreasedValue));
     properties.add(AttributedStringProperty('hint', attributedHint));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: ''));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    if (textSelection?.isValid ?? false)
+    if (textSelection?.isValid ?? false) {
       properties.add(MessageProperty('textSelection', '[${textSelection!.start}, ${textSelection!.end}]'));
+    }
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
     properties.add(IntProperty('currentValueLength', currentValueLength, defaultValue: null));
@@ -618,6 +625,7 @@ class SemanticsData with Diagnosticable {
         && other.attributedIncreasedValue == attributedIncreasedValue
         && other.attributedDecreasedValue == attributedDecreasedValue
         && other.attributedHint == attributedHint
+        && other.tooltip == tooltip
         && other.textDirection == textDirection
         && other.rect == rect
         && setEquals(other.tags, tags)
@@ -645,6 +653,7 @@ class SemanticsData with Diagnosticable {
     attributedIncreasedValue,
     attributedDecreasedValue,
     attributedHint,
+    tooltip,
     textDirection,
     rect,
     tags,
@@ -656,8 +665,8 @@ class SemanticsData with Diagnosticable {
     scrollExtentMin,
     platformViewId,
     maxValueLength,
-    currentValueLength,
     Object.hash(
+      currentValueLength,
       transform,
       elevation,
       thickness,
@@ -666,14 +675,18 @@ class SemanticsData with Diagnosticable {
   );
 
   static bool _sortedListsEqual(List<int>? left, List<int>? right) {
-    if (left == null && right == null)
+    if (left == null && right == null) {
       return true;
+    }
     if (left != null && right != null) {
-      if (left.length != right.length)
+      if (left.length != right.length) {
         return false;
-      for (int i = 0; i < left.length; i++)
-        if (left[i] != right[i])
+      }
+      for (int i = 0; i < left.length; i++) {
+        if (left[i] != right[i]) {
           return false;
+      }
+        }
       return true;
     }
     return false;
@@ -682,15 +695,11 @@ class SemanticsData with Diagnosticable {
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   _SemanticsDiagnosticableNode({
-    String? name,
-    required SemanticsNode value,
-    required DiagnosticsTreeStyle? style,
+    super.name,
+    required super.value,
+    required super.style,
     required this.childOrder,
-  }) : super(
-    name: name,
-    value: value,
-    style: style,
-  );
+  });
 
   final DebugSemanticsDumpOrder childOrder;
 
@@ -741,8 +750,9 @@ class SemanticsHintOverrides extends DiagnosticableTree {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SemanticsHintOverrides
         && other.onTapHint == onTapHint
         && other.onLongPressHint == onLongPressHint;
@@ -797,6 +807,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.decreasedValue,
     this.attributedDecreasedValue,
     this.hint,
+    this.tooltip,
     this.attributedHint,
     this.hintOverrides,
     this.textDirection,
@@ -1190,6 +1201,16 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [hint] for a plain string version of this property.
   final AttributedString? attributedHint;
 
+  /// Provides a textual description of the widget's tooltip.
+  ///
+  /// In Android, this property sets the `AccessibilityNodeInfo.setTooltipText`.
+  /// In iOS, this property is appended to the end of the
+  /// `UIAccessibilityElement.accessibilityLabel`.
+  ///
+  /// If a [tooltip] is provided, there must either by an ambient
+  /// [Directionality] or an explicit [textDirection] should be provided.
+  final String? tooltip;
+
   /// Provides hint values which override the default hints on supported
   /// platforms.
   ///
@@ -1481,6 +1502,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(AttributedStringProperty('attributedDecreasedValue', attributedDecreasedValue, defaultValue: null));
     properties.add(StringProperty('hint', hint, defaultValue: null));
     properties.add(AttributedStringProperty('attributedHint', attributedHint, defaultValue: null));
+    properties.add(StringProperty('tooltip', tooltip));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides, defaultValue: null));
@@ -1665,8 +1687,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   bool _isMergedIntoParent = false;
   set isMergedIntoParent(bool value) {
     assert(value != null);
-    if (_isMergedIntoParent == value)
+    if (_isMergedIntoParent == value) {
       return;
+    }
     _isMergedIntoParent = value;
     _markDirty();
   }
@@ -1733,22 +1756,25 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _debugPreviousSnapshot = List<SemanticsNode>.of(newChildren);
 
       SemanticsNode ancestor = this;
-      while (ancestor.parent is SemanticsNode)
+      while (ancestor.parent is SemanticsNode) {
         ancestor = ancestor.parent!;
+      }
       assert(!newChildren.any((SemanticsNode child) => child == ancestor));
       return true;
     }());
     assert(() {
       final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
-      for (final SemanticsNode child in newChildren)
-        assert(seenChildren.add(child)); // check for duplicate adds
+      for (final SemanticsNode child in newChildren) {
+        assert(seenChildren.add(child));
+      } // check for duplicate adds
       return true;
     }());
 
     // The goal of this function is updating sawChange.
     if (_children != null) {
-      for (final SemanticsNode child in _children!)
+      for (final SemanticsNode child in _children!) {
         child._dead = true;
+      }
     }
     for (final SemanticsNode child in newChildren) {
       assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
@@ -1794,8 +1820,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
     _children = newChildren;
-    if (sawChange)
+    if (sawChange) {
       _markDirty();
+    }
   }
 
   /// Whether this node has a non-zero number of children.
@@ -1813,8 +1840,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   void visitChildren(SemanticsNodeVisitor visitor) {
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
-        if (!visitor(child))
+        if (!visitor(child)) {
           return;
+        }
       }
     }
   }
@@ -1827,8 +1855,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   bool _visitDescendants(SemanticsNodeVisitor visitor) {
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
-        if (!visitor(child) || !child._visitDescendants(visitor))
+        if (!visitor(child) || !child._visitDescendants(visitor)) {
           return false;
+        }
       }
     }
     return true;
@@ -1862,8 +1891,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _markDirty();
     }
     if (_children != null) {
-      for (final SemanticsNode child in _children!)
+      for (final SemanticsNode child in _children!) {
         child.attach(owner);
+      }
     }
   }
 
@@ -1879,8 +1909,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       for (final SemanticsNode child in _children!) {
         // The list of children may be stale and may contain nodes that have
         // been assigned to a different parent.
-        if (child.parent == this)
+        if (child.parent == this) {
           child.detach();
+        }
       }
     }
     // The other side will have forgotten this node if we ever send
@@ -1893,8 +1924,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   bool _dirty = false;
   void _markDirty() {
-    if (_dirty)
+    if (_dirty) {
       return;
+    }
     _dirty = true;
     if (attached) {
       assert(!owner!._detachedNodes.contains(this));
@@ -1910,6 +1942,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         || _attributedValue != config.attributedValue
         || _attributedIncreasedValue != config.attributedIncreasedValue
         || _attributedDecreasedValue != config.attributedDecreasedValue
+        || _tooltip != config.tooltip
         || _flags != config._flags
         || _textDirection != config.textDirection
         || _sortKey != config._sortKey
@@ -2039,6 +2072,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   AttributedString get attributedHint => _attributedHint;
   AttributedString _attributedHint = _kEmptyConfig.attributedHint;
 
+  /// A textual description of the widget's tooltip.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get tooltip => _tooltip;
+  String _tooltip = _kEmptyConfig.tooltip;
+
   /// The elevation along the z-axis at which the [rect] of this [SemanticsNode]
   /// is located above its parent.
   ///
@@ -2081,7 +2120,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// ```dart
   /// PhysicalModel( // A
   ///   color: Colors.amber,
-  ///   elevation: 0.0,
   ///   child: Semantics(
   ///     explicitChildNodes: true,
   ///     child: const PhysicalModel( // B
@@ -2234,8 +2272,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     List<SemanticsNode>? childrenInInversePaintOrder,
   }) {
     config ??= _kEmptyConfig;
-    if (_isDifferentFromCurrentSemanticAnnotation(config))
+    if (_isDifferentFromCurrentSemanticAnnotation(config)) {
       _markDirty();
+    }
 
     assert(
       config.platformViewId == null || childrenInInversePaintOrder == null || childrenInInversePaintOrder.isEmpty,
@@ -2247,6 +2286,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _attributedIncreasedValue = config.attributedIncreasedValue;
     _attributedDecreasedValue = config.attributedDecreasedValue;
     _attributedHint = config.attributedHint;
+    _tooltip = config.tooltip;
     _hintOverrides = config.hintOverrides;
     _elevation = config.elevation;
     _thickness = config.thickness;
@@ -2294,6 +2334,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     AttributedString attributedIncreasedValue = _attributedIncreasedValue;
     AttributedString attributedDecreasedValue = _attributedDecreasedValue;
     AttributedString attributedHint = _attributedHint;
+    String tooltip = _tooltip;
     TextDirection? textDirection = _textDirection;
     Set<SemanticsTag>? mergedTags = tags == null ? null : Set<SemanticsTag>.of(tags!);
     TextSelection? textSelection = _textSelection;
@@ -2308,8 +2349,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
-    for (final CustomSemanticsAction action in _customSemanticsActions.keys)
+    for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+    }
     if (hintOverrides != null) {
       if (hintOverrides!.onTapHint != null) {
         final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
@@ -2342,18 +2384,25 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
-        if (attributedValue == null || attributedValue.string == '')
+        if (attributedValue == null || attributedValue.string == '') {
           attributedValue = node._attributedValue;
-        if (attributedIncreasedValue == null || attributedIncreasedValue.string == '')
+        }
+        if (attributedIncreasedValue == null || attributedIncreasedValue.string == '') {
           attributedIncreasedValue = node._attributedIncreasedValue;
-        if (attributedDecreasedValue == null || attributedDecreasedValue.string == '')
+        }
+        if (attributedDecreasedValue == null || attributedDecreasedValue.string == '') {
           attributedDecreasedValue = node._attributedDecreasedValue;
+        }
+        if (tooltip == '') {
+          tooltip = node._tooltip;
+        }
         if (node.tags != null) {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
         }
-        for (final CustomSemanticsAction action in _customSemanticsActions.keys)
+        for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
           customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
+        }
         if (node.hintOverrides != null) {
           if (node.hintOverrides!.onTapHint != null) {
             final CustomSemanticsAction action = CustomSemanticsAction.overridingAction(
@@ -2397,6 +2446,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       attributedIncreasedValue: attributedIncreasedValue,
       attributedDecreasedValue: attributedDecreasedValue,
       attributedHint: attributedHint,
+      tooltip: tooltip,
       textDirection: textDirection,
       rect: rect,
       transform: transform,
@@ -2469,6 +2519,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValueAttributes: data.attributedDecreasedValue.attributes,
       hint: data.attributedHint.string,
       hintAttributes: data.attributedHint.attributes,
+      tooltip: data.tooltip,
       textDirection: data.textDirection,
       textSelectionBase: data.textSelection != null ? data.textSelection!.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection!.extentOffset : -1,
@@ -2557,8 +2608,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Semantics events should be sent to inform interested parties (like
   /// the accessibility system of the operating system) about changes to the UI.
   void sendEvent(SemanticsEvent event) {
-    if (!attached)
+    if (!attached) {
       return;
+    }
     SystemChannels.accessibility.send(event.toMap(nodeId: id));
   }
 
@@ -2607,10 +2659,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(AttributedStringProperty('increasedValue', _attributedIncreasedValue));
     properties.add(AttributedStringProperty('decreasedValue', _attributedDecreasedValue));
     properties.add(AttributedStringProperty('hint', _attributedHint));
+    properties.add(StringProperty('tooltip', _tooltip, defaultValue: ''));
     properties.add(EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
-    if (_textSelection?.isValid ?? false)
+    if (_textSelection?.isValid ?? false) {
       properties.add(MessageProperty('text selection', '[${_textSelection!.start}, ${_textSelection!.end}]'));
+    }
     properties.add(IntProperty('platformViewId', platformViewId, defaultValue: null));
     properties.add(IntProperty('maxValueLength', maxValueLength, defaultValue: null));
     properties.add(IntProperty('currentValueLength', currentValueLength, defaultValue: null));
@@ -2662,8 +2716,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns the list of direct children of this node in the specified order.
   List<SemanticsNode> debugListChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
     assert(childOrder != null);
-    if (_children == null)
+    if (_children == null) {
       return const <SemanticsNode>[];
+    }
 
     switch (childOrder) {
       case DebugSemanticsDumpOrder.inverseHitTest:
@@ -2999,8 +3054,9 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [dart:ui.PlatformDispatcher.updateSemantics].
   void sendSemanticsUpdate() {
-    if (_dirtyNodes.isEmpty)
+    if (_dirtyNodes.isEmpty) {
       return;
+    }
     final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
@@ -3036,8 +3092,9 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if (node._dirty && node.attached)
+      if (node._dirty && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
+      }
     }
     _dirtyNodes.clear();
     for (final int actionId in customSemanticsActionIds) {
@@ -3059,8 +3116,9 @@ class SemanticsOwner extends ChangeNotifier {
         return true; // continue walk
       });
     }
-    if (result == null || !result!._canPerformAction(action))
+    if (result == null || !result!._canPerformAction(action)) {
       return null;
+    }
     return result!._actions[action];
   }
 
@@ -3080,19 +3138,22 @@ class SemanticsOwner extends ChangeNotifier {
     }
 
     // Default actions if no [handler] was provided.
-    if (action == SemanticsAction.showOnScreen && _nodes[id]!._showOnScreen != null)
+    if (action == SemanticsAction.showOnScreen && _nodes[id]!._showOnScreen != null) {
       _nodes[id]!._showOnScreen!();
+    }
   }
 
   SemanticsActionHandler? _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
       final Matrix4 inverse = Matrix4.identity();
-      if (inverse.copyInverse(node.transform!) == 0.0)
+      if (inverse.copyInverse(node.transform!) == 0.0) {
         return null;
+      }
       position = MatrixUtils.transformPoint(inverse, position);
     }
-    if (!node.rect.contains(position))
+    if (!node.rect.contains(position)) {
       return null;
+    }
     if (node.mergeAllDescendantsIntoThisNode) {
       SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
@@ -3107,8 +3168,9 @@ class SemanticsOwner extends ChangeNotifier {
     if (node.hasChildren) {
       for (final SemanticsNode child in node._children!.reversed) {
         final SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(child, position, action);
-        if (handler != null)
+        if (handler != null) {
           return handler;
+        }
       }
     }
     return node._actions[action];
@@ -3124,11 +3186,13 @@ class SemanticsOwner extends ChangeNotifier {
   void performActionAt(Offset position, SemanticsAction action, [ Object? args ]) {
     assert(action != null);
     final SemanticsNode? node = rootSemanticsNode;
-    if (node == null)
+    if (node == null) {
       return;
+    }
     final SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(node, position, action);
-    if (handler != null)
+    if (handler != null) {
       handler(args);
+    }
   }
 
   @override
@@ -3475,8 +3539,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3493,8 +3557,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
@@ -3511,8 +3575,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3529,8 +3593,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
@@ -3668,8 +3732,9 @@ class SemanticsConfiguration {
   int? get scrollChildCount => _scrollChildCount;
   int? _scrollChildCount;
   set scrollChildCount(int? value) {
-    if (value == scrollChildCount)
+    if (value == scrollChildCount) {
       return;
+    }
     _scrollChildCount = value;
     _hasBeenAnnotated = true;
   }
@@ -3679,8 +3744,9 @@ class SemanticsConfiguration {
   int? get scrollIndex => _scrollIndex;
   int? _scrollIndex;
   set scrollIndex(int? value) {
-    if (value == scrollIndex)
+    if (value == scrollIndex) {
       return;
+    }
     _scrollIndex = value;
     _hasBeenAnnotated = true;
   }
@@ -3690,8 +3756,9 @@ class SemanticsConfiguration {
   int? get platformViewId => _platformViewId;
   int? _platformViewId;
   set platformViewId(int? value) {
-    if (value == platformViewId)
+    if (value == platformViewId) {
       return;
+    }
     _platformViewId = value;
     _hasBeenAnnotated = true;
   }
@@ -3707,8 +3774,9 @@ class SemanticsConfiguration {
   int? get maxValueLength => _maxValueLength;
   int? _maxValueLength;
   set maxValueLength(int? value) {
-    if (value == maxValueLength)
+    if (value == maxValueLength) {
       return;
+    }
     _maxValueLength = value;
     _hasBeenAnnotated = true;
   }
@@ -3724,8 +3792,9 @@ class SemanticsConfiguration {
   int? get currentValueLength => _currentValueLength;
   int? _currentValueLength;
   set currentValueLength(int? value) {
-    if (value == currentValueLength)
+    if (value == currentValueLength) {
       return;
+    }
     _currentValueLength = value;
     _hasBeenAnnotated = true;
   }
@@ -3763,11 +3832,13 @@ class SemanticsConfiguration {
 
   void _onCustomSemanticsAction(Object? args) {
     final CustomSemanticsAction? action = CustomSemanticsAction.getAction(args! as int);
-    if (action == null)
+    if (action == null) {
       return;
+    }
     final VoidCallback? callback = _customSemanticsActions[action];
-    if (callback != null)
+    if (callback != null) {
       callback();
+    }
   }
 
   /// A textual description of the owning [RenderObject].
@@ -3967,13 +4038,24 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// A textual description of the widget's tooltip.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get tooltip => _tooltip;
+  String _tooltip = '';
+  set tooltip(String tooltip) {
+    _tooltip = tooltip;
+    _hasBeenAnnotated = true;
+  }
+
   /// Provides hint values which override the default hints on supported
   /// platforms.
   SemanticsHintOverrides? get hintOverrides => _hintOverrides;
   SemanticsHintOverrides? _hintOverrides;
   set hintOverrides(SemanticsHintOverrides? value) {
-    if (value == null)
+    if (value == null) {
       return;
+    }
     _hintOverrides = value;
     _hasBeenAnnotated = true;
   }
@@ -4359,12 +4441,15 @@ class SemanticsConfiguration {
   /// Two configurations are said to be compatible if they can be added to the
   /// same [SemanticsNode] without losing any semantics information.
   bool isCompatibleWith(SemanticsConfiguration? other) {
-    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
+    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated) {
       return true;
-    if (_actionsAsBits & other._actionsAsBits != 0)
+    }
+    if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
-    if ((_flags & other._flags) != 0)
+    }
+    if ((_flags & other._flags) != 0) {
       return false;
+    }
     if (_platformViewId != null && other._platformViewId != null) {
       return false;
     }
@@ -4374,8 +4459,9 @@ class SemanticsConfiguration {
     if (_currentValueLength != null && other._currentValueLength != null) {
       return false;
     }
-    if (_attributedValue != null && _attributedValue.string.isNotEmpty && other._attributedValue != null && other._attributedValue.string.isNotEmpty)
+    if (_attributedValue != null && _attributedValue.string.isNotEmpty && other._attributedValue != null && other._attributedValue.string.isNotEmpty) {
       return false;
+    }
     return true;
   }
 
@@ -4393,8 +4479,9 @@ class SemanticsConfiguration {
   void absorb(SemanticsConfiguration child) {
     assert(!explicitChildNodes);
 
-    if (!child.hasBeenAnnotated)
+    if (!child.hasBeenAnnotated) {
       return;
+    }
 
     _actions.addAll(child._actions);
     _customSemanticsActions.addAll(child._customSemanticsActions);
@@ -4420,18 +4507,24 @@ class SemanticsConfiguration {
       otherAttributedString: child._attributedLabel,
       otherTextDirection: child.textDirection,
     );
-    if (_attributedValue == null || _attributedValue.string == '')
+    if (_attributedValue == null || _attributedValue.string == '') {
       _attributedValue = child._attributedValue;
-    if (_attributedIncreasedValue == null || _attributedIncreasedValue.string == '')
+    }
+    if (_attributedIncreasedValue == null || _attributedIncreasedValue.string == '') {
       _attributedIncreasedValue = child._attributedIncreasedValue;
-    if (_attributedDecreasedValue == null || _attributedDecreasedValue.string == '')
+    }
+    if (_attributedDecreasedValue == null || _attributedDecreasedValue.string == '') {
       _attributedDecreasedValue = child._attributedDecreasedValue;
+    }
     _attributedHint = _concatAttributedString(
       thisAttributedString: _attributedHint,
       thisTextDirection: textDirection,
       otherAttributedString: child._attributedHint,
       otherTextDirection: child.textDirection,
     );
+    if (_tooltip == '') {
+      _tooltip = child._tooltip;
+    }
 
     _thickness = math.max(_thickness, child._thickness + child._elevation);
 
@@ -4454,6 +4547,7 @@ class SemanticsConfiguration {
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
       .._hintOverrides = _hintOverrides
+      .._tooltip = _tooltip
       .._elevation = _elevation
       .._thickness = _thickness
       .._flags = _flags
@@ -4497,8 +4591,9 @@ AttributedString _concatAttributedString({
   required TextDirection? thisTextDirection,
   required TextDirection? otherTextDirection,
 }) {
-  if (otherAttributedString.string.isEmpty)
+  if (otherAttributedString.string.isEmpty) {
     return thisAttributedString;
+  }
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
     switch (otherTextDirection) {
       case TextDirection.rtl:
@@ -4509,8 +4604,9 @@ AttributedString _concatAttributedString({
         break;
     }
   }
-  if (thisAttributedString.string.isEmpty)
+  if (thisAttributedString.string.isEmpty) {
     return otherAttributedString;
+  }
 
   return thisAttributedString + AttributedString('\n') + otherAttributedString;
 }
@@ -4610,12 +4706,11 @@ class OrdinalSortKey extends SemanticsSortKey {
   /// The [order] must be a finite number, and must not be null.
   const OrdinalSortKey(
     this.order, {
-    String? name,
+    super.name,
   }) : assert(order != null),
        assert(order != double.nan),
        assert(order > double.negativeInfinity),
-       assert(order < double.infinity),
-       super(name: name);
+       assert(order < double.infinity);
 
   /// Determines the placement of this key in a sequence of keys that defines
   /// the order in which this node is traversed by the platform's accessibility
@@ -4627,8 +4722,9 @@ class OrdinalSortKey extends SemanticsSortKey {
 
   @override
   int doCompare(OrdinalSortKey other) {
-    if (other.order == null || order == null || other.order == order)
+    if (other.order == null || order == null || other.order == order) {
       return 0;
+    }
     return order.compareTo(other.order);
   }
 

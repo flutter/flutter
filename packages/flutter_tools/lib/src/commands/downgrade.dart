@@ -92,7 +92,7 @@ class DowngradeCommand extends FlutterCommand {
     _fileSystem ??= globals.fs;
     String workingDirectory = Cache.flutterRoot!;
     if (argResults!.wasParsed('working-directory')) {
-      workingDirectory = stringArg('working-directory')!;
+      workingDirectory = stringArgDeprecated('working-directory')!;
       _flutterVersion = FlutterVersion(workingDirectory: workingDirectory);
     }
 
@@ -129,7 +129,7 @@ class DowngradeCommand extends FlutterCommand {
     final Stdio stdio = _stdio!;
     final Terminal terminal = _terminal!;
     final Logger logger = _logger!;
-    if (stdio.hasTerminal && boolArg('prompt')) {
+    if (stdio.hasTerminal && boolArgDeprecated('prompt')) {
       terminal.usesTerminalUi = true;
       final String result = await terminal.promptForCharInput(
         const <String>['y', 'n'],

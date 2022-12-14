@@ -906,7 +906,7 @@ void main() {
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {
-  const _RefreshProgressIndicatorGolden({Key? key}) : super(key: key);
+  const _RefreshProgressIndicatorGolden();
 
   @override
   _RefreshProgressIndicatorGoldenState createState() => _RefreshProgressIndicatorGoldenState();

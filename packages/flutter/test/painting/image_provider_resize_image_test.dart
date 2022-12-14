@@ -99,14 +99,14 @@ void main() {
     final MemoryImage memoryImage = MemoryImage(bytes);
     final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
-    Future<ui.Codec> decode(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
+    Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
       expect(cacheWidth, 123);
       expect(cacheHeight, 321);
       expect(allowUpscaling, false);
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+      return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
     }
 
-    resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+    resizeImage.loadBuffer(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
   });
 
   test('ResizeImage handles sync obtainKey', () async {
@@ -156,7 +156,7 @@ Future<Size> _resolveAndGetSize(
 // This version of MemoryImage guarantees obtainKey returns a future that has not been
 // completed synchronously.
 class _AsyncKeyMemoryImage extends MemoryImage {
-  const _AsyncKeyMemoryImage(Uint8List bytes) : super(bytes);
+  const _AsyncKeyMemoryImage(super.bytes);
 
   @override
   Future<MemoryImage> obtainKey(ImageConfiguration configuration) {

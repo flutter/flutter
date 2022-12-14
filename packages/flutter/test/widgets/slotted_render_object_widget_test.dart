@@ -198,10 +198,9 @@ enum _DiagonalSlot {
 
 class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot> {
   const _Diagonal({
-    Key? key,
     this.topLeft,
     this.bottomRight,
-  }) : super(key: key);
+  });
 
   final Widget? topLeft;
   final Widget? bottomRight;

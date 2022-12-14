@@ -51,7 +51,8 @@ Future<void> main() async {
         });
       });
 
-      bool foundAarProjectName = false;
+      bool foundProjectNameInOldAar = false;
+      bool foundProjectNameInNewAar = false;
       await runModuleProjectTest((FlutterModuleProject flutterProject) async {
         section('AAR content with --obfuscate');
 
@@ -67,21 +68,23 @@ Future<void> main() async {
           ]);
         });
 
-        final String outputAarDirectory = path.join(
+        section('Check old _release AAR files');
+
+        final String oldReleaseAar = path.join(
           flutterProject.rootPath,
           'build/host/outputs/repo/com/example/${flutterProject.name}/flutter_release/1.0/flutter_release-1.0.aar',
         );
-        final Iterable<String> aarFiles = await getFilesInAar(outputAarDirectory);
+        final Iterable<String> filesInOldAar = await getFilesInAar(oldReleaseAar);
 
         checkCollectionContains<String>(<String>[
           ...flutterAssets,
           'jni/armeabi-v7a/libapp.so',
-        ], aarFiles);
+        ], filesInOldAar);
 
         // Verify that an identifier from the Dart project code is not present
         // in the compiled binary.
         await inDirectory(flutterProject.rootPath, () async {
-          await exec('unzip', <String>[outputAarDirectory]);
+          await exec('unzip', <String>['-o', oldReleaseAar]);
           checkFileExists(path.join(flutterProject.rootPath, 'jni/armeabi-v7a/libapp.so'));
           final String response = await eval(
             'grep',
@@ -89,16 +92,46 @@ Future<void> main() async {
             canFail: true,
           );
           if (response.trim().contains('matches')) {
-            foundAarProjectName = true;
+            foundProjectNameInOldAar = true;
+          }
+        });
+
+        section('Check new -release AAR files');
+
+        final String newReleaseAar = path.join(
+          flutterProject.rootPath,
+          'build/host/outputs/repo/com/example/${flutterProject.name}/flutter/1.0/flutter-1.0-release.aar',
+        );
+        final Iterable<String> filesInNewAar = await getFilesInAar(newReleaseAar);
+
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          'jni/armeabi-v7a/libapp.so',
+        ], filesInNewAar);
+
+        await inDirectory(flutterProject.rootPath, () async {
+          await exec('unzip', <String>['-o', newReleaseAar]);
+          checkFileExists(path.join(flutterProject.rootPath, 'jni/armeabi-v7a/libapp.so'));
+          final String response = await eval(
+            'grep',
+            <String>[flutterProject.name, 'jni/armeabi-v7a/libapp.so'],
+            canFail: true,
+          );
+          if (response.trim().contains('matches')) {
+            foundProjectNameInNewAar = true;
           }
         });
       });
 
+
       if (foundApkProjectName) {
         return TaskResult.failure('Found project name in obfuscated APK dart library');
       }
-      if (foundAarProjectName) {
-        return TaskResult.failure('Found project name in obfuscated AAR dart library');
+      if (foundProjectNameInOldAar) {
+        return TaskResult.failure('Found project name in obfuscated AAR _release dart library');
+      }
+      if (foundProjectNameInNewAar) {
+        return TaskResult.failure('Found project name in obfuscated AAR -release dart library');
       }
 
       return TaskResult.success(null);

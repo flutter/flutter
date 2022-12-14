@@ -71,7 +71,7 @@ final List<FakeVmServiceRequest> vmServiceSetup = <FakeVmServiceRequest>[
       'isolateId': '1',
     },
     jsonResponse: <String, Object>{
-      'enabled': 'true'
+      'enabled': 'true',
     },
   ),
 ];

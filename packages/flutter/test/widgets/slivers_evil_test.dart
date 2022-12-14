@@ -45,7 +45,7 @@ class TestBehavior extends ScrollBehavior {
 }
 
 class TestScrollPhysics extends ClampingScrollPhysics {
-  const TestScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const TestScrollPhysics({ super.parent });
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -54,21 +54,6 @@ class TestScrollPhysics extends ClampingScrollPhysics {
 
   @override
   Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
-}
-
-class TestViewportScrollPosition extends ScrollPositionWithSingleContext {
-  TestViewportScrollPosition({
-    required ScrollPhysics physics,
-    required ScrollContext context,
-    ScrollPosition? oldPosition,
-  }) : super(physics: physics, context: context, oldPosition: oldPosition);
-
-  @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    expect(minScrollExtent, moreOrLessEquals(-3895.0));
-    expect(maxScrollExtent, moreOrLessEquals(8575.0));
-    return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
-  }
 }
 
 void main() {

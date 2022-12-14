@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/version.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart' show FakeFlutterVersion;
@@ -64,7 +63,7 @@ void main() {
         command: <String>['git', 'fetch', '--tags'],
       ),
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--verify', '@{u}'],
+        command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
         stdout: upstreamHeadRevision,
       ),
       const FakeCommand(

@@ -18,12 +18,11 @@ class IconTheme extends InheritedTheme {
   ///
   /// Both [data] and [child] arguments must not be null.
   const IconTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(data != null),
-       assert(child != null),
-       super(key: key, child: child);
+       assert(child != null);
 
   /// Creates an icon theme that controls the color, opacity, and size of
   /// descendant widgets, and merges in the current icon theme, if any.

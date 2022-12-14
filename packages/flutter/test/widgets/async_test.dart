@@ -391,7 +391,7 @@ Future<void> eventFiring(WidgetTester tester) async {
 }
 
 class StringCollector extends StreamBuilderBase<String, List<String>> {
-  const StringCollector({ Key? key, Stream<String>? stream }) : super(key: key, stream: stream);
+  const StringCollector({ super.key, super.stream });
 
   @override
   List<String> initial() => <String>[];

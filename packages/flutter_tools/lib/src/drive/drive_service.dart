@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
@@ -25,11 +23,11 @@ import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
-    @required ApplicationPackageFactory applicationPackageFactory,
-    @required Logger logger,
-    @required ProcessUtils processUtils,
-    @required String dartSdkPath,
-    @required DevtoolsLauncher devtoolsLauncher,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required Logger logger,
+    required ProcessUtils processUtils,
+    required String dartSdkPath,
+    required DevtoolsLauncher devtoolsLauncher,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _processUtils = processUtils,
@@ -69,10 +67,10 @@ abstract class DriverService {
     Device device,
     DebuggingOptions debuggingOptions,
     bool ipv6, {
-    File applicationBinary,
-    String route,
-    String userIdentifier,
-    String mainPath,
+    File? applicationBinary,
+    String? route,
+    String? userIdentifier,
+    String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
   });
 
@@ -94,13 +92,14 @@ abstract class DriverService {
     List<String> arguments,
     Map<String, String> environment,
     PackageConfig packageConfig, {
-    bool headless,
-    String chromeBinary,
-    String browserName,
-    bool androidEmulator,
-    int driverPort,
-    List<String> browserDimension,
-    String profileMemory,
+    bool? headless,
+    String? chromeBinary,
+    String? browserName,
+    bool? androidEmulator,
+    int? driverPort,
+    List<String> webBrowserFlags,
+    List<String>? browserDimension,
+    String? profileMemory,
   });
 
   /// Stop the running application and uninstall it from the device.
@@ -109,8 +108,8 @@ abstract class DriverService {
   /// and write SkSL to the file. This is only supported on mobile and
   /// desktop devices.
   Future<void> stop({
-    File writeSkslOnExit,
-    String userIdentifier,
+    File? writeSkslOnExit,
+    String? userIdentifier,
   });
 }
 
@@ -118,11 +117,11 @@ abstract class DriverService {
 /// applications.
 class FlutterDriverService extends DriverService {
   FlutterDriverService({
-    @required ApplicationPackageFactory applicationPackageFactory,
-    @required Logger logger,
-    @required ProcessUtils processUtils,
-    @required String dartSdkPath,
-    @required DevtoolsLauncher devtoolsLauncher,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required Logger logger,
+    required ProcessUtils processUtils,
+    required String dartSdkPath,
+    required DevtoolsLauncher devtoolsLauncher,
     @visibleForTesting VMServiceConnector vmServiceConnector = connectToVmService,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
@@ -140,10 +139,10 @@ class FlutterDriverService extends DriverService {
   final VMServiceConnector _vmServiceConnector;
   final DevtoolsLauncher _devtoolsLauncher;
 
-  Device _device;
-  ApplicationPackage _applicationPackage;
-  String _vmServiceUri;
-  FlutterVmService _vmService;
+  Device? _device;
+  ApplicationPackage? _applicationPackage;
+  late String _vmServiceUri;
+  late FlutterVmService _vmService;
 
   @override
   Future<void> start(
@@ -151,11 +150,11 @@ class FlutterDriverService extends DriverService {
     Device device,
     DebuggingOptions debuggingOptions,
     bool ipv6, {
-    File applicationBinary,
-    String route,
-    String userIdentifier,
+    File? applicationBinary,
+    String? route,
+    String? userIdentifier,
     Map<String, Object> platformArgs = const <String, Object>{},
-    String mainPath,
+    String? mainPath,
   }) async {
     if (buildInfo.isRelease) {
       throwToolExit(
@@ -173,7 +172,7 @@ class FlutterDriverService extends DriverService {
       applicationBinary: applicationBinary,
     );
     int attempt = 0;
-    LaunchResult result;
+    LaunchResult? result;
     bool prebuiltApplication = applicationBinary != null;
     while (attempt < _kLaunchAttempts) {
       result = await device.startApp(
@@ -197,7 +196,7 @@ class FlutterDriverService extends DriverService {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
     return reuseApplication(
-      result.observatoryUri,
+      result.observatoryUri!,
       device,
       debuggingOptions,
       ipv6,
@@ -251,13 +250,14 @@ class FlutterDriverService extends DriverService {
     List<String> arguments,
     Map<String, String> environment,
     PackageConfig packageConfig, {
-    bool headless,
-    String chromeBinary,
-    String browserName,
-    bool androidEmulator,
-    int driverPort,
-    List<String> browserDimension,
-    String profileMemory,
+    bool? headless,
+    String? chromeBinary,
+    String? browserName,
+    bool? androidEmulator,
+    int? driverPort,
+    List<String> webBrowserFlags = const <String>[],
+    List<String>? browserDimension,
+    String? profileMemory,
   }) async {
     if (profileMemory != null) {
       unawaited(_devtoolsLauncher.launch(
@@ -285,35 +285,35 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<void> stop({
-    File writeSkslOnExit,
-    String userIdentifier,
+    File? writeSkslOnExit,
+    String? userIdentifier,
   }) async {
     if (writeSkslOnExit != null) {
       final FlutterView flutterView = (await _vmService.getFlutterViews()).first;
-      final Map<String, Object> result = await _vmService.getSkSLs(
+      final Map<String, Object> result = await (_vmService.getSkSLs(
         viewId: flutterView.id
-      );
-      await sharedSkSlWriter(_device, result, outputFile: writeSkslOnExit, logger: _logger);
+      ) as FutureOr<Map<String, Object>>);
+      await sharedSkSlWriter(_device!, result, outputFile: writeSkslOnExit, logger: _logger);
     }
     // If the application package is available, stop and uninstall.
     if (_applicationPackage != null) {
-      if (!await _device.stopApp(_applicationPackage, userIdentifier: userIdentifier)) {
+      if (!await _device!.stopApp(_applicationPackage, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to stop app');
       }
-      if (!await _device.uninstallApp(_applicationPackage, userIdentifier: userIdentifier)) {
+      if (!await _device!.uninstallApp(_applicationPackage!, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to uninstall app');
       }
-    } else if (_device.supportsFlutterExit) {
+    } else if (_device!.supportsFlutterExit) {
       // Otherwise use the VM Service URI to stop the app as a best effort approach.
       final vm_service.VM vm = await _vmService.service.getVM();
-      final vm_service.IsolateRef isolateRef = vm.isolates
+      final vm_service.IsolateRef isolateRef = vm.isolates!
         .firstWhere((vm_service.IsolateRef element) {
-          return !element.isSystemIsolate;
-        }, orElse: () => null);
-      unawaited(_vmService.flutterExit(isolateId: isolateRef.id));
+          return !element.isSystemIsolate!;
+        });
+      unawaited(_vmService.flutterExit(isolateId: isolateRef.id!));
     } else {
       _logger.printTrace('No application package for $_device, leaving app running');
     }
-    await _device.dispose();
+    await _device!.dispose();
   }
 }

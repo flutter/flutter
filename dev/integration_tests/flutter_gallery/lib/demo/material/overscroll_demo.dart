@@ -64,6 +64,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         onRefresh: _handleRefresh,
         child: Scrollbar(
           child: ListView.builder(
+            primary: true,
             padding: kMaterialListPadding,
             itemCount: _items.length,
             itemBuilder: (BuildContext context, int index) {

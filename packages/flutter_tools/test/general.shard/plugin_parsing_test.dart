@@ -272,8 +272,7 @@ void main() {
       ' windows:\n'
       '  pluginClass: WinSamplePlugin\n'
       '  supportedVariants:\n'
-      '    - win32\n'
-      '    - uwp\n';
+      '    - win32\n';
 
     final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
     final Plugin plugin = Plugin.fromYaml(
@@ -288,7 +287,6 @@ void main() {
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
     expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[
       PluginPlatformVariant.win32,
-      PluginPlatformVariant.winuwp,
     ]);
   });
 
@@ -322,8 +320,7 @@ void main() {
       ' windows:\n'
       '  pluginClass: WinSamplePlugin\n'
       '  supportedVariants:\n'
-      '    - not_yet_invented_variant\n'
-      '    - uwp\n';
+      '    - not_yet_invented_variant\n';
 
     final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
     final Plugin plugin = Plugin.fromYaml(
@@ -336,9 +333,7 @@ void main() {
     );
 
     final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey]! as WindowsPlugin;
-    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>{
-      PluginPlatformVariant.winuwp,
-    });
+    expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>{});
   });
 
   testWithoutContext('Plugin parsing throws a fatal error on an empty plugin', () {

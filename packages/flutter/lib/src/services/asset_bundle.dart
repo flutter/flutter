@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
+
+export 'dart:typed_data' show ByteData;
+export 'dart:ui' show ImmutableBuffer;
 
 /// A collection of resources used by the application.
 ///
@@ -55,6 +57,15 @@ abstract class AssetBundle {
   /// Throws an exception if the asset is not found.
   Future<ByteData> load(String key);
 
+  /// Retrieve a binary resource from the asset bundle as an immutable
+  /// buffer.
+  ///
+  /// Throws an exception if the asset is not found.
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+  }
+
   /// Retrieve a string from the asset bundle.
   ///
   /// Throws an exception if the asset is not found.
@@ -70,8 +81,9 @@ abstract class AssetBundle {
   /// isolate to avoid jank on the main thread.
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
-    if (data == null)
+    if (data == null) {
       throw FlutterError('Unable to load asset: $key');
+    }
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
     // on a Pixel 4.
     if (data.lengthInBytes < 50 * 1024) {
@@ -125,11 +137,12 @@ class NetworkAssetBundle extends AssetBundle {
   Future<ByteData> load(String key) async {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok)
+    if (response.statusCode != HttpStatus.ok) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Unable to load asset: $key'),
         IntProperty('HTTP status code', response.statusCode),
       ]);
+    }
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
     return bytes.buffer.asByteData();
   }
@@ -168,8 +181,9 @@ abstract class CachingAssetBundle extends AssetBundle {
 
   @override
   Future<String> loadString(String key, { bool cache = true }) {
-    if (cache)
+    if (cache) {
       return _stringCache.putIfAbsent(key, () => super.loadString(key));
+    }
     return super.loadString(key);
   }
 
@@ -187,8 +201,9 @@ abstract class CachingAssetBundle extends AssetBundle {
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
     assert(key != null);
     assert(parser != null);
-    if (_structuredDataCache.containsKey(key))
+    if (_structuredDataCache.containsKey(key)) {
       return _structuredDataCache[key]! as Future<T>;
+    }
     Completer<T>? completer;
     Future<T>? result;
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {
@@ -224,6 +239,12 @@ abstract class CachingAssetBundle extends AssetBundle {
     _stringCache.clear();
     _structuredDataCache.clear();
   }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+  }
 }
 
 /// An [AssetBundle] that loads resources using platform messages.
@@ -233,9 +254,39 @@ class PlatformAssetBundle extends CachingAssetBundle {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData? asset =
         await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
-    if (asset == null)
+    if (asset == null) {
       throw FlutterError('Unable to load asset: $key');
+    }
     return asset;
+  }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    if (kIsWeb) {
+      final ByteData bytes = await load(key);
+      return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
+    }
+    bool debugUsePlatformChannel = false;
+    assert(() {
+      // dart:io is safe to use here since we early return for web
+      // above. If that code is changed, this needs to be gaurded on
+      // web presence. Override how assets are loaded in tests so that
+      // the old loader behavior that allows tests to load assets from
+      // the current package using the package prefix.
+      if (Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
+        debugUsePlatformChannel = true;
+      }
+      return true;
+    }());
+    if (debugUsePlatformChannel) {
+      final ByteData bytes = await load(key);
+      return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
+    }
+    try {
+      return await ui.ImmutableBuffer.fromAsset(key);
+    } on Exception {
+      throw FlutterError('Unable to load asset: $key.');
+    }
   }
 }
 

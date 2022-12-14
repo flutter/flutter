@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -16,9 +14,9 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
-  FlutterRunTestDriver flutter;
-  VmService vmService;
+  late Directory tempDir;
+  late FlutterRunTestDriver flutter;
+  late VmService vmService;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('vmservice_integration_test.');
@@ -28,12 +26,12 @@ void main() {
 
     flutter = FlutterRunTestDriver(tempDir);
     await flutter.run(withDebugger: true);
-    final int port = flutter.vmServicePort;
+    final int? port = flutter.vmServicePort;
     vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
   });
 
   tearDown(() async {
-    await flutter?.stop();
+    await flutter.stop();
     tryToDelete(tempDir);
   });
 
@@ -78,16 +76,16 @@ void main() {
         'ext.flutter.brightnessOverride',
         isolateId: isolate.id,
       );
-      expect(response.json['value'], 'Brightness.light');
+      expect(response.json!['value'], 'Brightness.light');
     }
     timer.cancel();
 
     // Verify that all duration events on the timeline are properly nested.
     final Response response = await vmService.callServiceExtension('getVMTimeline');
-    final List<TimelineEvent> events = (response as Timeline).traceEvents;
+    final List<TimelineEvent>? events = (response as Timeline).traceEvents;
     final Map<int, List<String>> threadDurationEventStack = <int, List<String>>{};
-    for (final TimelineEvent e in events) {
-      final Map<String, dynamic> event = e.json;
+    for (final TimelineEvent e in events!) {
+      final Map<String, dynamic> event = e.json!;
       final String phase = event['ph'] as String;
       final int tid = event['tid'] as int;
       final String name = event['name'] as String;

@@ -39,7 +39,7 @@ class ChannelCommand extends FlutterCommand {
     switch (rest.length) {
       case 0:
         await _listChannels(
-          showAll: boolArg('all'),
+          showAll: boolArgDeprecated('all'),
           verbose: globalResults?['verbose'] == true,
         );
         return FlutterCommandResult.success();
@@ -79,6 +79,10 @@ class ChannelCommand extends FlutterCommand {
 
     for (final String line in rawOutput) {
       final List<String> split = line.split('/');
+      if (split.length != 2) {
+        // We don't know how to parse this line, skip it.
+        continue;
+      }
       final String branch = split[1];
       if (split.length > 1) {
         final int index = officialChannels.indexOf(branch);

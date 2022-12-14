@@ -106,13 +106,13 @@ class MaterialGap extends MergeableMaterialItem {
 class MergeableMaterial extends StatefulWidget {
   /// Creates a mergeable Material list of items.
   const MergeableMaterial({
-    Key? key,
+    super.key,
     this.mainAxis = Axis.vertical,
     this.elevation = 2,
     this.hasDividers = false,
     this.children = const <MergeableMaterialItem>[],
     this.dividerColor,
-  }) : super(key: key);
+  });
 
   /// The children of the [MergeableMaterial].
   final List<MergeableMaterialItem> children;
@@ -211,8 +211,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   @override
   void dispose() {
     for (final MergeableMaterialItem child in _children) {
-      if (child is MaterialGap)
+      if (child is MaterialGap) {
         _animationTuples[child.key]!.controller.dispose();
+      }
     }
     super.dispose();
   }
@@ -226,21 +227,24 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   bool _debugHasConsecutiveGaps(List<MergeableMaterialItem> children) {
     for (int i = 0; i < widget.children.length - 1; i += 1) {
       if (widget.children[i] is MaterialGap &&
-          widget.children[i + 1] is MaterialGap)
+          widget.children[i + 1] is MaterialGap) {
         return true;
+      }
     }
     return false;
   }
 
   bool _debugGapsAreValid(List<MergeableMaterialItem> children) {
     // Check for consecutive gaps.
-    if (_debugHasConsecutiveGaps(children))
+    if (_debugHasConsecutiveGaps(children)) {
       return false;
+    }
 
     // First and last children must not be gaps.
     if (children.isNotEmpty) {
-      if (children.first is MaterialGap || children.last is MaterialGap)
+      if (children.first is MaterialGap || children.last is MaterialGap) {
         return false;
+      }
     }
 
     return true;
@@ -249,15 +253,17 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void _insertChild(int index, MergeableMaterialItem child) {
     _children.insert(index, child);
 
-    if (child is MaterialGap)
+    if (child is MaterialGap) {
       _initGap(child);
+    }
   }
 
   void _removeChild(int index) {
     final MergeableMaterialItem child = _children.removeAt(index);
 
-    if (child is MaterialGap)
+    if (child is MaterialGap) {
       _animationTuples[child.key] = null;
+    }
   }
 
   bool _isClosingGap(int index) {
@@ -312,12 +318,14 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         final int startOld = j;
 
         // Skip new keys.
-        while (newOnly.contains(newChildren[i].key))
+        while (newOnly.contains(newChildren[i].key)) {
           i += 1;
+        }
 
         // Skip old keys.
-        while (oldOnly.contains(_children[j].key) || _isClosingGap(j))
+        while (oldOnly.contains(_children[j].key) || _isClosingGap(j)) {
           j += 1;
+        }
 
         final int newLength = i - startNew;
         final int oldLength = j - startOld;
@@ -348,10 +356,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               j += 1;
             } else {
               // No animation if replaced items are more than one.
-              for (int k = 0; k < oldLength; k += 1)
+              for (int k = 0; k < oldLength; k += 1) {
                 _removeChild(startOld);
-              for (int k = 0; k < newLength; k += 1)
+              }
+              for (int k = 0; k < newLength; k += 1) {
                 _insertChild(startOld + k, newChildren[startNew + k]);
+              }
 
               j += newLength - oldLength;
             }
@@ -365,8 +375,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
               _removeChild(startOld);
 
-              for (int k = 0; k < newLength; k += 1)
+              for (int k = 0; k < newLength; k += 1) {
                 _insertChild(startOld + k, newChildren[startNew + k]);
+              }
 
               j += newLength - 1;
               double gapSizeSum = 0.0;
@@ -457,8 +468,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     }
 
     // Handle remaining items.
-    while (j < _children.length)
+    while (j < _children.length) {
       _removeChild(j);
+    }
     while (i < newChildren.length) {
       _insertChild(j, newChildren[i]);
 
@@ -515,10 +527,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   bool _willNeedDivider(int index) {
-    if (index < 0)
+    if (index < 0) {
       return false;
-    if (index >= _children.length)
+    }
+    if (index >= _children.length) {
       return false;
+    }
     return _children[index] is MaterialSlice || _isClosingGap(index);
   }
 
@@ -644,11 +658,11 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 
 class _MergeableMaterialListBody extends ListBody {
   _MergeableMaterialListBody({
-    required List<Widget> children,
-    Axis mainAxis = Axis.vertical,
+    required super.children,
+    super.mainAxis,
     required this.items,
     required this.elevation,
-  }) : super(children: children, mainAxis: mainAxis);
+  });
 
   final List<MergeableMaterialItem> items;
   final double elevation;
@@ -676,17 +690,16 @@ class _MergeableMaterialListBody extends ListBody {
 
 class _RenderMergeableMaterialListBody extends RenderListBody {
   _RenderMergeableMaterialListBody({
-    List<RenderBox>? children,
-    AxisDirection axisDirection = AxisDirection.down,
+    super.axisDirection,
     double elevation = 0.0,
-  }) : _elevation = elevation,
-       super(children: children, axisDirection: axisDirection);
+  }) : _elevation = elevation;
 
   double get elevation => _elevation;
   double _elevation;
   set elevation(double value) {
-    if (value == _elevation)
+    if (value == _elevation) {
       return;
+    }
     _elevation = value;
     markNeedsPaint();
   }
@@ -710,8 +723,9 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
     while (child != null) {
       final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
-      if (index.isEven)
+      if (index.isEven) {
         _paintShadows(context.canvas, rect);
+      }
       child = childParentData.nextSibling;
       index += 1;
     }

@@ -11,7 +11,7 @@ void main() {
 }
 
 class BottomAppBarDemo extends StatefulWidget {
-  const BottomAppBarDemo({Key? key}) : super(key: key);
+  const BottomAppBarDemo({super.key});
 
   @override
   State createState() => _BottomAppBarDemoState();

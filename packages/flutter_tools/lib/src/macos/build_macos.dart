@@ -114,7 +114,7 @@ Future<void> buildMacOS({
       else
         '-quiet',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      ...environmentVariablesAsXcodeBuildSettings(globals.platform)
+      ...environmentVariablesAsXcodeBuildSettings(globals.platform),
     ],
     trace: true,
     stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,

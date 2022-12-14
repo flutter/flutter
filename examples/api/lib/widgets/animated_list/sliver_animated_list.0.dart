@@ -4,13 +4,12 @@
 
 // Flutter code sample for SliverAnimatedList
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const SliverAnimatedListSample());
 
 class SliverAnimatedListSample extends StatefulWidget {
-  const SliverAnimatedListSample({Key? key}) : super(key: key);
+  const SliverAnimatedListSample({super.key});
 
   @override
   State<SliverAnimatedListSample> createState() =>
@@ -192,13 +191,12 @@ class ListModel<E> {
 // transitions from 0.0 to 1.0.
 class CardItem extends StatelessWidget {
   const CardItem({
-    Key? key,
+    super.key,
     this.onTap,
     this.selected = false,
     required this.animation,
     required this.item,
-  })  : assert(item >= 0),
-        super(key: key);
+  })  : assert(item >= 0);
 
   final Animation<double> animation;
   final VoidCallback? onTap;

@@ -68,10 +68,10 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'abcd'
+            'git', 'describe', '--tags', 'abcd',
           ],
-          stdout: 'v1.2.3'
-        )
+          stdout: 'v1.2.3',
+        ),
       ]),
       terminal: terminal,
       stdio: stdio,
@@ -96,10 +96,10 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'invalid'
+            'git', 'describe', '--tags', 'invalid',
           ],
           exitCode: 1,
-        )
+        ),
       ]),
       terminal: terminal,
       stdio: stdio,
@@ -188,19 +188,19 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'g6b00b5e88'
+            'git', 'describe', '--tags', 'g6b00b5e88',
           ],
           stdout: 'v1.2.3',
         ),
         const FakeCommand(
           command: <String>[
-            'git', 'reset', '--hard', 'g6b00b5e88'
+            'git', 'reset', '--hard', 'g6b00b5e88',
           ],
         ),
         const FakeCommand(
           command: <String>[
-            'git', 'checkout', 'master', '--'
-          ]
+            'git', 'checkout', 'master', '--',
+          ],
         ),
       ]),
       terminal: terminal,

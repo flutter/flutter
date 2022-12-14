@@ -4573,8 +4573,9 @@ double? _labelOpacity(WidgetTester tester, String text) {
     of: find.text(text),
     matching: find.byType(Opacity),
   ));
-  if (opacityWidgets.isNotEmpty)
+  if (opacityWidgets.isNotEmpty) {
     return opacityWidgets.single.opacity;
+  }
 
   final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(
     find.ancestor(

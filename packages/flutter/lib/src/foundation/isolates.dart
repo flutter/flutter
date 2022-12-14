@@ -78,7 +78,7 @@ typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q
 ///
 /// Using closures must be done with care. Due to
 /// [dart-lang/sdk#36983](https://github.com/dart-lang/sdk/issues/36983) a
-/// closure may captures objects that, while not directly used in the closure
+/// closure may capture objects that, while not directly used in the closure
 /// itself, may prevent it from being sent to an isolate.
 /// {@endtemplate}
 ///

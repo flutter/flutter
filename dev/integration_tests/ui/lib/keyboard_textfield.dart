@@ -62,11 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Text('$offset',
             key: const ValueKey<String>(keys.kOffsetText),
           ),
-          Text(
-            isSoftKeyboardVisible ? 'keyboard visible' : 'keyboard hidden',
-            key: const ValueKey<String>(keys.kKeyboardVisibleView),
+          if (isSoftKeyboardVisible) const Text(
+            'keyboard visible',
+            key: ValueKey<String>(keys.kKeyboardVisibleView),
           ),
-          const ElevatedButton(onPressed: debugDumpApp, child: Text('dump app')),
           Expanded(
             child: ListView(
               key: const ValueKey<String>(keys.kListView),

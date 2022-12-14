@@ -10,6 +10,16 @@ import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
+import 'build_test_task.dart';
+
+final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
+
+/// Temp function during gallery tests transition to build+test model.
+///
+/// https://github.com/flutter/flutter/issues/103542
+TaskFunction createGalleryTransitionBuildTest(List<String> args, {bool semanticsEnabled = false}) {
+  return GalleryTransitionBuildTest(args, semanticsEnabled: semanticsEnabled);
+}
 
 TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
@@ -131,7 +141,7 @@ class GalleryTransitionTest {
         if (transitionDurationFile != null)
           '$testOutputDirectory/$transitionDurationFile.json',
         if (timelineTraceFile != null)
-          '$testOutputDirectory/$timelineTraceFile.json'
+          '$testOutputDirectory/$timelineTraceFile.json',
       ],
       benchmarkScoreKeys: <String>[
         if (transitionDurationFile != null)
@@ -173,6 +183,137 @@ class GalleryTransitionTest {
         ],
       ],
     );
+  }
+}
+
+class GalleryTransitionBuildTest extends BuildTestTask {
+  GalleryTransitionBuildTest(
+    super.args, {
+    this.semanticsEnabled = false,
+    this.testFile = 'transitions_perf',
+    this.needFullTimeline = true,
+    this.timelineSummaryFile = 'transitions.timeline_summary',
+    this.timelineTraceFile = 'transitions.timeline',
+    this.transitionDurationFile = 'transition_durations.timeline',
+    this.driverFile,
+    this.measureCpuGpu = true,
+    this.measureMemory = true,
+  }) : super(workingDirectory: galleryDirectory);
+
+  final bool semanticsEnabled;
+  final bool needFullTimeline;
+  final bool measureCpuGpu;
+  final bool measureMemory;
+  final String testFile;
+  final String timelineSummaryFile;
+  final String? timelineTraceFile;
+  final String? transitionDurationFile;
+  final String? driverFile;
+
+  final String testOutputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '${galleryDirectory.path}/build';
+
+  @override
+  List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
+    return <String>[
+      'apk',
+      '--no-android-gradle-daemon',
+      '--profile',
+      '-t',
+      'test_driver/$testFile.dart',
+      '--target-platform',
+      'android-arm,android-arm64',
+    ];
+  }
+
+  @override
+  List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
+    final String testDriver = driverFile ?? (semanticsEnabled ? '${testFile}_with_semantics_test' : '${testFile}_test');
+    return <String>[
+      '--profile',
+      if (needFullTimeline) '--trace-startup',
+      '-t',
+      'test_driver/$testFile.dart',
+      '--use-application-binary=${getApplicationBinaryPath()}',
+      '--driver',
+      'test_driver/$testDriver.dart',
+      '-d',
+      deviceId,
+    ];
+  }
+
+  @override
+  Future<TaskResult> parseTaskResult() async {
+    final Map<String, dynamic> summary = json.decode(
+      file('$testOutputDirectory/$timelineSummaryFile.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+
+    if (transitionDurationFile != null) {
+      final Map<String, dynamic> original = json.decode(
+        file('$testOutputDirectory/$transitionDurationFile.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final Map<String, List<int>> transitions = <String, List<int>>{};
+      for (final String key in original.keys) {
+        transitions[key] = List<int>.from(original[key] as List<dynamic>);
+      }
+      summary['transitions'] = transitions;
+      summary['missed_transition_count'] = _countMissedTransitions(transitions);
+    }
+
+    final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+    return TaskResult.success(
+      summary,
+      detailFiles: <String>[
+        if (transitionDurationFile != null) '$testOutputDirectory/$transitionDurationFile.json',
+        if (timelineTraceFile != null) '$testOutputDirectory/$timelineTraceFile.json',
+      ],
+      benchmarkScoreKeys: <String>[
+        if (transitionDurationFile != null) 'missed_transition_count',
+        'average_frame_build_time_millis',
+        'worst_frame_build_time_millis',
+        '90th_percentile_frame_build_time_millis',
+        '99th_percentile_frame_build_time_millis',
+        'average_frame_rasterizer_time_millis',
+        'worst_frame_rasterizer_time_millis',
+        '90th_percentile_frame_rasterizer_time_millis',
+        '99th_percentile_frame_rasterizer_time_millis',
+        'average_layer_cache_count',
+        '90th_percentile_layer_cache_count',
+        '99th_percentile_layer_cache_count',
+        'worst_layer_cache_count',
+        'average_layer_cache_memory',
+        '90th_percentile_layer_cache_memory',
+        '99th_percentile_layer_cache_memory',
+        'worst_layer_cache_memory',
+        'average_picture_cache_count',
+        '90th_percentile_picture_cache_count',
+        '99th_percentile_picture_cache_count',
+        'worst_picture_cache_count',
+        'average_picture_cache_memory',
+        '90th_percentile_picture_cache_memory',
+        '99th_percentile_picture_cache_memory',
+        'worst_picture_cache_memory',
+        if (measureCpuGpu && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (summary['average_cpu_usage'] != null) 'average_cpu_usage',
+          if (summary['average_gpu_usage'] != null) 'average_gpu_usage',
+        ],
+        if (measureMemory && !isAndroid) ...<String>[
+          // See https://github.com/flutter/flutter/issues/68888
+          if (summary['average_memory_usage'] != null) 'average_memory_usage',
+          if (summary['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
+          if (summary['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
+        ],
+      ],
+    );
+  }
+
+  @override
+  String getApplicationBinaryPath() {
+    if (applicationBinaryPath != null) {
+      return applicationBinaryPath!;
+    }
+
+    return 'build/app/outputs/flutter-apk/app-profile.apk';
   }
 }
 

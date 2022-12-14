@@ -1,0 +1,10 @@
+# This file is also used by dev/bots/analyze_snippet_code.dart to analyze code snippets (`{@tool snippet}` sections).
+
+include: ../../analysis_options.yaml
+
+linter:
+  rules:
+    # Developer-facing code
+    curly_braces_in_flow_control_structures: true
+    # Samples want to print things pretty often.
+    avoid_print: false

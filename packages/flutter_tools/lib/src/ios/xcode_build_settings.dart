@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -194,7 +195,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
       }
     } else {
       if (localEngineName.endsWith('_arm')) {
-        arch = 'armv7';
+        throwToolExit('32-bit iOS local engine binaries are not supported.');
       } else if (localEngineName.contains('_arm64')) {
         arch = 'arm64';
       } else if (localEngineName.contains('_sim')) {
@@ -215,6 +216,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
       excludedSimulatorArchs += ' arm64';
     }
     xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {

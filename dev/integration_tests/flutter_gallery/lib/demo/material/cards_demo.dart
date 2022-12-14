@@ -247,7 +247,7 @@ class TravelDestinationContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TextStyle titleStyle = theme.textTheme.headline5!.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subtitle1!;
-    final ButtonStyle textButtonStyle = TextButton.styleFrom(primary: Colors.amber.shade500);
+    final ButtonStyle textButtonStyle = TextButton.styleFrom(foregroundColor: Colors.amber.shade500);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,6 +375,7 @@ class _CardsDemoState extends State<CardsDemo> {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
           children: destinations.map<Widget>((TravelDestination destination) {
             Widget? child;

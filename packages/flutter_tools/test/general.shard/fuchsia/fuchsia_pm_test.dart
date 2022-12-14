@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
@@ -16,13 +14,12 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   group('FuchsiaPM', () {
-    File pm;
-    FakeProcessManager fakeProcessManager;
-    FakeFuchsiaArtifacts fakeFuchsiaArtifacts;
+    late File pm;
+    late FakeProcessManager fakeProcessManager;
+    late FakeFuchsiaArtifacts fakeFuchsiaArtifacts;
 
     setUp(() {
       pm = MemoryFileSystem.test().file('pm');
-
       fakeFuchsiaArtifacts = FakeFuchsiaArtifacts(pm);
       fakeProcessManager = FakeProcessManager.empty();
     });
@@ -55,7 +52,7 @@ void main() {
         '-l',
         '[fe80::ec4:7aff:fecc:ea8f%eno2]:43819',
         '-c',
-        '2'
+        '2',
       ]));
 
       await FuchsiaPM().serve('<repo>', 'fe80::ec4:7aff:fecc:ea8f%eno2', 43819);

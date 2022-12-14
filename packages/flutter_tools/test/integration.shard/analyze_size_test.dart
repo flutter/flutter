@@ -26,7 +26,7 @@ void main() {
       'build',
       'apk',
       '--analyze-size',
-      '--target-platform=android-arm64'
+      '--target-platform=android-arm64',
     ], workingDirectory: workingDirectory);
 
     printOnFailure('Output of flutter build apk:');
@@ -165,7 +165,7 @@ void main() {
       'apk',
       '--analyze-size',
       '--target-platform=android-arm64',
-      '--split-debug-info=infos'
+      '--split-debug-info=infos',
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
     expect(result.stderr.toString(), contains('"--analyze-size" cannot be combined with "--split-debug-info"'));

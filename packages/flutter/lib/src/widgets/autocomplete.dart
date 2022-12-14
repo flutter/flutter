@@ -121,7 +121,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// [displayStringForOption], [optionsBuilder] and [optionsViewBuilder] must
   /// not be null.
   const RawAutocomplete({
-    Key? key,
+    super.key,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
     this.displayStringForOption = defaultStringForOption,
@@ -142,8 +142,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert(
          !(textEditingController != null && initialValue != null),
          'textEditingController and initialValue cannot be simultaneously defined.',
-       ),
-       super(key: key);
+       );
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
@@ -553,9 +552,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
 class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
   _AutocompleteCallbackAction({
-    required OnInvokeCallback<T> onInvoke,
+    required super.onInvoke,
     this.enabled = true,
-  }) : super(onInvoke: onInvoke);
+  });
 
   bool enabled;
 
@@ -597,10 +596,10 @@ class AutocompleteNextOptionIntent extends Intent {
 class AutocompleteHighlightedOption extends InheritedNotifier<ValueNotifier<int>> {
   /// Create an instance of AutocompleteHighlightedOption inherited widget.
   const AutocompleteHighlightedOption({
-    Key? key,
+    super.key,
     required ValueNotifier<int> highlightIndexNotifier,
-    required Widget child,
-  }) : super(key: key, notifier: highlightIndexNotifier, child: child);
+    required super.child,
+  }) : super(notifier: highlightIndexNotifier);
 
   /// Returns the index of the highlighted option from the closest
   /// [AutocompleteHighlightedOption] ancestor.

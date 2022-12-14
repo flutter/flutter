@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io' as io; // flutter_ignore: dart_io_import
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -520,7 +519,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           ...<String>[
             'chrome',
             '--web-run-headless',
-            if (!expressionEvaluation) '--no-web-enable-expression-evaluation'
+            if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
           ]
         else
           'flutter-tester',
@@ -753,7 +752,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   void _throwErrorResponse(String message) {
-    throw Exception('$message\n\n$_lastResponse\n\n${_errorBuffer.toString()}'.trim());
+    throw Exception('$message\n\n$_lastResponse\n\n$_errorBuffer'.trim());
   }
 
   final bool spawnDdsInstance;
@@ -850,9 +849,9 @@ class FlutterTestTestDriver extends FlutterTestDriver {
 
     await resume();
 
-    final Future<Object> timeoutFuture =
-        Future<Object>.delayed(defaultTimeout);
-    await Future.any<Object>(<Future<Object>>[done.future, timeoutFuture]);
+    final Future<void> timeoutFuture =
+        Future<void>.delayed(defaultTimeout);
+    await Future.any<void>(<Future<void>>[done.future, timeoutFuture]);
     await subscription.cancel();
     if (!done.isCompleted) {
       await quit();

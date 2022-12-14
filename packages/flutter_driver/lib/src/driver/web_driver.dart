@@ -294,34 +294,30 @@ class FlutterWebConnection {
 
   /// Sends command via WebDriver to Flutter web application.
   Future<dynamic> sendCommand(String script, Duration? duration) async {
-    dynamic result;
+    String phase = 'executing';
     try {
+      // Execute the script, which should leave the result in the `$flutterDriverResult` global variable.
       await _driver.execute(script, <void>[]);
-    } catch (error) {
-      // We should not just arbitrarily throw all exceptions on the ground.
-      // This is probably hiding real errors.
-      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
-    }
 
-    try {
-      result = await waitFor<dynamic>(
+      // Read the result.
+      phase = 'reading';
+      final dynamic result = await waitFor<dynamic>(
         () => _driver.execute(r'return $flutterDriverResult', <String>[]),
         matcher: isNotNull,
         timeout: duration ?? const Duration(days: 30),
       );
-    } catch (error) {
-      // We should not just arbitrarily throw all exceptions on the ground.
-      // This is probably hiding real errors.
-      // TODO(ianh): Determine what exceptions are expected here and handle those specifically.
-      // Returns null if exception thrown.
-      return null;
-    } finally {
-      // Resets the result.
-      await _driver.execute(r'''
-        $flutterDriverResult = null
-      ''', <void>[]);
+
+      // Reset the result to null to avoid polluting the results of future commands.
+      phase = 'resetting';
+      await _driver.execute(r'$flutterDriverResult = null', <void>[]);
+      return result;
+    } catch (error, stackTrace) {
+      throw DriverError(
+        'Error while $phase FlutterDriver result for command: $script',
+        error,
+        stackTrace,
+      );
     }
-    return result;
   }
 
   /// Gets performance log from WebDriver.

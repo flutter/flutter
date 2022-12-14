@@ -15,11 +15,11 @@ enum DiagonalSlot {
 /// by providing slots for two children that will be arranged diagonally.
 class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<DiagonalSlot> {
   const Diagonal({
-    Key? key,
+    super.key,
     this.topLeft,
     this.bottomRight,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   final Widget? topLeft;
   final Widget? bottomRight;
@@ -251,7 +251,7 @@ class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<Di
 }
 
 class ExampleWidget extends StatelessWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+  const ExampleWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

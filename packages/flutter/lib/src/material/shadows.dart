@@ -8,7 +8,7 @@ import 'package:flutter/painting.dart';
 // Currently, only the elevation values that are bound to one or more widgets are
 // defined here.
 
-/// Map of elevation offsets used by material design to [BoxShadow] definitions.
+/// Map of elevation offsets used by Material Design to [BoxShadow] definitions.
 ///
 /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24.
 ///

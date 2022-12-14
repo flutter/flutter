@@ -92,6 +92,23 @@ const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
   },
 };
 
+const String _malformedDescriptionResponse = r'''
+[
+  {
+    "installationPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community",
+    "displayName": "Visual Studio Community 2019",
+    "description": "This description has too many "quotes",
+    "installationVersion": "16.2.29306.81",
+    "isRebootRequired": false,
+    "isComplete": true,
+    "isPrerelease": false,
+    "catalog": {
+      "productDisplayVersion": "16.2.5"
+    }
+  }
+]
+''';
+
 // Arguments for a vswhere query to search for an installation with the
 // requirements.
 const List<String> _requirements = <String>[
@@ -124,7 +141,7 @@ void setMockVswhereResponse(
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
   final String finalResponse = responseOverride
-    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '');
+    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '[]');
   final List<String> requirementArguments = requiredComponents == null
     ? <String>[]
     : <String>['-requires', ...requiredComponents];
@@ -323,7 +340,7 @@ VisualStudioFixture setUpVisualStudio() {
     logger: logger,
     processManager: processManager,
   );
-  return VisualStudioFixture(visualStudio, fileSystem, processManager);
+  return VisualStudioFixture(visualStudio, fileSystem, processManager, logger);
 }
 
 // Set all vswhere query with the required components return null.
@@ -717,7 +734,7 @@ void main() {
       expect(visualStudio.fullVersion, equals('16.2.29306.81'));
     });
 
-    testWithoutContext('cmakePath returns null when VS is present but when vswhere returns invalid JSON', () {
+    testWithoutContext('Warns and returns no installation when VS is present but vswhere returns invalid JSON', () {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
@@ -729,7 +746,19 @@ void main() {
         fixture.processManager,
       );
 
+      expect(visualStudio.isInstalled, isFalse);
+      expect(visualStudio.isComplete, isFalse);
+      expect(visualStudio.isLaunchable, isFalse);
+      expect(visualStudio.isPrerelease, isFalse);
+      expect(visualStudio.isRebootRequired, isFalse);
+      expect(visualStudio.hasNecessaryComponents, isFalse);
+      expect(visualStudio.displayName, isNull);
+      expect(visualStudio.displayVersion, isNull);
+      expect(visualStudio.installLocation, isNull);
+      expect(visualStudio.fullVersion, isNull);
       expect(visualStudio.cmakePath, isNull);
+
+      expect(fixture.logger.warningText, contains('Warning: Unexpected vswhere.exe JSON output'));
     });
 
     testWithoutContext('Everything returns good values when VS is present with all components', () {
@@ -941,6 +970,29 @@ void main() {
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
       expect(visualStudio.displayVersion, equals('\u{FFFD}'));
     });
+<<<<<<< HEAD
+=======
+
+    testWithoutContext('Ignores malformed JSON in description property', () {
+      setMockVswhereResponse(
+        fixture.fileSystem,
+        fixture.processManager,
+        _requirements,
+        <String>['-version', '16'],
+        null,
+        _malformedDescriptionResponse,
+      );
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 16 2019'));
+      expect(visualStudio.displayVersion, equals('16.2.5'));
+
+      expect(fixture.logger.warningText, isEmpty);
+    });
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
   });
 
   group(VswhereDetails, () {
@@ -1037,9 +1089,10 @@ void main() {
 }
 
 class VisualStudioFixture {
-  VisualStudioFixture(this.visualStudio, this.fileSystem, this.processManager);
+  VisualStudioFixture(this.visualStudio, this.fileSystem, this.processManager, this.logger);
 
   final VisualStudio visualStudio;
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
+  final BufferLogger logger;
 }

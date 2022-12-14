@@ -228,12 +228,12 @@ Future<String> runCommand(
     );
   } on ProcessException catch (e) {
     stderr.writeln('Running "${cmd.join(' ')}" in ${workingDirectory.path} '
-        'failed with:\n${e.toString()}');
+        'failed with:\n$e');
     exitCode = 2;
     return utf8.decode(stdoutOutput);
   } on ArgumentError catch (e) {
     stderr.writeln('Running "${cmd.join(' ')}" in ${workingDirectory.path} '
-        'failed with:\n${e.toString()}');
+        'failed with:\n$e');
     exitCode = 3;
     return utf8.decode(stdoutOutput);
   }

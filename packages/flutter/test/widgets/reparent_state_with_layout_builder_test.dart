@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
 
 class Bar extends StatefulWidget {
-  const Bar({ Key? key }) : super(key: key);
+  const Bar({ super.key });
   @override
   BarState createState() => BarState();
 }
@@ -45,7 +45,7 @@ class BarState extends State<Bar> {
 }
 
 class StatefulCreationCounter extends StatefulWidget {
-  const StatefulCreationCounter({ Key? key }) : super(key: key);
+  const StatefulCreationCounter({ super.key });
 
   @override
   StatefulCreationCounterState createState() => StatefulCreationCounterState();

@@ -146,8 +146,9 @@ class ListTileThemeData with Diagnosticable {
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ListTileThemeData(
       dense: t < 0.5 ? a?.dense : b?.dense,
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -188,10 +189,12 @@ class ListTileThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ListTileThemeData
       && other.dense == dense
       && other.shape == shape
@@ -246,7 +249,7 @@ class ListTileTheme extends InheritedTheme {
   /// Only the [data] parameter should be used. The other parameters are
   /// redundant (are now obsolete) and will be deprecated in a future update.
   const ListTileTheme({
-    Key? key,
+    super.key,
     ListTileThemeData? data,
     bool? dense,
     ShapeBorder? shape,
@@ -262,7 +265,7 @@ class ListTileTheme extends InheritedTheme {
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
-    required Widget child,
+    required super.child,
   }) : assert(
          data == null ||
          (shape ??
@@ -291,8 +294,7 @@ class ListTileTheme extends InheritedTheme {
        _mouseCursor = mouseCursor,
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
-       _minLeadingWidth = minLeadingWidth,
-       super(key: key, child: child);
+       _minLeadingWidth = minLeadingWidth;
 
   final ListTileThemeData? _data;
   final bool? _dense;

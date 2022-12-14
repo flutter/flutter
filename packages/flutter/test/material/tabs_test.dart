@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,7 +29,7 @@ Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.
 }
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key? key, this.child }) : super(key: key);
+  const StateMarker({ super.key, this.child });
 
   final Widget? child;
 
@@ -43,14 +42,15 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null)
+    if (widget.child != null) {
       return widget.child!;
+    }
     return Container();
   }
 }
 
 class AlwaysKeepAliveWidget extends StatefulWidget {
-  const AlwaysKeepAliveWidget({ Key? key}) : super(key: key);
+  const AlwaysKeepAliveWidget({ super.key});
   static String text = 'AlwaysKeepAlive';
   @override
   AlwaysKeepAliveState createState() => AlwaysKeepAliveState();
@@ -130,11 +130,11 @@ typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabCon
 
 class TabControllerFrame extends StatefulWidget {
   const TabControllerFrame({
-    Key? key,
+    super.key,
     required this.length,
     this.initialIndex = 0,
     required this.builder,
-  }) : super(key: key);
+  });
 
   final int length;
   final int initialIndex;
@@ -204,13 +204,14 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
   void drawLine(Offset p1, Offset p2, Paint paint) {
     // Assuming that the indicatorWeight is 2.0, the default.
     const double indicatorWeight = 2.0;
-    if (paint.color == indicatorColor)
+    if (paint.color == indicatorColor) {
       indicatorRect = Rect.fromPoints(p1, p2).inflate(indicatorWeight / 2.0);
+    }
   }
 }
 
 class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const TestScrollPhysics({ super.parent });
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -812,8 +813,9 @@ void main() {
     ));
 
     tabController.animation!.addListener(() {
-      if (tabController.animation!.status == AnimationStatus.forward)
+      if (tabController.animation!.status == AnimationStatus.forward) {
         tabController.index = 2;
+      }
       expect(tabController.indexIsChanging, true);
     });
 
@@ -1104,6 +1106,45 @@ void main() {
     expect(pageController.viewportFraction, 1);
   });
 
+  testWidgets('TabBarView has clipBehavior Clip.hardEdge by default', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final TabBarView tabBarView = tester.widget(find.byType(TabBarView));
+    expect(tabBarView.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('TabBarView sets clipBehavior correctly', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[const Text('First'), const Text('Second')];
+
+    Widget builder() {
+      return boilerplate(
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(
+            clipBehavior: Clip.none,
+            children: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final PageView pageView = tester.widget(find.byType(PageView));
+    expect(pageView.clipBehavior, Clip.none);
+  });
+
   testWidgets('TabBar tap skips indicator animation when disabled in controller', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B'];
 
@@ -1148,6 +1189,51 @@ void main() {
     expect(controller.index, 2);
     expect(controller.previousIndex, 0);
     expect(controller.indexIsChanging, false);
+  });
+
+  testWidgets('TabBar should not throw when animation is disabled in controller', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/102600
+    final List<String> tabs = <String>['A'];
+
+    Widget buildWithTabBarView() {
+      return boilerplate(
+        child: DefaultTabController(
+          animationDuration: Duration.zero,
+          length: tabs.length,
+          child: Column(
+            children: <Widget>[
+              TabBar(
+                tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                isScrollable: true,
+              ),
+              Flexible(
+                child: TabBarView(
+                  children: List<Widget>.generate(
+                    tabs.length,
+                    (int index) => Text('Tab $index'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWithTabBarView());
+    TabController controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 0);
+
+    tabs.add('B');
+    await tester.pumpWidget(buildWithTabBarView());
+    tabs.add('C');
+    await tester.pumpWidget(buildWithTabBarView());
+    await tester.tap(find.text('C'));
+    await tester.pumpAndSettle();
+    controller = DefaultTabController.of(tester.element(find.text('A')))!;
+    expect(controller.index, 2);
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('TabBarView skips animation when disabled in controller', (WidgetTester tester) async {
@@ -2991,7 +3077,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Tab).first));
-    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -3169,10 +3254,12 @@ void main() {
               ],
               overlayColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
-                 if (states.contains(MaterialState.hovered))
-                    return const Color(0xff00ff00);
-                  if (states.contains(MaterialState.pressed))
+                 if (states.contains(MaterialState.hovered)) {
+                   return const Color(0xff00ff00);
+                 }
+                  if (states.contains(MaterialState.pressed)) {
                     return const Color(0xf00fffff);
+                  }
                   return const Color(0xffbadbad); // Shouldn't happen.
                 },
               ),
@@ -3182,7 +3269,6 @@ void main() {
       );
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
       await gesture.moveTo(tester.getCenter(find.byType(Tab)));
       await tester.pumpAndSettle();
       final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
@@ -3203,10 +3289,12 @@ void main() {
                 ],
                 overlayColor: MaterialStateProperty.resolveWith<Color>(
                   (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered))
+                    if (states.contains(MaterialState.hovered)) {
                       return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.pressed))
+                    }
+                    if (states.contains(MaterialState.pressed)) {
                       return splashColor;
+                    }
                     return const Color(0xffbadbad); // Shouldn't happen.
                   },
                 ),
@@ -3582,13 +3670,13 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/94504.
     final List<String> tabTitles = <String>[];
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
       });
@@ -3606,12 +3694,12 @@ void main() {
                     TextButton(
                       key: const Key('Add tab'),
                       child: const Text('Add tab'),
-                      onPressed: () => _onTabAdd(setState),
+                      onPressed: () => onTabAdd(setState),
                     ),
                     TextButton(
                       key: const Key('Remove tab'),
                       child: const Text('Remove tab'),
-                      onPressed: () => _onTabRemove(setState),
+                      onPressed: () => onTabRemove(setState),
                     ),
                   ],
                   bottom: PreferredSize(
@@ -3657,14 +3745,14 @@ void main() {
     final List<String> tabTitles = <String>[];
     TabController tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
 
-    void _onTabAdd(StateSetter setState) {
+    void onTabAdd(StateSetter setState) {
       setState(() {
         tabTitles.add('Tab ${tabTitles.length + 1}');
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
       });
     }
 
-    void _onTabRemove(StateSetter setState) {
+    void onTabRemove(StateSetter setState) {
       setState(() {
         tabTitles.removeLast();
         tabController = TabController(length: tabTitles.length, vsync: const TestVSync());
@@ -3681,12 +3769,12 @@ void main() {
                   TextButton(
                     key: const Key('Add tab'),
                     child: const Text('Add tab'),
-                    onPressed: () => _onTabAdd(setState),
+                    onPressed: () => onTabAdd(setState),
                   ),
                   TextButton(
                     key: const Key('Remove tab'),
                     child: const Text('Remove tab'),
-                    onPressed: () => _onTabRemove(setState),
+                    onPressed: () => onTabRemove(setState),
                   ),
                 ],
                 bottom: PreferredSize(
@@ -4573,10 +4661,135 @@ void main() {
     );
     gesture.removePointer();
   });
+
+  testWidgets('Do not crash if the controller and TabBarView are updated at different phases(build and layout) of the same frame', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/104994.
+    List<String> tabTextContent = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabTextContent.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Default TabBar Preview'),
+                  bottom: tabTextContent.isNotEmpty
+                      ? TabBar(
+                    isScrollable: true,
+                    tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
+                  )
+                      : null,
+                ),
+                body: LayoutBuilder(
+                  builder: (_, __) {
+                    return tabTextContent.isNotEmpty
+                      ? TabBarView(
+                        children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList(),
+                      )
+                      : const Center(child: Text('No tabs'));
+                  },
+                ),
+                bottomNavigationBar: BottomAppBar(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconButton(
+                        key: const Key('Add tab'),
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..add('Tab ${tabTextContent.length + 1}');
+                          });
+                        },
+                      ),
+                      IconButton(
+                        key: const Key('Delete tab'),
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..removeLast();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs properly
+    expect(find.text('No tabs'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('Add tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text("Tab 1's view"), findsOneWidget);
+
+    // Dynamically updates to zero tabs properly
+    await tester.tap(find.byKey(const Key('Delete tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('No tabs'), findsOneWidget);
+  });
+
+  testWidgets("Throw if the controller's length mismatch the tabs count", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets("Throw if the controller's length mismatch the TabBarView‘s children count", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 1,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: <Widget>[
+                  Container(width: 100, height: 100, color: Colors.green),
+                ],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[
+                Icon(Icons.directions_car),
+                Icon(Icons.directions_transit),
+                Icon(Icons.directions_bike),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
 }
 
 class KeepAliveInk extends StatefulWidget {
-  const KeepAliveInk(this.title, {Key? key}) : super(key: key);
+  const KeepAliveInk(this.title, {super.key});
   final String title;
   @override
   State<StatefulWidget> createState() {
@@ -4598,7 +4811,7 @@ class _KeepAliveInkState extends State<KeepAliveInk> with AutomaticKeepAliveClie
 }
 
 class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({Key? key}) : super(key: key);
+  const TabBarDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -4632,7 +4845,7 @@ class TabBarDemo extends StatelessWidget {
 class MockScrollMetrics extends Fake implements ScrollMetrics { }
 
 class TabBody extends StatefulWidget {
-  const TabBody({ Key? key, required this.index, required this.log }) : super(key: key);
+  const TabBody({ super.key, required this.index, required this.log });
 
   final int index;
   final List<String> log;

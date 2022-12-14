@@ -226,13 +226,16 @@ class RenderListWheelViewport
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
     assert(value != null);
-    if (value == _offset)
+    if (value == _offset) {
       return;
-    if (attached)
+    }
+    if (attached) {
       _offset.removeListener(_hasScrolled);
+    }
     _offset = value;
-    if (attached)
+    if (attached) {
       _offset.addListener(_hasScrolled);
+    }
     markNeedsLayout();
   }
 
@@ -272,8 +275,9 @@ class RenderListWheelViewport
       value > 0,
       diameterRatioZeroMessage,
     );
-    if (value == _diameterRatio)
+    if (value == _diameterRatio) {
       return;
+    }
     _diameterRatio = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -302,8 +306,9 @@ class RenderListWheelViewport
       value <= 0.01,
       perspectiveTooHighMessage,
     );
-    if (value == _perspective)
+    if (value == _perspective) {
       return;
+    }
     _perspective = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -338,8 +343,9 @@ class RenderListWheelViewport
   double _offAxisFraction = 0.0;
   set offAxisFraction(double value) {
     assert(value != null);
-    if (value == _offAxisFraction)
+    if (value == _offAxisFraction) {
       return;
+    }
     _offAxisFraction = value;
     markNeedsPaint();
   }
@@ -351,8 +357,9 @@ class RenderListWheelViewport
   bool _useMagnifier = false;
   set useMagnifier(bool value) {
     assert(value != null);
-    if (value == _useMagnifier)
+    if (value == _useMagnifier) {
       return;
+    }
     _useMagnifier = value;
     markNeedsPaint();
   }
@@ -371,8 +378,9 @@ class RenderListWheelViewport
   set magnification(double value) {
     assert(value != null);
     assert(value > 0);
-    if (value == _magnification)
+    if (value == _magnification) {
       return;
+    }
     _magnification = value;
     markNeedsPaint();
   }
@@ -390,8 +398,9 @@ class RenderListWheelViewport
   set overAndUnderCenterOpacity(double value) {
     assert(value != null);
     assert(value >= 0 && value <= 1);
-    if (value == _overAndUnderCenterOpacity)
+    if (value == _overAndUnderCenterOpacity) {
       return;
+    }
     _overAndUnderCenterOpacity = value;
     markNeedsPaint();
   }
@@ -407,8 +416,9 @@ class RenderListWheelViewport
   set itemExtent(double value) {
     assert(value != null);
     assert(value > 0);
-    if (value == _itemExtent)
+    if (value == _itemExtent) {
       return;
+    }
     _itemExtent = value;
     markNeedsLayout();
   }
@@ -439,8 +449,9 @@ class RenderListWheelViewport
   set squeeze(double value) {
     assert(value != null);
     assert(value > 0);
-    if (value == _squeeze)
+    if (value == _squeeze) {
       return;
+    }
     _squeeze = value;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
@@ -464,8 +475,9 @@ class RenderListWheelViewport
       !renderChildrenOutsideViewport || clipBehavior == Clip.none,
       clipBehaviorAndRenderChildrenOutsideViewportConflict,
     );
-    if (value == _renderChildrenOutsideViewport)
+    if (value == _renderChildrenOutsideViewport) {
       return;
+    }
     _renderChildrenOutsideViewport = value;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
@@ -492,8 +504,9 @@ class RenderListWheelViewport
 
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! ListWheelParentData)
+    if (child.parentData is! ListWheelParentData) {
       child.parentData = ListWheelParentData();
+    }
   }
 
   @override
@@ -521,8 +534,9 @@ class RenderListWheelViewport
   /// the first item in the center.
   double get _minEstimatedScrollExtent {
     assert(hasSize);
-    if (childManager.childCount == null)
+    if (childManager.childCount == null) {
       return double.negativeInfinity;
+    }
     return 0.0;
   }
 
@@ -530,8 +544,9 @@ class RenderListWheelViewport
   /// the last item in the center.
   double get _maxEstimatedScrollExtent {
     assert(hasSize);
-    if (childManager.childCount == null)
+    if (childManager.childCount == null) {
       return double.infinity;
+    }
 
     return math.max(0.0, (childManager.childCount! - 1) * _itemExtent);
   }
@@ -563,8 +578,9 @@ class RenderListWheelViewport
   /// When the center of children passes this angle, they are no longer painted
   /// if [renderChildrenOutsideViewport] is false.
   double get _maxVisibleRadian {
-    if (_diameterRatio < 1.0)
+    if (_diameterRatio < 1.0) {
       return math.pi / 2.0;
+    }
     return math.asin(1.0 / _diameterRatio);
   }
 
@@ -594,15 +610,17 @@ class RenderListWheelViewport
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (childManager.childCount == null)
+    if (childManager.childCount == null) {
       return 0.0;
+    }
     return childManager.childCount! * _itemExtent;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (childManager.childCount == null)
+    if (childManager.childCount == null) {
       return 0.0;
+    }
     return childManager.childCount! * _itemExtent;
   }
 
@@ -674,8 +692,9 @@ class RenderListWheelViewport
     // If renderChildrenOutsideViewport is true, we spawn extra children by
     // doubling the visibility range, those that are in the backside of the
     // cylinder won't be painted anyway.
-    if (renderChildrenOutsideViewport)
+    if (renderChildrenOutsideViewport) {
       visibleHeight *= 2;
+    }
 
     final double firstVisibleOffset =
       offset.pixels + _itemExtent / 2 - visibleHeight / 2;
@@ -687,20 +706,24 @@ class RenderListWheelViewport
     int targetLastIndex = scrollOffsetToIndex(lastVisibleOffset);
     // Because we exclude lastVisibleOffset, if there's a new child starting at
     // that offset, it is removed.
-    if (targetLastIndex * _itemExtent == lastVisibleOffset)
+    if (targetLastIndex * _itemExtent == lastVisibleOffset) {
       targetLastIndex--;
+    }
 
     // Validates the target index range.
-    while (!childManager.childExistsAt(targetFirstIndex) && targetFirstIndex <= targetLastIndex)
+    while (!childManager.childExistsAt(targetFirstIndex) && targetFirstIndex <= targetLastIndex) {
       targetFirstIndex++;
-    while (!childManager.childExistsAt(targetLastIndex) && targetFirstIndex <= targetLastIndex)
+    }
+    while (!childManager.childExistsAt(targetLastIndex) && targetFirstIndex <= targetLastIndex) {
       targetLastIndex--;
+    }
 
     // If it turns out there's no children to layout, we remove old children and
     // return.
     if (targetFirstIndex > targetLastIndex) {
-      while (firstChild != null)
+      while (firstChild != null) {
         _destroyChild(firstChild!);
+      }
       return;
     }
 
@@ -715,8 +738,9 @@ class RenderListWheelViewport
     // Case when there is no intersection.
     if (childCount > 0 &&
         (indexOf(firstChild!) > targetLastIndex || indexOf(lastChild!) < targetFirstIndex)) {
-      while (firstChild != null)
+      while (firstChild != null) {
         _destroyChild(firstChild!);
+      }
     }
 
     final BoxConstraints childConstraints = constraints.copyWith(
@@ -842,8 +866,9 @@ class RenderListWheelViewport
     // renderChildrenOutsideViewport is true. Otherwise, only children within
     // suitable angles (via _first/lastVisibleLayoutOffset) reach the paint
     // phase.
-    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0)
+    if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) {
       return;
+    }
 
     final Matrix4 transform = MatrixUtils.createCylindricalProjectionTransform(
       radius: size.height * _diameterRatio / 2.0,
@@ -1038,8 +1063,9 @@ class RenderListWheelViewport
 
     // `child` will be the last RenderObject before the viewport when walking up from `target`.
     RenderObject child = target;
-    while (child.parent != this)
+    while (child.parent != this) {
       child = child.parent! as RenderObject;
+    }
 
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
     final double targetOffset = parentData.offset.dy; // the so-called "centerPosition"

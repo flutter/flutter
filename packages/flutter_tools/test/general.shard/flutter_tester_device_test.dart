@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:dds/dds.dart';
@@ -16,7 +14,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/flutter_tester_device.dart';
 import 'package:flutter_tools/src/test/font_config_manager.dart';
-import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 
@@ -25,10 +22,10 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
 void main() {
-  FakePlatform platform;
-  FileSystem fileSystem;
-  FakeProcessManager processManager;
-  FlutterTesterTestDevice device;
+  late FakePlatform platform;
+  late FileSystem fileSystem;
+  late FakeProcessManager processManager;
+  late FlutterTesterTestDevice device;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -87,6 +84,7 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
         'example.dill',
       ], environment: <String, String>{
@@ -131,8 +129,9 @@ void main() {
         '--enable-dart-profiling',
         '--non-interactive',
         '--use-test-fonts',
+        '--disable-asset-fonts',
         '--packages=.dart_tool/package_config.json',
-        'example.dill'
+        'example.dill',
       ], environment: <String, String>{
         'FLUTTER_TEST': expectedFlutterTestValue,
         'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
@@ -171,14 +170,6 @@ void main() {
       await device.start('example.dill');
       expect(processManager.hasRemainingExpectations, isFalse);
     });
-
-    testUsingContext('as null when set to null', () async {
-      platform.environment = <String, String>{'FLUTTER_TEST': null};
-      processManager.addCommand(flutterTestCommand(null));
-
-      await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
-    });
   });
 
   group('Dart Entrypoint Args', () {
@@ -203,14 +194,15 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
             '--foo',
             '--bar',
-            'example.dill'
+            'example.dill',
           ],
           stdout: 'success',
           stderr: 'failure',
-        )
+        ),
       ]);
       device = createDevice(dartEntrypointArgs: <String>['--foo', '--bar']);
     });
@@ -244,12 +236,13 @@ void main() {
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
+            '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
-            'example.dill'
+            'example.dill',
           ],
           stdout: 'The Dart VM service is listening on http://localhost:1234',
           stderr: 'failure',
-        )
+        ),
       ]);
       device = createDevice(enableObservatory: true);
     });
@@ -269,17 +262,14 @@ void main() {
 /// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   TestFlutterTesterDevice({
-    @required Platform platform,
-    @required FileSystem fileSystem,
-    @required ProcessManager processManager,
-    @required bool enableObservatory,
-    @required List<String> dartEntrypointArgs,
+    required super.platform,
+    required super.fileSystem,
+    required super.processManager,
+    required super.enableObservatory,
+    required List<String> dartEntrypointArgs,
   }) : super(
     id: 999,
     shellPath: '/',
-    platform: platform,
-    fileSystem: fileSystem,
-    processManager: processManager,
     logger: BufferLogger.test(),
     debuggingOptions: DebuggingOptions.enabled(
       const BuildInfo(
@@ -290,10 +280,9 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
       hostVmServicePort: 1234,
       dartEntrypointArgs: dartEntrypointArgs,
     ),
-    enableObservatory: enableObservatory,
     machine: false,
     host: InternetAddress.loopbackIPv6,
-    buildTestAssets: false,
+    testAssetDirectory: null,
     flutterProject: null,
     icudtlPath: null,
     compileExpression: null,
@@ -311,7 +300,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   }
 
   @override
-  Future<HttpServer> bind(InternetAddress host, int port) async => FakeHttpServer();
+  Future<HttpServer> bind(InternetAddress? host, int port) async => FakeHttpServer();
 
   @override
   Future<StreamChannel<String>> get remoteChannel async => StreamChannelController<String>().foreign;

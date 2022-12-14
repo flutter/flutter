@@ -47,25 +47,21 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// saved with [PageStorage] and restored it if this scroll position's scrollable
   /// is recreated.
   ScrollPositionWithSingleContext({
-    required ScrollPhysics physics,
-    required ScrollContext context,
+    required super.physics,
+    required super.context,
     double? initialPixels = 0.0,
-    bool keepScrollOffset = true,
-    ScrollPosition? oldPosition,
-    String? debugLabel,
-  }) : super(
-         physics: physics,
-         context: context,
-         keepScrollOffset: keepScrollOffset,
-         oldPosition: oldPosition,
-         debugLabel: debugLabel,
-       ) {
+    super.keepScrollOffset,
+    super.oldPosition,
+    super.debugLabel,
+  }) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
-    if (!hasPixels && initialPixels != null)
+    if (!hasPixels && initialPixels != null) {
       correctPixels(initialPixels);
-    if (activity == null)
+    }
+    if (activity == null) {
       goIdle();
+    }
     assert(activity != null);
   }
 
@@ -108,14 +104,16 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void beginActivity(ScrollActivity? newActivity) {
     _heldPreviousVelocity = 0.0;
-    if (newActivity == null)
+    if (newActivity == null) {
       return;
+    }
     assert(newActivity.delegate == this);
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
     _currentDrag = null;
-    if (!activity!.isScrolling)
+    if (!activity!.isScrolling) {
       updateUserScrollDirection(ScrollDirection.idle);
+    }
   }
 
   @override
@@ -160,8 +158,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
     assert(value != null);
-    if (userScrollDirection == value)
+    if (userScrollDirection == value) {
       return;
+    }
     _userScrollDirection = value;
     didUpdateScrollDirection(value);
   }

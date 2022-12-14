@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -110,10 +109,12 @@ class RenderAndroidView extends PlatformViewRenderBox {
   /// Sets a new Android view controller.
   @override
   set controller(AndroidViewController controller) {
+    assert(!_isDisposed);
     assert(_viewController != null);
     assert(controller != null);
-    if (_viewController == controller)
+    if (_viewController == controller) {
       return;
+    }
     _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     super.controller = controller;
     _viewController = controller;
@@ -140,6 +141,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   }
 
   void _onPlatformViewCreated(int id) {
+    assert(!_isDisposed);
     markNeedsSemanticsUpdate();
   }
 
@@ -167,8 +169,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
-    if (_state == _PlatformViewState.resizing || size.isEmpty)
+    if (_state == _PlatformViewState.resizing || size.isEmpty) {
       return;
+    }
 
     _state = _PlatformViewState.resizing;
     markNeedsPaint();
@@ -177,6 +180,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     do {
       targetSize = size;
       _currentTextureSize = await _viewController.setSize(targetSize);
+      if (_isDisposed) {
+        return;
+      }
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
@@ -196,8 +202,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
-        if (attached)
+        if (attached) {
           await _viewController.setOffset(localToGlobal(Offset.zero));
+        }
         // Schedule a new post frame callback.
         _setOffset();
       }
@@ -206,8 +213,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_viewController.textureId == null || _currentTextureSize == null)
+    if (_viewController.textureId == null || _currentTextureSize == null) {
       return;
+    }
 
     // As resizing the Android view happens asynchronously we don't know exactly when is a
     // texture frame with the new size is ready for consumption.
@@ -240,12 +248,14 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void dispose() {
     _isDisposed = true;
     _clipRectLayer.layer = null;
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     super.dispose();
   }
 
   void _paintTexture(PaintingContext context, Offset offset) {
-    if (_currentTextureSize == null)
+    if (_currentTextureSize == null) {
       return;
+    }
 
     context.addLayer(TextureLayer(
       rect: offset & _currentTextureSize!,
@@ -368,8 +378,9 @@ class RenderUiKitView extends RenderBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset? position }) {
-    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!))
+    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!)) {
       return false;
+    }
     result.add(BoxHitTestEntry(this, position));
     return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
@@ -433,9 +444,8 @@ class RenderUiKitView extends RenderBox {
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _UiKitViewGestureRecognizer(
     this.controller,
-    this.gestureRecognizerFactories, {
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(supportedDevices: supportedDevices) {
+    this.gestureRecognizerFactories
+  ) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -510,9 +520,8 @@ typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizer(
     _HandlePointerEvent handlePointerEvent,
-    this.gestureRecognizerFactories, {
-    Set<PointerDeviceKind>? supportedDevices,
-  }) : super(supportedDevices: supportedDevices) {
+    this.gestureRecognizerFactories
+  ) {
     team = GestureArenaTeam()
       ..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -714,8 +723,9 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;
-      if (owner != null)
+      if (owner != null) {
         markNeedsPaint();
+      }
     }
   }
   PlatformViewHitTestBehavior? _hitTestBehavior;

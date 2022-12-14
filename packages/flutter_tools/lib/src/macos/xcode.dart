@@ -101,6 +101,8 @@ class Xcode {
 
   Version? get currentVersion => _xcodeProjectInterpreter.version;
 
+  String? get buildVersion => _xcodeProjectInterpreter.build;
+
   String? get versionText => _xcodeProjectInterpreter.versionText;
 
   bool? _eulaSigned;

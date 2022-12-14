@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
 import 'semantics_event.dart' show AnnounceSemanticsEvent, TooltipSemanticsEvent;
 
+export 'dart:ui' show TextDirection;
 
 /// Allows access to the platform's accessibility services.
 ///

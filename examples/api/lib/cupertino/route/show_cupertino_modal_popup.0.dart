@@ -6,25 +6,23 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ModalPopupApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class ModalPopupApp extends StatelessWidget {
+  const ModalPopupApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
+      theme: CupertinoThemeData(brightness: Brightness.light),
       restorationScopeId: 'app',
-      title: _title,
-      home: MyStatelessWidget(),
+      home: ModalPopupExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class ModalPopupExample extends StatelessWidget {
+  const ModalPopupExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +31,13 @@ class MyStatelessWidget extends StatelessWidget {
         middle: Text('Home'),
       ),
       child: Center(
-          child: CupertinoButton(
-        onPressed: () {
-          Navigator.of(context).restorablePush(_modalBuilder);
-        },
-        child: const Text('Open Modal'),
-      )),
+        child: CupertinoButton(
+          onPressed: () {
+            Navigator.of(context).restorablePush(_modalBuilder);
+          },
+          child: const Text('Open Modal'),
+        ),
+      ),
     );
   }
 

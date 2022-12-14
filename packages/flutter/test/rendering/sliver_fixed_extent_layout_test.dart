@@ -110,6 +110,44 @@ void main() {
       expect(actual, 0);
     });
   });
+
+  test('Implements paintsChild correctly', () {
+    final List<RenderBox> children = <RenderBox>[
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+      RenderSizedBox(const Size(400.0, 100.0)),
+    ];
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
+      children: children,
+    );
+    final RenderViewport root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0,
+      children: <RenderSliver>[
+        childManager.createRenderSliverFillViewport(),
+      ],
+    );
+    layout(root);
+    expect(children.first.parent, isA<RenderSliverMultiBoxAdaptor>());
+
+    final RenderSliverMultiBoxAdaptor parent = children.first.parent! as RenderSliverMultiBoxAdaptor;
+    expect(parent.paintsChild(children[0]), true);
+    expect(parent.paintsChild(children[1]), false);
+    expect(parent.paintsChild(children[2]), false);
+
+    root.offset = ViewportOffset.fixed(600);
+    pumpFrame();
+    expect(parent.paintsChild(children[0]), false);
+    expect(parent.paintsChild(children[1]), true);
+    expect(parent.paintsChild(children[2]), false);
+
+    root.offset = ViewportOffset.fixed(1200);
+    pumpFrame();
+    expect(parent.paintsChild(children[0]), false);
+    expect(parent.paintsChild(children[1]), false);
+    expect(parent.paintsChild(children[2]), true);
+  });
 }
 
 int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
@@ -137,8 +175,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length)
+    if (index < 0 || index >= children.length) {
       return;
+    }
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject!.insert(children[index], after: after);

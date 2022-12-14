@@ -40,23 +40,10 @@ void main() {
       // Bring up keyboard
       await driver.tap(textFieldFinder);
 
-      const int keyboardTimeout = 3;
-      bool keyboardVisible = false;
-      for (int i = 0; i < keyboardTimeout; i++) {
-        await Future<void>.delayed(const Duration(seconds: 1));
-        final String keyboardVisibilityText = await driver.getText(keyboardVisibilityIndicatorFinder);
-        keyboardVisible = keyboardVisibilityText == 'keyboard visible';
-        if (keyboardVisible) {
-          break;
-        }
-      }
-
-      if (!keyboardVisible) {
-        await driver.tap(find.text('dump app'));
-      }
-
-      // TODO(jmagman): Remove timeout once flake has been diagnosed. https://github.com/flutter/flutter/issues/96787
-      expect(keyboardVisible, isTrue);
+      // The blinking cursor may have animation. Do not wait for it to finish.
+      await driver.runUnsynchronized(() async {
+        await driver.waitFor(keyboardVisibilityIndicatorFinder);
+      });
 
       // Ensure that TextField is visible again
       await driver.waitFor(textFieldFinder);

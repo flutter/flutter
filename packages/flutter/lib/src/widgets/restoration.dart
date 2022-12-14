@@ -57,11 +57,10 @@ class RestorationScope extends StatefulWidget {
   ///
   /// The [child] must not be null.
   const RestorationScope({
-    Key? key,
+    super.key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// Returns the [RestorationBucket] inserted into the widget tree by the
   /// closest ancestor [RestorationScope] of `context`.
@@ -147,11 +146,10 @@ class UnmanagedRestorationScope extends InheritedWidget {
   ///
   /// The [child] must not be null.
   const UnmanagedRestorationScope({
-    Key? key,
+    super.key,
     this.bucket,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(child != null);
 
   /// The [RestorationBucket] that this widget will insert into the widget tree.
   ///
@@ -222,11 +220,10 @@ class RootRestorationScope extends StatefulWidget {
   ///
   /// The [child] must not be null.
   const RootRestorationScope({
-    Key? key,
+    super.key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  }) : assert(child != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -476,7 +473,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
 
   @override
   void dispose() {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this)); // FYI, This uses ChangeNotifier's _debugDisposed, not _disposed.
     _owner?._unregister(this);
     super.dispose();
     _disposed = true;
@@ -486,14 +483,14 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   String? _restorationId;
   RestorationMixin? _owner;
   void _register(String restorationId, RestorationMixin owner) {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(restorationId != null);
     assert(owner != null);
     _restorationId = restorationId;
     _owner = owner;
   }
   void _unregister() {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(_restorationId != null);
     assert(_owner != null);
     _restorationId = null;
@@ -506,28 +503,15 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   @protected
   State get state {
     assert(isRegistered);
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     return _owner!;
   }
 
   /// Whether this property is currently registered with a [RestorationMixin].
   @protected
   bool get isRegistered {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
     return _restorationId != null;
-  }
-
-  bool _debugAssertNotDisposed() {
-    assert(() {
-      if (_disposed) {
-        throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
-        );
-      }
-      return true;
-    }());
-    return true;
   }
 }
 
@@ -755,8 +739,9 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
     if (!property.isRegistered) {
       property._register(restorationId, this);
       void listener() {
-        if (bucket == null)
+        if (bucket == null) {
           return;
+        }
         _updateProperty(property);
       }
       property.addListener(listener);

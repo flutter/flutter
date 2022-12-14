@@ -175,6 +175,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
       ),
       body: Scrollbar(
         child: ListView(
+          primary: true,
           padding: const EdgeInsets.all(20.0),
           children: <Widget>[
             PaginatedDataTable(

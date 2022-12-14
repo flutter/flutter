@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -73,13 +71,16 @@ class MatrixUtils {
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.
   static bool matrixEquals(Matrix4? a, Matrix4? b) {
-    if (identical(a, b))
+    if (identical(a, b)) {
       return true;
+    }
     assert(a != null || b != null);
-    if (a == null)
+    if (a == null) {
       return isIdentity(b!);
-    if (b == null)
+    }
+    if (b == null) {
       return isIdentity(a);
+    }
     assert(a != null && b != null);
     return a.storage[0] == b.storage[0]
         && a.storage[1] == b.storage[1]
@@ -441,8 +442,9 @@ class MatrixUtils {
     // Fixing it introduces a bunch of runtime failures; for more context see:
     // https://github.com/flutter/flutter/pull/31568
     // assert(transform.determinant != 0.0);
-    if (isIdentity(transform))
+    if (isIdentity(transform)) {
       return rect;
+    }
     transform = Matrix4.copy(transform)..invert();
     return transformRect(transform, rect);
   }
@@ -537,8 +539,9 @@ class MatrixUtils {
 ///
 /// If the argument is null, returns a list with the single string "null".
 List<String> debugDescribeTransform(Matrix4? transform) {
-  if (transform == null)
+  if (transform == null) {
     return const <String>['null'];
+  }
   return <String>[
     '[0] ${debugFormatDouble(transform.entry(0, 0))},${debugFormatDouble(transform.entry(0, 1))},${debugFormatDouble(transform.entry(0, 2))},${debugFormatDouble(transform.entry(0, 3))}',
     '[1] ${debugFormatDouble(transform.entry(1, 0))},${debugFormatDouble(transform.entry(1, 1))},${debugFormatDouble(transform.entry(1, 2))},${debugFormatDouble(transform.entry(1, 3))}',
@@ -553,20 +556,13 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   ///
   /// The [showName] and [level] arguments must not be null.
   TransformProperty(
-    String name,
-    Matrix4? value, {
-    bool showName = true,
-    Object? defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    String super.name,
+    super.value, {
+    super.showName,
+    super.defaultValue,
+    super.level,
   }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-       );
+       assert(level != null);
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -88,7 +88,6 @@ final TextSelectionControls desktopTextSelectionControls =
 // Generates the child that's passed into DesktopTextSelectionToolbar.
 class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
   const _DesktopTextSelectionControlsToolbar({
-    Key? key,
     required this.clipboardStatus,
     required this.endpoints,
     required this.globalEditableRegion,
@@ -99,7 +98,7 @@ class _DesktopTextSelectionControlsToolbar extends StatefulWidget {
     required this.selectionMidpoint,
     required this.textLineHeight,
     required this.lastSecondaryTapDownPosition,
-  }) : super(key: key);
+  });
 
   final ClipboardStatusNotifier? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
@@ -155,7 +154,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final Offset midpointAnchor = Offset(
-      (widget.selectionMidpoint.dx - widget.globalEditableRegion.left).clamp(
+      clampDouble(widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         mediaQuery.padding.left,
         mediaQuery.size.width - mediaQuery.padding.right,
       ),
@@ -220,11 +219,9 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
 class _DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates an instance of _DesktopTextSelectionToolbar.
   const _DesktopTextSelectionToolbar({
-    Key? key,
     required this.anchor,
     required this.children,
-  }) : assert(children.length > 0),
-       super(key: key);
+  }) : assert(children.length > 0);
 
   /// The point at which the toolbar will attempt to position itself as closely
   /// as possible.
@@ -297,15 +294,13 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 class _DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// Creates an instance of DesktopTextSelectionToolbarButton.
   const _DesktopTextSelectionToolbarButton({
-    Key? key,
     required this.onPressed,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// Create an instance of [_DesktopTextSelectionToolbarButton] whose child is
   /// a [Text] widget in the style of the Material text selection toolbar.
   _DesktopTextSelectionToolbarButton.text({
-    Key? key,
     required BuildContext context,
     required this.onPressed,
     required String text,
@@ -317,8 +312,7 @@ class _DesktopTextSelectionToolbarButton extends StatelessWidget {
                ? Colors.white
                : Colors.black87,
          ),
-       ),
-       super(key: key);
+       );
 
   /// {@macro flutter.material.TextSelectionToolbarTextButton.onPressed}
   final VoidCallback onPressed;

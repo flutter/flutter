@@ -50,6 +50,7 @@ void main() {
 
   testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+<<<<<<< HEAD
     ButtonStyle(
       textStyle: MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10.0)),
       backgroundColor: MaterialStateProperty.all<Color>(const Color(0xfffffff1)),
@@ -64,8 +65,24 @@ void main() {
       maximumSize: MaterialStateProperty.all<Size>(const Size(100.0, 200.0)),
       shape: MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder()),
       mouseCursor: MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden),
+=======
+    const ButtonStyle(
+      textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10.0)),
+      backgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
+      foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
+      overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff3)),
+      shadowColor: MaterialStatePropertyAll<Color>(Color(0xfffffff4)),
+      surfaceTintColor: MaterialStatePropertyAll<Color>(Color(0xfffffff5)),
+      elevation: MaterialStatePropertyAll<double>(1.5),
+      padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(1.0)),
+      minimumSize: MaterialStatePropertyAll<Size>(Size(1.0, 2.0)),
+      side: MaterialStatePropertyAll<BorderSide>(BorderSide(width: 4.0, color: Color(0xfffffff6))),
+      maximumSize: MaterialStatePropertyAll<Size>(Size(100.0, 200.0)),
+      shape: MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+      mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden),
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      animationDuration: const Duration(seconds: 1),
+      animationDuration: Duration(seconds: 1),
       enableFeedback: true,
     ).debugFillProperties(builder);
 
@@ -75,6 +92,7 @@ void main() {
       .toList();
 
     expect(description, <String>[
+<<<<<<< HEAD
       'textStyle: MaterialStateProperty.all(TextStyle(inherit: true, size: 10.0))',
       'backgroundColor: MaterialStateProperty.all(Color(0xfffffff1))',
       'foregroundColor: MaterialStateProperty.all(Color(0xfffffff2))',
@@ -88,6 +106,21 @@ void main() {
       'side: MaterialStateProperty.all(BorderSide(Color(0xfffffff6), 4.0, BorderStyle.solid))',
       'shape: MaterialStateProperty.all(StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none)))',
       'mouseCursor: MaterialStateProperty.all(SystemMouseCursor(forbidden))',
+=======
+      'textStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 10.0))',
+      'backgroundColor: MaterialStatePropertyAll(Color(0xfffffff1))',
+      'foregroundColor: MaterialStatePropertyAll(Color(0xfffffff2))',
+      'overlayColor: MaterialStatePropertyAll(Color(0xfffffff3))',
+      'shadowColor: MaterialStatePropertyAll(Color(0xfffffff4))',
+      'surfaceTintColor: MaterialStatePropertyAll(Color(0xfffffff5))',
+      'elevation: MaterialStatePropertyAll(1.5)',
+      'padding: MaterialStatePropertyAll(EdgeInsets.all(1.0))',
+      'minimumSize: MaterialStatePropertyAll(Size(1.0, 2.0))',
+      'maximumSize: MaterialStatePropertyAll(Size(100.0, 200.0))',
+      'side: MaterialStatePropertyAll(BorderSide(Color(0xfffffff6), 4.0, BorderStyle.solid))',
+      'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none)))',
+      'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))',
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
       'tapTargetSize: shrinkWrap',
       'animationDuration: 0:00:01.000000',
       'enableFeedback: true',
@@ -95,6 +128,7 @@ void main() {
   });
 
   testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
+<<<<<<< HEAD
     final MaterialStateProperty<TextStyle> textStyle = MaterialStateProperty.all<TextStyle>(const TextStyle(fontSize: 10));
     final MaterialStateProperty<Color> backgroundColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff1));
     final MaterialStateProperty<Color> foregroundColor =  MaterialStateProperty.all<Color>(const Color(0xfffffff2));
@@ -109,12 +143,28 @@ void main() {
     final MaterialStateProperty<BorderSide> side = MaterialStateProperty.all<BorderSide>(const BorderSide());
     final MaterialStateProperty<OutlinedBorder> shape  = MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder());
     final MaterialStateProperty<MouseCursor> mouseCursor = MaterialStateProperty.all<MouseCursor>(SystemMouseCursors.forbidden);
+=======
+    const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10));
+    const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
+    const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
+    const MaterialStateProperty<Color> overlayColor = MaterialStatePropertyAll<Color>(Color(0xfffffff3));
+    const MaterialStateProperty<Color> shadowColor =  MaterialStatePropertyAll<Color>(Color(0xfffffff4));
+    const MaterialStateProperty<Color> surfaceTintColor = MaterialStatePropertyAll<Color>(Color(0xfffffff5));
+    const MaterialStateProperty<double> elevation = MaterialStatePropertyAll<double>(1);
+    const MaterialStateProperty<EdgeInsets> padding = MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(1));
+    const MaterialStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
+    const MaterialStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
+    const MaterialStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
+    const MaterialStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(BorderSide());
+    const MaterialStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
+    const MaterialStateProperty<MouseCursor> mouseCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
     const VisualDensity visualDensity = VisualDensity.compact;
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Duration animationDuration = Duration(seconds: 1);
     const bool enableFeedback = true;
 
-    final ButtonStyle style = ButtonStyle(
+    const ButtonStyle style = ButtonStyle(
       textStyle: textStyle,
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
@@ -180,8 +230,8 @@ void main() {
     const BorderSide whiteSide = BorderSide(color: Color(0xFFFFFFFF));
     const BorderSide emptyBlackSide = BorderSide(width: 0, color: Color(0x00000000));
 
-    final ButtonStyle blackStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(blackSide));
-    final ButtonStyle whiteStyle = ButtonStyle(side: MaterialStateProperty.all<BorderSide>(whiteSide));
+    const ButtonStyle blackStyle = ButtonStyle(side: MaterialStatePropertyAll<BorderSide>(blackSide));
+    const ButtonStyle whiteStyle = ButtonStyle(side: MaterialStatePropertyAll<BorderSide>(whiteSide));
 
     // MaterialState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.

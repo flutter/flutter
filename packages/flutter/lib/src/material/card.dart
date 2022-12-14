@@ -8,7 +8,7 @@ import 'card_theme.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// A material design card: a panel with slightly rounded corners and an
+/// A Material Design card: a panel with slightly rounded corners and an
 /// elevation shadow.
 ///
 /// A card is a sheet of [Material] used to represent some related information,
@@ -53,13 +53,14 @@ import 'theme.dart';
 ///  * [ListTile], to display icons and text in a card.
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
+///  * <https://m3.material.io/components/cards>
 class Card extends StatelessWidget {
-  /// Creates a material design card.
+  /// Creates a Material Design card.
   ///
   /// The [elevation] must be null or non-negative. The [borderOnForeground]
   /// must not be null.
   const Card({
-    Key? key,
+    super.key,
     this.color,
     this.shadowColor,
     this.surfaceTintColor,
@@ -71,8 +72,7 @@ class Card extends StatelessWidget {
     this.child,
     this.semanticContainer = true,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null),
-       super(key: key);
+       assert(borderOnForeground != null);
 
   /// The card's background color.
   ///
@@ -91,8 +91,8 @@ class Card extends StatelessWidget {
 
   /// The color used as an overlay on [color] to indicate elevation.
   ///
-  /// If this is null, no overlay will be applied. Otherwise the this
-  /// color will be composited on top of [color] with an opacity related
+  /// If this is null, no overlay will be applied. Otherwise this color
+  /// will be composited on top of [color] with an opacity related
   /// to [elevation] and used to paint the background of the card.
   ///
   /// The default is null.
@@ -161,7 +161,7 @@ class Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CardTheme cardTheme = CardTheme.of(context);
-    final CardTheme defaults = Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final CardTheme defaults = Theme.of(context).useMaterial3 ? _CardDefaultsM3(context) : _CardDefaultsM2(context);
 
     return Semantics(
       container: semanticContainer,
@@ -186,8 +186,9 @@ class Card extends StatelessWidget {
   }
 }
 
-class _DefaultsM2 extends CardTheme {
-  const _DefaultsM2(this.context)
+// Hand coded defaults based on Material Design 2.
+class _CardDefaultsM2 extends CardTheme {
+  const _CardDefaultsM2(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
@@ -206,15 +207,18 @@ class _DefaultsM2 extends CardTheme {
   Color? get shadowColor => Theme.of(context).shadowColor;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - Card
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
-class _TokenDefaultsM3 extends CardTheme {
-  const _TokenDefaultsM3(this.context)
+// Token database version: v0_101
+
+// Generated version v0_101
+class _CardDefaultsM3 extends CardTheme {
+  const _CardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
@@ -234,4 +238,4 @@ class _TokenDefaultsM3 extends CardTheme {
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - Card

@@ -109,7 +109,7 @@ void main() {
       foregroundColor: Colors.black,
     );
 
-    Widget _buildWithBackwardsCompatibility([bool? enabled]) => MaterialApp(
+    Widget buildWithBackwardsCompatibility([bool? enabled]) => MaterialApp(
       theme: ThemeData(appBarTheme: appBarTheme),
       home: Scaffold(body: CustomScrollView(
         slivers: <Widget>[
@@ -125,17 +125,17 @@ void main() {
     );
 
     // Backwards compatibility enabled, AppBar should be built with true.
-    await tester.pumpWidget(_buildWithBackwardsCompatibility(true));
+    await tester.pumpWidget(buildWithBackwardsCompatibility(true));
     AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.backwardsCompatibility, true);
 
     // Backwards compatibility disabled, AppBar should be built with false.
-    await tester.pumpWidget(_buildWithBackwardsCompatibility(false));
+    await tester.pumpWidget(buildWithBackwardsCompatibility(false));
     appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.backwardsCompatibility, false);
 
     // Backwards compatibility unspecified, AppBar should be built with null.
-    await tester.pumpWidget(_buildWithBackwardsCompatibility());
+    await tester.pumpWidget(buildWithBackwardsCompatibility());
     appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.backwardsCompatibility, null);
 

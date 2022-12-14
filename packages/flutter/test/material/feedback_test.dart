@@ -202,10 +202,10 @@ void main () {
 
 class TestWidget extends StatelessWidget {
   const TestWidget({
-    Key? key,
+    super.key,
     this.tapHandler = nullHandler,
     this.longPressHandler = nullHandler,
-  }) : super(key: key);
+  });
 
   final HandlerCreator tapHandler;
   final HandlerCreator longPressHandler;

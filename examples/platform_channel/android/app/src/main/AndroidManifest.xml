@@ -14,6 +14,7 @@ found in the LICENSE file. -->
 
     <application android:label="@string/app_name">
         <activity android:name=".MainActivity"
+                  android:exported="true"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

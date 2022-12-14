@@ -14,7 +14,7 @@ class TestNotifier extends ChangeNotifier {
 }
 
 class HasListenersTester<T> extends ValueNotifier<T> {
-  HasListenersTester(T value) : super(value);
+  HasListenersTester(super.value);
   bool get testHasListeners => hasListeners;
 }
 
@@ -459,6 +459,29 @@ void main() {
     FlutterError? error;
     try {
       testNotifier.dispose();
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    expect(
+      error!.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A TestNotifier was used after being disposed.\n'
+        '   Once you have called dispose() on a TestNotifier, it can no\n'
+        '   longer be used.\n',
+      ),
+    );
+  });
+
+  test('Calling debugAssertNotDisposed works as intended', () {
+    final TestNotifier testNotifier = TestNotifier();
+    expect(ChangeNotifier.debugAssertNotDisposed(testNotifier), isTrue);
+    testNotifier.dispose();
+    FlutterError? error;
+    try {
+      ChangeNotifier.debugAssertNotDisposed(testNotifier);
     } on FlutterError catch (e) {
       error = e;
     }

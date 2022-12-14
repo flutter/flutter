@@ -93,31 +93,6 @@ void main() {
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
-  testWithoutContext('treats winuwp_debug_unopt as a host engine', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Directory localEngine = fileSystem
-        .directory('$kArbitraryEngineRoot/src/out/winuwp_debug_unopt/')
-        ..createSync(recursive: true);
-    fileSystem.directory('$kArbitraryEngineRoot/src/out/winuwp_debug_unopt/').createSync(recursive: true);
-
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
-      fileSystem: fileSystem,
-      flutterRoot: 'flutter/flutter',
-      logger: logger,
-      userMessages: UserMessages(),
-      platform: FakePlatform(environment: <String, String>{}),
-    );
-
-    expect(
-      await localEngineLocator.findEnginePath(null, localEngine.path, null),
-      matchesEngineBuildPaths(
-        hostEngine: '/arbitrary/engine/src/out/winuwp_debug_unopt',
-        targetEngine: '/arbitrary/engine/src/out/winuwp_debug_unopt',
-      ),
-    );
-  });
-
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
       'is determined by --local-engine', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();

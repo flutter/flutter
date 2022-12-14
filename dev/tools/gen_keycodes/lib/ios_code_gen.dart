@@ -89,7 +89,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line ='    {${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
+      final String line = '{${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
@@ -99,7 +99,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line ='    {kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
+      final String line = '{kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
@@ -122,7 +122,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'darwin', 'ios', 'framework', 'Source', 'KeyCodeMap.mm');
+      'shell', 'platform', 'darwin', 'ios', 'framework', 'Source', 'KeyCodeMap.g.mm');
 
   @override
   Map<String, String> mappings() {

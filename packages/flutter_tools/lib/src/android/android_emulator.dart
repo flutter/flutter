@@ -7,9 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../android/android_sdk.dart';
-import '../android/android_workflow.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -18,6 +15,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
+import 'android_workflow.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
   AndroidEmulators({
@@ -158,7 +156,7 @@ class AndroidEmulator extends Emulator {
       '-avd',
       id,
       if (coldBoot)
-        '-no-snapshot-load'
+        '-no-snapshot-load',
     ];
     final Process process = await _processUtils.start(command);
 

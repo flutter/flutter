@@ -339,7 +339,7 @@ void main() {
 }
 
 class _CustomWidget extends SingleChildRenderObjectWidget {
-  const _CustomWidget({Key? key, Widget? child}) : super(key: key, child: child);
+  const _CustomWidget();
 
   @override
   _CustomRenderObject createRenderObject(BuildContext context) => _CustomRenderObject();

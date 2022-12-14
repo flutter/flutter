@@ -10,8 +10,9 @@
 bool nearEqual(double? a, double? b, double epsilon) {
   assert(epsilon != null);
   assert(epsilon >= 0.0);
-  if (a == null || b == null)
+  if (a == null || b == null) {
     return a == b;
+  }
   return (a > (b - epsilon)) && (a < (b + epsilon)) || a == b;
 }
 

@@ -6,37 +6,35 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const NavBarApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class NavBarApp extends StatelessWidget {
+  const NavBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: NavBarExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class NavBarExample extends StatefulWidget {
+  const NavBarExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<NavBarExample> createState() => _NavBarExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _NavBarExampleState extends State<NavBarExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         // Try removing opacity to observe the lack of a blur effect and of sliding content.
         backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
-        middle: const Text('Sample Code'),
+        middle: const Text('CupertinoNavigationBar Sample'),
       ),
       child: Column(
         children: <Widget>[

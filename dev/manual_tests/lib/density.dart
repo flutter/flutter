@@ -534,7 +534,7 @@ class _MyHomePageState extends State<MyHomePage> {
         label: _model.rtl ? 'زر مسطح' : 'Text Button',
         child: TextButton(
           style: TextButton.styleFrom(
-            primary: Colors.white,
+            foregroundColor: Colors.white,
             backgroundColor: m2Swatch[200]
           ),
           onPressed: _model.enable ? () {} : null,

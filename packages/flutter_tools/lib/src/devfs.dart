@@ -477,7 +477,7 @@ class DevFS {
   final StopwatchFactory _stopwatchFactory;
 
   final String fsName;
-  final Directory rootDirectory;
+  final Directory? rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
@@ -497,7 +497,7 @@ class DevFS {
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory.uri.resolve(deviceUriSuffix);
+      return rootDirectory!.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
   }

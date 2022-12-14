@@ -83,8 +83,9 @@ final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.m
 
 double getScrollOffset(WidgetTester tester, {bool last = true}) {
   Finder viewportFinder = find.byType(Viewport);
-  if (last)
+  if (last) {
     viewportFinder = viewportFinder.last;
+  }
   final RenderViewport viewport = tester.renderObject(viewportFinder);
   return viewport.offset.pixels;
 }
@@ -358,8 +359,9 @@ void main() {
     await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
 
     controller.addListener(() {
-      if(controller.position.userScrollDirection != ScrollDirection.idle)
+      if(controller.position.userScrollDirection != ScrollDirection.idle) {
         lastUserScrollingDirection = controller.position.userScrollDirection;
+      }
     });
 
     await tester.drag(find.byType(Scrollable), const Offset(0.0, -20.0), touchSlopY: 0.0);
@@ -402,12 +404,14 @@ void main() {
         MaterialApp(
           home: CustomScrollView(
             physics: canDrag ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-            slivers: <Widget>[SliverToBoxAdapter(
-              child: SizedBox(
-                height: 2000,
-                child: GestureDetector(onTap: () {}),
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 2000,
+                  child: GestureDetector(onTap: () {}),
+                ),
               ),
-            )],
+            ],
           ),
         ),
       );
@@ -551,18 +555,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -50.0, 800.0, 0.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
@@ -603,18 +611,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(-50.0, 0.0, 0.0, 600.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
   }, variant: KeySimulatorTransitModeVariant.all());
@@ -652,18 +664,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
   }, variant: KeySimulatorTransitModeVariant.all());
@@ -700,18 +716,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 600.0, 800.0, 650.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
@@ -755,18 +775,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.00)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
   }, variant: KeySimulatorTransitModeVariant.all());
 
@@ -807,22 +831,26 @@ void main() {
     for (int i = 0; i < 10; ++i) {
       // We exclude the modifier keys here for web testing since default web shortcuts
       // do not use a modifier key with arrow keys for ScrollActions.
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyDownEvent(modifierKey);
+      }
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyUpEvent(modifierKey);
+      }
       await tester.pumpAndSettle();
     }
     // Starts at #10 already, so doesn't work out to 500.0 because it hits bottom.
     expect(controller.position.pixels, equals(400.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)));
     for (int i = 0; i < 10; ++i) {
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyDownEvent(modifierKey);
+      }
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyUpEvent(modifierKey);
+      }
       await tester.pumpAndSettle();
     }
     // Goes up two past "center" where it started, so negative.
@@ -1403,7 +1431,7 @@ void main() {
 
 // ignore: must_be_immutable
 class SuperPessimisticScrollPhysics extends ScrollPhysics {
-  SuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  SuperPessimisticScrollPhysics({super.parent});
 
   int count = 0;
 
@@ -1420,7 +1448,7 @@ class SuperPessimisticScrollPhysics extends ScrollPhysics {
 }
 
 class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
-  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  const ExtraSuperPessimisticScrollPhysics({super.parent});
 
   @override
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {

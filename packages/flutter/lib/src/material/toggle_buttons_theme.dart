@@ -148,8 +148,9 @@ class ToggleButtonsThemeData with Diagnosticable {
   /// Linearly interpolate between two toggle buttons themes.
   static ToggleButtonsThemeData? lerp(ToggleButtonsThemeData? a, ToggleButtonsThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return ToggleButtonsThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
@@ -190,10 +191,12 @@ class ToggleButtonsThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ToggleButtonsThemeData
         && other.textStyle == textStyle
         && other.constraints == constraints
@@ -244,10 +247,10 @@ class ToggleButtonsTheme extends InheritedTheme {
   ///
   /// The data argument must not be null.
   const ToggleButtonsTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;

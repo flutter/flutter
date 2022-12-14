@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui hide window;
 
 import 'package:flutter/foundation.dart';
@@ -569,8 +568,9 @@ class FakeAccessibilityFeatures implements ui.AccessibilityFeatures {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FakeAccessibilityFeatures
         && other.accessibleNavigation == accessibleNavigation
         && other.invertColors == invertColors

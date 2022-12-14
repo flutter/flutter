@@ -14,6 +14,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -24,7 +25,9 @@ import 'icon_tree_shaker.dart';
 /// included in the final bundle, but not the AssetManifest.json file.
 ///
 /// Returns a [Depfile] containing all assets used in the build.
-Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
+Future<Depfile> copyAssets(
+  Environment environment,
+  Directory outputDirectory, {
   Map<String, DevFSContent>? additionalContent,
   required TargetPlatform targetPlatform,
   BuildMode? buildMode,
@@ -72,12 +75,21 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
+  final ShaderCompiler shaderCompiler = ShaderCompiler(
+    processManager: environment.processManager,
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    artifacts: environment.artifacts,
+  );
 
   final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
     ...assetBundle.entries,
     ...?additionalContent,
     if (skslBundle != null)
       kSkSLShaderBundlePath: skslBundle,
+  };
+  final Map<String, AssetKind> entryKinds = <String, AssetKind>{
+    ...assetBundle.entryKinds,
   };
 
   await Future.wait<void>(
@@ -91,16 +103,31 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
         // and the native APIs will look for files this way.
         final File file = environment.fileSystem.file(
           environment.fileSystem.path.join(outputDirectory.path, entry.key));
+        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(content.file as File);
-          if (!await iconTreeShaker.subsetFont(
-            input: content.file as File,
-            outputPath: file.path,
-            relativePath: entry.key,
-          )) {
+          bool doCopy = true;
+          switch (assetKind) {
+            case AssetKind.regular:
+              break;
+            case AssetKind.font:
+              doCopy = !await iconTreeShaker.subsetFont(
+                input: content.file as File,
+                outputPath: file.path,
+                relativePath: entry.key,
+              );
+              break;
+            case AssetKind.shader:
+              doCopy = !await shaderCompiler.compileShader(
+                input: content.file as File,
+                outputPath: file.path,
+              );
+              break;
+          }
+          if (doCopy) {
             await (content.file as File).copy(file.path);
           }
         } else {
@@ -115,8 +142,8 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   // The assets are included in assetBundle.entries as a normal asset when
   // building as debug.
   if (environment.defines[kDeferredComponents] == 'true' && buildMode != null) {
-    await Future.wait<void>(
-      assetBundle.deferredComponentsEntries.entries.map<Future<void>>((MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
+    await Future.wait<void>(assetBundle.deferredComponentsEntries.entries.map<Future<void>>(
+      (MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
         final Directory componentOutputDir =
             environment.projectDir
                 .childDirectory('build')
@@ -198,10 +225,10 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
   }
 
   // Step 2: validate top level bundle structure.
-  Map<String, Object>? bundle;
+  Map<String, Object?>? bundle;
   try {
     final Object? rawBundle = json.decode(skSLBundleFile.readAsStringSync());
-    if (rawBundle is Map<String, Object>) {
+    if (rawBundle is Map<String, Object?>) {
       bundle = rawBundle;
     } else {
       logger.printError('"$bundle" was not a JSON object: $rawBundle');
@@ -258,6 +285,7 @@ class CopyAssets extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
     ...IconTreeShaker.inputs,
+    ...ShaderCompiler.inputs,
   ];
 
   @override
@@ -265,7 +293,7 @@ class CopyAssets extends Target {
 
   @override
   List<String> get depfiles => const <String>[
-    'flutter_assets.d'
+    'flutter_assets.d',
   ];
 
   @override

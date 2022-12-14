@@ -37,7 +37,7 @@ void main() {
     const double delta = 0.005;
     for (double x = 0.0; x < 1.0 - delta; x += delta) {
       final double deltaY = curve.transform(x) - curve.transform(x + delta);
-      assert(deltaY.abs() < delta * maximumSlope, '${curve.toString()} discontinuous at $x');
+      assert(deltaY.abs() < delta * maximumSlope, '$curve discontinuous at $x');
     }
   }
 

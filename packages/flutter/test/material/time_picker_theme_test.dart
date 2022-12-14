@@ -417,10 +417,9 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
 
 class _TimePickerLauncher extends StatelessWidget {
   const _TimePickerLauncher({
-    Key? key,
     this.themeData,
     this.entryMode = TimePickerEntryMode.dial,
-  }) : super(key: key);
+  });
 
   final ThemeData? themeData;
   final TimePickerEntryMode entryMode;

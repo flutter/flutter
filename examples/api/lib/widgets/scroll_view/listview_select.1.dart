@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ListTileSelectExample extends StatefulWidget {
-  const ListTileSelectExample({Key? key}) : super(key: key);
+  const ListTileSelectExample({super.key});
 
   @override
   ListTileSelectExampleState createState() => ListTileSelectExampleState();
@@ -134,11 +134,11 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
 
 class GridBuilder extends StatefulWidget {
   const GridBuilder({
-    Key? key,
+    super.key,
     required this.selectedList,
     required this.isSelectionMode,
     required this.onSelectionChange,
-  }) : super(key: key);
+  });
 
   final bool isSelectionMode;
   final Function(bool)? onSelectionChange;
@@ -189,11 +189,11 @@ class GridBuilderState extends State<GridBuilder> {
 
 class ListBuilder extends StatefulWidget {
   const ListBuilder({
-    Key? key,
+    super.key,
     required this.selectedList,
     required this.isSelectionMode,
     required this.onSelectionChange,
-  }) : super(key: key);
+  });
 
   final bool isSelectionMode;
   final List<bool> selectedList;

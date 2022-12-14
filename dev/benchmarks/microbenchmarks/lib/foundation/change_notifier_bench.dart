@@ -11,7 +11,7 @@ const int _kNumWarmUp = 100;
 const int _kScale = 1000;
 
 void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   // In the following benchmarks, we won't remove the listeners when we don't
   // want to measure removeListener because we know that everything will be

@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -26,11 +26,11 @@ class MyApp extends StatelessWidget {
 
 class ColorChanger extends StatefulWidget {
   const ColorChanger({
-    Key? key,
+    super.key,
     required this.initialColor,
     required this.useResolver,
     this.child,
-  }) : super(key: key);
+  });
 
   final HSVColor initialColor;
   final bool useResolver;
@@ -86,7 +86,7 @@ class _ColorChangerState extends State<ColorChanger> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();

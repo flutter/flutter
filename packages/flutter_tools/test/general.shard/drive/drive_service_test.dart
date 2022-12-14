@@ -55,36 +55,6 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   isolateFlags: <vm_service.IsolateFlag>[],
 );
 
-final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kPauseException,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[
-    vm_service.Breakpoint(
-      breakpointNumber: 123,
-      id: 'test-breakpoint',
-      location: vm_service.SourceLocation(
-        tokenPos: 0,
-        script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
-      ),
-      enabled: true,
-      resolved: true,
-    ),
-  ],
-  exceptionPauseMode: null,
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
 final vm_service.VM fakeVM = vm_service.VM(
   isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
   pid: 1,
@@ -141,7 +111,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -166,7 +136,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -196,7 +166,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -229,7 +199,7 @@ void main() {
         exitCode: 23,
         environment: <String, String>{
           'FOO': 'BAR',
-          'VM_SERVICE_URL': 'http://127.0.0.1:1234/' // dds forwarded URI
+          'VM_SERVICE_URL': 'http://127.0.0.1:1234/', // dds forwarded URI
         },
       ),
     ]);
@@ -259,7 +229,7 @@ void main() {
         command: <String>['dart', 'foo.test', '-rexpanded'],
         exitCode: 11,
         environment: <String, String>{
-          'VM_SERVICE_URL': 'http://127.0.0.1:63426/1UasC_ihpXY=/'
+          'VM_SERVICE_URL': 'http://127.0.0.1:63426/1UasC_ihpXY=/',
         },
       ),
     ]);
@@ -311,13 +281,13 @@ void main() {
       const FakeVmServiceRequest(
         method: '_flutter.getSkSLs',
         args: <String, Object>{
-          'viewId': 'a'
+          'viewId': 'a',
         },
         jsonResponse: <String, Object>{
           'SkSLs': <String, Object>{
             'A': 'B',
-          }
-        }
+          },
+        },
       ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
@@ -335,10 +305,10 @@ void main() {
       'platform': 'android',
       'name': 'test',
       'engineRevision': 'abcdefghijklmnopqrstuvwxyz',
-      'data': <String, Object>{'A': 'B'}
+      'data': <String, Object>{'A': 'B'},
     });
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FakeFlutterVersion()
+    FlutterVersion: () => FakeFlutterVersion(),
   });
 
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
@@ -349,8 +319,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
@@ -373,8 +343,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
@@ -397,8 +367,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
@@ -421,8 +391,8 @@ void main() {
         method: 'ext.flutter.exit',
         args: <String, Object>{
           'isolateId': '1',
-        }
-      )
+        },
+      ),
     ]);
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);

@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -53,7 +52,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -81,7 +79,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -104,7 +101,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -126,7 +122,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -153,7 +148,6 @@ void main() {
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
       ipv6: true,
-      urlTunneller: null,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),

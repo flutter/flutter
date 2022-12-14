@@ -106,16 +106,16 @@ class AppBarTheme with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [foregroundColor], which overrides the default value for
-  ///    [AppBar.foregroundColor] in all descendant widgets.
+  ///  * [foregroundColor], which overrides the default value of
+  ///    [AppBar.foregroundColor] in all descendant [AppBar] widgets.
   final Color? backgroundColor;
 
   /// Overrides the default value of [AppBar.foregroundColor] in all
-  /// descendant widgets.
+  /// descendant [AppBar] widgets.
   ///
   /// See also:
   ///
-  ///  * [backgroundColor], which overrides the default value for
+  ///  * [backgroundColor], which overrides the default value of
   ///    [AppBar.backgroundColor] in all descendant [AppBar] widgets.
   final Color? foregroundColor;
 
@@ -127,6 +127,7 @@ class AppBarTheme with Diagnosticable {
   /// descendant [AppBar] widgets.
   final double? scrolledUnderElevation;
 
+<<<<<<< HEAD
   /// Overrides the default value for [AppBar.shadowColor] in all
   /// descendant widgets.
   final Color? shadowColor;
@@ -137,6 +138,18 @@ class AppBarTheme with Diagnosticable {
 
   /// Overrides the default value for [AppBar.shape] in all
   /// descendant widgets.
+=======
+  /// Overrides the default value of [AppBar.shadowColor] in all
+  /// descendant [AppBar] widgets.
+  final Color? shadowColor;
+
+  /// Overrides the default value of [AppBar.surfaceTintColor] in all
+  /// descendant [AppBar] widgets.
+  final Color? surfaceTintColor;
+
+  /// Overrides the default value of [AppBar.shape] in all
+  /// descendant [AppBar] widgets.
+>>>>>>> b8f7f1f9869bb2d116aa6a70dbeac61000b52849
   final ShapeBorder? shape;
 
   /// Overrides the default value of [AppBar.iconTheme] in all
@@ -144,21 +157,21 @@ class AppBarTheme with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [actionsIconTheme], which overrides the default value for
+  ///  * [actionsIconTheme], which overrides the default value of
   ///    [AppBar.actionsIconTheme] in all descendant [AppBar] widgets.
   ///  * [foregroundColor], which overrides the default value
-  ///    [AppBar.foregroundColor] in all descendant widgets.
+  ///    [AppBar.foregroundColor] in all descendant [AppBar] widgets.
   final IconThemeData? iconTheme;
 
   /// Overrides the default value of [AppBar.actionsIconTheme] in all
-  /// descendant widgets.
+  /// descendant [AppBar] widgets.
   ///
   /// See also:
   ///
-  ///  * [iconTheme], which overrides the default value for
-  ///    [AppBar.iconTheme] in all descendant widgets.
+  ///  * [iconTheme], which overrides the default value of
+  ///    [AppBar.iconTheme] in all descendant [AppBar] widgets.
   ///  * [foregroundColor], which overrides the default value
-  ///    [AppBar.foregroundColor] in all descendant widgets.
+  ///    [AppBar.foregroundColor] in all descendant [AppBar] widgets.
   final IconThemeData? actionsIconTheme;
 
   /// This property is deprecated, please use [toolbarTextStyle] and
@@ -169,9 +182,9 @@ class AppBarTheme with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [toolbarTextStyle], which overrides the default value for
+  ///  * [toolbarTextStyle], which overrides the default value of
   ///    [AppBar.toolbarTextStyle in all descendant [AppBar] widgets.
-  ///  * [titleTextStyle], which overrides the default value for
+  ///  * [titleTextStyle], which overrides the default value of
   ///    [AppBar.titleTextStyle in all descendant [AppBar] widgets.
   @Deprecated(
     'This property is no longer used, please use toolbarTextStyle and titleTextStyle instead. '
@@ -179,17 +192,17 @@ class AppBarTheme with Diagnosticable {
   )
   final TextTheme? textTheme;
 
-  /// Overrides the default value for [AppBar.centerTitle].
-  /// property in all descendant widgets.
+  /// Overrides the default value of [AppBar.centerTitle]
+  /// property in all descendant [AppBar] widgets.
   final bool? centerTitle;
 
-  /// Overrides the default value for the obsolete [AppBar.titleSpacing]
+  /// Overrides the default value of the obsolete [AppBar.titleSpacing]
   /// property in all descendant [AppBar] widgets.
   ///
   /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
   final double? titleSpacing;
 
-  /// Overrides the default value for the [AppBar.toolbarHeight]
+  /// Overrides the default value of the [AppBar.toolbarHeight]
   /// property in all descendant [AppBar] widgets.
   ///
   /// See also:
@@ -198,7 +211,7 @@ class AppBarTheme with Diagnosticable {
   ///    height of an AppBar widget, taking this value into account.
   final double? toolbarHeight;
 
-  /// Overrides the default value for the obsolete [AppBar.toolbarTextStyle]
+  /// Overrides the default value of the obsolete [AppBar.toolbarTextStyle]
   /// property in all descendant [AppBar] widgets.
   ///
   /// If this property is specified, then [backwardsCompatibility]
@@ -353,10 +366,12 @@ class AppBarTheme with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is AppBarTheme
         && other.brightness == brightness
         && other.backgroundColor == backgroundColor

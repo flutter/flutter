@@ -32,6 +32,13 @@
 // dart dev/tools/localization/bin/gen_localizations.dart
 // ```
 //
+// If you have removed localizations from the canonical localizations, then
+// add the '--remove-undefined' flag to also remove them from the other files.
+//
+// ```
+// dart dev/tools/localization/bin/gen_localizations.dart --remove-undefined
+// ```
+//
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
 // packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart
 // and packages/flutter_localizations/lib/src/l10n/generated_cupertino_localizations.dart file:
@@ -542,10 +549,15 @@ void main(List<String> rawArgs) {
   );
 
   try {
-    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes);
-    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes);
+    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
+    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes, removeUndefined: options.removeUndefined);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
+  }
+
+  if (options.removeUndefined) {
+    removeUndefinedLocalizations(materialLocaleToResources);
+    removeUndefinedLocalizations(cupertinoLocaleToResources);
   }
 
   final String? materialLocalizations = options.writeToFile || !options.cupertinoOnly

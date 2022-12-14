@@ -194,10 +194,10 @@ class NextContext extends Context {
           previousCheckoutLocation: state.framework.checkoutPath,
         );
         stdio.printStatus('Writing candidate branch...');
-        bool needsCommit = await framework.updateCandidateBranchVersion(state.releaseVersion);
+        bool needsCommit = await framework.updateCandidateBranchVersion(state.framework.candidateBranch);
         if (needsCommit) {
           final String revision = await framework.commit(
-              'Create candidate branch version ${state.engine.candidateBranch} for ${state.releaseChannel}',
+              'Create candidate branch version ${state.framework.candidateBranch} for ${state.releaseChannel}',
               addFirst: true,
           );
           // append to list of cherrypicks so we know a PR is required
@@ -340,7 +340,8 @@ class NextContext extends Context {
             '\t$kLuciPackagingConsoleLink',
         );
         if (autoAccept == false) {
-          final bool response = await prompt('Have all packaging builds finished successfully?');
+          final bool response = await prompt(
+              'Have all packaging builds finished successfully and post release announcements been completed?');
           if (!response) {
             stdio.printError('Aborting command.');
             updateState(state, stdio.logs);

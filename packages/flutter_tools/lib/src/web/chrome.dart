@@ -164,11 +164,14 @@ class ChromiumLauncher {
   /// port is picked automatically.
   ///
   /// [skipCheck] does not attempt to make a devtools connection before returning.
+  ///
+  /// [webBrowserFlags] add arbitrary browser flags.
   Future<Chromium> launch(String url, {
     bool headless = false,
     int? debugPort,
     bool skipCheck = false,
     Directory? cacheDir,
+    List<String> webBrowserFlags = const <String>[],
   }) async {
     if (currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
@@ -215,6 +218,7 @@ class ChromiumLauncher {
           '--no-sandbox',
           '--window-size=2400,1800',
         ],
+      ...webBrowserFlags,
       url,
     ];
 
@@ -226,7 +230,7 @@ class ChromiumLauncher {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
     }
-    return _connect(Chromium(
+    return connect(Chromium(
       port,
       ChromeConnection('localhost', port),
       url: url,
@@ -393,13 +397,15 @@ class ChromiumLauncher {
            !directory.path.endsWith('GPUCache');
   }
 
-  Future<Chromium> _connect(Chromium chrome, bool skipCheck) async {
+  /// Connect to the [chrome] instance, testing the connection if
+  /// [skipCheck] is set to false.
+  @visibleForTesting
+  Future<Chromium> connect(Chromium chrome, bool skipCheck) async {
     // The connection is lazy. Try a simple call to make sure the provided
     // connection is valid.
     if (!skipCheck) {
       try {
-        await chrome.chromeConnection.getTab(
-          (ChromeTab tab) => true, retryFor: const Duration(seconds: 2));
+        await _getFirstTab(chrome);
       } on Exception catch (error, stackTrace) {
         _logger.printError('$error', stackTrace: stackTrace);
         await chrome.close();
@@ -409,6 +415,36 @@ class ChromiumLauncher {
     }
     currentCompleter.complete(chrome);
     return chrome;
+  }
+
+  /// Gets the first [chrome] tab.
+  ///
+  /// Note: Retry getting tabs from Chrome for a few seconds and retry finding
+  /// the tab a few times. This prevents flakes caused by Chrome not returning
+  /// correct output if the call was too close to the start.
+  Future<ChromeTab?> _getFirstTab(Chromium chrome) async {
+    const Duration retryFor = Duration(seconds: 2);
+    const int attempts = 5;
+
+    for (int i = 1; i <= attempts; i++) {
+      try {
+        final List<ChromeTab> tabs =
+          await chrome.chromeConnection.getTabs(retryFor: retryFor);
+
+        if (tabs.isNotEmpty) {
+          return tabs.first;
+        }
+        if (i == attempts) {
+          return null;
+        }
+      } on ConnectionException catch (_) {
+        if (i == attempts) {
+          rethrow;
+        }
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+    }
+    return null;
   }
 
   Future<Chromium> get connectedInstance => currentCompleter.future;

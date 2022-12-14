@@ -34,14 +34,13 @@ import 'theme.dart';
 class CupertinoPageScaffold extends StatefulWidget {
   /// Creates a layout for pages with a navigation bar at the top.
   const CupertinoPageScaffold({
-    Key? key,
+    super.key,
     this.navigationBar,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
     required this.child,
   }) : assert(child != null),
-       assert(resizeToAvoidBottomInset != null),
-       super(key: key);
+       assert(resizeToAvoidBottomInset != null);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.
