@@ -183,7 +183,10 @@ void main() {
 
   testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
-    final double width = 7 * (TestBox.itemWidth + tester.binding.window.devicePixelRatio);
+    final double spacerWidth = 1.0 / tester.binding.window.devicePixelRatio;
+    final double dividerWidth = 1.0 / tester.binding.window.devicePixelRatio;
+    const double borderRadius = 8.0; // Should match _kToolbarBorderRadius
+    final double width = 7 * TestBox.itemWidth + 6 * (dividerWidth + 2 * spacerWidth) + 2 * borderRadius;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
