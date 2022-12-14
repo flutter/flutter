@@ -7,13 +7,17 @@ import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
+    print("MainFlutterWindow: 1");
     let flutterViewController = FlutterViewController.init()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
+    print("MainFlutterWindow: 2");
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    print("MainFlutterWindow: 3");
 
     super.awakeFromNib()
+    print("MainFlutterWindow: 4");
   }
 }
