@@ -603,6 +603,10 @@ String _generateLicense(String prefix) {
          '${prefix}found in the LICENSE file.';
 }
 
+// Attempt to match reasonable GLSL version headers like:
+// `version 460 es` or `version 120 core`.
+const String kGlslVersionHeader = r'#version [0-9]+( es)?( core)?(\n)+';
+
 Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimums = true }) async {
   final int? overrideMinimumMatches = checkMinimums ? null : 0;
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', overrideMinimumMatches ?? 2000, _generateLicense('// '));
@@ -618,7 +622,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', overrideMinimumMatches ?? 1, _generateLicense('# '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', trailingBlank: false, header: r'<!DOCTYPE HTML>\n');
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', overrideMinimumMatches ?? 1, '<!-- ${_generateLicense('')} -->', header: r'(<\?xml version="1.0" encoding="utf-8"\?>\n)?');
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'frag', overrideMinimumMatches ?? 1, _generateLicense('// '), header: r'#version 320 es(\n)+');
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'frag', overrideMinimumMatches ?? 1, _generateLicense('// '), header: kGlslVersionHeader);
 }
 
 Future<void> _verifyNoMissingLicenseForExtension(
