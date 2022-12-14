@@ -75,6 +75,6 @@ pylint-2.7 --rcfile=.pylintrc \
   "ci/" \
   "impeller/" \
   "tools/gn" \
-  "testing/run_tests.py"
+  "testing/"
 
 echo "$(date +%T) Linting complete"
