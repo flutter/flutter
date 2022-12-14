@@ -552,7 +552,6 @@ void main() {
         'LICENSE',
         'README.md',
         'example/lib/main.dart',
-        'example/integration_test/plugin_integration_test.dart',
         'flutter_project.iml',
         'lib/flutter_project.dart',
       ],
@@ -622,6 +621,27 @@ void main() {
     expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
     final PathDependency pathDependency = pubspec.dependencies[pluginName]! as PathDependency;
     expect(pathDependency.path, '../');
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: mockStdio,
+    ),
+  });
+
+  testUsingContext('plugin example app includes an integration test', () async {
+    await _createAndAnalyzeProject(
+      projectDir,
+      <String>['--template=plugin'],
+      <String>[
+        'example/integration_test/plugin_integration_test.dart',
+      ],
+    );
+    return _runFlutterTest(projectDir.childDirectory('example'));
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
       fileSystem: globals.fs,
