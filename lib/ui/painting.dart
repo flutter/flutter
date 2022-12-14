@@ -4163,8 +4163,8 @@ class ImageShader extends Shader {
 /// An instance of [FragmentProgram] creates [Shader] objects (as used by
 /// [Paint.shader]).
 ///
-/// This API is in beta and does not yet work on web.
-/// See https://github.com/flutter/flutter/projects/207 for roadmap.
+/// For more information, see the website
+/// [documentation]( https://docs.flutter.dev/development/ui/advanced/shaders).
 class FragmentProgram extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   FragmentProgram._fromAsset(String assetKey) {
@@ -4181,8 +4181,6 @@ class FragmentProgram extends NativeFieldWrapperClass1 {
 
   String? _debugName;
 
-  // TODO(zra): Document custom shaders on the website and add a link to it
-  // here. https://github.com/flutter/flutter/issues/107929.
   /// Creates a fragment program from the asset with key [assetKey].
   ///
   /// The asset must be a file produced as the output of the `impellerc`
