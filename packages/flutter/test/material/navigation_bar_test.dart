@@ -589,7 +589,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    Offset indicatorCenter = const Offset(600, 30);
+    Offset indicatorCenter = const Offset(600, 32);
     const Size includedIndicatorSize = Size(64, 32);
     const Size excludedIndicatorSize = Size(74, 40);
 
@@ -715,7 +715,7 @@ void main() {
     selectedIndex = 1;
     await tester.pumpWidget(buildWidget(labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected));
     await tester.pumpAndSettle();
-    indicatorCenter = const Offset(600, 30);
+    indicatorCenter = const Offset(600, 32);
 
     expect(
       inkFeatures,
@@ -802,6 +802,96 @@ void main() {
     await tester.pumpAndSettle();
     transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 1.0);
+  });
+
+  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = CircleBorder();
+
+    Widget buildNaviagationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            destinations: <Widget>[
+              NavigationDestination(
+                icon: const Icon(Icons.ac_unit),
+                label: 'AC',
+                indicatorColor: indicatorColor,
+                indicatorShape: indicatorShape,
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNaviagationBar());
+
+    // Test default indicator color and shape.
+    expect(_indicator(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_indicator(tester)?.shape, const StadiumBorder());
+
+    await tester.pumpWidget(buildNaviagationBar(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_indicator(tester)?.color, color);
+    expect(_indicator(tester)?.shape, shape);
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const Color color = Color(0xff0000ff);
+      const ShapeBorder shape = CircleBorder();
+
+      Widget buildNaviagationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+        return MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            bottomNavigationBar: NavigationBar(
+              destinations: <Widget>[
+                NavigationDestination(
+                  icon: const Icon(Icons.ac_unit),
+                  label: 'AC',
+                  indicatorColor: indicatorColor,
+                  indicatorShape: indicatorShape,
+                ),
+                const NavigationDestination(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+              onDestinationSelected: (int i) { },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildNaviagationBar());
+
+      // Test default indicator color and shape.
+      expect(_indicator(tester)?.color, theme.colorScheme.secondary.withOpacity(0.24));
+      expect(
+        _indicator(tester)?.shape,
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+      );
+
+      await tester.pumpWidget(buildNaviagationBar(indicatorColor: color, indicatorShape: shape));
+
+      // Test custom indicator color and shape.
+      expect(_indicator(tester)?.color, color);
+      expect(_indicator(tester)?.shape, shape);
+    });
   });
 }
 
