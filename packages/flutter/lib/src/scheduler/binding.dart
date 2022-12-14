@@ -1275,7 +1275,7 @@ mixin SchedulerBinding on BindingBase {
   // Calls the given [callback] with [timestamp] as argument.
   //
   // Wraps the callback in a try/catch and forwards any error to
-  // [debugSchedulerExceptionHandler], if set. If not set, then simply prints
+  // [debugSchedulerExceptionHandler], if set. If not set, prints
   // the error.
   @pragma('vm:notify-debugger-on-exception')
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace? callbackStack ]) {

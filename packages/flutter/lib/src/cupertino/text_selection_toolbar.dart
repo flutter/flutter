@@ -53,7 +53,7 @@ typedef CupertinoToolbarBuilder = Widget Function(
 class _CupertinoToolbarButtonDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    return SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
   }
 }
 
@@ -132,9 +132,9 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
-    final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryPadding.top + _kToolbarScreenPadding;
     final double toolbarHeightNeeded = paddingAbove
         + _kToolbarContentDistance
         + _kToolbarHeight;
@@ -142,8 +142,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 
     // The arrow, which points to the anchor, has some margin so it can't get
     // too close to the horizontal edges of the screen.
-    final double leftMargin = _kArrowScreenPadding + mediaQuery.padding.left;
-    final double rightMargin = mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding;
+    final double leftMargin = _kArrowScreenPadding + mediaQueryPadding.left;
+    final double rightMargin = MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding;
 
     final Offset anchorAboveAdjusted = Offset(
       clampDouble(anchorAbove.dx, leftMargin, rightMargin),
@@ -480,7 +480,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           onPressed: _handlePreviousPage,
           text: '◀',
         ),
-        dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
+        dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
         nextButton: CupertinoTextSelectionToolbarButton.text(
           onPressed: _handleNextPage,
           text: '▶',
