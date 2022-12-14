@@ -153,7 +153,7 @@ class NavigationBar extends StatelessWidget {
 
   /// The color used as an overlay on [backgroundColor] to indicate elevation.
   ///
-  /// If null, [NavigationBarThemeData.surfaceTintColor] is used. If that
+  /// If null, then [NavigationBarThemeData.surfaceTintColor] is used. If that
   /// is also null, the default value is [ColorScheme.surfaceTint].
   ///
   /// See [Material.surfaceTintColor] for more details on how this
@@ -161,9 +161,17 @@ class NavigationBar extends StatelessWidget {
   final Color? surfaceTintColor;
 
   /// The color of the [indicatorShape] when this destination is selected.
+  /// 
+  /// If null, [NavigationBarThemeData.indicatorColor] is used. If that
+  /// is also null and [ThemeData.useMaterial3] is true, [ColorScheme.secondaryContainer]
+  /// is used. Otherwise, [ColorScheme.secondary] with an opacity of 0.24 is used.
   final Color? indicatorColor;
 
   /// The shape of the selected inidicator.
+  /// 
+  /// If null, [NavigationBarThemeData.indicatorShape] is used. If that
+  /// is also null and [ThemeData.useMaterial3] is true, [StadiumBorder] is used.
+  /// Otherwise, [RoundedRectangleBorder] with a circular border radius of 16 is used.
   final ShapeBorder? indicatorShape;
 
   /// The height of the [NavigationBar] itself.
@@ -593,12 +601,12 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// label, or hide all labels.
   final NavigationDestinationLabelBehavior labelBehavior;
 
-  /// The color of the indicator.
+  /// The color of the selection indicator.
   ///
   /// This is used by destinations to override the indicator color.
   final Color? indicatorColor;
 
-  /// The shape of the indicator.
+  /// The shape of the selection indicator.
   ///
   /// This is used by destinations to override the indicator shape.
   final ShapeBorder? indicatorShape;
