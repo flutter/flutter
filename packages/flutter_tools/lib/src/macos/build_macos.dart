@@ -98,6 +98,8 @@ Future<void> buildMacOS({
 
   // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
+  print('test');
+  globals.printWarning('*1');
   final Status status = globals.logger.startProgress(
     'Building macOS application...',
   );
@@ -126,12 +128,15 @@ Future<void> buildMacOS({
     mapFunction: verboseLogging ? null : (String line) => _filteredOutput.hasMatch(line) ? line : null,
   );
   } finally {
+    globals.printWarning('*2');
     status.cancel();
   }
   if (result != 0) {
     throwToolExit('Build process failed');
   }
+  globals.printWarning('*3');
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
+    globals.printWarning('*4');
     final String arch = getNameForDarwinArch(DarwinArch.x86_64);
     final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('snapshot.$arch.json');
@@ -148,6 +153,7 @@ Future<void> buildMacOS({
       .firstWhere((Directory directory) {
       return globals.fs.path.extension(directory.path) == '.app';
     });
+    globals.printWarning('*5');
     final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: aotSnapshot,
       precompilerTrace: precompilerTrace,
@@ -164,7 +170,7 @@ Future<void> buildMacOS({
     globals.printStatus(
       'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
     );
-
+    globals.printWarning('*6');
     // DevTools expects a file path relative to the .flutter-devtools/ dir.
     final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
     globals.printStatus(
@@ -173,5 +179,6 @@ Future<void> buildMacOS({
       '--appSizeBase=$relativeAppSizePath'
     );
   }
+  globals.printWarning('*7');
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

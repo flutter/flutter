@@ -587,6 +587,8 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    globals.printWarning('####01');
+    print('####01');
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final BuildInfo buildInfo = await getBuildInfo();
@@ -630,6 +632,8 @@ class RunCommand extends RunCommandBase {
       );
     }
     globals.terminal.usesTerminalUi = true;
+    globals.printWarning('####02');
+    print('####02');
 
     final BuildMode buildMode = getBuildMode();
     for (final Device device in devices!) {
@@ -658,7 +662,8 @@ class RunCommand extends RunCommandBase {
         }
       }
     }
-
+    globals.printWarning('####03');
+    print('####03');
     List<String>? expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
@@ -676,14 +681,16 @@ class RunCommand extends RunCommandBase {
           platform: globals.platform,
         ),
     ];
-
+    globals.printWarning('####04');
+    print('####04');
     final ResidentRunner runner = await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
       flutterProject: flutterProject,
       hotMode: hotMode,
     );
-
+    globals.printWarning('####05');
+    print('####05');
     DateTime? appStartedTime;
     // Sync completer so the completing agent attaching to the resident doesn't
     // need to know about analytics.
@@ -713,25 +720,30 @@ class RunCommand extends RunCommandBase {
     ));
     try {
       globals.printWarning('####1');
+      print('####1');
       final int? result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         enableDevTools: stayResident && boolArgDeprecated(FlutterCommand.kEnableDevTools),
         route: route,
       );
       globals.printWarning('####2');
+      print('####2');
       handler?.stop();
       if (result != 0) {
         globals.printWarning('####3');
+        print('####3');
         throwToolExit(null, exitCode: result);
       }
     } on RPCError catch (error) {
       globals.printWarning('####4');
+      print('####4');
       if (error.code == RPCErrorCodes.kServiceDisappeared) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
     } finally {
       globals.printWarning('####5');
+      print('####5');
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
@@ -741,6 +753,7 @@ class RunCommand extends RunCommandBase {
       }
     }
     globals.printWarning('####6');
+    print('####6');
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String?>[
