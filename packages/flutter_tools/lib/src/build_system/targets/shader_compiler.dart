@@ -186,6 +186,7 @@ class ShaderCompiler {
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',
       '--input-type=frag',
+      '--remap-samplers',
       '--include=${input.parent.path}',
       '--include=$shaderLibPath',
     ];
