@@ -222,7 +222,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive because it requires painting the child into an intermediate
-/// buffer. For the value 0.0, the child is simply not painted at all. For the
+/// buffer. For the value 0.0, the child is not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 ///
 /// The presence of the intermediate buffer which has a transparent background
@@ -1896,7 +1896,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// ### Why use a [Padding] widget rather than a [Container] with a [Container.padding] property?
 ///
 /// There isn't really any difference between the two. If you supply a
-/// [Container.padding] argument, [Container] simply builds a [Padding] widget
+/// [Container.padding] argument, [Container] builds a [Padding] widget
 /// for you.
 ///
 /// [Container] doesn't implement its properties directly. Instead, [Container]
@@ -1907,7 +1907,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// convenient, feel free to use it. If not, feel free to build these simpler
 /// widgets in whatever combination meets your needs.
 ///
-/// In fact, the majority of widgets in Flutter are simply combinations of other
+/// In fact, the majority of widgets in Flutter are combinations of other
 /// simpler widgets. Composition, rather than inheritance, is the primary
 /// mechanism for building up widgets.
 ///
@@ -5439,7 +5439,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// Rather than positioning the children during layout, the children are
 /// positioned using transformation matrices during the paint phase using the
 /// matrices from the [FlowDelegate.paintChildren] function. The children can be
-/// repositioned efficiently by simply repainting the flow, which happens
+/// repositioned efficiently by only _repainting_ the flow, which happens
 /// without the children being laid out again (contrast this with a [Stack],
 /// which does the sizing and positioning together during layout).
 ///
@@ -6480,7 +6480,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// Because the widget conditionally creates the `MouseRegion`, and leaks the
   /// hover state, it needs to take the restriction into consideration. In this
   /// case, since it has access to the event that triggers the disappearance of
-  /// the `MouseRegion`, it simply trigger the exit callback during that event
+  /// the `MouseRegion`, it triggers the exit callback during that event
   /// as well.
   ///
   /// ** See code in examples/api/lib/widgets/basic/mouse_region.on_exit.1.dart **
@@ -7373,8 +7373,8 @@ class KeyedSubtree extends StatelessWidget {
 /// )
 /// ```
 ///
-/// The difference between either of the previous examples and simply
-/// creating a child directly, without an intervening widget, is the
+/// The difference between either of the previous examples and
+/// creating a child directly without an intervening widget, is the
 /// extra [BuildContext] element that the additional widget adds. This
 /// is particularly noticeable when the tree contains an inherited
 /// widget that is referred to by a method like [Scaffold.of],

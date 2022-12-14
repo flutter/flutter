@@ -3206,6 +3206,30 @@ targets:
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
 
+  - name: Mac_android run_debug_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    runIf:
+      - dev/**
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac"]
+      task_name: run_debug_test_android
+
+  - name: Mac_arm64_android run_debug_test_android
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    runIf:
+      - dev/**
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "arm64"]
+      task_name: run_debug_test_android
+
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3879,8 +3903,42 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac run_debug_test_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: run_debug_test_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64_ios run_debug_test_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
+      task_name: run_debug_test_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -4187,6 +4245,43 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: plugin_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows run_debug_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: run_debug_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows run_release_test_windows
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: run_release_test_windows
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4630,62 +4725,68 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
 
-  - name: Linux flutter_packaging_beta
+  - name: Linux flutter_packaging
     recipe: packaging_v2/packaging_v2
     timeout: 60
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
+      - stable
     properties:
-      task_name: flutter_packaging_beta
+      task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
-
-  - name: Mac flutter_packaging_beta
+  - name: Mac flutter_packaging
     recipe: packaging_v2/packaging_v2
     timeout: 60
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
+      - stable
     properties:
-      task_name: flutter_packaging_beta
+      task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
 
-  - name: Mac_arm64 flutter_packaging_beta
+  - name: Mac_arm64 flutter_packaging
     recipe: packaging_v2/packaging_v2
     timeout: 60
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
+      - stable
     properties:
-      task_name: flutter_packaging_beta
+      task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "arm64"
 
-
-  - name: Windows flutter_packaging_beta
+  - name: Windows flutter_packaging
     recipe: packaging_v2/packaging_v2
     timeout: 60
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
+      - stable
     properties:
-      task_name: flutter_packaging_beta
+      task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
 
-  - name: Linux docs_deploy
+  - name: Linux docs_deploy_beta
     recipe: flutter/flutter
     scheduler: release
     bringup: true
+    enabled_branches:
+      - beta
     presubmit: false
     timeout: 60
     properties:
@@ -4699,5 +4800,25 @@ targets:
         ["framework", "hostonly", "linux"]
       validation: docs_deploy
       validation_name: Docs_deploy
-      # TODO(godofredoc): Update to docs-flutter-dev before release.
       firebase_project: master-docs-flutter-dev
+
+  - name: Linux docs_deploy_stable
+    recipe: flutter/flutter
+    scheduler: release
+    bringup: true
+    enabled_branches:
+      - stable
+    presubmit: false
+    timeout: 60
+    properties:
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"},
+          {"dependency": "firebase", "version": "v11.0.1"}
+        ]
+      tags: >
+        ["framework", "hostonly", "linux"]
+      validation: docs_deploy
+      validation_name: Docs_deploy
+      firebase_project: docs-flutter-dev
