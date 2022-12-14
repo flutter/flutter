@@ -2057,8 +2057,8 @@ class TextSelectionGestureDetectorBuilder {
 
     // Handle shift + click selection if needed.
     final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
-    // When the renderEditable.selection is invalid, we are unable to extend the selection when
-    // the shift key is pressed.
+    // It is impossible to extend the selection when the shift key is pressed, if the
+    // renderEditable.selection is invalid.
     final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -2156,8 +2156,8 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       // Handle shift + click selection if needed.
       final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
-      // When the renderEditable.selection is invalid, we are unable to extend the selection when
-      // the shift key is pressed.
+      // It is impossible to extend the selection when the shift key is pressed, if the
+      // renderEditable.selection is invalid.
       final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
         case TargetPlatform.linux:
@@ -2847,17 +2847,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  static int? _getDefaultMaxConsecutiveTap() {
-    switch(defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return 2;
-    }
-  }
+  static int? _getDefaultMaxConsecutiveTap() => 2;
 
   @override
   void dispose() {

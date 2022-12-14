@@ -698,18 +698,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
-  /// [dragStartBehavior] must not be null.
-  ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapAndDragGestureRecognizer({
-    this.dragStartBehavior = DragStartBehavior.start,
-    this.dragUpdateThrottleFrequency,
-    this.maxConsecutiveTap,
     super.debugOwner,
     super.kind,
     super.supportedDevices,
-  }) : assert(dragStartBehavior != null),
-      _deadline = kPressTimeout,
+  }) : _deadline = kPressTimeout,
+      dragStartBehavior = DragStartBehavior.start,
       slopTolerance = kTouchSlop;
 
   /// Configure the behavior of offsets passed to [onDragStart].
