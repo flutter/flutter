@@ -712,21 +712,26 @@ class RunCommand extends RunCommandBase {
       }
     ));
     try {
+      globals.printWarning('####1');
       final int? result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         enableDevTools: stayResident && boolArgDeprecated(FlutterCommand.kEnableDevTools),
         route: route,
       );
+      globals.printWarning('####2');
       handler?.stop();
       if (result != 0) {
+        globals.printWarning('####3');
         throwToolExit(null, exitCode: result);
       }
     } on RPCError catch (error) {
+      globals.printWarning('####4');
       if (error.code == RPCErrorCodes.kServiceDisappeared) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
     } finally {
+      globals.printWarning('####5');
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
@@ -735,6 +740,7 @@ class RunCommand extends RunCommandBase {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
     }
+    globals.printWarning('####6');
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String?>[

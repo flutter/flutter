@@ -443,6 +443,7 @@ class FlutterDevice {
     await startEchoingDeviceLog();
 
     // Start the application.
+    globals.printWarning('##1');
     final Future<LaunchResult> futureResult = device!.startApp(
       package,
       mainPath: hotRunner.mainPath,
@@ -453,23 +454,30 @@ class FlutterDevice {
       ipv6: hotRunner.ipv6!,
       userIdentifier: userIdentifier,
     );
+    globals.printWarning('##2');
 
     final LaunchResult result = await futureResult;
+    globals.printWarning('##3');
 
     if (!result.started) {
+      globals.printWarning('##4');
       globals.printError('Error launching application on ${device!.name}.');
       await stopEchoingDeviceLog();
       return 2;
     }
     if (result.hasObservatory) {
+      globals.printWarning('##5');
       observatoryUris = Stream<Uri?>
         .value(result.observatoryUri)
         .asBroadcastStream();
     } else {
+      globals.printWarning('##6');
+
       observatoryUris = const Stream<Uri>
         .empty()
         .asBroadcastStream();
     }
+    globals.printWarning('##7');
     return 0;
   }
 
