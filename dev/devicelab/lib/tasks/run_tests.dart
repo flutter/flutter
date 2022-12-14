@@ -102,28 +102,34 @@ class AndroidRunOutputTest extends RunOutputTask {
 
   @override
   TaskResult verify(List<String> stdout, List<String> stderr) {
+    final String gradleTask = release ? 'assembleRelease' : 'assembleDebug';
+    final String apk = release ? 'app-release.apk' : 'app-debug.apk';
+
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Launching lib/main.dart on ') && line.endsWith(' in release mode...'),
+      (String line) => line.startsWith('Launching lib/main.dart on ') &&
+        line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
       'Launching lib/main.dart on',
     );
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith("Running Gradle task 'assembleRelease'..."),
-      "Running Gradle task 'assembleRelease'...",
+      (String line) => line.startsWith("Running Gradle task '$gradleTask'..."),
+      "Running Gradle task '$gradleTask'...",
+    );
+
+    // Size information is only included in release builds.
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') &&
+        (!release || line.contains('MB).')),
+      'Built build/app/outputs/flutter-apk/$apk',
     );
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.contains('Built build/app/outputs/flutter-apk/app-release.apk (') && line.contains('MB).'),
-      'Built build/app/outputs/flutter-apk/app-release.apk',
-    );
-
-    _findNextMatcherInList(
-      stdout,
-      (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/app-release.apk...'),
-      'Installing build/app/outputs/flutter-apk/app-release.apk...',
+      (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/$apk...'),
+      'Installing build/app/outputs/flutter-apk/$apk...',
     );
 
     _findNextMatcherInList(
