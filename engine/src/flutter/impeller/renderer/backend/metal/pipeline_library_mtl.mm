@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
-
 #include <Metal/Metal.h>
 
-#include "flutter/fml/build_config.h"
 #include "flutter/fml/container.h"
 #include "impeller/base/promise.h"
 #include "impeller/renderer/backend/metal/compute_pipeline_mtl.h"
@@ -133,19 +131,9 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
             ));
         promise->set_value(new_pipeline);
       };
-  auto mtl_descriptor = GetMTLRenderPipelineDescriptor(descriptor);
-#if FML_OS_IOS
-  [device_ newRenderPipelineStateWithDescriptor:mtl_descriptor
+  [device_ newRenderPipelineStateWithDescriptor:GetMTLRenderPipelineDescriptor(
+                                                    descriptor)
                               completionHandler:completion_handler];
-#else   // FML_OS_IOS
-  // TODO(116919): Investigate and revert speculative fix to make MTL pipeline
-  //               state creation use a worker.
-  NSError* error = nil;
-  auto render_pipeline_state =
-      [device_ newRenderPipelineStateWithDescriptor:mtl_descriptor
-                                              error:&error];
-  completion_handler(render_pipeline_state, error);
-#endif  // FML_OS_IOS
   return pipeline_future;
 }
 
