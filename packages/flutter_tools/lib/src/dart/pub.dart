@@ -404,7 +404,7 @@ class _DefaultPub implements Pub {
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
     if (!retry) {
-      // pubEnvironment[_kPubMaxHttpRetriesEnvironmentKey] = '1';
+      pubEnvironment[_kPubMaxHttpRetriesEnvironmentKey] = '1';
     }
 
     try {
