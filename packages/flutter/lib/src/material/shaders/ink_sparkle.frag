@@ -1,4 +1,4 @@
-#version 460 core
+#version 460
 
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
