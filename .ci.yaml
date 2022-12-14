@@ -4272,7 +4272,6 @@ targets:
 
   - name: Windows run_release_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
