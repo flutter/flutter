@@ -234,8 +234,8 @@ class ModalBarrier extends StatelessWidget {
 
     Widget barrier = Semantics(
       onTapHint: semanticsOnTapHint,
-      onTap: semanticsDismissible ? handleDismiss : null,
-      onDismiss: semanticsDismissible ? handleDismiss : null,
+      onTap: semanticsDismissible && semanticsLabel != null ? handleDismiss : null,
+      onDismiss: semanticsDismissible && semanticsLabel != null ? handleDismiss : null,
       label: semanticsDismissible ? semanticsLabel : null,
       textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
       child: MouseRegion(
