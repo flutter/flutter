@@ -218,7 +218,6 @@ void main() {
                 bottomNavigationBar: BottomAppBar(
                   color: Color(0xff0000ff),
                 ),
-              
             );
           },
         ),
