@@ -1,4 +1,4 @@
-#version 320 es
+#version 420 es
 
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -8,27 +8,25 @@ precision highp float;
 
 #include <flutter/runtime_effect.glsl>
 
-// TODO(antrob): Put these in a more logical order (e.g. separate consts vs varying, etc)
+uniform vec4 u_color;
+uniform float u_alpha;
+uniform vec4 u_sparkle_color;
+uniform float u_sparkle_alpha;
+uniform float u_blur;
+uniform vec2 u_center;
+uniform float u_radius_scale;
+uniform float u_max_radius;
+uniform vec2 u_resolution_scale;
+uniform vec2 u_noise_scale;
+uniform float u_noise_phase;
+uniform vec2 u_circle1;
+uniform vec2 u_circle2;
+uniform vec2 u_circle3;
+uniform vec2 u_rotation1;
+uniform vec2 u_rotation2;
+uniform vec2 u_rotation3;
 
-layout(location = 0) uniform vec4 u_color;
-layout(location = 1) uniform float u_alpha;
-layout(location = 2) uniform vec4 u_sparkle_color;
-layout(location = 3) uniform float u_sparkle_alpha;
-layout(location = 4) uniform float u_blur;
-layout(location = 5) uniform vec2 u_center;
-layout(location = 6) uniform float u_radius_scale;
-layout(location = 7) uniform float u_max_radius;
-layout(location = 8) uniform vec2 u_resolution_scale;
-layout(location = 9) uniform vec2 u_noise_scale;
-layout(location = 10) uniform float u_noise_phase;
-layout(location = 11) uniform vec2 u_circle1;
-layout(location = 12) uniform vec2 u_circle2;
-layout(location = 13) uniform vec2 u_circle3;
-layout(location = 14) uniform vec2 u_rotation1;
-layout(location = 15) uniform vec2 u_rotation2;
-layout(location = 16) uniform vec2 u_rotation3;
-
-layout(location = 0) out vec4 fragColor;
+ out vec4 fragColor;
 
 const float PI = 3.1415926535897932384626;
 const float PI_ROTATE_RIGHT = PI * 0.0078125;
