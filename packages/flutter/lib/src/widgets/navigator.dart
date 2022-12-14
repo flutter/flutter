@@ -3698,10 +3698,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         oldEntriesTop -= 1;
         continue;
       }
-      final Page<dynamic> newPage = widget.pages[newPagesTop];
-      if (!oldEntry.canUpdateFrom(newPage)) {
-        break;
-      }
+
       // We found the page for all the consecutive pageless routes below. Attach these
       // pageless routes to the page.
       if(unattachedPagelessRoutes.isNotEmpty) {
@@ -3712,11 +3709,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         pagelessRoutes.addAll(unattachedPagelessRoutes);
         unattachedPagelessRoutes.clear();
       }
+
+      final Page<dynamic> newPage = widget.pages[newPagesTop];
+      if (!oldEntry.canUpdateFrom(newPage)) {
+        break;
+      }
+
       oldEntriesTop -= 1;
       newPagesTop -= 1;
     }
-    // Reverts the pageless routes that cannot be updated.
-    oldEntriesTop += unattachedPagelessRoutes.length;
 
     // Scans middle of the old entries and records the page key to old entry map.
     int oldEntriesBottomToScan = oldEntriesBottom;
