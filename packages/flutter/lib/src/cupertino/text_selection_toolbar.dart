@@ -103,7 +103,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
 
-  // Add the visial vertical line spacer between children buttons.
+  // Add the visual vertical line spacer between children buttons.
   static List<Widget> _addChildrenSpacers(List<Widget> children) {
     final List<Widget> nextChildren = <Widget>[];
     for (int i = 0; i < children.length; i++) {
