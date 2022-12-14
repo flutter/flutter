@@ -17,7 +17,7 @@ import 'dart:convert';
 ///
 /// Since the function is executed on the host driving the test, you can access any environment
 /// variable from it.
-typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image);
+typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image, [Map<String, Object?>? args]);
 
 /// Classes shared between `integration_test.dart` and `flutter drive` based
 /// adoptor (ex: `integration_test_driver.dart`).
@@ -247,9 +247,12 @@ class WebDriverCommand {
         values = <String, dynamic>{};
 
   /// Constructor for [WebDriverCommandType.noop] screenshot.
-  WebDriverCommand.screenshot(String screenshotName)
+  WebDriverCommand.screenshot(String screenshotName, [Map<String, Object?>? args])
       : type = WebDriverCommandType.screenshot,
-        values = <String, dynamic>{'screenshot_name': screenshotName};
+        values = <String, dynamic>{
+          'screenshot_name': screenshotName,
+          if (args != null) 'args': args,
+        };
 
   /// Type of the [WebDriverCommand].
   ///
@@ -286,7 +289,7 @@ abstract class CallbackManager {
 
   /// Takes a screenshot of the application.
   /// Returns the data that is sent back to the host.
-   Future<Map<String, dynamic>> takeScreenshot(String screenshot);
+   Future<Map<String, dynamic>> takeScreenshot(String screenshot, [Map<String, Object?>? args]);
 
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();
