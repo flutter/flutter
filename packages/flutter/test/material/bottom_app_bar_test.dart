@@ -187,7 +187,6 @@ void main() {
                 ),
                 bottomNavigationBar: BottomAppBar(
                   color: Color(0xff0000ff),
-                  surfaceTintColor: Colors.transparent,
                 ),
               ),
             );
@@ -218,7 +217,6 @@ void main() {
                 ),
                 bottomNavigationBar: BottomAppBar(
                   color: Color(0xff0000ff),
-                  surfaceTintColor: Colors.transparent,
                 ),
               
             );
