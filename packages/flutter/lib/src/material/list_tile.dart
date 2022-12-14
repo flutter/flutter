@@ -369,7 +369,7 @@ class ListTile extends StatelessWidget {
   ///
   /// Dense list tiles default to a smaller height.
   ///
-  /// When [ThemeData.useMaterial3] is true, [dense] wil not have any effect.
+  /// It is not recommended to set [dense] to true when [ThemeData.useMaterial3] is true.
   final bool? dense;
 
   /// Defines how compact the list tile's layout will be.
