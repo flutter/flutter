@@ -127,12 +127,12 @@ abstract class DesktopDevice extends Device {
     final BuildMode buildMode = debuggingOptions.buildInfo.mode;
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     final String? executable = executablePathForDevice(package, buildMode);
-    _logger.printWarning('#1. Executable path $executable');
+    print('#1. Executable path $executable');
     if (executable == null) {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
-    _logger.printWarning('#2');
+    print('#2');
 
     Process process;
     final List<String> command = <String>[
@@ -140,31 +140,31 @@ abstract class DesktopDevice extends Device {
       ...debuggingOptions.dartEntrypointArgs,
     ];
     try {
-    _logger.printWarning('#3');
+    print('#3');
 
       process = await _processManager.start(
         command,
         environment: _computeEnvironment(debuggingOptions, traceStartup, route),
       );
-    _logger.printWarning('#4');
+    print('#4');
     } on ProcessException catch (e) {
-    _logger.printWarning('#5');
+    print('#5');
       _logger.printError('Unable to start executable "${command.join(' ')}": $e');
       rethrow;
     }
-    _logger.printWarning('#6');
+    print('#6');
 
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
-    _logger.printWarning('#7');
+    print('#7');
 
     _deviceLogReader.initializeProcess(process);
-    _logger.printWarning('#8');
+    print('#8');
 
     if (debuggingOptions.buildInfo.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    _logger.printWarning('#9');
+    print('#9');
 
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
@@ -173,17 +173,17 @@ abstract class DesktopDevice extends Device {
       logger: _logger,
     );
     try {
-    _logger.printWarning('#10');
+    print('#10');
 
       final Uri? observatoryUri = await observatoryDiscovery.uri;
-      _logger.printWarning('#11 $observatoryUri');
+      print('#11 $observatoryUri');
 
       if (observatoryUri != null) {
-      _logger.printWarning('#12');
+      print('#12');
         onAttached(package, buildMode, process);
         return LaunchResult.succeeded(observatoryUri: observatoryUri);
       }
-      _logger.printWarning('#13');
+      print('#13');
 
       _logger.printError(
         'Error waiting for a debug connection: '
@@ -192,10 +192,10 @@ abstract class DesktopDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
     } finally {
-    _logger.printWarning('#14');
+    print('#14');
       await observatoryDiscovery.cancel();
     }
-    _logger.printWarning('#15');
+    print('#15');
     return LaunchResult.failed();
   }
 

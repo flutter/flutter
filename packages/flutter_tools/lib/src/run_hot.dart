@@ -411,23 +411,23 @@ class HotRunner extends ResidentRunner {
     ).send()));
 
     try {
-      globals.printWarning('###1');
+      print('###1');
       final List<bool> results = await Future.wait(startupTasks);
-      globals.printWarning('###2');
+      print('###2');
       if (!results.every((bool passed) => passed)) {
-        globals.printWarning('###3');
+        print('###3');
         appFailedToStart();
         return 1;
       }
-      globals.printWarning('###4');
+      print('###4');
       cacheInitialDillCompilation();
     } on Exception catch (err) {
-      globals.printWarning('###5');
+      print('###5');
       globals.printError(err.toString());
       appFailedToStart();
       return 1;
     }
-    globals.printWarning('###6');
+    print('###6');
 
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
