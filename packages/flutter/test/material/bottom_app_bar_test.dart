@@ -170,10 +170,8 @@ void main() {
 
     final PhysicalShape physicalShape =
       tester.widget(find.byType(PhysicalShape).at(0));
-    final Material material = tester.widget(find.byType(Material).at(0));
 
     expect(physicalShape.color, const Color(0xffffff00));
-   // expect(material.color, const Color(0xffffff00));
   });
 
   testWidgets('color overrides theme color', (WidgetTester tester) async {
