@@ -417,7 +417,6 @@ class _DefaultPub implements Pub {
           pubCommand,
           workingDirectory: _fileSystem.path.current,
           environment: pubEnvironment,
-          runInShell: true,
           mode: ProcessStartMode.inheritStdio,
         );
       } else {
@@ -425,7 +424,6 @@ class _DefaultPub implements Pub {
         process = await _processUtils.start(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
-          runInShell: true,
           environment: pubEnvironment,
         );
 

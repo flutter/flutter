@@ -197,7 +197,6 @@ abstract class ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
-    bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   });
 
@@ -424,7 +423,6 @@ class _DefaultProcessUtils implements ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
-    bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
@@ -432,7 +430,6 @@ class _DefaultProcessUtils implements ProcessUtils {
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
-      runInShell: runInShell,
       mode: mode,
     );
   }
