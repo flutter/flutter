@@ -750,6 +750,39 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2WasmTarget invokes dart2wasm with dart defines', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        'bin/cache/dart-sdk/bin/dartaotruntime',
+        '--disable-dart-dev',
+        'bin/cache/dart-sdk/bin/snapshots/dart2wasm_product.snapshot',
+        '-Ddart.vm.profile=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        '--packages=.dart_tool/package_config.json',
+        '--dart-sdk=bin/cache/dart-sdk',
+        '--multi-root-scheme',
+        'org-dartlang-sdk',
+        '--multi-root',
+        'bin/cache/flutter_web_sdk/',
+        '--multi-root',
+        'bin/cache/',
+        '--libraries-spec',
+        'bin/cache/flutter_web_sdk/libraries.json',
+
+        environment.buildDir.childFile('main.dart').absolute.path,
+        environment.buildDir.childFile('main.dart.wasm').absolute.path,
+      ])
+    );
+
+    await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
   test('Generated service worker is empty with none-strategy', () {
     final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.none);
 
@@ -829,5 +862,20 @@ void main() {
     // No caching of source maps.
     expect(environment.outputDir.childFile('flutter.js').readAsStringSync(),
       equals(flutter_js.generateFlutterJsFile()));
+  }));
+
+  test('wasm build copies and generates specific files', () => testbed.run(() async {
+    globals.fs.file('bin/cache/dart-sdk/bin/dart2wasm_runtime.mjs')
+      .createSync(recursive: true);
+    globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
+      .createSync(recursive: true);
+    
+    await WebBuiltInAssets(globals.fs, globals.cache, true).build(environment);
+
+    expect(environment.outputDir.childFile('dart2wasm_runtime.mjs').existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
+    expect(environment.outputDir.childDirectory('canvaskit')
+      .childFile('canvaskit.wasm')
+      .existsSync(), true);
   }));
 }
