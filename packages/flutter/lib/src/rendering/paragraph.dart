@@ -139,6 +139,8 @@ class RenderParagraph extends RenderBox
         return;
       case RenderComparison.metadata:
         _textPainter.text = value;
+        _cachedCombinedSemanticsInfos = null;
+        markNeedsSemanticsUpdate();
         break;
       case RenderComparison.paint:
         _textPainter.text = value;
