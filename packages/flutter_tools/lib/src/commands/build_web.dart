@@ -44,7 +44,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addFlag(
       'wasm',
-      help: 'Compilie to WebAssembly rather than Javascript'
+      help: 'Compile to WebAssembly rather than Javascript (experimental).'
     );
 
     argParser.addOption('pwa-strategy',
