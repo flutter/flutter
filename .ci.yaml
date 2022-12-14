@@ -3956,7 +3956,6 @@ targets:
 
   - name: Mac_arm64_ios run_release_test_macos
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
