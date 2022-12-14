@@ -552,13 +552,13 @@ void main() {
         'LICENSE',
         'README.md',
         'example/lib/main.dart',
+        'example/integration_test/plugin_integration_test.dart',
         'flutter_project.iml',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-        'example/integration_test/plugin_integration_test.dart',
         'lib/flutter_project_web.dart',
       ],
     );
