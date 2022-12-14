@@ -121,6 +121,7 @@ void main() {
     expect(localizations.keyboardKeyScrollLock, isNotNull);
     expect(localizations.keyboardKeySelect, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
+    expect(localizations.currentDateLabel, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

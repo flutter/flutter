@@ -135,5 +135,6 @@
   "keyboardKeySpace": "Mezera",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Nabídka na liště s nabídkou"
+  "menuBarMenuLabel": "Nabídka na liště s nabídkou",
+  "currentDateLabel": "Date of today"
 }

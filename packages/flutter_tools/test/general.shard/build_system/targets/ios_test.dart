@@ -262,8 +262,9 @@ void main() {
         '--spirv=/App.framework/flutter_assets/shader.glsl.spirv',
         '--input=/shader.glsl',
         '--input-type=frag',
+        '--remap-samplers',
         '--include=/',
-        '--include=./shader_lib',
+        '--include=/./shader_lib',
       ]),
       FakeCommand(command: <String>[
         'codesign',

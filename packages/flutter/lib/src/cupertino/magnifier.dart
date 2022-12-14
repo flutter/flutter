@@ -174,7 +174,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
               CupertinoMagnifier.kMagnifierAboveFocalPoint),
     );
 
-    final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
+    final Rect screenRect = Offset.zero & MediaQuery.sizeOf(context);
 
     // Adjust the magnifier position so that it never exists outside the horizontal
     // padding.
