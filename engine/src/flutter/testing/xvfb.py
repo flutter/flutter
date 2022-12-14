@@ -6,27 +6,26 @@
 """
 
 import os
-import platform
 import signal
 import subprocess
 import tempfile
 import time
 
 
-def _XvfbDisplayIndex(_child_build_name):
+def xvfb_display_index(_child_build_name):
   return '9'
 
 
-def _XvfbPidFilename(child_build_name):
+def xvfb_pid_filename(child_build_name):
   """Returns the filename to the Xvfb pid file.  This name is unique for each
   builder. This is used by the linux builders."""
   return os.path.join(
       tempfile.gettempdir(),
-      'xvfb-' + _XvfbDisplayIndex(child_build_name) + '.pid'
+      'xvfb-' + xvfb_display_index(child_build_name) + '.pid'
   )
 
 
-def StartVirtualX(child_build_name, build_dir):
+def start_virtual_x(child_build_name, build_dir):
   """Start a virtual X server and set the DISPLAY environment variable so sub
   processes will use the virtual X server.  Also start openbox. This only works
   on Linux and assumes that xvfb and openbox are installed.
@@ -40,13 +39,13 @@ def StartVirtualX(child_build_name, build_dir):
   """
   # We use a pid file to make sure we don't have any xvfb processes running
   # from a previous test run.
-  StopVirtualX(child_build_name)
+  stop_virtual_x(child_build_name)
 
   xdisplaycheck_path = None
   if build_dir:
     xdisplaycheck_path = os.path.join(build_dir, 'xdisplaycheck')
 
-  display = ':%s' % _XvfbDisplayIndex(child_build_name)
+  display = ':%s' % xvfb_display_index(child_build_name)
   # Note we don't add the optional screen here (+ '.0')
   os.environ['DISPLAY'] = display
 
@@ -73,13 +72,13 @@ def StartVirtualX(child_build_name, build_dir):
       print('xdisplaycheck says there is a display still running, exiting...')
       raise Exception('Display already present.')
 
-    xvfb_lock_filename = '/tmp/.X%s-lock' % _XvfbDisplayIndex(child_build_name)
+    xvfb_lock_filename = '/tmp/.X%s-lock' % xvfb_display_index(child_build_name)
     if os.path.exists(xvfb_lock_filename):
       print('Removing stale xvfb lock file %r' % xvfb_lock_filename)
       try:
         os.unlink(xvfb_lock_filename)
-      except OSError as e:
-        print('Removing xvfb lock file failed: %s' % e)
+      except OSError as err:
+        print('Removing xvfb lock file failed: %s' % err)
 
   # Figure out which X server to try.
   cmd = 'Xvfb'
@@ -93,8 +92,8 @@ def StartVirtualX(child_build_name, build_dir):
                           stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT,
                           env=env)
-  xvfb_pid_filename = _XvfbPidFilename(child_build_name)
-  open(xvfb_pid_filename, 'w').write(str(proc.pid))
+  pid_filename = xvfb_pid_filename(child_build_name)
+  open(pid_filename, 'w').write(str(proc.pid))
 
   # Wait for Xvfb to start up.
   time.sleep(10)
@@ -112,24 +111,24 @@ def StartVirtualX(child_build_name, build_dir):
     if xdisplayproc.returncode != 0:
       print('xdisplaycheck failed after %d seconds.' % checktime)
       print('xdisplaycheck output:')
-      for l in logs.splitlines():
-        print('> %s' % l)
-      rc = proc.poll()
-      if rc is None:
+      for line in logs.splitlines():
+        print('> %s' % line)
+      return_code = proc.poll()
+      if return_code is None:
         print('Xvfb still running, stopping.')
         proc.terminate()
       else:
-        print('Xvfb exited, code %d' % rc)
+        print('Xvfb exited, code %d' % return_code)
 
       print('Xvfb output:')
-      for l in proc.communicate()[0].splitlines():
-        print('> %s' % l)
+      for line in proc.communicate()[0].splitlines():
+        print('> %s' % line)
       raise Exception(logs)
-    else:
-      print('xdisplaycheck succeeded after %d seconds.' % checktime)
-      print('xdisplaycheck output:')
-      for l in logs.splitlines():
-        print('> %s' % l)
+
+    print('xdisplaycheck succeeded after %d seconds.' % checktime)
+    print('xdisplaycheck output:')
+    for line in logs.splitlines():
+      print('> %s' % line)
     print('...OK')
 
   # Some ChromeOS tests need a window manager.
@@ -137,18 +136,18 @@ def StartVirtualX(child_build_name, build_dir):
   print('Window manager (openbox) started.')
 
 
-def StopVirtualX(child_build_name):
+def stop_virtual_x(child_build_name):
   """Try and stop the virtual X server if one was started with StartVirtualX.
   When the X server dies, it takes down the window manager with it.
   If a virtual x server is not running, this method does nothing."""
-  xvfb_pid_filename = _XvfbPidFilename(child_build_name)
-  if os.path.exists(xvfb_pid_filename):
-    xvfb_pid = int(open(xvfb_pid_filename).read())
+  pid_filename = xvfb_pid_filename(child_build_name)
+  if os.path.exists(pid_filename):
+    xvfb_pid = int(open(pid_filename).read())
     print('Stopping Xvfb with pid %d ...' % xvfb_pid)
     # If the process doesn't exist, we raise an exception that we can ignore.
     try:
       os.kill(xvfb_pid, signal.SIGKILL)
     except OSError:
       print('... killing failed, presuming unnecessary.')
-    os.remove(xvfb_pid_filename)
+    os.remove(pid_filename)
     print('Xvfb pid file removed')
