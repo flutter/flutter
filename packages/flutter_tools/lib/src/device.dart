@@ -1014,7 +1014,7 @@ class DebuggingOptions {
       enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
       skiaDeterministicRendering: json['skiaDeterministicRendering']! as bool,
       traceSkia: json['traceSkia']! as bool,
-      traceAllowlist: json['traceAllowlist']! as String,
+      traceAllowlist: json['traceAllowlist'] as String?,
       traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
       traceSystrace: json['traceSystrace']! as bool,
       endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
