@@ -38,12 +38,7 @@
 /**
  * Called by the engine when the given view's buffers should be swapped.
  */
-- (BOOL)present:(uint64_t)viewId;
-
-/**
- * Tells the renderer that there is no Flutter content available for this frame.
- */
-- (void)presentWithoutContent:(uint64_t)viewId;
+- (BOOL)present:(uint64_t)viewId texture:(nonnull const FlutterMetalTexture*)texture;
 
 /**
  * Creates a Metal texture for the given view with the given size.
