@@ -116,6 +116,8 @@ enum WebRendererMode {
   canvaskit,
   /// Always uses html.
   html,
+  /// Always use skwasm.
+  skwasm,
 }
 
 /// The correct precompiled artifact to use for each build and render mode.

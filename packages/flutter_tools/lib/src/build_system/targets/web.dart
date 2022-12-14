@@ -315,6 +315,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
       dartSdkRoot,
       '--libraries-spec',
       artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
+      if (webRenderer == WebRendererMode.skwasm)
+        ...<String>[
+          '--import-shared-memory',
+          '--shared-memory-max-pages=32768',
+        ],
 
       environment.buildDir.childFile('main.dart').path, // dartfile
       outputWasmFile.path,
@@ -484,10 +489,11 @@ class WebReleaseBundle extends Target {
 /// These assets can be cached forever and are only invalidated when the
 /// Flutter SDK is upgraded to a new version.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem, this.cache, this.isWasm);
+  const WebBuiltInAssets(this.fileSystem, this.cache, this.webRenderer, this.isWasm);
 
   final FileSystem fileSystem;
   final Cache cache;
+  final WebRendererMode webRenderer;
   final bool isWasm;
 
   @override
@@ -516,11 +522,22 @@ class WebBuiltInAssets extends Target {
     // built as part of the engine, but fetched from CIPD, and so it won't be
     // found in ENGINE/src/out.
     final Directory flutterWebSdk = cache.getWebSdkDirectory();
-    final Directory canvasKitDirectory = flutterWebSdk.childDirectory('canvaskit');
-    for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
-      final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
-      final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
-      file.copySync(targetPath);
+
+    if (webRenderer == WebRendererMode.autoDetect || webRenderer == WebRendererMode.canvaskit) {
+      final Directory canvasKitDirectory = flutterWebSdk.childDirectory('canvaskit');
+      for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
+        final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
+        final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
+        file.copySync(targetPath);
+      }
+    } else if (webRenderer == WebRendererMode.skwasm) {
+      final String skwasmSrcDirectory = globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).parent.path;
+      final String skwasmOutDirectory = fileSystem.path.join(environment.outputDir.path, 'skwasm');
+      for (final String fileName in <String>['skwasm.wasm', 'skwasm.js', 'skwasm.worker.js']) {
+        final File srcFile = fileSystem.file(fileSystem.path.join(skwasmSrcDirectory, fileName));
+        final String targetPath = fileSystem.path.join(skwasmOutDirectory, fileName);
+        srcFile.copySync(targetPath);
+      }
     }
 
     if (isWasm) {
@@ -535,7 +552,9 @@ class WebBuiltInAssets extends Target {
       dart2wasmRuntime.copySync(targetPath);
 
       final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
-      bootstrapFile.writeAsStringSync(wasm_bootstrap.generateWasmBootstrapFile());
+      bootstrapFile.writeAsStringSync(
+        wasm_bootstrap.generateWasmBootstrapFile(webRenderer == WebRendererMode.skwasm)
+      );
     }
 
     // Write the flutter.js file
@@ -560,7 +579,7 @@ class WebServiceWorker extends Target {
   List<Target> get dependencies => <Target>[
     if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
     WebReleaseBundle(webRenderer, isWasm),
-    WebBuiltInAssets(fileSystem, cache, isWasm),
+    WebBuiltInAssets(fileSystem, cache, webRenderer, isWasm),
   ];
 
   @override
