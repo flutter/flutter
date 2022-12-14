@@ -4637,6 +4637,7 @@ targets:
       task_name: channels_integration_test_win
 
   - name: Windows_android complex_layout_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/117068
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
