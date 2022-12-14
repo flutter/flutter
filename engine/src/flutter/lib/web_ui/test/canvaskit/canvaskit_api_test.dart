@@ -533,11 +533,40 @@ void _imageFilterTests() {
 }
 
 void _mallocTests() {
-  test('SkFloat32List', () {
+  test('$SkFloat32List', () {
+    final List<SkFloat32List> lists = <SkFloat32List>[];
+
     for (int size = 0; size < 1000; size++) {
       final SkFloat32List skList = mallocFloat32List(4);
       expect(skList, isNotNull);
-      expect(skList.toTypedArray().length, 4);
+      expect(skList.toTypedArray(), hasLength(4));
+      lists.add(skList);
+    }
+
+    for (final SkFloat32List skList in lists) {
+      // toTypedArray() still works.
+      expect(() => skList.toTypedArray(), returnsNormally);
+      free(skList);
+      // toTypedArray() throws after free.
+      expect(() => skList.toTypedArray(), throwsA(isA<Error>()));
+    }
+  });
+  test('$SkUint32List', () {
+    final List<SkUint32List> lists = <SkUint32List>[];
+
+    for (int size = 0; size < 1000; size++) {
+      final SkUint32List skList = mallocUint32List(4);
+      expect(skList, isNotNull);
+      expect(skList.toTypedArray(), hasLength(4));
+      lists.add(skList);
+    }
+
+    for (final SkUint32List skList in lists) {
+      // toTypedArray() still works.
+      expect(() => skList.toTypedArray(), returnsNormally);
+      free(skList);
+      // toTypedArray() throws after free.
+      expect(() => skList.toTypedArray(), throwsA(isA<Error>()));
     }
   });
 }
@@ -812,7 +841,7 @@ void _pathTests() {
       ui.Offset(10, 10),
     ]);
     path.addPoly(encodedPoints.toTypedArray(), true);
-    freeFloat32List(encodedPoints);
+    free(encodedPoints);
   });
 
   test('addRRect', () {
