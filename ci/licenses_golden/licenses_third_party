@@ -1,4 +1,4 @@
-Signature: f97ff5227a3dcd51964efbb926421da4
+Signature: a608407eb248a96de65ccc6089229915
 
 UNUSED LICENSES:
 
@@ -11411,7 +11411,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/vm/bin/stdio_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/bin/vmservice_io.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/bin/vmservice_server.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/core_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/deferred_load_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/function.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/internal_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/mirror_reference.dart
