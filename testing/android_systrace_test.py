@@ -15,7 +15,7 @@ BUILDROOT_DIR = os.path.abspath(
 
 PERFETTO_SESSION_KEY = 'session1'
 PERFETTO_TRACE_FILE = '/data/misc/perfetto-traces/trace'
-PERFETTO_CONFIG = '''
+PERFETTO_CONFIG = """
 write_into_file: true
 file_write_period_ms: 1000000000
 flush_period_ms: 1000
@@ -32,10 +32,10 @@ data_sources: {
         }
     }
 }
-'''
+"""
 
 
-def InstallApk(apk_path, package_name, adb_path='adb'):
+def install_apk(apk_path, package_name, adb_path='adb'):
   print('Installing APK')
   subprocess.check_output([adb_path, 'shell', 'am', 'force-stop', package_name])
   # Allowed to fail if APK was never installed.
@@ -44,7 +44,7 @@ def InstallApk(apk_path, package_name, adb_path='adb'):
   subprocess.check_output([adb_path, 'install', apk_path])
 
 
-def StartPerfetto(package_name, adb_path='adb'):
+def start_perfetto(package_name, adb_path='adb'):
   print('Starting trace')
   cmd = [
       adb_path, 'shell', 'echo', "'" + PERFETTO_CONFIG % package_name + "'",
@@ -55,7 +55,7 @@ def StartPerfetto(package_name, adb_path='adb'):
   subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
 
-def LaunchPackage(package_name, activity_name, adb_path='adb'):
+def launch_package(package_name, activity_name, adb_path='adb'):
   print('Scanning logcat')
   subprocess.check_output([adb_path, 'logcat', '-c'], stderr=subprocess.STDOUT)
   logcat = subprocess.Popen([adb_path, 'logcat'],
@@ -77,7 +77,7 @@ def LaunchPackage(package_name, activity_name, adb_path='adb'):
       break
 
 
-def CollectAndValidateTrace(adb_path='adb'):
+def collect_and_validate_trace(adb_path='adb'):
   print('Fetching trace')
   subprocess.check_output([
       adb_path, 'shell', 'perfetto', '--attach', PERFETTO_SESSION_KEY, '--stop'
@@ -140,10 +140,10 @@ def main():
 
   args = parser.parse_args()
 
-  InstallApk(args.apk_path, args.package_name, args.adb_path)
-  StartPerfetto(args.package_name, args.adb_path)
-  LaunchPackage(args.package_name, args.activity_name, args.adb_path)
-  return CollectAndValidateTrace(args.adb_path)
+  install_apk(args.apk_path, args.package_name, args.adb_path)
+  start_perfetto(args.package_name, args.adb_path)
+  launch_package(args.package_name, args.activity_name, args.adb_path)
+  return collect_and_validate_trace(args.adb_path)
 
 
 if __name__ == '__main__':

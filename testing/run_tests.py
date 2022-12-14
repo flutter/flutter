@@ -1089,7 +1089,7 @@ def main():
   if 'impeller-vulkan' in types:
     build_name = args.variant
     try:
-      xvfb.StartVirtualX(build_name, build_dir)
+      xvfb.start_virtual_x(build_name, build_dir)
       vulkan_gtest_filter = parse_impeller_vulkan_filter()
       gtest_flags = shuffle_flags
       gtest_flags.append(vulkan_gtest_filter)
@@ -1101,7 +1101,7 @@ def main():
           coverage=args.coverage
       )
     finally:
-      xvfb.StopVirtualX(build_name)
+      xvfb.stop_virtual_x(build_name)
 
   if 'dart' in types:
     dart_filter = args.dart_filter.split(',') if args.dart_filter else None
