@@ -140,15 +140,16 @@ abstract class DesktopDevice extends Device {
       ...debuggingOptions.dartEntrypointArgs,
     ];
     try {
-    print('#3');
+      print('#3');
+      print('### Start process: $command');
 
       process = await _processManager.start(
         command,
         environment: _computeEnvironment(debuggingOptions, traceStartup, route),
       );
-    print('#4');
+      print('#4');
     } on ProcessException catch (e) {
-    print('#5');
+      print('#5');
       _logger.printError('Unable to start executable "${command.join(' ')}": $e');
       rethrow;
     }

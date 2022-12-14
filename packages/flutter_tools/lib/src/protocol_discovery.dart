@@ -99,6 +99,7 @@ class ProtocolDiscovery {
   Future<void> cancel() => _stopScrapingLogs();
 
   Future<void> _stopScrapingLogs() async {
+    print('### Stop scraping logs');
     await _uriStreamController.close();
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
@@ -110,6 +111,7 @@ class ProtocolDiscovery {
 
   Uri? _getObservatoryUri(String line) {
     final Match? match = _getPatternMatch(line);
+    print('### Pattern match $match');
     if (match != null) {
       return Uri.parse(match[1]!);
     }
@@ -117,19 +119,29 @@ class ProtocolDiscovery {
   }
 
   void _handleLine(String line) {
+    print('### Protocol discovery line: "$line"');
     Uri? uri;
     try {
       uri = _getObservatoryUri(line);
+      print('!1');
     } on FormatException catch (error, stackTrace) {
+      print('!2');
       _uriStreamController.addError(error, stackTrace);
     }
     if (uri == null || uri.host.isEmpty) {
+      print('!3');
       return;
     }
+
+    print('!4');
+
     if (devicePort != null && uri.port != devicePort) {
+      print('!5');
       _logger.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
+
+    print('!6');
     _uriStreamController.add(uri);
   }
 
