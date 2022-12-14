@@ -212,6 +212,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           case ContextMenuButtonType.selectAll:
             return localizations.selectAllButtonLabel;
           case ContextMenuButtonType.delete:
+            return localizations.deleteButtonTooltip.toUpperCase();
           case ContextMenuButtonType.custom:
             return '';
         }

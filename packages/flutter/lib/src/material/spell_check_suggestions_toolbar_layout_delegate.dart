@@ -10,14 +10,14 @@ import 'package:flutter/widgets.dart' show TextSelectionToolbarLayoutDelegate;
 ///
 /// See also:
 ///
-///   * [MaterialSpellCheckSuggestionsToolbar], which uses this to position itself.
+///   * [SpellCheckSuggestionsToolbar], which uses this to position itself.
 class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   /// Creates an instance of [SpellCheckSuggestionsToolbarLayoutDelegate].
   SpellCheckSuggestionsToolbarLayoutDelegate({
     required this.anchor,
   });
 
-  /// {@macro flutter.material.MaterialSpellCheckSuggestionsToolbar.anchor}
+  /// {@macro flutter.material.SpellCheckSuggestionsToolbar.anchor}
   ///
   /// Should be provided in local coordinates.
   final Offset anchor;

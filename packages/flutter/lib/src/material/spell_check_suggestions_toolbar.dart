@@ -5,37 +5,39 @@
 import 'package:flutter/services.dart' show SuggestionSpan;
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'material.dart';
-import 'material_localizations.dart';
 import 'spell_check_suggestions_toolbar_layout_delegate.dart';
 import 'text_selection_toolbar_text_button.dart';
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
-// viewport.
+// viewport. Same values as TextSelectionToolbar.
 const double _kToolbarScreenPadding = 8.0;
 const double _kHandleSize = 22.0;
 
-// Padding between the toolbar and the anchor.
+// Padding between the toolbar and the anchor. Eyeballed on Pixel 4 emulator
+// running Android API 31.
 const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 
-// The default height of the MaterialSpellCheckSuggestionsToolbar, which
+// The default height of the SpellCheckSuggestionsToolbar, which
 // assumes there are the maximum number of spell check suggestions available, 3.
+// Size eyeballed on Pixel 4 emulator running Android API 31.
 const double _kDefaultToolbarHeight = 193.0;
 
 /// The default spell check suggestions toolbar for Android.
 ///
 /// Tries to position itself below the [anchor], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
-class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
-  /// Constructs a [MaterialSpellCheckSuggestionsToolbar].
-  const MaterialSpellCheckSuggestionsToolbar({
+class SpellCheckSuggestionsToolbar extends StatelessWidget {
+  /// Constructs a [SpellCheckSuggestionsToolbar].
+  const SpellCheckSuggestionsToolbar({
     super.key,
     required this.anchor,
     required this.buttonItems,
   }) : assert(buttonItems != null);
 
-  /// {@template flutter.material.MaterialSpellCheckSuggestionsToolbar.anchor}
+  /// {@template flutter.material.SpellCheckSuggestionsToolbar.anchor}
   /// The focal point below which the toolbar attempts to position itself.
   /// {@endtemplate}
   final Offset anchor;
@@ -45,7 +47,7 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// Builds the default Android Material spell check suggestions toolbar.
   static Widget _spellCheckSuggestionsToolbarBuilder(BuildContext context, Widget child) {
-    return _MaterialSpellCheckSuggestionsToolbarContainer(
+    return _SpellCheckSuggestionsToolbarContainer(
       child: child,
     );
   }
@@ -74,8 +76,7 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
     }
 
     // Build delete button.
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final ContextMenuButtonItem deleteButton =
+    ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
           editableTextState.replaceComposingRegion(
@@ -84,8 +85,9 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
           );
         },
         type: ContextMenuButtonType.delete,
-        label: localizations.deleteButtonTooltip.toUpperCase(),
     );
+    deleteButton = deleteButton.copyWith(label: AdaptiveTextSelectionToolbar.getButtonLabel(context, deleteButton));
+    // deleteButton.label = AdaptiveTextSelectionToolbar.getButtonLabel(context, deleteButton);
     buttonItems.add(deleteButton);
 
     return buttonItems;
@@ -160,8 +162,8 @@ class MaterialSpellCheckSuggestionsToolbar extends StatelessWidget {
 
 /// The Material-styled toolbar outline for the spell check suggestions
 /// toolbar.
-class _MaterialSpellCheckSuggestionsToolbarContainer extends StatelessWidget {
-  const _MaterialSpellCheckSuggestionsToolbarContainer({
+class _SpellCheckSuggestionsToolbarContainer extends StatelessWidget {
+  const _SpellCheckSuggestionsToolbarContainer({
     required this.child,
   });
 
@@ -171,7 +173,7 @@ class _MaterialSpellCheckSuggestionsToolbarContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       // This elevation was eyeballed on a Pixel 4 emulator running Android
-      // API 31 for the MaterialSpellCheckSuggestionsToolbar.
+      // API 31 for the SpellCheckSuggestionsToolbar.
       elevation: 2.0,
       type: MaterialType.card,
       child: child,
@@ -195,7 +197,7 @@ class _SpellCheckSuggestsionsToolbarItemsLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       // This width was eyeballed on a Pixel 4 emulator running Android
-      // API 31 for the MaterialSpellCheckSuggestionsToolbar.
+      // API 31 for the SpellCheckSuggestionsToolbar.
       width: 165,
       height: height,
       child: Column(

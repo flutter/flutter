@@ -6,20 +6,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
-import 'editable_text.dart' show EditableTextState;
+import 'editable_text.dart' show EditableTextContextMenuBuilder, EditableTextState;
 import 'framework.dart' show BuildContext, Widget, immutable;
-
-/// Signature for a function that builds a widget to use as the spell check
-/// suggestions toolbar for [EditableText].
-///
-/// See also:
-///
-///  * [SpellCheckConfiguration], where this builder can be set to use by
-///    default for displaying spell check suggestions for misspelled words.
-typedef SpellCheckSuggestionsToolbarBuilder = Widget Function(
-  BuildContext context,
-  EditableTextState editableTextState,
-);
 
 /// Controls how spell check is performed for text input.
 ///
@@ -56,7 +44,7 @@ class SpellCheckConfiguration {
 
   /// Builds the toolbar used to display spell check suggestions for misspelled
   /// words.
-  final SpellCheckSuggestionsToolbarBuilder? spellCheckSuggestionsToolbarBuilder;
+  final EditableTextContextMenuBuilder? spellCheckSuggestionsToolbarBuilder;
 
   final bool _spellCheckEnabled;
 
@@ -68,7 +56,7 @@ class SpellCheckConfiguration {
   SpellCheckConfiguration copyWith({
     SpellCheckService? spellCheckService,
     TextStyle? misspelledTextStyle,
-    SpellCheckSuggestionsToolbarBuilder? spellCheckSuggestionsToolbarBuilder}) {
+    EditableTextContextMenuBuilder? spellCheckSuggestionsToolbarBuilder}) {
     if (!_spellCheckEnabled) {
       // A new configuration should be constructed to enable spell check.
       return const SpellCheckConfiguration.disabled();
@@ -353,7 +341,7 @@ void _addComposingRegionTextSpans(
   );
 }
 
-/// Methods for showing spell check suggestions for misspelled words in toolbar:
+// Methods for showing spell check suggestions for misspelled words in toolbar:
 
 /// Finds specified [SuggestionSpan] that matches the provided index using
 /// binary search.

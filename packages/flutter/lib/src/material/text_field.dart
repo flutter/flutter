@@ -807,6 +807,7 @@ class TextField extends StatefulWidget {
   /// See also:
   ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
   //     builder configured to show a spell check suggestions toolbar.
+  @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
@@ -818,15 +819,15 @@ class TextField extends StatefulWidget {
       );
 
     if (spanAtCursorIndex == null) {
-      return const SizedBox(width: 0.0, height: 0.0);
+      return const SizedBox.shrink();
     }
 
     final Offset anchor =
-      MaterialSpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
+      SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
     final List<ContextMenuButtonItem> buttonItems =
-      MaterialSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState, spanAtCursorIndex);
+      SpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState, spanAtCursorIndex);
 
-    return MaterialSpellCheckSuggestionsToolbar(
+    return SpellCheckSuggestionsToolbar(
       anchor: anchor,
       buttonItems: buttonItems,
     );

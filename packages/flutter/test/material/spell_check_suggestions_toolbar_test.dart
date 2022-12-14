@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const double _kAnchor = 200;
 // Amount for toolbar to overlap bottom padding for testing.
 const double _kTestToolbarOverlap = 10;
-// Same padding values as MaterialSpellCheckSuggestionsToolbar.
+// Same padding values as SpellCheckSuggestionsToolbar.
 const double _kHandleSize = 22.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 const double _kToolbarScreenPadding = 8;
@@ -39,13 +39,13 @@ void main() {
     return buttonItems;
   }
 
-  /// Finds the container of the [MaterialSpellCheckSuggestionsToolbar] so that
+  /// Finds the container of the [SpellCheckSuggestionsToolbar] so that
   /// the position of the toolbar itself may be determined.
-  Finder findMaterialSpellCheckSuggestionsToolbar() {
+  Finder findSpellCheckSuggestionsToolbar() {
     return find.descendant(
       of: find.byType(MaterialApp),
       matching: find.byWidgetPredicate(
-        (Widget w) => '${w.runtimeType}' == '_MaterialSpellCheckSuggestionsToolbarContainer'),
+        (Widget w) => '${w.runtimeType}' == '_SpellCheckSuggestionsToolbarContainer'),
     );
   }
 
@@ -58,7 +58,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body:
-              MaterialSpellCheckSuggestionsToolbar(
+              SpellCheckSuggestionsToolbar(
                 anchor: const Offset(0.0, _kAnchor),
                 buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
               ),
@@ -66,7 +66,7 @@ void main() {
         ),
       );
 
-    final double toolbarY = tester.getTopLeft(findMaterialSpellCheckSuggestionsToolbar()).dy;
+    final double toolbarY = tester.getTopLeft(findSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
   });
 
@@ -79,7 +79,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body:
-              MaterialSpellCheckSuggestionsToolbar(
+              SpellCheckSuggestionsToolbar(
                 anchor: const Offset(0.0, _kAnchor - _kTestToolbarOverlap),
                 buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
               ),
@@ -87,7 +87,7 @@ void main() {
         ),
       );
 
-    final double toolbarY = tester.getTopLeft(findMaterialSpellCheckSuggestionsToolbar()).dy;
+    final double toolbarY = tester.getTopLeft(findSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
   });
 }

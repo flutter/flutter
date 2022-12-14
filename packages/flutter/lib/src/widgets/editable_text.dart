@@ -3701,7 +3701,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     assert(
       _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder != null,
-      'SpellCheckSuggestionsToolbarBuilder must be defined in '
+      'spellCheckSuggestionsToolbarBuilder must be defined in '
       'SpellCheckConfiguration to show a toolbar with spell check '
       'suggestions',
     );
