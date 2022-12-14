@@ -4660,6 +4660,7 @@ targets:
       task_name: flavors_test
 
   - name: Windows_android flutter_gallery_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/117065
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
