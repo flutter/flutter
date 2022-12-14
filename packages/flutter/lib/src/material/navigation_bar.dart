@@ -153,7 +153,7 @@ class NavigationBar extends StatelessWidget {
 
   /// The color used as an overlay on [backgroundColor] to indicate elevation.
   ///
-  /// If null, then [NavigationBarThemeData.surfaceTintColor] is used. If that
+  /// If null, [NavigationBarThemeData.surfaceTintColor] is used. If that
   /// is also null, the default value is [ColorScheme.surfaceTint].
   ///
   /// See [Material.surfaceTintColor] for more details on how this
