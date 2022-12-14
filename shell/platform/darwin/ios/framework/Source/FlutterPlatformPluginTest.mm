@@ -22,11 +22,11 @@
 
 - (void)testClipboardHasCorrectStrings {
   [UIPasteboard generalPasteboard].string = nil;
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
       std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
   FlutterPlatformPlugin* plugin =
-      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()];
+      [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
 
   XCTestExpectation* setStringExpectation = [self expectationWithDescription:@"setString"];
   FlutterResult resultSet = ^(id result) {
@@ -61,11 +61,11 @@
 
 - (void)testClipboardSetDataToNullDoNotCrash {
   [UIPasteboard generalPasteboard].string = nil;
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
       std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
   FlutterPlatformPlugin* plugin =
-      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()];
+      [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
 
   XCTestExpectation* setStringExpectation = [self expectationWithDescription:@"setData"];
   FlutterResult resultSet = ^(id result) {
@@ -88,18 +88,18 @@
 }
 
 - (void)testPopSystemNavigator {
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  UINavigationController* navigationController =
-      [[UINavigationController alloc] initWithRootViewController:flutterViewController];
-  UITabBarController* tabBarController = [[UITabBarController alloc] init];
+  UINavigationController* navigationController = [[[UINavigationController alloc]
+      initWithRootViewController:flutterViewController] autorelease];
+  UITabBarController* tabBarController = [[[UITabBarController alloc] init] autorelease];
   tabBarController.viewControllers = @[ navigationController ];
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
       std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
   FlutterPlatformPlugin* plugin =
-      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()];
+      [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
 
   id navigationControllerMock = OCMPartialMock(navigationController);
   OCMStub([navigationControllerMock popViewControllerAnimated:YES]);
@@ -113,16 +113,19 @@
   [plugin handleMethodCall:methodCallSet result:resultSet];
   [self waitForExpectationsWithTimeout:1 handler:nil];
   OCMVerify([navigationControllerMock popViewControllerAnimated:YES]);
+
+  [flutterViewController deregisterNotifications];
+  [flutterViewController release];
 }
 
 - (void)testWhetherDeviceHasLiveTextInputInvokeCorrectly {
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
       std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
   XCTestExpectation* invokeExpectation =
       [self expectationWithDescription:@"isLiveTextInputAvailableInvoke"];
   FlutterPlatformPlugin* plugin =
-      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()];
+      [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
   FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
   FlutterMethodCall* methodCall =
       [FlutterMethodCall methodCallWithMethodName:@"LiveText.isLiveTextInputAvailable"

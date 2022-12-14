@@ -27,6 +27,12 @@ extern NSNotificationName const FlutterViewControllerHideHomeIndicator;
 FLUTTER_DARWIN_EXPORT
 extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
+typedef NS_ENUM(NSInteger, FlutterKeyboardMode) {
+  FlutterKeyboardModeHidden = 0,
+  FlutterKeyboardModeDocked = 1,
+  FlutterKeyboardModeFloating = 2,
+};
+
 @interface FlutterViewController () <FlutterViewResponder>
 
 @property(class, nonatomic, readonly) BOOL accessibilityIsOnOffSwitchLabelsEnabled;
