@@ -26,7 +26,7 @@ uniform vec2 u_rotation1;
 uniform vec2 u_rotation2;
 uniform vec2 u_rotation3;
 
- out vec4 fragColor;
+out vec4 fragColor;
 
 const float PI = 3.1415926535897932384626;
 const float PI_ROTATE_RIGHT = PI * 0.0078125;
