@@ -869,7 +869,7 @@ void main() {
       .createSync(recursive: true);
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
       .createSync(recursive: true);
-    
+
     await WebBuiltInAssets(globals.fs, globals.cache, true).build(environment);
 
     expect(environment.outputDir.childFile('dart2wasm_runtime.mjs').existsSync(), true);
