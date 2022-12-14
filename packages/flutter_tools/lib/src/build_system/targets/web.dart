@@ -182,7 +182,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 
   @override
   String get name => 'dart2js';
-  
+
   @override
   Source get compilerSnapshot => const Source.artifact(Artifact.dart2jsSnapshot);
 
@@ -334,7 +334,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.wasm'),
-  ];  
+  ];
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
@@ -524,13 +524,13 @@ class WebBuiltInAssets extends Target {
     }
 
     if (isWasm) {
-      final String dartSdkPath = 
+      final String dartSdkPath =
         globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath);
       final File dart2wasmRuntime = fileSystem.directory(dartSdkPath)
         .childDirectory('bin')
         .childFile('dart2wasm_runtime.mjs');
       final String targetPath = fileSystem.path.join(
-        environment.outputDir.path, 
+        environment.outputDir.path,
         'dart2wasm_runtime.mjs');
       dart2wasmRuntime.copySync(targetPath);
 

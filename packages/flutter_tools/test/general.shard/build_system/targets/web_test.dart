@@ -112,7 +112,7 @@ void main() {
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await const WebReleaseBundle(WebRendererMode.autoDetect).build(environment);
+      await const WebReleaseBundle(WebRendererMode.autoDetect, false).build(environment);
 
       final String versionFile = environment.outputDir
           .childFile('version.json')
@@ -130,7 +130,7 @@ void main() {
 <!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await const WebReleaseBundle(WebRendererMode.autoDetect).build(environment);
+    await const WebReleaseBundle(WebRendererMode.autoDetect, false).build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -143,7 +143,7 @@ void main() {
 <!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await const WebReleaseBundle(WebRendererMode.autoDetect).build(environment);
+    await const WebReleaseBundle(WebRendererMode.autoDetect, false).build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -165,7 +165,7 @@ void main() {
       .writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
 
-    await const WebReleaseBundle(WebRendererMode.autoDetect).build(environment);
+    await const WebReleaseBundle(WebRendererMode.autoDetect, false).build(environment);
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'A');
@@ -177,7 +177,7 @@ void main() {
     // Update to arbitrary resource file triggers rebuild.
     webResources.childFile('foo.txt').writeAsStringSync('B');
 
-    await const WebReleaseBundle(WebRendererMode.autoDetect).build(environment);
+    await const WebReleaseBundle(WebRendererMode.autoDetect, false).build(environment);
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'B');
@@ -358,7 +358,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -396,7 +396,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -430,7 +430,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -463,7 +463,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -499,7 +499,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -533,7 +533,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -556,7 +556,7 @@ void main() {
           .writeAsStringSync('file:///a.dart');
       },
     ));
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d'), exists);
     final Depfile depfile = depfileService.parse(environment.buildDir.childFile('dart2js.d'));
@@ -601,7 +601,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -633,7 +633,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -673,7 +673,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
+    await Dart2JSTarget(WebRendererMode.autoDetect).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -709,7 +709,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
+    await Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -745,7 +745,7 @@ void main() {
       ]
     ));
 
-    await const Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
+    await Dart2JSTarget(WebRendererMode.canvaskit).build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
@@ -772,7 +772,7 @@ void main() {
     environment.outputDir.childDirectory('a').childFile('a.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
-    await WebServiceWorker(globals.fs, globals.cache, WebRendererMode.autoDetect).build(environment);
+    await WebServiceWorker(globals.fs, globals.cache, WebRendererMode.autoDetect, false).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
     // Contains file hash.
@@ -791,7 +791,7 @@ void main() {
     environment.outputDir
       .childFile('index.html')
       .createSync(recursive: true);
-    await WebServiceWorker(globals.fs, globals.cache, WebRendererMode.autoDetect).build(environment);
+    await WebServiceWorker(globals.fs, globals.cache, WebRendererMode.autoDetect, false).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
     // Contains file hash for both `/` and index.html.
@@ -809,7 +809,7 @@ void main() {
     environment.outputDir
       .childFile('main.dart.js.map')
       .createSync(recursive: true);
-    await WebServiceWorker(globals.fs, globals.cache, WebRendererMode.autoDetect).build(environment);
+    await WebServiceWorker(globals.fs, globals.cache, WebRendererMode.autoDetect, false).build(environment);
 
     // No caching of source maps.
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
@@ -824,7 +824,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
 
-    await WebBuiltInAssets(globals.fs, globals.cache).build(environment);
+    await WebBuiltInAssets(globals.fs, globals.cache, false).build(environment);
 
     // No caching of source maps.
     expect(environment.outputDir.childFile('flutter.js').readAsStringSync(),

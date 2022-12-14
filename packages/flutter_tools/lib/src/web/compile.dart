@@ -25,7 +25,7 @@ Future<void> buildWeb(
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
-  bool nativeNullAssertions, 
+  bool nativeNullAssertions,
   bool isWasm, {
   String? dart2jsOptimization,
   String? baseHref,
