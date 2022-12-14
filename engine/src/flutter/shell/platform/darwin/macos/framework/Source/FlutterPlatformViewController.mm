@@ -53,6 +53,9 @@
   }
 
   NSView* platform_view = [factory createWithViewIdentifier:viewId arguments:nil];
+  // Flutter compositing requires CALayer-backed platform views.
+  // Force the platform view to be backed by a CALayer.
+  [platform_view setWantsLayer:YES];
   _platformViews[viewId] = platform_view;
   result(nil);
 }

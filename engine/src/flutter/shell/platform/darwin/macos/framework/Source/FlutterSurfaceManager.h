@@ -3,42 +3,100 @@
 // found in the LICENSE file.
 
 #import <Cocoa/Cocoa.h>
-#import <QuartzCore/CAMetalLayer.h>
+#import <QuartzCore/QuartzCore.h>
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterBackingStore.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
 /**
- * Manages render surfaces and corresponding backing stores used by the engine.
+ * Surface with additional properties needed for presenting.
+ */
+@interface FlutterSurfacePresentInfo : NSObject
+
+@property(readwrite, strong, nonatomic, nonnull) FlutterSurface* surface;
+@property(readwrite, nonatomic) CGPoint offset;
+@property(readwrite, nonatomic) size_t zIndex;
+
+@end
+
+@protocol FlutterSurfaceManagerDelegate <NSObject>
+
+/*
+ * Schedules the block on the platform thread and blocks until the block is executed.
+ * Provided `frameSize` is used to unblock the platform thread if it waits for
+ * a certain frame size during resizing.
+ */
+- (void)onPresent:(CGSize)frameSize withBlock:(nonnull dispatch_block_t)block;
+
+@end
+
+/**
+ * FlutterSurfaceManager is responsible for providing and presenting Core Animation render
+ * surfaces and managing sublayers.
  *
- * The backing store when rendering with on Metal is a Metal texture. There are two IOSurfaces
- * created during initialization, FlutterSurfaceManager manages the lifecycle of these.
+ * Owned by `FlutterView`.
  */
 @interface FlutterSurfaceManager : NSObject
 
 /**
  * Initializes and returns a surface manager that renders to a child layer (referred to as the
- * content layer) of the containing layer and applies the transform to the contents of the content
- * layer.
+ * content layer) of the containing layer.
  */
 - (nullable instancetype)initWithDevice:(nonnull id<MTLDevice>)device
                            commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
-                                  layer:(nonnull CALayer*)containingLayer;
+                                  layer:(nonnull CALayer*)containingLayer
+                               delegate:(nonnull id<FlutterSurfaceManagerDelegate>)delegate;
 
 /**
- * Updates the backing store size of the managed IOSurfaces the specified size. If the surfaces are
- * already of this size, this is a no-op.
+ * Returns a back buffer surface of the given size to which Flutter can render content.
+ * A cached surface will be returned if available; otherwise a new one will be created.
+ *
+ * Must be called on raster thread.
  */
-- (void)ensureSurfaceSize:(CGSize)size;
+- (nonnull FlutterSurface*)surfaceForSize:(CGSize)size;
 
 /**
- * Swaps the front and the back buffer.
+ * Sets the provided surfaces as contents of FlutterView. Will create, update and
+ * remove sublayers as needed.
+ *
+ * Must be called on raster thread. This will schedule a commit on the platform thread and block the
+ * raster thread until the commit is done. The `notify` block will be invoked on the platform thread
+ * and can be used to perform additional work, such as mutating platform views. It is guaranteed be
+ * called in the same CATransaction.
  */
-- (void)swapBuffers;
+- (void)present:(nonnull NSArray<FlutterSurfacePresentInfo*>*)surfaces
+         notify:(nullable dispatch_block_t)notify;
+
+@end
 
 /**
- * Returns the backing store for the back buffer.
+ * Cache of back buffers to prevent unnecessary IOSurface allocations.
  */
-- (nonnull FlutterRenderBackingStore*)renderBuffer;
+@interface FlutterBackBufferCache : NSObject
+
+/**
+ * Removes surface with given size from cache (if available) and returns it.
+ */
+- (nullable FlutterSurface*)removeSurfaceForSize:(CGSize)size;
+
+/**
+ * Removes all cached surfaces replacing them with new ones.
+ */
+- (void)replaceSurfaces:(nonnull NSArray<FlutterSurface*>*)surfaces;
+
+/**
+ * Returns number of surfaces currently in cache. Used for tests.
+ */
+- (NSUInteger)count;
+
+@end
+
+/**
+ * Interface to internal properties used for testing.
+ */
+@interface FlutterSurfaceManager (Private)
+
+@property(readonly, nonatomic, nonnull) FlutterBackBufferCache* backBufferCache;
+@property(readonly, nonatomic, nonnull) NSArray<FlutterSurface*>* frontSurfaces;
+@property(readonly, nonatomic, nonnull) NSArray<CALayer*>* layers;
 
 @end

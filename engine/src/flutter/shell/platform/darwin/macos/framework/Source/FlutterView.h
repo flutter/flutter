@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 #import <Cocoa/Cocoa.h>
-#include <stdint.h>
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterThreadSynchronizer.h"
+
+#include <stdint.h>
 
 /**
  * The view ID for APIs that don't support multi-view.
@@ -49,21 +51,10 @@ constexpr uint64_t kFlutterDefaultViewId = 0;
 - (nonnull instancetype)init NS_UNAVAILABLE;
 
 /**
- * Flushes the graphics context and flips the surfaces. Expected to be called on raster thread.
+ * Returns SurfaceManager for this view. SurfaceManager is responsible for
+ * providing and presenting render surfaces.
  */
-- (void)present;
-
-/**
- * Called when there is no Flutter content available to render. This must be passed to resize
- * synchronizer.
- */
-- (void)presentWithoutContent;
-
-/**
- * Ensures that a backing store with requested size exists and returns the descriptor. Expected to
- * be called on raster thread.
- */
-- (nonnull FlutterRenderBackingStore*)backingStoreForSize:(CGSize)size;
+@property(readonly, nonatomic, nonnull) FlutterSurfaceManager* surfaceManager;
 
 /**
  * Must be called when shutting down. Unblocks raster thread and prevents any further
@@ -79,5 +70,15 @@ constexpr uint64_t kFlutterDefaultViewId = 0;
  * with.
  */
 - (void)setBackgroundColor:(nonnull NSColor*)color;
+
+@end
+
+@interface FlutterView (FlutterViewPrivate)
+
+/**
+ * Returns FlutterThreadSynchronizer for this view.
+ * Used for FlutterEngineTest.
+ */
+- (nonnull FlutterThreadSynchronizer*)threadSynchronizer;
 
 @end

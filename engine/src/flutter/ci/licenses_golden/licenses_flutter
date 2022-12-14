@@ -2717,8 +2717,6 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngin
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTexture.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTexture.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterIOSurfaceHolder.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.mm
@@ -2739,10 +2737,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatf
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterRendererTest.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizableBackingStoreProvider.mm
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManagerTest.mm
@@ -2754,6 +2750,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextI
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObjectTest.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterThreadSynchronizer.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterThreadSynchronizer.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController.mm

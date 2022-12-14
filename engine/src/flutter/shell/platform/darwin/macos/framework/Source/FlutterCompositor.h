@@ -10,8 +10,8 @@
 
 #include "flutter/fml/macros.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
-#include "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewProvider.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewProvider.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
@@ -28,8 +28,7 @@ class FlutterCompositor {
   // It must not be null, and is typically FlutterViewEngineProvider.
   explicit FlutterCompositor(
       id<FlutterViewProvider> view_provider,
-      FlutterPlatformViewController* platform_views_controller,
-      id<MTLDevice> mtl_device);
+      FlutterPlatformViewController* platform_views_controller);
 
   ~FlutterCompositor() = default;
 
@@ -48,56 +47,11 @@ class FlutterCompositor {
   bool CreateBackingStore(const FlutterBackingStoreConfig* config,
                           FlutterBackingStore* backing_store_out);
 
-  // Releases the memory for any resources that were allocated for the
-  // specified backing store.
-  bool CollectBackingStore(const FlutterBackingStore* backing_store);
-
   // Presents the FlutterLayers by updating the FlutterView specified by
   // `view_id` using the layer content. Sets frame_started_ to false.
   bool Present(uint64_t view_id,
                const FlutterLayer** layers,
                size_t layers_count);
-
-  // Callback triggered at the end of the Present function. has_flutter_content
-  // is true when Flutter content was rendered, otherwise false.
-  using PresentCallback = std::function<bool(bool has_flutter_content)>;
-
-  // Registers a callback to be triggered at the end of the Present function.
-  // If a callback was previously registered, it will be replaced.
-  void SetPresentCallback(const PresentCallback& present_callback);
-
-  // The status of the frame being composited.
-  // Started: A new frame has begun and we have cleared the old layer tree and
-  //     are now creating backingstore(s) for the embedder to use.
-  // Presenting: the embedder has finished rendering into the provided
-  //     backingstore(s) and we are creating the layer tree for the system
-  //     compositor to present with.
-  // Ended: The frame has been presented and we are no longer processing it.
-  typedef enum { kStarted, kPresenting, kEnded } FrameStatus;
-
- protected:
-  // Returns the view associated with the view ID.
-  //
-  // Returns nil if the ID is invalid.
-  FlutterView* GetView(uint64_t view_id);
-
-  // Gets and sets the FrameStatus for the current frame.
-  void SetFrameStatus(FrameStatus frame_status);
-  FrameStatus GetFrameStatus();
-
-  // Clears the previous CALayers and updates the frame status to frame started.
-  void StartFrame();
-
-  // Calls the present callback and ensures the frame status is updated
-  // to frame ended, returning whether the present was successful or not.
-  bool EndFrame(bool has_flutter_content);
-
-  // Creates a CALayer object which is backed by the supplied IOSurface, and
-  // adds it to the root CALayer for the given view.
-  void InsertCALayerForIOSurface(
-      FlutterView* view,
-      const IOSurfaceRef& io_surface,
-      CATransform3D transform = CATransform3DIdentity);
 
  private:
   // Presents the platform view layer represented by `layer`. `layer_index` is
@@ -107,24 +61,11 @@ class FlutterCompositor {
                            const FlutterLayer* layer,
                            size_t layer_position);
 
-  // A list of the active CALayer objects for the frame that need to be removed.
-  std::list<CALayer*> active_ca_layers_;
-
   // Where the compositor can query FlutterViews. Must not be null.
   id<FlutterViewProvider> const view_provider_;
 
   // The controller used to manage creation and deletion of platform views.
   const FlutterPlatformViewController* platform_view_controller_;
-
-  // The Metal device used to draw graphics.
-  const id<MTLDevice> mtl_device_;
-
-  // Callback set by the embedder to be called when the layer tree has been
-  // correctly set up for this frame.
-  PresentCallback present_callback_;
-
-  // Current frame status.
-  FrameStatus frame_status_ = kEnded;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterCompositor);
 };

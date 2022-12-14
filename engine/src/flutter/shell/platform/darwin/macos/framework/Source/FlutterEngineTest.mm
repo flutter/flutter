@@ -30,6 +30,16 @@
 @property(nonatomic, readonly, nullable) flutter::FlutterCompositor* macOSCompositor;
 @end
 
+@interface TestPlatformViewFactory : NSObject <FlutterPlatformViewFactory>
+@end
+
+@implementation TestPlatformViewFactory
+- (nonnull NSView*)createWithViewIdentifier:(int64_t)viewId arguments:(nullable id)args {
+  return viewId == 42 ? [[NSView alloc] init] : nil;
+}
+
+@end
+
 namespace flutter::testing {
 
 TEST_F(FlutterEngineTest, CanLaunch) {
@@ -447,8 +457,7 @@ TEST_F(FlutterEngineTest, NativeCallbacks) {
   ASSERT_TRUE(latch_called);
 }
 
-// TODO(iskakaushik): Enable after https://github.com/flutter/flutter/issues/96668 is fixed.
-TEST(FlutterEngine, DISABLED_Compositor) {
+TEST(FlutterEngine, Compositor) {
   NSString* fixtures = @(flutter::testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithAssetsPath:fixtures
@@ -462,26 +471,29 @@ TEST(FlutterEngine, DISABLED_Compositor) {
 
   EXPECT_TRUE([engine runWithEntrypoint:@"canCompositePlatformViews"]);
 
-  // Latch to ensure the entire layer tree has been generated and presented.
-  fml::AutoResetWaitableEvent latch;
-  auto compositor = engine.macOSCompositor;
-  compositor->SetPresentCallback([&](bool has_flutter_content) {
-    latch.Signal();
-    return true;
-  });
-  latch.Wait();
+  [engine.platformViewController registerViewFactory:[[TestPlatformViewFactory alloc] init]
+                                              withId:@"factory_id"];
+  [engine.platformViewController
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                         arguments:@{
+                                                           @"id" : @(42),
+                                                           @"viewType" : @"factory_id",
+                                                         }]
+                result:^(id result){
+                }];
+
+  [viewController.flutterView.threadSynchronizer blockUntilFrameAvailable];
 
   CALayer* rootLayer = viewController.flutterView.layer;
 
-  // There are three layers total - the root layer and two sublayers.
-  // This test will need to be updated when PlatformViews are supported, as
-  // there are two PlatformView layers in this test.
+  // There are two layers with Flutter contents and one view
   EXPECT_EQ(rootLayer.sublayers.count, 2u);
+  EXPECT_EQ(viewController.flutterView.subviews.count, 1u);
 
   // TODO(gw280): add support for screenshot tests in this test harness
 
   [engine shutDownEngine];
-}
+}  // namespace flutter::testing
 
 TEST(FlutterEngine, DartEntrypointArguments) {
   NSString* fixtures = @(flutter::testing::GetFixturesPath());
