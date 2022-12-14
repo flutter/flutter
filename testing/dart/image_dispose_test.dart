@@ -73,17 +73,17 @@ void main() {
     final Image handle1 = frame.image.clone();
     final Image handle2 = handle1.clone();
 
-    List<StackTrace> stackTraces = (frame.image.debugGetOpenHandleStackTraces())!;
+    List<StackTrace> stackTraces = frame.image.debugGetOpenHandleStackTraces()!;
     expect(stackTraces.length, 3);
     expect(stackTraces, equals(handle1.debugGetOpenHandleStackTraces()));
 
     handle1.dispose();
-    stackTraces = (frame.image.debugGetOpenHandleStackTraces())!;
+    stackTraces = frame.image.debugGetOpenHandleStackTraces()!;
     expect(stackTraces.length, 2);
     expect(stackTraces, equals(handle2.debugGetOpenHandleStackTraces()));
 
     handle2.dispose();
-    stackTraces = (frame.image.debugGetOpenHandleStackTraces())!;
+    stackTraces = frame.image.debugGetOpenHandleStackTraces()!;
     expect(stackTraces.length, 1);
     expect(stackTraces, equals(frame.image.debugGetOpenHandleStackTraces()));
 
