@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ScrollMetricsNotification
+/// Flutter code sample for [ScrollMetricsNotification].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const ScrollMetricsDemo());
 
 class ScrollMetricsDemo extends StatefulWidget {
-  const ScrollMetricsDemo({Key? key}) : super(key: key);
+  const ScrollMetricsDemo({super.key});
 
   @override
   State<ScrollMetricsDemo> createState() => ScrollMetricsDemoState();
@@ -46,6 +46,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
               height: windowSize,
               width: double.infinity,
               child: const SingleChildScrollView(
+                primary: true,
                 child: FlutterLogo(
                   size: 300.0,
                 ),

@@ -7,6 +7,63 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('SliverReorderableList works well when having gestureSettings', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103404
+    const int itemCount = 5;
+    int onReorderCallCount = 0;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorder(int fromIndex, int toIndex) {
+      onReorderCallCount += 1;
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+    // The list has five elements of height 100
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: itemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorder: handleReorder,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Start gesture on first item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag a little bit to make `ImmediateMultiDragGestureRecognizer` compete with `VerticalDragGestureRecognizer`
+    await drag.moveBy(const Offset(0, 10));
+    await tester.pump();
+    // Drag enough to move down the first item
+    await drag.moveBy(const Offset(0, 40));
+    await tester.pump();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 1);
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('SliverReorderableList.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
@@ -462,6 +519,57 @@ void main() {
 
     // There shouldn't be a layout overflow exception.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('SliverReorderableList - properly animates the drop in a reversed list', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110949
+    final List<int> items = List<int>.generate(8, (int index) => index);
+
+    Future<void> pressDragRelease(Offset start, Offset delta) async {
+      final TestGesture drag = await tester.startGesture(start);
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(delta);
+      await tester.pumpAndSettle();
+      await drag.up();
+      await tester.pump();
+    }
+
+    // The TestList is 800x600 SliverReorderableList with 8 items 800x100 each.
+    // Each item has a text widget with 'item $index' that can be moved by a
+    // press and drag gesture. For this test we are reversing the order so
+    // the first item is at the bottom.
+    await tester.pumpWidget(TestList(items: items, reverse: true));
+
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 500));
+    expect(tester.getTopLeft(find.text('item 2')), const Offset(0, 300));
+
+    // Drag item 0 up and insert it between item 1 and item 2. It should
+    // smoothly animate.
+    await pressDragRelease(tester.getCenter(find.text('item 0')), const Offset(0, -50));
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 450));
+    expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 500));
+    expect(tester.getTopLeft(find.text('item 2')), const Offset(0, 300));
+
+    // After the first several frames we should be moving closer to the final position,
+    // not further away as was the case with the original bug.
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(450));
+    expect(tester.getTopLeft(find.text('item 0')).dy, greaterThan(400));
+
+    // Sample the middle (don't use exact values as it depends on the internal
+    // curve being used).
+    await tester.pump(const Duration(milliseconds: 125));
+    expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(450));
+    expect(tester.getTopLeft(find.text('item 0')).dy, greaterThan(400));
+
+    // Sample the end of the animation.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(450));
+    expect(tester.getTopLeft(find.text('item 0')).dy, greaterThan(400));
+
+    // Wait for it to finish, it should be back to the original position
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 400));
   });
 
   testWidgets('SliverReorderableList - properly animates the drop at starting position in a reversed list', (WidgetTester tester) async {
@@ -948,9 +1056,76 @@ void main() {
       expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
     });
   });
+
+  testWidgets('SliverReorderableList properly disposes items', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/105010
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          drawer: Drawer(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverReorderableList(
+                            itemCount: itemCount,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Material(
+                                key: ValueKey<String>('item-$index'),
+                                child: ReorderableDragStartListener(
+                                  index: index,
+                                  child: ListTile(
+                                    title: Text('item ${items[index]}'),
+                                  ),
+                                ),
+                              );
+                            },
+                            onReorder: (int oldIndex, int newIndex) {},
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Scaffold.of(context).closeDrawer();
+                      },
+                      child: const Text('Close drawer'),
+                    ),
+                  ],
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+
+    final Finder item0 = find.text('item 0');
+    expect(item0, findsOneWidget);
+
+    // Start gesture on first item without drag up event.
+    final TestGesture drag = await tester.startGesture(tester.getCenter(item0));
+    await drag.moveBy(const Offset(0, 200));
+    await tester.pump();
+
+    await tester.tap(find.text('Close drawer'));
+    await tester.pumpAndSettle();
+
+    expect(item0, findsNothing);
+  });
 }
 
-class TestList extends StatefulWidget {
+class TestList extends StatelessWidget {
   const TestList({
     super.key,
     this.textColor,
@@ -970,23 +1145,18 @@ class TestList extends StatefulWidget {
   final void Function(int)? onReorderStart, onReorderEnd;
 
   @override
-  State<TestList> createState() => _TestListState();
-}
-
-class _TestListState extends State<TestList> {
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: DefaultTextStyle(
-          style: TextStyle(color: widget.textColor),
+          style: TextStyle(color: textColor),
           child: IconTheme(
-            data: IconThemeData(color: widget.iconColor),
+            data: IconThemeData(color: iconColor),
             child: StatefulBuilder(
               builder: (BuildContext outerContext, StateSetter setState) {
-                final List<int> items = widget.items;
+                final List<int> items = this.items;
                 return CustomScrollView(
-                  reverse: widget.reverse,
+                  reverse: reverse,
                   slivers: <Widget>[
                     SliverReorderableList(
                       itemBuilder: (BuildContext context, int index) {
@@ -1015,9 +1185,9 @@ class _TestListState extends State<TestList> {
                           items.insert(toIndex, items.removeAt(fromIndex));
                         });
                       },
-                      proxyDecorator: widget.proxyDecorator,
-                      onReorderStart: widget.onReorderStart,
-                      onReorderEnd: widget.onReorderEnd,
+                      proxyDecorator: proxyDecorator,
+                      onReorderStart: onReorderStart,
+                      onReorderEnd: onReorderEnd,
                     ),
                   ],
                 );

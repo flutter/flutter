@@ -10,9 +10,15 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'lookup_boundary.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'table.dart';
+
+// Examples can assume:
+// late BuildContext context;
+// List<Widget> children = <Widget>[];
+// List<Widget> items = <Widget>[];
 
 // Any changes to this file should be reflected in the debugAssertAllWidgetVarsUnset()
 // function below.
@@ -165,36 +171,47 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
   for (final Widget widget in widgets) {
     assert(widget != null);
-    if (widget.key == null)
+    if (widget.key == null) {
       continue;
-    if (!keySet.add(widget.key!))
+    }
+    if (!keySet.add(widget.key!)) {
       return widget.key;
+    }
   }
   return null;
 }
 
 /// Asserts if the given child list contains any duplicate non-null keys.
 ///
-/// To invoke this function, use the following pattern, typically in the
-/// relevant Widget's constructor:
+/// To invoke this function, use the following pattern:
 ///
 /// ```dart
-/// assert(!debugChildrenHaveDuplicateKeys(this, children));
+/// class MyWidget extends StatelessWidget {
+///   MyWidget({ super.key, required this.children }) {
+///     assert(!debugChildrenHaveDuplicateKeys(this, children));
+///   }
+///
+///   final List<Widget> children;
+///
+///   // ...
+/// }
 /// ```
+///
+/// If specified, the `message` overrides the default message.
 ///
 /// For a version of this function that can be used in contexts where
 /// the list of items does not have a particular parent, see
 /// [debugItemsHaveDuplicateKeys].
 ///
-/// Does nothing if asserts are disabled. Always returns true.
-bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
+/// Does nothing if asserts are disabled. Always returns false.
+bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children, { String? message }) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
       throw FlutterError(
-        'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-        '$parent has multiple children with key $nonUniqueKey.',
+        "${message ?? 'Duplicate keys found.\n'
+                      'If multiple keyed widgets exist as children of another widget, they must have unique keys.'}"
+        '\n$parent has multiple children with key $nonUniqueKey.',
       );
     }
     return true;
@@ -213,12 +230,13 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
 /// For a version of this function specifically intended for parents
 /// checking their children lists, see [debugChildrenHaveDuplicateKeys].
 ///
-/// Does nothing if asserts are disabled. Always returns true.
+/// Does nothing if asserts are disabled. Always returns false.
 bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(items);
-    if (nonUniqueKey != null)
+    if (nonUniqueKey != null) {
       throw FlutterError('Duplicate key found: $nonUniqueKey.');
+    }
     return true;
   }());
   return false;
@@ -234,6 +252,10 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// ```dart
 /// assert(debugCheckHasTable(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This method can be expensive (it walks the element tree).
 ///
@@ -264,6 +286,10 @@ bool debugCheckHasTable(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasMediaQuery(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMediaQuery(BuildContext context) {
@@ -316,6 +342,10 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// Each one can be null, in which case it is skipped (this is the default).
 /// If they are non-null, they are included in the order above, interspersed
 /// with the more generic advice regarding [Directionality].
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hint, String? alternative }) {
@@ -389,6 +419,10 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
 /// assert(debugCheckHasWidgetsLocalizations(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasWidgetsLocalizations(BuildContext context) {
   assert(() {
@@ -426,17 +460,26 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
 /// assert(debugCheckHasOverlay(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasOverlay(BuildContext context) {
   assert(() {
-    if (context.widget is! Overlay && context.findAncestorWidgetOfExactType<Overlay>() == null) {
+    if (LookupBoundary.findAncestorWidgetOfExactType<Overlay>(context) == null) {
+      final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Overlay>(context);
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No Overlay widget found.'),
+        ErrorSummary('No Overlay widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+        if (hiddenByBoundary)
+          ErrorDescription(
+              'There is an ancestor Overlay widget, but it is hidden by a LookupBoundary.'
+          ),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require an Overlay '
-          'widget ancestor.\n'
+          'widget ancestor within the closest LookupBoundary.\n'
           'An overlay lets widgets float on top of other widget children.',
         ),
         ErrorHint(

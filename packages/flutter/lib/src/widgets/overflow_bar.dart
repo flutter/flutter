@@ -33,7 +33,7 @@ enum OverflowBarAlignment {
 ///
 /// This widget's width will expand to contain its children and the
 /// specified [spacing] until it overflows. The overflow column will
-/// consume all of the available width.  The [overflowAlignment]
+/// consume all of the available width. The [overflowAlignment]
 /// defines how each child will be aligned within the overflow column
 /// and the [overflowSpacing] defines the gap between each child.
 ///
@@ -276,8 +276,9 @@ class _RenderOverflowBar extends RenderBox
   double _spacing;
   set spacing (double value) {
     assert(value != null);
-    if (_spacing == value)
+    if (_spacing == value) {
       return;
+    }
     _spacing = value;
     markNeedsLayout();
   }
@@ -285,8 +286,9 @@ class _RenderOverflowBar extends RenderBox
   MainAxisAlignment? get alignment => _alignment;
   MainAxisAlignment? _alignment;
   set alignment (MainAxisAlignment? value) {
-    if (_alignment == value)
+    if (_alignment == value) {
       return;
+    }
     _alignment = value;
     markNeedsLayout();
   }
@@ -295,8 +297,9 @@ class _RenderOverflowBar extends RenderBox
   double _overflowSpacing;
   set overflowSpacing (double value) {
     assert(value != null);
-    if (_overflowSpacing == value)
+    if (_overflowSpacing == value) {
       return;
+    }
     _overflowSpacing = value;
     markNeedsLayout();
   }
@@ -305,8 +308,9 @@ class _RenderOverflowBar extends RenderBox
   OverflowBarAlignment _overflowAlignment;
   set overflowAlignment (OverflowBarAlignment value) {
     assert(value != null);
-    if (_overflowAlignment == value)
+    if (_overflowAlignment == value) {
       return;
+    }
     _overflowAlignment = value;
     markNeedsLayout();
   }
@@ -315,8 +319,9 @@ class _RenderOverflowBar extends RenderBox
   VerticalDirection _overflowDirection;
   set overflowDirection (VerticalDirection value) {
     assert(value != null);
-    if (_overflowDirection == value)
+    if (_overflowDirection == value) {
       return;
+    }
     _overflowDirection = value;
     markNeedsLayout();
   }
@@ -324,8 +329,9 @@ class _RenderOverflowBar extends RenderBox
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsLayout();
   }
@@ -334,8 +340,9 @@ class _RenderOverflowBar extends RenderBox
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
     assert(value != null);
-    if (value == _clipBehavior)
+    if (value == _clipBehavior) {
       return;
+    }
     _clipBehavior = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -343,15 +350,17 @@ class _RenderOverflowBar extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _OverflowBarParentData)
+    if (child.parentData is! _OverflowBarParentData) {
       child.parentData = _OverflowBarParentData();
+    }
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    if (child == null)
+    if (child == null) {
       return 0;
+    }
     double barWidth = 0.0;
     while (child != null) {
       barWidth += child.getMinIntrinsicWidth(double.infinity);
@@ -380,8 +389,9 @@ class _RenderOverflowBar extends RenderBox
   @override
   double computeMaxIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    if (child == null)
+    if (child == null) {
       return 0;
+    }
     double barWidth = 0.0;
     while (child != null) {
       barWidth += child.getMinIntrinsicWidth(double.infinity);
@@ -410,8 +420,9 @@ class _RenderOverflowBar extends RenderBox
   @override
   double computeMinIntrinsicWidth(double height) {
     RenderBox? child = firstChild;
-    if (child == null)
+    if (child == null) {
       return 0;
+    }
     double width = 0.0;
     while (child != null) {
       width += child.getMinIntrinsicWidth(double.infinity);
@@ -423,8 +434,9 @@ class _RenderOverflowBar extends RenderBox
   @override
   double computeMaxIntrinsicWidth(double height) {
     RenderBox? child = firstChild;
-    if (child == null)
+    if (child == null) {
       return 0;
+    }
     double width = 0.0;
     while (child != null) {
       width += child.getMaxIntrinsicWidth(double.infinity);

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for showCupertinoDialog
+/// Flutter code sample for [showCupertinoDialog].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const CupertinoDialogApp());
 
 class CupertinoDialogApp extends StatelessWidget {
-  const CupertinoDialogApp({Key? key}) : super(key: key);
+  const CupertinoDialogApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class CupertinoDialogApp extends StatelessWidget {
 }
 
 class CupertinoDialogExample extends StatelessWidget {
-  const CupertinoDialogExample({Key? key}) : super(key: key);
+  const CupertinoDialogExample({super.key});
 
   @override
   Widget build(BuildContext context) {

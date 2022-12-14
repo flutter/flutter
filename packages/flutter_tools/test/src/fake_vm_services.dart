@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
 
 /// A fake implementation of a vm_service that mocks the JSON-RPC request
 /// and response structure.
@@ -93,7 +93,7 @@ abstract class VmServiceExpectation {
 class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     required this.method,
-    this.args = const <String, Object>{},
+    this.args = const <String, Object?>{},
     this.jsonResponse,
     this.errorCode,
     this.close = false,
@@ -107,7 +107,7 @@ class FakeVmServiceRequest implements VmServiceExpectation {
   /// If non-null, the error code for a [vm_service.RPCError] in place of a
   /// standard response.
   final int? errorCode;
-  final Map<String, Object>? args;
+  final Map<String, Object?>? args;
   final Map<String, Object?>? jsonResponse;
 
   @override

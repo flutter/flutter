@@ -2,11 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show FlutterError;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
+}
+
 void main() {
-  test('Border.uniform constructor', () {
+  test('Border.fromBorderSide constructor', () {
     const BorderSide side = BorderSide();
     const Border border = Border.fromBorderSide(side);
     expect(border.left, same(side));
@@ -190,6 +200,14 @@ void main() {
       false,
     );
     expect(
+      const Border(
+        left: BorderSide(),
+        top: BorderSide(strokeAlign: BorderSide.strokeAlignCenter),
+        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+      ).isUniform,
+      false,
+    );
+    expect(
       const Border().isUniform,
       true,
     );
@@ -237,5 +255,49 @@ void main() {
     expect(Border.lerp(visualWithTop10, null, 2.0), const Border());
     expect(Border.lerp(null, visualWithTop10, 2.0), const Border(top: BorderSide(width: 20.0)));
     expect(Border.lerp(at0, at100, 2.0), at200);
+  });
+
+  test('Border - throws correct exception with strokeAlign', () {
+    late FlutterError error;
+    try {
+      final TestCanvas canvas = TestCanvas();
+      // Border.all supports all StrokeAlign values.
+      // Border() supports [BorderSide.strokeAlignInside] only.
+      const Border(
+        left: BorderSide(strokeAlign: BorderSide.strokeAlignCenter),
+        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+      ).paint(canvas, const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0));
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 1);
+    expect(
+      error.diagnostics[0].toStringDeep(),
+      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on uniform borders.\n',
+    );
+  });
+
+  test('Border.dimension', () {
+    final Border insideBorder = Border.all(width: 10);
+    expect(insideBorder.dimensions, const EdgeInsets.all(10));
+
+    final Border centerBorder = Border.all(width: 10, strokeAlign: BorderSide.strokeAlignCenter);
+    expect(centerBorder.dimensions, const EdgeInsets.all(5));
+
+    final Border outsideBorder = Border.all(width: 10, strokeAlign: BorderSide.strokeAlignOutside);
+    expect(outsideBorder.dimensions, EdgeInsets.zero);
+
+    const BorderSide insideSide = BorderSide(width: 10);
+    const BorderDirectional insideBorderDirectional = BorderDirectional(top: insideSide, bottom: insideSide, start: insideSide, end: insideSide);
+    expect(insideBorderDirectional.dimensions, const EdgeInsetsDirectional.all(10));
+
+    const BorderSide centerSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter);
+    const BorderDirectional centerBorderDirectional = BorderDirectional(top: centerSide, bottom: centerSide, start: centerSide, end: centerSide);
+    expect(centerBorderDirectional.dimensions, const EdgeInsetsDirectional.all(5));
+
+    const BorderSide outsideSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside);
+    const BorderDirectional outsideBorderDirectional = BorderDirectional(top: outsideSide, bottom: outsideSide, start: outsideSide, end: outsideSide);
+    expect(outsideBorderDirectional.dimensions, EdgeInsetsDirectional.zero);
   });
 }

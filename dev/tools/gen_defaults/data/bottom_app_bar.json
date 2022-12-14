@@ -1,0 +1,9 @@
+{
+  "version": "v0_143",
+
+  "md.comp.bottom-app-bar.container.color": "surface",
+  "md.comp.bottom-app-bar.container.elevation": "md.sys.elevation.level2",
+  "md.comp.bottom-app-bar.container.height": 80.0,
+  "md.comp.bottom-app-bar.container.shape": "md.sys.shape.corner.none",
+  "md.comp.bottom-app-bar.container.surface-tint-layer.color": "surfaceTint"
+}

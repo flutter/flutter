@@ -9,8 +9,7 @@ description: The Flutter application's synthetic package.
 ''';
 
 const String fileTemplate = '''
-@(header)
-import 'dart:async';
+@(header)import 'dart:async';
 
 @(requiresFoundationImport)
 import 'package:flutter/widgets.dart';
@@ -19,14 +18,14 @@ import 'package:intl/intl.dart' as intl;
 
 @(messageClassImports)
 
-/// Callers can lookup localized strings with an instance of @(class) returned
-/// by `@(class).of(context)`.
+/// Callers can lookup localized strings with an instance of @(class)
+/// returned by `@(class).of(context)`.
 ///
 /// Applications need to include `@(class).delegate()` in their app's
-/// localizationDelegates list, and the locales they support in the app's
-/// supportedLocales list. For example:
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
 ///
-/// ```
+/// ```dart
 /// import '@(importFile)';
 ///
 /// return MaterialApp(
@@ -41,14 +40,14 @@ import 'package:intl/intl.dart' as intl;
 /// Please make sure to update your pubspec.yaml to include the following
 /// packages:
 ///
-/// ```
+/// ```yaml
 /// dependencies:
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
 ///   intl: any # Use the pinned version from flutter_localizations
 ///
-///   # rest of dependencies
+///   # Rest of dependencies
 /// ```
 ///
 /// ## iOS Applications
@@ -138,74 +137,28 @@ const String getterTemplate = '''
 const String methodTemplate = '''
   @override
   String @(name)(@(parameters)) {
-    return @(message);
-  }''';
-
-const String formatMethodTemplate = '''
-  @override
-  String @(name)(@(parameters)) {
 @(dateFormatting)
 @(numberFormatting)
-    return @(message);
+@(tempVars)    return @(message);
   }''';
 
-const String pluralMethodTemplate = '''
-  @override
-  String @(name)(@(parameters)) {
-@(dateFormatting)
-@(numberFormatting)
-    return intl.Intl.pluralLogic(
+const String pluralVariableTemplate = '''
+    String @(varName) = intl.Intl.pluralLogic(
       @(count),
       locale: localeName,
-@(pluralLogicArgs),
-    );
-  }''';
+@(pluralLogicArgs)
+    );''';
 
-const String pluralMethodTemplateInString = '''
-  @override
-  String @(name)(@(parameters)) {
-@(dateFormatting)
-@(numberFormatting)
-    final String @(variable) = intl.Intl.pluralLogic(
-      @(count),
-      locale: localeName,
-@(pluralLogicArgs),
-    );
-
-    return @(string);
-  }''';
-
-const String selectMethodTemplate = '''
-  @override
-  String @(name)(@(parameters)) {
-    return intl.Intl.select(
+const String selectVariableTemplate = '''
+    String @(varName) = intl.Intl.selectLogic(
       @(choice),
       {
-        @(cases)
+@(selectCases)
       },
-      desc: '@(description)'
-    );
-  }''';
-
-const String selectMethodTemplateInString = '''
-  @override
-  String @(name)(@(parameters)) {
-    final String @(variable) = intl.Intl.select(
-      @(choice),
-      {
-        @(cases)
-      },
-      desc: '@(description)'
-    );
-
-    return @(string);
-  }''';
+    );''';
 
 const String classFileTemplate = '''
-@(header)
-
-@(requiresIntlImport)
-import '@(fileName)';
+@(header)@(requiresIntlImport)import '@(fileName)';
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
@@ -226,14 +179,14 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String @(name)(@(parameters));

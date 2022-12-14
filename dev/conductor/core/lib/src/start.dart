@@ -31,6 +31,7 @@ const String kEngineMirrorOption = 'engine-mirror';
 const String kReleaseOption = 'release-channel';
 const String kStateOption = 'state-file';
 const String kVersionOverrideOption = 'version-override';
+const String kGithubUsernameOption = 'github-username';
 
 /// Command to print the status of the current Flutter release.
 class StartCommand extends Command<void> {
@@ -54,7 +55,8 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kFrameworkUpstreamOption,
       defaultsTo: FrameworkRepository.defaultUpstream,
-      help: 'Configurable Framework repo upstream remote. Primarily for testing.',
+      help:
+          'Configurable Framework repo upstream remote. Primarily for testing.',
       hide: true,
     );
     argParser.addOption(
@@ -62,14 +64,6 @@ class StartCommand extends Command<void> {
       defaultsTo: EngineRepository.defaultUpstream,
       help: 'Configurable Engine repo upstream remote. Primarily for testing.',
       hide: true,
-    );
-    argParser.addOption(
-      kFrameworkMirrorOption,
-      help: 'Framework repo mirror remote.',
-    );
-    argParser.addOption(
-      kEngineMirrorOption,
-      help: 'Engine repo mirror remote.',
     );
     argParser.addOption(
       kStateOption,
@@ -98,7 +92,11 @@ class StartCommand extends Command<void> {
     argParser.addOption(
       kVersionOverrideOption,
       help: 'Explicitly set the desired version. This should only be used if '
-        'the version computed by the tool is not correct.',
+          'the version computed by the tool is not correct.',
+    );
+    argParser.addOption(
+      kGithubUsernameOption,
+      help: 'Github username',
     );
   }
 
@@ -130,21 +128,19 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
-    final String frameworkMirror = getValueFromEnvOrArgs(
-      kFrameworkMirrorOption,
+    final String githubUsername = getValueFromEnvOrArgs(
+      kGithubUsernameOption,
       argumentResults,
       platform.environment,
     )!;
+    final String frameworkMirror =
+        'git@github.com:$githubUsername/flutter.git';
     final String engineUpstream = getValueFromEnvOrArgs(
       kEngineUpstreamOption,
       argumentResults,
       platform.environment,
     )!;
-    final String engineMirror = getValueFromEnvOrArgs(
-      kEngineMirrorOption,
-      argumentResults,
-      platform.environment,
-    )!;
+    final String engineMirror = 'git@github.com:$githubUsername/engine.git';
     final String candidateBranch = getValueFromEnvOrArgs(
       kCandidateOption,
       argumentResults,
@@ -177,7 +173,8 @@ class StartCommand extends Command<void> {
       platform.environment,
     );
     final File stateFile = checkouts.fileSystem.file(
-      getValueFromEnvOrArgs(kStateOption, argumentResults, platform.environment),
+      getValueFromEnvOrArgs(
+          kStateOption, argumentResults, platform.environment),
     );
     final String? versionOverrideString = getValueFromEnvOrArgs(
       kVersionOverrideOption,
@@ -206,6 +203,7 @@ class StartCommand extends Command<void> {
       stateFile: stateFile,
       force: force,
       versionOverride: versionOverride,
+      githubUsername: githubUsername,
     );
     return context.run();
   }
@@ -227,34 +225,36 @@ class StartContext extends Context {
     required this.conductorVersion,
     required this.processManager,
     required this.releaseChannel,
+    required this.githubUsername,
     required super.checkouts,
     required super.stateFile,
     this.force = false,
     this.versionOverride,
-  }) : git = Git(processManager),
-  engine = EngineRepository(
-    checkouts,
-    initialRef: 'upstream/$candidateBranch',
-    upstreamRemote: Remote(
-      name: RemoteName.upstream,
-      url: engineUpstream,
-    ),
-    mirrorRemote: Remote(
-      name: RemoteName.mirror,
-      url: engineMirror,
-    ),
-  ), framework = FrameworkRepository(
-    checkouts,
-    initialRef: 'upstream/$candidateBranch',
-    upstreamRemote: Remote(
-      name: RemoteName.upstream,
-      url: frameworkUpstream,
-    ),
-    mirrorRemote: Remote(
-      name: RemoteName.mirror,
-      url: frameworkMirror,
-    ),
-  );
+  })  : git = Git(processManager),
+        engine = EngineRepository(
+          checkouts,
+          initialRef: 'upstream/$candidateBranch',
+          upstreamRemote: Remote(
+            name: RemoteName.upstream,
+            url: engineUpstream,
+          ),
+          mirrorRemote: Remote(
+            name: RemoteName.mirror,
+            url: engineMirror,
+          ),
+        ),
+        framework = FrameworkRepository(
+          checkouts,
+          initialRef: 'upstream/$candidateBranch',
+          upstreamRemote: Remote(
+            name: RemoteName.upstream,
+            url: frameworkUpstream,
+          ),
+          mirrorRemote: Remote(
+            name: RemoteName.mirror,
+            url: frameworkMirror,
+          ),
+        );
 
   final String candidateBranch;
   final String? dartRevision;
@@ -269,6 +269,7 @@ class StartContext extends Context {
   final ProcessManager processManager;
   final String releaseChannel;
   final Version? versionOverride;
+  final String githubUsername;
 
   /// If validations should be overridden.
   final bool force;
@@ -298,7 +299,8 @@ class StartContext extends Context {
 
   Future<void> run() async {
     if (stateFile.existsSync()) {
-      throw ConductorException('Error! A persistent state file already found at ${stateFile.path}.\n\n'
+      throw ConductorException(
+          'Error! A persistent state file already found at ${stateFile.path}.\n\n'
           'Run `conductor clean` to cancel a previous release.');
     }
     if (!releaseCandidateBranchRegex.hasMatch(candidateBranch)) {
@@ -329,10 +331,12 @@ class StartContext extends Context {
       cherrypicks: engineCherrypickRevisions,
       upstreamRef: EngineRepository.defaultBranch,
       releaseRef: candidateBranch,
-    )).map((String revision) => pb.Cherrypick(
-      trunkRevision: revision,
-      state: pb.CherrypickState.PENDING,
-    )).toList();
+    ))
+        .map((String revision) => pb.Cherrypick(
+              trunkRevision: revision,
+              state: pb.CherrypickState.PENDING,
+            ))
+        .toList();
 
     for (final pb.Cherrypick cherrypick in engineCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -366,10 +370,12 @@ class StartContext extends Context {
       cherrypicks: frameworkCherrypickRevisions,
       upstreamRef: FrameworkRepository.defaultBranch,
       releaseRef: candidateBranch,
-    )).map((String revision) => pb.Cherrypick(
-      trunkRevision: revision,
-      state: pb.CherrypickState.PENDING,
-    )).toList();
+    ))
+        .map((String revision) => pb.Cherrypick(
+              trunkRevision: revision,
+              state: pb.CherrypickState.PENDING,
+            ))
+        .toList();
 
     for (final pb.Cherrypick cherrypick in frameworkCherrypicks) {
       final String revision = cherrypick.trunkRevision;
@@ -399,7 +405,8 @@ class StartContext extends Context {
     );
     final bool atBranchPoint = branchPoint == frameworkHead;
 
-    final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);
+    final ReleaseType releaseType =
+        computeReleaseType(lastVersion, atBranchPoint);
     state.releaseType = releaseType;
 
     try {
@@ -451,10 +458,10 @@ class StartContext extends Context {
     switch (releaseType) {
       case ReleaseType.STABLE_INITIAL:
         nextVersion = Version(
-            x: lastVersion.x,
-            y: lastVersion.y,
-            z: 0,
-            type: VersionType.stable,
+          x: lastVersion.x,
+          y: lastVersion.y,
+          z: 0,
+          type: VersionType.stable,
         );
         break;
       case ReleaseType.STABLE_HOTFIX:
@@ -501,7 +508,8 @@ class StartContext extends Context {
       throw ConductorException('Aborting command.');
     }
 
-    stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
+    stdio.printStatus(
+        'Applying the tag $requestedVersion at the branch point $branchPoint');
 
     await framework.tag(
       branchPoint,
@@ -549,10 +557,13 @@ class StartContext extends Context {
     final List<String> upstreamRevlist = (await repository.revList(<String>[
       '--ancestry-path',
       '$branchPoint..$upstreamRef',
-    ])).reversed.toList();
+    ]))
+        .reversed
+        .toList();
 
     stdio.printStatus('upstreamRevList:\n${upstreamRevlist.join('\n')}\n');
-    stdio.printStatus('validatedCherrypicks:\n${validatedCherrypicks.join('\n')}\n');
+    stdio.printStatus(
+        'validatedCherrypicks:\n${validatedCherrypicks.join('\n')}\n');
     for (final String upstreamRevision in upstreamRevlist) {
       if (validatedCherrypicks.contains(upstreamRevision)) {
         validatedCherrypicks.remove(upstreamRevision);
@@ -569,7 +580,10 @@ class StartContext extends Context {
       'The following ${repository.name} cherrypicks were not found in the '
       'upstream $upstreamRef branch:',
     );
-    for (final String cp in <String>[...validatedCherrypicks, ...unknownCherrypicks]) {
+    for (final String cp in <String>[
+      ...validatedCherrypicks,
+      ...unknownCherrypicks
+    ]) {
       stdio.printError('\t$cp');
     }
     throw ConductorException(

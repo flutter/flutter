@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -21,6 +19,7 @@ import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
+import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
@@ -64,6 +63,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
+    this.verbose = false,
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
@@ -95,7 +95,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         help: 'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
       )
       ..addFlag('start-paused',
-        defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.\n'
               'You must specify a single test file to run, explicitly.\n'
@@ -103,26 +102,27 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'console once the test has started.',
       )
       ..addFlag('run-skipped',
-        defaultsTo: false,
         help: 'Run skipped tests instead of skipping them.',
       )
       ..addFlag('disable-service-auth-codes',
-        defaultsTo: false,
         negatable: false,
         hide: !verboseHelp,
         help: '(deprecated) Allow connections to the VM service without using authentication codes. '
               '(Not recommended! This can open your device to remote code execution attacks!)'
       )
       ..addFlag('coverage',
-        defaultsTo: false,
         negatable: false,
         help: 'Whether to collect coverage information.',
       )
       ..addFlag('merge-coverage',
-        defaultsTo: false,
         negatable: false,
         help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
               'Implies collecting coverage data. (Requires lcov.)',
+      )
+      ..addFlag('branch-coverage',
+        negatable: false,
+        help: 'Whether to collect branch coverage information. '
+              'Implies collecting coverage data.',
       )
       ..addFlag('ipv6',
         negatable: false,
@@ -153,7 +153,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       )
       ..addFlag('test-assets',
         defaultsTo: true,
-        negatable: true,
         help: 'Whether to build the assets bundle for testing. '
               'This takes additional time before running the tests. '
               'Consider using "--no-test-assets" if assets are not required.',
@@ -191,7 +190,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'them separately.'
       )
       ..addFlag('enable-vmservice',
-        defaultsTo: false,
         hide: !verboseHelp,
         help: 'Enables the VM service without "--start-paused". This flag is '
               'intended for use with tests that will use "dart:developer" to '
@@ -201,12 +199,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       )
       ..addOption('reporter',
         abbr: 'r',
-        defaultsTo: 'compact',
-        help: 'Set how to print test results.',
-        allowed: <String>['compact', 'expanded', 'json'],
+        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
+        allowed: <String>['compact', 'expanded', 'github', 'json'],
         allowedHelp: <String, String>{
-          'compact':  'A single line that updates dynamically.',
+          'compact':  'A single line that updates dynamically (The default reporter).',
           'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'github':   'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json':     'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
         },
       )
@@ -215,7 +213,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'in seconds (e.g. "60s"), '
               'as a multiplier of the default timeout (e.g. "2x"), '
               'or as the string "none" to disable the timeout entirely.',
-        defaultsTo: '30s',
       );
     addDdsOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
@@ -226,6 +223,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   /// Interface for running the tester process.
   final FlutterTestRunner testRunner;
+
+  final bool verbose;
 
   @visibleForTesting
   bool get isIntegrationTest => _isIntegrationTest;
@@ -255,8 +254,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) {
-    _testFiles = argResults.rest.map<String>(globals.fs.path.absolute).toList();
+  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
+    _testFiles = argResults!.rest.map<String>(globals.fs.path.absolute).toList();
     if (_testFiles.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like "hit_test.dart" don't get run.
@@ -302,12 +301,17 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'directory (or one of its subdirectories).');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final bool buildTestAssets = boolArg('test-assets');
+    final bool buildTestAssets = boolArgDeprecated('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
-    final String tags = stringArgDeprecated('tags');
-    final String excludeTags = stringArgDeprecated('exclude-tags');
+    final String? tags = stringArgDeprecated('tags');
+    final String? excludeTags = stringArgDeprecated('exclude-tags');
     final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
+
+    TestTimeRecorder? testTimeRecorder;
+    if (verbose) {
+      testTimeRecorder = TestTimeRecorder(globals.logger);
+    }
 
     if (buildInfo.packageConfig['test_api'] == null) {
       throwToolExit(
@@ -320,11 +324,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
+    String? testAssetDirectory;
     if (buildTestAssets) {
       await _buildTestAsset();
+      testAssetDirectory = globals.fs.path.
+        join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
 
-    final bool startPaused = boolArg('start-paused');
+    final bool startPaused = boolArgDeprecated('start-paused');
     if (startPaused && _testFiles.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
@@ -332,14 +339,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    int jobs = int.tryParse(stringArgDeprecated('concurrency'));
+    int? jobs = int.tryParse(stringArgDeprecated('concurrency')!);
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
     }
     if (_isIntegrationTest) {
-      if (argResults.wasParsed('concurrency')) {
+      if (argResults!.wasParsed('concurrency')) {
         globals.printStatus(
           '-j/--concurrency was parsed but will be ignored, this option is not '
           'supported when running Integration Tests.',
@@ -350,13 +357,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       jobs = 1;
     }
 
-    final int shardIndex = int.tryParse(stringArgDeprecated('shard-index') ?? '');
+    final int? shardIndex = int.tryParse(stringArgDeprecated('shard-index') ?? '');
     if (shardIndex != null && (shardIndex < 0 || !shardIndex.isFinite)) {
       throwToolExit(
           'Could not parse --shard-index=$shardIndex argument. It must be an integer greater than -1.');
     }
 
-    final int totalShards = int.tryParse(stringArgDeprecated('total-shards') ?? '');
+    final int? totalShards = int.tryParse(stringArgDeprecated('total-shards') ?? '');
     if (totalShards != null && (totalShards <= 0 || !totalShards.isFinite)) {
       throwToolExit(
           'Could not parse --total-shards=$totalShards argument. It must be an integer greater than zero.');
@@ -371,18 +378,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'If you set --shard-index you need to also set --total-shards.');
     }
 
-    final bool machine = boolArg('machine');
-    CoverageCollector collector;
-    if (boolArg('coverage') || boolArg('merge-coverage')) {
+    final bool machine = boolArgDeprecated('machine');
+    CoverageCollector? collector;
+    if (boolArgDeprecated('coverage') || boolArgDeprecated('merge-coverage') ||
+        boolArgDeprecated('branch-coverage')) {
       final String projectName = flutterProject.manifest.appName;
       collector = CoverageCollector(
         verbose: !machine,
-        libraryPredicate: (String libraryName) => libraryName.contains(projectName),
-        packagesPath: buildInfo.packagesPath
+        libraryNames: <String>{projectName},
+        packagesPath: buildInfo.packagesPath,
+        resolver: await CoverageCollector.getResolver(buildInfo.packagesPath),
+        testTimeRecorder: testTimeRecorder,
+        branchCoverage: boolArgDeprecated('branch-coverage'),
       );
     }
 
-    TestWatcher watcher;
+    TestWatcher? watcher;
     if (machine) {
       watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
@@ -392,14 +403,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
-      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      disableServiceAuthCodes: boolArgDeprecated('disable-service-auth-codes'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
-      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      nullAssertions: boolArgDeprecated(FlutterOptions.kNullAssertions),
     );
 
-    Device integrationTestDevice;
+    Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
 
@@ -430,6 +441,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
+    final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.TestRunner);
     final int result = await testRunner.runTests(
       testWrapper,
       _testFiles,
@@ -439,33 +451,40 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       tags: tags,
       excludeTags: excludeTags,
       watcher: watcher,
-      enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
-      ipv6: boolArg('ipv6'),
+      enableObservatory: collector != null || startPaused || boolArgDeprecated('enable-vmservice'),
+      ipv6: boolArgDeprecated('ipv6'),
       machine: machine,
-      updateGoldens: boolArg('update-goldens'),
+      updateGoldens: boolArgDeprecated('update-goldens'),
       concurrency: jobs,
-      buildTestAssets: buildTestAssets,
+      testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
       web: stringArgDeprecated('platform') == 'chrome',
       randomSeed: stringArgDeprecated('test-randomize-ordering-seed'),
       reporter: stringArgDeprecated('reporter'),
       timeout: stringArgDeprecated('timeout'),
-      runSkipped: boolArg('run-skipped'),
+      runSkipped: boolArgDeprecated('run-skipped'),
       shardIndex: shardIndex,
       totalShards: totalShards,
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: stringArgDeprecated(FlutterOptions.kDeviceUser),
+      testTimeRecorder: testTimeRecorder,
     );
+    testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
     if (collector != null) {
-      final bool collectionResult = collector.collectCoverageData(
+      final Stopwatch? collectTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageDataCollect);
+      final bool collectionResult = await collector.collectCoverageData(
         stringArgDeprecated('coverage-path'),
-        mergeCoverageData: boolArg('merge-coverage'),
+        mergeCoverageData: boolArgDeprecated('merge-coverage'),
       );
+      testTimeRecorder?.stop(TestTimePhases.CoverageDataCollect, collectTimeRecorderStopwatch!);
       if (!collectionResult) {
+        testTimeRecorder?.print();
         throwToolExit(null);
       }
     }
+
+    testTimeRecorder?.print();
 
     if (result != 0) {
       throwToolExit(null);
@@ -480,8 +499,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needRebuild(assetBundle.entries)) {
-      await writeBundle(globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
-          assetBundle.entries);
+      await writeBundle(
+        globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
+        assetBundle.entries,
+        assetBundle.entryKinds,
+        targetPlatform: TargetPlatform.tester,
+      );
     }
   }
 

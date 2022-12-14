@@ -25,8 +25,9 @@ class _SaltedKey<S, V> extends LocalKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _SaltedKey<S, V>
         && other.salt == salt
         && other.value == value;
@@ -206,14 +207,14 @@ class ExpansionPanelList extends StatefulWidget {
   /// is pressed. The arguments passed to the callback are the index of the
   /// pressed panel and whether the panel is currently expanded or not.
   ///
-  /// If ExpansionPanelList.radio is used, the callback may be called a
+  /// If [ExpansionPanelList.radio] is used, the callback may be called a
   /// second time if a different panel was previously open. The arguments
   /// passed to the second callback are the index of the panel that will close
   /// and false, marking that it will be closed.
   ///
-  /// For ExpansionPanelList, the callback needs to setState when it's notified
+  /// For [ExpansionPanelList], the callback needs to setState when it's notified
   /// about the closing/opening panel. On the other hand, the callback for
-  /// ExpansionPanelList.radio is simply meant to inform the parent widget of
+  /// [ExpansionPanelList.radio] is intended to inform the parent widget of
   /// changes, as the radio panels' open/close states are managed internally.
   ///
   /// This callback is useful in order to keep track of the expanded/collapsed
@@ -239,7 +240,7 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// Defines color for the divider when [ExpansionPanel.isExpanded] is false.
   ///
-  /// If `dividerColor` is null, then [DividerThemeData.color] is used. If that
+  /// If [dividerColor] is null, then [DividerThemeData.color] is used. If that
   /// is null, then [ThemeData.dividerColor] is used.
   final Color? dividerColor;
 
@@ -312,8 +313,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         final ExpansionPanelRadio child = widget.children[childIndex] as ExpansionPanelRadio;
         if (widget.expansionCallback != null &&
             childIndex != index &&
-            child.value == _currentOpenPanel?.value)
+            child.value == _currentOpenPanel?.value) {
           widget.expansionCallback!(childIndex, false);
+        }
       }
 
       setState(() {
@@ -324,8 +326,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
     for (final ExpansionPanelRadio panel in panels) {
-      if (panel.value == value)
+      if (panel.value == value) {
         return panel;
+      }
     }
     return null;
   }
@@ -340,8 +343,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
 
     for (int index = 0; index < widget.children.length; index += 1) {
-      if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
+      if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
         items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
+      }
 
       final ExpansionPanel child = widget.children[index];
       final Widget headerWidget = child.headerBuilder(
@@ -412,8 +416,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         ),
       );
 
-      if (_isChildExpanded(index) && index != widget.children.length - 1)
+      if (_isChildExpanded(index) && index != widget.children.length - 1) {
         items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
+      }
     }
 
     return MergeableMaterial(

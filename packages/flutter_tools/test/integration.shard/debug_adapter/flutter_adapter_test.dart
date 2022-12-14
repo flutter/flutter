@@ -8,6 +8,7 @@ import 'package:dds/dap.dart';
 import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -15,6 +16,7 @@ import '../test_data/basic_project.dart';
 import '../test_data/compile_error_project.dart';
 import '../test_utils.dart';
 import 'test_client.dart';
+import 'test_server.dart';
 import 'test_support.dart';
 
 void main() {
@@ -62,6 +64,7 @@ void main() {
         'Launching $relativeMainPath on Flutter test device in debug mode...',
         startsWith('Connecting to VM Service at'),
         'topLevelFunction',
+        'Application finished.',
         '',
         startsWith('Exited'),
       ]);
@@ -92,10 +95,39 @@ void main() {
       expectLines(output, <Object>[
         'Launching $relativeMainPath on Flutter test device in debug mode...',
         'topLevelFunction',
+        'Application finished.',
         '',
         startsWith('Exited'),
       ]);
+
+      // If we're running with an out-of-process debug adapter, ensure that its
+      // own process shuts down after we terminated.
+      final DapTestServer server = dap.server;
+      if (server is OutOfProcessDapTestServer) {
+        await server.exitCode;
+      }
     });
+
+    testWithoutContext('outputs useful message on invalid DAP protocol messages', () async {
+      final OutOfProcessDapTestServer server = dap.server as OutOfProcessDapTestServer;
+      final CompileErrorProject project = CompileErrorProject();
+      await project.setUpIn(tempDir);
+
+      final StringBuffer stderrOutput = StringBuffer();
+      dap.server.onStderrOutput = stderrOutput.write;
+
+      // Write invalid headers and await the error.
+      dap.server.sink.add(utf8.encode('foo\r\nbar\r\n\r\n'));
+      await server.exitCode;
+
+      // Verify the user-friendly message was included in the output.
+      final String error = stderrOutput.toString();
+      expect(error, contains('Input could not be parsed as a Debug Adapter Protocol message'));
+      expect(error, contains('The "flutter debug-adapter" command is intended for use by tooling'));
+      // This test only runs with out-of-process DAP as it's testing _actual_
+      // stderr output and that the debug-adapter process terminates, which is
+      // not possible when running the DAP Server in-process.
+    }, skip: useInProcessDap); // [intended] See above.
 
     testWithoutContext('correctly outputs launch errors and terminates', () async {
       final CompileErrorProject project = CompileErrorProject();
@@ -186,6 +218,43 @@ void main() {
       await dap.client.terminate();
     });
 
+    testWithoutContext('sends progress notifications during hot reload', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a reload.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotReload();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot reloading…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
+    });
+
     testWithoutContext('can hot restart', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
@@ -221,6 +290,43 @@ void main() {
       );
 
       await dap.client.terminate();
+    });
+
+    testWithoutContext('sends progress notifications during hot restart', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.initialize(supportsProgressReporting: true),
+        dap.client.launch(
+              cwd: project.dir.path,
+              noDebug: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+      ], eagerError: true);
+
+      // Capture progress events during a restart.
+      final Future<List<Event>> progressEventsFuture = dap.client.progressEvents().toList();
+      await dap.client.hotRestart();
+      await dap.client.terminate();
+
+      // Verify the progress events.
+      final List<Event> progressEvents = await progressEventsFuture;
+      expect(progressEvents, hasLength(2));
+
+      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      expect(eventKinds, <String>['progressStart', 'progressEnd']);
+
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
+      final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
+      expect(start.progressId, isNotNull);
+      expect(start.title, 'Flutter');
+      expect(start.message, 'Hot restarting…');
+      expect(end.progressId, start.progressId);
+      expect(end.message, isNull);
     });
 
     testWithoutContext('can hot restart when exceptions occur on outgoing isolates', () async {
@@ -299,6 +405,24 @@ void main() {
       // Ensure the event occurred, and its value was as expected.
       final Map<String, Object?> stateChangeEvent = await stateChangeEventFuture;
       expect(stateChangeEvent['value'], 'true'); // extension state change values are always strings
+
+      await dap.client.terminate();
+    });
+
+    testWithoutContext('provides appStarted events to the client', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to send a 'flutter.appStarted' event.
+      await Future.wait(<Future<void>>[
+        dap.client.event('flutter.appStarted'),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
+        ),
+      ], eagerError: true);
 
       await dap.client.terminate();
     });

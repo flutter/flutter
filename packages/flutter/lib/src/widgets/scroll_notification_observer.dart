@@ -11,6 +11,10 @@ import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'scroll_position.dart';
 
+// Examples can assume:
+// void _listener(ScrollNotification notification) { }
+// late BuildContext context;
+
 /// A [ScrollNotification] listener for [ScrollNotificationObserver].
 ///
 /// [ScrollNotificationObserver] is similar to
@@ -39,25 +43,34 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// Notifies its listeners when a descendant scrolls.
 ///
 /// To add a listener to a [ScrollNotificationObserver] ancestor:
+///
 /// ```dart
-/// void listener(ScrollNotification notification) {
-///   // Do something, maybe setState()
-/// }
-/// ScrollNotificationObserver.of(context).addListener(listener)
+/// ScrollNotificationObserver.of(context).addListener(_listener);
 /// ```
 ///
 /// To remove the listener from a [ScrollNotificationObserver] ancestor:
+///
 /// ```dart
-/// ScrollNotificationObserver.of(context).removeListener(listener);
+/// ScrollNotificationObserver.of(context).removeListener(_listener);
 /// ```
 ///
 /// Stateful widgets that share an ancestor [ScrollNotificationObserver] typically
 /// add a listener in [State.didChangeDependencies] (removing the old one
 /// if necessary) and remove the listener in their [State.dispose] method.
 ///
-/// This widget is similar to [NotificationListener]. It supports
-/// a listener list instead of just a single listener and its listeners
-/// run unconditionally, they do not require a gating boolean return value.
+/// Any function with the [ScrollNotificationCallback] signature can act as a
+/// listener:
+///
+/// ```dart
+/// // (e.g. in a stateful widget)
+/// void _listener(ScrollNotification notification) {
+///   // Do something, maybe setState()
+/// }
+/// ```
+///
+/// This widget is similar to [NotificationListener]. It supports a listener
+/// list instead of just a single listener and its listeners run
+/// unconditionally, they do not require a gating boolean return value.
 class ScrollNotificationObserver extends StatefulWidget {
   /// Create a [ScrollNotificationObserver].
   ///
@@ -72,9 +85,50 @@ class ScrollNotificationObserver extends StatefulWidget {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ScrollNotificationObserver] widget, then null is returned.
-  static ScrollNotificationObserverState? of(BuildContext context) {
+  /// If there is no enclosing [ScrollNotificationObserver] widget, then null is
+  /// returned.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [ScrollNotificationObserver] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [ScrollNotificationObserver.of], which is similar to this method, but
+  ///   asserts if no [ScrollNotificationObserver] ancestor is found.
+  static ScrollNotificationObserverState? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
+  }
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If no ancestor is found, this method will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [ScrollNotificationObserver] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [ScrollNotificationObserver.maybeOf], which is similar to this method,
+  ///   but returns null if no [ScrollNotificationObserver] ancestor is found.
+  static ScrollNotificationObserverState of(BuildContext context) {
+    final ScrollNotificationObserverState? observerState = maybeOf(context);
+    assert(() {
+      if (observerState == null) {
+        throw FlutterError(
+          'ScrollNotificationObserver.of() was called with a context that does not contain a '
+          'ScrollNotificationObserver widget.\n'
+          'No ScrollNotificationObserver widget ancestor could be found starting from the '
+          'context that was passed to ScrollNotificationObserver.of(). This can happen '
+          'because you are using a widget that looks for a ScrollNotificationObserver '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return observerState!;
   }
 
   @override
@@ -124,14 +178,16 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   void _notifyListeners(ScrollNotification notification) {
     assert(_debugAssertNotDisposed());
-    if (_listeners!.isEmpty)
+    if (_listeners!.isEmpty) {
       return;
+    }
 
     final List<_ListenerEntry> localListeners = List<_ListenerEntry>.of(_listeners!);
     for (final _ListenerEntry entry in localListeners) {
       try {
-        if (entry.list != null)
+        if (entry.list != null) {
           entry.listener(notification);
+        }
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,

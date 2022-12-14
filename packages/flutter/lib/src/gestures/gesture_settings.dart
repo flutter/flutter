@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
+
+export 'dart:ui' show FlutterView;
 
 /// The device specific gesture settings scaled into logical pixels.
 ///
@@ -41,8 +44,9 @@ class DeviceGestureSettings {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DeviceGestureSettings
       && other.touchSlop == touchSlop;
   }

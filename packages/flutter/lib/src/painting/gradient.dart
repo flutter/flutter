@@ -4,7 +4,6 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -26,10 +25,12 @@ Color _sample(List<Color> colors, List<double> stops, double t) {
   assert(stops != null);
   assert(stops.isNotEmpty);
   assert(t != null);
-  if (t <= stops.first)
+  if (t <= stops.first) {
     return colors.first;
-  if (t >= stops.last)
+  }
+  if (t >= stops.last) {
     return colors.last;
+  }
   final int index = stops.lastIndexWhere((double s) => s <= t);
   assert(index != -1);
   return Color.lerp(
@@ -120,10 +121,12 @@ class GradientRotation extends GradientTransform {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is GradientRotation
         && other.radians == radians;
   }
@@ -202,8 +205,9 @@ abstract class Gradient {
   final GradientTransform? transform;
 
   List<double> _impliedStops() {
-    if (stops != null)
+    if (stops != null) {
       return stops!;
+    }
     assert(colors.length >= 2, 'colors list must have at least two colors');
     final double separation = 1.0 / (colors.length - 1);
     return List<double>.generate(
@@ -260,8 +264,9 @@ abstract class Gradient {
   /// Instead of calling this directly, use [Gradient.lerp].
   @protected
   Gradient? lerpFrom(Gradient? a, double t) {
-    if (a == null)
+    if (a == null) {
       return scale(t);
+    }
     return null;
   }
 
@@ -291,8 +296,9 @@ abstract class Gradient {
   /// Instead of calling this directly, use [Gradient.lerp].
   @protected
   Gradient? lerpTo(Gradient? b, double t) {
-    if (b == null)
+    if (b == null) {
       return scale(1.0 - t);
+    }
     return null;
   }
 
@@ -307,14 +313,18 @@ abstract class Gradient {
   static Gradient? lerp(Gradient? a, Gradient? b, double t) {
     assert(t != null);
     Gradient? result;
-    if (b != null)
+    if (b != null) {
       result = b.lerpFrom(a, t); // if a is null, this must return non-null
-    if (result == null && a != null)
+    }
+    if (result == null && a != null) {
       result = a.lerpTo(b, t); // if b is null, this must return non-null
-    if (result != null)
+    }
+    if (result != null) {
       return result;
-    if (a == null && b == null)
+    }
+    if (a == null && b == null) {
       return null;
+    }
     assert(a != null && b != null);
     return t < 0.5 ? a!.scale(1.0 - (t * 2.0)) : b!.scale((t - 0.5) * 2.0);
   }
@@ -325,6 +335,8 @@ abstract class Gradient {
 }
 
 /// A 2D linear gradient.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=gYNTcgZVcWw}
 ///
 /// This class is used by [BoxDecoration] to represent linear gradients. This
 /// abstracts out the arguments to the [ui.Gradient.linear] constructor from
@@ -447,15 +459,17 @@ class LinearGradient extends Gradient {
 
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
-    if (a == null || (a is LinearGradient))
+    if (a == null || (a is LinearGradient)) {
       return LinearGradient.lerp(a as LinearGradient?, this, t);
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
-    if (b == null || (b is LinearGradient))
+    if (b == null || (b is LinearGradient)) {
       return LinearGradient.lerp(this, b as LinearGradient?, t);
+    }
     return super.lerpTo(b, t);
   }
 
@@ -480,12 +494,15 @@ class LinearGradient extends Gradient {
   /// an [AnimationController].
   static LinearGradient? lerp(LinearGradient? a, LinearGradient? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(
         a.colors,
         a._impliedStops(),
@@ -504,10 +521,12 @@ class LinearGradient extends Gradient {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is LinearGradient
         && other.begin == begin
         && other.end == end
@@ -562,7 +581,7 @@ class LinearGradient extends Gradient {
 /// which will make the rendered gradient appear to be pointed or directed in the
 /// direction of the [focal] point. This is only important if [focal] and [center]
 /// are not equal or [focalRadius] > 0.0 (as this case is visually identical to a
-/// normal radial gradient).  One important case to avoid is having [focal] and
+/// normal radial gradient). One important case to avoid is having [focal] and
 /// [center] both resolve to [Offset.zero] when [focalRadius] > 0.0. In such a case,
 /// a valid shader cannot be created by the framework.
 ///
@@ -670,7 +689,7 @@ class RadialGradient extends Gradient {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radialWithFocal.png)
   final TileMode tileMode;
 
-  /// The focal point of the gradient.  If specified, the gradient will appear
+  /// The focal point of the gradient. If specified, the gradient will appear
   /// to be focused along the vector from [center] to focal.
   ///
   /// See [center] for a description of how the coordinates are mapped.
@@ -723,15 +742,17 @@ class RadialGradient extends Gradient {
 
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
-    if (a == null || (a is RadialGradient))
+    if (a == null || (a is RadialGradient)) {
       return RadialGradient.lerp(a as RadialGradient?, this, t);
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
-    if (b == null || (b is RadialGradient))
+    if (b == null || (b is RadialGradient)) {
       return RadialGradient.lerp(this, b as RadialGradient?, t);
+    }
     return super.lerpTo(b, t);
   }
 
@@ -756,12 +777,15 @@ class RadialGradient extends Gradient {
   /// an [AnimationController].
   static RadialGradient? lerp(RadialGradient? a, RadialGradient? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(
         a.colors,
         a._impliedStops(),
@@ -782,10 +806,12 @@ class RadialGradient extends Gradient {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RadialGradient
         && other.center == center
         && other.radius == radius
@@ -857,8 +883,6 @@ class RadialGradient extends Gradient {
 ///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
-///       startAngle: 0.0,
-///       endAngle: math.pi * 2,
 ///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green
@@ -883,8 +907,6 @@ class RadialGradient extends Gradient {
 ///   decoration: const BoxDecoration(
 ///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
-///       startAngle: 0.0,
-///       endAngle: math.pi * 2,
 ///       colors: <Color>[
 ///         Color(0xFF4285F4), // blue
 ///         Color(0xFF34A853), // green
@@ -992,15 +1014,17 @@ class SweepGradient extends Gradient {
 
   @override
   Gradient? lerpFrom(Gradient? a, double t) {
-    if (a == null || (a is SweepGradient))
+    if (a == null || (a is SweepGradient)) {
       return SweepGradient.lerp(a as SweepGradient?, this, t);
+    }
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient? lerpTo(Gradient? b, double t) {
-    if (b == null || (b is SweepGradient))
+    if (b == null || (b is SweepGradient)) {
       return SweepGradient.lerp(this, b as SweepGradient?, t);
+    }
     return super.lerpTo(b, t);
   }
 
@@ -1024,12 +1048,15 @@ class SweepGradient extends Gradient {
   /// an [AnimationController].
   static SweepGradient? lerp(SweepGradient? a, SweepGradient? b, double t) {
     assert(t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
-    if (a == null)
+    }
+    if (a == null) {
       return b!.scale(t);
-    if (b == null)
+    }
+    if (b == null) {
       return a.scale(1.0 - t);
+    }
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(
         a.colors,
         a._impliedStops(),
@@ -1049,10 +1076,12 @@ class SweepGradient extends Gradient {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SweepGradient
         && other.center == center
         && other.startAngle == startAngle

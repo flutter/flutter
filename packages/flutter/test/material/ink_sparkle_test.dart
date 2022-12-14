@@ -30,7 +30,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
   },
-    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+    skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
   testWidgets('InkSparkle default splashFactory paints with drawRect when bounded', (WidgetTester tester) async {
@@ -48,16 +48,23 @@ void main() {
     final Finder buttonFinder = find.text('Sparkle!');
     await tester.tap(buttonFinder);
     await tester.pump();
-    await tester.pumpAndSettle();
-
-    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
     await tester.pump(const Duration(milliseconds: 200));
+
+    final MaterialInkController material = Material.of(tester.element(buttonFinder));
     expect(material, paintsExactlyCountTimes(#drawRect, 1));
+
+    // ignore: avoid_dynamic_calls
+    expect((material as dynamic).debugInkFeatures, hasLength(1));
+
+    await tester.pumpAndSettle();
+    // ink feature is disposed.
+    // ignore: avoid_dynamic_calls
+    expect((material as dynamic).debugInkFeatures, isEmpty);
   },
-    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+    skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
-    testWidgets('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
+  testWidgets('InkSparkle default splashFactory paints with drawPaint when unbounded', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -72,13 +79,12 @@ void main() {
     final Finder buttonFinder = find.text('Sparkle!');
     await tester.tap(buttonFinder);
     await tester.pump();
-    await tester.pumpAndSettle();
-
-    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
     await tester.pump(const Duration(milliseconds: 200));
+
+    final MaterialInkController material = Material.of(tester.element(buttonFinder));
     expect(material, paintsExactlyCountTimes(#drawPaint, 1));
   },
-    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+    skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
   /////////////
@@ -88,19 +94,19 @@ void main() {
   testWidgets('InkSparkle renders with sparkles when top left of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'top_left', 0.2);
   },
-    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+    skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
   testWidgets('InkSparkle renders with sparkles when center of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'center', 0.5);
   },
-    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+    skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 
   testWidgets('InkSparkle renders with sparkles when bottom right of button is tapped', (WidgetTester tester) async {
     await _runTest(tester, 'bottom_right', 0.8);
   },
-    skip: kIsWeb, // [intended] SPIR-V shaders are not yet supported for web.
+    skip: kIsWeb, // [intended] shaders are not yet supported for web.
   );
 }
 
@@ -126,11 +132,10 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
 
   final Finder buttonFinder = find.byKey(buttonKey);
   final Finder repaintFinder = find.byKey(repaintKey);
-
-  await _warmUpShader(tester, buttonFinder);
-
   final Offset topLeft = tester.getTopLeft(buttonFinder);
   final Offset bottomRight = tester.getBottomRight(buttonFinder);
+
+  await _warmUpShader(tester, buttonFinder);
 
   final Offset target = topLeft + (bottomRight - topLeft) * distanceFromTopLeft;
   await tester.tapAt(target);

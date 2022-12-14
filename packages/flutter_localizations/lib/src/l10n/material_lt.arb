@@ -135,5 +135,6 @@
   "keyboardKeySpace": "Tarpas",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Meniu juostos meniu",
+  "currentDateLabel": "Date of today"
 }

@@ -130,5 +130,6 @@
   "keyboardKeySpace": "Leertaste",
   "keyboardKeyMetaMacOs": "Befehl",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Menü in der Menüleiste",
+  "currentDateLabel": "Date of today"
 }

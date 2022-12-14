@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ClipRRect
+/// Flutter code sample for [ClipRRect].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const ClipRRectApp());
 
 class ClipRRectApp extends StatelessWidget {
-  const ClipRRectApp({Key? key}) : super(key: key);
+  const ClipRRectApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class ClipRRectApp extends StatelessWidget {
 }
 
 class ClipRRectExample extends StatelessWidget {
-  const ClipRRectExample({Key? key}) : super(key: key);
+  const ClipRRectExample({super.key});
 
   @override
   Widget build(BuildContext context) {

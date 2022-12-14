@@ -553,6 +553,24 @@ void main() {
     parent.buildScene(SceneBuilder());
   }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
 
+  test('ContainerLayer.toImageSync can render interior layer', () {
+    final OffsetLayer parent = OffsetLayer();
+    final OffsetLayer child = OffsetLayer();
+    final OffsetLayer grandChild = OffsetLayer();
+    child.append(grandChild);
+    parent.append(child);
+
+    // This renders the layers and generates engine layers.
+    parent.buildScene(SceneBuilder());
+
+    // Causes grandChild to pass its engine layer as `oldLayer`
+    grandChild.toImageSync(const Rect.fromLTRB(0, 0, 10, 10));
+
+    // Ensure we can render the same scene again after rendering an interior
+    // layer.
+    parent.buildScene(SceneBuilder());
+  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/49857
+
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
     expect(layer.debugHandleCount, 0);
@@ -715,6 +733,299 @@ void main() {
     layer.removeAllChildren();
     layer.addToScene(builder);
     expect(layer.engineLayer, null);
+  });
+
+  test('Layers describe clip bounds', () {
+    ContainerLayer layer = ContainerLayer();
+    expect(layer.describeClipBounds(), null);
+
+    const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
+    final RRect rbounds = RRect.fromRectXY(bounds, 2, 2);
+    layer = ClipRectLayer(clipRect: bounds);
+    expect(layer.describeClipBounds(), bounds);
+
+    layer = ClipRRectLayer(clipRRect: rbounds);
+    expect(layer.describeClipBounds(), rbounds.outerRect);
+
+    layer = ClipPathLayer(clipPath: Path()..addRect(bounds));
+    expect(layer.describeClipBounds(), bounds);
+  });
+
+  test('Subtree has composition callbacks', () {
+    final ContainerLayer root = ContainerLayer();
+    expect(root.subtreeHasCompositionCallbacks, false);
+
+    final List<VoidCallback> cancellationCallbacks = <VoidCallback>[];
+
+    cancellationCallbacks.add(root.addCompositionCallback((_) {}));
+    expect(root.subtreeHasCompositionCallbacks, true);
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, false);
+    cancellationCallbacks.add(b1.addCompositionCallback((_) {}));
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, true);
+
+    cancellationCallbacks.removeAt(0)();
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, true);
+
+    cancellationCallbacks.removeAt(0)();
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+    expect(b1.subtreeHasCompositionCallbacks, false);
+  });
+
+  test('Subtree has composition callbacks - removeChild', () {
+    final ContainerLayer root = ContainerLayer();
+    expect(root.subtreeHasCompositionCallbacks, false);
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    expect(b1.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+
+    b1.addCompositionCallback((_) { });
+
+    expect(b1.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+
+    b1.remove();
+
+    expect(b1.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a2.subtreeHasCompositionCallbacks, false);
+  });
+
+  test('No callback if removed', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    // Add and immediately remove the callback.
+    b1.addCompositionCallback((Layer layer) {
+      fail('Should not have called back');
+    })();
+
+    root.buildScene(SceneBuilder()).dispose();
+  });
+
+  test('Observe layer tree composition - not retained', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(SceneBuilder()).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - retained', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    // Actually build the retained layer so that the engine sees it as real and
+    // reusable.
+    SceneBuilder builder = SceneBuilder();
+    b1.engineLayer = builder.pushOffset(0, 0);
+    builder.build().dispose();
+    builder = SceneBuilder();
+
+    // Force the layer to appear clean and have an engine layer for retained
+    // rendering.
+    expect(b1.engineLayer, isNotNull);
+    b1.debugMarkClean();
+    expect(b1.debugSubtreeNeedsAddToScene, false);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(builder).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - asserts on mutation', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      expect(() => layer.remove(), throwsAssertionError);
+      expect(() => layer.dispose(), throwsAssertionError);
+      expect(() => layer.markNeedsAddToScene(), throwsAssertionError);
+      expect(() => layer.debugMarkClean(), throwsAssertionError);
+      expect(() => layer.updateSubtreeNeedsAddToScene(), throwsAssertionError);
+      expect(() => layer.dropChild(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.adoptChild(ContainerLayer()), throwsAssertionError);
+      expect(() => (layer as ContainerLayer).append(ContainerLayer()), throwsAssertionError);
+      expect(() => layer.engineLayer = null, throwsAssertionError);
+      compositedB1 = true;
+    });
+
+    expect(compositedB1, false);
+
+    root.buildScene(SceneBuilder()).dispose();
+
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - detach triggers callback', () {
+    final ContainerLayer root = ContainerLayer();
+
+    final ContainerLayer a1 = ContainerLayer();
+    final ContainerLayer a2 = ContainerLayer();
+    final ContainerLayer b1 = ContainerLayer();
+    root.append(a1);
+    root.append(a2);
+    a1.append(b1);
+
+    bool compositedB1 = false;
+
+    b1.addCompositionCallback((Layer layer) {
+      expect(layer, b1);
+      compositedB1 = true;
+    });
+
+    root.attach(Object());
+    expect(compositedB1, false);
+    root.detach();
+    expect(compositedB1, true);
+  });
+
+  test('Observe layer tree composition - observer count correctly maintained', () {
+    final ContainerLayer root = ContainerLayer();
+    final ContainerLayer a1 = ContainerLayer();
+    root.append(a1);
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+
+    final VoidCallback remover1 = a1.addCompositionCallback((_) { });
+    final VoidCallback remover2 = a1.addCompositionCallback((_) { });
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+
+    remover1();
+
+    expect(root.subtreeHasCompositionCallbacks, true);
+    expect(a1.subtreeHasCompositionCallbacks, true);
+
+    remover2();
+
+    expect(root.subtreeHasCompositionCallbacks, false);
+    expect(a1.subtreeHasCompositionCallbacks, false);
+  });
+
+  test('Double removing a observe callback throws', () {
+    final ContainerLayer root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) { });
+    callback();
+
+    expect(() => callback(), throwsAssertionError);
+  });
+
+  test('Removing an observe callback on a disposed layer does not throw', () {
+    final ContainerLayer root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) { });
+    root.dispose();
+    expect(() => callback(), returnsNormally);
+  });
+
+  test('Layer types that support rasterization', () {
+    // Supported.
+    final OffsetLayer offsetLayer = OffsetLayer();
+    final OpacityLayer opacityLayer = OpacityLayer();
+    final ClipRectLayer clipRectLayer = ClipRectLayer();
+    final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
+    final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
+    final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
+    final PhysicalModelLayer physicalModelLayer = PhysicalModelLayer();
+    final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
+    final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
+    final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
+    expect(offsetLayer.supportsRasterization(), true);
+    expect(opacityLayer.supportsRasterization(), true);
+    expect(clipRectLayer.supportsRasterization(), true);
+    expect(clipRRectLayer.supportsRasterization(), true);
+    expect(imageFilterLayer.supportsRasterization(), true);
+    expect(backdropFilterLayer.supportsRasterization(), true);
+    expect(physicalModelLayer.supportsRasterization(), true);
+    expect(colorFilterLayer.supportsRasterization(), true);
+    expect(shaderMaskLayer.supportsRasterization(), true);
+    expect(textureLayer.supportsRasterization(), true);
+
+    // Unsupported.
+    final PlatformViewLayer platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
+
+    expect(platformViewLayer.supportsRasterization(), false);
   });
 }
 

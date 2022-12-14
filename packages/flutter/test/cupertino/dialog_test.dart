@@ -125,6 +125,23 @@ void main() {
     expect(widget.style.color!.withAlpha(255), CupertinoColors.systemRed.color);
   });
 
+  testWidgets('Dialog default action style', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoTheme(
+      data: const CupertinoThemeData(
+        primaryColor: CupertinoColors.systemGreen,
+      ),
+      child: boilerplate(const CupertinoDialogAction(
+        child: Text('Ok'),
+      )),
+      ),
+    );
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color!.withAlpha(255), CupertinoColors.systemGreen.color);
+  });
+
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -571,7 +588,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerWidth = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -616,7 +633,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -824,7 +841,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.of(context).devicePixelRatio;
+          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -927,7 +944,7 @@ void main() {
     );
 
     // We must explicitly cause an "up" gesture to avoid a crash.
-    // todo(mattcarroll) remove this call, https://github.com/flutter/flutter/issues/19540
+    // TODO(mattcarroll): remove this call, https://github.com/flutter/flutter/issues/19540
     await gesture.up();
   });
 
@@ -1233,7 +1250,7 @@ void main() {
 
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      const CupertinoApp(
         restorationScopeId: 'app',
         home: _RestorableDialogTestWidget(),
       ),
@@ -1480,7 +1497,6 @@ void main() {
 
     final Offset dialogAction = tester.getCenter(find.text('OK'));
     await gesture.moveTo(dialogAction);
-    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -1547,6 +1563,8 @@ Widget createAppWithCenteredButton(Widget child) {
 
 
 class _RestorableDialogTestWidget extends StatelessWidget {
+  const _RestorableDialogTestWidget();
+
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,

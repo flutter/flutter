@@ -10,6 +10,9 @@ import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 
@@ -24,9 +27,14 @@ const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
 ///
 /// ```dart
 /// ScaffoldMessenger.of(context).showMaterialBanner(
-///   MaterialBanner( ... )
+///   const MaterialBanner(
+///     content: Text('Message...'),
+///     actions: <Widget>[
+///       // ...
+///     ],
+///   )
 /// ).closed.then((MaterialBannerClosedReason reason) {
-///    ...
+///    // ...
 /// });
 /// ```
 enum MaterialBannerClosedReason {
@@ -94,12 +102,15 @@ class MaterialBanner extends StatefulWidget {
     this.elevation,
     this.leading,
     this.backgroundColor,
+    this.surfaceTintColor,
+    this.shadowColor,
+    this.dividerColor,
     this.padding,
     this.leadingPadding,
     this.forceActionsBelow = false,
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
-    this.onVisible
+    this.onVisible,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(actions != null),
@@ -113,7 +124,7 @@ class MaterialBanner extends StatefulWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [TextTheme.bodyText2] of [ThemeData.textTheme] is used.
+  /// also `null`, [TextTheme.bodyMedium] of [ThemeData.textTheme] is used.
   final TextStyle? contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
@@ -144,6 +155,29 @@ class MaterialBanner extends StatefulWidget {
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
   /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
   final Color? backgroundColor;
+
+  /// The color used as an overlay on [backgroundColor] to indicate elevation.
+  ///
+  /// If null, [MaterialBannerThemeData.surfaceTintColor] is used. If that
+  /// is also null, the default value is [ColorScheme.surfaceTint].
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
+  final Color? surfaceTintColor;
+
+  /// The color of the shadow below the [MaterialBanner].
+  ///
+  /// If this property is null, then [MaterialBannerThemeData.shadowColor] of
+  /// [ThemeData.bannerTheme] is used. If that is also null, the default value
+  /// is null.
+  final Color? shadowColor;
+
+  /// The color of the divider.
+  ///
+  /// If this property is null, then [MaterialBannerThemeData.dividerColor] of
+  /// [ThemeData.bannerTheme] is used. If that is also null, the default value
+  /// is [ColorScheme.surfaceVariant].
+  final Color? dividerColor;
 
   /// The amount of space by which to inset the [content].
   ///
@@ -259,12 +293,13 @@ class _MaterialBannerState extends State<MaterialBanner> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
     assert(widget.actions.isNotEmpty);
 
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
+    final MaterialBannerThemeData defaults = theme.useMaterial3 ? _BannerDefaultsM3(context) : _BannerDefaultsM2(context);
 
     final bool isSingleRow = widget.actions.length == 1 && !widget.forceActionsBelow;
     final EdgeInsetsGeometry padding = widget.padding ?? bannerTheme.padding ?? (isSingleRow
@@ -288,16 +323,26 @@ class _MaterialBannerState extends State<MaterialBanner> {
     final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
     final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
-        ?? theme.colorScheme.surface;
+        ?? defaults.backgroundColor!;
+    final Color? surfaceTintColor = widget.surfaceTintColor
+        ?? bannerTheme.surfaceTintColor
+        ?? defaults.surfaceTintColor;
+    final Color? shadowColor = widget.shadowColor
+        ?? bannerTheme.shadowColor;
+    final Color? dividerColor = widget.dividerColor
+        ?? bannerTheme.dividerColor
+        ?? defaults.dividerColor;
     final TextStyle? textStyle = widget.contentTextStyle
         ?? bannerTheme.contentTextStyle
-        ?? theme.textTheme.bodyText2;
+        ?? defaults.contentTextStyle;
 
     Widget materialBanner = Container(
       margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
       child: Material(
         elevation: elevation,
         color: backgroundColor,
+        surfaceTintColor: surfaceTintColor,
+        shadowColor: shadowColor,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -323,17 +368,17 @@ class _MaterialBannerState extends State<MaterialBanner> {
             ),
             if (!isSingleRow)
               buttonBar,
-
             if (elevation == 0)
-              const Divider(height: 0),
+              Divider(height: 0, color: dividerColor),
           ],
         ),
       ),
     );
 
     // This provides a static banner for backwards compatibility.
-    if (widget.animation == null)
+    if (widget.animation == null) {
       return materialBanner;
+    }
 
     materialBanner = SafeArea(
       child: materialBanner,
@@ -354,7 +399,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       onDismiss: () {
         ScaffoldMessenger.of(context).removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
       },
-      child: mediaQueryData.accessibleNavigation
+      child: accessibleNavigation
           ? materialBanner
           : SlideTransition(
         position: slideOutAnimation,
@@ -363,7 +408,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final Widget materialBannerTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       materialBannerTransition = materialBanner;
     } else {
       materialBannerTransition = AnimatedBuilder(
@@ -385,3 +430,48 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
   }
 }
+
+class _BannerDefaultsM2 extends MaterialBannerThemeData {
+  _BannerDefaultsM2(this.context)
+    : _theme = Theme.of(context),
+      super(elevation: 0.0);
+
+  final BuildContext context;
+  final ThemeData _theme;
+
+  @override
+  Color? get backgroundColor => _theme.colorScheme.surface;
+
+  @override
+  TextStyle? get contentTextStyle => _theme.textTheme.bodyMedium;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Banner
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_143
+
+class _BannerDefaultsM3 extends MaterialBannerThemeData {
+  const _BannerDefaultsM3(this.context)
+    : super(elevation: 1.0);
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get dividerColor => Theme.of(context).colorScheme.outlineVariant;
+
+  @override
+  TextStyle? get contentTextStyle => Theme.of(context).textTheme.bodyMedium;
+}
+
+// END GENERATED TOKEN PROPERTIES - Banner

@@ -44,19 +44,14 @@ class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
     required AndroidSdk? androidSdk,
     required FeatureFlags featureFlags,
-    required OperatingSystemUtils operatingSystemUtils,
   }) : _androidSdk = androidSdk,
-       _featureFlags = featureFlags,
-       _operatingSystemUtils = operatingSystemUtils;
+       _featureFlags = featureFlags;
 
   final AndroidSdk? _androidSdk;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled
-    // Android Studio is not currently supported on Linux Arm64 Hosts.
-    && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
   bool get canListDevices => appliesToHostPlatform && _androidSdk != null
@@ -271,7 +266,7 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
-    required AndroidSdk androidSdk,
+    required AndroidSdk? androidSdk,
     required Platform platform,
     required OperatingSystemUtils operatingSystemUtils,
     required FileSystem fileSystem,
@@ -291,7 +286,7 @@ class AndroidLicenseValidator extends DoctorValidator {
        _userMessages = userMessages,
        super('Android license subvalidator');
 
-  final AndroidSdk _androidSdk;
+  final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
   final Stdio _stdio;
   final OperatingSystemUtils _operatingSystemUtils;
@@ -309,13 +304,13 @@ class AndroidLicenseValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
-    if (_androidSdk == null || _androidSdk.latestVersion == null ||
-        _androidSdk.validateSdkWellFormed().isNotEmpty ||
+    if (_androidSdk == null || _androidSdk?.latestVersion == null ||
+        _androidSdk!.validateSdkWellFormed().isNotEmpty ||
         ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    final String sdkVersionText = _userMessages.androidStatusInfo(_androidSdk.latestVersion!.buildToolsVersionName);
+    final String sdkVersionText = _userMessages.androidStatusInfo(_androidSdk!.latestVersion!.buildToolsVersionName);
 
     // Check for licenses.
     switch (await licensesAccepted) {
@@ -392,8 +387,8 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     try {
       final Process process = await _processManager.start(
-        <String>[_androidSdk.sdkManagerPath!, '--licenses'],
-        environment: _androidSdk.sdkManagerEnv,
+        <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
+        environment: _androidSdk!.sdkManagerEnv,
       );
       process.stdin.write('n\n');
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -402,12 +397,12 @@ class AndroidLicenseValidator extends DoctorValidator {
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
         .listen(handleLine)
-        .asFuture<void>(null);
+        .asFuture<void>();
       final Future<void> errors = process.stderr
         .transform<String>(const Utf8Decoder(reportErrors: false))
         .transform<String>(const LineSplitter())
         .listen(handleLine)
-        .asFuture<void>(null);
+        .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on ProcessException catch (e) {
@@ -432,8 +427,8 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     try {
       final Process process = await _processManager.start(
-        <String>[_androidSdk.sdkManagerPath!, '--licenses'],
-        environment: _androidSdk.sdkManagerEnv,
+        <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
+        environment: _androidSdk!.sdkManagerEnv,
       );
 
       // The real stdin will never finish streaming. Pipe until the child process
@@ -463,7 +458,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return exitCode == 0;
     } on ProcessException catch (e) {
       throwToolExit(_userMessages.androidCannotRunSdkManager(
-        _androidSdk.sdkManagerPath ?? '',
+        _androidSdk?.sdkManagerPath ?? '',
         e.toString(),
         _platform,
       ));
@@ -471,7 +466,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   bool _canRunSdkManager() {
-    final String? sdkManagerPath = _androidSdk.sdkManagerPath;
+    final String? sdkManagerPath = _androidSdk?.sdkManagerPath;
     if (sdkManagerPath == null) {
       return false;
     }

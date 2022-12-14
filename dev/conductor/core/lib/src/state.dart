@@ -7,15 +7,36 @@ import 'dart:convert' show JsonEncoder, jsonDecode;
 import 'package:file/file.dart' show File;
 import 'package:platform/platform.dart';
 
-import './globals.dart';
+import './globals.dart' as globals;
 import './proto/conductor_state.pb.dart' as pb;
 import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 
 const String kStateFileName = '.flutter_conductor_state.json';
 
+const String betaPostReleaseMsg = """
+  'Ensure the following post release steps are complete:',
+  '\t 1. Post announcement to discord and press the publish button',
+  '\t\t Discord: ${globals.discordReleaseChannel}',
+  '\t 2. Post announcement flutter release hotline chat room',
+  '\t\t Chatroom: ${globals.flutterReleaseHotline}',
+""";
+
+const String stablePostReleaseMsg = """
+  'Ensure the following post release steps are complete:',
+  '\t 1. Update hotfix to stable wiki following documentation best practices',
+  '\t\t Wiki link: ${globals.hotfixToStableWiki}',
+  '\t\t Best practices: ${globals.hotfixDocumentationBestPractices}',
+  '\t 2. Post announcement to flutter-announce group',
+  '\t\t Flutter Announce: ${globals.flutterAnnounceGroup}',
+  '\t 3. Post announcement to discord and press the publish button',
+  '\t\t Discord: ${globals.discordReleaseChannel}',
+  '\t 4. Post announcement flutter release hotline chat room',
+  '\t\t Chatroom: ${globals.flutterReleaseHotline}',
+""";
+
 String luciConsoleLink(String channel, String groupName) {
   assert(
-    kReleaseChannels.contains(channel),
+    globals.kReleaseChannels.contains(channel),
     'channel $channel not recognized',
   );
   assert(
@@ -30,7 +51,8 @@ String luciConsoleLink(String channel, String groupName) {
 String defaultStateFilePath(Platform platform) {
   final String? home = platform.environment['HOME'];
   if (home == null) {
-    throw ConductorException(r'Environment variable $HOME must be set!');
+    throw globals.ConductorException(
+        r'Environment variable $HOME must be set!');
   }
   return <String>[
     home,
@@ -127,6 +149,10 @@ String phaseInstructions(pb.ConductorState state) {
         return <String>[
           'There are no engine cherrypicks, so issue `conductor next` to continue',
           'to the next step.',
+          '\n',
+          '******************************************************',
+          '* Create a new entry in http://go/release-eng-retros *',
+          '******************************************************',
         ].join('\n');
       }
       return <String>[
@@ -134,7 +160,7 @@ String phaseInstructions(pb.ConductorState state) {
         'at ${state.engine.checkoutPath} in order:',
         for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
           '\t${cherrypick.trunkRevision}',
-        'See $kReleaseDocumentationUrl for more information.',
+        'See ${globals.kReleaseDocumentationUrl} for more information.',
       ].join('\n');
     case ReleasePhase.CODESIGN_ENGINE_BINARIES:
       if (!requiresEnginePR(state)) {
@@ -143,7 +169,7 @@ String phaseInstructions(pb.ConductorState state) {
       }
       // User's working branch was pushed to their mirror, but a PR needs to be
       // opened on GitHub.
-      final String newPrLink = getNewPrLink(
+      final String newPrLink = globals.getNewPrLink(
         userName: githubAccount(state.engine.mirror.url),
         repoName: 'engine',
         state: state,
@@ -179,7 +205,7 @@ String phaseInstructions(pb.ConductorState state) {
             'PR is necessary.';
       }
 
-      final String newPrLink = getNewPrLink(
+      final String newPrLink = globals.getNewPrLink(
         userName: githubAccount(state.framework.mirror.url),
         repoName: 'flutter',
         state: state,
@@ -195,44 +221,21 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.VERIFY_RELEASE:
       return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
-      const String DISCORD_RELEASE_CHANNEL =
-          'https://discord.com/channels/608014603317936148/783492179922124850';
-      const String FLUTTER_RELEASE_HOTLINE =
-          'https://mail.google.com/chat/u/0/#chat/space/AAAA6RKcK2k';
-      const String HOTFIX_TO_STABLE_WIKI =
-          'https://github.com/flutter/flutter/wiki/Hotfixes-to-the-Stable-Channel';
-      const String FLUTTER_ANNOUNCE_GROUP =
-          'https://groups.google.com/g/flutter-announce';
-      const String DOCUMENTATION_BEST_PRACTICES =
-          'https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices';
       if (state.releaseChannel == 'beta') {
         return <String>[
-          'Ensure the following post release steps are complete:',
-          '\t 1. Post announcement to discord',
-          '\t\t Discord: $DISCORD_RELEASE_CHANNEL',
-          '\t 2. Post announcement flutter release hotline chat room',
-          '\t\t Chatroom: $FLUTTER_RELEASE_HOTLINE',
+          betaPostReleaseMsg,
           '-----------------------------------------------------------------------',
           'This release has been completed.',
         ].join('\n');
       }
       return <String>[
-        'Ensure the following post release steps are complete:',
-        '\t 1. Update hotfix to stable wiki following documentation best practices',
-        '\t\t Wiki link: $HOTFIX_TO_STABLE_WIKI',
-        '\t\t Best practices: $DOCUMENTATION_BEST_PRACTICES',
-        '\t 2. Post announcement to flutter-announce group',
-        '\t\t Flutter Announce: $FLUTTER_ANNOUNCE_GROUP',
-        '\t 3. Post announcement to discord',
-        '\t\t Discord: $DISCORD_RELEASE_CHANNEL',
-        '\t 4. Post announcement flutter release hotline chat room',
-        '\t\t Chatroom: $FLUTTER_RELEASE_HOTLINE',
+        stablePostReleaseMsg,
         '-----------------------------------------------------------------------',
         'This release has been completed.',
       ].join('\n');
   }
   // For analyzer
-  throw ConductorException('Unimplemented phase ${state.currentPhase}');
+  throw globals.ConductorException('Unimplemented phase ${state.currentPhase}');
 }
 
 /// Regex pattern for git remote host URLs.
@@ -250,13 +253,13 @@ String githubAccount(String remoteUrl) {
   final String engineUrl = remoteUrl;
   final RegExpMatch? match = githubRemotePattern.firstMatch(engineUrl);
   if (match == null) {
-    throw ConductorException(
+    throw globals.ConductorException(
       'Cannot determine the GitHub account from $engineUrl',
     );
   }
   final String? accountName = match.group(2);
   if (accountName == null || accountName.isEmpty) {
-    throw ConductorException(
+    throw globals.ConductorException(
       'Cannot determine the GitHub account from $match',
     );
   }
@@ -271,7 +274,7 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
   assert(currentPhase != null);
   final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
   if (nextPhase == null) {
-    throw ConductorException('There is no next ReleasePhase!');
+    throw globals.ConductorException('There is no next ReleasePhase!');
   }
   return nextPhase;
 }

@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -75,8 +76,9 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   set refreshIndicatorLayoutExtent(double value) {
     assert(value != null);
     assert(value >= 0.0);
-    if (value == _refreshIndicatorExtent)
+    if (value == _refreshIndicatorExtent) {
       return;
+    }
     _refreshIndicatorExtent = value;
     markNeedsLayout();
   }
@@ -88,8 +90,9 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   bool _hasLayoutExtent;
   set hasLayoutExtent(bool value) {
     assert(value != null);
-    if (value == _hasLayoutExtent)
+    if (value == _hasLayoutExtent) {
       return;
+    }
     _hasLayoutExtent = value;
     markNeedsLayout();
   }
@@ -375,15 +378,15 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    final double percentageComplete = (pulledExtent / refreshTriggerPullDistance).clamp(0.0, 1.0);
+    final double percentageComplete = clampDouble(pulledExtent / refreshTriggerPullDistance, 0.0, 1.0);
 
-    // Place the indicator at the top of the sliver that opens up. Note that we're using
-    // a Stack/Positioned widget because the CupertinoActivityIndicator does some internal
-    // translations based on the current size (which grows as the user drags) that makes
-    // Padding calculations difficult. Rather than be reliant on the internal implementation
-    // of the activity indicator, the Positioned widget allows us to be explicit where the
-    // widget gets placed. Also note that the indicator should appear over the top of the
-    // dragged widget, hence the use of Overflow.visible.
+    // Place the indicator at the top of the sliver that opens up. We're using a
+    // Stack/Positioned widget because the CupertinoActivityIndicator does some
+    // internal translations based on the current size (which grows as the user drags)
+    // that makes Padding calculations difficult. Rather than be reliant on the
+    // internal implementation of the activity indicator, the Positioned widget allows
+    // us to be explicit where the widget gets placed. The indicator should appear
+    // over the top of the dragged widget, hence the use of Clip.none.
     return Center(
       child: Stack(
         clipBehavior: Clip.none,
@@ -419,7 +422,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
         return CupertinoActivityIndicator(radius: radius * percentageComplete);
       case RefreshIndicatorMode.inactive:
         // Anything else doesn't show anything.
-        return Container();
+        return const SizedBox.shrink();
     }
   }
 

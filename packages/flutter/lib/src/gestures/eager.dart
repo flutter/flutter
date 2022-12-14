@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'arena.dart';
-import 'events.dart';
 import 'recognizer.dart';
+
+export 'dart:ui' show PointerDeviceKind;
+
+export 'events.dart' show PointerDownEvent, PointerEvent;
 
 /// A gesture recognizer that eagerly claims victory in all gesture arenas.
 ///

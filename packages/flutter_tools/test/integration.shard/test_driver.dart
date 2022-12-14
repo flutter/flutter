@@ -763,6 +763,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
 
   Future<void> test({
     String testFile = 'test/test.dart',
+    String? deviceId,
     bool withDebugger = false,
     bool pauseOnExceptions = false,
     bool coverage = false,
@@ -775,6 +776,8 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       '--machine',
       if (coverage)
         '--coverage',
+      if (deviceId != null)
+        ...<String>['-d', deviceId],
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, beforeStart: beforeStart);
   }
 
@@ -849,9 +852,9 @@ class FlutterTestTestDriver extends FlutterTestDriver {
 
     await resume();
 
-    final Future<Object> timeoutFuture =
-        Future<Object>.delayed(defaultTimeout);
-    await Future.any<Object>(<Future<Object>>[done.future, timeoutFuture]);
+    final Future<void> timeoutFuture =
+        Future<void>.delayed(defaultTimeout);
+    await Future.any<void>(<Future<void>>[done.future, timeoutFuture]);
     await subscription.cancel();
     if (!done.isCompleted) {
       await quit();

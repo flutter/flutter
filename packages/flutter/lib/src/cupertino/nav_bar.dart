@@ -33,6 +33,8 @@ const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
 
+const double _kNavBarBottomPadding = 8.0;
+
 const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
@@ -160,8 +162,9 @@ Widget _wrapWithBackground({
     child: result,
   );
 
-  if (backgroundColor.alpha == 0xFF)
+  if (backgroundColor.alpha == 0xFF) {
     return childWithBackground;
+  }
 
   return ClipRect(
     child: BackdropFilter(
@@ -550,10 +553,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
-/// `CupertinoSliverNavigationBar` has its text scale factor set to 1.0 by default
+/// [CupertinoSliverNavigationBar] has its text scale factor set to 1.0 by default
 /// and does not respond to text scale factor changes from the operating system,
 /// to match the native iOS behavior. To override this behavior, wrap each of the
-/// `CupertinoSliverNavigationBar`'s components inside a [MediaQuery] with the
+/// [CupertinoSliverNavigationBar]'s components inside a [MediaQuery] with the
 /// desired [MediaQueryData.textScaleFactor] value. The text scale factor value
 /// from the operating system can be retrieved in many ways, such as querying
 /// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
@@ -585,6 +588,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.leading,
     this.automaticallyImplyLeading = true,
     this.automaticallyImplyTitle = true,
+    this.alwaysShowMiddle = true,
     this.previousPageTitle,
     this.middle,
     this.trailing,
@@ -644,13 +648,25 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// This value cannot be null.
   final bool automaticallyImplyTitle;
 
+  /// Controls whether [middle] widget should always be visible (even in
+  /// expanded state).
+  ///
+  /// If true (default) and [middle] is not null, [middle] widget is always
+  /// visible. If false, [middle] widget is visible only in collapsed state if
+  /// it is provided.
+  ///
+  /// This should be set to false if you only want to show [largeTitle] in
+  /// expanded state and [middle] in collapsed state.
+  final bool alwaysShowMiddle;
+
   /// {@macro flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
   final String? previousPageTitle;
 
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
   ///
-  /// This widget is visible in both collapsed and expanded states. The text
+  /// This widget is visible in both collapsed and expanded states if
+  /// [alwaysShowMiddle] is true, otherwise just in collapsed state. The text
   /// supplied in [largeTitle] will no longer appear in collapsed state if a
   /// [middle] widget is provided.
   final Widget? middle;
@@ -740,8 +756,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           actionsForegroundColor: CupertinoTheme.of(context).primaryColor,
           transitionBetweenRoutes: widget.transitionBetweenRoutes,
           heroTag: widget.heroTag,
-          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-          alwaysShowMiddle: widget.middle != null,
+          persistentHeight: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
+          alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
         ),
       ),
@@ -819,31 +835,27 @@ class _LargeTitleNavigationBarSliverDelegate
               right: 0.0,
               bottom: 0.0,
               child: ClipRect(
-                // The large title starts at the persistent bar.
-                // It's aligned with the bottom of the sliver and expands clipped
-                // and behind the persistent bar.
-                child: OverflowBox(
-                  minHeight: 0.0,
-                  maxHeight: double.infinity,
-                  alignment: AlignmentDirectional.bottomStart,
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      start: _kNavBarEdgePadding,
-                      bottom: 8.0, // Bottom has a different padding.
-                    ),
-                    child: SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: AnimatedOpacity(
-                        opacity: showLargeTitle ? 1.0 : 0.0,
-                        duration: _kNavBarTitleFadeDuration,
-                        child: Semantics(
-                          header: true,
-                          child: DefaultTextStyle(
-                            style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            child: components.largeTitle!,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: _kNavBarBottomPadding
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: AnimatedOpacity(
+                      opacity: showLargeTitle ? 1.0 : 0.0,
+                      duration: _kNavBarTitleFadeDuration,
+                      child: Semantics(
+                        header: true,
+                        child: DefaultTextStyle(
+                          style: CupertinoTheme.of(context)
+                              .textTheme
+                              .navLargeTitleTextStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          child: _LargeTitle(
+                            child: components.largeTitle,
                           ),
                         ),
                       ),
@@ -904,6 +916,123 @@ class _LargeTitleNavigationBarSliverDelegate
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
         || heroTag != oldDelegate.heroTag;
+  }
+}
+
+/// The large title of the navigation bar.
+///
+/// Magnifies on over-scroll when [CupertinoSliverNavigationBar.stretch]
+/// parameter is true.
+class _LargeTitle extends SingleChildRenderObjectWidget {
+  const _LargeTitle({ super.child });
+
+  @override
+  _RenderLargeTitle createRenderObject(BuildContext context) {
+    return _RenderLargeTitle(alignment: AlignmentDirectional.bottomStart.resolve(Directionality.of(context)));
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLargeTitle renderObject) {
+    renderObject.alignment = AlignmentDirectional.bottomStart.resolve(Directionality.of(context));
+  }
+}
+
+class _RenderLargeTitle extends RenderShiftedBox {
+  _RenderLargeTitle({
+    required Alignment alignment,
+  })  : _alignment = alignment,
+        super(null);
+
+  Alignment get alignment => _alignment;
+  Alignment _alignment;
+  set alignment(Alignment value) {
+    if (_alignment == value) {
+      return;
+    }
+    _alignment = value;
+
+    markNeedsLayout();
+  }
+
+  double _scale = 1.0;
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    Size childSize = Size.zero;
+
+    size = constraints.biggest;
+
+    if (child == null) {
+      return;
+    }
+
+    final BoxConstraints childConstriants = constraints.widthConstraints().loosen();
+    child.layout(childConstriants, parentUsesSize: true);
+
+    final double maxScale = child.size.width != 0.0
+      ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
+      : 1.1;
+    _scale = clampDouble(
+      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
+      1.0,
+      maxScale,
+    );
+
+    childSize = child.size * _scale;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    childParentData.offset = alignment.alongOffset(size - childSize as Offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    assert(child == this.child);
+
+    super.applyPaintTransform(child, transform);
+
+    transform.scale(_scale, _scale);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
+
+    if (child == null) {
+      layer = null;
+    } else {
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
+
+      layer = context.pushTransform(
+        needsCompositing,
+        offset + childParentData.offset,
+        Matrix4.diagonal3Values(_scale, _scale, 1.0),
+        (PaintingContext context, Offset offset) => context.paintChild(child, offset),
+        oldLayer: layer as TransformLayer?,
+      );
+    }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox? child = this.child;
+
+    if (child == null) {
+      return false;
+    }
+
+    final Offset childOffset = (child.parentData! as BoxParentData).offset;
+
+    final Matrix4 transform = Matrix4.identity()
+      ..scale(1.0/_scale, 1.0/_scale, 1.0)
+      ..translate(-childOffset.dx, -childOffset.dy);
+
+    return result.addWithRawTransform(
+      transform: transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        return child.hitTest(result, position: transformed);
+      }
+    );
   }
 }
 
@@ -975,7 +1104,7 @@ class _PersistentNavigationBar extends StatelessWidget {
     }
 
     return SizedBox(
-      height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+      height: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
       child: SafeArea(
         bottom: false,
         child: paddedToolbar,
@@ -1643,7 +1772,7 @@ class _NavigationBarTransition extends StatelessWidget {
     // can actually be outside the linearly lerp'ed Rect in the middle of
     // the animation, such as the topLargeTitle.
     return SizedBox(
-      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.of(context).padding.top,
+      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
       width: double.infinity,
       child: Stack(
         children: children,

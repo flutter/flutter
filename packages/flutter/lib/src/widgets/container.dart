@@ -216,7 +216,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// ```dart
 /// Container(
 ///   constraints: BoxConstraints.expand(
-///     height: Theme.of(context).textTheme.headline4!.fontSize! * 1.1 + 200.0,
+///     height: Theme.of(context).textTheme.headlineMedium!.fontSize! * 1.1 + 200.0,
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.blue[600],
@@ -225,7 +225,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   child: Text('Hello World',
 ///     style: Theme.of(context)
 ///         .textTheme
-///         .headline4!
+///         .headlineMedium!
 ///         .copyWith(color: Colors.white)),
 /// )
 /// ```
@@ -369,11 +369,13 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null)
+    if (decoration == null || decoration!.padding == null) {
       return padding;
+    }
     final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
-    if (padding == null)
+    if (padding == null) {
       return decorationPadding;
+    }
     return padding!.add(decorationPadding!);
   }
 
@@ -392,11 +394,13 @@ class Container extends StatelessWidget {
     }
 
     final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
-    if (effectivePadding != null)
+    if (effectivePadding != null) {
       current = Padding(padding: effectivePadding, child: current);
+    }
 
-    if (color != null)
+    if (color != null) {
       current = ColoredBox(color: color!, child: current);
+    }
 
     if (clipBehavior != Clip.none) {
       assert(decoration != null);
@@ -410,8 +414,9 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (decoration != null)
+    if (decoration != null) {
       current = DecoratedBox(decoration: decoration!, child: current);
+    }
 
     if (foregroundDecoration != null) {
       current = DecoratedBox(
@@ -421,14 +426,17 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (constraints != null)
+    if (constraints != null) {
       current = ConstrainedBox(constraints: constraints!, child: current);
+    }
 
-    if (margin != null)
+    if (margin != null) {
       current = Padding(padding: margin!, child: current);
+    }
 
-    if (transform != null)
+    if (transform != null) {
       current = Transform(transform: transform!, alignment: transformAlignment, child: current);
+    }
 
     return current!;
   }
@@ -439,10 +447,11 @@ class Container extends StatelessWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
-    if (color != null)
+    if (color != null) {
       properties.add(DiagnosticsProperty<Color>('bg', color));
-    else
+    } else {
       properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    }
     properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));

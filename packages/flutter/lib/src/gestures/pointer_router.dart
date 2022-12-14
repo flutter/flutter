@@ -4,9 +4,12 @@
 
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'events.dart' show PointerEvent;
 
 /// A callback that receives a [PointerEvent]
 typedef PointerRoute = void Function(PointerEvent event);
@@ -44,8 +47,9 @@ class PointerRouter {
     final Map<PointerRoute, Matrix4?> routes = _routeMap[pointer]!;
     assert(routes.containsKey(route));
     routes.remove(route);
-    if (routes.isEmpty)
+    if (routes.isEmpty) {
       _routeMap.remove(pointer);
+    }
   }
 
   /// Adds a route to the global entry in the routing table.

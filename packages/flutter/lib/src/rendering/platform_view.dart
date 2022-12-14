@@ -109,10 +109,12 @@ class RenderAndroidView extends PlatformViewRenderBox {
   /// Sets a new Android view controller.
   @override
   set controller(AndroidViewController controller) {
+    assert(!_isDisposed);
     assert(_viewController != null);
     assert(controller != null);
-    if (_viewController == controller)
+    if (_viewController == controller) {
       return;
+    }
     _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     super.controller = controller;
     _viewController = controller;
@@ -139,6 +141,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   }
 
   void _onPlatformViewCreated(int id) {
+    assert(!_isDisposed);
     markNeedsSemanticsUpdate();
   }
 
@@ -166,8 +169,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
-    if (_state == _PlatformViewState.resizing || size.isEmpty)
+    if (_state == _PlatformViewState.resizing || size.isEmpty) {
       return;
+    }
 
     _state = _PlatformViewState.resizing;
     markNeedsPaint();
@@ -175,11 +179,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     Size targetSize;
     do {
       targetSize = size;
-      if (_viewController.isCreated) {
-        _currentTextureSize = await _viewController.setSize(targetSize);
-      } else {
-        await _viewController.create(size: targetSize);
-        _currentTextureSize = targetSize;
+      _currentTextureSize = await _viewController.setSize(targetSize);
+      if (_isDisposed) {
+        return;
       }
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
@@ -190,7 +192,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
     markNeedsPaint();
   }
 
-  // Sets the offset of the underlaying platform view on the platform side.
+  // Sets the offset of the underlying platform view on the platform side.
   //
   // This allows the Android native view to draw the a11y highlights in the same
   // location on the screen as the platform view widget in the Flutter framework.
@@ -200,8 +202,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
-        if (attached)
+        if (attached) {
           await _viewController.setOffset(localToGlobal(Offset.zero));
+        }
         // Schedule a new post frame callback.
         _setOffset();
       }
@@ -210,8 +213,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_viewController.textureId == null || _currentTextureSize == null)
+    if (_viewController.textureId == null || _currentTextureSize == null) {
       return;
+    }
 
     // As resizing the Android view happens asynchronously we don't know exactly when is a
     // texture frame with the new size is ready for consumption.
@@ -244,12 +248,14 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void dispose() {
     _isDisposed = true;
     _clipRectLayer.layer = null;
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     super.dispose();
   }
 
   void _paintTexture(PaintingContext context, Offset offset) {
-    if (_currentTextureSize == null)
+    if (_currentTextureSize == null) {
       return;
+    }
 
     context.addLayer(TextureLayer(
       rect: offset & _currentTextureSize!,
@@ -314,10 +320,13 @@ class RenderUiKitView extends RenderBox {
   /// must have been created by calling [PlatformViewsService.initUiKitView].
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
-  set viewController(UiKitViewController viewController) {
-    assert(viewController != null);
-    final bool needsSemanticsUpdate = _viewController.id != viewController.id;
-    _viewController = viewController;
+  set viewController(UiKitViewController value) {
+    assert(value != null);
+    if (_viewController == value) {
+      return;
+    }
+    final bool needsSemanticsUpdate = _viewController.id != value.id;
+    _viewController = value;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
       markNeedsSemanticsUpdate();
@@ -372,8 +381,9 @@ class RenderUiKitView extends RenderBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset? position }) {
-    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!))
+    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!)) {
       return false;
+    }
     result.add(BoxHitTestEntry(this, position));
     return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
@@ -716,15 +726,16 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
     if (value != _hitTestBehavior) {
       _hitTestBehavior = value;
-      if (owner != null)
+      if (owner != null) {
         markNeedsPaint();
+      }
     }
   }
   PlatformViewHitTestBehavior? _hitTestBehavior;
 
   _HandlePointerEvent? _handlePointerEvent;
 
-  /// {@macro  flutter.rendering.RenderAndroidView.updateGestureRecognizers}
+  /// {@macro flutter.rendering.RenderAndroidView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.

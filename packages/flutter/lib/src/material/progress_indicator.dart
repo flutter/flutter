@@ -108,11 +108,11 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticsValue;
 
-  Color _getValueColor(BuildContext context) {
-    return
-      valueColor?.value ??
+  Color _getValueColor(BuildContext context, {Color? defaultColor}) {
+    return valueColor?.value ??
       color ??
       ProgressIndicatorTheme.of(context).color ??
+      defaultColor ??
       Theme.of(context).colorScheme.primary;
   }
 
@@ -186,8 +186,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     paint.color = valueColor;
 
     void drawBar(double x, double width) {
-      if (width <= 0.0)
+      if (width <= 0.0) {
         return;
+      }
 
       final double left;
       switch (textDirection) {
@@ -202,7 +203,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     if (value != null) {
-      drawBar(0.0, value!.clamp(0.0, 1.0) * size.width);
+      drawBar(0.0, clampDouble(value!, 0.0, 1.0) * size.width);
     } else {
       final double x1 = size.width * line1Tail.transform(animationValue);
       final double width1 = size.width * line1Head.transform(animationValue) - x1;
@@ -251,6 +252,14 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [LinearProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of a [LinearProgressIndicator] with a changing value.
+/// When toggling the switch, [LinearProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -308,17 +317,19 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
       vsync: this,
     );
-    if (widget.value == null)
+    if (widget.value == null) {
       _controller.repeat();
+    }
   }
 
   @override
   void didUpdateWidget(LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
   }
 
   @override
@@ -328,12 +339,17 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
+    final ProgressIndicatorThemeData defaults = Theme.of(context).useMaterial3
+      ? _LinearProgressIndicatorDefaultsM3(context)
+      : _LinearProgressIndicatorDefaultsM2(context);
+
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
-    final Color trackColor =
-      widget.backgroundColor ??
+    final Color trackColor = widget.backgroundColor ??
       indicatorTheme.linearTrackColor ??
-      Theme.of(context).colorScheme.background;
-    final double minHeight = widget.minHeight ?? indicatorTheme.linearMinHeight ?? 4.0;
+      defaults.linearTrackColor!;
+    final double minHeight = widget.minHeight ??
+      indicatorTheme.linearMinHeight ??
+      defaults.linearMinHeight!;
 
     return widget._buildSemanticsWrapper(
       context: context,
@@ -345,7 +361,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
         child: CustomPaint(
           painter: _LinearProgressIndicatorPainter(
             backgroundColor: trackColor,
-            valueColor: widget._getValueColor(context),
+            valueColor: widget._getValueColor(context, defaultColor: defaults.color),
             value: widget.value, // may be null
             animationValue: animationValue, // ignored if widget.value is not null
             textDirection: textDirection,
@@ -359,8 +375,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
 
-    if (widget.value != null)
+    if (widget.value != null) {
       return _buildIndicator(context, _controller.value, textDirection);
+    }
 
     return AnimatedBuilder(
       animation: _controller.view,
@@ -385,7 +402,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
        arcSweep = value != null
-         ? value.clamp(0.0, 1.0) * _sweep
+         ? clampDouble(value, 0.0, 1.0) * _sweep
          : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color? backgroundColor;
@@ -419,8 +436,9 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
     }
 
-    if (value == null) // Indeterminate
+    if (value == null) { // Indeterminate
       paint.strokeCap = StrokeCap.square;
+    }
 
     canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
   }
@@ -462,6 +480,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [CircularProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of a [CircularProgressIndicator] with a changing value.
+/// When toggling the switch, [CircularProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -548,17 +574,19 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       vsync: this,
     );
-    if (widget.value == null)
+    if (widget.value == null) {
       _controller.repeat();
+    }
   }
 
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value == null && !_controller.isAnimating)
+    if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
-    else if (widget.value != null && _controller.isAnimating)
+    } else if (widget.value != null && _controller.isAnimating) {
       _controller.stop();
+    }
   }
 
   @override
@@ -573,6 +601,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+    final ProgressIndicatorThemeData defaults = Theme.of(context).useMaterial3
+      ? _CircularProgressIndicatorDefaultsM3(context)
+      : _CircularProgressIndicatorDefaultsM2(context);
     final Color? trackColor = widget.backgroundColor ?? ProgressIndicatorTheme.of(context).circularTrackColor;
 
     return widget._buildSemanticsWrapper(
@@ -585,7 +616,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
         child: CustomPaint(
           painter: _CircularProgressIndicatorPainter(
             backgroundColor: trackColor,
-            valueColor: widget._getValueColor(context),
+            valueColor: widget._getValueColor(context, defaultColor: defaults.color),
             value: widget.value, // may be null
             headValue: headValue, // remaining arguments are ignored if widget.value is not null
             tailValue: tailValue,
@@ -617,8 +648,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   Widget build(BuildContext context) {
     switch (widget._indicatorType) {
       case _ActivityIndicatorType.material:
-        if (widget.value != null)
+        if (widget.value != null) {
           return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+        }
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
         final ThemeData theme = Theme.of(context);
@@ -631,8 +663,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            if (widget.value != null)
+            if (widget.value != null) {
               return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+            }
             return _buildAnimation();
         }
     }
@@ -683,8 +716,9 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
   @override
   void paint(Canvas canvas, Size size) {
     super.paint(canvas, size);
-    if (arrowheadScale > 0.0)
+    if (arrowheadScale > 0.0) {
       paintArrowhead(canvas, size);
+    }
   }
 }
 
@@ -856,3 +890,67 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     );
   }
 }
+
+// Hand coded defaults based on Material Design 2.
+class _CircularProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
+  _CircularProgressIndicatorDefaultsM2(this.context);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  Color get color => _colors.primary;
+}
+
+class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
+  _LinearProgressIndicatorDefaultsM2(this.context);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  Color get color => _colors.primary;
+
+  @override
+  Color get linearTrackColor => _colors.background;
+
+  @override
+  double get linearMinHeight => 4.0;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - ProgressIndicator
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_143
+
+class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
+  _CircularProgressIndicatorDefaultsM3(this.context);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  Color get color => _colors.primary;
+}
+
+class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
+  _LinearProgressIndicatorDefaultsM3(this.context);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  Color get color => _colors.primary;
+
+  @override
+  Color get linearTrackColor => _colors.surfaceVariant;
+
+  @override
+  double get linearMinHeight => 4.0;
+}
+
+// END GENERATED TOKEN PROPERTIES - ProgressIndicator

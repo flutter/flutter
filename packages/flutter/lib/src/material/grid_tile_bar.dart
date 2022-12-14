@@ -59,8 +59,9 @@ class GridTileBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     BoxDecoration? decoration;
-    if (backgroundColor != null)
+    if (backgroundColor != null) {
       decoration = BoxDecoration(color: backgroundColor);
+    }
 
     final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
       start: leading != null ? 8.0 : 16.0,
@@ -87,13 +88,13 @@ class GridTileBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       DefaultTextStyle(
-                        style: darkTheme.textTheme.subtitle1!,
+                        style: darkTheme.textTheme.titleMedium!,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         child: title!,
                       ),
                       DefaultTextStyle(
-                        style: darkTheme.textTheme.caption!,
+                        style: darkTheme.textTheme.bodySmall!,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         child: subtitle!,
@@ -104,7 +105,7 @@ class GridTileBar extends StatelessWidget {
               else if (title != null || subtitle != null)
                 Expanded(
                   child: DefaultTextStyle(
-                    style: darkTheme.textTheme.subtitle1!,
+                    style: darkTheme.textTheme.titleMedium!,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     child: title ?? subtitle!,

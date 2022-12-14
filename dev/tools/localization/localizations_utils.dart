@@ -93,10 +93,12 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       }
       // Update the base string to reflect assumed scriptCodes.
       originalString = languageCode;
-      if (scriptCode != null)
+      if (scriptCode != null) {
         originalString += '_$scriptCode';
-      if (countryCode != null)
+      }
+      if (countryCode != null) {
         originalString += '_$countryCode';
+      }
     }
 
     return LocaleInfo(
@@ -175,10 +177,11 @@ void loadMatchingArbsIntoBundleMaps({
         final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
         for (final String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
-          if (key.startsWith('@'))
+          if (key.startsWith('@')) {
             attributes[key.substring(1)] = bundle[key];
-          else
+          } else {
             resources[key] = bundle[key] as String;
+          }
         }
       }
       // Only pre-assume scriptCode if there is a country or script code to assume off of.
@@ -288,15 +291,17 @@ Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
-    if (line == '')
+    if (line == '') {
       continue;
+    }
     if (line.startsWith('  ')) {
       lastHeading[lastHeading.length - 1] = '${lastHeading.last}${line.substring(1)}';
       continue;
     }
     final int colon = line.indexOf(':');
-    if (colon <= 0)
+    if (colon <= 0) {
       throw 'not sure how to deal with "$line"';
+    }
     final String name = line.substring(0, colon);
     final String value = line.substring(colon + 2);
     lastHeading = result.putIfAbsent(name, () => <String>[]);
@@ -324,14 +329,18 @@ void precacheLanguageAndRegionTags() {
       assert(section.containsKey('Subtag') && section.containsKey('Description'), section.toString());
       final String subtag = section['Subtag']!.single;
       String description = section['Description']!.join(' ');
-      if (description.startsWith('United '))
+      if (description.startsWith('United ')) {
         description = 'the $description';
-      if (description.contains(kParentheticalPrefix))
+      }
+      if (description.contains(kParentheticalPrefix)) {
         description = description.substring(0, description.indexOf(kParentheticalPrefix));
-      if (description.contains(kProvincePrefix))
+      }
+      if (description.contains(kProvincePrefix)) {
         description = description.substring(0, description.indexOf(kProvincePrefix));
-      if (description.endsWith(' Republic'))
+      }
+      if (description.endsWith(' Republic')) {
         description = 'the $description';
+      }
       switch (type) {
         case 'language':
           _languages[subtag] = description;
@@ -364,10 +373,12 @@ String describeLocale(String tag) {
     script = _scripts[subtags[1]];
     assert(region != null && script != null);
   }
-  if (region != null)
+  if (region != null) {
     output += ', as used in $region';
-  if (script != null)
+  }
+  if (script != null) {
     output += ', using the $script script';
+  }
   return output;
 }
 
@@ -450,8 +461,9 @@ String generateString(String value) {
 /// some of the localized strings contain characters that can crash Emacs on Linux.
 /// See packages/flutter_localizations/lib/src/l10n/README for more information.
 String generateEncodedString(String? locale, String value) {
-  if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF))
+  if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF)) {
     return generateString(value);
+  }
 
   final String unicodeEscapes = value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
   return "'$unicodeEscapes'";

@@ -533,15 +533,16 @@ class ExtraProductsNumber extends StatelessWidget {
   }
 
   Widget _buildOverflow(AppStateModel model, BuildContext context) {
-    if (model.productsInCart.length <= 3)
+    if (model.productsInCart.length <= 3) {
       return Container();
+    }
 
     final int numOverflowProducts = _calculateOverflow(model);
     // Maximum of 99 so padding doesn't get messy.
     final int displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
     return Text(
       '+$displayedOverflowProducts',
-      style: Theme.of(context).primaryTextTheme.button,
+      style: Theme.of(context).primaryTextTheme.labelLarge,
     );
   }
 

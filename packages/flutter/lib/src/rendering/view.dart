@@ -4,11 +4,10 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, FlutterView;
+import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'box.dart';
@@ -40,8 +39,9 @@ class ViewConfiguration {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ViewConfiguration
         && other.size == size
         && other.devicePixelRatio == devicePixelRatio;
@@ -83,14 +83,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
 
-  /// The configuration is initially set by the `configuration` argument
+  /// The configuration is initially set by the [configuration] argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
-    if (configuration == value)
+    if (configuration == value) {
       return;
+    }
     final ViewConfiguration oldConfiguration = _configuration;
     _configuration = value;
     if (oldConfiguration.toMatrix() != _configuration.toMatrix()) {
@@ -110,6 +111,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// hit-test result from the top of the screen provides the status bar settings
   /// and the hit-test result from the bottom of the screen provides the system
   /// nav bar settings.
+  ///
+  /// If there is no [AnnotatedRegionLayer] on the bottom, the hit-test result
+  /// from the top provides the system nav bar settings. If there is no
+  /// [AnnotatedRegionLayer] on the top, the hit-test result from the bottom
+  /// provides the system status bar settings.
   ///
   /// Setting this to false does not cause previous automatic adjustments to be
   /// reset, nor does setting it to true cause the app to update immediately.
@@ -165,13 +171,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     _size = configuration.size;
     assert(_size.isFinite);
 
-    if (child != null)
+    if (child != null) {
       child!.layout(BoxConstraints.tight(_size));
-  }
-
-  @override
-  void rotate({ int? oldAngle, int? newAngle, Duration? time }) {
-    assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
+    }
   }
 
   /// Determines the set of render objects located at the given position.
@@ -185,8 +187,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
   bool hitTest(HitTestResult result, { required Offset position }) {
-    if (child != null)
+    if (child != null) {
       child!.hitTest(BoxHitTestResult.wrap(result), position: position);
+    }
     result.add(HitTestEntry(this));
     return true;
   }
@@ -209,8 +212,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
+    if (child != null) {
       context.paintChild(child!, offset);
+    }
   }
 
   @override
@@ -230,13 +234,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer!.buildScene(builder);
-      if (automaticSystemUiAdjustment)
+      if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
+      }
       _window.render(scene);
       scene.dispose();
       assert(() {
-        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
+        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
           debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
+        }
         return true;
       }());
     } finally {
@@ -244,6 +250,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         Timeline.finishSync();
       }
     }
+  }
+
+  /// Sends the provided [SemanticsUpdate] to the [FlutterView] associated with
+  /// this [RenderView].
+  ///
+  /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
+  /// [EnginePhase.flushSemantics] phase.
+  void updateSemantics(ui.SemanticsUpdate update) {
+    _window.updateSemantics(update);
   }
 
   void _updateSystemChrome() {
@@ -302,20 +317,47 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       case TargetPlatform.windows:
         break;
     }
-    // If there are no overlay styles in the UI don't bother updating.
-    if (upperOverlayStyle != null || lowerOverlayStyle != null) {
+    // If there are no overlay style in the UI don't bother updating.
+    if (upperOverlayStyle == null && lowerOverlayStyle == null) {
+      return;
+    }
+
+    // If both are not null, the upper provides the status bar properties and the lower provides
+    // the system navigation bar properties. This is done for advanced use cases where a widget
+    // on the top (for instance an app bar) will create an annotated region to set the status bar
+    // style and another widget on the bottom will create an annotated region to set the system
+    // navigation bar style.
+    if (upperOverlayStyle != null && lowerOverlayStyle != null) {
       final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
-        statusBarBrightness: upperOverlayStyle?.statusBarBrightness,
-        statusBarIconBrightness: upperOverlayStyle?.statusBarIconBrightness,
-        statusBarColor: upperOverlayStyle?.statusBarColor,
-        systemStatusBarContrastEnforced: upperOverlayStyle?.systemStatusBarContrastEnforced,
-        systemNavigationBarColor: lowerOverlayStyle?.systemNavigationBarColor,
-        systemNavigationBarDividerColor: lowerOverlayStyle?.systemNavigationBarDividerColor,
-        systemNavigationBarIconBrightness: lowerOverlayStyle?.systemNavigationBarIconBrightness,
-        systemNavigationBarContrastEnforced: lowerOverlayStyle?.systemNavigationBarContrastEnforced,
+        statusBarBrightness: upperOverlayStyle.statusBarBrightness,
+        statusBarIconBrightness: upperOverlayStyle.statusBarIconBrightness,
+        statusBarColor: upperOverlayStyle.statusBarColor,
+        systemStatusBarContrastEnforced: upperOverlayStyle.systemStatusBarContrastEnforced,
+        systemNavigationBarColor: lowerOverlayStyle.systemNavigationBarColor,
+        systemNavigationBarDividerColor: lowerOverlayStyle.systemNavigationBarDividerColor,
+        systemNavigationBarIconBrightness: lowerOverlayStyle.systemNavigationBarIconBrightness,
+        systemNavigationBarContrastEnforced: lowerOverlayStyle.systemNavigationBarContrastEnforced,
       );
       SystemChrome.setSystemUIOverlayStyle(overlayStyle);
+      return;
     }
+    // If only one of the upper or the lower overlay style is not null, it provides all properties.
+    // This is done for developer convenience as it allows setting both status bar style and
+    // navigation bar style using only one annotated region layer (for instance the one
+    // automatically created by an [AppBar]).
+    final bool isAndroid = defaultTargetPlatform == TargetPlatform.android;
+    final SystemUiOverlayStyle definedOverlayStyle = (upperOverlayStyle ?? lowerOverlayStyle)!;
+    final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
+      statusBarBrightness: definedOverlayStyle.statusBarBrightness,
+      statusBarIconBrightness: definedOverlayStyle.statusBarIconBrightness,
+      statusBarColor: definedOverlayStyle.statusBarColor,
+      systemStatusBarContrastEnforced: definedOverlayStyle.systemStatusBarContrastEnforced,
+      systemNavigationBarColor: isAndroid ? definedOverlayStyle.systemNavigationBarColor : null,
+      systemNavigationBarDividerColor: isAndroid ? definedOverlayStyle.systemNavigationBarDividerColor : null,
+      systemNavigationBarIconBrightness: isAndroid ? definedOverlayStyle.systemNavigationBarIconBrightness : null,
+      systemNavigationBarContrastEnforced: isAndroid ? definedOverlayStyle.systemNavigationBarContrastEnforced : null,
+    );
+    SystemChrome.setSystemUIOverlayStyle(overlayStyle);
   }
 
   @override
@@ -339,7 +381,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.platformDispatcher.semanticsEnabled)
+    if (_window.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
+    }
   }
 }

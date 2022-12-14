@@ -129,5 +129,6 @@
   "keyboardKeySpace": "Blanksteg",
   "keyboardKeyMetaMacOs": "Kommando",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Menyrad",
+  "currentDateLabel": "Date of today"
 }

@@ -18,11 +18,16 @@ void main() {
     ScrollController controller, {
     Axis axis = Axis.vertical,
     bool reverse = false,
+    TextDirection textDirection = TextDirection.ltr,
   }) {
     final AxisDirection axisDirection;
     switch (axis) {
       case Axis.horizontal:
-        axisDirection = reverse ? AxisDirection.left : AxisDirection.right;
+        if (textDirection == TextDirection.rtl) {
+          axisDirection = reverse ? AxisDirection.right : AxisDirection.left;
+        } else {
+          axisDirection = reverse ? AxisDirection.left : AxisDirection.right;
+        }
         break;
       case Axis.vertical:
         axisDirection = reverse ? AxisDirection.up : AxisDirection.down;
@@ -30,7 +35,7 @@ void main() {
     }
 
     return Directionality(
-      textDirection: TextDirection.ltr,
+      textDirection: textDirection,
       child: MediaQuery(
         data: const MediaQueryData(size: Size(800.0, 600.0)),
         child: ScrollConfiguration(
@@ -218,6 +223,92 @@ void main() {
     );
   });
 
+  testWidgets('Stretch overscroll works in reverse - horizontal - RTL', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(
+        box1Key,
+        box2Key,
+        box3Key,
+        controller,
+        axis: Axis.horizontal,
+        reverse: true,
+        textDirection: TextDirection.rtl,
+      )
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(300.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(600.0, 0.0));
+    await expectLater(
+      find.byType(CustomScrollView),
+      matchesGoldenFile('overscroll_stretch.horizontal.reverse.rtl.start.png'),
+    );
+
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll the start
+    await gesture.moveBy(const Offset(200.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(305.0));
+    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
+    await expectLater(
+      find.byType(CustomScrollView),
+      matchesGoldenFile('overscroll_stretch.horizontal.reverse.rtl.start.stretched.png'),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Stretch released back to the start
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(300.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(600.0, 0.0));
+
+    // Jump to end of the list
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    expect(controller.offset, 100.0);
+    expect(box1.localToGlobal(Offset.zero).dx, -100.0);
+    expect(box2.localToGlobal(Offset.zero).dx, 200.0);
+    expect(box3.localToGlobal(Offset.zero).dx, 500.0);
+    await expectLater(
+      find.byType(CustomScrollView),
+      matchesGoldenFile('overscroll_stretch.horizontal.reverse.rtl.end.png'),
+    );
+
+    gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll the end
+    await gesture.moveBy(const Offset(-200.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(box1.localToGlobal(Offset.zero).dx, lessThan(-116.0));
+    expect(box2.localToGlobal(Offset.zero).dx, lessThan(190.0));
+    expect(box3.localToGlobal(Offset.zero).dx, lessThan(500.0));
+    await expectLater(
+      find.byType(CustomScrollView),
+      matchesGoldenFile('overscroll_stretch.horizontal.reverse.rtl.end.stretched.png'),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Stretch released back
+    expect(box1.localToGlobal(Offset.zero).dx, -100.0);
+    expect(box2.localToGlobal(Offset.zero).dx, 200.0);
+    expect(box3.localToGlobal(Offset.zero).dx, 500.0);
+  });
+
   testWidgets('Stretch overscroll horizontally', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
@@ -293,6 +384,46 @@ void main() {
     expect(box1.localToGlobal(Offset.zero).dx, -100.0);
     expect(box2.localToGlobal(Offset.zero).dx, 200.0);
     expect(box3.localToGlobal(Offset.zero).dx, 500.0);
+  });
+
+  testWidgets('Stretch overscroll horizontally RTl', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(
+        box1Key,
+        box2Key,
+        box3Key,
+        controller,
+        axis: Axis.horizontal,
+        textDirection: TextDirection.rtl,
+      )
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), const Offset(500.0, 0.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(-100.0, 0.0));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll
+    await gesture.moveBy(const Offset(-200.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(box1.localToGlobal(Offset.zero).dx, lessThan(500.0));
+    expect(box2.localToGlobal(Offset.zero).dx, lessThan(200.0));
+    expect(box3.localToGlobal(Offset.zero).dx, lessThan(-100.0));
+    await expectLater(
+      find.byType(CustomScrollView),
+      matchesGoldenFile('overscroll_stretch.horizontal.rtl.png'),
+    );
   });
 
   testWidgets('Disallow stretching overscroll', (WidgetTester tester) async {
@@ -449,6 +580,70 @@ void main() {
     renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
     // Now clipping
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('clipBehavior parameter updates overscroll clipping behavior', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103491
+
+    Widget buildFrame(Clip clipBehavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(overscroll: false),
+            child: Column(
+              children: <Widget>[
+                StretchingOverscrollIndicator(
+                  axisDirection: AxisDirection.down,
+                  clipBehavior: clipBehavior,
+                  child: SizedBox(
+                    height: 300,
+                    child: ListView.builder(
+                      itemCount: 20,
+                      itemBuilder: (BuildContext context, int index){
+                        return Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text('Index $index'),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                Opacity(
+                  opacity: 0.5,
+                  child: Container(
+                    color: const Color(0xD0FF0000),
+                    height: 100,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Clip.none));
+
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
+    RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Currently not clipping
+    expect(renderClip.clipBehavior, equals(Clip.none));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+    // Overscroll the start.
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('Index 1'), findsOneWidget);
+    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    // Now clipping
+    expect(renderClip.clipBehavior, equals(Clip.none));
 
     await gesture.up();
     await tester.pumpAndSettle();

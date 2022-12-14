@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -56,11 +54,11 @@ void main() {
     stdout: 'hw.optional.arm64: 1',
   );
 
-  FakeProcessManager fakeProcessManager;
-  XcodeProjectInterpreter xcodeProjectInterpreter;
-  FakePlatform platform;
-  FileSystem fileSystem;
-  BufferLogger logger;
+  late FakeProcessManager fakeProcessManager;
+  late XcodeProjectInterpreter xcodeProjectInterpreter;
+  late FakePlatform platform;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
@@ -146,6 +144,7 @@ void main() {
     ]);
 
     expect(xcodeProjectInterpreter.version, Version(11, 4, 1));
+    expect(xcodeProjectInterpreter.build, '11N111s');
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -173,6 +172,7 @@ void main() {
       ),
     ]);
     expect(xcodeProjectInterpreter.version, isNull);
+    expect(xcodeProjectInterpreter.build, isNull);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -389,6 +389,76 @@ void main() {
     expect(
         await xcodeProjectInterpreter.getBuildSettings('', buildContext: const XcodeProjectBuildContext(scheme: 'Free')),
         const <String, String>{});
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('build settings uses watch destination if isWatch is true', () async {
+    platform.environment = const <String, String>{};
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-project',
+          '/',
+          '-destination',
+          'generic/platform=watchOS',
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        buildContext: const XcodeProjectBuildContext(isWatch: true),
+      ),
+      const <String, String>{},
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('build settings uses watch simulator destination if isWatch is true and environment type is simulator', () async {
+    platform.environment = const <String, String>{};
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-project',
+          '/',
+          '-sdk',
+          'iphonesimulator',
+          '-destination',
+          'generic/platform=watchOS Simulator',
+          '-showBuildSettings',
+          'BUILD_DIR=${fileSystem.path.absolute('build', 'ios')}',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+
+    expect(
+      await xcodeProjectInterpreter.getBuildSettings(
+        '',
+        buildContext: const XcodeProjectBuildContext(environmentType: EnvironmentType.simulator, isWatch: true),
+      ),
+      const <String, String>{},
+    );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -658,7 +728,7 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
   });
  group('environmentVariablesAsXcodeBuildSettings', () {
-    FakePlatform platform;
+    late FakePlatform platform;
 
     setUp(() {
       platform = FakePlatform();
@@ -677,9 +747,9 @@ Information about project "Runner":
   });
 
   group('updateGeneratedXcodeProperties', () {
-    Artifacts localIosArtifacts;
-    FakePlatform macOS;
-    FileSystem fs;
+    late Artifacts localIosArtifacts;
+    late FakePlatform macOS;
+    late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -689,8 +759,8 @@ Information about project "Runner":
     });
 
     group('arm simulator', () {
-      FakeProcessManager fakeProcessManager;
-      XcodeProjectInterpreter xcodeProjectInterpreter;
+      late FakeProcessManager fakeProcessManager;
+      late XcodeProjectInterpreter xcodeProjectInterpreter;
 
       setUp(() {
         fakeProcessManager = FakeProcessManager.empty();
@@ -1045,7 +1115,7 @@ Build settings for action build and target plugin2:
       });
     });
 
-    String propertyFor(String key, File file) {
+    String? propertyFor(String key, File file) {
       final List<String> properties = file
           .readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
@@ -1055,10 +1125,10 @@ Build settings for action build and target plugin2:
     }
 
     Future<void> checkBuildVersion({
-      String manifestString,
-      BuildInfo buildInfo,
-      String expectedBuildName,
-      String expectedBuildNumber,
+      required String manifestString,
+      required BuildInfo buildInfo,
+      String? expectedBuildName,
+      String? expectedBuildNumber,
     }) async {
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);

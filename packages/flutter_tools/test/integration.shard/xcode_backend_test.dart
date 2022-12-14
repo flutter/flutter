@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -69,8 +67,8 @@ void main() {
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
   group('observatory Bonjour service keys', () {
-    Directory buildDirectory;
-    File infoPlist;
+    late Directory buildDirectory;
+    late File infoPlist;
 
     setUp(() {
       buildDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_tools_xcode_backend_test.');

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FocusNode
+/// Flutter code sample for [FocusNode].
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ColorfulButton extends StatefulWidget {
-  const ColorfulButton({Key? key}) : super(key: key);
+  const ColorfulButton({super.key});
 
   @override
   State<ColorfulButton> createState() => _ColorfulButtonState();
@@ -115,13 +115,13 @@ class _ColorfulButtonState extends State<ColorfulButton> {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return DefaultTextStyle(
-      style: textTheme.headline4!,
+      style: textTheme.headlineMedium!,
       child: const ColorfulButton(),
     );
   }

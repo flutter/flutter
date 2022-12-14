@@ -701,11 +701,11 @@ void main() {
           }
 
           @override
-          void rebuild() {
+          void rebuild({bool force = false}) {
             if (_throwOnRebuild) {
               throw 'rebuild';
             }
-            super.rebuild();
+            super.rebuild(force: force);
           }
         }
       ''',
@@ -731,7 +731,7 @@ class TestProject extends Project {
   final String pubspec = '''
     name: test
     environment:
-      sdk: '>=2.12.0-0 <3.0.0'
+      sdk: '>=2.12.0-0 <4.0.0'
 
     dependencies:
       flutter:

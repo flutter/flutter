@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Navigator
+/// Flutter code sample for [Navigator].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +26,12 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline4!,
+      style: Theme.of(context).textTheme.headlineMedium!,
       child: Container(
         color: Colors.white,
         alignment: Alignment.center,
@@ -42,12 +42,12 @@ class HomePage extends StatelessWidget {
 }
 
 class CollectPersonalInfoPage extends StatelessWidget {
-  const CollectPersonalInfoPage({Key? key}) : super(key: key);
+  const CollectPersonalInfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline4!,
+      style: Theme.of(context).textTheme.headlineMedium!,
       child: GestureDetector(
         onTap: () {
           // This moves from the personal info page to the credentials page,
@@ -67,9 +67,9 @@ class CollectPersonalInfoPage extends StatelessWidget {
 
 class ChooseCredentialsPage extends StatelessWidget {
   const ChooseCredentialsPage({
-    Key? key,
+    super.key,
     required this.onSignupComplete,
-  }) : super(key: key);
+  });
 
   final VoidCallback onSignupComplete;
 
@@ -78,7 +78,7 @@ class ChooseCredentialsPage extends StatelessWidget {
     return GestureDetector(
       onTap: onSignupComplete,
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.headline4!,
+        style: Theme.of(context).textTheme.headlineMedium!,
         child: Container(
           color: Colors.pinkAccent,
           alignment: Alignment.center,
@@ -90,7 +90,7 @@ class ChooseCredentialsPage extends StatelessWidget {
 }
 
 class SignUpPage extends StatelessWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {

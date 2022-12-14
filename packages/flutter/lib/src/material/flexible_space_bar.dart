@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -175,8 +176,9 @@ class FlexibleSpaceBar extends StatefulWidget {
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (widget.centerTitle != null)
+    if (widget.centerTitle != null) {
       return widget.centerTitle!;
+    }
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -191,8 +193,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   }
 
   Alignment _getTitleAlignment(bool effectiveCenterTitle) {
-    if (effectiveCenterTitle)
+    if (effectiveCenterTitle) {
       return Alignment.bottomCenter;
+    }
     final TextDirection textDirection = Directionality.of(context);
     assert(textDirection != null);
     switch (textDirection) {
@@ -231,7 +234,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // 0.0 -> Expanded
         // 1.0 -> Collapsed to toolbar
-        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
+        final double t = clampDouble(1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent, 0.0, 1.0);
 
         // background
         if (widget.background != null) {
@@ -307,7 +310,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
             constraints.maxHeight > settings.maxExtent) {
             final double stretchOpacity = 1 -
-              (((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0));
+                clampDouble(
+                    (constraints.maxHeight - settings.maxExtent) / 100,
+                    0.0,
+                    1.0);
             title = Opacity(
               opacity: stretchOpacity,
               child: title,
@@ -316,7 +322,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle = theme.primaryTextTheme.headline6!;
+            TextStyle titleStyle = theme.primaryTextTheme.titleLarge!;
             titleStyle = titleStyle.copyWith(
               color: titleStyle.color!.withOpacity(opacity),
             );
@@ -409,7 +415,7 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   ///
   /// This value is used by the [AppBar] to resolve
   /// [AppBar.backgroundColor] against [MaterialState.scrolledUnder],
-  /// i.e.  to enable apps to specify different colors when content
+  /// i.e. to enable apps to specify different colors when content
   /// has been scrolled up and behind the app bar.
   ///
   /// Null if the caller hasn't determined if the FlexibleSpaceBar

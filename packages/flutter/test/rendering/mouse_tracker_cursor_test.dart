@@ -463,10 +463,12 @@ class _CursorUpdateDetails extends MethodCall {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(other, this))
+    if (identical(other, this)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _CursorUpdateDetails
         && other.method == method
         && other.arguments.length == arguments.length

@@ -24,6 +24,7 @@ const String kListViewsMethod = '_flutter.listViews';
 const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
 const String kScreenshotMethod = '_flutter.screenshot';
 const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
+const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -99,7 +100,7 @@ typedef CompileExpression = Future<String> Function(
 /// A method that pulls an SkSL shader from the device and writes it to a file.
 ///
 /// The name of the file returned as a result.
-typedef GetSkSLMethod = Future<String> Function();
+typedef GetSkSLMethod = Future<String?> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(String url, {
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
@@ -186,7 +187,7 @@ Future<vm_service.VmService> setUpVmService(
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
-  final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
+  final List<Future<vm_service.Success?>> registrationRequests = <Future<vm_service.Success?>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, Object?> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
@@ -265,7 +266,14 @@ Future<vm_service.VmService> setUpVmService(
   }
   if (skSLMethod != null) {
     vmService.registerServiceCallback('flutterGetSkSL', (Map<String, Object?> params) async {
-      final String filename = await skSLMethod();
+      final String? filename = await skSLMethod();
+      if (filename == null) {
+        return <String, Object>{
+          'result': <String, Object>{
+            'type': 'Success',
+          },
+        };
+      }
       return <String, Object>{
         'result': <String, Object>{
           'type': 'Success',
@@ -281,7 +289,8 @@ Future<vm_service.VmService> setUpVmService(
     // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
-      .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
+      .then<vm_service.Success?>((vm_service.Success success) => success)
+      .catchError((Object? error) => null, test: (Object? error) => error is vm_service.RPCError)
     );
   }
 
@@ -468,12 +477,13 @@ class FlutterVmService {
     required Uri assetsDirectory,
     required String? viewId,
     required String? uiIsolateId,
+    required bool windows,
   }) async {
     await callMethodWrapper(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
       args: <String, Object?>{
         'viewId': viewId,
-        'assetDirectory': assetsDirectory.toFilePath(windows: false),
+        'assetDirectory': assetsDirectory.toFilePath(windows: windows),
       });
   }
 
@@ -481,7 +491,7 @@ class FlutterVmService {
   ///
   /// This method will only return data if `--cache-sksl` was provided as a
   /// flutter run argument, and only then on physical devices.
-  Future<Map<String, Object>?> getSkSLs({
+  Future<Map<String, Object?>?> getSkSLs({
     required String viewId,
   }) async {
     final vm_service.Response? response = await callMethodWrapper(
@@ -493,7 +503,7 @@ class FlutterVmService {
     if (response == null) {
       return null;
     }
-    return response.json?['SkSLs'] as Map<String, Object>?;
+    return response.json?['SkSLs'] as Map<String, Object?>?;
   }
 
   /// Flush all tasks on the UI thread for an attached Flutter view.
@@ -545,7 +555,7 @@ class FlutterVmService {
   /// for rasterization which is not reflective of how long the frame takes in
   /// production. This is primarily intended to be used to identify the layers
   /// that result in the most raster perf degradation.
-  Future<Map<String, Object>?> renderFrameWithRasterStats({
+  Future<Map<String, Object?>?> renderFrameWithRasterStats({
     required String? viewId,
     required String? uiIsolateId,
   }) async {
@@ -556,7 +566,7 @@ class FlutterVmService {
         'viewId': viewId,
       },
     );
-    return response?.json as Map<String, Object>?;
+    return response?.json;
   }
 
   Future<String> flutterDebugDumpApp({
@@ -717,6 +727,19 @@ class FlutterVmService {
     );
   }
 
+  Future<Map<String, Object?>?> flutterEvictShader(String assetPath, {
+   required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.window.reinitializeShader',
+      isolateId: isolateId,
+      args: <String, Object?>{
+        'assetKey': assetPath,
+      },
+    );
+  }
+
+
   /// Exit the application by calling [exit] from `dart:io`.
   ///
   /// This method is only supported by certain embedders. This is
@@ -854,6 +877,20 @@ class FlutterVmService {
       }
       await Future<void>.delayed(delay);
     }
+  }
+
+  /// Tell the provided flutter view that the font manifest has been updated
+  /// and asset fonts should be reloaded.
+  Future<void> reloadAssetFonts({
+    required String isolateId,
+    required String viewId,
+  }) async {
+    await callMethodWrapper(
+      kReloadAssetFonts,
+      isolateId: isolateId, args: <String, Object?>{
+        'viewId': viewId,
+      },
+    );
   }
 
   /// Waits for a signal from the VM service that [extensionName] is registered.

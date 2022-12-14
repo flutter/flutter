@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 // TODO(gspencergoog): Remove this tag once this test's state leaks/test
 // dependencies have been fixed.
 // https://github.com/flutter/flutter/issues/85160
@@ -205,7 +203,7 @@ Future<void> _testFile(
   String testName,
   String workingDirectory,
   String testDirectory, {
-  Matcher exitCode,
+  Matcher? exitCode,
   List<String> extraArguments = const <String>[],
 }) async {
   exitCode ??= isNonZero;
@@ -287,7 +285,7 @@ Future<void> _testFile(
 }
 
 Future<ProcessResult> _runFlutterTest(
-  String testName,
+  String? testName,
   String workingDirectory,
   String testDirectory, {
   List<String> extraArguments = const <String>[],
@@ -315,6 +313,8 @@ Future<ProcessResult> _runFlutterTest(
     '--no-color',
     '--no-version-check',
     '--no-pub',
+    '--reporter',
+    'compact',
     ...extraArguments,
     testPath,
   ];

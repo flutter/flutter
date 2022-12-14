@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show VoidCallback;
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
-import 'basic_types.dart';
 import 'diagnostics.dart';
+import 'memory_allocations.dart';
+
+export 'dart:ui' show VoidCallback;
 
 /// An object that maintains a list of listeners.
 ///
@@ -92,13 +96,15 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
-/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// {@macro flutter.flutter.ListenableBuilder.ChangeNotifier.rebuild}
 ///
 /// See also:
 ///
@@ -119,12 +125,39 @@ class ChangeNotifier implements Listenable {
   int _reentrantlyRemovedListeners = 0;
   bool _debugDisposed = false;
 
-  bool _debugAssertNotDisposed() {
+  /// If true, the event [ObjectCreated] for this instance was dispatched to
+  /// [MemoryAllocations].
+  ///
+  /// As [ChangedNotifier] is used as mixin, it does not have constructor,
+  /// so we use [addListener] to dispatch the event.
+  bool _creationDispatched = false;
+
+  /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
+  /// disposed.
+  ///
+  /// {@tool snippet}
+  /// The [debugAssertNotDisposed] function should only be called inside of an
+  /// assert, as in this example.
+  ///
+  /// ```dart
+  /// class MyNotifier with ChangeNotifier {
+  ///   void doUpdate() {
+  ///     assert(ChangeNotifier.debugAssertNotDisposed(this));
+  ///     // ...
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  // This is static and not an instance method because too many people try to
+  // implement ChangeNotifier instead of extending it (and so it is too breaking
+  // to add a method, especially for debug).
+  static bool debugAssertNotDisposed(ChangeNotifier notifier) {
     assert(() {
-      if (_debugDisposed) {
+      if (notifier._debugDisposed) {
         throw FlutterError(
-          'A $runtimeType was used after being disposed.\n'
-          'Once you have called dispose() on a $runtimeType, it can no longer be used.',
+          'A ${notifier.runtimeType} was used after being disposed.\n'
+          'Once you have called dispose() on a ${notifier.runtimeType}, it '
+          'can no longer be used.',
         );
       }
       return true;
@@ -147,11 +180,10 @@ class ChangeNotifier implements Listenable {
   /// [notifyListeners]; and similarly, by overriding [removeListener], checking
   /// if [hasListeners] is false after calling `super.removeListener()`, and if
   /// so, stopping that same work.
+  ///
+  /// This method returns false if [dispose] has been called.
   @protected
-  bool get hasListeners {
-    assert(_debugAssertNotDisposed());
-    return _count > 0;
-  }
+  bool get hasListeners => _count > 0;
 
   /// Register a closure to be called when the object changes.
   ///
@@ -181,7 +213,15 @@ class ChangeNotifier implements Listenable {
   ///    the list of closures that are notified when the object changes.
   @override
   void addListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ChangeNotifier',
+        object: this,
+      );
+      _creationDispatched = true;
+    }
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -208,20 +248,23 @@ class ChangeNotifier implements Listenable {
       final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(_count, null);
 
       // Listeners before the index are at the same place.
-      for (int i = 0; i < index; i++)
+      for (int i = 0; i < index; i++) {
         newListeners[i] = _listeners[i];
+      }
 
       // Listeners after the index move towards the start of the list.
-      for (int i = index; i < _count; i++)
+      for (int i = index; i < _count; i++) {
         newListeners[i] = _listeners[i + 1];
+      }
 
       _listeners = newListeners;
     } else {
       // When there are more listeners than half the length of the list, we only
       // shift our listeners, so that we avoid to reallocate memory for the
       // whole list.
-      for (int i = index; i < _count; i++)
+      for (int i = index; i < _count; i++) {
         _listeners[i] = _listeners[i + 1];
+      }
       _listeners[_count] = null;
     }
   }
@@ -271,13 +314,26 @@ class ChangeNotifier implements Listenable {
   /// [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
+  ///
+  /// This method does not notify listeners, and clears the listener list once
+  /// it is called. Consumers of this class must decide on whether to notify
+  /// listeners or not immediately before disposal.
   @mustCallSuper
   void dispose() {
-    assert(_debugAssertNotDisposed());
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    assert(
+      _notificationCallStackDepth == 0,
+      'The "dispose()" method on $this was called during the call to '
+      '"notifyListeners()". This is likely to cause errors since it modifies '
+      'the list of listeners while the list is being used.',
+    );
     assert(() {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _listeners = _emptyListeners;
     _count = 0;
   }
@@ -301,9 +357,10 @@ class ChangeNotifier implements Listenable {
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
-    assert(_debugAssertNotDisposed());
-    if (_count == 0)
+    assert(ChangeNotifier.debugAssertNotDisposed(this));
+    if (_count == 0) {
       return;
+    }
 
     // To make sure that listeners removed during this iteration are not called,
     // we set them to null, but we don't shrink the list right away.
@@ -411,7 +468,16 @@ class _MergingListenable extends Listenable {
 /// listeners.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
-  ValueNotifier(this._value);
+  ValueNotifier(this._value) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ValueNotifier',
+        object: this,
+      );
+    }
+    _creationDispatched = true;
+  }
 
   /// The current value stored in this notifier.
   ///
@@ -422,8 +488,9 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   T get value => _value;
   T _value;
   set value(T newValue) {
-    if (_value == newValue)
+    if (_value == newValue) {
       return;
+    }
     _value = newValue;
     notifyListeners();
   }

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
+import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -19,7 +18,6 @@ import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -37,7 +35,6 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
     timestamp: 0
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
       id: '1',
@@ -45,36 +42,6 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
       name: '',
     ),
   ],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kPauseException,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[
-    vm_service.Breakpoint(
-      breakpointNumber: 123,
-      id: 'test-breakpoint',
-      location: vm_service.SourceLocation(
-        tokenPos: 0,
-        script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
-      ),
-      enabled: true,
-      resolved: true,
-    ),
-  ],
-  exceptionPauseMode: null,
-  libraries: <vm_service.LibraryRef>[],
   livePorts: 0,
   name: 'test',
   number: '1',
@@ -456,10 +423,10 @@ void main() {
 }
 
 FlutterDriverService setUpDriverService({
-  Logger logger,
-  ProcessManager processManager,
-  FlutterVmService vmService,
-  DevtoolsLauncher devtoolsLauncher,
+  Logger? logger,
+  ProcessManager? processManager,
+  FlutterVmService? vmService,
+  DevtoolsLauncher? devtoolsLauncher,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
@@ -472,14 +439,14 @@ FlutterDriverService setUpDriverService({
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
     vmServiceConnector: (Uri httpUri, {
-      ReloadSources reloadSources,
-      Restart restart,
-      CompileExpression compileExpression,
-      GetSkSLMethod getSkSLMethod,
-      PrintStructuredErrorLogMethod printStructuredErrorLogMethod,
-      Object compression,
-      Device device,
-      @required Logger logger,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+      Device? device,
+      required Logger logger,
     }) async {
       assert(logger != null);
       if (httpUri.scheme != 'http') {
@@ -488,7 +455,7 @@ FlutterDriverService setUpDriverService({
       if (httpUri.path.endsWith('/ws')) {
         fail('Expected HTTP uri to not contain `/ws`, found $httpUri');
       }
-      return vmService;
+      return vmService!;
     }
   );
 }
@@ -501,8 +468,8 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   @override
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
-    BuildInfo buildInfo,
-    File applicationBinary,
+    BuildInfo? buildInfo,
+    File? applicationBinary,
   }) async => applicationPackage;
 }
 
@@ -536,21 +503,21 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage app,
+    covariant ApplicationPackage? app,
     bool includePastLogs = false,
   }) async => NoOpDeviceLogReader('test');
 
   @override
   Future<LaunchResult> startApp(
     covariant ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
-  }) async {
+    String? userIdentifier,
+    }) async {
     if (failOnce) {
       failOnce = false;
       return LaunchResult.failed();
@@ -559,13 +526,13 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
     didStopApp = true;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String userIdentifier}) async {
+  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
     didUninstallApp = true;
     return true;
   }
@@ -586,10 +553,10 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri observatoryUri, {
-    @required Logger logger,
-    int hostPort,
-    bool ipv6,
-    bool disableServiceAuthCodes,
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
     bool cacheStartupProfile = false,
   }) async {
     started = true;
@@ -606,7 +573,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   final Completer<void> _processStarted = Completer<void>();
 
   @override
-  Future<void> launch(Uri vmServiceUri, {List<String> additionalArguments}) {
+  Future<void> launch(Uri vmServiceUri, {List<String>? additionalArguments}) {
     _processStarted.complete();
     return Completer<void>().future;
   }

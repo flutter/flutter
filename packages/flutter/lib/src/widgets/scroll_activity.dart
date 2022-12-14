@@ -7,9 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -246,6 +244,7 @@ class ScrollDragController implements Drag {
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
+       _kind = details.kind,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
@@ -382,8 +381,9 @@ class ScrollDragController implements Drag {
     if (offset == 0.0) {
       return;
     }
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       offset = -offset;
+    }
     delegate.applyUserOffset(offset);
   }
 
@@ -394,8 +394,9 @@ class ScrollDragController implements Drag {
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
     double velocity = -details.primaryVelocity!;
-    if (_reversed) // e.g. an AxisDirection.up scrollable
+    if (_reversed) {
       velocity = -velocity;
+    }
     _lastDetails = details;
 
     if (_retainMomentum) {
@@ -424,6 +425,8 @@ class ScrollDragController implements Drag {
     onDragCanceled?.call();
   }
 
+  /// The type of input device driving the drag.
+  final PointerDeviceKind? _kind;
   /// The most recently observed [DragStartDetails], [DragUpdateDetails], or
   /// [DragEndDetails] object.
   dynamic get lastDetails => _lastDetails;
@@ -483,7 +486,7 @@ class DragScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  bool get shouldIgnorePointer => _controller?._kind != PointerDeviceKind.trackpad;
 
   @override
   bool get isScrolling => true;
@@ -526,6 +529,7 @@ class BallisticScrollActivity extends ScrollActivity {
     super.delegate,
     Simulation simulation,
     TickerProvider vsync,
+    this.shouldIgnorePointer,
   ) {
     _controller = AnimationController.unbounded(
       debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
@@ -549,8 +553,9 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _tick() {
-    if (!applyMoveTo(_controller.value))
+    if (!applyMoveTo(_controller.value)) {
       delegate.goIdle();
+    }
   }
 
   /// Move the position to the given location.
@@ -575,7 +580,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => true;
+  final bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;
@@ -643,8 +648,9 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (delegate.setPixels(_controller.value) != 0.0)
+    if (delegate.setPixels(_controller.value) != 0.0) {
       delegate.goIdle();
+    }
   }
 
   void _end() {

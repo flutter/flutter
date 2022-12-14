@@ -9,6 +9,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of [MaterialBanner] widgets.
 ///
 /// Descendant widgets obtain the current [MaterialBannerThemeData] object using
@@ -32,6 +35,9 @@ class MaterialBannerThemeData with Diagnosticable {
   /// [ThemeData.bannerTheme].
   const MaterialBannerThemeData({
     this.backgroundColor,
+    this.surfaceTintColor,
+    this.shadowColor,
+    this.dividerColor,
     this.contentTextStyle,
     this.elevation,
     this.padding,
@@ -40,6 +46,15 @@ class MaterialBannerThemeData with Diagnosticable {
 
   /// The background color of a [MaterialBanner].
   final Color? backgroundColor;
+
+  /// Overrides the default value of [MaterialBanner.surfaceTintColor].
+  final Color? surfaceTintColor;
+
+  /// Overrides the default value of [MaterialBanner.shadowColor].
+  final Color? shadowColor;
+
+  /// Overrides the default value of [MaterialBanner.dividerColor].
+  final Color? dividerColor;
 
   /// Used to configure the [DefaultTextStyle] for the [MaterialBanner.content]
   /// widget.
@@ -60,6 +75,9 @@ class MaterialBannerThemeData with Diagnosticable {
   /// new values.
   MaterialBannerThemeData copyWith({
     Color? backgroundColor,
+    Color? surfaceTintColor,
+    Color? shadowColor,
+    Color? dividerColor,
     TextStyle? contentTextStyle,
     double? elevation,
     EdgeInsetsGeometry? padding,
@@ -67,6 +85,9 @@ class MaterialBannerThemeData with Diagnosticable {
   }) {
     return MaterialBannerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
+      shadowColor: shadowColor ?? this.shadowColor,
+      dividerColor: dividerColor ?? this.dividerColor,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
       elevation: elevation ?? this.elevation,
       padding: padding ?? this.padding,
@@ -83,6 +104,9 @@ class MaterialBannerThemeData with Diagnosticable {
     assert(t != null);
     return MaterialBannerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
@@ -93,6 +117,9 @@ class MaterialBannerThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     backgroundColor,
+    surfaceTintColor,
+    shadowColor,
+    dividerColor,
     contentTextStyle,
     elevation,
     padding,
@@ -101,24 +128,32 @@ class MaterialBannerThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is MaterialBannerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.contentTextStyle == contentTextStyle
-        && other.elevation == elevation
-        && other.padding == padding
-        && other.leadingPadding == leadingPadding;
+      && other.backgroundColor == backgroundColor
+      && other.surfaceTintColor == surfaceTintColor
+      && other.shadowColor == shadowColor
+      && other.dividerColor == dividerColor
+      && other.contentTextStyle == contentTextStyle
+      && other.elevation == elevation
+      && other.padding == padding
+      && other.leadingPadding == leadingPadding;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('leadingPadding', leadingPadding, defaultValue: null));
   }

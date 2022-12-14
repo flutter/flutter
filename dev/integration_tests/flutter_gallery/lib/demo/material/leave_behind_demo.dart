@@ -131,6 +131,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     } else {
       body = Scrollbar(
         child: ListView(
+          primary: true,
           children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
             return _LeaveBehindListItem(
               confirmDismiss: _confirmDismiss,
@@ -221,10 +222,11 @@ class _LeaveBehindListItem extends StatelessWidget {
         key: ObjectKey(item),
         direction: dismissDirection,
         onDismissed: (DismissDirection direction) {
-          if (direction == DismissDirection.endToStart)
+          if (direction == DismissDirection.endToStart) {
             _handleArchive();
-          else
+          } else {
             _handleDelete();
+          }
         },
         confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
           switch(dismissDirection) {
@@ -275,7 +277,6 @@ class _LeaveBehindListItem extends StatelessWidget {
   Future<bool?> _showConfirmationDialog(BuildContext context, String action) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Do you want to $action this item?'),

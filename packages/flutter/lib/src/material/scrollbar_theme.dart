@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [Scrollbar] widgets.
 ///
 /// Descendant widgets obtain the current [ScrollbarThemeData] object with
@@ -49,7 +52,7 @@ class ScrollbarThemeData with Diagnosticable {
     this.isAlwaysShown,
     @Deprecated(
       'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     this.showTrackOnHover,
   }) : assert(
@@ -79,7 +82,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// descendant [Scrollbar] widgets.
   @Deprecated(
     'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-    'This feature was deprecated after v2.9.0-1.0.pre.',
+    'This feature was deprecated after v3.4.0-19.0.pre.',
   )
   final bool? showTrackOnHover;
 
@@ -158,7 +161,6 @@ class ScrollbarThemeData with Diagnosticable {
     MaterialStateProperty<bool?>? thumbVisibility,
     MaterialStateProperty<double?>? thickness,
     MaterialStateProperty<bool?>? trackVisibility,
-    bool? showTrackOnHover,
     bool? interactive,
     Radius? radius,
     MaterialStateProperty<Color?>? thumbColor,
@@ -172,6 +174,12 @@ class ScrollbarThemeData with Diagnosticable {
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     bool? isAlwaysShown,
+
+    @Deprecated(
+      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+      'This feature was deprecated after v3.4.0-19.0.pre.',
+    )
+    bool? showTrackOnHover,
   }) {
     return ScrollbarThemeData(
       thumbVisibility: thumbVisibility ?? this.thumbVisibility,
@@ -198,16 +206,16 @@ class ScrollbarThemeData with Diagnosticable {
   static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
     assert(t != null);
     return ScrollbarThemeData(
-      thumbVisibility: _lerpProperties<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
-      thickness: _lerpProperties<double?>(a?.thickness, b?.thickness, t, lerpDouble),
-      trackVisibility: _lerpProperties<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
+      thumbVisibility: MaterialStateProperty.lerp<bool?>(a?.thumbVisibility, b?.thumbVisibility, t, _lerpBool),
+      thickness: MaterialStateProperty.lerp<double?>(a?.thickness, b?.thickness, t, lerpDouble),
+      trackVisibility: MaterialStateProperty.lerp<bool?>(a?.trackVisibility, b?.trackVisibility, t, _lerpBool),
       showTrackOnHover: _lerpBool(a?.showTrackOnHover, b?.showTrackOnHover, t),
       isAlwaysShown: _lerpBool(a?.isAlwaysShown, b?.isAlwaysShown, t),
       interactive: _lerpBool(a?.interactive, b?.interactive, t),
       radius: Radius.lerp(a?.radius, b?.radius, t),
-      thumbColor: _lerpProperties<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
-      trackColor: _lerpProperties<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
-      trackBorderColor: _lerpProperties<Color?>(a?.trackBorderColor, b?.trackBorderColor, t, Color.lerp),
+      thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
+      trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
+      trackBorderColor: MaterialStateProperty.lerp<Color?>(a?.trackBorderColor, b?.trackBorderColor, t, Color.lerp),
       crossAxisMargin: lerpDouble(a?.crossAxisMargin, b?.crossAxisMargin, t),
       mainAxisMargin: lerpDouble(a?.mainAxisMargin, b?.mainAxisMargin, t),
       minThumbLength: lerpDouble(a?.minThumbLength, b?.minThumbLength, t),
@@ -233,10 +241,12 @@ class ScrollbarThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ScrollbarThemeData
       && other.thumbVisibility == thumbVisibility
       && other.thickness == thickness
@@ -269,34 +279,6 @@ class ScrollbarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<double>('crossAxisMargin', crossAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('mainAxisMargin', mainAxisMargin, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('minThumbLength', minThumbLength, defaultValue: null));
-  }
-
-  static MaterialStateProperty<T>? _lerpProperties<T>(
-    MaterialStateProperty<T>? a,
-    MaterialStateProperty<T>? b,
-    double t,
-    T Function(T?, T?, double) lerpFunction,
-  ) {
-    // Avoid creating a _LerpProperties object for a common case.
-    if (a == null && b == null)
-      return null;
-    return _LerpProperties<T>(a, b, t, lerpFunction);
-  }
-}
-
-class _LerpProperties<T> implements MaterialStateProperty<T> {
-  const _LerpProperties(this.a, this.b, this.t, this.lerpFunction);
-
-  final MaterialStateProperty<T>? a;
-  final MaterialStateProperty<T>? b;
-  final double t;
-  final T Function(T?, T?, double) lerpFunction;
-
-  @override
-  T resolve(Set<MaterialState> states) {
-    final T? resolvedA = a?.resolve(states);
-    final T? resolvedB = b?.resolve(states);
-    return lerpFunction(resolvedA, resolvedB, t);
   }
 }
 

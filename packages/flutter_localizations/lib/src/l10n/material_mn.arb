@@ -130,5 +130,6 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Тушаал",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Цэсний талбарын цэс",
+  "currentDateLabel": "Date of today"
 }

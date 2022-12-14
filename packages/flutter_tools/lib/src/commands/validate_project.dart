@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../project.dart';
@@ -9,31 +11,26 @@ import '../project_validator.dart';
 import '../project_validator_result.dart';
 import '../runner/flutter_command.dart';
 
-class ValidateProjectCommand extends FlutterCommand {
-  ValidateProjectCommand({
+class ValidateProject {
+  ValidateProject({
     required this.fileSystem,
     required this.logger,
     required this.allProjectValidators,
-    this.verbose = false
+    required this.userPath,
+    required this.processManager,
+    this.verbose = false,
+    this.machine = false,
   });
 
   final FileSystem fileSystem;
   final Logger logger;
   final bool verbose;
+  final bool machine;
+  final String userPath;
   final List<ProjectValidator> allProjectValidators;
+  final ProcessManager processManager;
 
-  @override
-  final String name = 'validate-project';
-
-  @override
-  final String description = 'Show information about the current project.';
-
-  @override
-  final String category = FlutterCommandCategory.project;
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    final String userPath = getUserPath();
+  Future<FlutterCommandResult> run() async {
     final Directory workingDirectory = userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
 
     final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
@@ -41,6 +38,9 @@ class ValidateProjectCommand extends FlutterCommand {
 
     bool hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
+      if (validator.machineOutput != machine) {
+        continue;
+      }
       if (!results.containsKey(validator) && validator.supportsProject(project)) {
         results[validator] = validator.start(project).catchError((Object exception, StackTrace trace) {
           hasCrash = true;
@@ -50,15 +50,30 @@ class ValidateProjectCommand extends FlutterCommand {
     }
 
     final StringBuffer buffer = StringBuffer();
-    final List<String> resultsString = <String>[];
-    for (final ProjectValidator validator in results.keys) {
-      if (results[validator] != null) {
-        resultsString.add(validator.title);
-        addResultString(validator.title, await results[validator], resultsString);
+    if (machine) {
+      // Print properties
+      buffer.write('{\n');
+      for (final Future<List<ProjectValidatorResult>> resultListFuture in results.values) {
+        final List<ProjectValidatorResult> resultList = await resultListFuture;
+        int count = 0;
+        for (final ProjectValidatorResult result in resultList) {
+          count++;
+          buffer.write('  "${result.name}": ${result.value}${count < resultList.length ? ',' : ''}\n');
+        }
       }
+      buffer.write('}');
+      logger.printStatus(buffer.toString());
+    } else {
+      final List<String> resultsString = <String>[];
+      for (final ProjectValidator validator in results.keys) {
+        if (results[validator] != null) {
+          resultsString.add(validator.title);
+          addResultString(validator.title, await results[validator], resultsString);
+        }
+      }
+      buffer.writeAll(resultsString, '\n');
+      logger.printBox(buffer.toString());
     }
-    buffer.writeAll(resultsString, '\n');
-    logger.printBox(buffer.toString());
 
     if (hasCrash) {
       return const FlutterCommandResult(ExitStatus.fail);
@@ -81,6 +96,7 @@ class ValidateProjectCommand extends FlutterCommand {
       case StatusProjectValidator.error:
         icon = '[✗]';
         break;
+      case StatusProjectValidator.info:
       case StatusProjectValidator.success:
         icon = '[✓]';
         break;
@@ -93,9 +109,5 @@ class ValidateProjectCommand extends FlutterCommand {
     }
 
     return '$icon $result';
-  }
-
-  String getUserPath(){
-    return (argResults == null || argResults!.rest.isEmpty) ? '' : argResults!.rest[0];
   }
 }

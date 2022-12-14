@@ -130,5 +130,6 @@
   "keyboardKeySpace": "Бос орын",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Мәзір жолағының мәзірі",
+  "currentDateLabel": "Date of today"
 }

@@ -37,7 +37,7 @@ const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
 ///
-/// When used as [CupertinoTabScaffold.tabBar], by default `CupertinoTabBar` has
+/// When used as [CupertinoTabScaffold.tabBar], by default [CupertinoTabBar] has
 /// its text scale factor set to 1.0 and does not respond to text scale factor
 /// changes from the operating system, to match the native iOS behavior. To override
 /// this behavior, wrap each of the `navigationBar`'s components inside a [MediaQuery]
@@ -156,7 +156,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final double bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     final Color backgroundColor = CupertinoDynamicColor.resolve(
       this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
@@ -230,22 +230,26 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         _wrapActiveItem(
           context,
           Expanded(
-            child: Semantics(
-              selected: active,
-              hint: localizations.tabSemanticsLabel(
-                tabIndex: index + 1,
-                tabCount: items.length,
-              ),
-              child: MouseRegion(
-                cursor:  kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onTap == null ? null : () { onTap!(index); },
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: _buildSingleTabItem(items[index], active),
+            // Make tab items part of the EditableText tap region so that
+            // switching tabs doesn't unfocus text fields.
+            child: TextFieldTapRegion(
+              child: Semantics(
+                selected: active,
+                hint: localizations.tabSemanticsLabel(
+                  tabIndex: index + 1,
+                  tabCount: items.length,
+                ),
+                child: MouseRegion(
+                  cursor:  kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onTap == null ? null : () { onTap!(index); },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: _buildSingleTabItem(items[index], active),
+                      ),
                     ),
                   ),
                 ),
@@ -271,8 +275,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Change the active tab item's icon and title colors to active.
   Widget _wrapActiveItem(BuildContext context, Widget item, { required bool active }) {
-    if (!active)
+    if (!active) {
       return item;
+    }
 
     final Color activeColor = CupertinoDynamicColor.resolve(
       this.activeColor ?? CupertinoTheme.of(context).primaryColor,

@@ -68,8 +68,9 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   }
 
   Decoration? getIndicator() {
-    if (!_customIndicator)
+    if (!_customIndicator) {
       return const UnderlineTabIndicator();
+    }
 
     switch(_demoStyle) {
       case TabsDemoStyle.iconsAndText:

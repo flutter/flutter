@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -28,7 +26,6 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -40,10 +37,9 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(
     kind: vm_service.EventKind.kResume,
-    timestamp: 0
+    timestamp: 0,
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[],
   livePorts: 0,
   name: 'wrong name',
@@ -57,9 +53,9 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
 
 void main() {
   group('fuchsia device', () {
-    MemoryFileSystem memoryFileSystem;
-    File sshConfig;
-    FakeProcessManager processManager;
+    late MemoryFileSystem memoryFileSystem;
+    late File sshConfig;
+    late FakeProcessManager processManager;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
@@ -87,8 +83,10 @@ void main() {
       expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     });
 
-    testWithoutContext('lists nothing when workflow cannot list devices', () async {
-      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(canListDevices: false);
+    testWithoutContext('lists nothing when workflow cannot list devices',
+        () async {
+      final FakeFuchsiaWorkflow fuchsiaWorkflow =
+          FakeFuchsiaWorkflow(canListDevices: false);
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
         platform: FakePlatform(),
         fuchsiaSdk: FakeFuchsiaSdk(devices: 'ignored'),
@@ -102,7 +100,9 @@ void main() {
 
     testWithoutContext('can parse ffx output for single device', () async {
       final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow();
-      final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices: '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel');
+      final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(
+          devices:
+              '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
         platform: FakePlatform(environment: <String, String>{}),
         fuchsiaSdk: fuchsiaSdk,
@@ -118,10 +118,10 @@ void main() {
 
     testWithoutContext('can parse ffx output for multiple devices', () async {
       final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow();
-      final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices:
-        '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel\n'
-        '2001:0db8:85a3:0000:0000:8a2e:0370:7335 foo-bar-fiz-buzz'
-      );
+      final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(
+          devices:
+              '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel\n'
+              '2001:0db8:85a3:0000:0000:8a2e:0370:7335 foo-bar-fiz-buzz');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
         platform: FakePlatform(),
         fuchsiaSdk: fuchsiaSdk,
@@ -138,7 +138,8 @@ void main() {
     });
 
     testWithoutContext('can parse junk output from ffx', () async {
-      final FakeFuchsiaWorkflow fuchsiaWorkflow = FakeFuchsiaWorkflow(canListDevices: false);
+      final FakeFuchsiaWorkflow fuchsiaWorkflow =
+          FakeFuchsiaWorkflow(canListDevices: false);
       final FakeFuchsiaSdk fuchsiaSdk = FakeFuchsiaSdk(devices: 'junk');
       final FuchsiaDevices fuchsiaDevices = FuchsiaDevices(
         platform: FakePlatform(),
@@ -163,7 +164,8 @@ void main() {
 
     testWithoutContext('default capabilities', () async {
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
-      final FlutterProject project = FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
+      final FlutterProject project =
+          FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
       memoryFileSystem.directory('fuchsia').createSync(recursive: true);
       memoryFileSystem.file('pubspec.yaml').createSync();
 
@@ -181,7 +183,8 @@ void main() {
 
     testWithoutContext('supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
-      final FlutterProject project = FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
+      final FlutterProject project =
+          FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
       memoryFileSystem.directory('fuchsia').createSync(recursive: true);
       memoryFileSystem.file('pubspec.yaml').createSync();
 
@@ -190,13 +193,15 @@ void main() {
 
     testWithoutContext('not supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
-      final FlutterProject project = FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
+      final FlutterProject project =
+          FlutterProject.fromDirectoryTest(memoryFileSystem.currentDirectory);
       memoryFileSystem.file('pubspec.yaml').createSync();
 
       expect(device.isSupportedForProject(project), false);
     });
 
-    testUsingContext('targetPlatform does not throw when sshConfig is missing', () async {
+    testUsingContext('targetPlatform does not throw when sshConfig is missing',
+        () async {
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
 
       expect(await device.targetPlatform, TargetPlatform.fuchsia_arm64);
@@ -236,8 +241,15 @@ void main() {
 
     testUsingContext('hostAddress parsing works', () async {
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/ssh_config', 'id', r'echo $SSH_CONNECTION'],
-        stdout: 'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
+        command: <String>[
+          'ssh',
+          '-F',
+          '/ssh_config',
+          'id',
+          r'echo $SSH_CONNECTION'
+        ],
+        stdout:
+            'fe80::8c6c:2fff:fe3d:c5e1%ethp0003 50666 fe80::5054:ff:fe63:5e7a%ethp0003 22',
       ));
 
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'device');
@@ -248,9 +260,16 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('hostAddress parsing throws tool error on failure', () async {
+    testUsingContext('hostAddress parsing throws tool error on failure',
+        () async {
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/ssh_config', 'id', r'echo $SSH_CONNECTION'],
+        command: <String>[
+          'ssh',
+          '-F',
+          '/ssh_config',
+          'id',
+          r'echo $SSH_CONNECTION'
+        ],
         exitCode: 1,
       ));
 
@@ -262,9 +281,16 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('hostAddress parsing throws tool error on empty response', () async {
+    testUsingContext('hostAddress parsing throws tool error on empty response',
+        () async {
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/ssh_config', 'id', r'echo $SSH_CONNECTION'],
+        command: <String>[
+          'ssh',
+          '-F',
+          '/ssh_config',
+          'id',
+          r'echo $SSH_CONNECTION'
+        ],
       ));
 
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'device');
@@ -277,8 +303,8 @@ void main() {
   });
 
   group('displays friendly error when', () {
-    File artifactFile;
-    FakeProcessManager processManager;
+    late File artifactFile;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -287,50 +313,68 @@ void main() {
 
     testUsingContext('No vmservices found', () async {
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/artifact', 'id', 'find /hub -name vmservice-port'],
+        command: <String>[
+          'ssh',
+          '-F',
+          '/artifact',
+          'id',
+          'find /hub -name vmservice-port'
+        ],
       ));
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'device');
 
-      await expectLater(device.servicePorts, throwsToolExit(message: 'No Dart Observatories found. Are you running a debug build?'));
+      await expectLater(
+          device.servicePorts,
+          throwsToolExit(
+              message:
+                  'No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
-        sshConfig: artifactFile,
-        ffx: artifactFile,
-      ),
+            sshConfig: artifactFile,
+            ffx: artifactFile,
+          ),
       FuchsiaSdk: () => FakeFuchsiaSdk(),
     });
 
     group('device logs', () {
       const String exampleUtcLogs = '''
-[2018-11-09 01:27:45][3][297950920][log] INFO: example_app.cmx(flutter): Error doing thing
+[2018-11-09 01:27:45][3][297950920][log] INFO: example_app.cm(flutter): Error doing thing
 [2018-11-09 01:27:58][46257][46269][foo] INFO: Using a thing
 [2018-11-09 01:29:58][46257][46269][foo] INFO: Blah blah blah
-[2018-11-09 01:29:58][46257][46269][foo] INFO: other_app.cmx(flutter): Do thing
+[2018-11-09 01:29:58][46257][46269][foo] INFO: other_app.cm(flutter): Do thing
 [2018-11-09 01:30:02][41175][41187][bar] INFO: Invoking a bar
-[2018-11-09 01:30:12][52580][52983][log] INFO: example_app.cmx(flutter): Did thing this time
+[2018-11-09 01:30:12][52580][52983][log] INFO: example_app.cm(flutter): Did thing this time
 
   ''';
-      FakeProcessManager processManager;
-      File ffx;
-      File sshConfig;
+      late FakeProcessManager processManager;
+      late File ffx;
+      late File sshConfig;
 
       setUp(() {
-       processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.empty();
         final FileSystem memoryFileSystem = MemoryFileSystem.test();
         ffx = memoryFileSystem.file('ffx')..writeAsStringSync('\n');
-        sshConfig = memoryFileSystem.file('ssh_config')..writeAsStringSync('\n');
+        sshConfig = memoryFileSystem.file('ssh_config')
+          ..writeAsStringSync('\n');
       });
 
       testUsingContext('can be parsed for an app', () async {
         final Completer<void> lock = Completer<void>();
         processManager.addCommand(FakeCommand(
-          command: const <String>['ssh', '-F', '/ssh_config', 'id', 'log_listener --clock Local'],
+          command: const <String>[
+            'ssh',
+            '-F',
+            '/ssh_config',
+            'id',
+            'log_listener --clock Local'
+          ],
           stdout: exampleUtcLogs,
           completer: lock,
         ));
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
+        final DeviceLogReader reader =
+            device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
         reader.logLines.listen((String line) {
           logLines.add(line);
@@ -355,12 +399,19 @@ void main() {
       testUsingContext('cuts off prior logs', () async {
         final Completer<void> lock = Completer<void>();
         processManager.addCommand(FakeCommand(
-          command: const <String>['ssh', '-F', '/ssh_config', 'id', 'log_listener --clock Local'],
+          command: const <String>[
+            'ssh',
+            '-F',
+            '/ssh_config',
+            'id',
+            'log_listener --clock Local'
+          ],
           stdout: exampleUtcLogs,
           completer: lock,
         ));
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
+        final DeviceLogReader reader =
+            device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
         reader.logLines.listen((String line) {
           logLines.add(line);
@@ -376,13 +427,20 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => processManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 29, 45)),
-        FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, ffx: ffx),
+        FuchsiaArtifacts: () =>
+            FuchsiaArtifacts(sshConfig: sshConfig, ffx: ffx),
       });
 
       testUsingContext('can be parsed for all apps', () async {
         final Completer<void> lock = Completer<void>();
         processManager.addCommand(FakeCommand(
-          command: const <String>['ssh', '-F', '/ssh_config', 'id', 'log_listener --clock Local'],
+          command: const <String>[
+            'ssh',
+            '-F',
+            '/ssh_config',
+            'id',
+            'log_listener --clock Local'
+          ],
           stdout: exampleUtcLogs,
           completer: lock,
         ));
@@ -407,13 +465,14 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => processManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 25, 45)),
-        FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, ffx: ffx),
+        FuchsiaArtifacts: () =>
+            FuchsiaArtifacts(sshConfig: sshConfig, ffx: ffx),
       });
     });
   });
 
   group('screenshot', () {
-    FakeProcessManager processManager;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -432,8 +491,8 @@ void main() {
       expect(device.supportsScreenshot, false);
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
-        operatingSystem: 'windows',
-      ),
+            operatingSystem: 'windows',
+          ),
     });
 
     test("takeScreenshot throws if file isn't .ppm", () async {
@@ -441,43 +500,38 @@ void main() {
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
         throwsA(isA<Exception>().having(
-          (Exception exception) => exception.toString(),
-          'message',
-          contains('file.invalid must be a .ppm file')
-        )),
+            (Exception exception) => exception.toString(),
+            'message',
+            contains('file.invalid must be a .ppm file'))),
       );
     });
 
     testUsingContext('takeScreenshot throws if screencap failed', () async {
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'ssh',
-          '-F',
-          '/fuchsia/out/default/.ssh',
-          '0.0.0.0',
-          'screencap > /tmp/screenshot.ppm',
-        ],
-        exitCode: 1,
-        stderr: '<error-message>'
-      ));
+      processManager.addCommand(const FakeCommand(command: <String>[
+        'ssh',
+        '-F',
+        '/fuchsia/out/default/.ssh',
+        '0.0.0.0',
+        'screencap > /tmp/screenshot.ppm',
+      ], exitCode: 1, stderr: '<error-message>'));
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
 
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
         throwsA(isA<Exception>().having(
-          (Exception exception) => exception.toString(),
-          'message',
-          contains('Could not take a screenshot on device tester:\n<error-message>')
-        )),
+            (Exception exception) => exception.toString(),
+            'message',
+            contains(
+                'Could not take a screenshot on device tester:\n<error-message>'))),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-        },
-      ),
+            environment: <String, String>{
+              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+            },
+          ),
     });
 
     testUsingContext('takeScreenshot throws if scp failed', () async {
@@ -515,22 +569,24 @@ void main() {
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
         throwsA(isA<Exception>().having(
-          (Exception exception) => exception.toString(),
-          'message',
-          contains('Failed to copy screenshot from device:\n<error-message>')
-        )),
+            (Exception exception) => exception.toString(),
+            'message',
+            contains(
+                'Failed to copy screenshot from device:\n<error-message>'))),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-        },
-      ),
+            environment: <String, String>{
+              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+            },
+          ),
     });
 
-    testUsingContext("takeScreenshot prints error if can't delete file from device", () async {
+    testUsingContext(
+        "takeScreenshot prints error if can't delete file from device",
+        () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -565,16 +621,17 @@ void main() {
       await device.takeScreenshot(globals.fs.file('file.ppm'));
       expect(
         testLogger.errorText,
-        contains('Failed to delete screenshot.ppm from the device:\n<error-message>'),
+        contains(
+            'Failed to delete screenshot.ppm from the device:\n<error-message>'),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-        },
-      ),
+            environment: <String, String>{
+              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+            },
+          ),
     }, testOn: 'posix');
 
     testUsingContext('takeScreenshot returns', () async {
@@ -607,39 +664,55 @@ void main() {
         ],
       ));
 
-      expect(() => device.takeScreenshot(globals.fs.file('file.ppm')), returnsNormally);
+      expect(() => device.takeScreenshot(globals.fs.file('file.ppm')),
+          returnsNormally);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => MemoryFileSystem.test(),
       Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-        },
-      ),
+            environment: <String, String>{
+              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+            },
+          ),
     });
   });
 
   group('portForwarder', () {
-    FakeProcessManager processManager;
-    File sshConfig;
+    late FakeProcessManager processManager;
+    late File sshConfig;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
-      sshConfig = MemoryFileSystem.test().file('irrelevant')..writeAsStringSync('\n');
+      sshConfig = MemoryFileSystem.test().file('irrelevant')
+        ..writeAsStringSync('\n');
     });
 
-    testUsingContext('`unforward` prints stdout and stderr if ssh command failed', () async {
+    testUsingContext(
+        '`unforward` prints stdout and stderr if ssh command failed', () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/irrelevant', '-O', 'cancel', '-vvv', '-L', '0:127.0.0.1:1', 'id'],
+        command: <String>[
+          'ssh',
+          '-F',
+          '/irrelevant',
+          '-O',
+          'cancel',
+          '-vvv',
+          '-L',
+          '0:127.0.0.1:1',
+          'id'
+        ],
         exitCode: 1,
         stdout: '<stdout>',
         stderr: '<stderr>',
       ));
 
       await expectLater(
-        () => device.portForwarder.unforward(ForwardedPort(/*hostPort=*/ 0, /*devicePort=*/ 1)),
-        throwsToolExit(message: 'Unforward command failed:\nstdout: <stdout>\nstderr: <stderr>'),
+        () => device.portForwarder
+            .unforward(ForwardedPort(/*hostPort=*/ 0, /*devicePort=*/ 1)),
+        throwsToolExit(
+            message:
+                'Unforward command failed:\nstdout: <stdout>\nstderr: <stderr>'),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
@@ -647,36 +720,37 @@ void main() {
     });
   });
 
-
   group('FuchsiaIsolateDiscoveryProtocol', () {
-    Future<Uri> findUri(List<FlutterView> views, String expectedIsolateName) async {
+    Future<Uri> findUri(
+        List<FlutterView> views, String expectedIsolateName) async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
             method: kListViewsMethod,
             jsonResponse: <String, Object>{
               'views': <Object>[
-                for (FlutterView view in views)
-                  view.toJson(),
+                for (FlutterView view in views) view.toJson(),
               ],
             },
           ),
         ],
         httpAddress: Uri.parse('example'),
       );
-      final MockFuchsiaDevice fuchsiaDevice = MockFuchsiaDevice('123', const NoOpDevicePortForwarder(), false);
+      final MockFuchsiaDevice fuchsiaDevice =
+          MockFuchsiaDevice('123', const NoOpDevicePortForwarder(), false);
       final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
-        FuchsiaIsolateDiscoveryProtocol(
+          FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri, bool enableServiceAuthCodes) => null,
+        (Device device, Uri uri, bool enableServiceAuthCodes) async {},
         true, // only poll once.
       );
       return discoveryProtocol.uri;
     }
 
-    testUsingContext('can find flutter view with matching isolate name', () async {
+    testUsingContext('can find flutter view with matching isolate name',
+        () async {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<FlutterView>[
         // no ui isolate.
@@ -693,25 +767,29 @@ void main() {
         FlutterView(
           id: '3',
           uiIsolate: vm_service.Isolate.parse(<String, dynamic>{
-             ...fakeIsolate.toJson(),
+            ...fakeIsolate.toJson(),
             'name': expectedIsolateName,
           }),
         ),
       ], expectedIsolateName);
 
-      expect(uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
+      expect(
+          uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
     });
 
-    testUsingContext('can handle flutter view without matching isolate name', () async {
+    testUsingContext('can handle flutter view without matching isolate name',
+        () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<FlutterView>[
         // no ui isolate.
         FlutterView(id: '1', uiIsolate: fakeIsolate),
         // wrong name.
-        FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object>{
-           ...fakeIsolate.toJson(),
-          'name': 'wrong name',
-        })),
+        FlutterView(
+            id: '2',
+            uiIsolate: vm_service.Isolate.parse(<String, Object?>{
+              ...fakeIsolate.toJson(),
+              'name': 'wrong name',
+            })),
       ], expectedIsolateName);
 
       expect(uri, throwsException);
@@ -738,28 +816,32 @@ void main() {
       platform: FakePlatform(),
       operatingSystemUtils: globals.os,
     );
-    expect(artifacts.getArtifactPath(
+    expect(
+      artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.debug,
       ),
       contains('flutter_jit_runner'),
     );
-    expect(artifacts.getArtifactPath(
+    expect(
+      artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.profile,
       ),
       contains('flutter_aot_runner'),
     );
-    expect(artifacts.getArtifactPath(
+    expect(
+      artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.release,
       ),
       contains('flutter_aot_product_runner'),
     );
-    expect(artifacts.getArtifactPath(
+    expect(
+      artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.jitRelease,
@@ -769,11 +851,12 @@ void main() {
   });
 
   group('sdkNameAndVersion: ', () {
-    File sshConfig;
-    FakeProcessManager processManager;
+    late File sshConfig;
+    late FakeProcessManager processManager;
 
     setUp(() {
-      sshConfig = MemoryFileSystem.test().file('ssh_config')..writeAsStringSync('\n');
+      sshConfig = MemoryFileSystem.test().file('ssh_config')
+        ..writeAsStringSync('\n');
       processManager = FakeProcessManager.empty();
     });
 
@@ -787,11 +870,15 @@ void main() {
       FuchsiaSdk: () => FakeFuchsiaSdk(),
     });
 
-    testUsingContext('returns what we get from the device on success', () async {
-      processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/ssh_config', '123', 'cat /pkgfs/packages/build-info/0/data/version'],
-        stdout: 'version'
-      ));
+    testUsingContext('returns what we get from the device on success',
+        () async {
+      processManager.addCommand(const FakeCommand(command: <String>[
+        'ssh',
+        '-F',
+        '/ssh_config',
+        '123',
+        'cat /pkgfs/packages/build-info/0/data/version'
+      ], stdout: 'version'));
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
 
       expect(await device.sdkNameAndVersion, equals('Fuchsia version'));
@@ -803,7 +890,13 @@ void main() {
 
     testUsingContext('returns "Fuchsia" when device command fails', () async {
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/ssh_config', '123', 'cat /pkgfs/packages/build-info/0/data/version'],
+        command: <String>[
+          'ssh',
+          '-F',
+          '/ssh_config',
+          '123',
+          'cat /pkgfs/packages/build-info/0/data/version'
+        ],
         exitCode: 1,
       ));
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
@@ -815,9 +908,16 @@ void main() {
       FuchsiaSdk: () => FakeFuchsiaSdk(),
     });
 
-    testUsingContext('returns "Fuchsia" when device gives an empty result', () async {
+    testUsingContext('returns "Fuchsia" when device gives an empty result',
+        () async {
       processManager.addCommand(const FakeCommand(
-        command: <String>['ssh', '-F', '/ssh_config', '123', 'cat /pkgfs/packages/build-info/0/data/version'],
+        command: <String>[
+          'ssh',
+          '-F',
+          '/ssh_config',
+          '123',
+          'cat /pkgfs/packages/build-info/0/data/version'
+        ],
       ));
       final FuchsiaDevice device = FuchsiaDevice('123', name: 'device');
 
@@ -831,7 +931,7 @@ void main() {
 }
 
 class FuchsiaModulePackage extends ApplicationPackage {
-  FuchsiaModulePackage({@required this.name}) : super(id: name);
+  FuchsiaModulePackage({required this.name}) : super(id: name);
 
   @override
   final String name;
@@ -855,7 +955,8 @@ class MockFuchsiaDevice extends Fake implements FuchsiaDevice {
   final DevicePortForwarder portForwarder;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia_arm64;
+  Future<TargetPlatform> get targetPlatform async =>
+      TargetPlatform.fuchsia_arm64;
 
   @override
   String get name => 'fuchsia';
@@ -876,29 +977,9 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
   }
 }
 
-class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
-
-  @override
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
-    return FakeFuchsiaIsolateDiscoveryProtocol();
-  }
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia_arm64;
-}
-
-class FakeFuchsiaIsolateDiscoveryProtocol implements FuchsiaIsolateDiscoveryProtocol {
-  @override
-  FutureOr<Uri> get uri => Uri.parse('http://[::1]:37');
-
-  @override
-  void dispose() {}
-}
-
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
@@ -906,18 +987,32 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   Future<String> resolve(String deviceName) async {
     return '192.168.42.10';
   }
+
+  @override
+  Future<String?> sessionShow() async {
+    return null;
+  }
+
+  @override
+  Future<bool> sessionAdd(String url) async {
+    return false;
+  }
 }
+
+class FakeFuchsiaPM extends Fake implements FuchsiaPM {}
+
+class FakeFuchsiaKernelCompiler extends Fake implements FuchsiaKernelCompiler {}
 
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM pm,
-    FuchsiaKernelCompiler compiler,
-    FuchsiaFfx ffx,
-    String devices,
-  }) : fuchsiaPM = pm,
-       fuchsiaKernelCompiler = compiler,
-       fuchsiaFfx = ffx ?? FakeFuchsiaFfx(),
-       _devices = devices;
+    FuchsiaPM? pm,
+    FuchsiaKernelCompiler? compiler,
+    FuchsiaFfx? ffx,
+    String? devices,
+  })  : fuchsiaPM = pm ?? FakeFuchsiaPM(),
+        fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
+        fuchsiaFfx = ffx ?? FakeFuchsiaFfx(),
+        _devices = devices;
 
   @override
   final FuchsiaPM fuchsiaPM;
@@ -928,22 +1023,23 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   @override
   final FuchsiaFfx fuchsiaFfx;
 
-  final String _devices;
+  final String? _devices;
 
   @override
-  Future<String> listDevices({Duration timeout}) async {
+  Future<String?> listDevices({Duration? timeout}) async {
     return _devices;
   }
 }
 
-class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake
+    implements DartDevelopmentService {
   @override
   Future<void> startDartDevelopmentService(
     Uri observatoryUri, {
-    @required Logger logger,
-    int hostPort,
-    bool ipv6,
-    bool disableServiceAuthCodes,
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
     bool cacheStartupProfile = false,
   }) async {}
 

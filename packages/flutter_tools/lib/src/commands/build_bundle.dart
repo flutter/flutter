@@ -15,6 +15,7 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
+    required super.logger,
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
   }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
@@ -87,7 +88,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<void> validateCommand() async {
-    if (boolArg('tree-shake-icons')) {
+    if (boolArgDeprecated('tree-shake-icons')) {
       throwToolExit('The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.');
     }
     return super.validateCommand();

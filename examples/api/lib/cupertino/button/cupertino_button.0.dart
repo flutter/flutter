@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoButton
+/// Flutter code sample for [CupertinoButton].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const CupertinoButtonApp());
 
 class CupertinoButtonApp extends StatelessWidget {
-  const CupertinoButtonApp({Key? key}) : super(key: key);
+  const CupertinoButtonApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CupertinoButtonApp extends StatelessWidget {
 }
 
 class CupertinoButtonExample extends StatelessWidget {
-  const CupertinoButtonExample({Key? key}) : super(key: key);
+  const CupertinoButtonExample({super.key});
 
   @override
   Widget build(BuildContext context) {

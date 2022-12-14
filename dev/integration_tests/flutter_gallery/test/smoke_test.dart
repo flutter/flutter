@@ -40,8 +40,9 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
 void verifyToStringOutput(String name, String route, String testString) {
   int lineNumber = 0;
   final List<String> lines = testString.split('\n');
-  if (!testString.endsWith('\n'))
+  if (!testString.endsWith('\n')) {
     reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
+  }
   for (final String line in lines) {
     lineNumber += 1;
     if (line == '' && lineNumber != lines.length) {

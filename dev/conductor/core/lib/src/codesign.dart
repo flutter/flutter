@@ -28,6 +28,7 @@ const String kSignatures = 'signatures';
 const String kRevision = 'revision';
 const String kUpstream = 'upstream';
 
+
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
   CodesignCommand({
@@ -187,6 +188,7 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/font-subset',
       'artifacts/engine/darwin-x64/impellerc',
+      'artifacts/engine/darwin-x64/libpath_ops.dylib',
       'artifacts/engine/darwin-x64/libtessellator.dylib',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',

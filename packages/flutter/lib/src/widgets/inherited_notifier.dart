@@ -109,8 +109,9 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
 
   @override
   Widget build() {
-    if (_dirty)
+    if (_dirty) {
       notifyClients(widget as InheritedNotifier<T>);
+    }
     return super.build();
   }
 

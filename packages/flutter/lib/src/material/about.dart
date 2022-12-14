@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline, Flow;
+import 'dart:developer' show Flow, Timeline;
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -29,6 +29,9 @@ import 'scrollbar.dart';
 import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// BuildContext context;
 
 /// A [ListTile] that shows an about box.
 ///
@@ -315,22 +318,24 @@ class AboutDialog extends StatelessWidget {
     final String name = applicationName ?? _defaultApplicationName(context);
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget? icon = applicationIcon ?? _defaultApplicationIcon(context);
+    final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return AlertDialog(
       content: ListBody(
         children: <Widget>[
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
+              if (icon != null) IconTheme(data: themeData.iconTheme, child: icon),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ListBody(
                     children: <Widget>[
-                      Text(name, style: Theme.of(context).textTheme.headline5),
-                      Text(version, style: Theme.of(context).textTheme.bodyText2),
+                      Text(name, style: themeData.textTheme.headlineSmall),
+                      Text(version, style: themeData.textTheme.bodyMedium),
                       const SizedBox(height: _textVerticalSeparation),
-                      Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+                      Text(applicationLegalese ?? '', style: themeData.textTheme.bodySmall),
                     ],
                   ),
                 ),
@@ -342,7 +347,11 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
+          child: Text(
+            themeData.useMaterial3
+              ? localizations.viewLicensesButtonLabel
+              : localizations.viewLicensesButtonLabel.toUpperCase()
+          ),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -354,7 +363,11 @@ class AboutDialog extends StatelessWidget {
           },
         ),
         TextButton(
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+          child: Text(
+            themeData.useMaterial3
+              ? localizations.closeButtonLabel
+              : localizations.closeButtonLabel.toUpperCase()
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -427,6 +440,12 @@ class _LicensePageState extends State<LicensePage> {
   final ValueNotifier<int?> selectedId = ValueNotifier<int?>(null);
 
   @override
+  void dispose() {
+    selectedId.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _MasterDetailFlow(
       detailPageFABlessGutterWidth: _getGutterSize(context),
@@ -486,7 +505,7 @@ class _AboutProgram extends StatelessWidget {
         children: <Widget>[
           Text(
             name,
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           if (icon != null)
@@ -496,20 +515,20 @@ class _AboutProgram extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: _textVerticalSeparation),
               child: Text(
                 version,
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
             ),
           if (legalese != null && legalese != '')
             Text(
               legalese!,
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
           const SizedBox(height: _textVerticalSeparation),
           Text(
             'Powered by Flutter',
-            style: Theme.of(context).textTheme.bodyText2,
+            style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
         ],
@@ -552,6 +571,17 @@ class _PackagesViewState extends State<_PackagesView> {
           builder: (BuildContext context, BoxConstraints constraints) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
+                if (snapshot.hasError) {
+                  assert(() {
+                    FlutterError.reportError(FlutterErrorDetails(
+                      exception: snapshot.error!,
+                      stack: snapshot.stackTrace,
+                      context: ErrorDescription('while decoding the license file'),
+                    ));
+                    return true;
+                  }());
+                  return Center(child: Text(snapshot.error.toString()));
+                }
                 _initDefaultDetailPage(snapshot.data!, context);
                 return ValueListenableBuilder<int?>(
                   valueListenable: widget.selectedId,
@@ -593,7 +623,7 @@ class _PackagesViewState extends State<_PackagesView> {
     }
     final String packageName = data.packages[widget.selectedId.value ?? 0];
     final List<int> bindings = data.packageLicenseBindings[packageName]!;
-    _MasterDetailFlow.of(context)!.setInitialDetailPage(
+    _MasterDetailFlow.of(context).setInitialDetailPage(
       _DetailArguments(
         packageName,
         bindings.map((int i) => data.licenses[i]).toList(growable: false),
@@ -623,7 +653,7 @@ class _PackagesViewState extends State<_PackagesView> {
           numberLicenses: bindings.length,
           onTap: () {
             widget.selectedId.value = packageIndex;
-            _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
+            _MasterDetailFlow.of(context).openDetailPage(_DetailArguments(
               packageName,
               bindings.map((int i) => data.licenses[i]).toList(growable: false),
             ));
@@ -899,7 +929,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       );
     }
     return DefaultTextStyle(
-      style: theme.textTheme.caption!,
+      style: theme.textTheme.bodySmall!,
       child: page,
     );
   }
@@ -924,8 +954,8 @@ class _PackageLicensePageTitle extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: theme.headline6?.copyWith(color: color)),
-        Text(subtitle, style: theme.subtitle2?.copyWith(color: color)),
+        Text(title, style: theme.titleLarge?.copyWith(color: color)),
+        Text(subtitle, style: theme.titleSmall?.copyWith(color: color)),
       ],
     );
   }
@@ -957,7 +987,7 @@ const double _wideGutterSize = 24.0;
 const double _narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.of(context).size.width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
+    MediaQuery.sizeOf(context).width >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
@@ -1056,15 +1086,15 @@ class _MasterDetailFlow extends StatefulWidget {
   @override
   _MasterDetailFlowState createState() => _MasterDetailFlowState();
 
-  /// The master detail flow proxy from the closest instance of this class that encloses the given
-  /// context.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// _MasterDetailFlow.of(context).openDetailPage(arguments);
-  /// ```
-  static _MasterDetailFlowProxy? of(BuildContext context) {
+  // The master detail flow proxy from the closest instance of this class that encloses the given
+  // context.
+  //
+  // Typical usage is as follows:
+  //
+  // ```dart
+  // _MasterDetailFlow.of(context).openDetailPage(arguments);
+  // ```
+  static _MasterDetailFlowProxy of(BuildContext context) {
     _PageOpener? pageOpener = context.findAncestorStateOfType<_MasterDetailScaffoldState>();
     pageOpener ??= context.findAncestorStateOfType<_MasterDetailFlowState>();
     assert(() {
@@ -1077,7 +1107,7 @@ class _MasterDetailFlow extends StatefulWidget {
       }
       return true;
     }());
-    return pageOpener != null ? _MasterDetailFlowProxy._(pageOpener) : null;
+    return _MasterDetailFlowProxy._(pageOpener!);
   }
 }
 
@@ -1322,15 +1352,21 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
   }
 
   @override
+  void dispose() {
+    _detailArguments.dispose();
+    super.dispose();
+  }
+
+  @override
   void openDetailPage(Object arguments) {
     SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
-    _MasterDetailFlow.of(context)!.openDetailPage(arguments);
+    _MasterDetailFlow.of(context).openDetailPage(arguments);
   }
 
   @override
   void setInitialDetailPage(Object arguments) {
     SchedulerBinding.instance.addPostFrameCallback((_) => _detailArguments.value = arguments);
-    _MasterDetailFlow.of(context)!.setInitialDetailPage(arguments);
+    _MasterDetailFlow.of(context).setInitialDetailPage(arguments);
   }
 
   @override
@@ -1436,9 +1472,9 @@ class _DetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_arguments == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
-    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
 
     return DraggableScrollableSheet(

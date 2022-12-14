@@ -93,11 +93,11 @@ class SafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData data = MediaQuery.of(context);
-    EdgeInsets padding = data.padding;
+    EdgeInsets padding = MediaQuery.paddingOf(context);
     // Bottom padding has been consumed - i.e. by the keyboard
-    if (maintainBottomViewPadding)
-      padding = padding.copyWith(bottom: data.viewPadding.bottom);
+    if (maintainBottomViewPadding) {
+      padding = padding.copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom);
+    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -191,7 +191,7 @@ class SliverSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = MediaQuery.paddingOf(context);
     return SliverPadding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),

@@ -221,6 +221,81 @@ void main() {
       expect(renderBox.debugLayer!.firstChild, isA<TextureLayer>());
     });
   });
+
+  test('markNeedsPaint does not get called on a disposed RO', () async {
+    FakeAsync().run((FakeAsync async) {
+      final AndroidViewController viewController =
+        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
+      final RenderAndroidView renderBox = RenderAndroidView(
+        viewController: viewController,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+      );
+
+      final Completer<void> viewCreation = Completer<void>();
+      const MethodChannel channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        assert(methodCall.method == 'create', 'Unexpected method call');
+        await viewCreation.future;
+        return /*textureId=*/ 0;
+      });
+
+      layout(renderBox);
+      pumpFrame(phase: EnginePhase.paint);
+
+      expect(renderBox.debugLayer, isNotNull);
+      expect(renderBox.debugLayer!.hasChildren, isFalse);
+      expect(viewController.isCreated, isFalse);
+      expect(renderBox.debugNeedsPaint, isFalse);
+
+      renderBox.dispose();
+      viewCreation.complete();
+      async.flushMicrotasks();
+
+      expect(viewController.isCreated, isTrue);
+      expect(renderBox.debugNeedsPaint, isFalse);
+      expect(renderBox.debugLayer, isNull);
+
+      pumpFrame(phase: EnginePhase.paint);
+      expect(renderBox.debugLayer, isNull);
+    });
+  });
+
+  test('markNeedsPaint does not get called when setting the same viewController', () {
+    FakeAsync().run((FakeAsync async) {
+      final Completer<void> viewCreation = Completer<void>();
+      const MethodChannel channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        assert(methodCall.method == 'create', 'Unexpected method call');
+        await viewCreation.future;
+        return /*textureId=*/ 0;
+      });
+
+      bool futureCallbackRan = false;
+
+      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((UiKitViewController viewController) {
+        final RenderUiKitView renderBox = RenderUiKitView(
+          viewController: viewController,
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+        );
+
+        layout(renderBox);
+        pumpFrame(phase: EnginePhase.paint);
+        expect(renderBox.debugNeedsPaint, isFalse);
+
+        renderBox.viewController = viewController;
+
+        expect(renderBox.debugNeedsPaint, isFalse);
+
+        futureCallbackRan = true;
+      });
+
+      viewCreation.complete();
+      async.flushMicrotasks();
+      expect(futureCallbackRan, true);
+    });
+  });
 }
 
 ui.PointerData _pointerData(

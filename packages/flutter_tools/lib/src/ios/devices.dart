@@ -348,33 +348,11 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-    final List<String> launchArguments = <String>[
-      '--enable-dart-profiling',
-      '--disable-service-auth-codes',
-      if (debuggingOptions.disablePortPublication) '--disable-observatory-publication',
-      if (debuggingOptions.startPaused) '--start-paused',
-      if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
-      if (debuggingOptions.useTestFonts) '--use-test-fonts',
-      if (debuggingOptions.debuggingEnabled) ...<String>[
-        '--enable-checked-mode',
-        '--verify-entry-points',
-      ],
-      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
-      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
-      if (debuggingOptions.traceSkia) '--trace-skia',
-      if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
-      if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
-      if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
-      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
-      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
-      if (debuggingOptions.cacheSkSL) '--cache-sksl',
-      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
-      if (route != null) '--route=$route',
-      if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
-      if (debuggingOptions.enableImpeller) '--enable-impeller',
-    ];
-
+    final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
+      EnvironmentType.physical,
+      route,
+      platformArgs,
+    );
     final Status installStatus = _logger.startProgress(
       'Installing and launching...',
     );
@@ -703,7 +681,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
     void logMessage(vm_service.Event event) {
       if (_iosDeployDebugger != null && _iosDeployDebugger!.debuggerAttached) {
-        // Prefer the more complete logs from the  attached debugger.
+        // Prefer the more complete logs from the attached debugger.
         return;
       }
       final String message = processVmServiceMessage(event);

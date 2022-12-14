@@ -22,18 +22,11 @@ class OnTapPage extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: Center(
-          child: Text(id, style: Theme.of(context).textTheme.headline3),
+          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
         ),
       ),
     );
   }
-}
-
-Map<String, dynamic> convertRouteInformationToMap(RouteInformation routeInformation) {
-  return <String, dynamic>{
-    'location': routeInformation.location,
-    'state': routeInformation.state,
-  };
 }
 
 void main() {
@@ -358,8 +351,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   RouteInformation? get currentConfiguration {
-    if (reportConfiguration)
+    if (reportConfiguration) {
       return routeInformation;
+    }
     return null;
   }
 
@@ -371,8 +365,9 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Future<bool> popRoute() {
-    if (onPopRoute != null)
+    if (onPopRoute != null) {
       return onPopRoute!();
+    }
     return SynchronousFuture<bool>(true);
   }
 

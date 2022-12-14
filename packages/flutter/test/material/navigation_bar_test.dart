@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
@@ -552,6 +555,343 @@ void main() {
     final double newHeight = tester.getSize(find.byType(NavigationBar)).height;
 
     expect(newHeight, equals(initialHeight));
+  });
+
+  testWidgets('Navigation indicator renders ripple', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/116751.
+    int selectedIndex = 0;
+
+    Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
+      return _buildWidget(
+        NavigationBar(
+          selectedIndex: selectedIndex,
+          labelBehavior: labelBehavior,
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+          ],
+          onDestinationSelected: (int i) { },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.access_alarm)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    Offset indicatorCenter = const Offset(600, 32);
+    const Size includedIndicatorSize = Size(64, 32);
+    const Size excludedIndicatorSize = Size(74, 40);
+
+    // Test ripple when NavigationBar is using `NavigationDestinationLabelBehavior.alwaysShow` (default).
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (includedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (includedIndicatorSize.height / 2)),
+            ],
+            excludes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (excludedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (excludedIndicatorSize.height / 2)),
+            ],
+          ),
+        )
+        ..circle(
+          x: indicatorCenter.dx,
+          y: indicatorCenter.dy,
+          radius: 35.0,
+          color: const Color(0x0a000000),
+        )
+    );
+
+    // Test ripple when NavigationBar is using `NavigationDestinationLabelBehavior.alwaysHide`.
+    await tester.pumpWidget(buildWidget(labelBehavior: NavigationDestinationLabelBehavior.alwaysHide));
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.access_alarm)));
+    await tester.pumpAndSettle();
+
+    indicatorCenter = const Offset(600, 40);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (includedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (includedIndicatorSize.height / 2)),
+            ],
+            excludes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (excludedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (excludedIndicatorSize.height / 2)),
+            ],
+          ),
+        )
+        ..circle(
+          x: indicatorCenter.dx,
+          y: indicatorCenter.dy,
+          radius: 35.0,
+          color: const Color(0x0a000000),
+        )
+    );
+
+    // Test ripple when NavigationBar is using `NavigationDestinationLabelBehavior.onlyShowSelected`.
+    await tester.pumpWidget(buildWidget(labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected));
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.access_alarm)));
+    await tester.pumpAndSettle();
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (includedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (includedIndicatorSize.height / 2)),
+            ],
+            excludes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (excludedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (excludedIndicatorSize.height / 2)),
+            ],
+          ),
+        )
+        ..circle(
+          x: indicatorCenter.dx,
+          y: indicatorCenter.dy,
+          radius: 35.0,
+          color: const Color(0x0a000000),
+        )
+    );
+
+    // Make sure ripple is shifted when selectedIndex changes.
+    selectedIndex = 1;
+    await tester.pumpWidget(buildWidget(labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected));
+    await tester.pumpAndSettle();
+    indicatorCenter = const Offset(600, 32);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (includedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (includedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (includedIndicatorSize.height / 2)),
+            ],
+            excludes: <Offset>[
+              // Left center.
+              Offset(indicatorCenter.dx - (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Top center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy - (excludedIndicatorSize.height / 2)),
+              // Right center.
+              Offset(indicatorCenter.dx + (excludedIndicatorSize.width / 2), indicatorCenter.dy),
+              // Bottom center.
+              Offset(indicatorCenter.dx, indicatorCenter.dy + (excludedIndicatorSize.height / 2)),
+            ],
+          ),
+        )
+        ..circle(
+          x: indicatorCenter.dx,
+          y: indicatorCenter.dy,
+          radius: 35.0,
+          color: const Color(0x0a000000),
+        )
+    );
+  });
+
+  testWidgets('Navigation indicator scale transform', (WidgetTester tester) async {
+    int selectedIndex = 0;
+
+    Widget buildNavigationBar() {
+      return MaterialApp(
+        theme: ThemeData.light(),
+        home: Scaffold(
+          bottomNavigationBar: Center(
+            child: NavigationBar(
+              selectedIndex: selectedIndex,
+              destinations: const <Widget>[
+                NavigationDestination(
+                  icon: Icon(Icons.ac_unit),
+                  label: 'AC',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+              onDestinationSelected: (int i) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+    await tester.pumpAndSettle();
+    final Finder transformFinder = find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Transform),
+    ).last;
+    Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], 0.0);
+
+    selectedIndex = 1;
+    await tester.pumpWidget(buildNavigationBar());
+    await tester.pump(const Duration(milliseconds: 100));
+    transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], closeTo(0.7805849514007568, precisionErrorTolerance));
+
+    await tester.pump(const Duration(milliseconds: 100));
+    transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], closeTo(0.9473570239543915, precisionErrorTolerance));
+
+    await tester.pumpAndSettle();
+    transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], 1.0);
+  });
+
+  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = CircleBorder();
+
+    Widget buildNaviagationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            destinations: <Widget>[
+              NavigationDestination(
+                icon: const Icon(Icons.ac_unit),
+                label: 'AC',
+                indicatorColor: indicatorColor,
+                indicatorShape: indicatorShape,
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNaviagationBar());
+
+    // Test default indicator color and shape.
+    expect(_indicator(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_indicator(tester)?.shape, const StadiumBorder());
+
+    await tester.pumpWidget(buildNaviagationBar(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_indicator(tester)?.color, color);
+    expect(_indicator(tester)?.shape, shape);
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const Color color = Color(0xff0000ff);
+      const ShapeBorder shape = CircleBorder();
+
+      Widget buildNaviagationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+        return MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            bottomNavigationBar: NavigationBar(
+              destinations: <Widget>[
+                NavigationDestination(
+                  icon: const Icon(Icons.ac_unit),
+                  label: 'AC',
+                  indicatorColor: indicatorColor,
+                  indicatorShape: indicatorShape,
+                ),
+                const NavigationDestination(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+              onDestinationSelected: (int i) { },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildNaviagationBar());
+
+      // Test default indicator color and shape.
+      expect(_indicator(tester)?.color, theme.colorScheme.secondary.withOpacity(0.24));
+      expect(
+        _indicator(tester)?.shape,
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+      );
+
+      await tester.pumpWidget(buildNaviagationBar(indicatorColor: color, indicatorShape: shape));
+
+      // Test custom indicator color and shape.
+      expect(_indicator(tester)?.color, color);
+      expect(_indicator(tester)?.shape, shape);
+    });
   });
 }
 

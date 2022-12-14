@@ -30,4 +30,62 @@ void main() {
     expect(value.resolve(<MaterialState>{MaterialState.disabled}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.error}), 123);
   });
+
+  test('MaterialStatePropertyAll', () {
+    const MaterialStatePropertyAll<int> value = MaterialStatePropertyAll<int>(123);
+    expect(value.resolve(<MaterialState>{}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.hovered}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.focused}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.pressed}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.dragged}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.selected}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.disabled}), 123);
+    expect(value.resolve(<MaterialState>{MaterialState.error}), 123);
+  });
+
+  test('toString formats correctly', () {
+    const MaterialStateProperty<Color?> colorProperty = MaterialStatePropertyAll<Color?>(Color(0xFFFFFFFF));
+    expect(colorProperty.toString(), equals('MaterialStatePropertyAll(Color(0xffffffff))'));
+
+    const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(33 + 1/3);
+    expect(doubleProperty.toString(), equals('MaterialStatePropertyAll(33.3)'));
+  });
+
+  test("Can interpolate between two MaterialStateProperty's", () {
+    const MaterialStateProperty<TextStyle?> textStyle1 =  MaterialStatePropertyAll<TextStyle?>(
+      TextStyle(fontSize: 14.0),
+    );
+    const MaterialStateProperty<TextStyle?> textStyle2 = MaterialStatePropertyAll<TextStyle?>(
+      TextStyle(fontSize: 20.0),
+    );
+
+    // Using `0.0` interpolation value.
+    TextStyle textStyle = MaterialStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      0.0,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
+    expect(textStyle.fontSize, 14.0);
+
+    // Using `0.5` interpolation value.
+    textStyle = MaterialStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      0.5,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
+    expect(textStyle.fontSize, 17.0);
+
+    // Using `1.0` interpolation value.
+    textStyle = MaterialStateProperty.lerp<TextStyle?>(
+      textStyle1,
+      textStyle2,
+      1.0,
+      TextStyle.lerp,
+    )!.resolve(enabled)!;
+    expect(textStyle.fontSize, 20.0);
+  });
 }
+
+Set<MaterialState> enabled = <MaterialState>{};

@@ -18,6 +18,15 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
+    // Update pod repo.
+    await eval(
+      'pod',
+      <String>['repo', 'update'],
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
+    );
+
     // this variable cannot be `late`, as we reference it in the `finally` block
     // which may execute before this field has been initialized
     String? simulatorDeviceId;
@@ -157,13 +166,12 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        // One dynamic framework, one static framework, one Dart-only,
-        // and one that does not support iOS.
+        // One framework, one Dart-only, one that does not support iOS, and one with a resource bundle.
         '''
 dependencies:
   url_launcher: 6.0.20
-  google_sign_in: 5.2.4
-  android_alarm_manager: 0.4.5+11
+  android_alarm_manager: 2.0.2
+  google_sign_in_ios: 5.5.0
   $dartPluginName:
     path: ../$dartPluginName
 ''',
@@ -196,7 +204,6 @@ dependencies:
       if (!podfileLockOutput.contains(':path: Flutter')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"')
-        || !podfileLockOutput.contains(':path: ".symlinks/plugins/google_sign_in/ios"')
         || podfileLockOutput.contains('android_alarm_manager')
         || podfileLockOutput.contains(dartPluginName)) {
         print(podfileLockOutput);
@@ -204,10 +211,9 @@ dependencies:
       }
 
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'url_launcher_ios.framework', 'url_launcher_ios'));
+      // Resources should be embedded.
+      checkDirectoryExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'GoogleSignIn.framework', 'GoogleSignIn.bundle'));
       checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'Flutter.framework', 'Flutter'));
-
-      // Static, no embedded framework.
-      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'google_sign_in.framework'));
 
       // Android-only, no embedded framework.
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', 'android_alarm_manager.framework'));
@@ -278,7 +284,6 @@ end
         if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/url_launcher_ios/ios"')
-            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/google_sign_in/ios"')
             || hostPodfileLockOutput.contains('android_alarm_manager')
             || hostPodfileLockOutput.contains(dartPluginName)) {
           print(hostPodfileLockOutput);
@@ -304,7 +309,7 @@ end
             'CODE_SIGNING_REQUIRED=NO',
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
-            'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
+            'BUILD_DIR=${objectiveCBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String> {
@@ -313,27 +318,33 @@ end
         );
       });
 
-      final bool existingAppBuilt = exists(File(path.join(
+      final String hostAppDirectory = path.join(
         objectiveCBuildDirectory.path,
+        'Debug-iphoneos',
         'Host.app',
+      );
+
+      final bool existingAppBuilt = exists(File(path.join(
+        hostAppDirectory,
         'Host',
       )));
       if (!existingAppBuilt) {
         return TaskResult.failure('Failed to build existing Objective-C app .app');
       }
 
-      checkFileExists(path.join(
-        objectiveCBuildDirectory.path,
-        'Host.app',
+      final String hostFrameworksDirectory = path.join(
+        hostAppDirectory,
         'Frameworks',
+      );
+
+      checkFileExists(path.join(
+        hostFrameworksDirectory,
         'Flutter.framework',
         'Flutter',
       ));
 
       checkFileExists(path.join(
-        objectiveCBuildDirectory.path,
-        'Host.app',
-        'Frameworks',
+        hostFrameworksDirectory,
         'App.framework',
         'flutter_assets',
         'isolate_snapshot_data',
@@ -342,9 +353,7 @@ end
       section('Check the NOTICE file is correct');
 
       final String licenseFilePath = path.join(
-        objectiveCBuildDirectory.path,
-        'Host.app',
-        'Frameworks',
+        hostFrameworksDirectory,
         'App.framework',
         'flutter_assets',
         'NOTICES.Z',
@@ -428,7 +437,6 @@ end
         if ((await fileType(builtFlutterBinary)).contains('armv7')) {
           throw TaskResult.failure('Unexpected armv7 architecture slice in $builtFlutterBinary');
         }
-        await checkContainsBitcode(builtFlutterBinary);
 
         final String builtAppBinary = path.join(
           archivedAppPath,
@@ -440,7 +448,6 @@ end
         if ((await fileType(builtAppBinary)).contains('armv7')) {
           throw TaskResult.failure('Unexpected armv7 architecture slice in $builtAppBinary');
         }
-        await checkContainsBitcode(builtAppBinary);
 
         // The host app example builds plugins statically, url_launcher_ios.framework
         // should not exist.
@@ -448,6 +455,16 @@ end
           archivedAppPath,
           'Frameworks',
           'url_launcher_ios.framework',
+        ));
+
+        checkFileExists(path.join(
+          '${objectiveCBuildArchiveDirectory.path}.xcarchive',
+          'dSYMs',
+          'App.framework.dSYM',
+          'Contents',
+          'Resources',
+          'DWARF',
+          'App'
         ));
       });
 
@@ -494,6 +511,7 @@ end
                 <String>[
                   '-r',
                   '-9',
+                  '-q',
                   zipPath,
                   'result.xcresult',
                 ],
@@ -522,7 +540,7 @@ end
             'CODE_SIGNING_REQUIRED=NO',
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
-            'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
+            'BUILD_DIR=${objectiveCBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           canFail: true,
@@ -530,8 +548,7 @@ end
       );
 
       if (!xcodebuildOutput.contains('flutter --verbose --local-engine-src-path=bogus assemble') || // Verbose output
-          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus') ||
-          !xcodebuildOutput.contains('Command PhaseScriptExecution failed with a nonzero exit code')) {
+          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus')) {
         return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');
       }
 
@@ -568,7 +585,7 @@ end
             'CODE_SIGNING_REQUIRED=NO',
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
-            'CONFIGURATION_BUILD_DIR=${swiftBuildDirectory.path}',
+            'BUILD_DIR=${swiftBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String> {
@@ -579,6 +596,7 @@ end
 
       final bool existingSwiftAppBuilt = exists(File(path.join(
         swiftBuildDirectory.path,
+        'Debug-iphoneos',
         'Host.app',
         'Host',
       )));

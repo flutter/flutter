@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoActivityIndicator
+/// Flutter code sample for [CupertinoActivityIndicator].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const CupertinoIndicatorApp());
 
 class CupertinoIndicatorApp extends StatelessWidget {
-  const CupertinoIndicatorApp({Key? key}) : super(key: key);
+  const CupertinoIndicatorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CupertinoIndicatorApp extends StatelessWidget {
 }
 
 class CupertinoIndicatorExample extends StatelessWidget {
-  const CupertinoIndicatorExample({Key? key}) : super(key: key);
+  const CupertinoIndicatorExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,8 @@ class CupertinoIndicatorExample extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const <Widget>[
-                // Cupertino activity indicator with custom radius and disabled animation.
+                // Cupertino activity indicator with custom radius and disabled
+                // animation.
                 CupertinoActivityIndicator(radius: 20.0, animating: false),
                 SizedBox(height: 10),
                 Text(

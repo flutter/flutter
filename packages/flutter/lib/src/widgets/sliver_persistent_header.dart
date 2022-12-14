@@ -158,12 +158,15 @@ class SliverPersistentHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (floating && pinned)
+    if (floating && pinned) {
       return _SliverFloatingPinnedPersistentHeader(delegate: delegate);
-    if (pinned)
+    }
+    if (pinned) {
       return _SliverPinnedPersistentHeader(delegate: delegate);
-    if (floating)
+    }
+    if (floating) {
       return _SliverFloatingPersistentHeader(delegate: delegate);
+    }
     return _SliverScrollingPersistentHeader(delegate: delegate);
   }
 
@@ -180,8 +183,9 @@ class SliverPersistentHeader extends StatelessWidget {
       if (pinned) 'pinned',
       if (floating) 'floating',
     ];
-    if (flags.isEmpty)
+    if (flags.isEmpty) {
       flags.add('normal');
+    }
     properties.add(IterableProperty<String>('mode', flags));
   }
 }
@@ -205,17 +209,20 @@ class _FloatingHeaderState extends State<_FloatingHeader> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_position != null)
+    if (_position != null) {
       _position!.isScrollingNotifier.removeListener(_isScrollingListener);
-    _position = Scrollable.of(context)?.position;
-    if (_position != null)
+    }
+    _position = Scrollable.maybeOf(context)?.position;
+    if (_position != null) {
       _position!.isScrollingNotifier.addListener(_isScrollingListener);
+    }
   }
 
   @override
   void dispose() {
-    if (_position != null)
+    if (_position != null) {
       _position!.isScrollingNotifier.removeListener(_isScrollingListener);
+    }
     super.dispose();
   }
 
@@ -274,8 +281,9 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
     if (newDelegate != oldDelegate &&
-        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
       renderObject.triggerRebuild();
+    }
   }
 
   @override
@@ -328,8 +336,9 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (child != null)
+    if (child != null) {
       visitor(child!);
+    }
   }
 }
 
@@ -393,6 +402,11 @@ class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObje
       stretchConfiguration: delegate.stretchConfiguration,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderSliverScrollingPersistentHeaderForWidgets renderObject) {
+    renderObject.stretchConfiguration = delegate.stretchConfiguration;
+  }
 }
 
 class _RenderSliverScrollingPersistentHeaderForWidgets extends RenderSliverScrollingPersistentHeader
@@ -413,6 +427,13 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
       stretchConfiguration: delegate.stretchConfiguration,
       showOnScreenConfiguration: delegate.showOnScreenConfiguration,
     );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderSliverPinnedPersistentHeaderForWidgets renderObject) {
+    renderObject
+      ..stretchConfiguration = delegate.stretchConfiguration
+      ..showOnScreenConfiguration = delegate.showOnScreenConfiguration;
   }
 }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ToggleButtons
+/// Flutter code sample for [ToggleButtons].
 
 import 'package:flutter/material.dart';
 
@@ -27,7 +27,7 @@ const List<Widget> icons = <Widget>[
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'ToggleButtons Sample';
 
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ToggleButtonsSample extends StatefulWidget {
-  const ToggleButtonsSample({Key? key, required this.title}) : super(key: key);
+  const ToggleButtonsSample({super.key, required this.title});
 
   final String title;
 
@@ -68,7 +68,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               // ToggleButtons with a single selection.
-              Text('Single-select', style: theme.textTheme.subtitle2),
+              Text('Single-select', style: theme.textTheme.titleSmall),
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
@@ -94,7 +94,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
               ),
               const SizedBox(height: 20),
               // ToggleButtons with a multiple selection.
-              Text('Multi-select', style: theme.textTheme.subtitle2),
+              Text('Multi-select', style: theme.textTheme.titleSmall),
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
@@ -119,7 +119,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
               ),
               const SizedBox(height: 20),
               // ToggleButtons with icons only.
-              Text('Icon-only', style: theme.textTheme.subtitle2),
+              Text('Icon-only', style: theme.textTheme.titleSmall),
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,

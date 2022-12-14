@@ -1354,7 +1354,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(gesture.removePointer);
 
     await tester.pumpAndSettle();
     expect(tester.renderObject(find.text('column1')).attached, true);
@@ -1412,9 +1411,9 @@ void main() {
     const Color checkColor = Color(0xFF0000FF);
 
     final ThemeData themeData = ThemeData(
-      checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.all(fillColor),
-        checkColor: MaterialStateProperty.all(checkColor),
+      checkboxTheme: const CheckboxThemeData(
+        fillColor: MaterialStatePropertyAll<Color?>(fillColor),
+        checkColor: MaterialStatePropertyAll<Color?>(checkColor),
       ),
     );
     Widget buildTable() {
@@ -1469,8 +1468,9 @@ void main() {
               selected: selected,
               color: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected))
+                  if (states.contains(MaterialState.selected)) {
                     return selectedColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1522,8 +1522,9 @@ void main() {
             DataRow(
               color: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled))
+                  if (states.contains(MaterialState.disabled)) {
                     return disabledColor;
+                  }
                   return defaultColor;
                 },
               ),
@@ -1567,8 +1568,9 @@ void main() {
           DataRow(
             color: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed))
+                if (states.contains(MaterialState.pressed)) {
                   return pressedColor;
+                }
                 return Colors.transparent;
               },
             ),
@@ -1587,7 +1589,7 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Content1')));
     await tester.pump(const Duration(milliseconds: 200)); // splash is well underway
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
     expect(box, paints..circle(x: 68.0, y: 24.0, color: pressedColor));
     await gesture.up();
   });
@@ -1892,5 +1894,54 @@ void main() {
 
     // Go without crashes.
 
+  });
+
+  testWidgets('DataTable clip behavior', (WidgetTester tester) async {
+    const Color selectedColor = Colors.green;
+    const Color defaultColor = Colors.red;
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(30));
+
+    Widget buildTable({bool selected = false, required Clip clipBehavior}) {
+      return Material(
+        child: DataTable(
+          clipBehavior: clipBehavior,
+          border: TableBorder.all(borderRadius: borderRadius),
+          columns: const <DataColumn>[
+            DataColumn(
+              label: Text('Column1'),
+            ),
+          ],
+          rows: <DataRow>[
+            DataRow(
+              selected: selected,
+              color: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return selectedColor;
+                  }
+                  return defaultColor;
+                },
+              ),
+              cells: const <DataCell>[
+                DataCell(Text('Content1')),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test default clip behavior.
+    await tester.pumpWidget(MaterialApp(home: buildTable(clipBehavior: Clip.none)));
+
+    Material material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.borderRadius, borderRadius);
+
+    await tester.pumpWidget(MaterialApp(home: buildTable(clipBehavior: Clip.hardEdge)));
+
+    material = tester.widget<Material>(find.byType(Material).last);
+    expect(material.clipBehavior, Clip.hardEdge);
+    expect(material.borderRadius, borderRadius);
   });
 }

@@ -83,8 +83,9 @@ final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.m
 
 double getScrollOffset(WidgetTester tester, {bool last = true}) {
   Finder viewportFinder = find.byType(Viewport);
-  if (last)
+  if (last) {
     viewportFinder = viewportFinder.last;
+  }
   final RenderViewport viewport = tester.renderObject(viewportFinder);
   return viewport.offset.pixels;
 }
@@ -133,8 +134,9 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     final double macOSResult = getScrollOffset(tester);
 
+    expect(macOSResult, lessThan(androidResult)); // macOS is slipperier than Android
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
   });
 
   testWidgets('Holding scroll', (WidgetTester tester) async {
@@ -358,8 +360,9 @@ void main() {
     await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
 
     controller.addListener(() {
-      if(controller.position.userScrollDirection != ScrollDirection.idle)
+      if(controller.position.userScrollDirection != ScrollDirection.idle) {
         lastUserScrollingDirection = controller.position.userScrollDirection;
+      }
     });
 
     await tester.drag(find.byType(Scrollable), const Offset(0.0, -20.0), touchSlopY: 0.0);
@@ -553,18 +556,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -50.0, 800.0, 0.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
@@ -605,18 +612,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(-50.0, 0.0, 0.0, 600.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
   }, variant: KeySimulatorTransitModeVariant.all());
@@ -654,18 +665,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
   }, variant: KeySimulatorTransitModeVariant.all());
@@ -702,18 +717,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 600.0, 800.0, 650.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
@@ -757,18 +776,22 @@ void main() {
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.00)));
     // We exclude the modifier keys here for web testing since default web shortcuts
     // do not use a modifier key with arrow keys for ScrollActions.
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyDownEvent(modifierKey);
+    }
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    if (!kIsWeb)
+    if (!kIsWeb) {
       await tester.sendKeyUpEvent(modifierKey);
+    }
     await tester.pumpAndSettle();
   }, variant: KeySimulatorTransitModeVariant.all());
 
@@ -809,22 +832,26 @@ void main() {
     for (int i = 0; i < 10; ++i) {
       // We exclude the modifier keys here for web testing since default web shortcuts
       // do not use a modifier key with arrow keys for ScrollActions.
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyDownEvent(modifierKey);
+      }
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyUpEvent(modifierKey);
+      }
       await tester.pumpAndSettle();
     }
     // Starts at #10 already, so doesn't work out to 500.0 because it hits bottom.
     expect(controller.position.pixels, equals(400.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)));
     for (int i = 0; i < 10; ++i) {
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyDownEvent(modifierKey);
+      }
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-      if (!kIsWeb)
+      if (!kIsWeb) {
         await tester.sendKeyUpEvent(modifierKey);
+      }
       await tester.pumpAndSettle();
     }
     // Goes up two past "center" where it started, so negative.
@@ -914,7 +941,7 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first)!.position.activity!.delegate.goBallistic(4000);
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity!.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
@@ -943,7 +970,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
     final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
@@ -987,7 +1014,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first)!.position;
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
 
     expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
@@ -1400,6 +1427,22 @@ void main() {
     });
     expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
     handle.dispose();
+  });
+
+  testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
+    await pumpTest(tester, null);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(const Duration(milliseconds: 200));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(testPointer.hover(tester.getCenter(find.byType(Scrollable))));
+    await tester.sendEventToBinding(testPointer.scrollInertiaCancel()); // Cancel partway through.
+    await tester.pump();
+    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
+    await tester.pump(const Duration(milliseconds: 4800));
+    expect(getScrollOffset(tester), closeTo(333.2944, 0.0001));
   });
 }
 

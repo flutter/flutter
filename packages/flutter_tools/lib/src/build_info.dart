@@ -4,6 +4,7 @@
 
 import 'package:package_config/package_config_types.dart';
 
+import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -12,6 +13,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
+import 'web/compile.dart';
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -34,8 +36,10 @@ class BuildInfo {
     List<String>? dartDefines,
     this.bundleSkSLPath,
     List<String>? dartExperiments,
+    this.webRenderer = WebRendererMode.autoDetect,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
+    this.dartDefineConfigJsonMap,
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
@@ -70,7 +74,7 @@ class BuildInfo {
   /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.dart_tool/packages`.
+  /// file. If not provided, defaults to `.dart_tool/package_config.json`.
   final String packagesPath;
 
   final List<String> fileSystemRoots;
@@ -90,12 +94,14 @@ class BuildInfo {
   /// It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.
   /// On Android it is used as versionCode.
   /// On Xcode builds it is used as CFBundleVersion.
+  /// On Windows it is used as the build suffix for the product and file versions.
   final String? buildNumber;
 
   /// A "x.y.z" string used as the version number shown to users.
   /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
   /// On Android it is used as versionName.
   /// On Xcode builds it is used as CFBundleShortVersionString.
+  /// On Windows it is used as the major, minor, and patch parts of the product and file versions.
   final String? buildName;
 
   /// An optional directory path to save debugging information from dwarf stack
@@ -120,12 +126,26 @@ class BuildInfo {
   /// A list of Dart experiments.
   final List<String> dartExperiments;
 
+  /// When compiling to web, which web renderer mode we are using (html, canvaskit, auto)
+  final WebRendererMode webRenderer;
+
   /// The name of a file where flutter assemble will output performance
   /// information in a JSON format.
   ///
   /// This is not considered a build input and will not force assemble to
   /// rerun tasks.
   final String? performanceMeasurementFile;
+
+  /// Configure a constant pool file.
+  /// Additional constant values to be made available in the Dart program.
+  ///
+  /// These values can be used with the const `fromEnvironment` constructors of
+  ///  [String] the key and field are json values
+  /// json value
+  ///
+  /// An additional field `dartDefineConfigJsonMap` is provided to represent the native JSON value of the configuration file
+  ///
+  final Map<String, Object>? dartDefineConfigJsonMap;
 
   /// If provided, an output directory where one or more v8-style heap snapshots
   /// will be written for code size profiling.
@@ -244,12 +264,17 @@ class BuildInfo {
     };
   }
 
+
   /// Convert to a structured string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
-    return <String, String>{
+    final Map<String, String> map = <String, String>{};
+    dartDefineConfigJsonMap?.forEach((String key, Object value) {
+      map[key] = '$value';
+    });
+    final Map<String, String> environmentMap = <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
       if (dartObfuscation != null)
@@ -273,13 +298,23 @@ class BuildInfo {
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
+    map.forEach((String key, String value) {
+      if (environmentMap.containsKey(key)) {
+        globals.printWarning(
+            'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
+      } else {
+        // System priority is greater than user priority
+        environmentMap[key] = value;
+      }
+    });
+    return environmentMap;
   }
 
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
     // PACKAGE_CONFIG not currently supported.
-    return <String>[
+    final List<String> result = <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
       if (dartObfuscation != null)
@@ -303,6 +338,18 @@ class BuildInfo {
       for (String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
+    if (dartDefineConfigJsonMap != null) {
+      final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
+      dartDefineConfigJsonMap!.forEach((String key, Object value) {
+        if (gradleConfKeys.contains(key)) {
+          globals.printWarning(
+              'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
+        } else {
+          result.add('-P$key=$value');
+        }
+      });
+    }
+    return result;
   }
 }
 
@@ -560,14 +607,42 @@ enum AndroidArch {
 
 /// The default set of iOS device architectures to build for.
 List<DarwinArch> defaultIOSArchsForEnvironment(
-    EnvironmentType environmentType) {
-  if (environmentType == EnvironmentType.simulator) {
+  EnvironmentType environmentType,
+  Artifacts artifacts,
+) {
+  // Handle single-arch local engines.
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    final String localEngineName = localEngineInfo.localEngineName;
+    if (localEngineName.contains('_arm64')) {
+      return <DarwinArch>[ DarwinArch.arm64 ];
+    }
+    if (localEngineName.contains('_sim')) {
+      return <DarwinArch>[ DarwinArch.x86_64 ];
+    }
+  } else if (environmentType == EnvironmentType.simulator) {
     return <DarwinArch>[
       DarwinArch.x86_64,
       DarwinArch.arm64,
     ];
   }
   return <DarwinArch>[
+    DarwinArch.arm64,
+  ];
+}
+
+/// The default set of macOS device architectures to build for.
+List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
+  // Handle single-arch local engines.
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    if (localEngineInfo.localEngineName.contains('_arm64')) {
+      return <DarwinArch>[ DarwinArch.arm64 ];
+    }
+    return <DarwinArch>[ DarwinArch.x86_64 ];
+  }
+  return <DarwinArch>[
+    DarwinArch.x86_64,
     DarwinArch.arm64,
   ];
 }
@@ -592,7 +667,7 @@ String getDartNameForDarwinArch(DarwinArch arch) {
 // Returns Apple's name for the specified target architecture.
 //
 // When invoking Apple tools such as `xcodebuild` or `lipo`, the tool often
-// passes one or more target architectures as paramters. The names returned by
+// passes one or more target architectures as parameters. The names returned by
 // this function reflect Apple's name for the specified architecture.
 //
 // For consistency with developer expectations, Flutter outputs also use these
@@ -694,7 +769,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
     // For backward-compatibility and also for Tester, where it must match
     // host platform name (HostPlatform.darwin_x64)
     case 'darwin-x64':
-    case 'darwin-arm':
+    case 'darwin-arm64':
       return TargetPlatform.darwin;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
@@ -787,6 +862,10 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
+FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
+  return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
+}
+
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
@@ -872,9 +951,6 @@ const String kTargetPlatform = 'TargetPlatform';
 /// The define to control what target file is used.
 const String kTargetFile = 'TargetFile';
 
-/// The define to control whether the AOT snapshot is built with bitcode.
-const String kBitcodeFlag = 'EnableBitcode';
-
 /// Whether to enable or disable track widget creation.
 const String kTrackWidgetCreation = 'TrackWidgetCreation';
 
@@ -947,6 +1023,11 @@ const String kBuildName = 'BuildName';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
+
+/// The action Xcode is taking.
+///
+/// Will be "build" when building and "install" when archiving.
+const String kXcodeAction = 'Action';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
@@ -1027,8 +1108,8 @@ String getNameForHostPlatformArch(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'x64';
-    case HostPlatform.darwin_arm:
-      return 'arm';
+    case HostPlatform.darwin_arm64:
+      return 'arm64';
     case HostPlatform.linux_x64:
       return 'x64';
     case HostPlatform.linux_arm64:

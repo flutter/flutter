@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -122,8 +121,9 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   void _handlePanEnd(DragEndDetails details) {
     final double vx = details.velocity.pixelsPerSecond.dx;
     final double vy = details.velocity.pixelsPerSecond.dy;
-    if (vx.abs() == vy.abs())
+    if (vx.abs() == vy.abs()) {
       return;
+    }
     if (vx.abs() > vy.abs()) {
       if (vx.sign < 0) {
         _performAction(_lastPointerDownLocation!, SemanticsAction.decrease);
@@ -133,10 +133,11 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _performAction(_lastPointerDownLocation!, SemanticsAction.scrollRight);
       }
     } else {
-      if (vy.sign < 0)
+      if (vy.sign < 0) {
         _performAction(_lastPointerDownLocation!, SemanticsAction.scrollUp);
-      else
+      } else {
         _performAction(_lastPointerDownLocation!, SemanticsAction.scrollDown);
+      }
     }
     setState(() {
       _lastPointerDownLocation = null;
@@ -222,8 +223,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final SemanticsNode? rootNode = _rootSemanticsNode;
     canvas.save();
     canvas.scale(1.0 / devicePixelRatio, 1.0 / devicePixelRatio);
-    if (rootNode != null)
+    if (rootNode != null) {
       _paint(canvas, rootNode, _findDepth(rootNode));
+    }
     if (pointerPosition != null) {
       final Paint paint = Paint();
       paint.color = const Color(0x7F0090FF);
@@ -255,15 +257,18 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
 
     if (data.hasAction(SemanticsAction.tap)) {
-      if (!wantsTap)
+      if (!wantsTap) {
         annotations.add('button');
+      }
     } else {
-      if (wantsTap)
+      if (wantsTap) {
         annotations.add('disabled');
+      }
     }
 
-    if (data.hasAction(SemanticsAction.longPress))
+    if (data.hasAction(SemanticsAction.longPress)) {
       annotations.add('long-pressable');
+    }
 
     final bool isScrollable = data.hasAction(SemanticsAction.scrollLeft)
         || data.hasAction(SemanticsAction.scrollRight)
@@ -273,18 +278,24 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final bool isAdjustable = data.hasAction(SemanticsAction.increase)
         || data.hasAction(SemanticsAction.decrease);
 
-    if (isScrollable)
+    if (isScrollable) {
       annotations.add('scrollable');
+    }
 
-    if (isAdjustable)
+    if (isAdjustable) {
       annotations.add('adjustable');
+    }
 
     assert(data.attributedLabel != null);
     final String message;
+    // Android will avoid pronouncing duplicating tooltip and label.
+    // Therefore, having two identical strings is the same as having a single
+    // string.
+    final bool shouldIgnoreDuplicatedLabel = defaultTargetPlatform == TargetPlatform.android && data.attributedLabel.string == data.tooltip;
     final String tooltipAndLabel = <String>[
       if (data.tooltip.isNotEmpty)
         data.tooltip,
-      if (data.attributedLabel.string.isNotEmpty)
+      if (data.attributedLabel.string.isNotEmpty && !shouldIgnoreDuplicatedLabel)
         data.attributedLabel.string,
     ].join('\n');
     if (tooltipAndLabel.isEmpty) {
@@ -316,8 +327,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   void _paintMessage(Canvas canvas, SemanticsNode node) {
     final String message = getMessage(node);
-    if (message.isEmpty)
+    if (message.isEmpty) {
       return;
+    }
     final Rect rect = node.rect;
     canvas.save();
     canvas.clipRect(rect);
@@ -331,12 +343,14 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       ..layout(maxWidth: rect.width);
 
     textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
+    textPainter.dispose();
     canvas.restore();
   }
 
   int _findDepth(SemanticsNode node) {
-    if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode)
+    if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode) {
       return 1;
+    }
     int childrenDepth = 0;
     node.visitChildren((SemanticsNode child) {
       childrenDepth = math.max(childrenDepth, _findDepth(child));
@@ -347,8 +361,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   void _paint(Canvas canvas, SemanticsNode node, int rank) {
     canvas.save();
-    if (node.transform != null)
+    if (node.transform != null) {
       canvas.transform(node.transform!.storage);
+    }
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
       final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));

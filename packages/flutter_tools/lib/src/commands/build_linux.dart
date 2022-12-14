@@ -17,13 +17,12 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
+    required super.logger,
     required OperatingSystemUtils operatingSystemUtils,
     bool verboseHelp = false,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesBuildNumberOption();
-    usesBuildNameOption();
     final String defaultTargetPlatform =
         (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64) ?
             'linux-arm64' : 'linux-x64';

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoFormRow
+/// Flutter code sample for [CupertinoFormRow].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const CupertinoFormRowApp());
 
 class CupertinoFormRowApp extends StatelessWidget {
-  const CupertinoFormRowApp({Key? key}) : super(key: key);
+  const CupertinoFormRowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CupertinoFormRowApp extends StatelessWidget {
 }
 
 class CupertinoFormRowExample extends StatefulWidget {
-  const CupertinoFormRowExample({Key? key}) : super(key: key);
+  const CupertinoFormRowExample({super.key});
 
   @override
   State<CupertinoFormRowExample> createState() => _CupertinoFormRowExampleState();
@@ -114,11 +114,11 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
 
 class PrefixWidget extends StatelessWidget {
   const PrefixWidget({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.color,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String title;

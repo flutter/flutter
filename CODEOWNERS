@@ -9,10 +9,6 @@
 /CODEOWNERS @jmagman
 /.ci.yaml @keyonghan
 /dev/ci/ @christopherfujino
-/packages/flutter_goldens @Piinks
-/packages/flutter_goldens_client @Piinks
-/packages/flutter_test/lib/src/_goldens_io.dart @Piinks
-/packages/flutter_test/lib/src/_goldens_web.dart @Piinks
-/packages/flutter_test/lib/src/goldens.dart @Piinks
+/packages/flutter_tools/pubspec.yaml @christopherfujino
 /packages/flutter_tools/templates/module/ios/ @jmagman
 /packages/flutter_tools/templates/**/Podfile* @jmagman

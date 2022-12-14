@@ -135,5 +135,6 @@
   "keyboardKeySpace": "Medzerník",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Ponuka panela s ponukami",
+  "currentDateLabel": "Date of today"
 }

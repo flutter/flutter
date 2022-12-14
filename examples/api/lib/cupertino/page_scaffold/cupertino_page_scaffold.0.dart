@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoPageScaffold
+/// Flutter code sample for [CupertinoPageScaffold].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const PageScaffoldApp());
 
 class PageScaffoldApp extends StatelessWidget {
-  const PageScaffoldApp({Key? key}) : super(key: key);
+  const PageScaffoldApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class PageScaffoldApp extends StatelessWidget {
 }
 
 class PageScaffoldExample extends StatefulWidget {
-  const PageScaffoldExample({Key? key}) : super(key: key);
+  const PageScaffoldExample({super.key});
 
   @override
   State<PageScaffoldExample> createState() => _PageScaffoldExampleState();

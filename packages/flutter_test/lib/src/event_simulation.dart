@@ -30,12 +30,12 @@ class _WebKeyLocationPair {
 
 String? _keyLabel(LogicalKeyboardKey key) {
   final String keyLabel = key.keyLabel;
-  if (keyLabel.length == 1)
+  if (keyLabel.length == 1) {
     return keyLabel.toLowerCase();
+  }
   return null;
 }
 
-// ignore: avoid_classes_with_only_static_members
 /// A class that serves as a namespace for a bunch of keyboard-key generation
 /// utilities.
 class KeyEventSimulator {
@@ -700,8 +700,9 @@ class KeyEventSimulator {
     final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
     for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
       final String? debugName = key.debugName;
-      if (debugName != null)
+      if (debugName != null) {
         result[debugName] = key;
+      }
     }
     return result;
   })();
@@ -721,7 +722,7 @@ class KeyEventSimulator {
   // its values.
   //
   // The `_transitMode` defaults to [KeyDataTransitMode.rawKeyEvent], and can be
-  // overridden with [debugKeyEventSimulatorTransitModeOverride].  In widget tests, it
+  // overridden with [debugKeyEventSimulatorTransitModeOverride]. In widget tests, it
   // is often set with [KeySimulationModeVariant].
   static KeyDataTransitMode get _transitMode {
     KeyDataTransitMode? result;
@@ -900,8 +901,13 @@ Future<bool> simulateKeyDownEvent(
   String? platform,
   PhysicalKeyboardKey? physicalKey,
   String? character,
-}) {
-  return KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+}) async {
+  final bool handled = await KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+  final ServicesBinding binding = ServicesBinding.instance;
+  if (!handled && binding is TestWidgetsFlutterBinding) {
+    await binding.testTextInput.handleKeyDownEvent(key);
+  }
+  return handled;
 }
 
 /// Simulates sending a hardware key up event through the system channel.
@@ -927,8 +933,13 @@ Future<bool> simulateKeyUpEvent(
   LogicalKeyboardKey key, {
   String? platform,
   PhysicalKeyboardKey? physicalKey,
-}) {
-  return KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
+}) async {
+  final bool handled = await KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
+  final ServicesBinding binding = ServicesBinding.instance;
+  if (!handled && binding is TestWidgetsFlutterBinding) {
+    await binding.testTextInput.handleKeyUpEvent(key);
+  }
+  return handled;
 }
 
 /// Simulates sending a hardware key repeat event through the system channel.

@@ -215,8 +215,9 @@ void main() {
       state.oldBuilt = state.built!;
       state.trigger();
     }
-    for (final StateSetter setState in setStates)
+    for (final StateSetter setState in setStates) {
       setState(() { });
+    }
 
     StatefulWrapperState.buildId = 0;
     middle = part1;

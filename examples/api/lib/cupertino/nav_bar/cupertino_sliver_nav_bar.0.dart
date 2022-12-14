@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoSliverNavigationBar
+/// Flutter code sample for [CupertinoSliverNavigationBar].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const SliverNavBarApp());
 
 class SliverNavBarApp extends StatelessWidget {
-  const SliverNavBarApp({Key? key}) : super(key: key);
+  const SliverNavBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class SliverNavBarApp extends StatelessWidget {
 }
 
 class SliverNavBarExample extends StatelessWidget {
-  const SliverNavBarExample({Key? key}) : super(key: key);
+  const SliverNavBarExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class SliverNavBarExample extends StatelessWidget {
 }
 
 class NextPage extends StatelessWidget {
-  const NextPage({ Key? key }) : super(key: key);
+  const NextPage({ super.key });
 
   @override
   Widget build(BuildContext context) {

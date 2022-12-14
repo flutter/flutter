@@ -42,16 +42,18 @@ class MenuDemoState extends State<MenuDemo> {
   }
 
   void showMenuSelection(String value) {
-    if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value))
+    if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value)) {
       setState(() => _simpleValue = value);
+    }
     showInSnackBar('You selected: $value');
   }
 
   void showCheckedMenuSelections(String value) {
-    if (_checkedValues.contains(value))
+    if (_checkedValues.contains(value)) {
       _checkedValues.remove(value);
-    else
+    } else {
       _checkedValues.add(value);
+    }
 
     showInSnackBar('Checked $_checkedValues');
   }

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoTextFormFieldRow
+/// Flutter code sample for [CupertinoTextFormFieldRow].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const FormSectionApp());
 
 class FormSectionApp extends StatelessWidget {
-  const FormSectionApp({Key? key}) : super(key: key);
+  const FormSectionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class FormSectionApp extends StatelessWidget {
 }
 
 class FromSectionExample extends StatelessWidget {
-  const FromSectionExample({Key? key}) : super(key: key);
+  const FromSectionExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class FromSectionExample extends StatelessWidget {
         child: Form(
           autovalidateMode: AutovalidateMode.always,
           onChanged: () {
-            Form.of(primaryFocus!.context!)?.save();
+            Form.maybeOf(primaryFocus!.context!)?.save();
           },
           child: CupertinoFormSection.insetGrouped(
             header: const Text('SECTION 1'),

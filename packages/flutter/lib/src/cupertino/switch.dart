@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// bool _giveVerse = false;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'theme.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
@@ -69,6 +73,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.activeColor,
     this.trackColor,
     this.thumbColor,
+    this.applyTheme,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(dragStartBehavior != null);
@@ -102,13 +107,15 @@ class CupertinoSwitch extends StatefulWidget {
   /// ```
   final ValueChanged<bool>? onChanged;
 
-  /// The color to use when this switch is on.
+  /// The color to use for the track when the switch is on.
   ///
-  /// Defaults to [CupertinoColors.systemGreen] when null and ignores
-  /// the [CupertinoTheme] in accordance to native iOS behavior.
+  /// If null and [applyTheme] is false, defaults to [CupertinoColors.systemGreen]
+  /// in accordance to native iOS behavior. Otherwise, defaults to
+  /// [CupertinoThemeData.primaryColor].
   final Color? activeColor;
 
-  /// The color to use for the background when the switch is off.
+
+  /// The color to use for the track when the switch is off.
   ///
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
@@ -117,6 +124,16 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to [CupertinoColors.white] when null.
   final Color? thumbColor;
+
+  /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
+  /// Whether to apply the ambient [CupertinoThemeData].
+  ///
+  /// If true, the track uses [CupertinoThemeData.primaryColor] for the track
+  /// when the switch is on.
+  ///
+  /// Defaults to [CupertinoThemeData.applyThemeToAll].
+  /// {@endtemplate}
+  final bool? applyTheme;
 
   /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -206,8 +223,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     super.didUpdateWidget(oldWidget);
     _drag.dragStartBehavior = widget.dragStartBehavior;
 
-    if (needsPositionAnimation || oldWidget.value != widget.value)
+    if (needsPositionAnimation || oldWidget.value != widget.value) {
       _resumePositionAnimation(isLinear: needsPositionAnimation);
+    }
   }
 
   // `isLinear` must be true if the position animation is trying to move the
@@ -221,15 +239,17 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     position
       ..curve = isLinear ? Curves.linear : Curves.ease
       ..reverseCurve = isLinear ? Curves.linear : Curves.ease.flipped;
-    if (widget.value)
+    if (widget.value) {
       _positionController.forward();
-    else
+    } else {
       _positionController.reverse();
+    }
   }
 
   void _handleTapDown(TapDownDetails details) {
-    if (isInteractive)
+    if (isInteractive) {
       needsPositionAnimation = false;
+    }
       _reactionController.forward();
   }
 
@@ -248,8 +268,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   void _handleTapCancel() {
-    if (isInteractive)
+    if (isInteractive) {
       _reactionController.reverse();
+    }
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -281,8 +302,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     // Deferring the animation to the next build phase.
     setState(() { needsPositionAnimation = true; });
     // Call onChanged when the user's intent to change value is clear.
-    if (position.value >= 0.5 != widget.value)
+    if (position.value >= 0.5 != widget.value) {
       widget.onChanged!(!widget.value);
+    }
     _reactionController.reverse();
   }
 
@@ -302,8 +324,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    if (needsPositionAnimation)
+    final CupertinoThemeData theme = CupertinoTheme.of(context);
+    if (needsPositionAnimation) {
       _resumePositionAnimation();
+    }
     return MouseRegion(
       cursor: isInteractive && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: Opacity(
@@ -311,7 +335,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         child: _CupertinoSwitchRenderObjectWidget(
           value: widget.value,
           activeColor: CupertinoDynamicColor.resolve(
-            widget.activeColor ?? CupertinoColors.systemGreen,
+            widget.activeColor
+            ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
+            ?? CupertinoColors.systemGreen,
             context,
           ),
           trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
@@ -369,6 +395,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoSwitch renderObject) {
+    assert(renderObject._state == state);
     renderObject
       ..value = value
       ..activeColor = activeColor
@@ -423,8 +450,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool _value;
   set value(bool value) {
     assert(value != null);
-    if (value == _value)
+    if (value == _value) {
       return;
+    }
     _value = value;
     markNeedsSemanticsUpdate();
   }
@@ -433,8 +461,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color _activeColor;
   set activeColor(Color value) {
     assert(value != null);
-    if (value == _activeColor)
+    if (value == _activeColor) {
       return;
+    }
     _activeColor = value;
     markNeedsPaint();
   }
@@ -443,8 +472,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color _trackColor;
   set trackColor(Color value) {
     assert(value != null);
-    if (value == _trackColor)
+    if (value == _trackColor) {
       return;
+    }
     _trackColor = value;
     markNeedsPaint();
   }
@@ -453,8 +483,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   CupertinoThumbPainter _thumbPainter;
   set thumbColor(Color value) {
     assert(value != null);
-    if (value == thumbColor)
+    if (value == thumbColor) {
       return;
+    }
     _thumbPainter = CupertinoThumbPainter.switchThumb(color: value);
     markNeedsPaint();
   }
@@ -462,8 +493,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   ValueChanged<bool>? get onChanged => _onChanged;
   ValueChanged<bool>? _onChanged;
   set onChanged(ValueChanged<bool>? value) {
-    if (value == _onChanged)
+    if (value == _onChanged) {
       return;
+    }
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive) {
@@ -476,8 +508,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsPaint();
   }
@@ -500,8 +533,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (isInteractive)
+    if (isInteractive) {
       config.onTap = _state._handleTap;
+    }
 
     config.isEnabled = isInteractive;
     config.isToggled = _value;

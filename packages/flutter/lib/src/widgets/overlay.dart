@@ -11,7 +11,11 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'lookup_boundary.dart';
 import 'ticker_provider.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// A place in an [Overlay] that can contain a widget.
 ///
@@ -90,8 +94,9 @@ class OverlayEntry implements Listenable {
   bool _opaque;
   set opaque(bool value) {
     assert(!_disposedByOwner);
-    if (_opaque == value)
+    if (_opaque == value) {
       return;
+    }
     _opaque = value;
     _overlay?._didChangeEntryOpacity();
   }
@@ -115,8 +120,9 @@ class OverlayEntry implements Listenable {
   set maintainState(bool value) {
     assert(!_disposedByOwner);
     assert(_maintainState != null);
-    if (_maintainState == value)
+    if (_maintainState == value) {
       return;
+    }
     _maintainState = value;
     assert(_overlay != null);
     _overlay!._didChangeEntryOpacity();
@@ -160,8 +166,9 @@ class OverlayEntry implements Listenable {
     assert(!_disposedByOwner);
     final OverlayState overlay = _overlay!;
     _overlay = null;
-    if (!overlay.mounted)
+    if (!overlay.mounted) {
       return;
+    }
 
     overlay._entries.remove(this);
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
@@ -267,13 +274,25 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// [OverlayEntry] objects.
 ///
 /// Although you can create an [Overlay] directly, it's most common to use the
-/// overlay created by the [Navigator] in a [WidgetsApp] or a [MaterialApp]. The
-/// navigator uses its overlay to manage the visual appearance of its routes.
+/// overlay created by the [Navigator] in a [WidgetsApp], [CupertinoApp] or a
+/// [MaterialApp]. The navigator uses its overlay to manage the visual
+/// appearance of its routes.
 ///
 /// The [Overlay] widget uses a custom stack implementation, which is very
 /// similar to the [Stack] widget. The main use case of [Overlay] is related to
 /// navigation and being able to insert widgets on top of the pages in an app.
-/// To simply display a stack of widgets, consider using [Stack] instead.
+/// For layout purposes unrelated to navigation, consider using [Stack] instead.
+///
+/// An [Overlay] widget requires a [Directionality] widget to be in scope, so
+/// that it can resolve direction-sensitive coordinates of any
+/// [Positioned.directional] children.
+///
+/// {@tool dartpad}
+/// This example shows how to use the [Overlay] to highlight the [NavigationBar]
+/// destination.
+///
+/// ** See code in examples/api/lib/widgets/overlay/overlay.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -281,6 +300,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 ///  * [OverlayState], which is used to insert the entries into the overlay.
 ///  * [WidgetsApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
+///  * [CupertinoApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [Stack], which allows directly displaying a stack of widgets.
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
@@ -289,7 +309,8 @@ class Overlay extends StatefulWidget {
   /// [OverlayState] is initialized.
   ///
   /// Rather than creating an overlay, consider using the overlay that is
-  /// created by the [Navigator] in a [WidgetsApp] or a [MaterialApp] for the application.
+  /// created by the [Navigator] in a [WidgetsApp], [CupertinoApp], or a
+  /// [MaterialApp] for the application.
   const Overlay({
     super.key,
     this.initialEntries = const <OverlayEntry>[],
@@ -317,13 +338,17 @@ class Overlay extends StatefulWidget {
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The [OverlayState] from the closest instance of [Overlay] that encloses
+  /// the given context within the closest [LookupBoundary], and, in debug mode,
+  /// will throw if one is not found.
   ///
-  /// In debug mode, if the `debugRequiredFor` argument is provided then this
-  /// function will assert that an overlay was found and will throw an exception
-  /// if not. The exception attempts to explain that the calling [Widget] (the
-  /// one given by the `debugRequiredFor` argument) needs an [Overlay] to be
-  /// present to function.
+  /// In debug mode, if the `debugRequiredFor` argument is provided and an
+  /// overlay isn't found, then this function will throw an exception containing
+  /// the runtime type of the given widget in the error message. The exception
+  /// attempts to explain that the calling [Widget] (the one given by the
+  /// `debugRequiredFor` argument) needs an [Overlay] to be present to function.
+  /// If `debugRequiredFor` is not supplied, then the error message is more
+  /// generic.
   ///
   /// Typical usage is as follows:
   ///
@@ -332,25 +357,33 @@ class Overlay extends StatefulWidget {
   /// ```
   ///
   /// If `rootOverlay` is set to true, the state from the furthest instance of
-  /// this class is given instead. Useful for installing overlay entries
-  /// above all subsequent instances of [Overlay].
+  /// this class is given instead. Useful for installing overlay entries above
+  /// all subsequent instances of [Overlay].
   ///
   /// This method can be expensive (it walks the element tree).
-  static OverlayState? of(
+  ///
+  /// See also:
+  ///
+  /// * [Overlay.maybeOf] for a similar function that returns null if an
+  ///   [Overlay] is not found.
+  static OverlayState of(
     BuildContext context, {
     bool rootOverlay = false,
     Widget? debugRequiredFor,
   }) {
-    final OverlayState? result = rootOverlay
-        ? context.findRootAncestorStateOfType<OverlayState>()
-        : context.findAncestorStateOfType<OverlayState>();
+    final OverlayState? result = maybeOf(context, rootOverlay: rootOverlay);
     assert(() {
-      if (debugRequiredFor != null && result == null) {
+      if (result == null) {
+        final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorStateOfType<OverlayState>(context);
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
-          ErrorSummary('No Overlay widget found.'),
-          ErrorDescription('${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.'),
-          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.'),
-          DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
+          ErrorSummary('No Overlay widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+          if (hiddenByBoundary)
+            ErrorDescription(
+                'There is an ancestor Overlay widget, but it is hidden by a LookupBoundary.'
+            ),
+          ErrorDescription('${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.'),
+          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.'),
+          if (debugRequiredFor != null) DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
           if (context.widget != debugRequiredFor)
             context.describeElement('The context from which that widget was searching for an overlay was'),
         ];
@@ -359,7 +392,36 @@ class Overlay extends StatefulWidget {
       }
       return true;
     }());
-    return result;
+    return result!;
+  }
+
+  /// The [OverlayState] from the closest instance of [Overlay] that encloses
+  /// the given context within the closest [LookupBoundary], if any.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// OverlayState? overlay = Overlay.maybeOf(context);
+  /// ```
+  ///
+  /// If `rootOverlay` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for installing overlay entries above
+  /// all subsequent instances of [Overlay].
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  ///  * [Overlay.of] for a similar function that returns a non-nullable result
+  ///    and throws if an [Overlay] is not found.
+
+  static OverlayState? maybeOf(
+    BuildContext context, {
+    bool rootOverlay = false,
+  }) {
+    return rootOverlay
+        ? LookupBoundary.findRootAncestorStateOfType<OverlayState>(context)
+        : LookupBoundary.findAncestorStateOfType<OverlayState>(context);
   }
 
   @override
@@ -381,10 +443,12 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 
   int _insertionIndex(OverlayEntry? below, OverlayEntry? above) {
     assert(above == null || below == null);
-    if (below != null)
+    if (below != null) {
       return _entries.indexOf(below);
-    if (above != null)
+    }
+    if (above != null) {
       return _entries.indexOf(above) + 1;
+    }
     return _entries.length;
   }
 
@@ -422,8 +486,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       entries.every((OverlayEntry entry) => entry._overlay == null),
       'One or more of the specified entries are already present in another Overlay.',
     );
-    if (entries.isEmpty)
+    if (entries.isEmpty) {
       return;
+    }
     for (final OverlayEntry entry in entries) {
       assert(entry._overlay == null);
       entry._overlay = this;
@@ -477,10 +542,12 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       newEntriesList.every((OverlayEntry entry) => _entries.indexOf(entry) == _entries.lastIndexOf(entry)),
       'One or more of the specified entries are specified multiple times.',
     );
-    if (newEntriesList.isEmpty)
+    if (newEntriesList.isEmpty) {
       return;
-    if (listEquals(_entries, newEntriesList))
+    }
+    if (listEquals(_entries, newEntriesList)) {
       return;
+    }
     final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.of(_entries);
     for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
@@ -515,8 +582,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
           result = true;
           break;
         }
-        if (candidate.opaque)
+        if (candidate.opaque) {
           break;
+        }
       }
       return true;
     }());
@@ -545,8 +613,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
           key: entry._key,
           entry: entry,
         ));
-        if (entry.opaque)
+        if (entry.opaque) {
           onstage = false;
+        }
       } else if (entry.maintainState) {
         children.add(_OverlayEntryWidget(
           key: entry._key,
@@ -651,15 +720,17 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! StackParentData)
+    if (child.parentData is! StackParentData) {
       child.parentData = StackParentData();
+    }
   }
 
   Alignment? _resolvedAlignment;
 
   void _resolve() {
-    if (_resolvedAlignment != null)
+    if (_resolvedAlignment != null) {
       return;
+    }
     _resolvedAlignment = AlignmentDirectional.topStart.resolve(textDirection);
   }
 
@@ -671,8 +742,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     _markNeedResolution();
   }
@@ -813,8 +885,9 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
           return child!.hitTest(result, position: transformed);
         },
       );
-      if (isHit)
+      if (isHit) {
         return true;
+      }
       child = childParentData.previousSibling;
     }
     return false;
@@ -866,7 +939,16 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 
   @override
-  Rect? describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _hasVisualOverflow ? Offset.zero & size : null;
+    }
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

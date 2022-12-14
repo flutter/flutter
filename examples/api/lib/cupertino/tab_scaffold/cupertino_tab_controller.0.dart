@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoTabController
+/// Flutter code sample for [CupertinoTabController].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const TabControllerApp());
 
 class TabControllerApp extends StatelessWidget {
-  const TabControllerApp({Key? key}) : super(key: key);
+  const TabControllerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class TabControllerApp extends StatelessWidget {
 }
 
 class TabControllerExample extends StatefulWidget {
-  const TabControllerExample({Key? key}) : super(key: key);
+  const TabControllerExample({super.key});
 
   @override
   State<TabControllerExample> createState() => _TabControllerExampleState();

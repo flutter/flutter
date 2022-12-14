@@ -6,13 +6,15 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
+import 'material_state.dart';
 import 'switch.dart';
+import 'switch_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
-// bool _isSelected;
+// bool _isSelected = true;
 
 enum _SwitchListTileType { material, adaptive }
 
@@ -37,7 +39,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
 /// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [ThemeData.toggleableActiveColor] if [activeColor] is null.
+/// the theme's [SwitchThemeData.overlayColor] if [activeColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the
 /// [value]; to have the list tile appear selected when the
@@ -46,6 +48,34 @@ enum _SwitchListTileType { material, adaptive }
 /// The switch is shown on the right by default in left-to-right languages (i.e.
 /// in the [ListTile.trailing] slot) which can be changed using [controlAffinity].
 /// The [secondary] widget is placed in the [ListTile.leading] slot.
+///
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], and [selectedTileColor] are not painted by the
+/// [SwitchListTile] itself but by the [Material] widget ancestor. In this
+/// case, one can wrap a [Material] widget around the [SwitchListTile], e.g.:
+///
+/// {@tool snippet}
+/// ```dart
+/// Container(
+///   color: Colors.green,
+///   child: Material(
+///     child: SwitchListTile(
+///       tileColor: Colors.red,
+///       title: const Text('SwitchListTile with red background'),
+///       value: true,
+///       onChanged:(bool? value) { },
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ## Performance considerations when wrapping [SwitchListTile] with [Material]
+///
+/// Wrapping a large number of [SwitchListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [SwitchListTile]s that require it
+/// or include a common [Material] ancestor where possible.
 ///
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
@@ -146,6 +176,7 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.material,
@@ -191,6 +222,7 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
@@ -217,6 +249,7 @@ class SwitchListTile extends StatelessWidget {
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
+  /// {@tool snippet}
   /// ```dart
   /// SwitchListTile(
   ///   value: _isSelected,
@@ -225,9 +258,10 @@ class SwitchListTile extends StatelessWidget {
   ///       _isSelected = newValue;
   ///     });
   ///   },
-  ///   title: Text('Selection'),
+  ///   title: const Text('Selection'),
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<bool>? onChanged;
 
   /// The color to use when this switch is on.
@@ -319,7 +353,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// Defines the position of control and [secondary], relative to text.
   ///
-  /// By default, the value of `controlAffinity` is [ListTileControlAffinity.platform].
+  /// By default, the value of [controlAffinity] is [ListTileControlAffinity.platform].
   final ListTileControlAffinity controlAffinity;
 
   /// {@macro flutter.material.ListTile.shape}
@@ -335,6 +369,9 @@ class SwitchListTile extends StatelessWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.material.ListTile.enableFeedback}
   ///
@@ -362,6 +399,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
+          onFocusChange: onFocusChange,
         );
         break;
 
@@ -377,6 +415,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
+          onFocusChange: onFocusChange,
         );
     }
 
@@ -393,29 +432,36 @@ class SwitchListTile extends StatelessWidget {
         break;
     }
 
+    final ThemeData theme = Theme.of(context);
+    final SwitchThemeData switchTheme = SwitchTheme.of(context);
+    final Set<MaterialState> states = <MaterialState>{
+      if (selected) MaterialState.selected,
+    };
+    final Color effectiveActiveColor = activeColor
+      ?? switchTheme.thumbColor?.resolve(states)
+      ?? theme.colorScheme.secondary;
     return MergeSemantics(
-      child: ListTileTheme.merge(
-        selectedColor: activeColor ?? Theme.of(context).toggleableActiveColor,
-        child: ListTile(
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing,
-          isThreeLine: isThreeLine,
-          dense: dense,
-          contentPadding: contentPadding,
-          enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged!(!value); } : null,
-          selected: selected,
-          selectedTileColor: selectedTileColor,
-          autofocus: autofocus,
-          shape: shape,
-          tileColor: tileColor,
-          visualDensity: visualDensity,
-          focusNode: focusNode,
-          enableFeedback: enableFeedback,
-          hoverColor: hoverColor,
-        ),
+      child: ListTile(
+        selectedColor: effectiveActiveColor,
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        isThreeLine: isThreeLine,
+        dense: dense,
+        contentPadding: contentPadding,
+        enabled: onChanged != null,
+        onTap: onChanged != null ? () { onChanged!(!value); } : null,
+        selected: selected,
+        selectedTileColor: selectedTileColor,
+        autofocus: autofocus,
+        shape: shape,
+        tileColor: tileColor,
+        visualDensity: visualDensity,
+        focusNode: focusNode,
+        onFocusChange: onFocusChange,
+        enableFeedback: enableFeedback,
+        hoverColor: hoverColor,
       ),
     );
   }

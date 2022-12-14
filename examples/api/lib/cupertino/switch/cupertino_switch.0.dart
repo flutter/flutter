@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoSwitch
+/// Flutter code sample for [CupertinoSwitch].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const CupertinoSwitchApp());
 
 class CupertinoSwitchApp extends StatelessWidget {
-  const CupertinoSwitchApp({Key? key}) : super(key: key);
+  const CupertinoSwitchApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +21,14 @@ class CupertinoSwitchApp extends StatelessWidget {
 }
 
 class CupertinoSwitchExample extends StatefulWidget {
-  const CupertinoSwitchExample({Key? key}) : super(key: key);
+  const CupertinoSwitchExample({super.key});
 
   @override
   State<CupertinoSwitchExample> createState() => _CupertinoSwitchExampleState();
 }
 
 class _CupertinoSwitchExampleState extends State<CupertinoSwitchExample> {
-  bool wifi = true;
+  bool switchValue = true;
 
   @override
   Widget build(BuildContext context) {
@@ -37,38 +37,16 @@ class _CupertinoSwitchExampleState extends State<CupertinoSwitchExample> {
         middle: Text('CupertinoSwitch Sample'),
       ),
       child: Center(
-        // CupertinoFormRow's main axis is set to max by default.
-        // Set the intrinsic height widget to center the CupertinoFormRow.
-        child: IntrinsicHeight(
-          child: Container(
-            color: CupertinoTheme.of(context).barBackgroundColor,
-            child: CupertinoFormRow(
-              prefix: Row(
-                children: <Widget>[
-                  Icon(
-                    // Wifi icon is updated based on switch value.
-                    wifi ? CupertinoIcons.wifi : CupertinoIcons.wifi_slash,
-                    color: wifi ? CupertinoColors.systemBlue : CupertinoColors.systemRed,
-                  ),
-                  const SizedBox(width: 10),
-                  const Text('Wi-Fi')
-                ],
-              ),
-              child: CupertinoSwitch(
-                // This bool value toggles the switch.
-                value: wifi,
-                thumbColor: CupertinoColors.systemBlue,
-                trackColor: CupertinoColors.systemRed.withOpacity(0.14),
-                activeColor: CupertinoColors.systemRed.withOpacity(0.64),
-                onChanged: (bool? value) {
-                  // This is called when the user toggles the switch.
-                  setState(() {
-                    wifi = value!;
-                  });
-                },
-              ),
-            ),
-          ),
+        child: CupertinoSwitch(
+          // This bool value toggles the switch.
+          value: switchValue,
+          activeColor: CupertinoColors.activeBlue,
+          onChanged: (bool? value) {
+            // This is called when the user toggles the switch.
+            setState(() {
+              switchValue = value ?? false;
+            });
+          },
         ),
       ),
     );

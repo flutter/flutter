@@ -34,6 +34,7 @@ class BouncingScrollSimulation extends Simulation {
     required this.leadingExtent,
     required this.trailingExtent,
     required this.spring,
+    double constantDeceleration = 0,
     super.tolerance,
   }) : assert(position != null),
        assert(velocity != null),
@@ -50,7 +51,7 @@ class BouncingScrollSimulation extends Simulation {
     } else {
       // Taken from UIScrollView.decelerationRate (.normal = 0.998)
       // 0.998^1000 = ~0.135
-      _frictionSimulation = FrictionSimulation(0.135, position, velocity);
+      _frictionSimulation = FrictionSimulation(0.135, position, velocity, constantDeceleration: constantDeceleration);
       final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
@@ -212,13 +213,13 @@ class ClampingScrollSimulation extends Simulation {
 
   @override
   double x(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
     return position + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 
   @override
   double dx(double time) {
-    final double t = (time / _duration).clamp(0.0, 1.0);
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
     return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
   }
 

@@ -8,7 +8,6 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 const String kPackageName = 'com.example.macrobenchmarks';
-const String kActivityName = 'com.example.macrobenchmarks.MainActivity';
 
 class FastScrollHeavyGridViewMemoryTest extends MemoryTest {
   FastScrollHeavyGridViewMemoryTest()

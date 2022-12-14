@@ -5,7 +5,8 @@
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show SingletonFlutterWindow, Brightness, PlatformDispatcher, window;
+import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
+
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -14,10 +15,14 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'diagnostics.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+import 'service_extensions.dart';
+
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
+
+export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
 // Examples can assume:
 // mixin BarBinding on BindingBase { }
@@ -105,7 +110,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// layer that it wishes to expose, and should have an
 /// `ensureInitialized` method that constructs the class if that
 /// layer's mixin's `_instance` field is null. This allows the binding
-/// to be overriden by developers who have more specific needs, while
+/// to be overridden by developers who have more specific needs, while
 /// still allowing other code to call `ensureInitialized` when a binding
 /// is needed.
 ///
@@ -116,6 +121,7 @@ typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<Str
 /// class.
 ///
 /// ```dart
+/// // continuing from previous example...
 /// class FooLibraryBinding extends BindingBase with BarBinding, FooBinding {
 ///   static FooBinding ensureInitialized() {
 ///     if (FooBinding._instance == null) {
@@ -174,15 +180,15 @@ abstract class BindingBase {
   /// Each of these other bindings could individually access a
   /// [ui.SingletonFlutterWindow] statically, but that would preclude the
   /// ability to test its behaviors with a fake window for verification
-  /// purposes.  Therefore, [BindingBase] exposes this
-  /// [ui.SingletonFlutterWindow] for use by other bindings.  A subclass of
+  /// purposes. Therefore, [BindingBase] exposes this
+  /// [ui.SingletonFlutterWindow] for use by other bindings. A subclass of
   /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
   /// accessor to return a different [ui.SingletonFlutterWindow] implementation,
   /// such as a [TestWindow].
   ///
-  /// The `window` is a singleton meant for use by applications that only have a
+  /// The [window] is a singleton meant for use by applications that only have a
   /// single main window. In addition to the properties of [ui.FlutterWindow],
-  /// `window` provides access to platform-specific properties and callbacks
+  /// [window] provides access to platform-specific properties and callbacks
   /// available on the [platformDispatcher].
   ///
   /// For applications designed for more than one main window, prefer using the
@@ -419,7 +425,7 @@ abstract class BindingBase {
 
     assert(() {
       registerSignalServiceExtension(
-        name: 'reassemble',
+        name: FoundationServiceExtensions.reassemble.name,
         callback: reassembleApplication,
       );
       return true;
@@ -428,20 +434,20 @@ abstract class BindingBase {
     if (!kReleaseMode) {
       if (!kIsWeb) {
         registerSignalServiceExtension(
-          name: 'exit',
+          name: FoundationServiceExtensions.exit.name,
           callback: _exitApplication,
         );
       }
       // These service extensions are used in profile mode applications.
       registerStringServiceExtension(
-        name: 'connectedVmServiceUri',
+        name: FoundationServiceExtensions.connectedVmServiceUri.name,
         getter: () async => connectedVmServiceUri ?? '',
         setter: (String uri) async {
           connectedVmServiceUri = uri;
         },
       );
       registerStringServiceExtension(
-        name: 'activeDevToolsServerAddress',
+        name: FoundationServiceExtensions.activeDevToolsServerAddress.name,
         getter: () async => activeDevToolsServerAddress ?? '',
         setter: (String serverAddress) async {
           activeDevToolsServerAddress = serverAddress;
@@ -450,9 +456,8 @@ abstract class BindingBase {
     }
 
     assert(() {
-      const String platformOverrideExtensionName = 'platformOverride';
       registerServiceExtension(
-        name: platformOverrideExtensionName,
+        name: FoundationServiceExtensions.platformOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
@@ -479,7 +484,7 @@ abstract class BindingBase {
                 debugDefaultTargetPlatformOverride = null;
             }
             _postExtensionStateChangedEvent(
-              platformOverrideExtensionName,
+              FoundationServiceExtensions.platformOverride.name,
               defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
             );
             await reassembleApplication();
@@ -492,9 +497,8 @@ abstract class BindingBase {
         },
       );
 
-      const String brightnessOverrideExtensionName = 'brightnessOverride';
       registerServiceExtension(
-        name: brightnessOverrideExtensionName,
+        name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
@@ -508,7 +512,7 @@ abstract class BindingBase {
                 debugBrightnessOverride = null;
             }
             _postExtensionStateChangedEvent(
-              brightnessOverrideExtensionName,
+              FoundationServiceExtensions.brightnessOverride.name,
               (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
             );
             await reassembleApplication();
@@ -827,8 +831,9 @@ abstract class BindingBase {
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
-        if (debugInstrumentationEnabled)
+        if (debugInstrumentationEnabled) {
           debugPrint('service extension method received: $method($parameters)');
+        }
         return true;
       }());
 

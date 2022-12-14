@@ -7,6 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties needed for text selection in [TextField] and
 /// [SelectableText] widgets.
 ///
@@ -70,8 +73,9 @@ class TextSelectionThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TextSelectionThemeData? lerp(TextSelectionThemeData? a, TextSelectionThemeData? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     assert(t != null);
     return TextSelectionThemeData(
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),
@@ -89,10 +93,12 @@ class TextSelectionThemeData with Diagnosticable {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextSelectionThemeData
       && other.cursorColor == cursorColor
       && other.selectionColor == selectionColor

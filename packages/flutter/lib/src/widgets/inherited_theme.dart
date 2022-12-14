@@ -4,6 +4,9 @@
 
 import 'framework.dart';
 
+// Examples can assume:
+// TooltipThemeData data = const TooltipThemeData();
+
 /// An [InheritedWidget] that defines visual properties like colors
 /// and text styles, which the [child]'s subtree depends on.
 ///
@@ -153,8 +156,9 @@ class _CaptureAll extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget wrappedChild = child;
-    for (final InheritedTheme theme in themes)
+    for (final InheritedTheme theme in themes) {
       wrappedChild = theme.wrap(context, wrappedChild);
+    }
     return wrappedChild;
   }
 }

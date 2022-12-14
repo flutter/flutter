@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A key can be used to persist the widget state in storage after
 /// the destruction and will be restored when recreated.
 ///
@@ -33,8 +36,9 @@ class _StorageEntryIdentifier {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _StorageEntryIdentifier
         && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
@@ -56,8 +60,9 @@ class PageStorageBucket {
   static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
     final Key? key = widget.key;
-    if (key is PageStorageKey)
+    if (key is PageStorageKey) {
       keys.add(key);
+    }
     return widget is! PageStorage;
   }
 
@@ -91,8 +96,9 @@ class PageStorageBucket {
       _storage![identifier] = data;
     } else {
       final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-      if (contextIdentifier.isNotEmpty)
+      if (contextIdentifier.isNotEmpty) {
         _storage![contextIdentifier] = data;
+      }
     }
   }
 
@@ -105,10 +111,12 @@ class PageStorageBucket {
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
   dynamic readState(BuildContext context, { Object? identifier }) {
-    if (_storage == null)
+    if (_storage == null) {
       return null;
-    if (identifier != null)
+    }
+    if (identifier != null) {
       return _storage![identifier];
+    }
     final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
     return contextIdentifier.isNotEmpty ? _storage![contextIdentifier] : null;
   }
@@ -166,9 +174,33 @@ class PageStorage extends StatelessWidget {
   /// The page storage bucket to use for this subtree.
   final PageStorageBucket bucket;
 
-  /// The bucket from the closest instance of this class that encloses the given context.
+  /// The [PageStorageBucket] from the closest instance of a [PageStorage]
+  /// widget that encloses the given context.
   ///
   /// Returns null if none exists.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// PageStorageBucket? bucket = PageStorage.of(context);
+  /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  /// * [PageStorage.of], which is similar to this method, but
+  ///   asserts if no [PageStorage] ancestor is found.
+  static PageStorageBucket? maybeOf(BuildContext context) {
+    final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
+    return widget?.bucket;
+  }
+
+  /// The [PageStorageBucket] from the closest instance of a [PageStorage]
+  /// widget that encloses the given context.
+  ///
+  /// If no ancestor is found, this method will assert in debug mode, and throw
+  /// an exception in release mode.
   ///
   /// Typical usage is as follows:
   ///
@@ -177,9 +209,29 @@ class PageStorage extends StatelessWidget {
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).
-  static PageStorageBucket? of(BuildContext context) {
-    final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
-    return widget?.bucket;
+  ///
+  /// See also:
+  ///
+  /// * [PageStorage.maybeOf], which is similar to this method, but
+  ///   returns null if no [PageStorage] ancestor is found.
+  static PageStorageBucket of(BuildContext context) {
+    final PageStorageBucket? bucket = maybeOf(context);
+    assert(() {
+      if (bucket == null) {
+        throw FlutterError(
+          'PageStorage.of() was called with a context that does not contain a '
+          'PageStorage widget.\n'
+          'No PageStorage widget ancestor could be found starting from the '
+          'context that was passed to PageStorage.of(). This can happen '
+          'because you are using a widget that looks for a PageStorage '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return bucket!;
   }
 
   @override

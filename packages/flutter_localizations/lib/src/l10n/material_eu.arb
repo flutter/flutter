@@ -128,5 +128,6 @@
   "keyboardKeySpace": "Zuriune-barra",
   "keyboardKeyMetaMacOs": "Komandoa",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Menu-barraren menua",
+  "currentDateLabel": "Date of today"
 }

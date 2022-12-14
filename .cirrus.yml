@@ -12,7 +12,7 @@ environment:
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
 
-gcp_credentials: ENCRYPTED[!2c88dee9c9d9805b214c9f7ad8f3bc8fae936cdb0f881d562101151c408c7e024a41222677d5831df90c60d2dd6cd80a!]
+gcp_credentials: ENCRYPTED[!9e38557f08108136b3625b7e62c64cc9eccc50365ffeaaa55c6be52f1d8fd6225af5badc69983ca08484274f02f34424!]
 
 # LINUX SHARDS
 task:
@@ -68,7 +68,7 @@ task:
       - which flutter
   matrix:
     - name: analyze-linux # linux-only
-      only_if: "$CIRRUS_PR != ''"
+      only_if: "$CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
         # CPU.  We noticed OOM failures with 6GB 4/2020, so we increased the memory.
@@ -78,7 +78,7 @@ task:
         - dart --enable-asserts ./dev/bots/analyze.dart
 
     - name: framework_tests-widgets-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
         # running fast enough that it is not the long pole, as of October 2019.
@@ -87,7 +87,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: framework_tests-libraries-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # We use 3 CPUs because that's the minimum required to get the
         # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
@@ -98,7 +98,7 @@ task:
 
     - name: framework_tests-misc-linux
       # this includes the tests for directories in dev/
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # We use 3 CPUs because that's the minimum required to get framework_tests-misc-linux
         # running fast enough that it is not the long pole, as of October 2019.
@@ -107,7 +107,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-general-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # As of November 2019, the tool_tests-general-linux shard got faster with more CPUs up to 4
         # CPUs, and needed at least 10G of RAM to not run out of memory.
@@ -122,7 +122,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != ''"
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/**') && $CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # As of October 2019, the tool_tests-commands-linux shard got faster with more CPUs up to 6
         # CPUs, and needed at least 8G of RAM to not run out of memory.
@@ -139,12 +139,12 @@ task:
       environment:
         CPU: 4
         MEMORY: 12G
-      only_if: "$CIRRUS_PR != ''"
+      only_if: "$CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       script:
         - ./dev/bots/docs.sh
 
     - name: customer_testing-linux
-      only_if: "$CIRRUS_PR != ''"
+      only_if: "$CIRRUS_PR != '' && $CIRRUS_BASE_BRANCH == 'master'"
       environment:
         # Empirically, this shard runs fine at 1 CPU and 4G RAM as of October 2019. We will probably
         # want to grow this container when we invite people to add their tests in large numbers.

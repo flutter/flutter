@@ -53,7 +53,7 @@ enum AutofillContextAction {
 ///
 /// {@tool dartpad}
 /// An example form with autofillable fields grouped into different
-/// `AutofillGroup`s.
+/// [AutofillGroup]s.
 ///
 /// ** See code in examples/api/lib/widgets/autofill/autofill_group.0.dart **
 /// {@end-tool}
@@ -72,17 +72,60 @@ class AutofillGroup extends StatefulWidget {
     this.onDisposeAction = AutofillContextAction.commit,
   }) : assert(child != null);
 
-  /// Returns the closest [AutofillGroupState] which encloses the given context.
+  /// Returns the [AutofillGroupState] of the closest [AutofillGroup] widget
+  /// which encloses the given context, or null if one cannot be found.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [AutofillGroup] in the [context], if there is one.
   ///
   /// {@macro flutter.widgets.AutofillGroupState}
   ///
   /// See also:
   ///
+  /// * [AutofillGroup.of], which is similar to this method, but asserts if an
+  ///   [AutofillGroup] cannot be found.
   /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
-  static AutofillGroupState? of(BuildContext context) {
+  static AutofillGroupState? maybeOf(BuildContext context) {
     final _AutofillScope? scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
+  }
+
+  /// Returns the [AutofillGroupState] of the closest [AutofillGroup] widget
+  /// which encloses the given context.
+  ///
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [AutofillGroup] in the [context].
+  ///
+  /// {@macro flutter.widgets.AutofillGroupState}
+  ///
+  /// See also:
+  ///
+  /// * [AutofillGroup.maybeOf], which is similar to this method, but returns
+  ///   null if an [AutofillGroup] cannot be found.
+  /// * [EditableTextState], where this method is used to retrieve the closest
+  ///   [AutofillGroupState].
+  static AutofillGroupState of(BuildContext context) {
+    final AutofillGroupState? groupState = maybeOf(context);
+    assert(() {
+      if (groupState == null) {
+        throw FlutterError(
+          'AutofillGroup.of() was called with a context that does not contain an '
+          'AutofillGroup widget.\n'
+          'No AutofillGroup widget ancestor could be found starting from the '
+          'context that was passed to AutofillGroup.of(). This can happen '
+          'because you are using a widget that looks for an AutofillGroup '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return groupState!;
   }
 
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -171,7 +214,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _isTopmostAutofillGroup = AutofillGroup.of(context) == null;
+    _isTopmostAutofillGroup = AutofillGroup.maybeOf(context) == null;
   }
 
   @override
@@ -186,8 +229,9 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   void dispose() {
     super.dispose();
 
-    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null)
+    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null) {
       return;
+    }
     switch (widget.onDisposeAction) {
       case AutofillContextAction.cancel:
         TextInput.finishAutofillContext(shouldSave: false);

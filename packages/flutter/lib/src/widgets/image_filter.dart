@@ -46,7 +46,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;
 
-  /// Whether or not to apply the image filter opation to the child of this
+  /// Whether or not to apply the image filter operation to the child of this
   /// widget.
   ///
   /// Prefer setting enabled to `false` instead of creating a "no-op" filter
@@ -79,7 +79,11 @@ class _ImageFilterRenderObject extends RenderProxyBox {
     if (enabled == value) {
       return;
     }
+    final bool wasRepaintBoundary = isRepaintBoundary;
     _enabled = value;
+    if (isRepaintBoundary != wasRepaintBoundary) {
+      markNeedsCompositingBitsUpdate();
+    }
     markNeedsPaint();
   }
 
@@ -89,31 +93,20 @@ class _ImageFilterRenderObject extends RenderProxyBox {
     assert(value != null);
     if (value != _imageFilter) {
       _imageFilter = value;
-      markNeedsPaint();
+      markNeedsCompositedLayerUpdate();
     }
   }
 
   @override
   bool get alwaysNeedsCompositing => child != null && enabled;
 
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    assert(imageFilter != null);
-    if (!enabled) {
-      layer = null;
-      return super.paint(context, offset);
-    }
+   @override
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
 
-    if (layer == null) {
-      layer = ImageFilterLayer(imageFilter: imageFilter);
-    } else {
-      final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
-      filterLayer.imageFilter = imageFilter;
-    }
-    context.pushLayer(layer!, super.paint, offset);
-    assert(() {
-      layer!.debugCreator = debugCreator;
-      return true;
-    }());
+  @override
+  OffsetLayer updateCompositedLayer({required covariant ImageFilterLayer? oldLayer}) {
+    final ImageFilterLayer layer = oldLayer ?? ImageFilterLayer();
+    layer.imageFilter = imageFilter;
+    return layer;
   }
 }

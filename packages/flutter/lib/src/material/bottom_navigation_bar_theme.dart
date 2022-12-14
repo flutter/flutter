@@ -11,6 +11,9 @@ import 'bottom_navigation_bar.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [BottomNavigationBar]
 /// widgets.
 ///
@@ -210,10 +213,12 @@ class BottomNavigationBarThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BottomNavigationBarThemeData
         && other.backgroundColor == backgroundColor
         && other.elevation == elevation

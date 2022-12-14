@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
+import 'dart:ui' as ui show PointerChange, PointerData, PointerSignalKind;
 
 import 'events.dart';
+
+export 'dart:ui' show PointerData;
+
+export 'events.dart' show PointerEvent;
 
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
 //
@@ -212,7 +216,6 @@ class PointerEventConverter {
                   return PointerPanZoomStartEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     embedderId: datum.embedderId,
@@ -226,7 +229,6 @@ class PointerEventConverter {
                   return PointerPanZoomUpdateEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     pan: pan,
@@ -240,7 +242,6 @@ class PointerEventConverter {
                   return PointerPanZoomEndEvent(
                     timeStamp: timeStamp,
                     pointer: datum.pointerIdentifier,
-                    kind: kind,
                     device: datum.device,
                     position: position,
                     embedderId: datum.embedderId,
@@ -257,6 +258,23 @@ class PointerEventConverter {
                 position: position,
                 scrollDelta: scrollDelta,
                 embedderId: datum.embedderId,
+              );
+            case ui.PointerSignalKind.scrollInertiaCancel:
+              return PointerScrollInertiaCancelEvent(
+                timeStamp: timeStamp,
+                kind: kind,
+                device: datum.device,
+                position: position,
+                embedderId: datum.embedderId,
+              );
+            case ui.PointerSignalKind.scale:
+              return PointerScaleEvent(
+                timeStamp: timeStamp,
+                kind: kind,
+                device: datum.device,
+                position: position,
+                embedderId: datum.embedderId,
+                scale: datum.scale,
               );
             case ui.PointerSignalKind.unknown:
               // This branch should already have 'unknown' filtered out, but

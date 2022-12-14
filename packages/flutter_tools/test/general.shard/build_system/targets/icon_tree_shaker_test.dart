@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
@@ -16,7 +15,6 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
-final Platform kNoAnsiPlatform = FakePlatform();
 const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
 
 const String inputPath = '/input/fonts/MaterialIcons-Regular.otf';
@@ -81,7 +79,7 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    dartPath = artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    dartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     constFinderPath = artifacts.getArtifactPath(Artifact.constFinder);
     fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
 

@@ -1,6 +1,6 @@
 {
   "scriptCategory": "English-like",
-  "timeOfDayFormat": "HH:mm",
+  "timeOfDayFormat": "HH.mm",
   "openAppDrawerTooltip": "Buka menu navigasi",
   "backButtonTooltip": "Kembali",
   "closeButtonTooltip": "Tutup",
@@ -129,5 +129,6 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Menu panel menu",
+  "currentDateLabel": "Date of today"
 }

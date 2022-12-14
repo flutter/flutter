@@ -7,6 +7,8 @@ import 'dart:ui';
 import 'framework.dart';
 import 'inherited_theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
 
 /// The selection style to apply to descendant [EditableText] widgets which
 /// don't have an explicit style.
@@ -29,7 +31,7 @@ class DefaultSelectionStyle extends InheritedTheme {
   });
 
   /// A const-constructable default selection style that provides fallback
-  /// values.
+  /// values (null).
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing
   /// default selection style.
@@ -40,6 +42,12 @@ class DefaultSelectionStyle extends InheritedTheme {
     : cursorColor = null,
       selectionColor = null,
       super(child: const _NullWidget());
+
+  /// The default cursor and selection color (semi-transparent grey).
+  ///
+  /// This is the color that the [Text] widget uses when the specified selection
+  /// color is null.
+  static const Color defaultColor = Color(0x80808080);
 
   /// The color of the text field's cursor.
   ///
@@ -86,9 +94,9 @@ class _NullWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     throw FlutterError(
-      'A DefaultTextStyle constructed with DefaultTextStyle.fallback cannot be incorporated into the widget tree, '
-          'it is meant only to provide a fallback value returned by DefaultTextStyle.of() '
-          'when no enclosing default text style is present in a BuildContext.',
+      'A DefaultSelectionStyle constructed with DefaultSelectionStyle.fallback cannot be incorporated into the widget tree, '
+      'it is meant only to provide a fallback value returned by DefaultSelectionStyle.of() '
+      'when no enclosing default selection style is present in a BuildContext.',
     );
   }
 }

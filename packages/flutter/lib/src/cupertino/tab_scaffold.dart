@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+
 import 'bottom_tab_bar.dart';
 import 'colors.dart';
 import 'theme.dart';
@@ -161,9 +162,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
   ///
-  /// By default `tabBar` has its text scale factor set to 1.0 and does not
+  /// By default [tabBar] has its text scale factor set to 1.0 and does not
   /// respond to text scale factor changes from the operating system, to match
-  /// the native iOS behavior. To override this behavior, wrap each of the `tabBar`'s
+  /// the native iOS behavior. To override this behavior, wrap each of the [tabBar]'s
   /// items inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
   /// value. The text scale factor value from the operating system can be retrieved
   /// int many ways, such as querying [MediaQuery.textScaleFactorOf] against
@@ -457,7 +458,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     _focusActiveTab();
   }
 
-  // Will focus the active tab if the FocusScope above it has focus already.  If
+  // Will focus the active tab if the FocusScope above it has focus already. If
   // not, then it will just mark it as the preferred focus for that scope.
   void _focusActiveTab() {
     if (tabFocusNodes.length != widget.tabCount) {
@@ -504,7 +505,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
               child: FocusScope(
                 node: tabFocusNodes[index],
                 child: Builder(builder: (BuildContext context) {
-                  return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
+                  return shouldBuildTab[index] ? widget.tabBuilder(context, index) : const SizedBox.shrink();
                 }),
               ),
             ),

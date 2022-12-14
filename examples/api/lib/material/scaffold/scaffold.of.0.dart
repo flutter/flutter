@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Scaffold.of
+/// Flutter code sample for [Scaffold.of].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyScaffoldBody extends StatelessWidget {
-  const MyScaffoldBody({Key? key}) : super(key: key);
+  const MyScaffoldBody({super.key});
 
   @override
   Widget build(BuildContext context) {

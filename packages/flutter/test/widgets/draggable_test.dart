@@ -2839,8 +2839,9 @@ void main() {
             },
             onAccept: accepted.add,
             onWillAccept: (int? data) {
-              if (data == null)
+              if (data == null) {
                 isReceiveNullDataForCheck = true;
+              }
               return data != null;
             },
           ),
@@ -3096,7 +3097,6 @@ void main() {
     final Offset location = tester.getCenter(find.text('Target'));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: location);
-    addTearDown(gesture.removePointer);
 
     await gesture.down(location);
     await tester.pump();
@@ -3192,8 +3192,6 @@ void main() {
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1), isA<Draggable<int>>());
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).child, widget1);
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).feedback, widget2);
-    expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).dragAnchor, DragAnchor.child);
-    expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.pointer, child: widget1).dragAnchor, DragAnchor.pointer);
     expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
   });
 }

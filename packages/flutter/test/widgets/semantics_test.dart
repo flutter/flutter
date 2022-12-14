@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -585,7 +584,8 @@ void main() {
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling);
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isCheckStateMixed);
 
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -632,7 +632,49 @@ void main() {
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    await tester.pumpWidget(
+        Semantics(
+          key: const Key('a'),
+          container: true,
+          explicitChildNodes: true,
+          // flags
+          enabled: true,
+          hidden: true,
+          checked: false,
+          mixed: true,
+          selected: true,
+          button: true,
+          slider: true,
+          keyboardKey: true,
+          link: true,
+          textField: true,
+          readOnly: true,
+          focused: true,
+          focusable: true,
+          inMutuallyExclusiveGroup: true,
+          header: true,
+          obscured: true,
+          multiline: true,
+          scopesRoute: true,
+          namesRoute: true,
+          image: true,
+          liveRegion: true,
+        ),
+    );
+    flags
+      ..remove(SemanticsFlag.isChecked)
+      ..add(SemanticsFlag.isCheckStateMixed);
     semantics.dispose();
+    expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: flags,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
   });
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
@@ -1589,6 +1631,33 @@ void main() {
       label: 'foo',
       textDirection: TextDirection.ltr,
     ));
+  });
+
+  testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110671.
+    // Construct a widget tree that will end up with a fitted box that applies
+    // a zero transform because it does not actually draw its children.
+    // Assert that this subtree gets dropped (the root node has no children).
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(
+          height: 0,
+          width: 500,
+          child: FittedBox(
+            child: SizedBox(
+              height: 55,
+              width: 266,
+              child: SingleChildScrollView(child: Column()),
+            ),
+          ),
+        ),
+      ],
+    ));
+
+    final SemanticsNode node = RendererBinding.instance.renderView.debugSemantics!;
+
+    expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
+    expect(node.childrenCount, 0);
   });
 }
 

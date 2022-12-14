@@ -4,12 +4,19 @@
 
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'arena.dart' show GestureDisposition;
+export 'events.dart' show PointerCancelEvent, PointerDownEvent, PointerEvent, PointerUpEvent;
 
 /// Details for [GestureTapDownCallback], such as position.
 ///
@@ -209,7 +216,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     if (_down != null) {
       // This happens when this tap gesture has been rejected while the pointer
       // is down (i.e. due to movement), when another allowed pointer is added,
-      // in which case all pointers are simply ignored. The `_down` being null
+      // in which case all pointers are ignored. The `_down` being null
       // means that _reset() has been called, since it is always set at the
       // first allowed down event and will not be cleared except for reset(),
       super.addAllowedPointer(event);
@@ -276,8 +283,9 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     if (pointer == primaryPointer) {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
-      if (_sentTapDown)
+      if (_sentTapDown) {
         _checkCancel(null, 'forced');
+      }
       _reset();
     }
   }
@@ -549,21 +557,24 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
         if (onTapDown == null &&
             onTap == null &&
             onTapUp == null &&
-            onTapCancel == null)
+            onTapCancel == null) {
           return false;
+        }
         break;
       case kSecondaryButton:
         if (onSecondaryTap == null &&
             onSecondaryTapDown == null &&
             onSecondaryTapUp == null &&
-            onSecondaryTapCancel == null)
+            onSecondaryTapCancel == null) {
           return false;
+        }
         break;
       case kTertiaryButton:
         if (onTertiaryTapDown == null &&
             onTertiaryTapUp == null &&
-            onTertiaryTapCancel == null)
+            onTertiaryTapCancel == null) {
           return false;
+        }
         break;
       default:
         return false;
@@ -581,16 +592,19 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
     );
     switch (down.buttons) {
       case kPrimaryButton:
-        if (onTapDown != null)
+        if (onTapDown != null) {
           invokeCallback<void>('onTapDown', () => onTapDown!(details));
+        }
         break;
       case kSecondaryButton:
-        if (onSecondaryTapDown != null)
+        if (onSecondaryTapDown != null) {
           invokeCallback<void>('onSecondaryTapDown', () => onSecondaryTapDown!(details));
+        }
         break;
       case kTertiaryButton:
-        if (onTertiaryTapDown != null)
+        if (onTertiaryTapDown != null) {
           invokeCallback<void>('onTertiaryTapDown', () => onTertiaryTapDown!(details));
+        }
         break;
       default:
     }
@@ -606,20 +620,25 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
     );
     switch (down.buttons) {
       case kPrimaryButton:
-        if (onTapUp != null)
+        if (onTapUp != null) {
           invokeCallback<void>('onTapUp', () => onTapUp!(details));
-        if (onTap != null)
+        }
+        if (onTap != null) {
           invokeCallback<void>('onTap', onTap!);
+        }
         break;
       case kSecondaryButton:
-        if (onSecondaryTapUp != null)
+        if (onSecondaryTapUp != null) {
           invokeCallback<void>('onSecondaryTapUp', () => onSecondaryTapUp!(details));
-        if (onSecondaryTap != null)
+        }
+        if (onSecondaryTap != null) {
           invokeCallback<void>('onSecondaryTap', () => onSecondaryTap!());
+        }
         break;
       case kTertiaryButton:
-        if (onTertiaryTapUp != null)
+        if (onTertiaryTapUp != null) {
           invokeCallback<void>('onTertiaryTapUp', () => onTertiaryTapUp!(details));
+        }
         break;
       default:
     }
@@ -631,16 +650,19 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
     final String note = reason == '' ? reason : '$reason ';
     switch (down.buttons) {
       case kPrimaryButton:
-        if (onTapCancel != null)
+        if (onTapCancel != null) {
           invokeCallback<void>('${note}onTapCancel', onTapCancel!);
+        }
         break;
       case kSecondaryButton:
-        if (onSecondaryTapCancel != null)
+        if (onSecondaryTapCancel != null) {
           invokeCallback<void>('${note}onSecondaryTapCancel', onSecondaryTapCancel!);
+        }
         break;
       case kTertiaryButton:
-        if (onTertiaryTapCancel != null)
+        if (onTertiaryTapCancel != null) {
           invokeCallback<void>('${note}onTertiaryTapCancel', onTertiaryTapCancel!);
+        }
         break;
       default:
     }

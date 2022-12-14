@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.localeAware
+/// Flutter code sample for [FontFeature.FontFeature.localeAware].
 
 import 'package:flutter/widgets.dart';
 
 void main() => runApp(const ExampleApp());
 
 class ExampleApp extends StatelessWidget {
-  const ExampleApp({Key? key}) : super(key: key);
+  const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +21,12 @@ class ExampleApp extends StatelessWidget {
 }
 
 class ExampleWidget extends StatelessWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+  const ExampleWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // The Noto family of fonts can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Noto family of fonts can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       '次 化 刃 直 入 令',
       locale: Locale('zh', 'CN'), // or Locale('ja'), Locale('ko'), Locale('zh', 'TW'), etc

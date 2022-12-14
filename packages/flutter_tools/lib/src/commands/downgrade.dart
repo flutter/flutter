@@ -30,7 +30,7 @@ class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
     bool verboseHelp = false,
     PersistentToolState? persistentToolState,
-    Logger? logger,
+    required Logger logger,
     ProcessManager? processManager,
     FlutterVersion? flutterVersion,
     Terminal? terminal,
@@ -64,7 +64,7 @@ class DowngradeCommand extends FlutterCommand {
   PersistentToolState? _persistentToolState;
   ProcessUtils? _processUtils;
   ProcessManager? _processManager;
-  Logger? _logger;
+  final Logger _logger;
   Stdio? _stdio;
   FileSystem? _fileSystem;
 
@@ -83,11 +83,10 @@ class DowngradeCommand extends FlutterCommand {
     // values when being created. Fields must be lazily instantiated in runCommand,
     // at least until the zone injection is refactored.
     _terminal ??= globals.terminal;
-    _logger ??= globals.logger;
     _flutterVersion ??= globals.flutterVersion;
     _persistentToolState ??= globals.persistentToolState;
     _processManager ??= globals.processManager;
-    _processUtils ??= ProcessUtils(processManager: _processManager!, logger: _logger!);
+    _processUtils ??= ProcessUtils(processManager: _processManager!, logger: _logger);
     _stdio ??= globals.stdio;
     _fileSystem ??= globals.fs;
     String workingDirectory = Cache.flutterRoot!;
@@ -128,19 +127,18 @@ class DowngradeCommand extends FlutterCommand {
     // If there is a terminal attached, prompt the user to confirm the downgrade.
     final Stdio stdio = _stdio!;
     final Terminal terminal = _terminal!;
-    final Logger logger = _logger!;
-    if (stdio.hasTerminal && boolArg('prompt')) {
+    if (stdio.hasTerminal && boolArgDeprecated('prompt')) {
       terminal.usesTerminalUi = true;
       final String result = await terminal.promptForCharInput(
         const <String>['y', 'n'],
         prompt: 'Downgrade flutter to version $humanReadableVersion?',
-        logger: logger,
+        logger: _logger,
       );
       if (result == 'n') {
         return FlutterCommandResult.success();
       }
     } else {
-      logger.printStatus('Downgrading Flutter to version $humanReadableVersion');
+      _logger.printStatus('Downgrading Flutter to version $humanReadableVersion');
     }
 
     // To downgrade the tool, we perform a git checkout --hard, and then
@@ -175,7 +173,7 @@ class DowngradeCommand extends FlutterCommand {
       );
     }
     await FlutterVersion.resetFlutterVersionFreshnessCheck();
-    logger.printStatus('Success');
+    _logger.printStatus('Success');
     return FlutterCommandResult.success();
   }
 

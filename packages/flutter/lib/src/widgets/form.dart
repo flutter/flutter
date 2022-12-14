@@ -8,6 +8,9 @@ import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// An optional container for grouping together multiple form field widgets
 /// (e.g. [TextField] widgets).
 ///
@@ -46,7 +49,30 @@ class Form extends StatefulWidget {
   }) : assert(child != null),
        autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
-  /// Returns the closest [FormState] which encloses the given context.
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context, or null if none is found.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// FormState? form = Form.maybeOf(context);
+  /// form?.save();
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [Form.of], which is similar to this method, but asserts if no [Form]
+  ///   ancestor is found.
+  static FormState? maybeOf(BuildContext context) {
+    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
+    return scope?._formState;
+  }
+
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context.
   ///
   /// Typical usage is as follows:
   ///
@@ -54,9 +80,33 @@ class Form extends StatefulWidget {
   /// FormState form = Form.of(context);
   /// form.save();
   /// ```
-  static FormState? of(BuildContext context) {
-    final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
-    return scope?._formState;
+  ///
+  /// If no [Form] ancestor is found, this will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context].
+  ///
+  /// See also:
+  ///
+  /// * [Form.maybeOf], which is similar to this method, but returns null if no
+  ///   [Form] ancestor is found.
+  static FormState of(BuildContext context) {
+    final FormState? formState = maybeOf(context);
+    assert(() {
+      if (formState == null) {
+        throw FlutterError(
+          'Form.of() was called with a context that does not contain a Form widget.\n'
+          'No Form widget ancestor could be found starting from the context that '
+          'was passed to Form.of(). This can happen because you are using a widget '
+          'that looks for a Form ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return formState!;
   }
 
   /// The widget below this widget in the tree.
@@ -156,8 +206,9 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.save();
+    }
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
@@ -168,8 +219,9 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidateMode] property is [AutovalidateMode.always],
   /// the fields will all be revalidated after being reset.
   void reset() {
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       field.reset();
+    }
     _hasInteractedByUser = false;
     _fieldDidChange();
   }
@@ -186,8 +238,9 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (final FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+    }
     return !hasError;
   }
 }
@@ -243,7 +296,7 @@ typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 /// Use a [GlobalKey] with [FormField] if you want to retrieve its current
 /// state, for example if you want one form field to depend on another.
 ///
-/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// A [Form] ancestor is not required. The [Form] allows one to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
@@ -373,7 +426,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _hasInteractedByUser.value = false;
       _errorText.value = null;
     });
-    Form.of(context)?._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
@@ -391,8 +444,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   void _validate() {
-    if (widget.validator != null)
+    if (widget.validator != null) {
       _errorText.value = widget.validator!(_value);
+    }
   }
 
   /// Updates this field's state to the new value. Useful for responding to
@@ -406,7 +460,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _value = value;
       _hasInteractedByUser.value = true;
     });
-    Form.of(context)?._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Sets the value associated with this form field.
@@ -433,7 +487,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   void deactivate() {
-    Form.of(context)?._unregister(this);
+    Form.maybeOf(context)?._unregister(this);
     super.deactivate();
   }
 
@@ -453,7 +507,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           break;
       }
     }
-    Form.of(context)?._register(this);
+    Form.maybeOf(context)?._register(this);
     return widget.builder(this);
   }
 }

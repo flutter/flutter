@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SliverAnimatedList
+/// Flutter code sample for [SliverAnimatedList].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const SliverAnimatedListSample());
 
 class SliverAnimatedListSample extends StatefulWidget {
-  const SliverAnimatedListSample({Key? key}) : super(key: key);
+  const SliverAnimatedListSample({super.key});
 
   @override
   State<SliverAnimatedListSample> createState() =>
@@ -53,12 +53,13 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
     );
   }
 
-  // Used to build an item after it has been removed from the list. This
-  // method is needed because a removed item remains visible until its
-  // animation has completed (even though it's gone as far this ListModel is
-  // concerned). The widget will be used by the
-  // [AnimatedListState.removeItem] method's
-  // [AnimatedListRemovedItemBuilder] parameter.
+  /// The builder function used to build items that have been removed.
+  ///
+  /// Used to build an item after it has been removed from the list. This method
+  /// is needed because a removed item remains visible until its animation has
+  /// completed (even though it's gone as far this ListModel is concerned). The
+  /// widget will be used by the [AnimatedListState.removeItem] method's
+  /// [AnimatedRemovedItemBuilder] parameter.
   Widget _buildRemovedItem(
       int item, BuildContext context, Animation<double> animation) {
     return CardItem(
@@ -191,13 +192,12 @@ class ListModel<E> {
 // transitions from 0.0 to 1.0.
 class CardItem extends StatelessWidget {
   const CardItem({
-    Key? key,
+    super.key,
     this.onTap,
     this.selected = false,
     required this.animation,
     required this.item,
-  })  : assert(item >= 0),
-        super(key: key);
+  })  : assert(item >= 0);
 
   final Animation<double> animation;
   final VoidCallback? onTap;
@@ -225,7 +225,7 @@ class CardItem extends StatelessWidget {
               child: Center(
                 child: Text(
                   'Item $item',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
             ),

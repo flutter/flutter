@@ -47,14 +47,14 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 // that doesn't apply here.
 // ignore: deprecated_member_use
 export 'package:test_api/test_api.dart' hide
-  test,
-  group,
-  setUpAll,
-  tearDownAll,
-  setUp,
-  tearDown,
   expect,
-  isInstanceOf;
+  group,
+  isInstanceOf,
+  setUp,
+  setUpAll,
+  tearDown,
+  tearDownAll,
+  test;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -69,8 +69,9 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
       foundMatching = true;
     }
   }
-  if (foundMatching)
+  if (foundMatching) {
     return result;
+  }
   return null;
 }
 
@@ -253,8 +254,11 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   const TargetPlatformVariant(this.values);
 
   /// Creates a [TargetPlatformVariant] that tests all values from
-  /// the [TargetPlatform] enum.
-  TargetPlatformVariant.all() : values = TargetPlatform.values.toSet();
+  /// the [TargetPlatform] enum. If [excluding] is provided, will test all platforms
+  /// except those in [excluding].
+  TargetPlatformVariant.all({
+    Set<TargetPlatform> excluding = const <TargetPlatform>{},
+  }) : values = TargetPlatform.values.toSet()..removeAll(excluding);
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
   /// considered desktop platforms.
@@ -414,8 +418,9 @@ Future<void> benchmarkWidgets(
   bool semanticsEnabled = false,
 }) {
   assert(() {
-    if (mayRunWithAsserts)
+    if (mayRunWithAsserts) {
       return true;
+    }
     debugPrint(kDebugWarning);
     return true;
   }());
@@ -497,10 +502,15 @@ Future<void> expectLater(
 ///
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
+///
+/// When the binding is [LiveTestWidgetsFlutterBinding], events from
+/// [LiveTestWidgetsFlutterBinding.deviceEventDispatcher] will be handled in
+/// [dispatchEvent].
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(super.binding) {
-    if (binding is LiveTestWidgetsFlutterBinding)
+    if (binding is LiveTestWidgetsFlutterBinding) {
       (binding as LiveTestWidgetsFlutterBinding).deviceEventDispatcher = this;
+    }
   }
 
   /// The description string of the test currently being run.
@@ -663,8 +673,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final DateTime endTime = binding.clock.fromNowBy(timeout);
       int count = 0;
       do {
-        if (binding.clock.now().isAfter(endTime))
+        if (binding.clock.now().isAfter(endTime)) {
           throw FlutterError('pumpAndSettle timed out');
+        }
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
@@ -810,6 +821,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// Handler for device events caught by the binding in live test mode.
+  ///
+  /// [PointerDownEvent]s received here will only print a diagnostic message
+  /// showing possible [Finder]s that can be used to interact with the widget at
+  /// the location of [result].
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
@@ -837,8 +852,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int totalNumber = 0;
       printToConsole('Some possible finders for the widgets at ${event.position}:');
       for (final Element element in candidates) {
-        if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
+        if (totalNumber > 13) {
           break;
+        }
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
         final Widget widget = element.widget;
@@ -912,8 +928,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
         totalNumber -= 1; // if we got here, we didn't actually find something to say about it
       }
-      if (totalNumber == 0)
+      if (totalNumber == 0) {
         printToConsole('  <could not come up with any unique finders>');
+      }
     }
   }
 
@@ -927,6 +944,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// See [TestWidgetsFlutterBinding.takeException] for details.
   dynamic takeException() {
     return binding.takeException();
+  }
+
+  /// {@macro flutter.flutter_test.TakeAccessibilityAnnouncements}
+  ///
+  /// See [TestWidgetsFlutterBinding.takeAnnouncements] for details.
+  List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
+    return binding.takeAnnouncements();
   }
 
   /// Acts as if the application went idle.

@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+export 'dart:typed_data' show ByteData, Endian, Float32List, Float64List, Int32List, Int64List, Uint8List;
+
 /// Write-only buffer for incrementally building a [ByteData] instance.
 ///
 /// A WriteBuffer instance can be used only once. Attempts to reuse will result
@@ -262,7 +264,8 @@ class ReadBuffer {
 
   void _alignTo(int alignment) {
     final int mod = _position % alignment;
-    if (mod != 0)
+    if (mod != 0) {
       _position += alignment - mod;
+    }
   }
 }

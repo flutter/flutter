@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SliverFillRemaining
+/// Flutter code sample for [SliverFillRemaining].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -26,19 +26,18 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       // The ScrollPhysics are overridden here to illustrate the functionality
       // of fillOverscroll on all devices this sample may be run on.
-      // fillOverscroll only changes the behavior of your layout when applied
-      // to Scrollables that allow for overscroll. BouncingScrollPhysics are
-      // one example, which are provided by default on the iOS platform.
-      // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics
-      // to allow for the overscroll, regardless of the depth of the
-      // scrollable.
+      // fillOverscroll only changes the behavior of your layout when applied to
+      // Scrollables that allow for overscroll. BouncingScrollPhysics are one
+      // example, which are provided by default on the iOS platform.
+      // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics to
+      // allow for the overscroll, regardless of the depth of the scrollable.
       physics:
           const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       slivers: <Widget>[
@@ -50,9 +49,9 @@ class MyStatelessWidget extends StatelessWidget {
         ),
         SliverFillRemaining(
           hasScrollBody: false,
-          // Switch for different overscroll behavior in your layout.
-          // If your ScrollPhysics do not allow for overscroll, setting
-          // fillOverscroll to true will have no effect.
+          // Switch for different overscroll behavior in your layout. If your
+          // ScrollPhysics do not allow for overscroll, setting fillOverscroll
+          // to true will have no effect.
           fillOverscroll: true,
           child: Container(
             color: Colors.teal[100],

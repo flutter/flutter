@@ -16,20 +16,6 @@ import '../../src/common.dart';
 
 const TemplateRenderer renderer = MustacheTemplateRenderer();
 
-const String kPluginDependencies = r'''
-{
-  "info":"This is a generated file; do not edit or check into version control.",
-  "plugins":{
-    "windows":[
-      {
-        "name":"example","path":"C:\\\\example\\\\",
-        "dependencies":[]
-      }
-    ]
-  }
-}
-''';
-
 void main() {
 
   testWithoutContext('Win32 injects Win32 plugins', () async {

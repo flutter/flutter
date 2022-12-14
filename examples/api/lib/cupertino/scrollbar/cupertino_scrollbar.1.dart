@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoScrollbar
+/// Flutter code sample for [CupertinoScrollbar].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const ScrollbarApp());
 
 class ScrollbarApp extends StatelessWidget {
-  const ScrollbarApp({Key? key}) : super(key: key);
+  const ScrollbarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class ScrollbarApp extends StatelessWidget {
 }
 
 class ScrollbarExample extends StatefulWidget {
-  const ScrollbarExample({Key? key}) : super(key: key);
+  const ScrollbarExample({super.key});
 
   @override
   State<ScrollbarExample> createState() => _ScrollbarExampleState();

@@ -19,6 +19,7 @@ import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
 import 'globals.dart' as globals;
+import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
@@ -29,6 +30,7 @@ class FlutterCache extends Cache {
     required super.fileSystem,
     required Platform platform,
     required super.osUtils,
+    required FlutterProjectFactory projectFactory,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
@@ -54,6 +56,7 @@ class FlutterCache extends Cache {
       // before the version is determined.
       flutterRoot: () => Cache.flutterRoot!,
       pub: () => pub,
+      projectFactory: projectFactory,
     ));
   }
 }
@@ -70,14 +73,17 @@ class PubDependencies extends ArtifactSet {
     required String Function() flutterRoot,
     required Logger logger,
     required Pub Function() pub,
+    required FlutterProjectFactory projectFactory,
   }) : _logger = logger,
        _flutterRoot = flutterRoot,
        _pub = pub,
+       _projectFactory = projectFactory,
        super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
   final Logger _logger;
   final Pub Function() _pub;
+  final FlutterProjectFactory _projectFactory;
 
   @override
   Future<bool> isUpToDate(
@@ -98,7 +104,7 @@ class PubDependencies extends ArtifactSet {
       return false;
     }
     for (final Package package in packageConfig.packages) {
-      if (!fileSystem.directory(package.packageUriRoot).existsSync()) {
+      if (!fileSystem.directory(package.root).childFile('pubspec.yaml').existsSync()) {
         return false;
       }
     }
@@ -118,7 +124,9 @@ class PubDependencies extends ArtifactSet {
   ) async {
     await _pub().get(
       context: PubContext.pubGet,
-      directory: fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'),
+      project: _projectFactory.fromDirectory(
+        fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))
+      ),
       offline: offline
     );
   }
@@ -198,13 +206,20 @@ class FlutterWebSdk extends CachedArtifact {
       }
     }
 
-    final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
-    final String canvasKitUrl = '${cache.cipdBaseUrl}/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
-    return artifactUpdater.downloadZipArchive(
-      'Downloading CanvasKit...',
-      Uri.parse(canvasKitUrl),
-      location,
-    );
+    // If the flutter_web_sdk folder doesn't already contain CanvasKit, then
+    // download it from CIPD.
+    // TODO(hterkelsen): This whole section can be removed when we are always building
+    //   CanvasKit as part of flutter_web_sdk. See https://github.com/flutter/flutter/issues/113073
+    final File expectedCanvasKitFile = fileSystem.file(fileSystem.path.join(location.path, 'canvaskit', 'canvaskit.wasm'));
+    if (!expectedCanvasKitFile.existsSync()) {
+      final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
+      final String canvasKitUrl = '${cache.cipdBaseUrl}/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
+      return artifactUpdater.downloadZipArchive(
+        'Downloading CanvasKit...',
+        Uri.parse(canvasKitUrl),
+        location,
+      );
+    }
   }
 }
 
@@ -234,12 +249,12 @@ class FlutterSdk extends EngineCachedArtifact {
       if (cache.includeAllPlatforms) ...<List<String>>[
         <String>['windows-x64', 'windows-x64/artifacts.zip'],
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+        <String>['darwin-x64', 'darwin-$arch/artifacts.zip'],
       ]
       else if (_platform.isWindows)
         <String>['windows-x64', 'windows-x64/artifacts.zip']
       else if (_platform.isMacOS)
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip']
+        <String>['darwin-x64', 'darwin-$arch/artifacts.zip']
       else if (_platform.isLinux)
         <String>['linux-$arch', 'linux-$arch/artifacts.zip'],
     ];
@@ -729,7 +744,7 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
     // Currently only Linux supports both arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
     final Map<String, List<String>> artifacts = <String, List<String>> {
-      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
+      'macos': <String>['darwin-x64', 'darwin-$arch/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
       'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };

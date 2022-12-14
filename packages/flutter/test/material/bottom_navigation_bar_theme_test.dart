@@ -196,7 +196,6 @@ void main() {
     final Offset unselectedBarItem = tester.getCenter(findAlarmTransform);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(selectedBarItem);
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
@@ -327,7 +326,6 @@ void main() {
     );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(barItem);
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
@@ -361,14 +359,14 @@ void main() {
     );
 
 
-    final Finder findOpacity = find.descendant(
+    final Finder findVisibility = find.descendant(
       of: find.byType(BottomNavigationBar),
-      matching: find.byType(Opacity),
+      matching: find.byType(Visibility),
     );
 
-    expect(findOpacity, findsNWidgets(2));
-    expect(tester.widget<Opacity>(findOpacity.at(0)).opacity, 0.0);
-    expect(tester.widget<Opacity>(findOpacity.at(1)).opacity, 0.0);
+    expect(findVisibility, findsNWidgets(2));
+    expect(tester.widget<Visibility>(findVisibility.at(0)).visible, false);
+    expect(tester.widget<Visibility>(findVisibility.at(1)).visible, false);
   });
 
   testWidgets('BottomNavigationBarTheme can be used to hide selected labels', (WidgetTester tester) async {

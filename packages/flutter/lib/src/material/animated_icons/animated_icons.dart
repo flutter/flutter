@@ -9,26 +9,22 @@ part of material_animated_icons;
 // See: https://github.com/flutter/flutter/issues/1831 for details regarding
 // generic vector graphics support in Flutter.
 
-// Examples can assume:
-// late AnimationController controller;
-
 /// Shows an animated icon at a given animation [progress].
 ///
 /// The available icons are specified in [AnimatedIcons].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=pJcbh8pbvJs}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This example shows how to create an animated icon. The icon is animated
+/// forward and reverse in a loop.
 ///
-/// ```dart
-/// AnimatedIcon(
-///   icon: AnimatedIcons.menu_arrow,
-///   progress: controller,
-///   semanticLabel: 'Show menu',
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/animated_icon/animated_icon.0.dart **
 /// {@end-tool}
 ///
+/// See also:
+///
+///  * [Icons], for the list of available static Material Icons.
 class AnimatedIcon extends StatelessWidget {
   /// Creates an AnimatedIcon.
   ///
@@ -110,8 +106,9 @@ class AnimatedIcon extends StatelessWidget {
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
     final double iconOpacity = iconTheme.opacity!;
     Color iconColor = color ?? iconTheme.color!;
-    if (iconOpacity != 1.0)
+    if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+    }
     return Semantics(
       label: semanticLabel,
       child: CustomPaint(
@@ -161,9 +158,10 @@ class _AnimatedIconPainter extends CustomPainter {
     }
     canvas.scale(scale, scale);
 
-    final double clampedProgress = progress.value.clamp(0.0, 1.0);
-    for (final _PathFrames path in paths)
+    final double clampedProgress = clampDouble(progress.value, 0.0, 1.0);
+    for (final _PathFrames path in paths) {
       path.paint(canvas, color, uiPathFactory, clampedProgress);
+    }
   }
 
 
@@ -203,8 +201,9 @@ class _PathFrames {
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
-    for (final _PathCommand command in commands)
+    for (final _PathCommand command in commands) {
       command.apply(path, progress);
+    }
     canvas.drawPath(path, paint);
   }
 }
@@ -291,8 +290,9 @@ class _PathClose extends _PathCommand {
 T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
-  if (values.length == 1)
+  if (values.length == 1) {
     return values[0];
+  }
   final double targetIdx = lerpDouble(0, values.length -1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();

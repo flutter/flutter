@@ -5,15 +5,19 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback, PlatformDispatcher;
+import 'dart:ui' show AppLifecycleState, DartPerformanceMode, FramePhase, FrameTiming, PlatformDispatcher, TimingsCallback;
 
-import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
+import 'package:collection/collection.dart' show HeapPriorityQueue, PriorityQueue;
 import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
 import 'priority.dart';
+import 'service_extensions.dart';
 
-export 'dart:ui' show AppLifecycleState, VoidCallback, FrameTiming;
+export 'dart:developer' show Flow;
+export 'dart:ui' show AppLifecycleState, FrameTiming, TimingsCallback;
+
+export 'priority.dart' show Priority;
 
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
@@ -25,8 +29,9 @@ double _timeDilation = 1.0;
 /// It is safe to set this before initializing the binding.
 set timeDilation(double value) {
   assert(value > 0.0);
-  if (_timeDilation == value)
+  if (_timeDilation == value) {
     return;
+  }
   // If the binding has been created, we need to resetEpoch first so that we
   // capture start of the epoch with the current time dilation.
   SchedulerBinding._instance?.resetEpoch();
@@ -45,7 +50,7 @@ typedef FrameCallback = void Function(Duration timeStamp);
 ///
 /// The type argument `T` is the task's return value. Consider `void` if the
 /// task does not return a value.
-typedef TaskCallback<T> = T Function();
+typedef TaskCallback<T> = FutureOr<T> Function();
 
 /// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
@@ -177,6 +182,34 @@ enum SchedulerPhase {
   ///
   /// See [SchedulerBinding.handleDrawFrame].
   postFrameCallbacks,
+}
+
+/// This callback is invoked when a request for [DartPerformanceMode] is disposed.
+///
+/// See also:
+///
+/// * [PerformanceModeRequestHandle] for more information on the lifecycle of the handle.
+typedef _PerformanceModeCleaupCallback = VoidCallback;
+
+/// An opaque handle that keeps a request for [DartPerformanceMode] active until
+/// disposed.
+///
+/// To create a [PerformanceModeRequestHandle], use [SchedulerBinding.requestPerformanceMode].
+/// The component that makes the request is responsible for disposing the handle.
+class PerformanceModeRequestHandle {
+  PerformanceModeRequestHandle._(_PerformanceModeCleaupCallback this._cleanup);
+
+  _PerformanceModeCleaupCallback? _cleanup;
+
+  /// Call this method to signal to [SchedulerBinding] that a request for a [DartPerformanceMode]
+  /// is no longer needed.
+  ///
+  /// This method must only be called once per object.
+  void dispose() {
+    assert(_cleanup != null);
+    _cleanup!();
+    _cleanup = null;
+  }
 }
 
 /// Scheduler for running the following:
@@ -323,7 +356,7 @@ mixin SchedulerBinding on BindingBase {
 
     if (!kReleaseMode) {
       registerNumericServiceExtension(
-        name: 'timeDilation',
+        name: SchedulerServiceExtensions.timeDilation.name,
         getter: () async => timeDilation,
         setter: (double value) async {
           timeDilation = value;
@@ -376,8 +409,12 @@ mixin SchedulerBinding on BindingBase {
   }
   final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
 
-  /// Schedules the given `task` with the given `priority` and returns a
-  /// [Future] that completes to the `task`'s eventual return value.
+  /// Schedules the given `task` with the given `priority`.
+  ///
+  /// If `task` returns a future, the future returned by [scheduleTask] will
+  /// complete after the former future has been scheduled to completion.
+  /// Otherwise, the returned future for [scheduleTask] will complete with the
+  /// same value returned by `task` after it has been scheduled.
   ///
   /// The `debugLabel` and `flow` are used to report the task to the [Timeline],
   /// for use when profiling.
@@ -409,16 +446,18 @@ mixin SchedulerBinding on BindingBase {
       flow,
     );
     _taskQueue.add(entry);
-    if (isFirstTask && !locked)
+    if (isFirstTask && !locked) {
       _ensureEventLoopCallback();
+    }
     return entry.completer.future;
   }
 
   @override
   void unlocked() {
     super.unlocked();
-    if (_taskQueue.isNotEmpty)
+    if (_taskQueue.isNotEmpty) {
       _ensureEventLoopCallback();
+    }
   }
 
   // Whether this scheduler already requested to be called from the event loop.
@@ -429,8 +468,9 @@ mixin SchedulerBinding on BindingBase {
   void _ensureEventLoopCallback() {
     assert(!locked);
     assert(_taskQueue.isNotEmpty);
-    if (_hasRequestedAnEventLoopCallback)
+    if (_hasRequestedAnEventLoopCallback) {
       return;
+    }
     _hasRequestedAnEventLoopCallback = true;
     Timer.run(_runTasks);
   }
@@ -438,8 +478,9 @@ mixin SchedulerBinding on BindingBase {
   // Scheduled by _ensureEventLoopCallback.
   void _runTasks() {
     _hasRequestedAnEventLoopCallback = false;
-    if (handleEventLoopCallback())
-      _ensureEventLoopCallback(); // runs next task when there's time
+    if (handleEventLoopCallback()) {
+      _ensureEventLoopCallback();
+    } // runs next task when there's time
   }
 
   /// Execute the highest-priority task, if it is of a high enough priority.
@@ -455,8 +496,9 @@ mixin SchedulerBinding on BindingBase {
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
-    if (_taskQueue.isEmpty || locked)
+    if (_taskQueue.isEmpty || locked) {
       return false;
+    }
     final _TaskEntry<dynamic> entry = _taskQueue.first;
     if (schedulingStrategy(priority: entry.priority, scheduler: this)) {
       try {
@@ -596,6 +638,34 @@ mixin SchedulerBinding on BindingBase {
     return true;
   }
 
+  /// Asserts that there are no pending performance mode requests in debug mode.
+  ///
+  /// Throws a [FlutterError] if there are pending performance mode requests,
+  /// as this indicates a potential memory leak.
+  bool debugAssertNoPendingPerformanceModeRequests(String reason) {
+    assert(() {
+      if (_performanceMode != null) {
+        throw FlutterError(reason);
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  /// Asserts that there is no artificial time dilation in debug mode.
+  ///
+  /// Throws a [FlutterError] if there are such dilation, as this will make
+  /// subsequent tests see dilation and thus flaky.
+  bool debugAssertNoTimeDilation(String reason) {
+    assert(() {
+      if (timeDilation != 1.0) {
+        throw FlutterError(reason);
+      }
+      return true;
+    }());
+    return true;
+  }
+
   /// Prints the stack for where the current transient callback was registered.
   ///
   /// A transient frame callback is one that was registered with
@@ -690,8 +760,9 @@ mixin SchedulerBinding on BindingBase {
   /// off.
   Future<void> get endOfFrame {
     if (_nextFrameCompleter == null) {
-      if (schedulerPhase == SchedulerPhase.idle)
+      if (schedulerPhase == SchedulerPhase.idle) {
         scheduleFrame();
+      }
       _nextFrameCompleter = Completer<void>();
       addPostFrameCallback((Duration timeStamp) {
         _nextFrameCompleter!.complete();
@@ -716,11 +787,13 @@ mixin SchedulerBinding on BindingBase {
 
   bool _framesEnabled = true;
   void _setFramesEnabledState(bool enabled) {
-    if (_framesEnabled == enabled)
+    if (_framesEnabled == enabled) {
       return;
+    }
     _framesEnabled = enabled;
-    if (enabled)
+    if (enabled) {
       scheduleFrame();
+    }
   }
 
   /// Ensures callbacks for [PlatformDispatcher.onBeginFrame] and
@@ -785,11 +858,13 @@ mixin SchedulerBinding on BindingBase {
   ///  * [scheduleWarmUpFrame], which ignores the "Vsync" signal entirely and
   ///    triggers a frame immediately.
   void scheduleFrame() {
-    if (_hasScheduledFrame || !framesEnabled)
+    if (_hasScheduledFrame || !framesEnabled) {
       return;
+    }
     assert(() {
-      if (debugPrintScheduleFrameStacks)
+      if (debugPrintScheduleFrameStacks) {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
+      }
       return true;
     }());
     ensureFrameCallbacksRegistered();
@@ -818,11 +893,13 @@ mixin SchedulerBinding on BindingBase {
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the
   /// rendering as soon as possible (e.g. at application startup).
   void scheduleForcedFrame() {
-    if (_hasScheduledFrame)
+    if (_hasScheduledFrame) {
       return;
+    }
     assert(() {
-      if (debugPrintScheduleFrameStacks)
+      if (debugPrintScheduleFrameStacks) {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
+      }
       return true;
     }());
     ensureFrameCallbacksRegistered();
@@ -848,8 +925,9 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
   void scheduleWarmUpFrame() {
-    if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
+    if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle) {
       return;
+    }
 
     _warmUpFrame = true;
     final TimelineTask timelineTask = TimelineTask()..start('Warm-up frame');
@@ -872,8 +950,9 @@ mixin SchedulerBinding on BindingBase {
       // then skipping every frame and finishing in the new time.
       resetEpoch();
       _warmUpFrame = false;
-      if (hadScheduledFrame)
+      if (hadScheduledFrame) {
         scheduleFrame();
+      }
     });
 
     // Lock events so touch events etc don't insert themselves until the
@@ -1026,8 +1105,9 @@ mixin SchedulerBinding on BindingBase {
     _frameTimelineTask?.start('Frame');
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
-    if (rawTimeStamp != null)
+    if (rawTimeStamp != null) {
       _lastRawTimeStamp = rawTimeStamp;
+    }
 
     assert(() {
       _debugFrameNumber += 1;
@@ -1040,8 +1120,9 @@ mixin SchedulerBinding on BindingBase {
           frameTimeStampDescription.write('(warm-up frame)');
         }
         _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
-        if (debugPrintBeginFrameBanner)
+        if (debugPrintBeginFrameBanner) {
           debugPrint(_debugBanner);
+        }
       }
       return true;
     }());
@@ -1055,12 +1136,66 @@ mixin SchedulerBinding on BindingBase {
       final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
       _transientCallbacks = <int, _FrameCallbackEntry>{};
       callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {
-        if (!_removedIds.contains(id))
+        if (!_removedIds.contains(id)) {
           _invokeFrameCallback(callbackEntry.callback, _currentFrameTimeStamp!, callbackEntry.debugStack);
+        }
       });
       _removedIds.clear();
     } finally {
       _schedulerPhase = SchedulerPhase.midFrameMicrotasks;
+    }
+  }
+
+  DartPerformanceMode? _performanceMode;
+  int _numPerformanceModeRequests = 0;
+
+  /// Request a specific [DartPerformanceMode].
+  ///
+  /// Returns `null` if the request was not successful due to conflicting performance mode requests.
+  /// Two requests are said to be in conflict if they are not of the same [DartPerformanceMode] type,
+  /// and an explicit request for a performance mode has been made prior.
+  ///
+  /// Requestor is responsible for calling [PerformanceModeRequestHandle.dispose] when it no longer
+  /// requires the performance mode.
+  PerformanceModeRequestHandle? requestPerformanceMode(DartPerformanceMode mode) {
+    // conflicting requests are not allowed.
+    if (_performanceMode != null && _performanceMode != mode) {
+      return null;
+    }
+
+    if (_performanceMode == mode) {
+      assert(_numPerformanceModeRequests > 0);
+      _numPerformanceModeRequests++;
+    } else if (_performanceMode == null) {
+      assert(_numPerformanceModeRequests == 0);
+      _performanceMode = mode;
+      _numPerformanceModeRequests = 1;
+    }
+
+    return PerformanceModeRequestHandle._(_disposePerformanceModeRequest);
+  }
+
+  /// Remove a request for a specific [DartPerformanceMode].
+  ///
+  /// If all the pending requests have been disposed, the engine will revert to the
+  /// [DartPerformanceMode.balanced] performance mode.
+  void _disposePerformanceModeRequest() {
+    _numPerformanceModeRequests--;
+    if (_numPerformanceModeRequests == 0) {
+      _performanceMode = null;
+      PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
+    }
+  }
+
+  /// Returns the current [DartPerformanceMode] requested or `null` if no requests have
+  /// been made.
+  ///
+  /// This is only supported in debug and profile modes, returns `null` in release mode.
+  DartPerformanceMode? debugGetRequestedPerformanceMode() {
+    if (!(kDebugMode || kProfileMode)) {
+      return null;
+    } else {
+      return _performanceMode;
     }
   }
 
@@ -1079,22 +1214,25 @@ mixin SchedulerBinding on BindingBase {
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
-      for (final FrameCallback callback in _persistentCallbacks)
+      for (final FrameCallback callback in _persistentCallbacks) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
+      }
 
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
-      for (final FrameCallback callback in localPostFrameCallbacks)
+      for (final FrameCallback callback in localPostFrameCallbacks) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
+      }
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
       _frameTimelineTask?.finish(); // end the Frame
       assert(() {
-        if (debugPrintEndFrameBanner)
+        if (debugPrintEndFrameBanner) {
           debugPrint('▀' * _debugBanner!.length);
+        }
         _debugBanner = null;
         return true;
       }());
@@ -1114,25 +1252,30 @@ mixin SchedulerBinding on BindingBase {
   }
 
   static void _debugDescribeTimeStamp(Duration timeStamp, StringBuffer buffer) {
-    if (timeStamp.inDays > 0)
+    if (timeStamp.inDays > 0) {
       buffer.write('${timeStamp.inDays}d ');
-    if (timeStamp.inHours > 0)
+    }
+    if (timeStamp.inHours > 0) {
       buffer.write('${timeStamp.inHours - timeStamp.inDays * Duration.hoursPerDay}h ');
-    if (timeStamp.inMinutes > 0)
+    }
+    if (timeStamp.inMinutes > 0) {
       buffer.write('${timeStamp.inMinutes - timeStamp.inHours * Duration.minutesPerHour}m ');
-    if (timeStamp.inSeconds > 0)
+    }
+    if (timeStamp.inSeconds > 0) {
       buffer.write('${timeStamp.inSeconds - timeStamp.inMinutes * Duration.secondsPerMinute}s ');
+    }
     buffer.write('${timeStamp.inMilliseconds - timeStamp.inSeconds * Duration.millisecondsPerSecond}');
     final int microseconds = timeStamp.inMicroseconds - timeStamp.inMilliseconds * Duration.microsecondsPerMillisecond;
-    if (microseconds > 0)
+    if (microseconds > 0) {
       buffer.write('.${microseconds.toString().padLeft(3, "0")}');
+    }
     buffer.write('ms');
   }
 
   // Calls the given [callback] with [timestamp] as argument.
   //
   // Wraps the callback in a try/catch and forwards any error to
-  // [debugSchedulerExceptionHandler], if set. If not set, then simply prints
+  // [debugSchedulerExceptionHandler], if set. If not set, prints
   // the error.
   @pragma('vm:notify-debugger-on-exception')
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace? callbackStack ]) {
@@ -1175,7 +1318,8 @@ mixin SchedulerBinding on BindingBase {
 /// a [Priority] of [Priority.animation] or higher. Otherwise, runs
 /// all tasks.
 bool defaultSchedulingStrategy({ required int priority, required SchedulerBinding scheduler }) {
-  if (scheduler.transientCallbackCount > 0)
+  if (scheduler.transientCallbackCount > 0) {
     return priority >= Priority.animation.value;
+  }
   return true;
 }

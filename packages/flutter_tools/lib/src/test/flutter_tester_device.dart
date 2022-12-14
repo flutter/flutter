@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
@@ -15,7 +15,6 @@ import 'package:stream_channel/stream_channel.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -29,31 +28,26 @@ import 'test_device.dart';
 /// Implementation of [TestDevice] with the Flutter Tester over a [Process].
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
-    @required this.id,
-    @required this.platform,
-    @required this.fileSystem,
-    @required this.processManager,
-    @required this.logger,
-    @required this.shellPath,
-    @required this.debuggingOptions,
-    @required this.enableObservatory,
-    @required this.machine,
-    @required this.host,
-    @required this.buildTestAssets,
-    @required this.flutterProject,
-    @required this.icudtlPath,
-    @required this.compileExpression,
-    @required this.fontConfigManager,
+    required this.id,
+    required this.platform,
+    required this.fileSystem,
+    required this.processManager,
+    required this.logger,
+    required this.shellPath,
+    required this.debuggingOptions,
+    required this.enableObservatory,
+    required this.machine,
+    required this.host,
+    required this.testAssetDirectory,
+    required this.flutterProject,
+    required this.icudtlPath,
+    required this.compileExpression,
+    required this.fontConfigManager,
+    required this.uriConverter,
   })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
         assert(!debuggingOptions.startPaused || enableObservatory),
         _gotProcessObservatoryUri = enableObservatory
-            ? Completer<Uri>() : (Completer<Uri>()..complete(null)),
-        _operatingSystemUtils = OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+            ? Completer<Uri?>() : (Completer<Uri?>()..complete());
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
@@ -64,20 +58,20 @@ class FlutterTesterTestDevice extends TestDevice {
   final String shellPath;
   final DebuggingOptions debuggingOptions;
   final bool enableObservatory;
-  final bool machine;
-  final InternetAddress host;
-  final bool buildTestAssets;
-  final FlutterProject flutterProject;
-  final String icudtlPath;
-  final CompileExpression compileExpression;
+  final bool? machine;
+  final InternetAddress? host;
+  final String? testAssetDirectory;
+  final FlutterProject? flutterProject;
+  final String? icudtlPath;
+  final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
+  final UriConverter? uriConverter;
 
-  final Completer<Uri> _gotProcessObservatoryUri;
+  final Completer<Uri?> _gotProcessObservatoryUri;
   final Completer<int> _exitCode = Completer<int>();
 
-  Process _process;
-  HttpServer _server;
-  final OperatingSystemUtils _operatingSystemUtils;
+  Process? _process;
+  HttpServer? _server;
 
   /// Starts the device.
   ///
@@ -92,16 +86,8 @@ class FlutterTesterTestDevice extends TestDevice {
     // Prepare our WebSocket server to talk to the engine subprocess.
     // Let the server choose an unused port.
     _server = await bind(host, /*port*/ 0);
-    logger.printTrace('test $id: test harness socket server is running at port:${_server.port}');
-
+    logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
     final List<String> command = <String>[
-      // Until an arm64 flutter tester binary is available, force to run in Rosetta
-      // to avoid "unexpectedly got a signal in sigtramp" crash.
-      // https://github.com/flutter/flutter/issues/88106
-      if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) ...<String>[
-        '/usr/bin/arch',
-        '-x86_64',
-      ],
       shellPath,
       if (enableObservatory) ...<String>[
         // Some systems drive the _FlutterPlatform class in an unusual way, where
@@ -119,16 +105,20 @@ class FlutterTesterTestDevice extends TestDevice {
       ]
       else
         '--disable-observatory',
-      if (host.type == InternetAddressType.IPv6) '--ipv6',
+      if (host!.type == InternetAddressType.IPv6) '--ipv6',
       if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
       '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
-      '--enable-dart-profiling',
+      if (debuggingOptions.enableDartProfiling)
+        '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
+      '--disable-asset-fonts',
       '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      if (testAssetDirectory != null)
+        '--flutter-assets-dir=$testAssetDirectory',
       if (debuggingOptions.nullAssertions)
         '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
@@ -141,41 +131,44 @@ class FlutterTesterTestDevice extends TestDevice {
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
     final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
-        ? platform.environment['FLUTTER_TEST']
+        ? platform.environment['FLUTTER_TEST']!
         : 'true';
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
-      'SERVER_PORT': _server.port.toString(),
-      'APP_NAME': flutterProject?.manifest?.appName ?? '',
-      if (buildTestAssets)
-        'UNIT_TEST_ASSETS': fileSystem.path.join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets'),
+      'SERVER_PORT': _server!.port.toString(),
+      'APP_NAME': flutterProject?.manifest.appName ?? '',
+      if (testAssetDirectory != null)
+        'UNIT_TEST_ASSETS': testAssetDirectory!,
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
     _process = await processManager.start(command, environment: environment);
 
     // Unawaited to update state.
-    unawaited(_process.exitCode.then((int exitCode) {
-      logger.printTrace('test $id: flutter_tester process at pid ${_process.pid} exited with code=$exitCode');
+    unawaited(_process!.exitCode.then((int exitCode) {
+      logger.printTrace('test $id: flutter_tester process at pid ${_process!.pid} exited with code=$exitCode');
       _exitCode.complete(exitCode);
     }));
 
-    logger.printTrace('test $id: Started flutter_tester process at pid ${_process.pid}');
+    logger.printTrace('test $id: Started flutter_tester process at pid ${_process!.pid}');
 
     // Pipe stdout and stderr from the subprocess to our printStatus console.
     // We also keep track of what observatory port the engine used, if any.
     _pipeStandardStreamsToConsole(
-      process: _process,
+      process: _process!,
       reportObservatoryUri: (Uri detectedUri) async {
         assert(!_gotProcessObservatoryUri.isCompleted);
         assert(debuggingOptions.hostVmServicePort == null ||
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
-        Uri forwardingUri;
+        Uri? forwardingUri;
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-          final DartDevelopmentService dds = await startDds(detectedUri);
+          final DartDevelopmentService dds = await startDds(
+            detectedUri,
+            uriConverter: uriConverter,
+          );
           forwardingUri = dds.uri;
           logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {
@@ -184,7 +177,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
         final Future<FlutterVmService> localVmService = connectToVmService(
-          forwardingUri,
+          forwardingUri!,
           compileExpression: compileExpression,
           logger: logger,
         );
@@ -192,7 +185,7 @@ class FlutterTesterTestDevice extends TestDevice {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         }));
 
-        if (debuggingOptions.startPaused && !machine) {
+        if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The test process has been started.');
           logger.printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
           logger.printStatus('  $forwardingUri');
@@ -206,7 +199,7 @@ class FlutterTesterTestDevice extends TestDevice {
   }
 
   @override
-  Future<Uri> get observatoryUri {
+  Future<Uri?> get observatoryUri {
     assert(_gotProcessObservatoryUri != null);
     return _gotProcessObservatoryUri.future;
   }
@@ -242,7 +235,7 @@ class FlutterTesterTestDevice extends TestDevice {
   Uri get _ddsServiceUri {
     return Uri(
       scheme: 'http',
-      host: (host.type == InternetAddressType.IPv6 ?
+      host: (host!.type == InternetAddressType.IPv6 ?
         InternetAddress.loopbackIPv6 :
         InternetAddress.loopbackIPv4
       ).host,
@@ -252,12 +245,13 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @visibleForTesting
   @protected
-  Future<DartDevelopmentService> startDds(Uri uri) {
+  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) {
     return DartDevelopmentService.startDartDevelopmentService(
       uri,
       serviceUri: _ddsServiceUri,
       enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
-      ipv6: host.type == InternetAddressType.IPv6,
+      ipv6: host!.type == InternetAddressType.IPv6,
+      uriConverter: uriConverter,
     );
   }
 
@@ -266,7 +260,7 @@ class FlutterTesterTestDevice extends TestDevice {
   /// Only intended to be overridden in tests.
   @protected
   @visibleForTesting
-  Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
+  Future<HttpServer> bind(InternetAddress? host, int port) => HttpServer.bind(host, port);
 
   @protected
   @visibleForTesting
@@ -274,7 +268,7 @@ class FlutterTesterTestDevice extends TestDevice {
     assert(_server != null);
 
     try {
-      final HttpRequest firstRequest = await _server.first;
+      final HttpRequest firstRequest = await _server!.first;
       final WebSocket webSocket = await WebSocketTransformer.upgrade(firstRequest);
       return _webSocketToStreamChannel(webSocket);
     } on Exception catch (error, stackTrace) {
@@ -285,14 +279,14 @@ class FlutterTesterTestDevice extends TestDevice {
   @override
   String toString() {
     final String status = _process != null
-        ? 'pid: ${_process.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
+        ? 'pid: ${_process!.pid}, ${_exitCode.isCompleted ? 'exited' : 'running'}'
         : 'not started';
     return 'Flutter Tester ($status) for test $id';
   }
 
   void _pipeStandardStreamsToConsole({
-    @required Process process,
-    @required Future<void> Function(Uri uri) reportObservatoryUri,
+    required Process process,
+    required Future<void> Function(Uri uri) reportObservatoryUri,
   }) {
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
@@ -305,10 +299,10 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
           logger.printTrace('test $id: Shell: $line');
 
-          final Match match = globals.kVMServiceMessageRegExp.firstMatch(line);
+          final Match? match = globals.kVMServiceMessageRegExp.firstMatch(line);
           if (match != null) {
             try {
-              final Uri uri = Uri.parse(match[1]);
+              final Uri uri = Uri.parse(match[1]!);
               if (reportObservatoryUri != null) {
                 await reportObservatoryUri(uri);
               }

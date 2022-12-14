@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/cmake.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -23,6 +23,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String _kTestFlutterRoot = '/flutter';
@@ -45,9 +46,9 @@ void main() {
     Cache.disableLocking();
   });
 
-  FileSystem fileSystem;
-  ProcessManager processManager;
-  TestUsage usage;
+  late FileSystem fileSystem;
+  late ProcessManager processManager;
+  late TestUsage usage;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -71,7 +72,7 @@ void main() {
   // Returns the command matching the build_linux call to cmake.
   FakeCommand cmakeCommand(String buildMode, {
     String target = 'x64',
-    void Function() onRun,
+    void Function()? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -89,9 +90,9 @@ void main() {
 
   // Returns the command matching the build_linux call to ninja.
   FakeCommand ninjaCommand(String buildMode, {
-    Map<String, String> environment,
+    Map<String, String>? environment,
     String target = 'x64',
-    void Function() onRun,
+    void Function()? onRun,
     String stdout = '',
   }) {
     return FakeCommand(
@@ -108,7 +109,13 @@ void main() {
   }
 
   testUsingContext('Linux build fails when there is no linux project', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockCoreProjectFiles();
 
     expect(createTestCommandRunner(command).run(
@@ -124,7 +131,13 @@ void main() {
   });
 
   testUsingContext('Linux build fails on non-linux platform', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
@@ -138,7 +151,13 @@ void main() {
   });
 
   testUsingContext('Linux build fails when feature is disabled', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
@@ -152,7 +171,13 @@ void main() {
   });
 
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release'),
       ninjaCommand('release'),
@@ -172,18 +197,21 @@ void main() {
     OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   });
 
-  testUsingContext('Handles argument error from missing cmake', () async {
-    final BuildCommand command = BuildCommand();
+  testUsingContext('Handles missing cmake', () async {
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeCommand('release', onRun: () {
-        throw ArgumentError();
-      }),
-    ]);
+    processManager = FakeProcessManager.empty()
+        ..excludedExecutables.add('cmake');
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
-    ), throwsToolExit(message: "cmake not found. Run 'flutter doctor' for more information."));
+    ), throwsToolExit(message: 'CMake is required for Linux development.'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -193,7 +221,13 @@ void main() {
   });
 
   testUsingContext('Handles argument error from missing ninja', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release'),
@@ -214,7 +248,13 @@ void main() {
   });
 
   testUsingContext('Linux build does not spew stdout to status logger', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('debug'),
@@ -239,7 +279,13 @@ void main() {
   });
 
   testUsingContext('Linux build extracts errors from stdout', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
 
     // This contains a mix of routine build output and various types of errors
@@ -293,7 +339,13 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   });
 
   testUsingContext('Linux verbose build sets VERBOSE_SCRIPT_LOGGING', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('debug'),
@@ -321,7 +373,13 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   });
 
   testUsingContext('Linux on x64 build --debug passes debug mode to cmake and ninja', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('debug'),
@@ -340,7 +398,13 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   });
 
   testUsingContext('Linux on ARM64 build --debug passes debug mode to cmake and ninja', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('debug', target: 'arm64'),
@@ -355,11 +419,16 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     ProcessManager: () => processManager,
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
   });
 
   testUsingContext('Linux on x64 build --profile passes profile mode to make', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('profile'),
@@ -378,7 +447,13 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   });
 
   testUsingContext('Linux on ARM64 build --profile passes profile mode to make', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('profile', target: 'arm64'),
@@ -393,11 +468,16 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     ProcessManager: () => processManager,
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
   });
 
   testUsingContext('Not support Linux cross-build for x64 on arm64', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']
@@ -405,11 +485,16 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-    OperatingSystemUtils: () => CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
   });
 
   testUsingContext('Linux build configures CMake exports', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release'),
@@ -450,6 +535,11 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
     expect(configLines, containsAll(<String>[
       'file(TO_CMAKE_PATH "$_kTestFlutterRoot" FLUTTER_ROOT)',
       'file(TO_CMAKE_PATH "${fileSystem.currentDirectory.path}" PROJECT_DIR)',
+      'set(FLUTTER_VERSION "1.0.0" PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
+      'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
       '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw=="',
       '  "DART_OBFUSCATION=true"',
       '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
@@ -491,7 +581,13 @@ set(BINARY_NAME "fizz_bar")
   });
 
   testUsingContext('Refuses to build for Linux when feature is disabled', () {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    ));
 
     expect(() => runner.run(<String>['build', 'linux', '--no-pub']),
       throwsToolExit());
@@ -500,21 +596,27 @@ set(BINARY_NAME "fizz_bar")
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {
-    expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, true);
+    expect(BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Platform: () => notLinuxPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on Linux host', () {
-    expect(BuildLinuxCommand(operatingSystemUtils: FakeOperatingSystemUtils()).hidden, false);
+    expect(BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Platform: () => linuxPlatform,
   });
 
   testUsingContext('Performs code size analysis and sends analytics', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release'),
@@ -559,7 +661,13 @@ set(BINARY_NAME "fizz_bar")
   });
 
   testUsingContext('Linux on ARM64 build --release passes, and check if the LinuxBuildDirectory for arm64 can be referenced correctly by using analytics', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+    );
     setUpMockProjectFilesForBuild();
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeCommand('release', target: 'arm64'),

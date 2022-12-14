@@ -5,9 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const ShapeBorder defaultButtonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
-const EdgeInsets defaultButtonPadding = EdgeInsets.only(left: 16.0, right: 16.0);
-const BoxConstraints defaultButtonConstraints = BoxConstraints(minWidth: 88.0, minHeight: 36.0);
 const Duration defaultButtonDuration = Duration(milliseconds: 200);
 
 void main() {

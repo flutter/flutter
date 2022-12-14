@@ -17,7 +17,7 @@ class TrackerBenchmark {
 }
 
 void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
     TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker.withKind(PointerDeviceKind.touch)),
@@ -32,10 +32,12 @@ void main() {
     watch.start();
     for (int i = 0; i < _kNumIters; i += 1) {
       for (final PointerEvent event in velocityEventData) {
-        if (event is PointerDownEvent || event is PointerMoveEvent)
+        if (event is PointerDownEvent || event is PointerMoveEvent) {
           tracker.addPosition(event.timeStamp, event.position);
-        if (event is PointerUpEvent)
+        }
+        if (event is PointerUpEvent) {
           tracker.getVelocity();
+        }
       }
     }
     watch.stop();

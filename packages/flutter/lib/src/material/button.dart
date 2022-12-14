@@ -26,14 +26,16 @@ import 'theme_data.dart';
 /// from the themes or from app-specific sources.
 ///
 /// This class is planned to be deprecated in a future release, see
-/// [ButtonStyleButton], the base class of [TextButton], [ElevatedButton], and
-/// [OutlinedButton].
+/// [ButtonStyleButton], the base class of [ElevatedButton], [FilledButton],
+/// [OutlinedButton] and [TextButton].
 ///
 /// See also:
 ///
-///  * [TextButton], a simple flat button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
-///  * [OutlinedButton], a [TextButton] with a border outline.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 @Category(<String>['Material', 'Button'])
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
@@ -365,7 +367,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         right: densityAdjustment.dx,
         bottom: densityAdjustment.dy,
       ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
 
     final Widget result = ConstrainedBox(
@@ -467,37 +469,42 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
+    if (_minSize == value) {
       return;
+    }
     _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
+    if (child != null) {
       return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 

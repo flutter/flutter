@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for showDialog
+/// Flutter code sample for [showDialog].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
 }
 
 class DialogExample extends StatelessWidget {
-  const DialogExample({Key? key}) : super(key: key);
+  const DialogExample({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -10,6 +10,9 @@ import 'constants.dart';
 import 'elevation_overlay.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
 ///
 /// Used by [InkHighlight] and [InkSplash], for example.
@@ -164,6 +167,7 @@ abstract class MaterialInkController {
 ///  * [MergeableMaterial], a piece of material that can split and re-merge.
 ///  * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
 ///  * <https://material.io/design/>
+///  * <https://m3.material.io/styles/color/the-color-system/color-roles>
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
@@ -254,12 +258,12 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
-  /// When [ThemeData.useMaterial3] is true, and this is null, then no drop
-  /// shadow will be rendered for this material. If it is non-null, then this
-  /// color will be used to render a drop shadow below the material.
+  /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
+  /// [ColorScheme.shadow] will be used. If [ThemeData.useMaterial3] is false
+  /// then [ThemeData.shadowColor] will be used.
   ///
-  /// When [ThemeData.useMaterial3] is false, and this is null, then
-  /// [ThemeData.shadowColor] is used, which defaults to fully opaque black.
+  /// To remove the drop shadow when [elevation] is greater than 0, set
+  /// [shadowColor] to [Colors.transparent].
   ///
   /// See also:
   ///  * [ThemeData.useMaterial3], which determines the default value for this
@@ -278,9 +282,9 @@ class Material extends StatefulWidget {
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is not used.
   ///
-  /// If [ThemeData.useMaterial3] is true and [surfaceTintColor] is not null,
-  /// then it will be used to overlay the base [color] with an opacity based
-  /// on the [elevation].
+  /// If [ThemeData.useMaterial3] is true and [surfaceTintColor] is not null and
+  /// not [Colors.transparent], then it will be used to overlay the base [color]
+  /// with an opacity based on the [elevation].
   ///
   /// Otherwise, no surface tint will be applied.
   ///
@@ -339,7 +343,29 @@ class Material extends StatefulWidget {
   final BorderRadiusGeometry? borderRadius;
 
   /// The ink controller from the closest instance of this class that
-  /// encloses the given context.
+  /// encloses the given context within the closest [LookupBoundary].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MaterialInkController? inkController = Material.maybeOf(context);
+  /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  /// * [Material.of], which is similar to this method, but asserts if
+  ///   no [Material] ancestor is found.
+  static MaterialInkController? maybeOf(BuildContext context) {
+    return LookupBoundary.findAncestorRenderObjectOfType<_RenderInkFeatures>(context);
+  }
+
+  /// The ink controller from the closest instance of [Material] that encloses
+  /// the given context within the closest [LookupBoundary].
+  ///
+  /// If no [Material] widget ancestor can be found then this method will assert
+  /// in debug mode, and throw an exception in release mode.
   ///
   /// Typical usage is as follows:
   ///
@@ -348,8 +374,37 @@ class Material extends StatefulWidget {
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).
-  static MaterialInkController? of(BuildContext context) {
-    return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
+  ///
+  /// See also:
+  ///
+  /// * [Material.maybeOf], which is similar to this method, but returns null if
+  ///   no [Material] ancestor is found.
+  static MaterialInkController of(BuildContext context) {
+    final MaterialInkController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<_RenderInkFeatures>(context)) {
+          throw FlutterError(
+            'Material.of() was called with a context that does not have access to a Material widget.\n'
+            'The context provided to Material.of() does have a Material widget ancestor, but it is '
+            'hidden by a LookupBoundary. This can happen because you are using a widget that looks '
+            'for a Material ancestor, but no such ancestor exists within the closest LookupBoundary.\n'
+            'The context used was:\n'
+            '  $context',
+          );
+        }
+        throw FlutterError(
+          'Material.of() was called with a context that does not contain a Material widget.\n'
+          'No Material widget ancestor could be found starting from the context that was passed to '
+          'Material.of(). This can happen because you are using a widget that looks for a Material '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
   }
 
   @override
@@ -400,7 +455,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color? backgroundColor = _getBackgroundColor(context);
-    final Color? modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? null : theme.shadowColor);
+    final Color modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
     // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
     final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
     assert(
@@ -413,7 +468,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     Widget? contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
-        style: widget.textStyle ?? Theme.of(context).textTheme.bodyText2!,
+        style: widget.textStyle ?? Theme.of(context).textTheme.bodyMedium!,
         duration: widget.animationDuration,
         child: contents,
       );
@@ -454,7 +509,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         clipBehavior: widget.clipBehavior,
         elevation: modelElevation,
         color: color,
-        shadowColor: modelShadowColor ?? const Color(0x00000000),
+        shadowColor: modelShadowColor,
         animateColor: false,
         child: contents,
       );
@@ -513,10 +568,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   // Otherwise, the shape is determined by the widget type as described in the
   // Material class documentation.
   ShapeBorder _getShape() {
-    if (widget.shape != null)
+    if (widget.shape != null) {
       return widget.shape!;
-    if (widget.borderRadius != null)
+    }
+    if (widget.borderRadius != null) {
       return RoundedRectangleBorder(borderRadius: widget.borderRadius!);
+    }
     switch (widget.type) {
       case MaterialType.canvas:
       case MaterialType.transparency:
@@ -557,6 +614,13 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   bool absorbHitTest;
 
+  @visibleForTesting
+  List<InkFeature>? get debugInkFeatures {
+    if (kDebugMode) {
+      return _inkFeatures;
+    }
+    return null;
+  }
   List<InkFeature>? _inkFeatures;
 
   @override
@@ -576,8 +640,9 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   void _didChangeLayout() {
-    if (_inkFeatures != null && _inkFeatures!.isNotEmpty)
+    if (_inkFeatures != null && _inkFeatures!.isNotEmpty) {
       markNeedsPaint();
+    }
   }
 
   @override
@@ -590,8 +655,9 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
-      for (final InkFeature inkFeature in _inkFeatures!)
+      for (final InkFeature inkFeature in _inkFeatures!) {
         inkFeature._paint(canvas);
+      }
       canvas.restore();
     }
     super.paint(context, offset);
@@ -682,14 +748,24 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
+      final RenderObject childNode = node;
       node = node.parent! as RenderObject;
+      if (!node.paintsChild(childNode)) {
+        // Some node between the reference box and this would skip painting on
+        // the reference box, so bail out early and avoid unnecessary painting.
+        // Some cases where this can happen are the reference box being
+        // offstage, in a fully transparent opacity node, or in a keep alive
+        // bucket.
+        return;
+      }
       descendants.add(node);
     }
     // determine the transform that gets our coordinate system to be like theirs
     final Matrix4 transform = Matrix4.identity();
     assert(descendants.length >= 2);
-    for (int index = descendants.length - 1; index > 0; index -= 1)
+    for (int index = descendants.length - 1; index > 0; index -= 1) {
       descendants[index].applyPaintTransform(descendants[index - 1], transform);
+    }
     paintFeature(canvas, transform);
   }
 

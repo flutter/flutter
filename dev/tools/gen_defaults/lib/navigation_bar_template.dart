@@ -5,16 +5,15 @@
 import 'template.dart';
 
 class NavigationBarTemplate extends TokenTemplate {
-  const NavigationBarTemplate(super.fileName, super.tokens)
-    : super(colorSchemePrefix: '_colors.',
-        textThemePrefix: '_textTheme.',
-      );
+  const NavigationBarTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.',
+  });
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
-class _TokenDefaultsM3 extends NavigationBarThemeData {
-  _TokenDefaultsM3(this.context)
+class _${blockName}DefaultsM3 extends NavigationBarThemeData {
+  _${blockName}DefaultsM3(this.context)
       : super(
           height: ${tokens["md.comp.navigation-bar.container.height"]},
           elevation: ${elevation("md.comp.navigation-bar.container")},
@@ -27,7 +26,9 @@ class _TokenDefaultsM3 extends NavigationBarThemeData {
 
   @override Color? get backgroundColor => ${componentColor("md.comp.navigation-bar.container")};
 
-  @override Color? get surfaceTintColor => ${color("md.comp.navigation-bar.container.surface-tint-layer.color")};
+  @override Color? get shadowColor => ${colorOrTransparent("md.comp.navigation-bar.container.shadow-color")};
+
+  @override Color? get surfaceTintColor => ${colorOrTransparent("md.comp.navigation-bar.container.surface-tint-layer.color")};
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {

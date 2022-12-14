@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TabController
+/// Flutter code sample for [TabController].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -29,7 +29,7 @@ const List<Tab> tabs = <Tab>[
 ];
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class MyStatelessWidget extends StatelessWidget {
       // The Builder widget is used to have a different BuildContext to access
       // closest DefaultTabController.
       child: Builder(builder: (BuildContext context) {
-        final TabController tabController = DefaultTabController.of(context)!;
+        final TabController tabController = DefaultTabController.of(context);
         tabController.addListener(() {
           if (!tabController.indexIsChanging) {
             // Your code goes here.
@@ -56,7 +56,7 @@ class MyStatelessWidget extends StatelessWidget {
               return Center(
                 child: Text(
                   '${tab.text!} Tab',
-                  style: Theme.of(context).textTheme.headline5,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               );
             }).toList(),

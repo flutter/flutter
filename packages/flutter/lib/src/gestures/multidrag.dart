@@ -13,9 +13,15 @@ import 'constants.dart';
 import 'drag.dart';
 import 'drag_details.dart';
 import 'events.dart';
-import 'gesture_settings.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'arena.dart' show GestureDisposition;
+export 'drag.dart' show Drag;
+export 'events.dart' show PointerDownEvent;
+export 'gesture_settings.dart' show DeviceGestureSettings;
 
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
 typedef GestureMultiDragStartCallback = Drag? Function(Offset position);
@@ -78,8 +84,9 @@ abstract class MultiDragPointerState {
 
   void _move(PointerMoveEvent event) {
     assert(_arenaEntry != null);
-    if (!event.synthesized)
+    if (!event.synthesized) {
       _velocityTracker.addPosition(event.timeStamp, event.position);
+    }
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
@@ -276,8 +283,9 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   void acceptGesture(int pointer) {
     assert(_pointers != null);
     final MultiDragPointerState? state = _pointers![pointer];
-    if (state == null)
-      return; // We might already have canceled this drag if the up comes before the accept.
+    if (state == null) {
+      return;  // We might already have canceled this drag if the up comes before the accept.
+    }
     state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
   }
 
@@ -287,8 +295,9 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(state != null);
     assert(state._pendingDelta != null);
     Drag? drag;
-    if (onStart != null)
+    if (onStart != null) {
       drag = invokeCallback<Drag?>('onStart', () => onStart!(initialPosition));
+    }
     if (drag != null) {
       state._startDrag(drag);
     } else {
@@ -334,8 +343,9 @@ class _ImmediatePointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings))
+    if (pendingDelta!.distance > computeHitSlop(kind, gestureSettings)) {
       resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
@@ -390,8 +400,9 @@ class _HorizontalPointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dx.abs() > computeHitSlop(kind, gestureSettings))
+    if (pendingDelta!.dx.abs() > computeHitSlop(kind, gestureSettings)) {
       resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
@@ -446,8 +457,9 @@ class _VerticalPointerState extends MultiDragPointerState {
   @override
   void checkForResolutionAfterMove() {
     assert(pendingDelta != null);
-    if (pendingDelta!.dy.abs() > computeHitSlop(kind, gestureSettings))
+    if (pendingDelta!.dy.abs() > computeHitSlop(kind, gestureSettings)) {
       resolve(GestureDisposition.accepted);
+    }
   }
 
   @override
@@ -496,9 +508,8 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(Offset initialPosition, Duration delay, PointerDeviceKind kind, DeviceGestureSettings? deviceGestureSettings)
-      : assert(delay != null),
-        super(initialPosition, kind, deviceGestureSettings) {
+  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.deviceGestureSettings)
+      : assert(delay != null) {
     _timer = Timer(delay, _delayPassed);
   }
 
@@ -527,10 +538,11 @@ class _DelayedPointerState extends MultiDragPointerState {
   @override
   void accepted(GestureMultiDragStartCallback starter) {
     assert(_starter == null);
-    if (_timer == null)
+    if (_timer == null) {
       starter(initialPosition);
-    else
+    } else {
       _starter = starter;
+    }
   }
 
   @override

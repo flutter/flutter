@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
@@ -361,6 +362,30 @@ void main() {
         matchRoot: true,
       ), findsOneWidget);
     });
+
+    testWidgets('is fast in deep tree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: _deepWidgetTree(
+            depth: 1000,
+            child: Row(
+              children: <Widget>[
+                _deepWidgetTree(
+                  depth: 1000,
+                  child: Column(children: fooBarTexts),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(find.ancestor(
+        of: find.text('bar'),
+        matching: find.byType(Row),
+      ), findsOneWidget);
+    });
   });
 
   group('pageBack', () {
@@ -606,6 +631,23 @@ void main() {
         key: 'abczed',
       });
     });
+
+    testWidgets('control test (return value)', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<String>(() async => 'Judy Turner');
+      expect(result, 'Judy Turner');
+    });
+
+    testWidgets('async throw', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<Never>(() async => throw Exception('Lois Dilettente'));
+      expect(result, isNull);
+      expect(tester.takeException(), isNotNull);
+    });
+
+    testWidgets('sync throw', (WidgetTester tester) async {
+      final String? result = await tester.binding.runAsync<Never>(() => throw Exception('Butch Barton'));
+      expect(result, isNull);
+      expect(tester.takeException(), isNotNull);
+    });
   });
 
   group('showKeyboard', () {
@@ -720,13 +762,29 @@ void main() {
       expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
-      if (debugDefaultTargetPlatformOverride == null) {
-        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
-      } else {
-        numberOfVariationsRun += 1;
-      }
-    }, variant: TargetPlatformVariant.all());
+    group('all', () {
+      testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
+        if (debugDefaultTargetPlatformOverride == null) {
+          expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+        } else {
+          numberOfVariationsRun += 1;
+        }
+      }, variant: TargetPlatformVariant.all());
+
+      const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{ TargetPlatform.android, TargetPlatform.linux };
+      testWidgets('TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding', (WidgetTester tester) async {
+        if (debugDefaultTargetPlatformOverride == null) {
+          expect(numberOfVariationsRun, equals(TargetPlatform.values.length - excludePlatforms.length));
+          expect(
+            excludePlatforms,
+            isNot(contains(debugDefaultTargetPlatformOverride)),
+            reason: 'this test should not run on any platform in excludePlatforms'
+          );
+        } else {
+          numberOfVariationsRun += 1;
+        }
+      }, variant: TargetPlatformVariant.all(excluding: excludePlatforms));
+    });
 
     testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
       final TargetPlatformVariant all = TargetPlatformVariant.all();
@@ -764,6 +822,78 @@ void main() {
       binding.postTest();
     });
   });
+
+  group('Accessibility announcements testing API', () {
+    testWidgets('Returns the list of announcements', (WidgetTester tester) async {
+
+      // Make sure the handler is properly set
+      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isFalse);
+
+      await SemanticsService.announce('announcement 1', TextDirection.ltr);
+      await SemanticsService.announce('announcement 2', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      await SemanticsService.announce('announcement 3', TextDirection.rtl);
+
+      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
+      expect(list, hasLength(3));
+      final CapturedAccessibilityAnnouncement first = list[0];
+      expect(first.message, 'announcement 1');
+      expect(first.textDirection, TextDirection.ltr);
+
+      final CapturedAccessibilityAnnouncement second = list[1];
+      expect(second.message, 'announcement 2');
+      expect(second.textDirection, TextDirection.rtl);
+      expect(second.assertiveness, Assertiveness.assertive);
+
+      final CapturedAccessibilityAnnouncement third = list[2];
+      expect(third.message, 'announcement 3');
+      expect(third.textDirection, TextDirection.rtl);
+      expect(third.assertiveness, Assertiveness.polite);
+
+      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
+      expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
+    });
+
+    test('New test API is not breaking existing tests', () async {
+      final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
+
+      Future<dynamic> handleMessage(dynamic mockMessage) async {
+        final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
+        log.add(message);
+      }
+
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, handleMessage);
+
+      await SemanticsService.announce('announcement 1', TextDirection.rtl,
+          assertiveness: Assertiveness.assertive);
+      expect(
+          log,
+          equals(<Map<String, dynamic>>[
+            <String, dynamic>{
+              'type': 'announce',
+              'data': <String, dynamic>{
+                'message': 'announcement 1',
+                'textDirection': 0,
+                'assertiveness': 1
+              }
+            },
+      ]));
+
+      // Remove the handler
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, null);
+    });
+
+    tearDown(() {
+      // Make sure that the handler is removed in [TestWidgetsFlutterBinding.postTest]
+      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
+    });
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {
@@ -780,31 +910,6 @@ class FakeMatcher extends AsyncMatcher {
 
   @override
   Description describe(Description description) => description.add('--fake--');
-}
-
-class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest();
-
-  @override
-  _SingleTickerTestState createState() => _SingleTickerTestState();
-}
-
-class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 100),
-    )  ;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
 }
 
 class _AlwaysAnimating extends StatefulWidget {
@@ -862,4 +967,13 @@ class _AlwaysRepaint extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     onPaint();
   }
+}
+
+/// Wraps [child] in [depth] layers of [SizedBox]
+Widget _deepWidgetTree({required int depth, required Widget child}) {
+  Widget tree = child;
+  for (int i = 0; i < depth; i += 1) {
+    tree = SizedBox(child: tree);
+  }
+  return tree;
 }

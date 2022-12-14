@@ -47,7 +47,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///
 /// ```dart
 /// class MyHomePage extends StatefulWidget {
-///   const MyHomePage({Key? key, required this.title}) : super(key: key);
+///   const MyHomePage({super.key, required this.title});
 ///   final String title;
 ///
 ///   @override
@@ -141,10 +141,11 @@ class ValueListenableBuilder<T> extends StatefulWidget {
 
   /// A [valueListenable]-independent widget which is passed back to the [builder].
   ///
-  /// This argument is optional and can be null if the entire widget subtree
-  /// the [builder] builds depends on the value of the [valueListenable]. For
-  /// example, if the [valueListenable] is a [String] and the [builder] simply
-  /// returns a [Text] widget with the [String] value.
+  /// This argument is optional and can be null if the entire widget subtree the
+  /// [builder] builds depends on the value of the [valueListenable]. For
+  /// example, in the case where the [valueListenable] is a [String] and the
+  /// [builder] returns a [Text] widget with the current [String] value, there
+  /// would be no useful [child].
   final Widget? child;
 
   @override

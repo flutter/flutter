@@ -6,6 +6,8 @@ import 'dart:io';
 import 'assertions.dart';
 import 'platform.dart' as platform;
 
+export 'platform.dart' show TargetPlatform;
+
 /// The dart:io implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   platform.TargetPlatform? result;
@@ -23,12 +25,14 @@ platform.TargetPlatform get defaultTargetPlatform {
     result = platform.TargetPlatform.windows;
   }
   assert(() {
-    if (Platform.environment.containsKey('FLUTTER_TEST'))
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
       result = platform.TargetPlatform.android;
+    }
     return true;
   }());
-  if (platform.debugDefaultTargetPlatformOverride != null)
+  if (platform.debugDefaultTargetPlatformOverride != null) {
     result = platform.debugDefaultTargetPlatformOverride;
+  }
   if (result == null) {
     throw FlutterError(
       'Unknown platform.\n'

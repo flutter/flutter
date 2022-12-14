@@ -51,9 +51,9 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// The scaffold assumes the navigation bar will account for the [MediaQuery]
   /// top padding, also consume it if the navigation bar is opaque.
   ///
-  /// By default `navigationBar` has its text scale factor set to 1.0 and does
+  /// By default [navigationBar] has its text scale factor set to 1.0 and does
   /// not respond to text scale factor changes from the operating system, to match
-  /// the native iOS behavior. To override such behavior, wrap each of the `navigationBar`'s
+  /// the native iOS behavior. To override such behavior, wrap each of the [navigationBar]'s
   /// components inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
   /// value. The text scale factor value from the operating system can be retrieved
   /// in many ways, such as querying [MediaQuery.textScaleFactorOf] against
@@ -90,7 +90,7 @@ class CupertinoPageScaffold extends StatefulWidget {
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
   void _handleStatusBarTap() {
-    final ScrollController? primaryScrollController = PrimaryScrollController.of(context);
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
     // Only act on the scroll controller if it has any attached scroll positions.
     if (primaryScrollController != null && primaryScrollController.hasClients) {
       primaryScrollController.animateTo(

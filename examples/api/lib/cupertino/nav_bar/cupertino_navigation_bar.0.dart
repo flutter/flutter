@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoNavigationBar
+/// Flutter code sample for [CupertinoNavigationBar].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const NavBarApp());
 
 class NavBarApp extends StatelessWidget {
-  const NavBarApp({Key? key}) : super(key: key);
+  const NavBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class NavBarApp extends StatelessWidget {
 }
 
 class NavBarExample extends StatefulWidget {
-  const NavBarExample({Key? key}) : super(key: key);
+  const NavBarExample({super.key});
 
   @override
   State<NavBarExample> createState() => _NavBarExampleState();

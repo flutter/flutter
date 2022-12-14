@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
@@ -12,6 +12,113 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/105833
+  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.1, 0.5);
+    bool dragStarted = false;
+    final Key sliderKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 20)),
+                      child: RangeSlider(
+                        key: sliderKey,
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    // Less than configured touch slop, more than default touch slop
+    await drag.moveBy(const Offset(19.0, 0));
+    await tester.pump();
+
+    expect(values, const RangeValues(0.1, 0.5));
+    expect(dragStarted, true);
+
+    dragStarted = false;
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    bool sliderEnd = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 10)),
+                      child: RangeSlider(
+                        key: sliderKey,
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                        onChangeEnd: (RangeValues newValues) {
+                          sliderEnd = true;
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // More than touch slop.
+    await drag.moveBy(const Offset(12.0, 0));
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(sliderEnd, true);
+    expect(dragStarted, false);
+  });
+
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
@@ -1276,8 +1383,10 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..paragraph(),
+        ..paragraph()
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
@@ -1360,7 +1469,7 @@ void main() {
     );
 
     // Represents the Raised Button and Range Slider.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 4));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 6));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
 
     await tester.tap(find.text('Next'));
@@ -1370,11 +1479,11 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-       paints
-         ..path(color: fillColor)
-         ..paragraph()
-         ..path(color: fillColor)
-         ..paragraph(),
+      paints
+        ..path(color: fillColor)
+        ..paragraph()
+        ..path(color: fillColor)
+        ..paragraph(),
       ),
     );
 
@@ -1519,6 +1628,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1594,6 +1705,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1740,7 +1853,7 @@ void main() {
     );
   });
 
-  testWidgets('Range Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Range Slider Semantics - ltr', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1749,7 +1862,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Material(
               child: RangeSlider(
-                values: const RangeValues(10.0, 12.0),
+                values: const RangeValues(10.0, 30.0),
                 max: 100.0,
                 onChanged: (RangeValues v) { },
               ),
@@ -1761,8 +1874,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(RangeSlider));
     expect(
-      tester.getSemantics(find.byType(RangeSlider)),
+      semanticsNode,
       matchesSemantics(
         scopesRoute: true,
         children:<Matcher>[
@@ -1775,7 +1889,91 @@ void main() {
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
                 value: '10%',
-                increasedValue: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // TODO(tahatesser): This is a workaround for matching
+    // the semantics node rects by avoiding floating point errors.
+    // https://github.com/flutter/flutter/issues/115079
+    // Get semantics node rects.
+    final List<Rect> rects = <Rect>[];
+    semanticsNode.visitChildren((SemanticsNode node) {
+      node.visitChildren((SemanticsNode node) {
+       // Round rect values to avoid floating point errors.
+        rects.add(
+          Rect.fromLTRB(
+            node.rect.left.roundToDouble(),
+            node.rect.top.roundToDouble(),
+            node.rect.right.roundToDouble(),
+            node.rect.bottom.roundToDouble(),
+          ),
+        );
+        return true;
+      });
+      return true;
+    });
+    // Test that the semantics node rect sizes are correct.
+    expect(rects, <Rect>[
+      const Rect.fromLTRB(75.0, 276.0, 123.0, 324.0),
+      const Rect.fromLTRB(226.0, 276.0, 274.0, 324.0)
+    ]);
+  });
+
+  testWidgets('Range Slider Semantics - rtl', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData.light(),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: RangeSlider(
+                values: const RangeValues(10.0, 30.0),
+                max: 100.0,
+                onChanged: (RangeValues v) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(RangeSlider));
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children:<Matcher>[
+          matchesSemantics(
+            children:  <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
                 decreasedValue: '5%',
               ),
               matchesSemantics(
@@ -1784,15 +1982,41 @@ void main() {
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
-                value: '12%',
-                increasedValue: '17%',
-                decreasedValue: '12%',
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
               ),
             ],
           ),
         ],
       ),
     );
+
+    // TODO(tahatesser): This is a workaround for matching
+    // the semantics node rects by avoiding floating point errors.
+    // https://github.com/flutter/flutter/issues/115079
+    // Get semantics node rects.
+    final List<Rect> rects = <Rect>[];
+    semanticsNode.visitChildren((SemanticsNode node) {
+      node.visitChildren((SemanticsNode node) {
+        // Round rect values to avoid floating point errors.
+        rects.add(
+          Rect.fromLTRB(
+            node.rect.left.roundToDouble(),
+            node.rect.top.roundToDouble(),
+            node.rect.right.roundToDouble(),
+            node.rect.bottom.roundToDouble(),
+          ),
+        );
+        return true;
+      });
+      return true;
+    });
+    // Test that the semantics node rect sizes are correct.
+    expect(rects, <Rect>[
+      const Rect.fromLTRB(526.0, 276.0, 574.0, 324.0),
+      const Rect.fromLTRB(677.0, 276.0, 725.0, 324.0)
+    ]);
   });
 
   testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
@@ -1938,8 +2162,9 @@ void main() {
 
     late Rect activeTrackRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect)
+      if (method != #drawRect) {
         return false;
+      }
       activeTrackRect = arguments[0] as Rect;
       return true;
     }));

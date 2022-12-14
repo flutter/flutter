@@ -28,7 +28,7 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for macOS, based on the information in the key
 /// data structure given to it.
 class MacOSCodeGenerator extends PlatformCodeGenerator {
-  MacOSCodeGenerator(super.keyData, super.logicalData);
+  MacOSCodeGenerator(super.keyData, super.logicalData, this._layoutGoals);
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
@@ -96,24 +96,21 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
     return specialKeyConstants.toString().trimRight();
   }
 
-  String get _layoutGoals {
+  final Map<String, bool> _layoutGoals;
+  String get _layoutGoalsString {
     final OutputLines<int> lines = OutputLines<int>('macOS layout goals');
-    final Iterable<LogicalKeyEntry> asciiEntries = logicalData.entries.where(
-        (LogicalKeyEntry entry) => entry.value <= 128);
-    for (final LogicalKeyEntry logicalEntry in asciiEntries) {
-      final int value = logicalEntry.value;
-      final PhysicalKeyEntry? physicalEntry = keyData.tryEntryByName(logicalEntry.name);
-      if (physicalEntry == null) {
-        continue;
-      }
-      final bool mandatory = (value >= '0'.codeUnitAt(0) && value <= '9'.codeUnitAt(0))
-                          || (value >= 'a'.codeUnitAt(0) && value <= 'z'.codeUnitAt(0));
-      lines.add(value,
-          '    LayoutGoal{${toHex(physicalEntry.macOSScanCode, digits: 2)}, '
-          '${toHex(value, digits: 2)}, '
-          '${mandatory ? 'true}, ' : 'false},'}'
-          '  // ${logicalEntry.name}');
-    }
+    _layoutGoals.forEach((String name, bool mandatory) {
+      final PhysicalKeyEntry physicalEntry = keyData.entryByName(name);
+      final LogicalKeyEntry logicalEntry = logicalData.entryByName(name);
+      final String line = 'LayoutGoal{'
+          '${toHex(physicalEntry.macOSScanCode, digits: 2)}, '
+          '${toHex(logicalEntry.value, digits: 2)}, '
+          '${mandatory ? 'true' : 'false'}'
+          '},';
+      lines.add(logicalEntry.value,
+          '    ${line.padRight(39)}'
+          '// ${logicalEntry.name}');
+    });
     return lines.sortedJoin().trimRight();
   }
 
@@ -122,7 +119,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.mm');
+      'shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.g.mm');
 
   @override
   Map<String, String> mappings() {
@@ -136,7 +133,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
-      'LAYOUT_GOALS': _layoutGoals,
+      'LAYOUT_GOALS': _layoutGoalsString,
     };
   }
 }

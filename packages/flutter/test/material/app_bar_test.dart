@@ -51,7 +51,14 @@ Widget buildSliverAppBarApp({
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+}
+
+TextStyle? iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
@@ -394,7 +401,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -449,7 +456,7 @@ void main() {
       const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopRight(title).dx, 620 + 48 + 48);
+    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 16);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -544,6 +551,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar drawer icon has default color', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final bool useMaterial3 = themeData.useMaterial3;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    final Color iconColorM2 = themeData.colorScheme.onPrimary;
+    final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
+    expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
+  });
+
   testWidgets('AppBar drawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -560,6 +589,28 @@ void main() {
       tester.getSize(find.byIcon(Icons.menu)),
       equals(const Size(30, 30)),
     );
+  });
+
+  testWidgets('AppBar drawer icon is colored by iconTheme', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    const Color color = Color(0xFF2196F3);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+
+    expect(iconColor(), color);
   });
 
   testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
@@ -580,6 +631,28 @@ void main() {
     );
   });
 
+  testWidgets('AppBar endDrawer icon has default color', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final bool useMaterial3 = themeData.useMaterial3;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+    final Color iconColorM2 = themeData.colorScheme.onPrimary;
+    final Color iconColorM3 = themeData.colorScheme.onSurfaceVariant;
+    expect(iconColor(), useMaterial3 ? iconColorM3 : iconColorM2);
+  });
+
   testWidgets('AppBar endDrawer icon is sized by iconTheme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -598,10 +671,34 @@ void main() {
     );
   });
 
-  testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
+  testWidgets('AppBar endDrawer icon is colored by iconTheme', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    const Color color = Color(0xFF2196F3);
+
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+
+    Color? iconColor() => iconStyle(tester, Icons.menu)?.color;
+
+    expect(iconColor(), color);
+  });
+
+  testWidgets('leading widget extends to edge and is square', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
+    final bool material3 = themeData.useMaterial3;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -611,15 +708,52 @@ void main() {
       ),
     );
 
-    final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), Offset.zero);
-    expect(tester.getSize(hamburger), const Size(56.0, 56.0));
+    // Default IconButton has a size of (48x48) in M3, (56x56) in M2
+    final Finder hamburger = find.byType(IconButton);
+    expect(tester.getTopLeft(hamburger), material3 ? const Offset(4.0, 4.0) : Offset.zero);
+    expect(tester.getSize(hamburger), material3 ? const Size(48.0, 48.0) : const Size(56.0, 56.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: Container(),
+            title: const Text('X'),
+          ),
+        ),
+      ),
+    );
+
+    // Default leading widget has a size of (56x56) for both M2 and M3
+    final Finder leadingBox = find.byType(Container);
+    expect(tester.getTopLeft(leadingBox), Offset.zero);
+    expect(tester.getSize(leadingBox), const Size(56.0, 56.0));
+
+    // The custom leading widget should still be 56x56 even if its size is smaller.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: const SizedBox(height: 36, width: 36,),
+            title: const Text('X'),
+          ), // Doesn't really matter. Triggers a hamburger regardless.
+        ),
+      ),
+    );
+
+    final Finder leading = find.byType(SizedBox);
+    expect(tester.getTopLeft(leading), Offset.zero);
+    expect(tester.getSize(leading), const Size(56.0, 56.0));
   });
 
   testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(platform: TargetPlatform.android);
+    final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: theme,
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
@@ -642,14 +776,14 @@ void main() {
       ),
     );
 
-    final Finder addButton = find.byTooltip('Add');
+    final Finder addButton = find.widgetWithIcon(IconButton, Icons.add);
     expect(tester.getTopRight(addButton), const Offset(800.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
-    final Finder shareButton = find.byTooltip('Share');
+    final Finder shareButton = find.widgetWithIcon(IconButton, Icons.share);
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
-    expect(tester.getSize(shareButton), const Size(48.0, 56.0));
+    expect(tester.getSize(shareButton), material3 ? const Size(48.0, 48.0) : const Size(48.0, 56.0));
   });
 
   testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
@@ -953,6 +1087,152 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
+  testWidgets('SliverAppBar.medium defaults', (WidgetTester tester) async {
+    const double collapsedAppBarHeight = 64;
+    const double expandedAppBarHeight = 112;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar.medium(
+              title: const Text('AppBar Title'),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    // There are two widgets for the title. The first is the title on the main
+    // row with the icons. It is transparent when the app bar is expanded, and
+    // opaque when it is collapsed. The second title is a larger version that is
+    // shown at the bottom when the app bar is expanded. It scrolls under the
+    // main row until it is completely hidden and then the first title is faded
+    // in.
+    final Finder collapsedTitle = find.text('AppBar Title').first;
+    final Finder collapsedTitleOpacity = find.ancestor(
+      of: collapsedTitle,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitleClip = find.ancestor(
+      of: expandedTitle,
+      matching: find.byType(ClipRect),
+    );
+
+    // Default, fully expanded app bar.
+    expect(controller.offset, 0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+    // Scroll the expanded app bar partially out of view.
+    controller.jumpTo(45);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight - 45);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+    // Scroll so that it is completely collapsed.
+    controller.jumpTo(600);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), collapsedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+    expect(tester.getSize(expandedTitleClip).height, 0);
+
+    // Scroll back to fully expanded.
+    controller.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+  });
+
+  testWidgets('SliverAppBar.large defaults', (WidgetTester tester) async {
+    const double collapsedAppBarHeight = 64;
+    const double expandedAppBarHeight = 152;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar.large(
+              title: const Text('AppBar Title'),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final ScrollController controller = primaryScrollController(tester);
+    // There are two widgets for the title. The first is the title on the main
+    // row with the icons. It is transparent when the app bar is expanded, and
+    // opaque when it is collapsed. The second title is a larger version that is
+    // shown at the bottom when the app bar is expanded. It scrolls under the
+    // main row until it is completely hidden and then the first title is faded
+    // in.
+    final Finder collapsedTitle = find.text('AppBar Title').first;
+    final Finder collapsedTitleOpacity = find.ancestor(
+      of: collapsedTitle,
+      matching: find.byType(AnimatedOpacity),
+    );
+    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitleClip = find.ancestor(
+      of: expandedTitle,
+      matching: find.byType(ClipRect),
+    );
+
+    // Default, fully expanded app bar.
+    expect(controller.offset, 0);
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+
+    // Scroll the expanded app bar partially out of view.
+    controller.jumpTo(45);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight - 45);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight - 45);
+
+    // Scroll so that it is completely collapsed.
+    controller.jumpTo(600);
+    await tester.pump();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), collapsedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 1);
+    expect(tester.getSize(expandedTitleClip).height, 0);
+
+    // Scroll back to fully expanded.
+    controller.jumpTo(0);
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverAppBar), findsOneWidget);
+    expect(appBarHeight(tester), expandedAppBarHeight);
+    expect(tester.widget<AnimatedOpacity>(collapsedTitleOpacity).opacity, 0);
+    expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+  });
+
   testWidgets('AppBar uses the specified elevation or defaults to 4.0', (WidgetTester tester) async {
     final bool useMaterial3 = ThemeData().useMaterial3;
 
@@ -1011,6 +1291,53 @@ void main() {
     expect(getMaterial().elevation, 10);
   });
 
+  testWidgets('scrolledUnderElevation with nested scroll view', (WidgetTester tester) async {
+    Widget buildAppBar({double? scrolledUnderElevation}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Title'),
+            scrolledUnderElevation: scrolledUnderElevation,
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 1;
+            },
+          ),
+          body: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 600.0,
+                width: 800.0,
+                child: ListView.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) =>
+                    ListTile(title: Text('Item $index')),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Material getMaterial() => tester.widget<Material>(find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(Material),
+    ));
+
+    await tester.pumpWidget(buildAppBar(scrolledUnderElevation: 10));
+    // Starts with the base elevation.
+    expect(getMaterial().elevation, 0.0);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    // After scrolling it should be the scrolledUnderElevation.
+    expect(getMaterial().elevation, 10);
+  });
+
   group('SliverAppBar elevation', () {
     Widget buildSliverAppBar(bool forceElevated, {double? elevation, double? themeElevation}) {
       return MaterialApp(
@@ -1060,6 +1387,95 @@ void main() {
 
       await tester.pumpWidget(buildSliverAppBar(true, elevation: 8.0, themeElevation: 12.0));
       expect(getMaterial().elevation, 8.0);
+    });
+  });
+
+  group('SliverAppBar.forceMaterialTransparency', () {
+    Material getSliverAppBarMaterial(WidgetTester tester) {
+      return tester.widget<Material>(find
+          .descendant(of: find.byType(SliverAppBar), matching: find.byType(Material))
+          .first);
+    }
+
+    // Generates a MaterialApp with a SliverAppBar in a CustomScrollView.
+    // The first cell of the scroll view contains a button at its top, and is
+    // initially scrolled so that it is beneath the SliverAppBar.
+    Widget buildWidget({
+      required bool forceMaterialTransparency,
+      required VoidCallback onPressed
+    }) {
+      const double appBarHeight = 120;
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            controller: ScrollController(initialScrollOffset:appBarHeight),
+            slivers: <Widget>[
+              SliverAppBar(
+                collapsedHeight: appBarHeight,
+                expandedHeight: appBarHeight,
+                pinned: true,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                forceMaterialTransparency: forceMaterialTransparency,
+                title: const Text('AppBar'),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  return SizedBox(
+                    height: appBarHeight,
+                    child: index == 0
+                      ? Align(
+                          alignment: Alignment.topCenter,
+                          child: TextButton(onPressed: onPressed, child: const Text('press')))
+                      : const SizedBox(),
+                  );
+                },
+                childCount: 20,
+              ),
+            ),
+          ]),
+        ),
+      );
+    }
+
+    testWidgets(
+        'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:true,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getSliverAppBarMaterial(tester);
+      expect(material.type, MaterialType.transparency);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(buttonWasPressed, isTrue);
+    });
+
+    testWidgets(
+        'forceMaterialTransparency == false does not allow gestures beneath the app bar', (WidgetTester tester) async {
+      // Set this, and tester.tap(warnIfMissed:false), to suppress
+      // errors/warning that the button is not hittable (which is expected).
+      WidgetController.hitTestWarningShouldBeFatal = false;
+
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:false,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getSliverAppBarMaterial(tester);
+      expect(material.type, MaterialType.canvas);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder, warnIfMissed:false);
+      await tester.pump();
+      expect(buttonWasPressed, isFalse);
     });
   });
 
@@ -2094,6 +2510,56 @@ void main() {
     }
   });
 
+  testWidgets('Default status bar color', (WidgetTester tester) async {
+    Future<void> pumpBoilerplate({required bool useMaterial3, required bool backwardsCompatibility}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: GlobalKey(),
+          theme: ThemeData.light().copyWith(
+            useMaterial3: useMaterial3,
+            appBarTheme: AppBarTheme(
+              backwardsCompatibility: backwardsCompatibility,
+            ),
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('title'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: false);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: true);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: false);
+    expect(SystemChrome.latestStyle!.statusBarColor, Colors.transparent);
+    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: true);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+  });
+
+  testWidgets('AppBar systemOverlayStyle is use to style status bar and navigation bar', (WidgetTester tester) async {
+    final SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light.copyWith(
+      statusBarColor: Colors.red,
+      systemNavigationBarColor: Colors.green,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('test'),
+            systemOverlayStyle: systemOverlayStyle,
+          ),
+        ),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle!.statusBarColor, Colors.red);
+    expect(SystemChrome.latestStyle!.systemNavigationBarColor, Colors.green);
+  });
+
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17598
     const double appBarHeight = 256.0;
@@ -2381,8 +2847,9 @@ void main() {
         .delegate;
 
       // Ensure we have a non-null vsync when it's needed.
-      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null))
+      if (!floating || (delegate.snapConfiguration == null && delegate.showOnScreenConfiguration == null)) {
         expect(delegate.vsync, isNotNull);
+      }
 
       expect(delegate.showOnScreenConfiguration != null, snap && floating);
     }
@@ -2550,7 +3017,7 @@ void main() {
             backgroundColor: backgroundColor,
             leading: Icon(Icons.add_circle, key: leadingIconKey),
             title: const Text('title'),
-            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
           ),
         ),
       ),
@@ -2578,8 +3045,159 @@ void main() {
       find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
     ).data;
     expect(actionIconTheme.color, foregroundColor);
+
+    // Test icon color
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(leadingIconColor(), foregroundColor);
+    expect(actionIconColor(), foregroundColor);
   });
 
+  testWidgets('Leading, title, and actions show correct default colors', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData.from(
+      colorScheme: const ColorScheme.light(
+        onPrimary: Colors.blue,
+        onSurface: Colors.red,
+        onSurfaceVariant: Colors.yellow),
+    );
+    final bool material3 = themeData.useMaterial3;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            leading: const Icon(Icons.add_circle),
+            title: const Text('title'),
+            actions: const <Widget>[
+              Icon(Icons.ac_unit)
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color!;
+    }
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    // M2 default color are onPrimary, and M3 has onSurface for leading and title,
+    // onSurfaceVariant for actions.
+    expect(textColor(), material3 ? Colors.red : Colors.blue);
+    expect(leadingIconColor(), material3 ? Colors.red : Colors.blue);
+    expect(actionIconColor(), material3 ? Colors.yellow : Colors.blue);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/107305
+  group('Icons are colored correctly by IconTheme and ActionIconTheme in M3', () {
+    testWidgets('Icons and IconButtons are colored by IconTheme in M3', (WidgetTester tester) async {
+      const Color iconColor = Color(0xff00ff00);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(
+              colorScheme: const ColorScheme.light(), useMaterial3: true),
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: iconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {},)
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), iconColor);
+      expect(actionIconColor(), iconColor);
+      expect(actionIconButtonColor(), iconColor);
+    });
+
+    testWidgets('Action icons and IconButtons are colored by ActionIconTheme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
+
+      const Color actionsIconColor = Color(0xff0000ff);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              actionsIconTheme: const IconThemeData(color: actionsIconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), themeData.colorScheme.onSurface);
+      expect(actionIconColor(), actionsIconColor);
+      expect(actionIconButtonColor(), actionsIconColor);
+    });
+
+    testWidgets('The actionIconTheme property overrides iconTheme - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
+
+      const Color overallIconColor = Color(0xff00ff00);
+      const Color actionsIconColor = Color(0xff0000ff);
+      final Key leadingIconKey = UniqueKey();
+      final Key actionIconKey = UniqueKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: const IconThemeData(color: overallIconColor),
+              actionsIconTheme: const IconThemeData(color: actionsIconColor),
+              leading: Icon(Icons.add_circle, key: leadingIconKey),
+              title: const Text('title'),
+              actions: <Widget>[
+                Icon(Icons.ac_unit, key: actionIconKey),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+      Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.add)?.color;
+
+      expect(leadingIconColor(), overallIconColor);
+      expect(actionIconColor(), actionsIconColor);
+      expect(actionIconButtonColor(), actionsIconColor);
+    });
+  });
 
   testWidgets('AppBarTheme.backwardsCompatibility', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xff00ff00);
@@ -2599,7 +3217,7 @@ void main() {
             foregroundColor: foregroundColor, // only applies if backwardsCompatibility is false
             leading: Icon(Icons.add_circle, key: leadingIconKey),
             title: const Text('title'),
-            actions: <Widget>[Icon(Icons.add_circle, key: actionIconKey), const Text('action')],
+            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
           ),
         ),
       ),
@@ -2619,6 +3237,13 @@ void main() {
       find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
     ).data;
     expect(actionIconTheme.color, foregroundColor);
+
+    // Test icon color
+    Color? leadingIconColor() => iconStyle(tester, Icons.add_circle)?.color;
+    Color? actionIconColor() => iconStyle(tester, Icons.ac_unit)?.color;
+
+    expect(leadingIconColor(), foregroundColor);
+    expect(actionIconColor(), foregroundColor);
   });
 
   group('MaterialStateColor scrolledUnder', () {
@@ -3163,5 +3788,139 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).height, 64);
     expect(preferredHeight, 64);
     expect(preferredSize.height, 64);
+  });
+
+  testWidgets('AppBar title with actions should have the same position regardless of centerTitle', (WidgetTester tester) async {
+    final Key titleKey = UniqueKey();
+    bool centerTitle = false;
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            centerTitle: centerTitle,
+            title: Container(
+              key: titleKey,
+              constraints: BoxConstraints.loose(const Size(1000.0, 1000.0)),
+            ),
+            actions: const <Widget>[
+              SizedBox(width: 48.0),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    final Finder title = find.byKey(titleKey);
+    expect(tester.getTopLeft(title).dx, 16.0);
+
+    centerTitle = true;
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(title).dx, 16.0);
+  });
+
+  testWidgets('AppBar leading widget can take up arbitrary space', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    late double leadingWidth;
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            leadingWidth = constraints.maxWidth / 2;
+            return Scaffold(
+              appBar: AppBar(
+                leading: Container(
+                  key: leadingKey,
+                  width: leadingWidth,
+                ),
+                leadingWidth: leadingWidth,
+                title: Text('Title', key: titleKey),
+              ),
+            );
+          }
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(find.byKey(titleKey)).dx, leadingWidth + 16.0);
+    expect(tester.getSize(find.byKey(leadingKey)).width, leadingWidth);
+  });
+
+  group('AppBar.forceMaterialTransparency', () {
+    Material getAppBarMaterial(WidgetTester tester) {
+      return tester.widget<Material>(find
+          .descendant(of: find.byType(AppBar), matching: find.byType(Material))
+          .first);
+    }
+
+    // Generates a MaterialApp with an AppBar with a TextButton beneath it
+    // (via extendBodyBehindAppBar = true).
+    Widget buildWidget({
+      required bool forceMaterialTransparency,
+      required VoidCallback onPressed
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            forceMaterialTransparency: forceMaterialTransparency,
+            elevation: 3,
+            backgroundColor: Colors.red,
+            title: const Text('AppBar'),
+          ),
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: TextButton(
+              onPressed: onPressed,
+              child: const Text('press me'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+        'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+          forceMaterialTransparency:true,
+          onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getAppBarMaterial(tester);
+      expect(material.type, MaterialType.transparency);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(buttonWasPressed, isTrue);
+    });
+
+    testWidgets(
+        'forceMaterialTransparency == false does not allow gestures beneath the app bar', (WidgetTester tester) async {
+      // Set this, and tester.tap(warnIfMissed:false), to suppress
+      // errors/warning that the button is not hittable (which is expected).
+      WidgetController.hitTestWarningShouldBeFatal = false;
+
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:false,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getAppBarMaterial(tester);
+      expect(material.type, MaterialType.canvas);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder, warnIfMissed:false);
+      await tester.pump();
+      expect(buttonWasPressed, isFalse);
+    });
   });
 }

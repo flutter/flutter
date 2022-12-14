@@ -9,6 +9,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the visual properties of [Tooltip] widgets.
 ///
 /// Used by [TooltipTheme] to control the visual properties of tooltips in a
@@ -35,6 +38,7 @@ class TooltipThemeData with Diagnosticable {
     this.excludeFromSemantics,
     this.decoration,
     this.textStyle,
+    this.textAlign,
     this.waitDuration,
     this.showDuration,
     this.triggerMode,
@@ -79,6 +83,9 @@ class TooltipThemeData with Diagnosticable {
   /// The style to use for the message of [Tooltip]s.
   final TextStyle? textStyle;
 
+  /// The [TextAlign] to use for the message of [Tooltip]s.
+  final TextAlign? textAlign;
+
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   final Duration? waitDuration;
@@ -113,6 +120,7 @@ class TooltipThemeData with Diagnosticable {
     bool? excludeFromSemantics,
     Decoration? decoration,
     TextStyle? textStyle,
+    TextAlign? textAlign,
     Duration? waitDuration,
     Duration? showDuration,
     TooltipTriggerMode? triggerMode,
@@ -127,6 +135,7 @@ class TooltipThemeData with Diagnosticable {
       excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
       decoration: decoration ?? this.decoration,
       textStyle: textStyle ?? this.textStyle,
+      textAlign: textAlign ?? this.textAlign,
       waitDuration: waitDuration ?? this.waitDuration,
       showDuration: showDuration ?? this.showDuration,
       triggerMode: triggerMode ?? this.triggerMode,
@@ -140,8 +149,9 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
@@ -152,6 +162,7 @@ class TooltipThemeData with Diagnosticable {
       excludeFromSemantics: t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
+      textAlign: t < 0.5 ? a?.textAlign: b?.textAlign,
     );
   }
 
@@ -165,6 +176,7 @@ class TooltipThemeData with Diagnosticable {
     excludeFromSemantics,
     decoration,
     textStyle,
+    textAlign,
     waitDuration,
     showDuration,
     triggerMode,
@@ -173,10 +185,12 @@ class TooltipThemeData with Diagnosticable {
 
   @override
   bool operator==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TooltipThemeData
         && other.height == height
         && other.padding == padding
@@ -186,6 +200,7 @@ class TooltipThemeData with Diagnosticable {
         && other.excludeFromSemantics == excludeFromSemantics
         && other.decoration == decoration
         && other.textStyle == textStyle
+        && other.textAlign == textAlign
         && other.waitDuration == waitDuration
         && other.showDuration == showDuration
         && other.triggerMode == triggerMode
@@ -203,6 +218,7 @@ class TooltipThemeData with Diagnosticable {
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
@@ -283,6 +299,15 @@ class TooltipTheme extends InheritedTheme {
 
 /// The method of interaction that will trigger a tooltip.
 /// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
+///
+/// On desktop, a tooltip will be shown as soon as a pointer hovers over
+/// the widget, regardless of the value of [Tooltip.triggerMode].
+///
+/// See also:
+///
+///   * [Tooltip.waitDuration], which defines the length of time that
+///     a pointer must hover over a tooltip's widget before the tooltip
+///     will be shown.
 enum TooltipTriggerMode {
   /// Tooltip will only be shown by calling `ensureTooltipVisible`.
   manual,

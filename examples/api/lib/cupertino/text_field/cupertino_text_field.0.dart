@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoTextField
+/// Flutter code sample for [CupertinoTextField].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const CupertinoTextFieldApp());
 
 class CupertinoTextFieldApp extends StatelessWidget {
-  const CupertinoTextFieldApp({Key? key}) : super(key: key);
+  const CupertinoTextFieldApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CupertinoTextFieldApp extends StatelessWidget {
 }
 
 class CupertinoTextFieldExample extends StatefulWidget {
-  const CupertinoTextFieldExample({Key? key}) : super(key: key);
+  const CupertinoTextFieldExample({super.key});
 
   @override
   State<CupertinoTextFieldExample> createState() => _CupertinoTextFieldExampleState();

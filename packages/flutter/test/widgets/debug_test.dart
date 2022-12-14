@@ -31,8 +31,8 @@ void main() {
         equalsIgnoringHashCodes(
           'FlutterError\n'
           '   Duplicate keys found.\n'
-          '   If multiple keyed nodes exist as children of another node, they\n'
-          '   must have unique keys.\n'
+          '   If multiple keyed widgets exist as children of another widget,\n'
+          '   they must have unique keys.\n'
           '   Flex(direction: vertical, mainAxisAlignment: start,\n'
           '   crossAxisAlignment: center) has multiple children with key\n'
           "   [<'key'>].\n",
@@ -285,7 +285,7 @@ void main() {
                   child: Placeholder(),
                 ),
                 const Opacity(
-                  opacity: 1.0,
+                  opacity: 0.9,
                   child: Placeholder(),
                 ),
                 ImageFiltered(

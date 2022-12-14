@@ -246,10 +246,12 @@ class AsyncSnapshot<T> {
   /// Throws [error], if [hasError]. Throws [StateError], if neither [hasData]
   /// nor [hasError].
   T get requireData {
-    if (hasData)
+    if (hasData) {
       return data!;
-    if (hasError)
+    }
+    if (hasError) {
       Error.throwWithStackTrace(error!, stackTrace!);
+    }
     throw StateError('Snapshot has neither data nor error');
   }
 
@@ -294,8 +296,9 @@ class AsyncSnapshot<T> {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
+    }
     return other is AsyncSnapshot<T>
         && other.connectionState == connectionState
         && other.data == data
@@ -443,6 +446,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zEdw_1B7JHY}
 ///
 /// The [future] must have been obtained earlier, e.g. during [State.initState],
 /// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be
@@ -642,7 +647,11 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
         }());
 
       });
-      _snapshot = _snapshot.inState(ConnectionState.waiting);
+      // An implementation like `SynchronousFuture` may have already called the
+      // .then closure. Do not overwrite it in that case.
+      if (_snapshot.connectionState != ConnectionState.done) {
+        _snapshot = _snapshot.inState(ConnectionState.waiting);
+      }
     }
   }
 

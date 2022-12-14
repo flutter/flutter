@@ -8,6 +8,10 @@ import 'assertions.dart';
 import 'platform.dart';
 import 'print.dart';
 
+export 'dart:ui' show Brightness;
+
+export 'print.dart' show DebugPrintCallback;
+
 /// Returns true if none of the foundation library debug variables have been
 /// changed.
 ///
@@ -26,8 +30,9 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
-        debugBrightnessOverride != null)
+        debugBrightnessOverride != null) {
       throw FlutterError(reason);
+    }
     return true;
   }());
   return true;

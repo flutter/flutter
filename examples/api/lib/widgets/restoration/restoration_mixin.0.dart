@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for RestorationMixin
+/// Flutter code sample for [RestorationMixin].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const RestorationExampleApp());
 
 class RestorationExampleApp extends StatelessWidget {
-  const RestorationExampleApp({Key? key}) : super(key: key);
+  const RestorationExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class RestorationExampleApp extends StatelessWidget {
 }
 
 class RestorableCounter extends StatefulWidget {
-  const RestorableCounter({Key? key, this.restorationId}) : super(key: key);
+  const RestorableCounter({super.key, this.restorationId});
 
   final String? restorationId;
 
@@ -82,7 +82,7 @@ class _RestorableCounterState extends State<RestorableCounter>
             ),
             Text(
               '${_counter.value}',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),

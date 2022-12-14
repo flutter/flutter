@@ -441,8 +441,8 @@ void main() {
       1.0, // The larger font title is visible.
     ]);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -470,9 +470,9 @@ void main() {
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
     // The OverflowBox is squished with the text in it.
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 0.0);
   });
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
@@ -517,8 +517,8 @@ void main() {
     expect(find.text('Title'), findsOneWidget);
     expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
 
-    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
+    expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -530,6 +530,52 @@ void main() {
       tester.renderObject<RenderAnimatedOpacity>(find.widgetWithText(AnimatedOpacity, 'Title')).opacity.value,
       0.0,
     );
+  });
+
+  testWidgets('User specified middle is only visible when sliver is collapsed if alwaysShowMiddle is false', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large'),
+                middle: Text('Middle'),
+                alwaysShowMiddle: false,
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+    expect(find.text('Middle'), findsOneWidget);
+
+    // Initially (in expanded state) middle widget is not visible.
+    RenderAnimatedOpacity middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(middleOpacity.opacity.value, 0.0);
+
+    scrollController.jumpTo(600.0);
+    await tester.pumpAndSettle();
+
+    // Middle widget is visible when nav bar is collapsed.
+    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(middleOpacity.opacity.value, 1.0);
+
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+
+    // Middle widget is not visible when nav bar is again expanded.
+    middleOpacity = tester.element(find.text('Middle')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    expect(middleOpacity.opacity.value, 0.0);
   });
 
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
@@ -593,7 +639,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
     expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
 
-    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
+    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0); // Extension gone.
   });
 
   testWidgets('Auto back/close button', (WidgetTester tester) async {
@@ -1359,6 +1405,150 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar magnifies upon over-scroll and shrinks back once over-scroll ends',
+    (WidgetTester tester) async {
+      const Text titleText = Text('Large Title');
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: titleText,
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder titleTextFinder = find.byWidget(titleText).first;
+
+      // Gets the height of the large title
+      final Offset initialLargeTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getTopLeft(titleTextFinder);
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
+
+      final Offset magnifiedTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getTopLeft(titleTextFinder);
+
+      expect(
+        magnifiedTitleTextOffset.dy.abs(),
+        greaterThan(initialLargeTitleTextOffset.dy.abs()),
+      );
+
+      // Ensure title text retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+
+      final Offset finalTitleTextOffset = tester.getBottomLeft(titleTextFinder) -
+          tester.getTopLeft(titleTextFinder);
+
+      expect(
+        finalTitleTextOffset.dy.abs(),
+        initialLargeTitleTextOffset.dy.abs(),
+      );
+    },
+  );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar large title text does not get clipped when magnified',
+    (WidgetTester tester) async {
+      const Text titleText = Text('Very very very long large title');
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: titleText,
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder titleTextFinder = find.byWidget(titleText).first;
+
+      // Gets the width of the large title
+      final Offset initialLargeTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getBottomRight(titleTextFinder);
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 150.0));
+      await tester.pump();
+
+      final Offset magnifiedTitleTextOffset =
+          tester.getBottomLeft(titleTextFinder) -
+              tester.getBottomRight(titleTextFinder);
+
+      expect(
+        magnifiedTitleTextOffset.dx.abs(),
+        equals(initialLargeTitleTextOffset.dx.abs()),
+      );
+    },
+  );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar large title can be hit tested when magnified',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  largeTitle: Text('Large title'),
+                  stretch: true,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder largeTitleFinder = find.text('Large title').first;
+
+      // Drag for overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, 250.0));
+
+      // Hold position of the scroll view, so the Scrollable unblocks the hit-testing
+      scrollController.position.hold(() {});
+      await tester.pumpAndSettle();
+
+      expect(largeTitleFinder.hitTestable(), findsOneWidget);
+    },
+  );
 }
 
 class _ExpectStyles extends StatelessWidget {

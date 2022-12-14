@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -17,6 +13,7 @@ import '../web/chrome.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
+import 'test_time_recorder.dart';
 import 'test_wrapper.dart';
 import 'watcher.dart';
 import 'web_test_compiler.dart';
@@ -29,32 +26,33 @@ abstract class FlutterTestRunner {
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
-    @required DebuggingOptions debuggingOptions,
+    required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String tags,
-    String excludeTags,
+    String? tags,
+    String? excludeTags,
     bool enableObservatory = false,
     bool ipv6 = false,
     bool machine = false,
-    String precompiledDillPath,
-    Map<String, String> precompiledDillFiles,
+    String? precompiledDillPath,
+    Map<String, String>? precompiledDillFiles,
     bool updateGoldens = false,
-    TestWatcher watcher,
-    @required int concurrency,
-    bool buildTestAssets = false,
-    FlutterProject flutterProject,
-    String icudtlPath,
-    Directory coverageDirectory,
+    TestWatcher? watcher,
+    required int? concurrency,
+    String? testAssetDirectory,
+    FlutterProject? flutterProject,
+    String? icudtlPath,
+    Directory? coverageDirectory,
     bool web = false,
-    String randomSeed,
-    String reporter,
-    String timeout,
+    String? randomSeed,
+    String? reporter,
+    String? timeout,
     bool runSkipped = false,
-    int shardIndex,
-    int totalShards,
-    Device integrationTestDevice,
-    String integrationTestUserIdentifier,
+    int? shardIndex,
+    int? totalShards,
+    Device? integrationTestDevice,
+    String? integrationTestUserIdentifier,
+    TestTimeRecorder? testTimeRecorder,
   });
 }
 
@@ -65,35 +63,36 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   Future<int> runTests(
     TestWrapper testWrapper,
     List<String> testFiles, {
-    @required DebuggingOptions debuggingOptions,
+    required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String tags,
-    String excludeTags,
+    String? tags,
+    String? excludeTags,
     bool enableObservatory = false,
     bool ipv6 = false,
     bool machine = false,
-    String precompiledDillPath,
-    Map<String, String> precompiledDillFiles,
+    String? precompiledDillPath,
+    Map<String, String>? precompiledDillFiles,
     bool updateGoldens = false,
-    TestWatcher watcher,
-    @required int concurrency,
-    bool buildTestAssets = false,
-    FlutterProject flutterProject,
-    String icudtlPath,
-    Directory coverageDirectory,
+    TestWatcher? watcher,
+    required int? concurrency,
+    String? testAssetDirectory,
+    FlutterProject? flutterProject,
+    String? icudtlPath,
+    Directory? coverageDirectory,
     bool web = false,
-    String randomSeed,
-    String reporter,
-    String timeout,
+    String? randomSeed,
+    String? reporter,
+    String? timeout,
     bool runSkipped = false,
-    int shardIndex,
-    int totalShards,
-    Device integrationTestDevice,
-    String integrationTestUserIdentifier,
+    int? shardIndex,
+    int? totalShards,
+    Device? integrationTestDevice,
+    String? integrationTestUserIdentifier,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
-    final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
+    final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[
@@ -103,8 +102,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--pause-after-load',
       if (machine)
         ...<String>['-r', 'json']
-      else
-        ...<String>['-r', reporter ?? 'compact'],
+      else if (reporter != null)
+        ...<String>['-r', reporter],
       if (timeout != null)
         ...<String>['--timeout', timeout],
       '--concurrency=$concurrency',
@@ -136,11 +135,11 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         logger: globals.logger,
         fileSystem: globals.fs,
         platform: globals.platform,
-        artifacts: globals.artifacts,
+        artifacts: globals.artifacts!,
         processManager: globals.processManager,
         config: globals.config,
       ).initialize(
-        projectDirectory: flutterProject.directory,
+        projectDirectory: flutterProject!.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles,
         buildInfo: debuggingOptions.buildInfo,
@@ -177,6 +176,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
               logger: globals.logger,
             ),
             cache: globals.cache,
+            testTimeRecorder: testTimeRecorder,
           );
         },
       );
@@ -202,12 +202,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       precompiledDillPath: precompiledDillPath,
       precompiledDillFiles: precompiledDillFiles,
       updateGoldens: updateGoldens,
-      buildTestAssets: buildTestAssets,
+      testAssetDirectory: testAssetDirectory,
       projectRootDirectory: globals.fs.currentDirectory.uri,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
       integrationTestDevice: integrationTestDevice,
       integrationTestUserIdentifier: integrationTestUserIdentifier,
+      testTimeRecorder: testTimeRecorder,
     );
 
     try {

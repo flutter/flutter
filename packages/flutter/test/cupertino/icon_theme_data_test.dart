@@ -7,7 +7,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('IconTheme.of works', (WidgetTester tester) async {
-    const IconThemeData data = IconThemeData(color: Color(0xAAAAAAAA), opacity: 0.5, size: 16.0);
+    const IconThemeData data = IconThemeData(
+      size: 16.0,
+      fill: 0.0,
+      weight: 400.0,
+      grade: 0.0,
+      opticalSize: 48.0,
+      color: Color(0xAAAAAAAA),
+      opacity: 0.5
+    );
 
     late IconThemeData retrieved;
     await tester.pumpWidget(

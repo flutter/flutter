@@ -74,8 +74,9 @@ Future<Map<String, double>> readJsonResults(Process process) {
       return;
     }
 
-    if (jsonStarted && line.contains(jsonPrefix))
+    if (jsonStarted && line.contains(jsonPrefix)) {
       jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
+    }
   });
 
   process.exitCode.then<void>((int code) async {

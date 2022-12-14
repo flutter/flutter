@@ -222,6 +222,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return FadeTransition(
+      key: ValueKey<Key?>(child.key),
       opacity: animation,
       child: child,
     );
@@ -272,8 +273,9 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     // transitions.
     if (widget.transitionBuilder != oldWidget.transitionBuilder) {
       _outgoingEntries.forEach(_updateTransitionForEntry);
-      if (_currentEntry != null)
+      if (_currentEntry != null) {
         _updateTransitionForEntry(_currentEntry!);
+      }
       _markChildWidgetCacheAsDirty();
     }
 
@@ -307,8 +309,9 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
-    if (widget.child == null)
+    if (widget.child == null) {
       return;
+    }
     final AnimationController controller = AnimationController(
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
@@ -380,16 +383,18 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   @override
   void dispose() {
-    if (_currentEntry != null)
+    if (_currentEntry != null) {
       _currentEntry!.controller.dispose();
-    for (final _ChildEntry entry in _outgoingEntries)
+    }
+    for (final _ChildEntry entry in _outgoingEntries) {
       entry.controller.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!);
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
   }
 }

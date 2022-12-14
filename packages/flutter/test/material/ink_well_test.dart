@@ -5,7 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/services/keyboard_key.dart';
+import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -170,7 +170,6 @@ void main() {
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
@@ -189,12 +188,15 @@ void main() {
             height: 100,
             child: InkWell(
               overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered))
+                if (states.contains(MaterialState.hovered)) {
                   return const Color(0xff00ff00);
-                if (states.contains(MaterialState.focused))
+                }
+                if (states.contains(MaterialState.focused)) {
                   return const Color(0xff0000ff);
-                if (states.contains(MaterialState.pressed))
+                }
+                if (states.contains(MaterialState.pressed)) {
                   return const Color(0xf00fffff);
+                }
                 return const Color(0xffbadbad); // Shouldn't happen.
               }),
               onTap: () { },
@@ -207,7 +209,6 @@ void main() {
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
@@ -267,12 +268,15 @@ void main() {
               child: InkWell(
                 focusNode: focusNode,
                 overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered))
+                  if (states.contains(MaterialState.hovered)) {
                     return const Color(0xff00ff00);
-                  if (states.contains(MaterialState.focused))
+                  }
+                  if (states.contains(MaterialState.focused)) {
                     return const Color(0xff0000ff);
-                  if (states.contains(MaterialState.pressed))
+                  }
+                  if (states.contains(MaterialState.pressed)) {
                     return const Color(0xf00fffff);
+                  }
                   return const Color(0xffbadbad); // Shouldn't happen.
                 }),
                 highlightColor: const Color(0xf00fffff),
@@ -344,13 +348,13 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                  hoverColor: const Color(0xff00ff00),
-                  splashColor: splashColor,
-                  focusColor: const Color(0xff0000ff),
-                  highlightColor: const Color(0xf00fffff),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
+                hoverColor: const Color(0xff00ff00),
+                splashColor: splashColor,
+                focusColor: const Color(0xff0000ff),
+                highlightColor: const Color(0xf00fffff),
+                onTap: () { },
+                onLongPress: () { },
+                onHover: (bool hover) { },
               ),
             ),
           ),
@@ -382,18 +386,21 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                  overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered))
-                      return const Color(0xff00ff00);
-                    if (states.contains(MaterialState.focused))
-                      return const Color(0xff0000ff);
-                    if (states.contains(MaterialState.pressed))
-                      return splashColor;
-                    return const Color(0xffbadbad); // Shouldn't happen.
-                  }),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
+                overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered)) {
+                    return const Color(0xff00ff00);
+                  }
+                  if (states.contains(MaterialState.focused)) {
+                    return const Color(0xff0000ff);
+                  }
+                  if (states.contains(MaterialState.pressed)) {
+                    return splashColor;
+                  }
+                  return const Color(0xffbadbad); // Shouldn't happen.
+                }),
+                onTap: () { },
+                onLongPress: () { },
+                onHover: (bool hover) { },
               ),
             ),
           ),
@@ -438,6 +445,377 @@ void main() {
     expect(inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
   });
 
+  testWidgets('InkWell uses borderRadius for focus highlight', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                focusNode: focusNode,
+                borderRadius: BorderRadius.circular(10),
+                focusColor: const Color(0xff0000ff),
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
+
+    expect(inkFeatures, paints..rrect(
+      rrect: RRect.fromLTRBR(350.0, 250.0, 450.0, 350.0, const Radius.circular(10)),
+      color: const Color(0xff0000ff),
+    ));
+  });
+
+  testWidgets('InkWell uses borderRadius for hover highlight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: MouseRegion(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  hoverColor: const Color(0xff00ff00),
+                  onTap: () { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
+
+    // Hover the ink well.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getRect(find.byType(InkWell)).center);
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
+
+    expect(inkFeatures, paints..rrect(
+      rrect: RRect.fromLTRBR(350.0, 250.0, 450.0, 350.0, const Radius.circular(10)),
+      color: const Color(0xff00ff00),
+    ));
+  });
+
+  testWidgets('InkWell customBorder clips for focus highlight', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: MouseRegion(
+                child: InkWell(
+                  focusNode: focusNode,
+                  borderRadius: BorderRadius.circular(10),
+                  customBorder: const CircleBorder(),
+                  hoverColor: const Color(0xff00ff00),
+                  onTap: () { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
+
+    // Create a rounded rectangle path with a radius that makes it similar to the custom border circle.
+    const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
+    final Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(50.0),
+      ));
+    // The ink well custom border path should match the rounded rectangle path.
+    expect(
+      inkFeatures,
+      paints..clipPath(pathMatcher: coversSameAreaAs(
+        expectedClipPath,
+        areaToCompare: expectedClipRect.inflate(20.0),
+        sampleSize: 100,
+      )),
+    );
+  });
+
+  testWidgets('InkWell customBorder clips for hover highlight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: MouseRegion(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  customBorder: const CircleBorder(),
+                  hoverColor: const Color(0xff00ff00),
+                  onTap: () { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
+
+    // Hover the ink well.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getRect(find.byType(InkWell)).center);
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
+
+    // Create a rounded rectangle path with a radius that makes it similar to the custom border circle.
+    const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
+    final Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(50.0),
+      ));
+    // The ink well custom border path should match the rounded rectangle path.
+    expect(
+      inkFeatures,
+      paints..clipPath(pathMatcher: coversSameAreaAs(
+        expectedClipPath,
+        areaToCompare: expectedClipRect.inflate(20.0),
+        sampleSize: 100,
+      )),
+    );
+  });
+
+testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    Widget boilerplate(double radius) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkResponse(
+                focusNode: focusNode,
+                radius: radius,
+                focusColor: const Color(0xff0000ff),
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(boilerplate(10));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(inkFeatures, paints..circle(radius: 10, color: const Color(0xff0000ff)));
+
+    await tester.pumpWidget(boilerplate(20));
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
+  });
+
+  testWidgets('InkResponse highlightShape can be updated', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    Widget boilerplate(BoxShape shape) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkResponse(
+                focusNode: focusNode,
+                highlightShape: shape,
+                borderRadius: BorderRadius.circular(10),
+                focusColor: const Color(0xff0000ff),
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate(BoxShape.circle));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
+
+    await tester.pumpWidget(boilerplate(BoxShape.rectangle));
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
+  });
+
+  testWidgets('InkWell borderRadius can be updated', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    Widget boilerplate(BorderRadius borderRadius) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                focusNode: focusNode,
+                borderRadius: borderRadius,
+                focusColor: const Color(0xff0000ff),
+                onTap: () { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(10)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
+    expect(inkFeatures, paints..rrect(
+      rrect: RRect.fromLTRBR(350.0, 250.0, 450.0, 350.0, const Radius.circular(10)),
+      color: const Color(0xff0000ff),
+    ));
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(30)));
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
+    expect(inkFeatures, paints..rrect(
+      rrect: RRect.fromLTRBR(350.0, 250.0, 450.0, 350.0, const Radius.circular(30)),
+      color: const Color(0xff0000ff),
+    ));
+  });
+
+  testWidgets('InkWell customBorder can be updated', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    Widget boilerplate(BorderRadius borderRadius) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: MouseRegion(
+                child: InkWell(
+                  focusNode: focusNode,
+                  customBorder: RoundedRectangleBorder(borderRadius: borderRadius),
+                  hoverColor: const Color(0xff00ff00),
+                  onTap: () { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
+
+    const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
+    Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(20),
+      ));
+    expect(
+      inkFeatures,
+      paints..clipPath(pathMatcher: coversSameAreaAs(
+        expectedClipPath,
+        areaToCompare: expectedClipRect.inflate(20.0),
+        sampleSize: 100,
+      )),
+    );
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
+    await tester.pumpAndSettle();
+    expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(40),
+      ));
+    expect(
+      inkFeatures,
+      paints..clipPath(pathMatcher: coversSameAreaAs(
+        expectedClipPath,
+        areaToCompare: expectedClipRect.inflate(20.0),
+        sampleSize: 100,
+      )),
+    );
+  });
+
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
@@ -473,7 +851,6 @@ void main() {
   testWidgets('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(1, 1));
-    addTearDown(gesture.removePointer);
 
     // Test argument works
     await tester.pumpWidget(
@@ -802,7 +1179,6 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
     await tester.pumpAndSettle();
     expect(hovering, isTrue);
@@ -860,7 +1236,7 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
     // Press
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
@@ -933,7 +1309,7 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
     // Press
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
@@ -1014,7 +1390,7 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
     // Press middle
     await tester.startGesture(tester.getTopLeft(find.byKey(middleKey)) + const Offset(1, 1), pointer: 1);
@@ -1074,7 +1450,7 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(leftKey)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byKey(leftKey)));
 
     final Offset parentPosition = tester.getTopLeft(find.byKey(parentKey)) + const Offset(1, 1);
 
@@ -1186,7 +1562,7 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
     // Press inner
     final TestGesture gesture = await tester.startGesture(const Offset(100, 50), pointer: 1);
@@ -1260,7 +1636,7 @@ void main() {
         ),
       ),
     );
-    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)))!;
+    final MaterialInkController material = Material.of(tester.element(find.byKey(innerKey)));
 
     // Press
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerKey)), pointer: 1);
@@ -1311,7 +1687,6 @@ void main() {
     await tester.pumpWidget(buildFrame(enabled: true));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(InkWell)));
     await tester.pumpAndSettle();
@@ -1366,7 +1741,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
     await tester.pumpAndSettle();
 
@@ -1509,5 +1883,86 @@ void main() {
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+  });
+
+  testWidgets('InkWell dispose statesController', (WidgetTester tester) async {
+    int tapCount = 0;
+    Widget buildFrame(MaterialStatesController? statesController) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: InkWell(
+              statesController: statesController,
+              onTap: () { tapCount += 1; },
+              child: const Text('inkwell'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final MaterialStatesController controller = MaterialStatesController();
+    int pressedCount = 0;
+    controller.addListener(() {
+      if (controller.value.contains(MaterialState.pressed)) {
+        pressedCount += 1;
+      }
+    });
+
+    await tester.pumpWidget(buildFrame(controller));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 1);
+    expect(pressedCount, 1);
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 2);
+    expect(pressedCount, 1);
+
+    await tester.pumpWidget(buildFrame(controller));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(tapCount, 3);
+    expect(pressedCount, 2);
+  });
+
+  testWidgets('ink well overlayColor opacity fades from 0xff when hover ends', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110266
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              overlayColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered)) {
+                  return const Color(0xff00ff00);
+                }
+                return null;
+              }),
+              onTap: () { },
+              onLongPress: () { },
+              onHover: (bool hover) { },
+            ),
+          ),
+        ),
+      ),
+    ));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(10, 10)); // fade out the overlay
+    await tester.pump(); // trigger the fade out animation
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    // Fadeout begins with the MaterialStates.hovered overlay color
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
+    // 50ms fadeout is 50% complete, overlay color alpha goes from 0xff to 0x80
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0x8000ff00)));
   });
 }

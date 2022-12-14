@@ -75,21 +75,21 @@ void main() {
 
     expect(description, <String>[
       'backgroundColor: Color(0xffffffff)',
-      'hourMinuteTextColor: Color(0xffffffff)',
-      'hourMinuteColor: Color(0xffffffff)',
-      'dayPeriodTextColor: Color(0xffffffff)',
+      'dayPeriodBorderSide: BorderSide',
       'dayPeriodColor: Color(0xffffffff)',
-      'dialHandColor: Color(0xffffffff)',
+      'dayPeriodShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+      'dayPeriodTextColor: Color(0xffffffff)',
+      'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
       'dialBackgroundColor: Color(0xffffffff)',
+      'dialHandColor: Color(0xffffffff)',
       'dialTextColor: Color(0xffffffff)',
       'entryModeIconColor: Color(0xffffffff)',
-      'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
-      'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
       'helpTextStyle: TextStyle(<all styles inherited>)',
-      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
-      'hourMinuteShape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
-      'dayPeriodShape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
-      'dayPeriodBorderSide: BorderSide(Color(0xff000000), 1.0, BorderStyle.solid)',
+      'hourMinuteColor: Color(0xffffffff)',
+      'hourMinuteShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+      'hourMinuteTextColor: Color(0xffffffff)',
+      'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)'
     ]);
   });
 
@@ -104,50 +104,51 @@ void main() {
     expect(dialogMaterial.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
     final RenderBox dial = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+    debugPrint('Color: ${defaultTheme.colorScheme.onSurface.withOpacity(0.08)}');
     expect(
       dial,
       paints
-        ..circle(color: defaultTheme.colorScheme.onBackground.withOpacity(0.12)) // Dial background color.
+        ..circle(color: defaultTheme.colorScheme.onSurface.withOpacity(0.08)) // Dial background color.
         ..circle(color: Color(defaultTheme.colorScheme.primary.value)), // Dial hand color.
     );
 
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2014().englishLike.headline2!
-          .merge(Typography.material2014().black.headline2)
+      Typography.material2014().englishLike.displayMedium!
+          .merge(Typography.material2014().black.displayMedium)
           .copyWith(color: defaultTheme.colorScheme.primary),
     );
 
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2014().englishLike.headline2!
-          .merge(Typography.material2014().black.headline2)
+      Typography.material2014().englishLike.displayMedium!
+          .merge(Typography.material2014().black.displayMedium)
           .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
 
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
     expect(
       amText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .copyWith(color: defaultTheme.colorScheme.primary),
     );
 
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
     expect(
       pmText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.6)),
     );
 
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
     expect(
       helperText.text.style,
-      Typography.material2014().englishLike.overline!
-          .merge(Typography.material2014().black.overline),
+      Typography.material2014().englishLike.labelSmall!
+          .merge(Typography.material2014().black.labelSmall),
     );
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
@@ -157,17 +158,17 @@ void main() {
     expect(
       // ignore: avoid_dynamic_calls
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-        .merge(Typography.material2014().black.bodyText1)
+      Typography.material2014().englishLike.bodyLarge!
+        .merge(Typography.material2014().black.bodyLarge)
         .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
     // ignore: avoid_dynamic_calls
-    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
-      secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-        .merge(Typography.material2014().white.bodyText1)
+      selectedLabels.first.painter.text.style,
+      Typography.material2014().englishLike.bodyLarge!
+        .merge(Typography.material2014().white.bodyLarge)
         .copyWith(color: defaultTheme.colorScheme.onPrimary),
     );
 
@@ -186,7 +187,7 @@ void main() {
     expect(pmMaterial.color, Colors.transparent);
 
     final Color expectedBorderColor = Color.alphaBlend(
-      defaultTheme.colorScheme.onBackground.withOpacity(0.38),
+      defaultTheme.colorScheme.onSurface.withOpacity(0.38),
       defaultTheme.colorScheme.surface,
     );
     final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
@@ -220,15 +221,15 @@ void main() {
 
     final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.filled, true);
-    expect(hourDecoration.fillColor, defaultTheme.colorScheme.onSurface.withOpacity(0.12));
+    expect(hourDecoration.fillColor, MaterialStateColor.resolveWith((Set<MaterialState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12)));
     expect(hourDecoration.enabledBorder, const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)));
     expect(hourDecoration.errorBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.error, width: 2)));
     expect(hourDecoration.focusedBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.primary, width: 2)));
     expect(hourDecoration.focusedErrorBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.error, width: 2)));
     expect(
       hourDecoration.hintStyle,
-      Typography.material2014().englishLike.headline2!
-          .merge(defaultTheme.textTheme.headline2!.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))),
+      Typography.material2014().englishLike.displayMedium!
+          .merge(defaultTheme.textTheme.displayMedium!.copyWith(color: defaultTheme.colorScheme.onSurface.withOpacity(0.36))),
     );
   });
 
@@ -254,8 +255,8 @@ void main() {
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2014().englishLike.bodyText2!
-          .merge(Typography.material2014().black.bodyText2)
+      Typography.material2014().englishLike.bodyMedium!
+          .merge(Typography.material2014().black.bodyMedium)
           .merge(timePickerTheme.hourMinuteTextStyle)
           .copyWith(color: _selectedColor),
     );
@@ -263,8 +264,8 @@ void main() {
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2014().englishLike.bodyText2!
-          .merge(Typography.material2014().black.bodyText2)
+      Typography.material2014().englishLike.bodyMedium!
+          .merge(Typography.material2014().black.bodyMedium)
           .merge(timePickerTheme.hourMinuteTextStyle)
           .copyWith(color: _unselectedColor),
     );
@@ -272,8 +273,8 @@ void main() {
     final RenderParagraph amText = _textRenderParagraph(tester, 'AM');
     expect(
       amText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .merge(timePickerTheme.dayPeriodTextStyle)
           .copyWith(color: _selectedColor),
     );
@@ -281,8 +282,8 @@ void main() {
     final RenderParagraph pmText = _textRenderParagraph(tester, 'PM');
     expect(
       pmText.text.style,
-      Typography.material2014().englishLike.subtitle1!
-          .merge(Typography.material2014().black.subtitle1)
+      Typography.material2014().englishLike.titleMedium!
+          .merge(Typography.material2014().black.titleMedium)
           .merge(timePickerTheme.dayPeriodTextStyle)
           .copyWith(color: _unselectedColor),
     );
@@ -290,8 +291,8 @@ void main() {
     final RenderParagraph helperText = _textRenderParagraph(tester, 'SELECT TIME');
     expect(
       helperText.text.style,
-      Typography.material2014().englishLike.bodyText2!
-          .merge(Typography.material2014().black.bodyText2)
+      Typography.material2014().englishLike.bodyMedium!
+          .merge(Typography.material2014().black.bodyMedium)
           .merge(timePickerTheme.helpTextStyle),
     );
 
@@ -302,17 +303,17 @@ void main() {
     expect(
       // ignore: avoid_dynamic_calls
       primaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-          .merge(Typography.material2014().black.bodyText1)
+      Typography.material2014().englishLike.bodyLarge!
+          .merge(Typography.material2014().black.bodyLarge)
           .copyWith(color: _unselectedColor),
     );
     // ignore: avoid_dynamic_calls
-    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
-      secondaryLabels.first.painter.text.style,
-      Typography.material2014().englishLike.bodyText1!
-          .merge(Typography.material2014().white.bodyText1)
+      selectedLabels.first.painter.text.style,
+      Typography.material2014().englishLike.bodyLarge!
+          .merge(Typography.material2014().white.bodyLarge)
           .copyWith(color: _selectedColor),
     );
 

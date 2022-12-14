@@ -225,7 +225,7 @@ class Ink extends StatefulWidget {
   /// The decoration to paint on the nearest ancestor [Material] widget.
   ///
   /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
+  /// constructor: set the `color` argument instead of the [decoration]
   /// argument.
   ///
   /// A shorthand for specifying just an image is also available using the
@@ -241,11 +241,13 @@ class Ink extends StatefulWidget {
   final double? height;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null)
+    if (decoration == null || decoration!.padding == null) {
       return padding ?? EdgeInsets.zero;
+    }
     final EdgeInsetsGeometry decorationPadding = decoration!.padding!;
-    if (padding == null)
+    if (padding == null) {
       return decorationPadding;
+    }
     return padding!.add(decorationPadding);
   }
 
@@ -282,7 +284,7 @@ class _InkState extends State<Ink> {
       _ink = InkDecoration(
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
-        controller: Material.of(context)!,
+        controller: Material.of(context),
         referenceBox: _boxKey.currentContext!.findRenderObject()! as RenderBox,
         onRemoved: _handleRemoved,
       );
@@ -290,7 +292,7 @@ class _InkState extends State<Ink> {
       _ink!.decoration = widget.decoration;
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? Container();
+    return widget.child ?? const SizedBox();
   }
 
   @override
@@ -332,12 +334,11 @@ class InkDecoration extends InkFeature {
   InkDecoration({
     required Decoration? decoration,
     required ImageConfiguration configuration,
-    required MaterialInkController controller,
+    required super.controller,
     required super.referenceBox,
     super.onRemoved,
   }) : assert(configuration != null),
-       _configuration = configuration,
-       super(controller: controller) {
+       _configuration = configuration {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }
@@ -351,8 +352,9 @@ class InkDecoration extends InkFeature {
   Decoration? get decoration => _decoration;
   Decoration? _decoration;
   set decoration(Decoration? value) {
-    if (value == _decoration)
+    if (value == _decoration) {
       return;
+    }
     _decoration = value;
     _painter?.dispose();
     _painter = _decoration?.createBoxPainter(_handleChanged);
@@ -368,8 +370,9 @@ class InkDecoration extends InkFeature {
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
     assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     controller.markNeedsPaint();
   }
@@ -386,8 +389,9 @@ class InkDecoration extends InkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    if (_painter == null)
+    if (_painter == null) {
       return;
+    }
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final ImageConfiguration sizedConfiguration = configuration.copyWith(
       size: referenceBox.size,

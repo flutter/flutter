@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoSlider
+/// Flutter code sample for [CupertinoSlider].
 
 import 'package:flutter/cupertino.dart';
 
 void main() => runApp(const CupertinoSliderApp());
 
 class CupertinoSliderApp extends StatelessWidget {
-  const CupertinoSliderApp({Key? key}) : super(key: key);
+  const CupertinoSliderApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class CupertinoSliderApp extends StatelessWidget {
 }
 
 class CupertinoSliderExample extends StatefulWidget {
-  const CupertinoSliderExample({Key? key}) : super(key: key);
+  const CupertinoSliderExample({super.key});
 
   @override
   State<CupertinoSliderExample> createState() => _CupertinoSliderExampleState();

@@ -53,6 +53,7 @@ import 'theme.dart';
 ///  * [ListTile], to display icons and text in a card.
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
+///  * <https://m3.material.io/components/cards>
 class Card extends StatelessWidget {
   /// Creates a Material Design card.
   ///
@@ -160,7 +161,7 @@ class Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CardTheme cardTheme = CardTheme.of(context);
-    final CardTheme defaults = Theme.of(context).useMaterial3 ? _TokenDefaultsM3(context) : _DefaultsM2(context);
+    final CardTheme defaults = Theme.of(context).useMaterial3 ? _CardDefaultsM3(context) : _CardDefaultsM2(context);
 
     return Semantics(
       container: semanticContainer,
@@ -185,8 +186,9 @@ class Card extends StatelessWidget {
   }
 }
 
-class _DefaultsM2 extends CardTheme {
-  const _DefaultsM2(this.context)
+// Hand coded defaults based on Material Design 2.
+class _CardDefaultsM2 extends CardTheme {
+  const _CardDefaultsM2(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
@@ -205,20 +207,22 @@ class _DefaultsM2 extends CardTheme {
   Color? get shadowColor => Theme.of(context).shadowColor;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - Card
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
-class _TokenDefaultsM3 extends CardTheme {
-  const _TokenDefaultsM3(this.context)
+// Token database version: v0_143
+
+class _CardDefaultsM3 extends CardTheme {
+  const _CardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
         margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0))),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
       );
 
   final BuildContext context;
@@ -233,4 +237,4 @@ class _TokenDefaultsM3 extends CardTheme {
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
 }
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - Card

@@ -4,13 +4,17 @@
 
 import 'dart:math' as math;
 
-import 'package:vector_math/vector_math_64.dart';
-
-import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEvent;
+export 'recognizer.dart' show DragStartBehavior;
+export 'velocity_tracker.dart' show Velocity;
+
 
 /// The possible states of a [ScaleGestureRecognizer].
 enum _ScaleState {
@@ -442,8 +446,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     bool shouldStartIfAccepted = false;
     if (event is PointerMoveEvent) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
-      if (!event.synthesized)
+      if (!event.synthesized) {
         tracker.addPosition(event.timeStamp, event.position);
+      }
       _pointerLocations[event.pointer] = event.position;
       shouldStartIfAccepted = true;
       _lastTransform = event.transform;
@@ -469,8 +474,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       shouldStartIfAccepted = true;
     } else if (event is PointerPanZoomUpdateEvent) {
       assert(_pointerPanZooms[event.pointer] != null);
-      if (!event.synthesized)
+      if (!event.synthesized) {
         _velocityTrackers[event.pointer]!.addPosition(event.timeStamp, event.pan);
+      }
       _pointerPanZooms[event.pointer] = _PointerPanZoomData(
         focalPoint: event.position + event.pan,
         scale: event.scale,
@@ -487,8 +493,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _updateLines();
     _update();
 
-    if (!didChangeConfiguration || _reconfigure(event.pointer))
+    if (!didChangeConfiguration || _reconfigure(event.pointer)) {
       _advanceStateMachine(shouldStartIfAccepted, event.kind);
+    }
     stopTrackingIfPointerNoLongerDown(event);
   }
 
@@ -497,10 +504,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
     // Compute the focal point
     Offset focalPoint = Offset.zero;
-    for (final int pointer in _pointerLocations.keys)
+    for (final int pointer in _pointerLocations.keys) {
       focalPoint += _pointerLocations[pointer]!;
-    for (final _PointerPanZoomData p in _pointerPanZooms.values)
+    }
+    for (final _PointerPanZoomData p in _pointerPanZooms.values) {
       focalPoint += p.focalPoint;
+    }
     _currentFocalPoint = _pointerCount > 0 ? focalPoint / _pointerCount.toDouble() : Offset.zero;
 
     if (previousFocalPoint == null) {
@@ -521,10 +530,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     final int count = _pointerLocations.keys.length;
 
     Offset pointerFocalPoint = Offset.zero;
-    for (final int pointer in _pointerLocations.keys)
+    for (final int pointer in _pointerLocations.keys) {
       pointerFocalPoint += _pointerLocations[pointer]!;
-    if (count > 0)
+    }
+    if (count > 0) {
       pointerFocalPoint = pointerFocalPoint / count.toDouble();
+    }
 
     // Span is the average deviation from focal point. Horizontal and vertical
     // spans are the average deviations from the focal point's horizontal and
@@ -592,8 +603,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         Velocity velocity = tracker.getVelocity();
         if (_isFlingGesture(velocity)) {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
-          if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
+          if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity) {
             velocity = Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
+          }
           invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: velocity, pointerCount: _pointerCount)));
         } else {
           invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(pointerCount: _pointerCount)));
@@ -606,14 +618,16 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _advanceStateMachine(bool shouldStartIfAccepted, PointerDeviceKind pointerDeviceKind) {
-    if (_state == _ScaleState.ready)
+    if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
+    }
 
     if (_state == _ScaleState.possible) {
       final double spanDelta = (_currentSpan - _initialSpan).abs();
       final double focalPointDelta = (_currentFocalPoint! - _initialFocalPoint).distance;
-      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computePanSlop(pointerDeviceKind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05)
+      if (spanDelta > computeScaleSlop(pointerDeviceKind) || focalPointDelta > computePanSlop(pointerDeviceKind, gestureSettings) || math.max(_scaleFactor / _pointerScaleFactor, _pointerScaleFactor / _scaleFactor) > 1.05) {
         resolve(GestureDisposition.accepted);
+      }
     } else if (_state.index >= _ScaleState.accepted.index) {
       resolve(GestureDisposition.accepted);
     }
@@ -623,7 +637,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _dispatchOnStartCallbackIfNeeded();
     }
 
-    if (_state == _ScaleState.started && onUpdate != null)
+    if (_state == _ScaleState.started && onUpdate != null) {
       invokeCallback<void>('onUpdate', () {
         onUpdate!(ScaleUpdateDetails(
           scale: _scaleFactor,
@@ -636,11 +650,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           focalPointDelta: _delta,
         ));
       });
+    }
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
     assert(_state == _ScaleState.started);
-    if (onStart != null)
+    if (onStart != null) {
       invokeCallback<void>('onStart', () {
         onStart!(ScaleStartDetails(
           focalPoint: _currentFocalPoint!,
@@ -648,6 +663,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           pointerCount: _pointerCount,
         ));
       });
+    }
   }
 
   @override

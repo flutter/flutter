@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for PhysicalKeyboardKey
+/// Flutter code sample for [PhysicalKeyboardKey].
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 void main() => runApp(const KeyExampleApp());
 
 class KeyExampleApp extends StatelessWidget {
-  const KeyExampleApp({Key? key}) : super(key: key);
+  const KeyExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class KeyExampleApp extends StatelessWidget {
 }
 
 class MyPhysicalKeyExample extends StatefulWidget {
-  const MyPhysicalKeyExample({Key? key}) : super(key: key);
+  const MyPhysicalKeyExample({super.key});
 
   @override
   State<MyPhysicalKeyExample> createState() => _MyPhysicalKeyExampleState();
@@ -70,7 +70,7 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
       color: Colors.white,
       alignment: Alignment.center,
       child: DefaultTextStyle(
-        style: textTheme.headline4!,
+        style: textTheme.headlineMedium!,
         child: Focus(
           focusNode: _focusNode,
           onKey: _handleKeyEvent,

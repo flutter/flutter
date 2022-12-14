@@ -58,7 +58,7 @@ class DualHeaderWithHint extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 name!,
-                style: textTheme.bodyText2!.copyWith(fontSize: 15.0),
+                style: textTheme.bodyMedium!.copyWith(fontSize: 15.0),
               ),
             ),
           ),
@@ -68,8 +68,8 @@ class DualHeaderWithHint extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(left: 24.0),
             child: _crossFade(
-              Text(value!, style: textTheme.caption!.copyWith(fontSize: 15.0)),
-              Text(hint!, style: textTheme.caption!.copyWith(fontSize: 15.0)),
+              Text(value!, style: textTheme.bodySmall!.copyWith(fontSize: 15.0)),
+              Text(hint!, style: textTheme.bodySmall!.copyWith(fontSize: 15.0)),
               showHint!,
             ),
           ),
@@ -108,7 +108,7 @@ class CollapsibleBody extends StatelessWidget {
           ) - margin,
           child: Center(
             child: DefaultTextStyle(
-              style: textTheme.caption!.copyWith(fontSize: 15.0),
+              style: textTheme.bodySmall!.copyWith(fontSize: 15.0),
               child: child!,
             ),
           ),
@@ -210,8 +210,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
               builder: (BuildContext context) {
                 return CollapsibleBody(
                   margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                  onSave: () { Form.of(context)!.save(); close(); },
-                  onCancel: () { Form.of(context)!.reset(); close(); },
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: TextFormField(
@@ -244,8 +244,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: Builder(
               builder: (BuildContext context) {
                 return CollapsibleBody(
-                  onSave: () { Form.of(context)!.save(); close(); },
-                  onCancel: () { Form.of(context)!.reset(); close(); },
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
                   child: FormField<Location>(
                     initialValue: item.value,
                     onSaved: (Location? result) { item.value = result; },
@@ -298,8 +298,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
             child: Builder(
               builder: (BuildContext context) {
                 return CollapsibleBody(
-                  onSave: () { Form.of(context)!.save(); close(); },
-                  onCancel: () { Form.of(context)!.reset(); close(); },
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
                   child: FormField<double>(
                     initialValue: item.value,
                     onSaved: (double? value) { item.value = value; },

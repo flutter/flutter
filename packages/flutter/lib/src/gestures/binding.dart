@@ -19,6 +19,16 @@ import 'pointer_router.dart';
 import 'pointer_signal_resolver.dart';
 import 'resampler.dart';
 
+export 'dart:ui' show Offset;
+
+export 'package:flutter/foundation.dart' show DiagnosticsNode, InformationCollector;
+
+export 'arena.dart' show GestureArenaManager;
+export 'events.dart' show PointerEvent;
+export 'hit_test.dart' show HitTestEntry, HitTestResult, HitTestTarget;
+export 'pointer_router.dart' show PointerRouter;
+export 'pointer_signal_resolver.dart' show PointerSignalResolver;
+
 typedef _HandleSampleTimeChangedCallback = void Function();
 
 /// Class that implements clock used for sampling.
@@ -281,8 +291,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
     _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
-    if (!locked)
+    if (!locked) {
       _flushPointerEventQueue();
+    }
   }
 
   /// Dispatch a [PointerCancelEvent] for the given pointer soon.
@@ -290,16 +301,18 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// The pointer event will be dispatched before the next pointer event and
   /// before the end of the microtask but not within this function call.
   void cancelPointer(int pointer) {
-    if (_pendingPointerEvents.isEmpty && !locked)
+    if (_pendingPointerEvents.isEmpty && !locked) {
       scheduleMicrotask(_flushPointerEventQueue);
+    }
     _pendingPointerEvents.addFirst(PointerCancelEvent(pointer: pointer));
   }
 
   void _flushPointerEventQueue() {
     assert(!locked);
 
-    while (_pendingPointerEvents.isNotEmpty)
+    while (_pendingPointerEvents.isNotEmpty) {
       handlePointerEvent(_pendingPointerEvents.removeFirst());
+    }
   }
 
   /// A router that routes all pointer events received from the engine.
@@ -347,15 +360,16 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
-      assert(!_hitTests.containsKey(event.pointer));
+      assert(!_hitTests.containsKey(event.pointer), 'Pointer of $event unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
         _hitTests[event.pointer] = hitTestResult;
       }
       assert(() {
-        if (debugPrintHitTestResults)
+        if (debugPrintHitTestResults) {
           debugPrint('$event: $hitTestResult');
+        }
         return true;
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
@@ -369,8 +383,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       hitTestResult = _hitTests[event.pointer];
     }
     assert(() {
-      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent) {
         debugPrint('$event');
+      }
       return true;
     }());
     if (hitTestResult != null ||
@@ -399,9 +414,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   @pragma('vm:notify-debugger-on-exception')
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     assert(!locked);
-    // No hit test information implies that this is a [PointerHoverEvent],
-    // [PointerAddedEvent], or [PointerRemovedEvent]. These events are specially
-    // routed here; other events will be routed through the `handleEvent` below.
+    // No hit test information implies that this is a [PointerAddedEvent] or
+    // [PointerRemovedEvent]. These events are specially routed here; other
+    // events will be routed through the `handleEvent` below.
     if (hitTestResult == null) {
       assert(event is PointerAddedEvent || event is PointerRemovedEvent);
       try {
@@ -483,8 +498,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     SamplingClock value = SamplingClock();
     assert(() {
       final SamplingClock? debugValue = debugSamplingClock;
-      if (debugValue != null)
+      if (debugValue != null) {
         value = debugValue;
+      }
       return true;
     }());
     return value;

@@ -12,10 +12,11 @@ import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
 
-const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
+const String gobMirror =
+    'https://flutter.googlesource.com/mirrors/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra_release/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
@@ -51,30 +52,11 @@ class PreparePackageException implements Exception {
   }
 }
 
-enum Branch { dev, beta, stable }
-
-String getBranchName(Branch branch) {
-  switch (branch) {
-    case Branch.beta:
-      return 'beta';
-    case Branch.dev:
-      return 'dev';
-    case Branch.stable:
-      return 'stable';
-  }
-}
-
-Branch fromBranchName(String name) {
-  switch (name) {
-    case 'beta':
-      return Branch.beta;
-    case 'dev':
-      return Branch.dev;
-    case 'stable':
-      return Branch.stable;
-    default:
-      throw ArgumentError('Invalid branch name.');
-  }
+enum Branch {
+  beta,
+  stable,
+  master,
+  main;
 }
 
 /// A helper class for classes that want to run a process, optionally have the
@@ -184,7 +166,7 @@ typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> he
 
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
-  /// [tempDir] is the directory to use for creating the archive.  The script
+  /// [tempDir] is the directory to use for creating the archive. The script
   /// will place several GiB of data there, so it should have available space.
   ///
   /// The processManager argument is used to inject a mock of [ProcessManager] for
@@ -262,7 +244,7 @@ class ArchiveCreator {
   /// platform we're running on.
   final Platform platform;
 
-  /// The branch to build the archive for.  The branch must contain [revision].
+  /// The branch to build the archive for. The branch must contain [revision].
   final Branch branch;
 
   /// The git revision hash to build the archive for. This revision has
@@ -303,9 +285,6 @@ class ArchiveCreator {
         .trim().split(' ').last.replaceAll('"', '').split('_')[1];
   })();
 
-  /// Get the name of the channel as a string.
-  String get branchName => getBranchName(branch);
-
   /// Returns a default archive name when given a Git revision.
   /// Used when an output filename is not given.
   Future<String> get _archiveName async {
@@ -320,7 +299,8 @@ class ArchiveCreator {
     // unpacking it!) So, we use .zip for Mac, and the files are about
     // 220MB larger than they need to be. :-(
     final String suffix = platform.isLinux ? 'tar.xz' : 'zip';
-    return 'flutter_${os}_$arch${_version[frameworkVersionTag]}-$branchName.$suffix';
+    final String package = '${os}_$arch${_version[frameworkVersionTag]}';
+    return 'flutter_$package-${branch.name}.$suffix';
   }
 
   /// Checks out the flutter repo and prepares it for other operations.
@@ -384,7 +364,7 @@ class ArchiveCreator {
   /// git will give an error.
   ///
   /// If [strict] is true, the exact [revision] must be tagged to return the
-  /// version.  If [strict] is not true, will look backwards in time starting at
+  /// version. If [strict] is not true, will look backwards in time starting at
   /// [revision] to find the most recent version tag.
   ///
   /// The version found as a git tag is added to the information given by
@@ -424,11 +404,14 @@ class ArchiveCreator {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
-    await _runGit(<String>['clone', '-b', branchName, chromiumRepo], workingDirectory: tempDir);
+    await _runGit(<String>['clone', '-b', branch.name, gobMirror], workingDirectory: tempDir);
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
     await _runGit(<String>['remote', 'set-url', 'origin', githubRepo]);
+
+    // Minify `.git` footprint (saving about ~100 MB as of Oct 2022)
+    await _runGit(<String>['gc', '--prune=now', '--aggressive']);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
@@ -623,8 +606,7 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   final bool dryRun;
-  String get branchName => getBranchName(branch);
-  String get destinationArchivePath => '$branchName/$platformName/${path.basename(outputFile.path)}';
+  String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   Future<String> _getChecksum(File archiveFile) async {
@@ -657,6 +639,12 @@ class ArchivePublisher {
       dest: destGsPath,
     );
     assert(tempDir.existsSync());
+    final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
+    await _publishMetadata(gcsPath);
+  }
+
+  /// Downloads and updates the metadata file without publishing it.
+  Future<void> generateLocalMetadata() async {
     await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
@@ -665,14 +653,14 @@ class ArchivePublisher {
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    (jsonData['current_release'] as Map<String, dynamic>)[branchName] = revision;
+    (jsonData['current_release'] as Map<String, dynamic>)[branch.name] = revision;
     if (!jsonData.containsKey('releases')) {
       jsonData['releases'] = <Map<String, dynamic>>[];
     }
 
     final Map<String, dynamic> newEntry = <String, dynamic>{};
     newEntry['hash'] = revision;
-    newEntry['channel'] = branchName;
+    newEntry['channel'] = branch.name;
     newEntry['version'] = version[frameworkVersionTag];
     newEntry['dart_sdk_version'] = version[dartVersionTag];
     newEntry['dart_sdk_arch'] = version[dartTargetArchTag];
@@ -725,6 +713,13 @@ class ArchivePublisher {
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
+  }
+
+  /// Publishes the metadata file to GCS.
+  Future<void> _publishMetadata(String gsPath) async {
+    final File metadataFile = File(
+      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
+    );
     await _cloudCopy(
       src: metadataFile.absolute.path,
       dest: gsPath,
@@ -824,7 +819,7 @@ Future<void> main(List<String> rawArguments) async {
           'archive with. Must be the full 40-character hash. Required.');
   argParser.addOption(
     'branch',
-    allowed: Branch.values.map<String>((Branch branch) => getBranchName(branch)),
+    allowed: Branch.values.map<String>((Branch branch) => branch.name),
     help: 'The Flutter branch to build the archive with. Required.',
   );
   argParser.addOption(
@@ -869,10 +864,10 @@ Future<void> main(List<String> rawArguments) async {
     exit(exitCode);
   }
 
-  final String revision = parsedArguments['revision'] as String;
   if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
+  final String revision = parsedArguments['revision'] as String;
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
@@ -881,7 +876,7 @@ Future<void> main(List<String> rawArguments) async {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
-  final String tempDirArg = parsedArguments['temp_dir'] as String;
+  final String? tempDirArg = parsedArguments['temp_dir'] as String?;
   Directory tempDir;
   bool removeTempDir = false;
   if (tempDirArg == null || tempDirArg.isEmpty) {
@@ -906,7 +901,7 @@ Future<void> main(List<String> rawArguments) async {
 
   final bool publish = parsedArguments['publish'] as bool;
   final bool dryRun = parsedArguments['dry_run'] as bool;
-  final Branch branch = fromBranchName(parsedArguments['branch'] as String);
+  final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
   final ArchiveCreator creator = ArchiveCreator(
     tempDir,
     outputDir,
@@ -919,15 +914,16 @@ Future<void> main(List<String> rawArguments) async {
   try {
     final Map<String, String> version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
+    final ArchivePublisher publisher = ArchivePublisher(
+      tempDir,
+      revision,
+      branch,
+      version,
+      outputFile,
+      dryRun,
+    );
+    await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {
-      final ArchivePublisher publisher = ArchivePublisher(
-        tempDir,
-        revision,
-        branch,
-        version,
-        outputFile,
-        dryRun,
-      );
       await publisher.publishArchive(parsedArguments['force'] as bool);
     }
   } on PreparePackageException catch (e) {

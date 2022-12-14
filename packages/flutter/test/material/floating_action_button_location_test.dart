@@ -167,7 +167,7 @@ void main() {
         // We create the geometry listener here, but it can only be set up
         // after it is pumped into the widget tree and a tester is
         // available.
-        geometryListener = _GeometryListener();
+        geometryListener = const _GeometryListener();
         geometry = null;
         listenerState = null;
         previousRect = null;
@@ -295,6 +295,21 @@ void main() {
     );
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 572.0));
   });
+
+  testWidgets('Contained floating action button locations', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildFrame(
+        location: FloatingActionButtonLocation.endContained,
+        bab: const SizedBox(height: 100.0),
+        viewInsets: EdgeInsets.zero,
+      ),
+    );
+
+    // Scaffold 800x600, FAB is 56x56, BAB is 800x100, FAB's center is
+    // at the top of the BAB.
+    // Formula: scaffold height - BAB height + FAB height / 2 + BAB top & bottom margins.
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 550.0));
+ });
 
   testWidgets('Mini-start-top floating action button location', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -428,6 +443,12 @@ void main() {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _dockedOffsetY));
+    });
+
+    testWidgets('endContained', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endContained));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _containedOffsetY));
     });
 
     testWidgets('miniStartTop', (WidgetTester tester) async {
@@ -606,6 +627,58 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), end);
 
       expect(tester.binding.transientCallbackCount, 0);
+    });
+
+    testWidgets('Animator can be updated', (WidgetTester tester) async {
+      FloatingActionButtonAnimator fabAnimator = FloatingActionButtonAnimator.scaling;
+      FloatingActionButtonLocation fabLocation = FloatingActionButtonLocation.startFloat;
+
+      final Duration animationDuration = kFloatingActionButtonSegue * 2;
+
+      await tester.pumpWidget(_singleFabScaffold(
+        fabLocation,
+        animator: fabAnimator,
+      ));
+
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 44.0);
+
+      fabLocation = FloatingActionButtonLocation.endFloat;
+      await tester.pumpWidget(_singleFabScaffold(
+        fabLocation,
+        animator: fabAnimator,
+      ));
+
+      expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, lessThan(16.0));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, greaterThan(16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 756.0);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, lessThan(800 - 16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, lessThan(800 - 16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, equals(800 - 16));
+
+      fabLocation = FloatingActionButtonLocation.startFloat;
+      fabAnimator = _NoScalingFabAnimator();
+      await tester.pumpWidget(_singleFabScaffold(
+        fabLocation,
+        animator: fabAnimator,
+      ));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 756.0);
+      expect(tester.getTopRight(find.byType(FloatingActionButton)).dx, equals(800 - 16));
+
+      await tester.pump(animationDuration * 0.25);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 44.0);
+      expect(tester.getTopLeft(find.byType(FloatingActionButton)).dx, lessThan(16.0));
     });
   });
 
@@ -1516,6 +1589,8 @@ void main() {
 }
 
 class _GeometryListener extends StatefulWidget {
+  const _GeometryListener();
+
   @override
   State createState() => _GeometryListenerState();
 }
@@ -1536,11 +1611,13 @@ class _GeometryListenerState extends State<_GeometryListener> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
-    if (geometryListenable == newListenable)
+    if (geometryListenable == newListenable) {
       return;
+    }
 
-    if (geometryListenable != null)
+    if (geometryListenable != null) {
       geometryListenable!.removeListener(onGeometryChanged);
+    }
 
     geometryListenable = newListenable;
     geometryListenable!.addListener(onGeometryChanged);
@@ -1561,6 +1638,7 @@ const double _miniRightOffsetX = _rightOffsetX + kMiniButtonOffsetAdjustment;
 const double _topOffsetY = 56.0;
 const double _floatOffsetY = 500.0;
 const double _dockedOffsetY = 544.0;
+const double _containedOffsetY = 544.0 + 56.0 / 2;
 const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
 Widget _singleFabScaffold(
@@ -1701,6 +1779,23 @@ class _LinearMovementFabAnimator extends FloatingActionButtonAnimator {
   @override
   Offset getOffset({required Offset begin, required Offset end, required double progress}) {
     return Offset.lerp(begin, end, progress)!;
+  }
+
+  @override
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+
+  @override
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+}
+
+class _NoScalingFabAnimator extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
+    return progress < 0.5 ? begin : end;
   }
 
   @override

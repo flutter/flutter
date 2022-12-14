@@ -129,5 +129,6 @@
   "keyboardKeySpace": "Välilyönti",
   "keyboardKeyMetaMacOs": "Komento",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Valikkopalkki",
+  "currentDateLabel": "Date of today"
 }

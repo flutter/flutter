@@ -16,6 +16,7 @@ import '../base/task_queue.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// Map from package name to package version, used to artificially pin a pub
@@ -25,17 +26,21 @@ import '../runner/flutter_command.dart';
 /// defeats the whole purpose of pinning all our dependencies, which is to
 /// prevent upstream changes from causing our CI to fail randomly in ways
 /// unrelated to the commits. It also, more importantly, risks breaking users
-/// in ways that prevent them from every upgrading Flutter again!
+/// in ways that prevent them from ever upgrading Flutter again!
 const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
-  'archive': '3.1.11', // Breaking changes in 3.2.0, see https://github.com/flutter/flutter/issues/98536
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
-  'flutter_template_images': '4.0.0', // Must always exactly match flutter_tools template.
-  // "shelf" is pinned to avoid the performance regression from a reverted
-  // feature from https://github.com/dart-lang/shelf/issues/189 . This can be
-  // removed when a new major version of shelf is published.
-  'shelf': '1.1.4',
+  'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
+  // Could potentially break color scheme tests on upgrade,
+  // so pin and manually update as needed.
+  'material_color_utilities': '0.2.0',
+  // https://github.com/flutter/flutter/issues/111304
+  'url_launcher_android': '6.0.17',
+  // https://github.com/flutter/flutter/issues/115660
+  'archive': '3.3.2',
+  // https://github.com/flutter/flutter/issues/116376
+  'path_provider_android': '2.0.21',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -96,6 +101,14 @@ class UpdatePackagesCommand extends FlutterCommand {
         abbr: 'j',
         help: 'Causes the "pub get" runs to happen concurrently on this many '
               'CPUs. Defaults to the number of CPUs that this machine has.',
+      )
+      ..addOption(
+        'synthetic-package-path',
+        help: 'Write the synthetic monolithic pub package generated to do '
+              'version solving to a persistent path. By default, a temporary '
+              'directory that is deleted before the command exits. By '
+              'providing this path, a Flutter maintainer can inspect further '
+              'exactly how version solving was achieved.',
       );
   }
 
@@ -103,7 +116,10 @@ class UpdatePackagesCommand extends FlutterCommand {
   final String name = 'update-packages';
 
   @override
-  final String description = 'Update the packages inside the Flutter repo.';
+  final String description = 'Update the packages inside the Flutter repo. '
+                             'This is intended for CI and repo maintainers. '
+                             'Normal Flutter developers should not have to '
+                             'use this command.';
 
   @override
   final List<String> aliases = <String>['upgrade-packages'];
@@ -141,19 +157,35 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..writeAsBytesSync(data, flush: true);
   }
 
+  late final Directory _syntheticPackageDir = (() {
+    final String? optionPath = stringArg('synthetic-package-path');
+    if (optionPath == null) {
+      return globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
+    }
+    final Directory syntheticPackageDir = globals.fs.directory(optionPath);
+    if (!syntheticPackageDir.existsSync()) {
+      syntheticPackageDir.createSync(recursive: true);
+    }
+    globals.printStatus(
+      'The synthetic package with all pub dependencies across the repo will '
+      'be written to ${syntheticPackageDir.absolute.path}.',
+    );
+    return syntheticPackageDir;
+  })();
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner!.getRepoPackages();
 
-    final bool forceUpgrade = boolArg('force-upgrade');
-    final bool isPrintPaths = boolArg('paths');
-    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
-    final bool isVerifyOnly = boolArg('verify-only');
-    final bool isConsumerOnly = boolArg('consumer-only');
-    final bool offline = boolArg('offline');
+    final bool forceUpgrade = boolArgDeprecated('force-upgrade');
+    final bool isPrintPaths = boolArgDeprecated('paths');
+    final bool isPrintTransitiveClosure = boolArgDeprecated('transitive-closure');
+    final bool isVerifyOnly = boolArgDeprecated('verify-only');
+    final bool isConsumerOnly = boolArgDeprecated('consumer-only');
+    final bool offline = boolArgDeprecated('offline');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
 
-    if (boolArg('crash')) {
+    if (boolArgDeprecated('crash')) {
       throw StateError('test crash please ignore.');
     }
 
@@ -215,14 +247,18 @@ class UpdatePackagesCommand extends FlutterCommand {
     // attempt to download any necessary package versions to the pub cache to
     // warm the cache.
     final PubDependencyTree tree = PubDependencyTree(); // object to collect results
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
     await _generateFakePackage(
-      tempDir: tempDir,
+      tempDir: _syntheticPackageDir,
       dependencies: doUpgrade ? explicitDependencies.values : allDependencies.values,
       pubspecs: pubspecs,
       tree: tree,
       doUpgrade: doUpgrade,
     );
+
+    // Only delete the synthetic package if it was done in a temp directory
+    if (stringArg('synthetic-package-path') == null) {
+      _syntheticPackageDir.deleteSync(recursive: true);
+    }
 
     if (doUpgrade) {
       final bool done = _upgradePubspecs(
@@ -376,59 +412,50 @@ class UpdatePackagesCommand extends FlutterCommand {
     required PubDependencyTree tree,
     required bool doUpgrade,
   }) async {
-    try {
-      final File fakePackage = _pubspecFor(tempDir);
-      fakePackage.createSync();
-      fakePackage.writeAsStringSync(
-        _generateFakePubspec(
-          dependencies,
-          useAnyVersion: doUpgrade,
-        ),
+    Directory? temporaryFlutterSdk;
+    final Directory syntheticPackageDir = tempDir.childDirectory('synthetic_package');
+    final File fakePackage = _pubspecFor(syntheticPackageDir);
+    fakePackage.createSync(recursive: true);
+    fakePackage.writeAsStringSync(
+      generateFakePubspec(
+        dependencies,
+        doUpgrade: doUpgrade,
+      ),
+    );
+    // Create a synthetic flutter SDK so that transitive flutter SDK
+    // constraints are not affected by this upgrade.
+    if (doUpgrade) {
+      temporaryFlutterSdk = createTemporaryFlutterSdk(
+        globals.logger,
+        globals.fs,
+        globals.fs.directory(Cache.flutterRoot),
+        pubspecs,
+        tempDir,
       );
-      // Create a synthetic flutter SDK so that transitive flutter SDK
-      // constraints are not affected by this upgrade.
-      Directory? temporaryFlutterSdk;
-      if (doUpgrade) {
-        temporaryFlutterSdk = createTemporaryFlutterSdk(
-          globals.logger,
-          globals.fs,
-          globals.fs.directory(Cache.flutterRoot),
-          pubspecs,
-        );
-      }
+    }
 
-      // Next we run "pub get" on it in order to force the download of any
-      // needed packages to the pub cache, upgrading if requested.
-      await pub.get(
+    // Next we run "pub get" on it in order to force the download of any
+    // needed packages to the pub cache, upgrading if requested.
+    await pub.get(
+      context: PubContext.updatePackages,
+      project: FlutterProject.fromDirectory(syntheticPackageDir),
+      upgrade: doUpgrade,
+      offline: boolArgDeprecated('offline'),
+      flutterRootOverride: temporaryFlutterSdk?.path,
+    );
+
+    if (doUpgrade) {
+      // If upgrading, we run "pub deps --style=compact" on the result. We
+      // pipe all the output to tree.fill(), which parses it so that it can
+      // create a graph of all the dependencies so that we can figure out the
+      // transitive dependencies later. It also remembers which version was
+      // selected for each package.
+      await pub.batch(
+        <String>['deps', '--style=compact'],
         context: PubContext.updatePackages,
-        directory: tempDir.path,
-        upgrade: doUpgrade,
-        offline: boolArg('offline'),
-        flutterRootOverride: temporaryFlutterSdk?.path,
+        directory: syntheticPackageDir.path,
+        filter: tree.fill,
       );
-      // Cleanup the temporary SDK
-      try {
-        temporaryFlutterSdk?.deleteSync(recursive: true);
-      } on FileSystemException {
-        // Failed to delete temporary SDK.
-      }
-
-      if (doUpgrade) {
-        // If upgrading, we run "pub deps --style=compact" on the result. We
-        // pipe all the output to tree.fill(), which parses it so that it can
-        // create a graph of all the dependencies so that we can figure out the
-        // transitive dependencies later. It also remembers which version was
-        // selected for each package.
-        await pub.batch(
-          <String>['deps', '--style=compact'],
-          context: PubContext.updatePackages,
-          directory: tempDir.path,
-          filter: tree.fill,
-          retry: false, // errors here are usually fatal since we're not hitting the network
-        );
-      }
-    } finally {
-      tempDir.deleteSync(recursive: true);
     }
   }
 
@@ -454,14 +481,14 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    if (boolArg('transitive-closure')) {
+    if (boolArgDeprecated('transitive-closure')) {
       tree._dependencyTree.forEach((String from, Set<String> to) {
         globals.printStatus('$from -> $to');
       });
       return true;
     }
 
-    if (boolArg('paths')) {
+    if (boolArgDeprecated('paths')) {
       showDependencyPaths(from: stringArgDeprecated('from')!, to: stringArgDeprecated('to')!, tree: tree);
       return true;
     }
@@ -504,7 +531,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           stopwatch.start();
           await pub.get(
             context: PubContext.updatePackages,
-            directory: dir.path,
+            project: FlutterProject.fromDirectory(dir),
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
@@ -1319,8 +1346,22 @@ class PubspecDependency extends PubspecLine {
 
   /// This generates the entry for this dependency for the pubspec.yaml for the
   /// fake package that we'll use to get the version numbers figured out.
-  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool useAnyVersion = true}) {
-    final String versionToUse = useAnyVersion || version.isEmpty ? 'any' : version;
+  ///
+  /// When called with [doUpgrade] as [true], the version constrains will be set
+  /// to >= whatever the previous version was. If [doUpgrade] is [false], then
+  /// the previous version is used again as an exact pin.
+  void describeForFakePubspec(StringBuffer dependencies, StringBuffer overrides, { bool doUpgrade = true }) {
+    final String versionToUse;
+    // This should only happen when manually adding new dependencies; otherwise
+    // versions should always be pinned exactly
+    if (version.isEmpty || version == 'any') {
+      versionToUse = 'any';
+    } else if (doUpgrade) {
+      // Must wrap in quotes for Yaml parsing
+      versionToUse = "'>= $version'";
+    } else {
+      versionToUse = version;
+    }
     switch (kind) {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
@@ -1360,6 +1401,7 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln(lockLine);
         }
+        break;
     }
   }
 
@@ -1377,16 +1419,17 @@ File _pubspecFor(Directory directory) {
 
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
-String _generateFakePubspec(
+@visibleForTesting
+String generateFakePubspec(
   Iterable<PubspecDependency> dependencies, {
-  bool useAnyVersion = false
+  bool doUpgrade = false
 }) {
   final StringBuffer result = StringBuffer();
   final StringBuffer overrides = StringBuffer();
-  final bool verbose = useAnyVersion;
+  final bool verbose = doUpgrade;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  result.writeln("  sdk: '>=2.10.0 <4.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (kManuallyPinnedDependencies.isNotEmpty) {
@@ -1413,7 +1456,7 @@ String _generateFakePubspec(
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
-      dependency.describeForFakePubspec(result, overrides, useAnyVersion: useAnyVersion);
+      dependency.describeForFakePubspec(result, overrides, doUpgrade: doUpgrade);
     }
   }
   result.write(overrides.toString());
@@ -1425,7 +1468,7 @@ String _generateFakePubspec(
 /// It ends up holding the full graph of dependencies, and the version number for
 /// each one.
 class PubDependencyTree {
-  final Map<String, String?> _versions = <String, String>{};
+  final Map<String, String?> _versions = <String, String?>{};
   final Map<String, Set<String>> _dependencyTree = <String, Set<String>>{};
 
   /// Handles the output from "pub deps --style=compact".
@@ -1559,6 +1602,7 @@ Directory createTemporaryFlutterSdk(
   FileSystem fileSystem,
   Directory realFlutter,
   List<PubspecYaml> pubspecs,
+  Directory tempDir,
 ) {
   final Set<String> currentPackages = <String>{};
   for (final FileSystemEntity entity in realFlutter.childDirectory('packages').listSync()) {
@@ -1573,8 +1617,7 @@ Directory createTemporaryFlutterSdk(
     pubspecsByName[pubspec.name] = pubspec;
   }
 
-  final Directory directory = fileSystem.systemTempDirectory
-    .createTempSync('flutter_upgrade_sdk.')
+  final Directory directory = tempDir.childDirectory('flutter_upgrade_sdk')
     ..createSync();
   // Fill in version info.
   realFlutter.childFile('version')
@@ -1599,7 +1642,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.7.0 <4.0.0"
 ''');
 
     output.writeln('dependencies:');
@@ -1631,7 +1674,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=1.11.0 <3.0.0'
+  sdk: '>=1.11.0 <4.0.0'
 ''');
 
   return directory;

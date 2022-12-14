@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FlexibleSpaceBar
+/// Flutter code sample for [FlexibleSpaceBar].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

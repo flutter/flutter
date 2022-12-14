@@ -6,76 +6,31 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:dds/dap.dart' hide PidTracker;
-import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm;
 
-import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../cache.dart';
 import '../convert.dart';
 import 'flutter_adapter_args.dart';
-import 'mixins.dart';
+import 'flutter_base_adapter.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter tests.
-class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArguments, FlutterAttachRequestArguments>
-    with PidTracker, TestAdapter {
+class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   FlutterTestDebugAdapter(
     super.channel, {
-    required this.fileSystem,
-    required this.platform,
+    required super.fileSystem,
+    required super.platform,
     super.ipv6,
-    super.enableDds,
+    super.enableFlutterDds = true,
     super.enableAuthCodes,
     super.logger,
+    super.onError,
   });
-
-  FileSystem fileSystem;
-  Platform platform;
-  Process? _process;
-
-  @override
-  final FlutterLaunchRequestArguments Function(Map<String, Object?> obj)
-      parseLaunchArgs = FlutterLaunchRequestArguments.fromJson;
-
-  @override
-  final FlutterAttachRequestArguments Function(Map<String, Object?> obj)
-      parseAttachArgs = FlutterAttachRequestArguments.fromJson;
-
-  /// Whether the VM Service closing should be used as a signal to terminate the debug session.
-  ///
-  /// Since we do not support attaching for tests, this is always false.
-  @override
-  bool get terminateOnVmServiceClose => false;
 
   /// Called by [attachRequest] to request that we actually connect to the app to be debugged.
   @override
   Future<void> attachImpl() async {
     sendOutput('console', '\nAttach is not currently supported');
     handleSessionTerminate();
-  }
-
-  @override
-  Future<void> debuggerConnected(vm.VM vmInfo) async {
-    // Capture the PID from the VM Service so that we can terminate it when
-    // cleaning up. Terminating the process might not be enough as it could be
-    // just a shell script (e.g. pub on Windows) and may not pass the
-    // signal on correctly.
-    // See: https://github.com/Dart-Code/Dart-Code/issues/907
-    final int? pid = vmInfo.pid;
-    if (pid != null) {
-      pidsToTerminate.add(pid);
-    }
-  }
-
-  /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).
-  ///
-  /// Client IDEs/editors should send a terminateRequest before a
-  /// disconnectRequest to allow a graceful shutdown. This method must terminate
-  /// quickly and therefore may leave orphaned processes.
-  @override
-  Future<void> disconnectImpl() async {
-    terminatePids(ProcessSignal.sigkill);
   }
 
   /// Called by [launchRequest] to request that we actually start the tests to be run/debugged.
@@ -86,12 +41,13 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
   Future<void> launchImpl() async {
     final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
 
-    final bool debug = !(args.noDebug ?? false);
+    final bool debug = enableDebugger;
     final String? program = args.program;
 
     final List<String> toolArgs = <String>[
       'test',
       '--machine',
+      if (!enableFlutterDds) '--no-dds',
       if (debug) '--start-paused',
     ];
 
@@ -109,7 +65,11 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
       ...?args.args,
     ];
 
-    await launchAsProcess(executable, processArgs);
+    await launchAsProcess(
+      executable: executable,
+      processArgs: processArgs,
+      env: args.env,
+    );
 
     // Delay responding until the debugger is connected.
     if (debug) {
@@ -117,31 +77,16 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     }
   }
 
-  @visibleForOverriding
-  Future<void> launchAsProcess(String executable, List<String> processArgs) async {
-    logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
-    final Process process = await Process.start(
-      executable,
-      processArgs,
-      workingDirectory: args.cwd,
-    );
-    _process = process;
-    pidsToTerminate.add(process.pid);
-
-    process.stdout.transform(ByteToLineTransformer()).listen(_handleStdout);
-    process.stderr.listen(_handleStderr);
-    unawaited(process.exitCode.then(_handleExitCode));
-  }
-
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
   @override
   Future<void> terminateImpl() async {
     terminatePids(ProcessSignal.sigterm);
-    await _process?.exitCode;
+    await process?.exitCode;
   }
 
   /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
-  void _handleExitCode(int code) {
+  @override
+  void handleExitCode(int code) {
     final String codeSuffix = code == 0 ? '' : ' ($code)';
     logger?.call('Process exited ($code)');
     handleSessionTerminate(codeSuffix);
@@ -159,13 +104,15 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
     return false;
   }
 
-  void _handleStderr(List<int> data) {
+  @override
+  void handleStderr(List<int> data) {
     logger?.call('stderr: $data');
     sendOutput('stderr', utf8.decode(data));
   }
 
   /// Handles stdout from the `flutter test --machine` process, decoding the JSON and calling the appropriate handlers.
-  void _handleStdout(String data) {
+  @override
+  void handleStdout(String data) {
     // Output to stdout from `flutter test --machine` is either:
     //   1. JSON output from flutter_tools (eg. "test.startedProcess") which is
     //      wrapped in [] brackets and has an event/params.
@@ -207,11 +154,12 @@ class FlutterTestDebugAdapter extends DartDebugAdapter<FlutterLaunchRequestArgum
   /// Handles the test.processStarted event from Flutter that provides the VM Service URL.
   void _handleTestStartedProcess(Map<String, Object?> params) {
     final String? vmServiceUriString = params['observatoryUri'] as String?;
-    // For no-debug mode, this event is still sent, but has a null URI.
-    if (vmServiceUriString == null) {
+    // For no-debug mode, this event may be still sent so ignore it if we know
+    // we're not debugging, or its URI is null.
+    if (!enableDebugger || vmServiceUriString == null) {
       return;
     }
     final Uri vmServiceUri = Uri.parse(vmServiceUriString);
-    connectDebugger(vmServiceUri, resumeIfStarting: true);
+    connectDebugger(vmServiceUri);
   }
 }

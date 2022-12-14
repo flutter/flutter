@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -23,14 +23,22 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.json')
+    if (key == 'AssetManifest.json') {
       return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(_assetBundleContents)).buffer);
+    }
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
-    if (key == 'one')
+    if (key == 'one') {
       return ByteData(1)
         ..setInt8(0, 49);
+    }
     throw FlutterError('key not found');
+  }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
   }
 }
 
@@ -97,14 +105,12 @@ void main() {
         bundle: testAssetBundle,
       );
 
-      // we have the exact match for this scale, let's use it
       assetImage.obtainKey(ImageConfiguration.empty)
         .then(expectAsync1((AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
         }));
 
-      // we also have the exact match for this scale, let's use it
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: 3.0,
@@ -114,7 +120,7 @@ void main() {
       }));
     });
 
-    test('When high-res device and high-res asset not present in bundle then  return main variant', () {
+    test('When high-res device and high-res asset not present in bundle then return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
       final Map<String, List<String>> assetBundleMap =
