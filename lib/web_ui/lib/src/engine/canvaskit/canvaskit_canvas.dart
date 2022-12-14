@@ -326,7 +326,7 @@ class CanvasKitCanvas implements ui.Canvas {
       pointMode,
       skPoints.toTypedArray(),
     );
-    freeFloat32List(skPoints);
+    free(skPoints);
   }
 
   @override

@@ -1267,34 +1267,46 @@ Float32List toSkColorStops(List<double>? colorStops) {
   return skColorStops;
 }
 
-@JS('Float32Array')
-external _NativeFloat32ArrayType get _nativeFloat32ArrayType;
-
 @JS()
 @staticInterop
-class _NativeFloat32ArrayType {}
+abstract class _NativeType {}
+
+@JS('Float32Array')
+external _NativeType get _nativeFloat32ArrayType;
+
+@JS('Uint32Array')
+external _NativeType get _nativeUint32ArrayType;
 
 @JS('window.flutterCanvasKit.Malloc')
-external SkFloat32List _mallocFloat32List(
-  _NativeFloat32ArrayType float32ListType,
-  int size,
-);
+external Object _malloc(_NativeType nativeType, int length);
 
-/// Allocates a [Float32List] backed by WASM memory, managed by
-/// a [SkFloat32List].
+/// Allocates a [Float32List] of [length] elements, backed by WASM memory,
+/// managed by a [SkFloat32List].
 ///
-/// To free the allocated array use [freeFloat32List].
-SkFloat32List mallocFloat32List(int size) {
-  return _mallocFloat32List(_nativeFloat32ArrayType, size);
+/// To free the allocated array use [free].
+SkFloat32List mallocFloat32List(int length) {
+  return _malloc(_nativeFloat32ArrayType, length) as SkFloat32List;
 }
 
-/// Frees the WASM memory occupied by a [SkFloat32List].
+/// Allocates a [Uint32List] of [length] elements, backed by WASM memory,
+/// managed by a [SkUint32List].
+///
+/// To free the allocated array use [free].
+SkUint32List mallocUint32List(int length) {
+  return _malloc(_nativeUint32ArrayType, length) as SkUint32List;
+}
+
+/// Frees the WASM memory occupied by a [SkFloat32List] or [SkUint32List].
 ///
 /// The [list] is no longer usable after calling this function.
 ///
 /// Use this function to free lists owned by the engine.
 @JS('window.flutterCanvasKit.Free')
-external void freeFloat32List(SkFloat32List list);
+external void free(MallocObj list);
+
+@JS()
+@staticInterop
+abstract class MallocObj {}
 
 /// Wraps a [Float32List] backed by WASM memory.
 ///
@@ -1303,17 +1315,43 @@ external void freeFloat32List(SkFloat32List list);
 /// that's attached to the current WASM memory block.
 @JS()
 @staticInterop
-class SkFloat32List {}
+class SkFloat32List extends MallocObj {}
 
 extension SkFloat32ListExtension on SkFloat32List {
+  /// The number of objects this pointer refers to.
+  external int length;
+
   /// Returns the [Float32List] object backed by WASM memory.
   ///
-  /// Do not reuse the returned list across multiple WASM function/method
+  /// Do not reuse the returned array across multiple WASM function/method
   /// invocations that may lead to WASM memory to grow. When WASM memory
-  /// grows the [Float32List] object becomes "detached" and is no longer
-  /// usable. Instead, call this method every time you need to read from
+  /// grows, the returned [Float32List] object becomes "detached" and is no
+  /// longer usable. Instead, call this method every time you need to read from
   /// or write to the list.
   external Float32List toTypedArray();
+}
+
+/// Wraps a [Uint32List] backed by WASM memory.
+///
+/// This wrapper is necessary because the raw [Uint32List] will get detached
+/// when WASM grows its memory. Call [toTypedArray] to get a new instance
+/// that's attached to the current WASM memory block.
+@JS()
+@staticInterop
+class SkUint32List extends MallocObj {}
+
+extension SkUint32ListExtension on SkUint32List {
+  /// The number of objects this pointer refers to.
+  external int length;
+
+  /// Returns the [Uint32List] object backed by WASM memory.
+  ///
+  /// Do not reuse the returned array across multiple WASM function/method
+  /// invocations that may lead to WASM memory to grow. When WASM memory
+  /// grows, the returned [Uint32List] object becomes "detached" and is no
+  /// longer usable. Instead, call this method every time you need to read from
+  /// or write to the list.
+  external Uint32List toTypedArray();
 }
 
 /// Writes [color] information into the given [skColor] buffer.
@@ -1585,7 +1623,7 @@ Float32List toOuterSkRect(ui.RRect rrect) {
 /// Uses `CanvasKit.Malloc` to allocate storage for the points in the WASM
 /// memory to avoid unnecessary copying. Unless CanvasKit takes ownership of
 /// the list the returned list must be explicitly freed using
-/// [freeMallocedFloat32List].
+/// [free].
 SkFloat32List toMallocedSkPoints(List<ui.Offset> points) {
   final int len = points.length;
   final SkFloat32List skPoints = mallocFloat32List(len * 2);
