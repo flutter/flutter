@@ -51,7 +51,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   bool get supportsRestartRequest => true;
 
   /// A list of reverse-requests from `flutter run --machine` that should be forwarded to the client.
-  final Set<String> _requestsToForwardToClient = <String>{
+  static const Set<String> _requestsToForwardToClient = <String>{
     // The 'app.exposeUrl' request is sent by Flutter to request the client
     // exposes a URL to the user and return the public version of that URL.
     //
@@ -63,6 +63,14 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // return a user-facing URL that will map to the original (localhost) URL
     // Flutter provided.
     'app.exposeUrl',
+  };
+
+  /// A list of events from `flutter run --machine` that should be forwarded to the client.
+  static const Set<String> _eventsToForwardToClient = <String>{
+    // The 'app.webLaunchUrl' event is sent to the client to tell it about a URL
+    // that should be launched (including a flag for whether it has been
+    // launched by the tool or needs launching by the editor).
+    'app.webLaunchUrl',
   };
 
   /// Completers for reverse requests from Flutter that may need to be handled by the client.
@@ -453,6 +461,17 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
       case 'app.started':
         _handleAppStarted();
         break;
+    }
+
+    if (_eventsToForwardToClient.contains(event)) {
+      // Forward the event to the client.
+      sendEvent(
+        RawEventBody(<String, Object?>{
+          'event': event,
+          'params': params,
+        }),
+        eventType: 'flutter.forwardedEvent',
+      );
     }
   }
 

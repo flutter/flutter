@@ -26,10 +26,10 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     ValueNotifier<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
     final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
-      _kArrowScreenPadding + mediaQuery.padding.left,
-      mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
+      _kArrowScreenPadding + mediaQueryPadding.left,
+      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
     );
     final Offset anchorAbove = Offset(
       anchorX,
@@ -59,11 +59,6 @@ class TestBox extends SizedBox {
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;
 }
-
-const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xEB202020),
-  darkColor: Color(0xEBF7F7F7),
-);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -266,41 +261,5 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
-
-  testWidgets('draws dark buttons in dark mode and light button in light mode', (WidgetTester tester) async {
-    for (final Brightness brightness in Brightness.values) {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: Builder(
-              builder: (BuildContext context) {
-                return MediaQuery(
-                  data: MediaQuery.of(context).copyWith(platformBrightness: brightness),
-                  child: CupertinoTextSelectionToolbar(
-                    anchorAbove: const Offset(100.0, 0.0),
-                    anchorBelow: const Offset(100.0, 0.0),
-                    children: <Widget>[
-                      CupertinoTextSelectionToolbarButton.text(
-                        onPressed: () {},
-                        text: 'Button',
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      );
-
-      final Finder buttonFinder = find.byType(CupertinoButton);
-      expect(find.byType(CupertinoButton), findsOneWidget);
-      final CupertinoButton button = tester.widget(buttonFinder);
-      expect(
-        button.color,
-        _kToolbarBackgroundColor,
-      );
-    }
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }

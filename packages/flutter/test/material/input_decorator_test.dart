@@ -3182,6 +3182,65 @@ void main() {
     expect(FloatingLabelAlignment.center.toString(), 'FloatingLabelAlignment.center');
   });
 
+  group('inputText width', () {
+    testWidgets('outline textField', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 12.0);
+      expect(tester.getTopRight(find.text('text')).dx, 788.0);
+    });
+    testWidgets('outline textField with prefix and suffix icons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.visibility),
+            suffixIcon: Icon(Icons.close),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 48.0);
+      expect(tester.getTopRight(find.text('text')).dx, 752.0);
+    });
+    testWidgets('filled textField', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            filled: true,
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 12.0);
+      expect(tester.getTopRight(find.text('text')).dx, 788.0);
+    });
+    testWidgets('filled textField with prefix and suffix icons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            filled: true,
+            prefixIcon: Icon(Icons.visibility),
+            suffixIcon: Icon(Icons.close),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 48.0);
+      expect(tester.getTopRight(find.text('text')).dx, 752.0);
+    });
+  });
+
   group('floatingLabelAlignment', () {
     Widget buildInputDecoratorWithFloatingLabel({required TextDirection textDirection,
           required bool hasIcon,

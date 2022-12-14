@@ -71,8 +71,8 @@ enum SnackBarClosedReason {
 
 /// A button for a [SnackBar], known as an "action".
 ///
-/// Snack bar actions are always enabled. If you want to disable a snack bar
-/// action, simply don't include it in the snack bar.
+/// Snack bar actions are always enabled. Instead of disabling a snack bar
+/// action, avoid including it in the snack bar in the first place.
 ///
 /// Snack bar actions can only be pressed once. Subsequent presses are ignored.
 ///
@@ -485,7 +485,7 @@ class _SnackBarState extends State<SnackBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -599,7 +599,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
 
-    final double snackBarWidth = widget.width ?? mediaQueryData.size.width - (margin.left + margin.right);
+    final double snackBarWidth = widget.width ?? MediaQuery.sizeOf(context).width - (margin.left + margin.right);
     // Action and Icon will overflow to a new line if their width is greater
     // than one quarter of the total Snack Bar width.
     final bool actionLineOverflow =
@@ -628,9 +628,7 @@ class _SnackBarState extends State<SnackBar> {
 
     Widget snackBar = Padding(
       padding: padding,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Wrap(
           children: <Widget>[
             Row(
               children: <Widget>[
@@ -656,7 +654,7 @@ class _SnackBarState extends State<SnackBar> {
               children: maybeActionAndIcon),
             ),
           ],
-        ),
+
       ),
     );
 
@@ -677,7 +675,7 @@ class _SnackBarState extends State<SnackBar> {
       color: backgroundColor,
       child: Theme(
         data: effectiveTheme,
-        child: mediaQueryData.accessibleNavigation || theme.useMaterial3
+        child: accessibleNavigation || theme.useMaterial3
             ? snackBar
             : FadeTransition(
                 opacity: fadeOutAnimation,
@@ -725,7 +723,7 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     final Widget snackBarTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       snackBarTransition = snackBar;
     } else if (isFloatingSnackBar && !theme.useMaterial3) {
       snackBarTransition = FadeTransition(
@@ -885,10 +883,6 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 
   @override
   bool get showCloseIcon => false;
-
-  @override
-  Color get closeIconColor => _colors.onInverseSurface;
-  }
-
+}
 
 // END GENERATED TOKEN PROPERTIES - Snackbar

@@ -5,8 +5,42 @@
 import 'dart:ui' show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings, ViewConfiguration;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _MediaQueryAspectCase {
+  const _MediaQueryAspectCase(this.method, this.data);
+  final Function(BuildContext) method;
+  final MediaQueryData data;
+}
+
+class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
+  _MediaQueryAspectVariant({
+    required this.values
+  });
+
+  @override
+  final List<_MediaQueryAspectCase> values;
+
+  static _MediaQueryAspectCase? aspect;
+
+  @override
+  String describeValue(_MediaQueryAspectCase value) {
+    return value.method.toString();
+  }
+
+  @override
+  Future<_MediaQueryAspectCase?> setUp(_MediaQueryAspectCase value) async {
+    final _MediaQueryAspectCase? oldAspect = aspect;
+    aspect = value;
+    return oldAspect;
+  }
+
+  @override
+  Future<void> tearDown(_MediaQueryAspectCase value, _MediaQueryAspectCase? memento) async {
+    aspect = memento;
+  }
+}
 
 void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
@@ -686,21 +720,21 @@ void main() {
     expect(insideHighContrast, true);
   });
 
-  testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
+  testWidgets('MediaQuery.boldTextOf', (WidgetTester tester) async {
     late bool outsideBoldTextOverride;
     late bool insideBoldTextOverride;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          outsideBoldTextOverride = MediaQuery.boldTextOverride(context);
+          outsideBoldTextOverride = MediaQuery.boldTextOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               boldText: true,
             ),
             child: Builder(
               builder: (BuildContext context) {
-                insideBoldTextOverride = MediaQuery.boldTextOverride(context);
+                insideBoldTextOverride = MediaQuery.boldTextOf(context);
                 return Container();
               },
             ),
@@ -937,4 +971,177 @@ void main() {
     expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
   });
+
+  testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
+    MediaQueryData data = const MediaQueryData(
+      size: Size(800, 600),
+      textScaleFactor: 1.1
+    );
+
+    int sizeBuildCount = 0;
+    int textScaleFactorBuildCount = 0;
+
+    final Widget showSize = Builder(
+      builder: (BuildContext context) {
+        sizeBuildCount++;
+        return Text('size: ${MediaQuery.sizeOf(context)}');
+      }
+    );
+
+    final Widget showTextScaleFactor = Builder(
+      builder: (BuildContext context) {
+        textScaleFactorBuildCount++;
+        return Text('textScaleFactor: ${MediaQuery.textScaleFactorOf(context).toStringAsFixed(1)}');
+      }
+    );
+
+    final Widget page = StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return MediaQuery(
+          data: data,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                showSize,
+                showTextScaleFactor,
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
+                    });
+                  },
+                  child: const Text('Increase width by 100')
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(textScaleFactor: data.textScaleFactor + 0.1);
+                    });
+                  },
+                  child: const Text('Increase textScaleFactor by 0.1')
+                )
+              ]
+            )
+          )
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(home: page));
+    expect(find.text('size: Size(800.0, 600.0)'), findsOneWidget);
+    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
+    expect(sizeBuildCount, 1);
+    expect(textScaleFactorBuildCount, 1);
+
+    await tester.tap(find.text('Increase width by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
+    expect(find.text('textScaleFactor: 1.1'), findsOneWidget);
+    expect(sizeBuildCount, 2);
+    expect(textScaleFactorBuildCount, 1);
+
+    await tester.tap(find.text('Increase textScaleFactor by 0.1'));
+    await tester.pumpAndSettle();
+    expect(find.text('size: Size(900.0, 600.0)'), findsOneWidget);
+    expect(find.text('textScaleFactor: 1.2'), findsOneWidget);
+    expect(sizeBuildCount, 2);
+    expect(textScaleFactorBuildCount, 2);
+  });
+
+  testWidgets('MediaQuery partial dependencies', (WidgetTester tester) async {
+    MediaQueryData data = const MediaQueryData();
+
+    int buildCount = 0;
+
+    final Widget builder = Builder(
+      builder: (BuildContext context) {
+        _MediaQueryAspectVariant.aspect!.method(context);
+        buildCount++;
+        return const SizedBox.shrink();
+      }
+    );
+
+    final Widget page = StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return MediaQuery(
+          data: data,
+          child: ListView(
+            children: <Widget>[
+              builder,
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    data = _MediaQueryAspectVariant.aspect!.data;
+                  });
+                },
+                child: const Text('Change data')
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    data = data.copyWith();
+                  });
+                },
+                child: const Text('Copy data')
+              )
+            ]
+          )
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(home: page));
+    expect(buildCount, 1);
+
+    await tester.tap(find.text('Copy data'));
+    await tester.pumpAndSettle();
+    expect(buildCount, 1);
+
+    await tester.tap(find.text('Change data'));
+    await tester.pumpAndSettle();
+    expect(buildCount, 2);
+
+    await tester.tap(find.text('Copy data'));
+    await tester.pumpAndSettle();
+    expect(buildCount, 2);
+  }, variant: _MediaQueryAspectVariant(
+    values: <_MediaQueryAspectCase>[
+      const _MediaQueryAspectCase(MediaQuery.sizeOf, MediaQueryData(size: Size(1, 1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeSizeOf, MediaQueryData(size: Size(1, 1))),
+      const _MediaQueryAspectCase(MediaQuery.orientationOf, MediaQueryData(size: Size(2, 1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeOrientationOf, MediaQueryData(size: Size(2, 1))),
+      const _MediaQueryAspectCase(MediaQuery.devicePixelRatioOf, MediaQueryData(devicePixelRatio: 1.1)),
+      const _MediaQueryAspectCase(MediaQuery.maybeDevicePixelRatioOf, MediaQueryData(devicePixelRatio: 1.1)),
+      const _MediaQueryAspectCase(MediaQuery.textScaleFactorOf, MediaQueryData(textScaleFactor: 1.1)),
+      const _MediaQueryAspectCase(MediaQuery.maybeTextScaleFactorOf, MediaQueryData(textScaleFactor: 1.1)),
+      const _MediaQueryAspectCase(MediaQuery.platformBrightnessOf, MediaQueryData(platformBrightness: Brightness.dark)),
+      const _MediaQueryAspectCase(MediaQuery.maybePlatformBrightnessOf, MediaQueryData(platformBrightness: Brightness.dark)),
+      const _MediaQueryAspectCase(MediaQuery.paddingOf, MediaQueryData(padding: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.maybePaddingOf, MediaQueryData(padding: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.viewInsetsOf, MediaQueryData(viewInsets: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeViewInsetsOf, MediaQueryData(viewInsets: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.systemGestureInsetsOf, MediaQueryData(systemGestureInsets: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeSystemGestureInsetsOf, MediaQueryData(systemGestureInsets: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.viewPaddingOf, MediaQueryData(viewPadding: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeViewPaddingOf, MediaQueryData(viewPadding: EdgeInsets.all(1))),
+      const _MediaQueryAspectCase(MediaQuery.alwaysUse24HourFormatOf, MediaQueryData(alwaysUse24HourFormat: true)),
+      const _MediaQueryAspectCase(MediaQuery.maybeAlwaysUse24HourFormatOf, MediaQueryData(alwaysUse24HourFormat: true)),
+      const _MediaQueryAspectCase(MediaQuery.accessibleNavigationOf, MediaQueryData(accessibleNavigation: true)),
+      const _MediaQueryAspectCase(MediaQuery.maybeAccessibleNavigationOf, MediaQueryData(accessibleNavigation: true)),
+      const _MediaQueryAspectCase(MediaQuery.invertColorsOf, MediaQueryData(invertColors: true)),
+      const _MediaQueryAspectCase(MediaQuery.maybeInvertColorsOf, MediaQueryData(invertColors: true)),
+      const _MediaQueryAspectCase(MediaQuery.highContrastOf, MediaQueryData(highContrast: true)),
+      const _MediaQueryAspectCase(MediaQuery.maybeHighContrastOf, MediaQueryData(highContrast: true)),
+      const _MediaQueryAspectCase(MediaQuery.disableAnimationsOf, MediaQueryData(disableAnimations: true)),
+      const _MediaQueryAspectCase(MediaQuery.maybeDisableAnimationsOf, MediaQueryData(disableAnimations: true)),
+      const _MediaQueryAspectCase(MediaQuery.boldTextOf, MediaQueryData(boldText: true)),
+      const _MediaQueryAspectCase(MediaQuery.maybeBoldTextOf, MediaQueryData(boldText: true)),
+      const _MediaQueryAspectCase(MediaQuery.navigationModeOf, MediaQueryData(navigationMode: NavigationMode.directional)),
+      const _MediaQueryAspectCase(MediaQuery.maybeNavigationModeOf, MediaQueryData(navigationMode: NavigationMode.directional)),
+      const _MediaQueryAspectCase(MediaQuery.gestureSettingsOf, MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeGestureSettingsOf, MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 1))),
+      const _MediaQueryAspectCase(MediaQuery.displayFeaturesOf, MediaQueryData(displayFeatures: <DisplayFeature>[DisplayFeature(bounds: Rect.zero, type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)])),
+      const _MediaQueryAspectCase(MediaQuery.maybeDisplayFeaturesOf, MediaQueryData(displayFeatures: <DisplayFeature>[DisplayFeature(bounds: Rect.zero, type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)])),
+    ]
+  ));
 }

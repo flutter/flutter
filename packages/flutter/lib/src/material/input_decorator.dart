@@ -978,12 +978,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       0.0,
       constraints.maxWidth - (
         _boxSize(icon).width
-        + contentPadding.left
+        + (prefixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
         + _boxSize(prefixIcon).width
         + _boxSize(prefix).width
         + _boxSize(suffix).width
         + _boxSize(suffixIcon).width
-        + contentPadding.right),
+        + (suffixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left))),
     );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
@@ -4580,7 +4580,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
@@ -4604,7 +4604,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
@@ -4628,7 +4628,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
     }
@@ -4637,7 +4637,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     return textStyle.copyWith(color:_colors.error);
   });
 }

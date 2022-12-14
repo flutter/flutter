@@ -288,10 +288,14 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
     assert(data.attributedLabel != null);
     final String message;
+    // Android will avoid pronouncing duplicating tooltip and label.
+    // Therefore, having two identical strings is the same as having a single
+    // string.
+    final bool shouldIgnoreDuplicatedLabel = defaultTargetPlatform == TargetPlatform.android && data.attributedLabel.string == data.tooltip;
     final String tooltipAndLabel = <String>[
       if (data.tooltip.isNotEmpty)
         data.tooltip,
-      if (data.attributedLabel.string.isNotEmpty)
+      if (data.attributedLabel.string.isNotEmpty && !shouldIgnoreDuplicatedLabel)
         data.attributedLabel.string,
     ].join('\n');
     if (tooltipAndLabel.isEmpty) {

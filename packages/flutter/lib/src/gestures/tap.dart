@@ -216,7 +216,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     if (_down != null) {
       // This happens when this tap gesture has been rejected while the pointer
       // is down (i.e. due to movement), when another allowed pointer is added,
-      // in which case all pointers are simply ignored. The `_down` being null
+      // in which case all pointers are ignored. The `_down` being null
       // means that _reset() has been called, since it is always set at the
       // first allowed down event and will not be cleared except for reset(),
       super.addAllowedPointer(event);
