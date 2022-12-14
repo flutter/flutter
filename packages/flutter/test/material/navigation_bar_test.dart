@@ -263,8 +263,8 @@ void main() {
     expect(_getMaterial(tester).surfaceTintColor, null);
     expect(_getMaterial(tester).elevation, 0);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
-    expect(_indicator(tester)?.color, const Color(0x3d2196f3));
-    expect(_indicator(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
+    expect(_getIndicatorDecoration(tester)?.color, const Color(0x3d2196f3));
+    expect(_getIndicatorDecoration(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
 
     // M3 settings from the token database.
     await tester.pumpWidget(
@@ -292,8 +292,8 @@ void main() {
     expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
-    expect(_indicator(tester)?.color, const Color(0xff2196f3));
-    expect(_indicator(tester)?.shape, const StadiumBorder());
+    expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
   testWidgets('NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
@@ -807,21 +807,21 @@ void main() {
   testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const Color color = Color(0xff0000ff);
-    const ShapeBorder shape = CircleBorder();
+    const ShapeBorder shape = RoundedRectangleBorder();
 
-    Widget buildNaviagationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+    Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
       return MaterialApp(
         theme: theme,
         home: Scaffold(
           bottomNavigationBar: NavigationBar(
-            destinations: <Widget>[
+            indicatorColor: indicatorColor,
+            indicatorShape: indicatorShape,
+            destinations: const <Widget>[
               NavigationDestination(
-                icon: const Icon(Icons.ac_unit),
+                icon: Icon(Icons.ac_unit),
                 label: 'AC',
-                indicatorColor: indicatorColor,
-                indicatorShape: indicatorShape,
               ),
-              const NavigationDestination(
+              NavigationDestination(
                 icon: Icon(Icons.access_alarm),
                 label: 'Alarm',
               ),
@@ -832,17 +832,17 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildNaviagationBar());
+    await tester.pumpWidget(buildNavigationBar());
 
     // Test default indicator color and shape.
-    expect(_indicator(tester)?.color, theme.colorScheme.secondaryContainer);
-    expect(_indicator(tester)?.shape, const StadiumBorder());
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
 
-    await tester.pumpWidget(buildNaviagationBar(indicatorColor: color, indicatorShape: shape));
+    await tester.pumpWidget(buildNavigationBar(indicatorColor: color, indicatorShape: shape));
 
     // Test custom indicator color and shape.
-    expect(_indicator(tester)?.color, color);
-    expect(_indicator(tester)?.shape, shape);
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
   });
 
   group('Material 2', () {
@@ -852,21 +852,21 @@ void main() {
     testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);
       const Color color = Color(0xff0000ff);
-      const ShapeBorder shape = CircleBorder();
+      const ShapeBorder shape = RoundedRectangleBorder();
 
-      Widget buildNaviagationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
         return MaterialApp(
           theme: theme,
           home: Scaffold(
             bottomNavigationBar: NavigationBar(
-              destinations: <Widget>[
+              indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
+              destinations: const <Widget>[
                 NavigationDestination(
-                  icon: const Icon(Icons.ac_unit),
+                  icon: Icon(Icons.ac_unit),
                   label: 'AC',
-                  indicatorColor: indicatorColor,
-                  indicatorShape: indicatorShape,
                 ),
-                const NavigationDestination(
+                NavigationDestination(
                   icon: Icon(Icons.access_alarm),
                   label: 'Alarm',
                 ),
@@ -877,20 +877,20 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildNaviagationBar());
+      await tester.pumpWidget(buildNavigationBar());
 
       // Test default indicator color and shape.
-      expect(_indicator(tester)?.color, theme.colorScheme.secondary.withOpacity(0.24));
+      expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondary.withOpacity(0.24));
       expect(
-        _indicator(tester)?.shape,
+        _getIndicatorDecoration(tester)?.shape,
         const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
       );
 
-      await tester.pumpWidget(buildNaviagationBar(indicatorColor: color, indicatorShape: shape));
+      await tester.pumpWidget(buildNavigationBar(indicatorColor: color, indicatorShape: shape));
 
       // Test custom indicator color and shape.
-      expect(_indicator(tester)?.color, color);
-      expect(_indicator(tester)?.shape, shape);
+      expect(_getIndicatorDecoration(tester)?.color, color);
+      expect(_getIndicatorDecoration(tester)?.shape, shape);
     });
   });
 }
@@ -912,7 +912,7 @@ Material _getMaterial(WidgetTester tester) {
   );
 }
 
-ShapeDecoration? _indicator(WidgetTester tester) {
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(FadeTransition),
