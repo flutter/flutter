@@ -4733,7 +4733,6 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4747,7 +4746,6 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4762,7 +4760,6 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4778,7 +4775,6 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4791,7 +4787,6 @@ targets:
     bringup: true
     enabled_branches:
       - beta
-      - main
     presubmit: false
     timeout: 60
     properties:
