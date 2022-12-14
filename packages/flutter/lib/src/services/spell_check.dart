@@ -177,15 +177,12 @@ class DefaultSpellCheckService implements SpellCheckService {
     final String languageTag = locale.toLanguageTag();
 
     try {
-      print('CAMILLE, THE TEXT: $text');
-      print('CAMILLE, THE LOCALE: $languageTag');
       rawResults = await spellCheckChannel.invokeMethod(
         'SpellCheck.initiateSpellCheck',
         <String>[languageTag, text],
       ) as List<dynamic>;
     } catch (e) {
       // Spell check request canceled due to pending request.
-      print('CAMILLE, THE ERROR: $e');
       return null;
     }
 
