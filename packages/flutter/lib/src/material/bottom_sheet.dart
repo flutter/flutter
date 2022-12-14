@@ -409,7 +409,6 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
 
@@ -436,7 +435,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation!.value,
+            MediaQuery.accessibleNavigationOf(context) ? 1.0 : widget.route.animation!.value,
         );
         return Semantics(
           scopesRoute: true,
@@ -797,6 +796,13 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// when a user taps on a button inside the bottom sheet.
 ///
 /// ** See code in examples/api/lib/material/bottom_sheet/show_modal_bottom_sheet.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of [showModalBottomSheet], as described in:
+/// https://m3.material.io/components/bottom-sheets/overview
+///
+/// ** See code in examples/api/lib/material/bottom_sheet/show_modal_bottom_sheet.1.dart **
 /// {@end-tool}
 ///
 /// See also:

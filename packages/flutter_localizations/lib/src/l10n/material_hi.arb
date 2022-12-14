@@ -129,5 +129,6 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "मेन्यू बार का मेन्यू"
+  "menuBarMenuLabel": "मेन्यू बार का मेन्यू",
+  "currentDateLabel": "Date of today"
 }
