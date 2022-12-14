@@ -161,14 +161,14 @@ class NavigationBar extends StatelessWidget {
   final Color? surfaceTintColor;
 
   /// The color of the [indicatorShape] when this destination is selected.
-  /// 
+  ///
   /// If null, [NavigationBarThemeData.indicatorColor] is used. If that
   /// is also null and [ThemeData.useMaterial3] is true, [ColorScheme.secondaryContainer]
   /// is used. Otherwise, [ColorScheme.secondary] with an opacity of 0.24 is used.
   final Color? indicatorColor;
 
   /// The shape of the selected inidicator.
-  /// 
+  ///
   /// If null, [NavigationBarThemeData.indicatorShape] is used. If that
   /// is also null and [ThemeData.useMaterial3] is true, [StadiumBorder] is used.
   /// Otherwise, [RoundedRectangleBorder] with a circular border radius of 16 is used.

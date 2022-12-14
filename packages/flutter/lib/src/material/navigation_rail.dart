@@ -307,16 +307,16 @@ class NavigationRail extends StatefulWidget {
 
   /// Overrides the default value of [NavigationRail]'s selection indicator color,
   /// when [useIndicator] is true.
-  /// 
+  ///
   /// If this is null, [NavigationRailThemeData.indicatorColor] is used. If
   /// that is null, defaults to [ColorScheme.secondaryContainer].
   final Color? indicatorColor;
 
   /// Overrides the default value of [NavigationRail]'s selection indicator shape,
   /// when [useIndicator] is true.
-  /// 
+  ///
   /// If this is null, [NavigationRailThemeData.indicatorShape] is used. If
-  /// that is null, defaults to [StadiumBorder]. 
+  /// that is null, defaults to [StadiumBorder].
   final ShapeBorder? indicatorShape;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.

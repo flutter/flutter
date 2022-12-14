@@ -93,13 +93,13 @@ class NavigationDrawer extends StatelessWidget {
   final double? elevation;
 
   /// The color of the [indicatorShape] when this destination is selected.
-  /// 
+  ///
   /// If this is null, [NavigationDrawerThemeData.indicatorColor] is used.
   /// If that is also null, defaults to [ColorScheme.secondaryContainer].
   final Color? indicatorColor;
 
   /// The shape of the selected inidicator.
-  /// 
+  ///
   /// If this is null, [NavigationDrawerThemeData.indicatorShape] is used.
   /// If that is also null, defaults to [StadiumBorder].
   final ShapeBorder? indicatorShape;
