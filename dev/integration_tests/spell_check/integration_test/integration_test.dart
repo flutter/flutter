@@ -182,7 +182,7 @@ void main() {
       () async {
     final String text =
         'neaf niofenaifn iofn iefnaoeifn ifneoa finoiafn inf ionfieaon ienf ifn ieonfaiofneionf oieafn oifnaioe nioenfio nefaion oifan' *
-            10;
+            100;
 
     defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
 
