@@ -1310,8 +1310,9 @@ class ReorderableDelayedDragStartListener extends ReorderableDragStartListener {
     this.delay = kLongPressTimeout,
   });
 
-  /// The [Duration] it takes for the press gesture to be promoted into a long
-  /// press gesture and enable a drag ability.
+  /// The amount of time the pointer must remain in the same place for the drag to be recognized.
+  ///
+  /// The default is [kLongPressTimeOut].
   final Duration delay;
 
   @override
