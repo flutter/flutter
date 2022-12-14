@@ -198,23 +198,6 @@ void main() {
         processManager: processManager,
       ),
     });
-
-    // Regression test for https://github.com/flutter/flutter/issues/116627
-    testUsingContext('suppresses pub progress output', () async {
-      final UpdatePackagesCommand command = UpdatePackagesCommand();
-      await createTestCommandRunner(command).run(<String>['update-packages']);
-      final int occurrencesCount = 'Running "flutter pub get" in'
-          .allMatches(testLogger.statusText)
-          .length;
-      expect(occurrencesCount, 1);
-    }, overrides: <Type, Generator>{
-      Pub: () => pub,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Cache: () => Cache.test(
-        processManager: processManager,
-      ),
-    });
   });
 
   group('generateFakePubspec', () {

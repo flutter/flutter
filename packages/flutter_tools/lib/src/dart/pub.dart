@@ -409,22 +409,30 @@ class _DefaultPub implements Pub {
 
     try {
       final io.Process process;
+      final io.Stdio? stdio = _stdio;
 
-      if (_stdio != null || !printProgress) {
-        // Omit [mode] parameter if testing or if silent operation is requested.
+      if (stdio == null && printProgress) {
+        // Let pub inherit stdio and output directly to the tool's stdout and stderr handles.
+        process = await _processUtils.start(
+          pubCommand,
+          workingDirectory: _fileSystem.path.current,
+          environment: pubEnvironment,
+          mode: ProcessStartMode.inheritStdio,
+        );
+      } else {
+        // Omit [mode] parameter to send output to [process.stdout] and [process.stderr].
         process = await _processUtils.start(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
           environment: pubEnvironment,
         );
 
-        final io.Stdio? stdio = _stdio;
-        if (stdio != null) {
+        if (stdio != null && printProgress) {
           // Direct pub output to [Pub._stdio] for tests.
           final StreamSubscription<List<int>> stdoutSubscription =
-            process.stdout.listen(stdio.stdout.add);
+              process.stdout.listen(stdio.stdout.add);
           final StreamSubscription<List<int>> stderrSubscription =
-            process.stderr.listen(stdio.stderr.add);
+              process.stderr.listen(stdio.stderr.add);
 
           await Future.wait<void>(<Future<void>>[
             stdoutSubscription.asFuture<void>(),
@@ -434,14 +442,6 @@ class _DefaultPub implements Pub {
           unawaited(stdoutSubscription.cancel());
           unawaited(stderrSubscription.cancel());
         }
-      } else {
-        // Let pub inherit stdio for normal operation.
-        process = await _processUtils.start(
-          pubCommand,
-          workingDirectory: _fileSystem.path.current,
-          environment: pubEnvironment,
-          mode: ProcessStartMode.inheritStdio,
-        );
       }
 
       exitCode = await process.exitCode;
