@@ -28,7 +28,7 @@ static bool OnPresentDrawableOfDefaultView(FlutterEngine* engine,
   // operates on the default view. To support multi-view, we need a new callback
   // that also receives a view ID.
   uint64_t viewId = kFlutterDefaultViewId;
-  return [engine.renderer present:viewId];
+  return [engine.renderer present:viewId texture:texture];
 }
 
 static bool OnAcquireExternalTexture(FlutterEngine* engine,
@@ -95,30 +95,22 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
     // FlutterMetalTexture has texture `null`, therefore is discarded.
     return FlutterMetalTexture{};
   }
-  FlutterRenderBackingStore* backingStore = [view backingStoreForSize:size];
-  id<MTLTexture> texture = backingStore.texture;
-  FlutterMetalTexture embedderTexture;
-  embedderTexture.struct_size = sizeof(FlutterMetalTexture);
-  embedderTexture.texture = (__bridge void*)texture;
-  embedderTexture.texture_id = reinterpret_cast<int64_t>(texture);
-  return embedderTexture;
+  return [view.surfaceManager surfaceForSize:size].asFlutterMetalTexture;
 }
 
-- (BOOL)present:(uint64_t)viewId {
+- (BOOL)present:(uint64_t)viewId texture:(const FlutterMetalTexture*)texture {
   FlutterView* view = [_viewProvider getView:viewId];
   if (view == nil) {
     return NO;
   }
-  [view present];
-  return YES;
-}
-
-- (void)presentWithoutContent:(uint64_t)viewId {
-  FlutterView* view = [_viewProvider getView:viewId];
-  if (view == nil) {
-    return;
+  FlutterSurface* surface = [FlutterSurface fromFlutterMetalTexture:texture];
+  if (surface == nil) {
+    return NO;
   }
-  [view presentWithoutContent];
+  FlutterSurfacePresentInfo* info = [[FlutterSurfacePresentInfo alloc] init];
+  info.surface = surface;
+  [view.surfaceManager present:@[ info ] notify:nil];
+  return YES;
 }
 
 #pragma mark - FlutterTextureRegistrar methods.
