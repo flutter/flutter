@@ -423,11 +423,12 @@ class CkFragmentProgram implements ui.FragmentProgram {
       if (type == UniformType.SampledImage) {
         textureCount += 1;
       } else {
+        final Object? rows = rawUniformData['rows'];
         final Object? bitWidth = rawUniformData['bit_width'];
-        if (bitWidth is! int) {
+        if (bitWidth is! int || rows is! int) {
           throw const FormatException('Invalid Shader Data');
         }
-        floatCount += bitWidth ~/ 32;
+        floatCount += (bitWidth ~/ 32) * rows;
       }
       uniforms[location] = UniformData(
         name: name,
