@@ -9,19 +9,14 @@ import '_isolates_io.dart'
 
 /// Signature for the callback passed to [compute].
 ///
-/// {@macro flutter.foundation.compute.types}
-///
-/// Instances of [ComputeCallback] must be functions that can be sent to an
-/// isolate.
 /// {@macro flutter.foundation.compute.callback}
 ///
-/// {@macro flutter.foundation.compute.types}
 typedef ComputeCallback<M, R> = FutureOr<R> Function(M message);
 
 /// The signature of [compute], which spawns an isolate, runs `callback` on
 /// that isolate, passes it `message`, and (eventually) returns the value
 /// returned by `callback`.
-typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String? debugLabel });
+typedef ComputeImpl = Future<R> Function<M, R>(ComputeCallback<M, R> callback, M message, { String? debugLabel });
 
 /// Asynchronously runs the given [callback] - with the provided [message] -
 /// in the background and completes with the result.
@@ -58,14 +53,18 @@ typedef ComputeImpl = Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q
 /// {@end-tool}
 ///
 /// On web platforms this will run [callback] on the current eventloop.
+/// On native platforms this will run [callback] in a separate isolate.
 ///
-/// On native platforms this will run [callback] in a separate isolate. The
-/// provided [callback], the [message] given to it as well as the result have
-/// to be objects that can be sent across isolates (as they may be transitively
-/// copied if needed). The majority of objects can be sent across isolates.
+/// {@template flutter.foundation.compute.callback}
+///
+/// The `callback`, the `message` given to it as well as the result have to be
+/// objects that can be sent across isolates (as they may be transitively copied
+/// if needed). The majority of objects can be sent across isolates.
 ///
 /// See [SendPort.send] for more information about exceptions as well as a note
 /// of warning about sending closures, which can capture more state than needed.
+///
+/// {@endtemplate}
 ///
 /// On native platforms `await compute(fun, message)` is equivalent to
 /// `await Isolate.run(() => fun(message))`. See also [Isolate.run].
