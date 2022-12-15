@@ -88,10 +88,24 @@ G_MODULE_EXPORT const gchar* fl_dart_project_get_aot_library_path(
   return self->aot_library_path;
 }
 
+G_MODULE_EXPORT void fl_dart_project_set_assets_path(FlDartProject* self,
+                                                     gchar* path) {
+  g_return_if_fail(FL_IS_DART_PROJECT(self));
+  g_clear_pointer(&self->assets_path, g_free);
+  self->assets_path = g_strdup(path);
+}
+
 G_MODULE_EXPORT const gchar* fl_dart_project_get_assets_path(
     FlDartProject* self) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(self), nullptr);
   return self->assets_path;
+}
+
+G_MODULE_EXPORT void fl_dart_project_set_icu_data_path(FlDartProject* self,
+                                                       gchar* path) {
+  g_return_if_fail(FL_IS_DART_PROJECT(self));
+  g_clear_pointer(&self->icu_data_path, g_free);
+  self->icu_data_path = g_strdup(path);
 }
 
 G_MODULE_EXPORT const gchar* fl_dart_project_get_icu_data_path(

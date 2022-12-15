@@ -38,6 +38,22 @@ TEST(FlDartProjectTest, EnableMirrors) {
   G_GNUC_END_IGNORE_DEPRECATIONS
 }
 
+TEST(FlDartProjectTest, OverrideAssetsPath) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  char assets_path[] = "/normal/tuesday/night/for/shia/labeouf";
+  fl_dart_project_set_assets_path(project, assets_path);
+  EXPECT_STREQ(fl_dart_project_get_assets_path(project), assets_path);
+}
+
+TEST(FlDartProjectTest, OverrideIcuDataPath) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+
+  char icu_data_path[] = "/living/in/the/woods/icudtl.dat";
+  fl_dart_project_set_icu_data_path(project, icu_data_path);
+  EXPECT_STREQ(fl_dart_project_get_icu_data_path(project), icu_data_path);
+}
+
 TEST(FlDartProjectTest, DartEntrypointArgs) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
 
