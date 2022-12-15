@@ -3360,7 +3360,7 @@ void main() {
       );
       expect(find.text('second'), findsOneWidget);
       expect(find.text('initial'), findsNothing);
-      // Pushes pageless route to second page route
+      // Push pageless route to second page route
       navigator.currentState!.push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) => const Text('second-pageless1'),
