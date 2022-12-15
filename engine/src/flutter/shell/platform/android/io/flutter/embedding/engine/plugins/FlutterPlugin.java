@@ -6,8 +6,10 @@ package io.flutter.embedding.engine.plugins;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.platform.PlatformViewRegistry;
 import io.flutter.view.TextureRegistry;
@@ -107,6 +109,7 @@ public interface FlutterPlugin {
     private final TextureRegistry textureRegistry;
     private final PlatformViewRegistry platformViewRegistry;
     private final FlutterAssets flutterAssets;
+    private final FlutterEngineGroup group;
 
     public FlutterPluginBinding(
         @NonNull Context applicationContext,
@@ -114,13 +117,15 @@ public interface FlutterPlugin {
         @NonNull BinaryMessenger binaryMessenger,
         @NonNull TextureRegistry textureRegistry,
         @NonNull PlatformViewRegistry platformViewRegistry,
-        @NonNull FlutterAssets flutterAssets) {
+        @NonNull FlutterAssets flutterAssets,
+        @Nullable FlutterEngineGroup group) {
       this.applicationContext = applicationContext;
       this.flutterEngine = flutterEngine;
       this.binaryMessenger = binaryMessenger;
       this.textureRegistry = textureRegistry;
       this.platformViewRegistry = platformViewRegistry;
       this.flutterAssets = flutterAssets;
+      this.group = group;
     }
 
     @NonNull
@@ -156,6 +161,21 @@ public interface FlutterPlugin {
     @NonNull
     public FlutterAssets getFlutterAssets() {
       return flutterAssets;
+    }
+
+    /**
+     * Accessor for the {@link FlutterEngineGroup} used to create the {@link FlutterEngine} for the
+     * app.
+     *
+     * <p>This is useful in the rare case that a plugin has to spawn its own engine (for example,
+     * running an engine the background). The result is nullable since old versions of Flutter and
+     * custom setups may not have used a {@link FlutterEngineGroup}. Failing to use this when it is
+     * available will result in suboptimal performance and odd behaviors related to Dart isolate
+     * groups.
+     */
+    @Nullable
+    public FlutterEngineGroup getEngineGroup() {
+      return group;
     }
   }
 
