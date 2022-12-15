@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -225,7 +226,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(
-    IOSApp app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     bool result;
@@ -242,11 +243,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(IOSApp app) async => false;
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
   Future<bool> installApp(
-    IOSApp app, {
+    covariant IOSApp app, {
     String? userIdentifier,
   }) async {
     final Directory bundle = _fileSystem.directory(app.deviceBundlePath);
@@ -280,7 +281,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> uninstallApp(
-    IOSApp app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     int uninstallationResult;
@@ -434,7 +435,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    IOSApp app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     // If the debugger is not attached, killing the ios-deploy process won't stop the app.
@@ -453,7 +454,7 @@ class IOSDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    IOSApp? app,
+    covariant IOSApp? app,
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS devices.');
