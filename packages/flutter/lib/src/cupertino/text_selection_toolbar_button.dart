@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'icons.dart';
 import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
@@ -15,6 +16,8 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   letterSpacing: -0.15,
   fontWeight: FontWeight.w400,
 );
+
+const double _kToolbarButtonIconSize = 16.0;
 
 // Colors extracted from https://developer.apple.com/design/resources/.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
@@ -97,23 +100,49 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         return localizations.pasteButtonLabel;
       case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
+      case ContextMenuButtonType.captureText:
+        return localizations.scanTextButtonLabel;
       case ContextMenuButtonType.custom:
         return '';
+    }
+  }
+
+  static IconData? _getButtonIcon(BuildContext context, ContextMenuButtonItem buttonItem) {
+    switch (buttonItem.type) {
+      case ContextMenuButtonType.cut:
+      case ContextMenuButtonType.copy:
+      case ContextMenuButtonType.paste:
+      case ContextMenuButtonType.selectAll:
+      case ContextMenuButtonType.custom:
+        return null;
       case ContextMenuButtonType.captureText:
-        // TODO
-        return 'CaptureText';
+
+        /// TODO(luckysmg) need to get iOS scan text icon, but i didn't find it in CupertinoIcons.
+        return CupertinoIcons.switch_camera;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Widget child = this.child ?? Text(
-      getButtonLabel(context, buttonItem!),
-      overflow: TextOverflow.ellipsis,
-      style: _kToolbarButtonFontStyle.copyWith(
-        color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
-      ),
-    );
+    final Widget child;
+    if (this.child != null) {
+      child = this.child!;
+    } else {
+      // If there is icon for this button, only show icon.
+      final IconData? icon = _getButtonIcon(context, buttonItem!);
+      if (icon == null) {
+        child = Text(
+          getButtonLabel(context, buttonItem!),
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle.copyWith(
+            color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
+          ),
+        );
+      } else {
+        child = Icon(icon, size: _kToolbarButtonIconSize);
+      }
+    }
+
     return CupertinoButton(
       borderRadius: null,
       color: _kToolbarBackgroundColor,
