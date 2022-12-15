@@ -490,6 +490,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adc/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json

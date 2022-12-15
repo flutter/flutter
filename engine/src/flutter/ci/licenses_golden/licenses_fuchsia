@@ -1,4 +1,4 @@
-Signature: 4b0162e54f800056ccba552592ba5b88
+Signature: 9c8c53a57708a1bdfa8abb9badb41bb1
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -1242,6 +1242,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/manager.fidl + ../../../f
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/data.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/tiles.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.magma/magma.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/i2c.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/encoded_image.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/memory_type.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -1494,6 +1495,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/data.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/tiles.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.magma/magma.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/i2c.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/encoded_image.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/memory_type.fidl
