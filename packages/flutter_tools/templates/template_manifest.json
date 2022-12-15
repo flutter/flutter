@@ -44,7 +44,7 @@
         "templates/app_shared/ios-objc.tmpl/Runner/AppDelegate.m",
         "templates/app_shared/ios-objc.tmpl/Runner/main.m",
         "templates/app_shared/ios-swift.tmpl/Runner.xcodeproj/project.pbxproj.tmpl",
-        "templates/app_shared/ios-swift.tmpl/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+        "templates/app_shared/ios-swift.tmpl/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme.tmpl",
         "templates/app_shared/ios-swift.tmpl/Runner/AppDelegate.swift",
         "templates/app_shared/ios-swift.tmpl/Runner/Runner-Bridging-Header.h",
         "templates/app_shared/ios.tmpl/.gitignore",
@@ -54,7 +54,6 @@
         "templates/app_shared/ios.tmpl/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
         "templates/app_shared/ios.tmpl/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
         "templates/app_shared/ios.tmpl/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
-        "templates/app_shared/ios.tmpl/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
         "templates/app_shared/ios.tmpl/Runner.xcworkspace/contents.xcworkspacedata",
         "templates/app_shared/ios.tmpl/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
         "templates/app_shared/ios.tmpl/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
@@ -278,6 +277,8 @@
         "templates/plugin/windows.tmpl/pluginClassSnakeCase.h.tmpl",
         "templates/plugin/windows.tmpl/pluginClassSnakeCase_c_api.cpp.tmpl",
         "templates/plugin/lib/projectName_web.dart.tmpl",
+
+        "templates/plugin_example/ios-swift.tmpl/RunnerTests/pluginClassTests.swift.tmpl",
 
         "templates/plugin_ffi/android.tmpl/build.gradle.tmpl",
         "templates/plugin_ffi/android.tmpl/projectName_android.iml.tmpl",

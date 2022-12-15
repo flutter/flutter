@@ -2408,6 +2408,24 @@ void main() {
     androidIdentifier: 'com.example.flutter_project');
   });
 
+  testUsingContext('plugin includes native unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=ios', projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('example')
+        .childDirectory('ios')
+        .childDirectory('RunnerTests')
+        .childFile('FlutterProjectPluginTest.swift'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
   testUsingContext('create a module with --platforms throws error.', () async {
     Cache.flutterRoot = '../..';
 

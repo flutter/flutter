@@ -1,0 +1,31 @@
+import Flutter
+import UIKit
+import XCTest
+
+@testable import {{pluginProjectName}}
+
+// This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
+//
+// IMPORTANT: Before these tests can be compiled and run, the following needs to be added to this
+// example application's Podfile, in the `target 'Runner' do` section:
+//     target 'RunnerTests' do
+//       inherit! :search_paths
+//     end
+// followed by running 'pod install' in the example/ios/ directory.
+
+class {{pluginClass}}Tests: XCTestCase {
+
+  func testGetPlatformVersion() {
+    let plugin = {{pluginClass}}()
+
+    let call = FlutterMethodCall(methodName: "getPlatformVersion", arguments: [])
+
+    let resultExpectation = expectation(description: "result block must be called.")
+    plugin.handle(call) { result in
+      XCTAssertEqual(result as! String, "iOS " + UIDevice.current.systemVersion)
+      resultExpectation.fulfill()
+    }
+    waitForExpectations(timeout: 1)
+  }
+
+}
