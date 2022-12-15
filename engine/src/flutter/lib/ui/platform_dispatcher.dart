@@ -1156,8 +1156,7 @@ class PlatformDispatcher {
   ///
   /// This callback is not directly invoked by errors in child isolates of the
   /// root isolate. Programs that create new isolates must listen for errors on
-  /// those isolates and forward the errors to the root isolate. An example of
-  /// this can be found in the Flutter framework's `compute` function.
+  /// those isolates and forward the errors to the root isolate.
   ErrorCallback? get onError => _onError;
   set onError(ErrorCallback? callback) {
     _onError = callback;
