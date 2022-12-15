@@ -761,7 +761,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         // on the button will be lost.
         result = GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onLongPress: _handlePress,
+          onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
           excludeFromSemantics: true,
           child: result,
         );
