@@ -7,7 +7,7 @@ environment:
 dependencies:
   args: 2.3.1
   crypto: 3.0.2
-  intl: 0.17.0
+  intl: 0.18.0
   flutter_devicelab:
     path: ../devicelab
   http_parser: 4.0.2
@@ -71,4 +71,4 @@ dependencies:
 dev_dependencies:
   test_api: 0.4.17
 
-# PUBSPEC CHECKSUM: 257b
+# PUBSPEC CHECKSUM: 1f7c
