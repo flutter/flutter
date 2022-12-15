@@ -23,6 +23,9 @@ enum ContextMenuButtonType {
   /// A button that selects all the contents of the focused text field.
   selectAll,
 
+  /// A button that starts live text capture input.
+  captureText,
+
   /// Anything other than the default button types.
   custom,
 }

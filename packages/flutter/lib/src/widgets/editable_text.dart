@@ -1672,40 +1672,54 @@ class EditableText extends StatefulWidget {
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   static List<ContextMenuButtonItem> getEditableButtonItems({
     required final ClipboardStatus? clipboardStatus,
+    required final LiveTextStatus? liveTextStatus,
     required final VoidCallback? onCopy,
     required final VoidCallback? onCut,
     required final VoidCallback? onPaste,
     required final VoidCallback? onSelectAll,
+    required final VoidCallback? onCaptureText,
   }) {
-    // If the paste button is enabled, don't render anything until the state
-    // of the clipboard is known, since it's used to determine if paste is
-    // shown.
+    final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
+
+    // Config button items with clip board.
     if (onPaste != null && clipboardStatus == ClipboardStatus.unknown) {
-      return <ContextMenuButtonItem>[];
+      // If the paste button is enabled, don't render anything until the state
+      // of the clipboard is known, since it's used to determine if paste is
+      // shown.
+    } else {
+      resultButtonItem.addAll(<ContextMenuButtonItem>[
+        if (onCut != null)
+          ContextMenuButtonItem(
+            onPressed: onCut,
+            type: ContextMenuButtonType.cut,
+          ),
+        if (onCopy != null)
+          ContextMenuButtonItem(
+            onPressed: onCopy,
+            type: ContextMenuButtonType.copy,
+          ),
+        if (onPaste != null)
+          ContextMenuButtonItem(
+            onPressed: onPaste,
+            type: ContextMenuButtonType.paste,
+          ),
+        if (onSelectAll != null)
+          ContextMenuButtonItem(
+            onPressed: onSelectAll,
+            type: ContextMenuButtonType.selectAll,
+          ),
+      ]);
     }
 
-    return <ContextMenuButtonItem>[
-      if (onCut != null)
-        ContextMenuButtonItem(
-          onPressed: onCut,
-          type: ContextMenuButtonType.cut,
-        ),
-      if (onCopy != null)
-        ContextMenuButtonItem(
-          onPressed: onCopy,
-          type: ContextMenuButtonType.copy,
-        ),
-      if (onPaste != null)
-        ContextMenuButtonItem(
-          onPressed: onPaste,
-          type: ContextMenuButtonType.paste,
-        ),
-      if (onSelectAll != null)
-        ContextMenuButtonItem(
-          onPressed: onSelectAll,
-          type: ContextMenuButtonType.selectAll,
-        ),
-    ];
+    // Config button items with live text.
+    if (onCaptureText != null && liveTextStatus == LiveTextStatus.enabled) {
+      resultButtonItem.add(ContextMenuButtonItem(
+        onPressed: onCaptureText,
+        type: ContextMenuButtonType.captureText,
+      ));
+    }
+
+    return resultButtonItem;
   }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -1903,6 +1917,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Detects whether the clipboard can paste.
   final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
+  /// Detects whether the live text input is enabled.
+  final LiveTextStatusNotifier? liveTextStatus = kIsWeb ? null : LiveTextStatusNotifier();
+
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
@@ -2034,9 +2051,29 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  @override
+  bool get captureTextEnabled {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return !widget.obscureText && !widget.readOnly && textEditingValue.selection.isCollapsed;
+    }
+  }
+
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
+  void _onChangedLiveTextStatus() {
+    setState(() {
+      // Inform the widget that the value of liveTextStatus has changed.
     });
   }
 
@@ -2190,6 +2227,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  @override
+  void captureText(SelectionChangedCause cause) {
+    if (widget.readOnly || widget.obscureText) {
+      return;
+    }
+    if (_hasInputConnection) {
+      _textInputConnection?.startLiveTextInput();
+    }
+    if (cause == SelectionChangedCause.toolbar) {
+      hideToolbar();
+    }
+  }
+
   /// Infers the [SpellCheckConfiguration] used to perform spell check.
   ///
   /// If spell check is enabled, this will try to infer a value for
@@ -2339,6 +2389,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   List<ContextMenuButtonItem> get contextMenuButtonItems {
     return buttonItemsForToolbarOptions() ?? EditableText.getEditableButtonItems(
       clipboardStatus: clipboardStatus?.value,
+      liveTextStatus: liveTextStatus?.value,
       onCopy: copyEnabled
           ? () => copySelection(SelectionChangedCause.toolbar)
           : null,
@@ -2351,6 +2402,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onSelectAll: selectAllEnabled
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
+      onCaptureText: captureTextEnabled
+        ? () => captureText(SelectionChangedCause.toolbar)
+          : null,
     );
   }
 
@@ -2360,6 +2414,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void initState() {
     super.initState();
     clipboardStatus?.addListener(_onChangedClipboardStatus);
+    liveTextStatus?.addListener(_onChangedLiveTextStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_onEditableScroll);
@@ -2507,6 +2562,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     WidgetsBinding.instance.removeObserver(this);
     clipboardStatus?.removeListener(_onChangedClipboardStatus);
     clipboardStatus?.dispose();
+    liveTextStatus?.removeListener(_onChangedLiveTextStatus);
+    liveTextStatus?.dispose();
     _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3639,6 +3696,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
     clipboardStatus?.update();
+    liveTextStatus?.update();
     _selectionOverlay!.showToolbar();
     return true;
   }

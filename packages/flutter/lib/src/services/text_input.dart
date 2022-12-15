@@ -1058,6 +1058,9 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
+  /// Whether capture text input is enabled, must not be null.
+  bool get captureTextEnabled => false;
+
   /// Cut current selection to [Clipboard].
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
@@ -1083,6 +1086,12 @@ mixin TextSelectionDelegate {
   /// If [cause] is [SelectionChangedCause.toolbar], the position of
   /// [bringIntoView] to selection will be called and hide toolbar.
   void copySelection(SelectionChangedCause cause);
+
+  /// Start capturing text from camera to input.
+  ///
+  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
+  /// will be hidden and the current selection will be scrolled into view.
+  void captureText(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].
@@ -1332,6 +1341,12 @@ class TextInputConnection {
   void show() {
     assert(attached);
     TextInput._instance._show();
+  }
+
+  /// Start live text capture input.
+  void startLiveTextInput() {
+    assert(attached);
+    TextInput._instance._startLiveTextInput();
   }
 
   /// Requests the system autofill UI to appear.
@@ -1962,6 +1977,12 @@ class TextInput {
     }
   }
 
+  void _startLiveTextInput() {
+    for (final TextInputControl control in _inputControls) {
+      control.startLiveTextInput();
+    }
+  }
+
   void _hide() {
     for (final TextInputControl control in _inputControls) {
       control.hide();
@@ -2153,6 +2174,11 @@ mixin TextInputControl {
   /// This method is called when the input control should become visible.
   void show() {}
 
+  /// Requests that the text input control start live text input (OCR).
+  ///
+  /// This method is called when the input control will start capturing text input.
+  void startLiveTextInput() {}
+
   /// Requests that the text input control is hidden.
   ///
   /// This method is called when the input control should hide.
@@ -2271,6 +2297,11 @@ class _PlatformTextInputControl with TextInputControl {
   @override
   void show() {
     _channel.invokeMethod<void>('TextInput.show');
+  }
+
+  @override
+  void startLiveTextInput() {
+    _channel.invokeMethod<void>('TextInput.startLiveTextInput');
   }
 
   @override

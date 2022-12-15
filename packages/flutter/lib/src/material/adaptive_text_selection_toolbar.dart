@@ -99,18 +99,22 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   AdaptiveTextSelectionToolbar.editable({
     super.key,
     required ClipboardStatus clipboardStatus,
+    required LiveTextStatus liveTextStatus,
     required VoidCallback? onCopy,
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
     required VoidCallback? onSelectAll,
+    required VoidCallback? onCaptureText,
     required this.anchors,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
          clipboardStatus: clipboardStatus,
+         liveTextStatus: liveTextStatus,
          onCopy: onCopy,
          onCut: onCut,
          onPaste: onPaste,
          onSelectAll: onSelectAll,
+         onCaptureText: onCaptureText
        );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
@@ -213,6 +217,9 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             return localizations.selectAllButtonLabel;
           case ContextMenuButtonType.custom:
             return '';
+          case ContextMenuButtonType.captureText:
+            // TODO need a localizations text
+            return 'Capture Text';
         }
     }
   }

@@ -1059,6 +1059,11 @@ class FakeTextInputControl with TextInputControl {
   }
 
   @override
+  void startLiveTextInput() {
+    methodCalls.add('startLiveTextInput');
+  }
+
+  @override
   void hide() {
     methodCalls.add('hide');
   }

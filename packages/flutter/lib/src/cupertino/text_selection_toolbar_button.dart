@@ -99,6 +99,9 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         return localizations.selectAllButtonLabel;
       case ContextMenuButtonType.custom:
         return '';
+      case ContextMenuButtonType.captureText:
+        // TODO
+        return 'CaptureText';
     }
   }
 
