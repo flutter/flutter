@@ -104,7 +104,6 @@ void main() {
     expect(dialogMaterial.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
     final RenderBox dial = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-    debugPrint('Color: ${defaultTheme.colorScheme.onSurface.withOpacity(0.08)}');
     expect(
       dial,
       paints
