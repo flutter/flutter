@@ -1,13 +1,3 @@
-Signature: ffe64a3daaf0ad982854594ad155dd56
-
-====================================================================================================
-LIBRARY: engine
-ORIGIN: ../../../gpu/GLES2/gl2chromium.h + ../../../gpu/LICENSE
-ORIGIN: ../../../gpu/command_buffer/client/gles2_c_lib_export.h + ../../../gpu/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../gpu/GLES2/gl2chromium.h
-FILE: ../../../gpu/command_buffer/client/gles2_c_lib_export.h
-----------------------------------------------------------------------------------------------------
 Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -33,6 +23,3 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-Total license count: 1

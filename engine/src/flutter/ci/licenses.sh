@@ -35,14 +35,18 @@ PATH="$DART_BIN:$PATH"
 
 # Use:
 #   env VERBOSE=1 ./ci/licenses.sh
-# to turn on verbose progress report printing.
+# to turn on verbose progress report printing. Set it to 2 to also output
+# information about which patterns are taking the most time.
 QUIET="--quiet"
 if [[ "${VERBOSE}" == "1" ]]; then
   QUIET=""
 fi
+if [[ "${VERBOSE}" == "2" ]]; then
+  QUIET="--verbose"
+fi
 
 echo "Verifying license script is still happy..."
-echo "Using pub from $(command -v pub), dart from $(command -v dart)"
+echo "Using dart from: $(command -v dart)"
 
 untracked_files="$(cd "$SRC_DIR/flutter"; git status --ignored --short | grep -E "^!" | awk "{print\$2}")"
 untracked_count="$(echo "$untracked_files" | wc -l)"
@@ -57,6 +61,12 @@ if [[ $untracked_count -gt 0 ]]; then
 fi
 
 dart --version
+
+# Runs the tests for the license script.
+function run_tests() (
+  cd "$SRC_DIR/flutter/tools/licenses"
+  find -name "*_test.dart" | xargs -n 1 dart --enable-asserts
+)
 
 # Collects the license information from the repo.
 # Runs in a subshell.
@@ -117,11 +127,29 @@ function verify_licenses() (
       exitStatus=1
   fi
 
+  echo "Verifying excluded files list..."
+  if ! cmp -s "flutter/ci/licenses_golden/excluded_files" "out/license_script_output/excluded_files"; then
+      echo "============================= ERROR ============================="
+      echo "The license is excluding a different number of files than previously."
+      echo "This is only expected when new non-source files have been introduced."
+      echo "Verify that all the newly ignored files are definitely not shipped with"
+      echo "any binaries that we compile (including impellerc and Wasm)."
+      echo "If the changes look correct, update this file:"
+      echo "  ci/licenses_golden/excluded_files"
+      echo "For more information, see the script in:"
+      echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
+      echo ""
+      diff -U 6 "flutter/ci/licenses_golden/excluded_files" "out/license_script_output/excluded_files"
+      echo "================================================================="
+      echo ""
+      exitStatus=1
+  fi
+
   echo "Checking license count in licenses_flutter..."
 
   local actualLicenseCount
   actualLicenseCount="$(tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9')"
-  local expectedLicenseCount=19 # When changing this number: Update the error message below as well describing all expected license types.
+  local expectedLicenseCount=19 # When changing this number: Update the error message below as well describing the newly expected license types.
 
   if [[ $actualLicenseCount -ne $expectedLicenseCount ]]; then
       echo "=============================== ERROR ==============================="
@@ -145,4 +173,5 @@ function verify_licenses() (
   return $exitStatus
 )
 
+run_tests
 verify_licenses
