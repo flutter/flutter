@@ -39,6 +39,31 @@ _flutter_framework_headers = [
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
+source_set("flutter_framework_source_arc") {
+  visibility = [ ":*" ]
+  cflags_objc = flutter_cflags_objc_arc
+  cflags_objcc = flutter_cflags_objcc_arc
+
+  defines = [ "FLUTTER_FRAMEWORK=1" ]
+  allow_circular_includes_from = [ ":flutter_framework_source" ]
+  deps = [
+    ":flutter_framework_source",
+    "//flutter/fml",
+    "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/darwin/common:framework_shared",
+    "//third_party/icu",
+  ]
+  public_configs = [ "//flutter:config" ]
+
+  sources = [
+    "framework/Source/FlutterTextInputDelegate.h",
+    "framework/Source/FlutterTextInputPlugin.h",
+    "framework/Source/FlutterTextInputPlugin.mm",
+  ]
+
+  frameworks = [ "UIKit.framework" ]
+}
+
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
@@ -81,9 +106,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterSemanticsScrollView.mm",
     "framework/Source/FlutterSpellCheckPlugin.h",
     "framework/Source/FlutterSpellCheckPlugin.mm",
-    "framework/Source/FlutterTextInputDelegate.h",
-    "framework/Source/FlutterTextInputPlugin.h",
-    "framework/Source/FlutterTextInputPlugin.mm",
     "framework/Source/FlutterUIPressProxy.h",
     "framework/Source/FlutterUIPressProxy.mm",
     "framework/Source/FlutterUndoManagerDelegate.h",
@@ -209,6 +231,7 @@ source_set("ios_test_flutter_mrc") {
   ]
   deps = [
     ":flutter_framework_source",
+    ":flutter_framework_source_arc",
     "//flutter/common:common",
     "//flutter/lib/ui:ui",
     "//flutter/shell/common:common",
@@ -267,6 +290,7 @@ shared_library("ios_test_flutter") {
   deps = [
     ":flutter_framework",
     ":flutter_framework_source",
+    ":flutter_framework_source_arc",
     ":ios_gpu_configuration",
     ":ios_test_flutter_mrc",
     "//flutter/common:common",
@@ -295,7 +319,10 @@ shared_library("create_flutter_framework_dylib") {
 
   public = _flutter_framework_headers
 
-  deps = [ ":flutter_framework_source" ]
+  deps = [
+    ":flutter_framework_source",
+    ":flutter_framework_source_arc",
+  ]
 
   public_configs = [ "//flutter:config" ]
 }
