@@ -157,7 +157,10 @@ abstract class DesktopDevice extends Device {
     print('DesktopDevice.startApp: #3');
 
     _runningProcesses.add(process);
-    unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
+    unawaited(process.exitCode.then((value) {
+      print('DesktopDevice.startApp: process ended "$value"');
+      _runningProcesses.remove(process);
+    }));
 
     print('DesktopDevice.startApp: Initializing process..');
 
@@ -178,7 +181,7 @@ abstract class DesktopDevice extends Device {
       logger: _logger,
     );
     try {
-      print('DesktopDevice.startApp: #4');
+      print('DesktopDevice.startApp: discovering observatory URL...');
 
       final Uri? observatoryUri = await observatoryDiscovery.uri;
       print('DesktopDevice.startApp: Observatory URL $observatoryUri');
