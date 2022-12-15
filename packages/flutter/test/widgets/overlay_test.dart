@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 
 import 'semantics_tester.dart';
 
@@ -1193,39 +1194,52 @@ void main() {
       expect(error, isAssertionError);
     });
 
-    testWidgets('delayed dispose', (WidgetTester tester) async {
-      await tester.pumpWidget(emptyOverlay);
-      final OverlayState overlay = overlayKey.currentState! as OverlayState;
-      final List<bool> mountedLog = <bool>[];
-      final OverlayEntry entry = OverlayEntry(
-        builder: (BuildContext context) => Container(),
-      );
-      entry.addListener(() {
-        mountedLog.add(entry.mounted);
-      });
+    testWidgets(
+      'delayed dispose notifies listeners and disposes disposables',
+      (WidgetTester tester) async {
+        void flutterMemoryListener(ObjectEvent event) {
+          dispatchObjectEvent(event.toMap());
+        }
 
-      overlay.insert(entry);
-      await tester.pump();
-      expect(mountedLog, <bool>[true]);
+        MemoryAllocations.instance.addListener(flutterMemoryListener);
 
-      entry.remove();
-      // Call dispose on the entry. The listeners should be notified for one
-      // last time after this.
-      entry.dispose();
-      expect(mountedLog, <bool>[true]);
-      await tester.pump();
-      expect(mountedLog, <bool>[true, false]);
-      expect(tester.takeException(), isNull);
+        await tester.runAsync(() async {
+          await withLeakTracking(() async {
+            await tester.pumpWidget(emptyOverlay);
+            final OverlayState overlay = overlayKey.currentState! as OverlayState;
+            final List<bool> mountedLog = <bool>[];
+            final OverlayEntry entry = OverlayEntry(
+              builder: (BuildContext context) => Container(),
+            );
+            entry.addListener(() {
+              mountedLog.add(entry.mounted);
+            });
 
-      // The entry is no longer usable.
-      Object? error;
-      try {
-        entry.addListener(() {  });
-      } catch (e) {
-        error = e;
-      }
-      expect(error, isAssertionError);
-    });
+            overlay.insert(entry);
+            await tester.pump();
+            expect(mountedLog, <bool>[true]);
+
+            entry.remove();
+            // Call dispose on the entry. The listeners should be notified for one
+            // last time after this.
+            entry.dispose();
+            expect(mountedLog, <bool>[true]);
+            await tester.pump();
+            expect(mountedLog, <bool>[true, false]);
+            expect(tester.takeException(), isNull);
+
+            // The entry is no longer usable.
+            Object? error;
+            try {
+              entry.addListener(() {  });
+            } catch (e) {
+              error = e;
+            }
+            expect(error, isAssertionError);
+          });
+        });
+      },
+    );
   });
 
   group('LookupBoundary', () {
