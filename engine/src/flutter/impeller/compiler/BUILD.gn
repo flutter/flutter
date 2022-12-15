@@ -61,8 +61,7 @@ impeller_component("compiler_lib") {
     "../runtime_stage",
     "//flutter/fml",
 
-    # All third_party deps must be reflected below in the impellerc_license
-    # target.
+    # All third_party deps must be included by the global license script.
     "//third_party/inja",
     "//third_party/shaderc_flutter",
     "//third_party/spirv_cross_flutter",
@@ -86,23 +85,6 @@ generated_file("impellerc_license") {
     "",
     read_file("//flutter/sky/packages/sky_engine/LICENSE", "string"),
     "",
-
-    # These licenses are ignored by the main license checker, since they are not
-    # shipped to end-application binaries and only shipped as part of developer
-    # tooling in impellerc. Add them here.
-    "## Additional open source licenses",
-    "",
-    "### inja",
-    "",
-    read_file("//third_party/inja/LICENSE", "string"),
-    "",
-    "### shaderc",
-    "",
-    read_file("//third_party/shaderc/LICENSE", "string"),
-    "",
-    "### spirv_cross",
-    "",
-    read_file("//third_party/vulkan-deps/spirv-cross/src/LICENSE", "string"),
   ]
 }
 
