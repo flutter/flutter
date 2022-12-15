@@ -54,15 +54,25 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
-  static List<ContextMenuButtonItem> buildButtonItems(
+  static List<ContextMenuButtonItem>? buildButtonItems(
     BuildContext context,
     EditableTextState editableTextState,
-    SuggestionSpan suggestionSpan,
   ) {
+    // Determine if composing region is misspelled.
+    final SuggestionSpan? spanAtCursorIndex =
+      findSuggestionSpanAtCursorIndex(
+        editableTextState.currentTextEditingValue.selection.baseOffset,
+        editableTextState.spellCheckResults!.suggestionSpans,
+    );
+
+    if (spanAtCursorIndex == null) {
+      return null;
+    }
+
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
-    for (final String suggestion in suggestionSpan.suggestions) {
+    for (final String suggestion in spanAtCursorIndex.suggestions) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
           editableTextState
@@ -76,7 +86,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     }
 
     // Build delete button.
-    ContextMenuButtonItem deleteButton =
+    final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
           editableTextState.replaceComposingRegion(
@@ -86,8 +96,6 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
         },
         type: ContextMenuButtonType.delete,
     );
-    deleteButton = deleteButton.copyWith(label: AdaptiveTextSelectionToolbar.getButtonLabel(context, deleteButton));
-    // deleteButton.label = AdaptiveTextSelectionToolbar.getButtonLabel(context, deleteButton);
     buttonItems.add(deleteButton);
 
     return buttonItems;
@@ -99,21 +107,21 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   }
 
   /// Builds the toolbar buttons based on the [buttonItems].
-  List<Widget> _buildToolbarButtons() {
+  List<Widget> _buildToolbarButtons(BuildContext context) {
     return buttonItems.map((ContextMenuButtonItem buttonItem) {
       final TextSelectionToolbarTextButton button =
         TextSelectionToolbarTextButton(
           padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
           onPressed: buttonItem.onPressed,
           alignment: Alignment.centerLeft,
-          child: Text(buttonItem.label!),
+          child: Text(AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem)),
         );
 
       if (buttonItem.type == ContextMenuButtonType.delete) {
         return DecoratedBox(
           decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
           child: button.copyWith(
-            child: Text(buttonItem.label!, style: const TextStyle(color: Colors.blue)),
+            child: Text(AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem), style: const TextStyle(color: Colors.blue)),
           )
         );
       }
@@ -152,7 +160,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
           duration: const Duration(milliseconds: 140),
           child: _spellCheckSuggestionsToolbarBuilder(context, _SpellCheckSuggestsionsToolbarItemsLayout(
             height: spellCheckSuggestionsToolbarHeight,
-            children: <Widget>[..._buildToolbarButtons()],
+            children: <Widget>[..._buildToolbarButtons(context)],
           )),
         ),
       ),

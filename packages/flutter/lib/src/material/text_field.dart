@@ -812,20 +812,14 @@ class TextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    final SuggestionSpan? spanAtCursorIndex =
-      findSuggestionSpanAtCursorIndex(
-        editableTextState.currentTextEditingValue.selection.baseOffset,
-        editableTextState.spellCheckResults!.suggestionSpans,
-      );
-
-    if (spanAtCursorIndex == null) {
-      return const SizedBox.shrink();
-    }
-
     final Offset anchor =
       SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
-    final List<ContextMenuButtonItem> buttonItems =
-      SpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState, spanAtCursorIndex);
+    final List<ContextMenuButtonItem>? buttonItems =
+      SpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+
+    if (buttonItems == null){
+      return const SizedBox.shrink();
+    }
 
     return SpellCheckSuggestionsToolbar(
       anchor: anchor,
