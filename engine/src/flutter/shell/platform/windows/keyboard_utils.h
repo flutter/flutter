@@ -11,6 +11,15 @@
 
 namespace flutter {
 
+constexpr int kShift = 1 << 0;
+constexpr int kControl = 1 << 3;
+constexpr int kScanCodeShiftLeft = 0x2a;
+constexpr int kScanCodeShiftRight = 0x36;
+constexpr int kKeyCodeShiftLeft = 0xa0;
+constexpr int kScanCodeControlLeft = 0x1d;
+constexpr int kScanCodeControlRight = 0xe01d;
+constexpr int kKeyCodeControlLeft = 0xa2;
+
 // The bit of a mapped character in a WM_KEYDOWN message that indicates the
 // character is a dead key.
 //

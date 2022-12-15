@@ -42,6 +42,9 @@ class SpyKeyboardKeyHandler : public KeyboardHandlerBase {
     ON_CALL(*this, KeyboardHook(_, _, _, _, _, _, _))
         .WillByDefault(Invoke(real_implementation_.get(),
                               &KeyboardKeyHandler::KeyboardHook));
+    ON_CALL(*this, SyncModifiersIfNeeded(_))
+        .WillByDefault(Invoke(real_implementation_.get(),
+                              &KeyboardKeyHandler::SyncModifiersIfNeeded));
   }
 
   MOCK_METHOD7(KeyboardHook,
@@ -52,6 +55,8 @@ class SpyKeyboardKeyHandler : public KeyboardHandlerBase {
                     bool extended,
                     bool was_down,
                     KeyEventCallback callback));
+
+  MOCK_METHOD1(SyncModifiersIfNeeded, void(int modifiers_state));
 
  private:
   std::unique_ptr<KeyboardKeyHandler> real_implementation_;
@@ -266,15 +271,15 @@ TEST(FlutterWindowTest, OnPointerStarSendsDeviceType) {
   // Move
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId))
+                            kDefaultPointerDeviceId, 0))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId))
+                            kDefaultPointerDeviceId, 0))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId))
+                            kDefaultPointerDeviceId, 0))
       .Times(1);
 
   // Down
@@ -323,7 +328,7 @@ TEST(FlutterWindowTest, OnPointerStarSendsDeviceType) {
       .Times(1);
 
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId);
+                            kDefaultPointerDeviceId, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
                             kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
@@ -333,7 +338,7 @@ TEST(FlutterWindowTest, OnPointerStarSendsDeviceType) {
 
   // Touch
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId);
+                            kDefaultPointerDeviceId, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindTouch,
                             kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindTouch,
@@ -343,7 +348,7 @@ TEST(FlutterWindowTest, OnPointerStarSendsDeviceType) {
 
   // Pen
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId);
+                            kDefaultPointerDeviceId, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,

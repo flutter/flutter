@@ -29,6 +29,10 @@ class KeyboardHandlerBase {
                             bool extended,
                             bool was_down,
                             KeyEventCallback callback) = 0;
+
+  // If needed, synthesize modifier keys events by comparing the
+  // given modifiers state to the known pressing state..
+  virtual void SyncModifiersIfNeeded(int modifiers_state) = 0;
 };
 
 }  // namespace flutter

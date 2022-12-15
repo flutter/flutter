@@ -41,7 +41,8 @@ class FlutterWindow : public Window, public WindowBindingHandler {
   void OnPointerMove(double x,
                      double y,
                      FlutterPointerDeviceKind device_kind,
-                     int32_t device_id) override;
+                     int32_t device_id,
+                     int modifiers_state) override;
 
   // |Window|
   void OnPointerDown(double x,

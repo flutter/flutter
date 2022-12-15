@@ -15,6 +15,7 @@
 #include <cstring>
 
 #include "flutter/shell/platform/windows/dpi_utils.h"
+#include "flutter/shell/platform/windows/keyboard_utils.h"
 
 namespace flutter {
 
@@ -379,7 +380,7 @@ Window::HandleMessage(UINT const message,
             OnPointerDown(x, y, kFlutterPointerDeviceKindTouch, touch_id,
                           WM_LBUTTONDOWN);
           } else if (touch.dwFlags & TOUCHEVENTF_MOVE) {
-            OnPointerMove(x, y, kFlutterPointerDeviceKindTouch, touch_id);
+            OnPointerMove(x, y, kFlutterPointerDeviceKindTouch, touch_id, 0);
           } else if (touch.dwFlags & TOUCHEVENTF_UP) {
             OnPointerUp(x, y, kFlutterPointerDeviceKindTouch, touch_id,
                         WM_LBUTTONDOWN);
@@ -401,7 +402,15 @@ Window::HandleMessage(UINT const message,
         mouse_x_ = static_cast<double>(xPos);
         mouse_y_ = static_cast<double>(yPos);
 
-        OnPointerMove(mouse_x_, mouse_y_, device_kind, kDefaultPointerDeviceId);
+        int mods = 0;
+        if (wparam & MK_CONTROL) {
+          mods |= kControl;
+        }
+        if (wparam & MK_SHIFT) {
+          mods |= kShift;
+        }
+        OnPointerMove(mouse_x_, mouse_y_, device_kind, kDefaultPointerDeviceId,
+                      mods);
       }
       break;
     case WM_MOUSELEAVE:

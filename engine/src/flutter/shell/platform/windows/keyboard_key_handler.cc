@@ -31,6 +31,12 @@ void KeyboardKeyHandler::AddDelegate(
   delegates_.push_back(std::move(delegate));
 }
 
+void KeyboardKeyHandler::SyncModifiersIfNeeded(int modifiers_state) {
+  // Only call SyncModifierIfNeeded on the key embedder handler.
+  auto& key_embedder_handler = delegates_.front();
+  key_embedder_handler->SyncModifiersIfNeeded(modifiers_state);
+}
+
 void KeyboardKeyHandler::KeyboardHook(int key,
                                       int scancode,
                                       int action,

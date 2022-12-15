@@ -1832,7 +1832,7 @@ TEST(KeyboardTest, SynthesizeModifiers) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 
   // CapsLock, phase 0 -> 2 -> 0.
-  // (For phases, see |SynchronizeCritialToggledStates|.)
+  // (For phases, see |SynchronizeCriticalToggledStates|.)
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
       KeyStateChange{VK_CAPITAL, false, true}, event1});
   EXPECT_EQ(key_calls.size(), 3);

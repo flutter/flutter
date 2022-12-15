@@ -38,6 +38,8 @@ class KeyboardKeyChannelHandler
                     bool was_down,
                     std::function<void(bool)> callback);
 
+  void SyncModifiersIfNeeded(int modifiers_state);
+
  private:
   // The Flutter system channel for key event messages.
   std::unique_ptr<flutter::BasicMessageChannel<rapidjson::Document>> channel_;
