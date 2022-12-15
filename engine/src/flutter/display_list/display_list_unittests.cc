@@ -38,6 +38,112 @@ TEST(DisplayList, CallMethodAfterBuild) {
 }
 #endif  // NDEBUG
 
+TEST(DisplayList, RecorderInitialClipBounds) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkIRect clip_bounds = SkIRect::MakeWH(100, 100);
+  DisplayListCanvasRecorder recorder(cull_rect);
+  SkCanvas* canvas = &recorder;
+  ASSERT_EQ(canvas->getDeviceClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, RecorderInitialClipBoundsNaN) {
+  SkRect cull_rect = SkRect::MakeWH(SK_ScalarNaN, SK_ScalarNaN);
+  SkIRect clip_bounds = SkIRect::MakeEmpty();
+  DisplayListCanvasRecorder recorder(cull_rect);
+  SkCanvas* canvas = &recorder;
+  ASSERT_EQ(canvas->getDeviceClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, RecorderClipBoundsAfterClipRect) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkRect clip_rect = SkRect::MakeLTRB(10, 10, 20, 20);
+  SkIRect clip_bounds = SkIRect::MakeLTRB(10, 10, 20, 20);
+  DisplayListCanvasRecorder recorder(cull_rect);
+  SkCanvas* canvas = &recorder;
+  canvas->clipRect(clip_rect);
+  ASSERT_EQ(canvas->getDeviceClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, RecorderClipBoundsAfterClipRRect) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkRect clip_rect = SkRect::MakeLTRB(10, 10, 20, 20);
+  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 2, 2);
+  SkIRect clip_bounds = SkIRect::MakeLTRB(10, 10, 20, 20);
+  DisplayListCanvasRecorder recorder(cull_rect);
+  SkCanvas* canvas = &recorder;
+  canvas->clipRRect(clip_rrect);
+  ASSERT_EQ(canvas->getDeviceClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, RecorderClipBoundsAfterClipPath) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkPath clip_path = SkPath().addRect(10, 10, 15, 15).addRect(15, 15, 20, 20);
+  SkIRect clip_bounds = SkIRect::MakeLTRB(10, 10, 20, 20);
+  DisplayListCanvasRecorder recorder(cull_rect);
+  SkCanvas* canvas = &recorder;
+  canvas->clipPath(clip_path);
+  ASSERT_EQ(canvas->getDeviceClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, RecorderInitialClipBoundsNonZero) {
+  SkRect cull_rect = SkRect::MakeLTRB(10, 10, 100, 100);
+  SkIRect clip_bounds = SkIRect::MakeLTRB(10, 10, 100, 100);
+  DisplayListCanvasRecorder recorder(cull_rect);
+  SkCanvas* canvas = &recorder;
+  ASSERT_EQ(canvas->getDeviceClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, BuilderInitialClipBounds) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkRect clip_bounds = SkRect::MakeWH(100, 100);
+  DisplayListBuilder builder(cull_rect);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, BuilderInitialClipBoundsNaN) {
+  SkRect cull_rect = SkRect::MakeWH(SK_ScalarNaN, SK_ScalarNaN);
+  SkRect clip_bounds = SkRect::MakeEmpty();
+  DisplayListBuilder builder(cull_rect);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, BuilderClipBoundsAfterClipRect) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkRect clip_rect = SkRect::MakeLTRB(10, 10, 20, 20);
+  SkRect clip_bounds = SkRect::MakeLTRB(10, 10, 20, 20);
+  DisplayListBuilder builder(cull_rect);
+  builder.clipRect(clip_rect, SkClipOp::kIntersect, false);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, BuilderClipBoundsAfterClipRRect) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkRect clip_rect = SkRect::MakeLTRB(10, 10, 20, 20);
+  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 2, 2);
+  SkRect clip_bounds = SkRect::MakeLTRB(10, 10, 20, 20);
+  DisplayListBuilder builder(cull_rect);
+  builder.clipRRect(clip_rrect, SkClipOp::kIntersect, false);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, BuilderClipBoundsAfterClipPath) {
+  SkRect cull_rect = SkRect::MakeWH(100, 100);
+  SkPath clip_path = SkPath().addRect(10, 10, 15, 15).addRect(15, 15, 20, 20);
+  SkRect clip_bounds = SkRect::MakeLTRB(10, 10, 20, 20);
+  DisplayListCanvasRecorder recorder(cull_rect);
+  DisplayListBuilder builder(cull_rect);
+  builder.clipPath(clip_path, SkClipOp::kIntersect, false);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clip_bounds);
+}
+
+TEST(DisplayList, BuilderInitialClipBoundsNonZero) {
+  SkRect cull_rect = SkRect::MakeLTRB(10, 10, 100, 100);
+  SkRect clip_bounds = SkRect::MakeLTRB(10, 10, 100, 100);
+  DisplayListCanvasRecorder recorder(cull_rect);
+  DisplayListBuilder builder(cull_rect);
+  ASSERT_EQ(builder.getDestinationClipBounds(), clip_bounds);
+}
+
 TEST(DisplayList, SingleOpSizes) {
   for (auto& group : allGroups) {
     for (size_t i = 0; i < group.variants.size(); i++) {
