@@ -119,8 +119,6 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 
         auto strong_this = weak_this.lock();
         if (!strong_this) {
-          VALIDATION_LOG << "Library was collected before a pending pipeline "
-                            "creation could finish.";
           promise->set_value(nullptr);
           return;
         }
