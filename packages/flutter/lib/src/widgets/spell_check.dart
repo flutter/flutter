@@ -6,8 +6,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
-import 'editable_text.dart' show EditableTextContextMenuBuilder, EditableTextState;
-import 'framework.dart' show BuildContext, Widget, immutable;
+import 'editable_text.dart' show EditableTextContextMenuBuilder;
+import 'framework.dart' show immutable;
 
 /// Controls how spell check is performed for text input.
 ///
