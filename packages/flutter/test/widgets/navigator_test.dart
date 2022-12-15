@@ -3388,7 +3388,7 @@ void main() {
       expect(find.text('second-pageless1'), findsOneWidget);
       expect(myPages.length, 1);
 
-      // Pops the pageless route.
+      // Pop the pageless route.
       navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(myPages.length, 1);
