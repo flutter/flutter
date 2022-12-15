@@ -3698,7 +3698,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         oldEntriesTop -= 1;
         continue;
       }
-
       final Page<dynamic> newPage = widget.pages[newPagesTop];
       if (!oldEntry.canUpdateFrom(newPage)) {
         break;
