@@ -136,19 +136,16 @@ class ScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
   /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in
-  /// combination with a vertical pointer scroll event, will flip the axis of
-  /// the scroll input to be horizontal.
+  /// combination with a pointer scroll event, will flip the axes of the scroll
+  /// input.
   ///
-  /// This will for example, result in the input of a physical mouse wheel, to
-  /// apply to a [ScrollView] with an [Axis.horizontal] scroll direction.
+  /// This will for example, result in the input of a vertical mouse wheel, to
+  /// move the [ScrollPosition] of a [ScrollView] with an [Axis.horizontal]
+  /// scroll direction.
   ///
   /// If other keys exclusive of this set are pressed during a scroll event, in
-  /// conjunction with keys from this set, the scroll input will not be affected.
-  ///
-  /// On [TargetPlatform.macOS], the framework will not flip the input axes
-  /// when the default modifier of [LogicalKeyboardKey.shift]
-  /// is pressed, regardless of this value. This is because MacOS automatically
-  /// changes the input axis in this case.
+  /// conjunction with keys from this set, the scroll input will still be
+  /// flipped.
   ///
   /// Defaults to [LogicalKeyboardKey.shiftLeft],
   /// [LogicalKeyboardKey.shiftRight], cannot be null.

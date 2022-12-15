@@ -432,34 +432,7 @@ void main() {
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     // Vertical input not accepted
     expect(getScrollOffset(tester), 20.0);
-  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.macOS }));
-
-  testWidgets('Does not scroll horizontally on Mac when shift is pressed by default', (WidgetTester tester) async {
-    await pumpTest(
-      tester,
-      debugDefaultTargetPlatformOverride,
-      scrollDirection: Axis.horizontal,
-    );
-
-    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-    // Create a hover event so that |testPointer| has a location when generating the scroll.
-    testPointer.hover(scrollEventLocation);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-    // Vertical input not accepted
-    expect(getScrollOffset(tester), 0.0);
-
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-    // Vertical input not flipped or accepted.
-    expect(getScrollOffset(tester), 0.0);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-    await tester.pump();
-
-    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-    // Vertical input not accepted
-    expect(getScrollOffset(tester), 0.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Scrolls horizontally when custom key is pressed', (WidgetTester tester) async {
     await pumpTest(
@@ -487,11 +460,9 @@ void main() {
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     // Vertical input not accepted
     expect(getScrollOffset(tester), 20.0);
-
-    // No filtering out Mac this time, since it is not `shift`.
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Does not scroll horizontally when other keys are pressed at the same time', (WidgetTester tester) async {
+  testWidgets('Still scrolls horizontally when other keys are pressed at the same time', (WidgetTester tester) async {
     await pumpTest(
       tester,
       debugDefaultTargetPlatformOverride,
@@ -510,17 +481,15 @@ void main() {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
-    // Vertical not flipped or accepted.
-    expect(getScrollOffset(tester), 0.0);
+    // Vertical flipped & accepted.
+    expect(getScrollOffset(tester), 20.0);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
     await tester.pump();
 
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
     // Vertical input not accepted
-    expect(getScrollOffset(tester), 0.0);
-
-    // No filtering out Mac this time, since it is not `shift`.
+    expect(getScrollOffset(tester), 20.0);
   }, variant: TargetPlatformVariant.all());
 
   group('setCanDrag to false with active drag gesture: ', () {

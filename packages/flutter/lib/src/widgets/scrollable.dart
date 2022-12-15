@@ -755,57 +755,24 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     );
   }
 
-  bool _deltaShouldBeFlipped() {
-    final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
-    final bool keyModifiersAreActive = pressed.any(_configuration.pointerAxisModifiers.contains);
-    pressed.removeAll(_configuration.pointerAxisModifiers);
-    // Ensure no other keys are currently pressed so as to not conflict with
-    // other shortcuts.
-    if (keyModifiersAreActive && pressed.isEmpty) {
-      // The axis should be flipped.
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.macOS:
-          // Mac already handles shift to flip the input axis, so if the
-          // modifier is currently LogicalKeyboardKey.shift (the default),
-          // ignore.
-          final bool alreadyHandled = HardwareKeyboard.instance
-            .logicalKeysPressed.any(
-            <LogicalKeyboardKey>{
-              LogicalKeyboardKey.shiftLeft,
-              LogicalKeyboardKey.shiftRight,
-            }.contains);
-          if (alreadyHandled) {
-            return false;
-          }
-          continue flip;
-        flip:
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-        // iOS does not have the same quirk as MacOS.
-        case TargetPlatform.iOS:
-          return true;
-      }
-    }
-    // The axis should not be flipped.
-    return false;
-  }
-
   // Returns the delta that should result from applying [event] with axis,
   // direction, and any modifiers specified by the ScrollBehavior taken into
   // account for horizontal scrollers.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     late double delta;
+    final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
+    final bool flipAxes = pressed.any(_configuration.pointerAxisModifiers.contains);
 
     switch (widget.axis) {
       case Axis.horizontal:
-        delta = _deltaShouldBeFlipped()
+        delta = flipAxes
           ? event.scrollDelta.dy
           : event.scrollDelta.dx;
         break;
       case Axis.vertical:
-        delta = event.scrollDelta.dy;
+        delta = flipAxes
+          ? event.scrollDelta.dx
+          : event.scrollDelta.dy;
     }
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
