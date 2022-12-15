@@ -80,7 +80,7 @@ FLUTTER_ASSERT_ARC
   [restorationPlugin setRestorationData:data];
   XCTAssertEqual([capturedResult count], 2u);
   XCTAssertEqual([capturedResult objectForKey:@"enabled"], @YES);
-  XCTAssertEqual([[capturedResult objectForKey:@"data"] data], data);
+  XCTAssertEqualObjects([[capturedResult objectForKey:@"data"] data], data);
 }
 
 - (void)testRestorationDisabledRespondsRightAway {
@@ -112,7 +112,7 @@ FLUTTER_ASSERT_ARC
                                }];
   XCTAssertEqual([capturedResult count], 2u);
   XCTAssertEqual([capturedResult objectForKey:@"enabled"], @YES);
-  XCTAssertEqual([[capturedResult objectForKey:@"data"] data], data);
+  XCTAssertEqualObjects([[capturedResult objectForKey:@"data"] data], data);
 }
 
 - (void)testRespondsWithNoDataWhenRestorationIsCompletedWithoutData {
@@ -161,7 +161,7 @@ FLUTTER_ASSERT_ARC
                                result:^(id _Nullable result) {
                                  XCTAssertNil(result);
                                }];
-  XCTAssertEqual([restorationPlugin restorationData], data);
+  XCTAssertEqualObjects([restorationPlugin restorationData], data);
 }
 
 - (void)testRespondsWithDataSetByFramework {
@@ -177,7 +177,7 @@ FLUTTER_ASSERT_ARC
                                result:^(id _Nullable result) {
                                  XCTAssertNil(result);
                                }];
-  XCTAssertEqual([restorationPlugin restorationData], data);
+  XCTAssertEqualObjects([restorationPlugin restorationData], data);
 
   __block id capturedResult;
   methodCall = [FlutterMethodCall methodCallWithMethodName:@"get" arguments:nil];
@@ -187,7 +187,7 @@ FLUTTER_ASSERT_ARC
                                }];
   XCTAssertEqual([capturedResult count], 2u);
   XCTAssertEqual([capturedResult objectForKey:@"enabled"], @YES);
-  XCTAssertEqual([[capturedResult objectForKey:@"data"] data], data);
+  XCTAssertEqualObjects([[capturedResult objectForKey:@"data"] data], data);
 }
 
 - (void)testResetClearsData {
@@ -203,7 +203,7 @@ FLUTTER_ASSERT_ARC
                                result:^(id _Nullable result) {
                                  XCTAssertNil(result);
                                }];
-  XCTAssertEqual([restorationPlugin restorationData], data);
+  XCTAssertEqualObjects([restorationPlugin restorationData], data);
 
   [restorationPlugin reset];
   XCTAssertNil([restorationPlugin restorationData]);
