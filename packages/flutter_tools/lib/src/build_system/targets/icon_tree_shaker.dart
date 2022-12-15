@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:process/process.dart';
 
@@ -211,7 +212,21 @@ class IconTreeShaker {
       _logger.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
       throw IconTreeShakerException._('Font subsetting failed with exit code $code.');
     }
+    _logger.printStatus(getSubsetSummaryMessage(input, _fs.file(outputPath)));
     return true;
+  }
+
+  @visibleForTesting
+  String getSubsetSummaryMessage(File inputFont, File outputFont) {
+    final String fontName = inputFont.basename;
+    final double inputSize = inputFont.lengthSync().toDouble();
+    final double outputSize = outputFont.lengthSync().toDouble();
+    final double reductionBytes = inputSize - outputSize;
+    final String reductionPercentage = (reductionBytes / inputSize * 100).toStringAsFixed(1);
+    return 'Font asset "$fontName" was tree-shaken, reducing it from '
+        '${inputSize.ceil()} to ${outputSize.ceil()} bytes '
+        '($reductionPercentage% reduction). Tree-shaking can be disabled '
+        'by providing the --no-tree-shake-icons flag when building your app.';
   }
 
   /// Returns a map of { fontFamily: relativePath } pairs.

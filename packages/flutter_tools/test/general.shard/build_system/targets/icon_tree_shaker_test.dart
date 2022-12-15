@@ -232,9 +232,15 @@ void main() {
     final CompleterIOSink stdinSink = CompleterIOSink();
     addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     resetFontSubsetInvocation(stdinSink: stdinSink);
-
+    // Font starts out 2500 bytes long
+    final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+    // after subsetting, font is 1200 bytes long
+    fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
     bool subsetted = await iconTreeShaker.subsetFont(
-      input: fileSystem.file(inputPath),
+      input: inputFont,
       outputPath: outputPath,
       relativePath: relativePath,
     );
@@ -250,6 +256,10 @@ void main() {
     expect(subsetted, true);
     expect(stdinSink.getAndClear(), '59470\n');
     expect(processManager, hasNoRemainingExpectations);
+    expect(
+      logger.statusText,
+      contains('Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 2500 to 1200 bytes (52.0% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.'),
+    );
   });
 
   testWithoutContext('Does not subset a non-supported font', () async {
