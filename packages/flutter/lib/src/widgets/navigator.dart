@@ -3690,7 +3690,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     final List<_RouteEntry> unattachedPagelessRoutes=<_RouteEntry>[];
     // Scans the top of the list until we found a page-based route that cannot be
     // updated.
-    while ((oldEntriesBottom <= oldEntriesTop) && (newPagesBottom <= newPagesTop)) {    
+    while ((oldEntriesBottom <= oldEntriesTop) && (newPagesBottom <= newPagesTop)) {
       final _RouteEntry oldEntry = _history[oldEntriesTop];
       assert(oldEntry != null && oldEntry.currentState != _RouteLifecycle.disposed);
       if (!oldEntry.pageBased) {
