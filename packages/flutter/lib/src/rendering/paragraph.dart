@@ -650,37 +650,10 @@ class RenderParagraph extends RenderBox
     );
   }
 
-  bool _systemFontsChangeScheduled = false;
   @override
   void systemFontsDidChange() {
-    final SchedulerPhase phase = SchedulerBinding.instance.schedulerPhase;
-    switch (phase) {
-      case SchedulerPhase.idle:
-      case SchedulerPhase.postFrameCallbacks:
-        if (_systemFontsChangeScheduled) {
-          return;
-        }
-        _systemFontsChangeScheduled = true;
-        SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
-          assert(_systemFontsChangeScheduled);
-          _systemFontsChangeScheduled = false;
-          assert(
-            attached || (debugDisposed ?? true),
-            '$this is detached during $phase but not disposed.',
-          );
-          if (attached) {
-            super.systemFontsDidChange();
-            _textPainter.markNeedsLayout();
-          }
-        });
-        break;
-      case SchedulerPhase.transientCallbacks:
-      case SchedulerPhase.midFrameMicrotasks:
-      case SchedulerPhase.persistentCallbacks:
-        super.systemFontsDidChange();
-        _textPainter.markNeedsLayout();
-        break;
-    }
+    super.systemFontsDidChange();
+    _textPainter.markNeedsLayout();
   }
 
   // Placeholder dimensions representing the sizes of child inline widgets.

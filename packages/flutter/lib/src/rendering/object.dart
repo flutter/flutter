@@ -10,6 +10,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'debug.dart';
@@ -3945,12 +3946,17 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
 /// Mixin for [RenderObject] that will call [systemFontsDidChange] whenever the
 /// system fonts change.
 ///
-/// System fonts can change when the OS install or remove a font. Use this mixin if
-/// the [RenderObject] uses [TextPainter] or [Paragraph] to correctly update the
-/// text when it happens.
+/// System fonts can change when the OS installs or removes a font. Use this
+/// mixin if the [RenderObject] uses [TextPainter] or [Paragraph] to correctly
+/// update the text when it happens.
 mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
 
   /// A callback that is called when system fonts have changed.
+  ///
+  /// The framework defers the invocation of the callback to the
+  /// [SchedulerPhase.transientCallbacks] phase to ensure that the
+  /// [RenderObject]'s text layout is still valid when user interactions are in
+  /// progress (which usually take place during the [SchedulerPhase.idle] phase).
   ///
   /// By default, [markNeedsLayout] is called on the [RenderObject]
   /// implementing this mixin.
@@ -3963,15 +3969,44 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
     markNeedsLayout();
   }
 
+  bool _hasPendingSystemFontsDidChangeCallBack = false;
+  void _scheduleSystemFontsUpdate() {
+    assert(
+      SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle,
+      '${objectRuntimeType(this, "RelayoutWhenSystemFontsChangeMixin")}._scheduleSystemFontsUpdate() '
+      'called during ${SchedulerBinding.instance.schedulerPhase}.',
+    );
+    if (_hasPendingSystemFontsDidChangeCallBack) {
+      return;
+    }
+    _hasPendingSystemFontsDidChangeCallBack = true;
+    SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
+      assert(_hasPendingSystemFontsDidChangeCallBack);
+      _hasPendingSystemFontsDidChangeCallBack = false;
+      assert(
+        attached || (debugDisposed ?? true),
+        '$this is detached during ${SchedulerBinding.instance.schedulerPhase} but is not disposed.',
+      );
+      if (attached) {
+        systemFontsDidChange();
+      }
+    });
+  }
+
   @override
-  void attach(covariant PipelineOwner owner) {
+  void attach(PipelineOwner owner) {
     super.attach(owner);
-    PaintingBinding.instance.systemFonts.addListener(systemFontsDidChange);
+    // If there's a pending callback that would imply this node was detached
+    // between the idle phase and the next transientCallbacks phase. The tree
+    // can not be mutated between those two phases so that should never happen.
+    assert(!_hasPendingSystemFontsDidChangeCallBack);
+    PaintingBinding.instance.systemFonts.addListener(_scheduleSystemFontsUpdate);
   }
 
   @override
   void detach() {
-    PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
+    assert(!_hasPendingSystemFontsDidChangeCallBack);
+    PaintingBinding.instance.systemFonts.removeListener(_scheduleSystemFontsUpdate);
     super.detach();
   }
 }
