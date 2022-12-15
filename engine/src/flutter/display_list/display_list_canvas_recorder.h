@@ -26,7 +26,8 @@ class DisplayListCanvasRecorder
       public SkRefCnt,
       DisplayListOpFlags {
  public:
-  explicit DisplayListCanvasRecorder(const SkRect& bounds);
+  explicit DisplayListCanvasRecorder(const SkRect& bounds,
+                                     bool prepare_rtree = false);
 
   const sk_sp<DisplayListBuilder> builder() { return builder_; }
 

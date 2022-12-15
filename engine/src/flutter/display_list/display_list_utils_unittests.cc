@@ -9,22 +9,14 @@ namespace flutter {
 namespace testing {
 
 class MockDispatchHelper final : public virtual Dispatcher,
-                                 public virtual SkPaintDispatchHelper,
-                                 public virtual SkMatrixDispatchHelper,
-                                 public virtual ClipBoundsDispatchHelper,
-                                 public virtual IgnoreDrawDispatchHelper {
+                                 public SkPaintDispatchHelper,
+                                 public IgnoreClipDispatchHelper,
+                                 public IgnoreTransformDispatchHelper,
+                                 public IgnoreDrawDispatchHelper {
  public:
-  void save() override {
-    SkPaintDispatchHelper::save_opacity(0.5f);
-    SkMatrixDispatchHelper::save();
-    ClipBoundsDispatchHelper::save();
-  }
+  void save() override { SkPaintDispatchHelper::save_opacity(0.5f); }
 
-  void restore() override {
-    SkPaintDispatchHelper::restore_opacity();
-    SkMatrixDispatchHelper::restore();
-    ClipBoundsDispatchHelper::restore();
-  }
+  void restore() override { SkPaintDispatchHelper::restore_opacity(); }
 };
 
 // Regression test for https://github.com/flutter/flutter/issues/100176.
