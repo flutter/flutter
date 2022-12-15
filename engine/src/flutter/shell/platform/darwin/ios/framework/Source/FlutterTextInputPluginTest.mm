@@ -66,7 +66,6 @@ FLUTTER_ASSERT_ARC
                 delayRemoval:(BOOL)delayRemoval;
 - (NSArray<UIView*>*)textInputViews;
 - (UIView*)hostView;
-- (fml::WeakPtr<FlutterTextInputPlugin>)getWeakPtr;
 - (void)addToInputParentViewIfNeeded:(FlutterTextInputView*)inputView;
 - (void)startLiveTextInput;
 @end
