@@ -50,6 +50,32 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   bool get supportsRestartRequest => true;
 
+  /// A list of reverse-requests from `flutter run --machine` that should be forwarded to the client.
+  static const Set<String> _requestsToForwardToClient = <String>{
+    // The 'app.exposeUrl' request is sent by Flutter to request the client
+    // exposes a URL to the user and return the public version of that URL.
+    //
+    // This supports some web scenarios where the `flutter` tool may be running
+    // on a different machine to the user (for example a cloud IDE or in VS Code
+    // remote workspace) so we cannot just use the raw URL because the hostname
+    // and/or port might not be available to the machine the user is using.
+    // Instead, the IDE/infrastructure can set up port forwarding/proxying and
+    // return a user-facing URL that will map to the original (localhost) URL
+    // Flutter provided.
+    'app.exposeUrl',
+  };
+
+  /// A list of events from `flutter run --machine` that should be forwarded to the client.
+  static const Set<String> _eventsToForwardToClient = <String>{
+    // The 'app.webLaunchUrl' event is sent to the client to tell it about a URL
+    // that should be launched (including a flag for whether it has been
+    // launched by the tool or needs launching by the editor).
+    'app.webLaunchUrl',
+  };
+
+  /// Completers for reverse requests from Flutter that may need to be handled by the client.
+  final Map<Object, Completer<Object?>> _reverseRequestCompleters = <Object, Completer<Object?>>{};
+
   /// Whether or not the user requested debugging be enabled.
   ///
   /// For debugging to be enabled, the user must have chosen "Debug" (and not
@@ -148,6 +174,13 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
       case 'hotReload':
         final bool isFullRestart = request.command == 'hotRestart';
         await _performRestart(isFullRestart, args?.args['reason'] as String?);
+        sendResponse(null);
+        break;
+
+      // Handle requests (from the client) that provide responses to reverse-requests
+      // that we forwarded from `flutter run --machine`.
+      case 'flutter.sendForwardedRequestResponse':
+        _handleForwardedResponse(args);
         sendResponse(null);
         break;
 
@@ -275,42 +308,41 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     sendResponse();
   }
 
-  /// Sends a request to the Flutter daemon that is running/attaching to the app and waits for a response.
+  /// Sends a request to the Flutter run daemon that is running/attaching to the app and waits for a response.
   ///
-  /// If [failSilently] is `true` (the default) and there is no process, the
-  /// message will be silently ignored (this is common during the application
-  /// being stopped, where async messages may be processed). Setting it to
-  /// `false` will cause a [DebugAdapterException] to be thrown in that case.
+  /// If there is no process, the message will be silently ignored (this is
+  /// common during the application being stopped, where async messages may be
+  /// processed).
   Future<Object?> sendFlutterRequest(
     String method,
-    Map<String, Object?>? params, {
-    bool failSilently = true,
-  }) async {
-    final Process? process = this.process;
-
-    if (process == null) {
-      if (failSilently) {
-        return null;
-      } else {
-        throw DebugAdapterException(
-          'Unable to Restart because Flutter process is not available',
-        );
-      }
-    }
-
+    Map<String, Object?>? params,
+  ) async {
     final Completer<Object?> completer = Completer<Object?>();
     final int id = _flutterRequestId++;
     _flutterRequestCompleters[id] = completer;
 
-    // Flutter requests are always wrapped in brackets as an array.
-    final String messageString = jsonEncode(
-      <String, Object?>{'id': id, 'method': method, 'params': params},
-    );
-    final String payload = '[$messageString]\n';
-
-    process.stdin.writeln(payload);
+    sendFlutterMessage(<String, Object?>{
+      'id': id,
+      'method': method,
+      'params': params,
+    });
 
     return completer.future;
+  }
+
+  /// Sends a message to the Flutter run daemon.
+  ///
+  /// Throws `DebugAdapterException` if a Flutter process is not yet running.
+  void sendFlutterMessage(Map<String, Object?> message) {
+    final Process? process = this.process;
+    if (process == null) {
+      throw DebugAdapterException('Flutter process has not yet started');
+    }
+
+    final String messageString = jsonEncode(message);
+    // Flutter requests are always wrapped in brackets as an array.
+    final String payload = '[$messageString]\n';
+    process.stdin.writeln(payload);
   }
 
   /// Called by [terminateRequest] to request that we gracefully shut down the app being run (or in the case of an attach, disconnect).
@@ -430,6 +462,73 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         _handleAppStarted();
         break;
     }
+
+    if (_eventsToForwardToClient.contains(event)) {
+      // Forward the event to the client.
+      sendEvent(
+        RawEventBody(<String, Object?>{
+          'event': event,
+          'params': params,
+        }),
+        eventType: 'flutter.forwardedEvent',
+      );
+    }
+  }
+
+  /// Handles incoming reverse requests from `flutter run --machine`.
+  ///
+  /// These requests are usually just forwarded to the client via an event
+  /// (`flutter.forwardedRequest`) and responses are provided by the client in a
+  /// custom event (`flutter.forwardedRequestResponse`).
+  void _handleJsonRequest(
+    Object id,
+    String method,
+    Map<String, Object?>? params,
+  ) {
+    /// A helper to send a client response to Flutter.
+    void sendResponseToFlutter(Object? id, Object? value, { bool error = false }) {
+      sendFlutterMessage(<String, Object?>{
+        'id': id,
+        if (error)
+          'error': value
+        else
+          'result': value
+      });
+    }
+
+    // Set up a completer to forward the response back to `flutter` when it arrives.
+    final Completer<Object?> completer = Completer<Object?>();
+    _reverseRequestCompleters[id] = completer;
+    completer.future
+        .then((Object? value) => sendResponseToFlutter(id, value))
+        .catchError((Object? e) => sendResponseToFlutter(id, e.toString(), error: true));
+
+    if (_requestsToForwardToClient.contains(method)) {
+      // Forward the request to the client in an event.
+      sendEvent(
+        RawEventBody(<String, Object?>{
+          'id': id,
+          'method': method,
+          'params': params,
+        }),
+        eventType: 'flutter.forwardedRequest',
+      );
+    } else {
+      completer.completeError(ArgumentError.value(method, 'Unknown request method.'));
+    }
+  }
+
+  /// Handles client responses to reverse-requests that were forwarded from Flutter.
+  void _handleForwardedResponse(RawRequestArguments? args) {
+    final Object? id = args?.args['id'];
+    final Object? result = args?.args['result'];
+    final Object? error = args?.args['error'];
+    final Completer<Object?>? completer = _reverseRequestCompleters[id];
+    if (error != null) {
+      completer?.completeError(DebugAdapterException('Client reported an error handling reverse-request $error'));
+    } else {
+      completer?.complete(result);
+    }
   }
 
   /// Handles incoming JSON messages from `flutter run --machine` that are responses to requests that we sent.
@@ -509,10 +608,13 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     }
 
     final Object? event = payload['event'];
+    final Object? method = payload['method'];
     final Object? params = payload['params'];
     final Object? id = payload['id'];
     if (event is String && params is Map<String, Object?>?) {
       _handleJsonEvent(event, params);
+    } else if (id != null && method is String && params is Map<String, Object?>?) {
+      _handleJsonRequest(id, method, params);
     } else if (id is int && _flutterRequestCompleters.containsKey(id)) {
       _handleJsonResponse(id, payload);
     } else {

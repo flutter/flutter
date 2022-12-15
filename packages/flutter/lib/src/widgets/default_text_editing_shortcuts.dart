@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
+import 'scrollable.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
@@ -16,6 +18,12 @@ import 'text_editing_intents.dart';
 /// This default behavior can be overridden by placing a [Shortcuts] widget
 /// lower in the widget tree than this. See the [Action] class for an example
 /// of remapping an [Intent] to a custom [Action].
+///
+/// The [Shortcuts] widget usually takes precedence over system keybindings.
+/// Proceed with caution if the shortcut you wish to override is also used by
+/// the system. For example, overriding [LogicalKeyboardKey.backspace] could
+/// cause CJK input methods to discard more text than they should when the
+/// backspace key is pressed during text composition on iOS.
 ///
 /// {@tool snippet}
 ///
@@ -157,8 +165,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  // These are shortcuts are shared between most platforms except macOS for it
-  // uses different modifier keys as the line/word modifier.
+  // These shortcuts are shared between all platforms except Apple platforms,
+  // because they use different modifier keys as the line/word modifier.
   static final Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
     // Delete Shortcuts.
     for (final bool pressShift in const <bool>[true, false])
@@ -295,8 +303,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
@@ -315,6 +323,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.home, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.end, shift: true): const ExpandSelectionToDocumentBoundaryIntent(forward: true),
 
+    const SingleActivator(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    const SingleActivator(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
     const SingleActivator(LogicalKeyboardKey.pageUp, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.pageDown, shift: true): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 
@@ -436,11 +446,26 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   static final Map<ShortcutActivator, Intent> _macDisablingTextShortcuts = <ShortcutActivator, Intent>{
     ..._commonDisablingTextShortcuts,
+    ..._iOSDisablingTextShortcuts,
     const SingleActivator(LogicalKeyboardKey.escape): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+  };
+
+  // Hand backspace/delete events that do not depend on text layout (delete
+  // character and delete to the next word) back to the IME to allow it to
+  // update composing text properly.
+  static const Map<ShortcutActivator, Intent> _iOSDisablingTextShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.backspace): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.backspace, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.delete, alt: true): DoNothingAndStopPropagationTextIntent(),
   };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {
@@ -465,13 +490,13 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       return _webDisablingTextShortcuts;
     }
     switch (defaultTargetPlatform) {
-
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return null;
+      case TargetPlatform.iOS:
+        return _iOSDisablingTextShortcuts;
       case TargetPlatform.macOS:
         return _macDisablingTextShortcuts;
     }
@@ -553,9 +578,8 @@ Intent? intentForMacOSSelector(String selectorName) {
     'scrollToBeginningOfDocument:': ScrollToDocumentBoundaryIntent(forward: false),
     'scrollToEndOfDocument:': ScrollToDocumentBoundaryIntent(forward: true),
 
-    // TODO(knopp): Page Up/Down intents are missing (https://github.com/flutter/flutter/pull/105497)
-    'scrollPageUp:': ScrollToDocumentBoundaryIntent(forward: false),
-    'scrollPageDown:': ScrollToDocumentBoundaryIntent(forward: true),
+    'scrollPageUp:': ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    'scrollPageDown:': ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
     'pageUpAndModifySelection:': ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: false),
     'pageDownAndModifySelection:': ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: false),
 

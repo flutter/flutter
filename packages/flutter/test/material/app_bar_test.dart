@@ -1390,6 +1390,95 @@ void main() {
     });
   });
 
+  group('SliverAppBar.forceMaterialTransparency', () {
+    Material getSliverAppBarMaterial(WidgetTester tester) {
+      return tester.widget<Material>(find
+          .descendant(of: find.byType(SliverAppBar), matching: find.byType(Material))
+          .first);
+    }
+
+    // Generates a MaterialApp with a SliverAppBar in a CustomScrollView.
+    // The first cell of the scroll view contains a button at its top, and is
+    // initially scrolled so that it is beneath the SliverAppBar.
+    Widget buildWidget({
+      required bool forceMaterialTransparency,
+      required VoidCallback onPressed
+    }) {
+      const double appBarHeight = 120;
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            controller: ScrollController(initialScrollOffset:appBarHeight),
+            slivers: <Widget>[
+              SliverAppBar(
+                collapsedHeight: appBarHeight,
+                expandedHeight: appBarHeight,
+                pinned: true,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                forceMaterialTransparency: forceMaterialTransparency,
+                title: const Text('AppBar'),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  return SizedBox(
+                    height: appBarHeight,
+                    child: index == 0
+                      ? Align(
+                          alignment: Alignment.topCenter,
+                          child: TextButton(onPressed: onPressed, child: const Text('press')))
+                      : const SizedBox(),
+                  );
+                },
+                childCount: 20,
+              ),
+            ),
+          ]),
+        ),
+      );
+    }
+
+    testWidgets(
+        'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:true,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getSliverAppBarMaterial(tester);
+      expect(material.type, MaterialType.transparency);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(buttonWasPressed, isTrue);
+    });
+
+    testWidgets(
+        'forceMaterialTransparency == false does not allow gestures beneath the app bar', (WidgetTester tester) async {
+      // Set this, and tester.tap(warnIfMissed:false), to suppress
+      // errors/warning that the button is not hittable (which is expected).
+      WidgetController.hitTestWarningShouldBeFatal = false;
+
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:false,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getSliverAppBarMaterial(tester);
+      expect(material.type, MaterialType.canvas);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder, warnIfMissed:false);
+      await tester.pump();
+      expect(buttonWasPressed, isFalse);
+    });
+  });
+
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
@@ -2419,6 +2508,56 @@ void main() {
         statusBarIconBrightness: onAppBarBrightness,
       ));
     }
+  });
+
+  testWidgets('Default status bar color', (WidgetTester tester) async {
+    Future<void> pumpBoilerplate({required bool useMaterial3, required bool backwardsCompatibility}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: GlobalKey(),
+          theme: ThemeData.light().copyWith(
+            useMaterial3: useMaterial3,
+            appBarTheme: AppBarTheme(
+              backwardsCompatibility: backwardsCompatibility,
+            ),
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('title'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: false);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+    await pumpBoilerplate(useMaterial3: false, backwardsCompatibility: true);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: false);
+    expect(SystemChrome.latestStyle!.statusBarColor, Colors.transparent);
+    await pumpBoilerplate(useMaterial3: true, backwardsCompatibility: true);
+    expect(SystemChrome.latestStyle!.statusBarColor, null);
+  });
+
+  testWidgets('AppBar systemOverlayStyle is use to style status bar and navigation bar', (WidgetTester tester) async {
+    final SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light.copyWith(
+      statusBarColor: Colors.red,
+      systemNavigationBarColor: Colors.green,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('test'),
+            systemOverlayStyle: systemOverlayStyle,
+          ),
+        ),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle!.statusBarColor, Colors.red);
+    expect(SystemChrome.latestStyle!.systemNavigationBarColor, Colors.green);
   });
 
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
@@ -3709,5 +3848,79 @@ void main() {
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(find.byKey(titleKey)).dx, leadingWidth + 16.0);
     expect(tester.getSize(find.byKey(leadingKey)).width, leadingWidth);
+  });
+
+  group('AppBar.forceMaterialTransparency', () {
+    Material getAppBarMaterial(WidgetTester tester) {
+      return tester.widget<Material>(find
+          .descendant(of: find.byType(AppBar), matching: find.byType(Material))
+          .first);
+    }
+
+    // Generates a MaterialApp with an AppBar with a TextButton beneath it
+    // (via extendBodyBehindAppBar = true).
+    Widget buildWidget({
+      required bool forceMaterialTransparency,
+      required VoidCallback onPressed
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            forceMaterialTransparency: forceMaterialTransparency,
+            elevation: 3,
+            backgroundColor: Colors.red,
+            title: const Text('AppBar'),
+          ),
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: TextButton(
+              onPressed: onPressed,
+              child: const Text('press me'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+        'forceMaterialTransparency == true allows gestures beneath the app bar', (WidgetTester tester) async {
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+          forceMaterialTransparency:true,
+          onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getAppBarMaterial(tester);
+      expect(material.type, MaterialType.transparency);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(buttonWasPressed, isTrue);
+    });
+
+    testWidgets(
+        'forceMaterialTransparency == false does not allow gestures beneath the app bar', (WidgetTester tester) async {
+      // Set this, and tester.tap(warnIfMissed:false), to suppress
+      // errors/warning that the button is not hittable (which is expected).
+      WidgetController.hitTestWarningShouldBeFatal = false;
+
+      bool buttonWasPressed = false;
+      final Widget widget = buildWidget(
+        forceMaterialTransparency:false,
+        onPressed:() { buttonWasPressed = true; },
+      );
+      await tester.pumpWidget(widget);
+
+      final Material material = getAppBarMaterial(tester);
+      expect(material.type, MaterialType.canvas);
+
+      final Finder buttonFinder = find.byType(TextButton);
+      await tester.tap(buttonFinder, warnIfMissed:false);
+      await tester.pump();
+      expect(buttonWasPressed, isFalse);
+    });
   });
 }

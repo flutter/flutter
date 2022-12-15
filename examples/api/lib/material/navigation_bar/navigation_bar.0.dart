@@ -6,10 +6,10 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const ExampleApp());
+void main() => runApp(const NavigationBarApp());
 
-class ExampleApp extends StatelessWidget {
-  const ExampleApp({super.key});
+class NavigationBarApp extends StatelessWidget {
+  const NavigationBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -178,7 +178,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_143
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   const _ActionChipDefaultsM3(this.context, this.isEnabled)
@@ -239,7 +239,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 

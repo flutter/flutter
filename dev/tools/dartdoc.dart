@@ -59,7 +59,7 @@ Future<void> main(List<String> arguments) async {
   buf.writeln('homepage: https://flutter.dev');
   buf.writeln('version: 0.0.0');
   buf.writeln('environment:');
-  buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  buf.writeln("  sdk: '>=2.12.0 <4.0.0'");
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
@@ -394,7 +394,7 @@ void _sanityCheckExample(String fileString, String regExpString) {
     final RegExp regExp = RegExp(regExpString, dotAll: true);
     final String contents = file.readAsStringSync();
     if (!regExp.hasMatch(contents)) {
-      throw Exception("Missing example code in ${file.path}. Either it didn't get published, publishing has changed, or the example no longer exists.");
+      throw Exception("Missing example code matching '$regExpString' in ${file.path}.");
     }
   } else {
     throw Exception(
@@ -403,7 +403,7 @@ void _sanityCheckExample(String fileString, String regExpString) {
 }
 
 /// Runs a sanity check by running a test.
-void sanityCheckDocs() {
+void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
   final List<String> canaries = <String>[
     '$kPublishRoot/assets/overrides.css',
     '$kPublishRoot/api/dart-io/File-class.html',
@@ -414,6 +414,7 @@ void sanityCheckDocs() {
     '$kPublishRoot/api/material/Material-class.html',
     '$kPublishRoot/api/material/Tooltip-class.html',
     '$kPublishRoot/api/widgets/Widget-class.html',
+    '$kPublishRoot/api/widgets/Listener-class.html',
   ];
   for (final String canary in canaries) {
     if (!File(canary).existsSync()) {
@@ -434,11 +435,28 @@ void sanityCheckDocs() {
     r'\s*<pre.*id="sample-code">.*Color\s+get\s+barrierColor.*</pre>',
   );
 
-  // Check a "dartpad" example, any one will do.
-  _sanityCheckExample(
-    '$kPublishRoot/api/widgets/PhysicalShape-class.html',
-    r'\s*<iframe\s+class="snippet-dartpad"\s+src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>',
-  );
+  // Check a "dartpad" example, any one will do, and check for the correct URL
+  // arguments.
+  // Just use "master" for any branch other than the LUCH_BRANCH.
+  final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
+  final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
+  final List<String> argumentRegExps = <String>[
+    r'split=\d+',
+    r'run=true',
+    r'null_safety=true',
+    r'sample_id=widgets\.Listener\.\d+',
+    'sample_channel=$expectedBranch',
+    'channel=$expectedBranch',
+  ];
+  for (final String argumentRegExp in argumentRegExps) {
+    _sanityCheckExample(
+      '$kPublishRoot/api/widgets/Listener-class.html',
+      r'\s*<iframe\s+class="snippet-dartpad"\s+src="'
+      r'https:\/\/dartpad.dev\/embed-flutter.html\?.*?\b'
+      '$argumentRegExp'
+      r'\b.*">\s*<\/iframe>',
+    );
+  }
 }
 
 /// Creates a custom index.html because we try to maintain old

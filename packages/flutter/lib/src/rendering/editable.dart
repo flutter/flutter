@@ -53,6 +53,19 @@ class TextSelectionPoint {
   final TextDirection? direction;
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextSelectionPoint
+        && other.point == point
+        && other.direction == direction;
+  }
+
+  @override
   String toString() {
     switch (direction) {
       case TextDirection.ltr:
@@ -63,6 +76,10 @@ class TextSelectionPoint {
         return '$point';
     }
   }
+
+  @override
+  int get hashCode => Object.hash(point, direction);
+
 }
 
 /// The consecutive sequence of [TextPosition]s that the caret should move to
@@ -1861,21 +1878,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       return math.max(estimatedHeight, minHeight);
     }
 
-    // TODO(LongCatIsLooong): this is a workaround for
-    // https://github.com/flutter/flutter/issues/112123.
-    // Use preferredLineHeight since SkParagraph currently returns an incorrect
-    // height.
-    final TextHeightBehavior? textHeightBehavior = this.textHeightBehavior;
-    final bool usePreferredLineHeightHack = maxLines == 1
-        && text?.codeUnitAt(0) == null
-        && strutStyle != null && strutStyle != StrutStyle.disabled
-        && textHeightBehavior != null
-        && (!textHeightBehavior.applyHeightToFirstAscent || !textHeightBehavior.applyHeightToLastDescent);
-
     // Special case maxLines == 1 since it forces the scrollable direction
     // to be horizontal. Report the real height to prevent the text from being
     // clipped.
-    if (maxLines == 1 && !usePreferredLineHeightHack) {
+    if (maxLines == 1) {
       // The _layoutText call lays out the paragraph using infinite width when
       // maxLines == 1. Also _textPainter.maxLines will be set to 1 so should
       // there be any line breaks only the first line is shown.
@@ -2132,7 +2138,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
     final TextRange word = _textPainter.getWordBoundary(position);
     late TextSelection newSelection;
-    if (position.offset - word.start <= 1) {
+    if (position.offset <= word.start) {
       newSelection = TextSelection.collapsed(offset: word.start);
     } else {
       newSelection = TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream);
@@ -3085,7 +3091,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     }
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(floatingCursorRect.shift(renderEditable._paintOffset), _kFloatingCaretRadius),
+      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCaretRadius),
       floatingCursorPaint..color = floatingCursorColor,
     );
   }

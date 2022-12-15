@@ -219,7 +219,8 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
       });
       if (node.isMergedIntoParent ||
           node.isInvisible ||
-          node.hasFlag(ui.SemanticsFlag.isHidden)) {
+          node.hasFlag(ui.SemanticsFlag.isHidden) ||
+          node.hasFlag(ui.SemanticsFlag.isTextField)) {
         return result;
       }
       final SemanticsData data = node.getSemanticsData();
@@ -597,7 +598,7 @@ class _ContrastReport {
       count += entry.value;
     }
     final double averageLightness = totalLightness / count;
-    assert(averageLightness != double.nan);
+    assert(!averageLightness.isNaN);
 
     MapEntry<Color, int>? lightColor;
     MapEntry<Color, int>? darkColor;

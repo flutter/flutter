@@ -293,7 +293,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
     assert(widget.actions.isNotEmpty);
 
@@ -399,7 +399,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       onDismiss: () {
         ScaffoldMessenger.of(context).removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
       },
-      child: mediaQueryData.accessibleNavigation
+      child: accessibleNavigation
           ? materialBanner
           : SlideTransition(
         position: slideOutAnimation,
@@ -408,7 +408,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final Widget materialBannerTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       materialBannerTransition = materialBanner;
     } else {
       materialBannerTransition = AnimatedBuilder(
@@ -453,7 +453,7 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_143
 
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
   const _BannerDefaultsM3(this.context)

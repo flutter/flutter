@@ -706,6 +706,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     required TextBaseline textBaseline,
     required bool isFocused,
     required bool expands,
+    required bool material3,
     TextAlignVertical? textAlignVertical,
   }) : assert(decoration != null),
        assert(textDirection != null),
@@ -716,7 +717,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
        _textBaseline = textBaseline,
        _textAlignVertical = textAlignVertical,
        _isFocused = isFocused,
-       _expands = expands;
+       _expands = expands,
+       _material3 = material3;
 
   static const double subtextGap = 8.0;
 
@@ -831,6 +833,16 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       return;
     }
     _expands = value;
+    markNeedsLayout();
+  }
+
+  bool get material3 => _material3;
+  bool _material3 = false;
+  set material3(bool value) {
+    if (_material3 == value) {
+      return;
+    }
+    _material3 = value;
     markNeedsLayout();
   }
 
@@ -969,12 +981,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       0.0,
       constraints.maxWidth - (
         _boxSize(icon).width
-        + contentPadding.left
+        + (prefixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
         + _boxSize(prefixIcon).width
         + _boxSize(prefix).width
         + _boxSize(suffix).width
         + _boxSize(suffixIcon).width
-        + contentPadding.right),
+        + (suffixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left))),
     );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
@@ -1476,18 +1488,26 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width,
-              _boxSize(container).width / 2.0 + floatWidth / 2.0,
-              floatAlign);
+          double offsetToPrefixIcon = 0.0;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - left : 0;
+          }
+          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width + offsetToPrefixIcon,
+            _boxSize(container).width / 2.0 + floatWidth / 2.0,
+            floatAlign);
 
           break;
         case TextDirection.ltr:
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
           // floating label is centered, it's already relative to _BorderContainer.
-          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width,
-              _boxSize(container).width / 2.0 - floatWidth / 2.0,
-              floatAlign);
+          double offsetToPrefixIcon = 0.0;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            offsetToPrefixIcon = material3 ? (-_boxSize(prefixIcon).width + left) : 0;
+          }
+          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width + offsetToPrefixIcon,
+            _boxSize(container).width / 2.0 - floatWidth / 2.0,
+            floatAlign);
           break;
       }
       decoration.borderGap.extent = label!.size.width * _kFinalLabelScale;
@@ -1532,17 +1552,26 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double centeredFloatX = _boxParentData(container!).offset.dx +
           _boxSize(container).width / 2.0 - floatWidth / 2.0;
-      final double floatStartX;
+      final double startX;
+      double floatStartX;
       switch (textDirection) {
         case TextDirection.rtl: // origin is on the right
-          floatStartX = labelOffset.dx + labelWidth * (1.0 - scale);
+          startX = labelOffset.dx + labelWidth * (1.0 - scale);
+          floatStartX = startX;
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
+            floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.left : 0.0;
+          }
           break;
         case TextDirection.ltr: // origin on the left
-          floatStartX = labelOffset.dx;
+          startX = labelOffset.dx;
+          floatStartX = startX;
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
+            floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.left : 0.0;
+          }
           break;
       }
       final double floatEndX = lerpDouble(floatStartX, centeredFloatX, floatAlign)!;
-      final double dx = lerpDouble(floatStartX, floatEndX, t)!;
+      final double dx = lerpDouble(startX, floatEndX, t)!;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t)!;
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
@@ -1665,6 +1694,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
       textAlignVertical: textAlignVertical,
       isFocused: isFocused,
       expands: expands,
+      material3: Theme.of(context).useMaterial3,
     );
   }
 
@@ -2145,7 +2175,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
-      alwaysIncludeSemantics: true,
+      alwaysIncludeSemantics: isEmpty || (decoration.labelText == null && decoration.label == null),
       child: Text(
         hintText,
         style: hintStyle,
@@ -2324,18 +2354,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : themeData.useMaterial3
-            ? const EdgeInsets.fromLTRB(12.0, 12.75, 12.0, 12.75)
-            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : themeData.useMaterial3
-            ? const EdgeInsets.fromLTRB(0.0, 12.75, 0.0, 12.75)
-            : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
@@ -4463,9 +4489,8 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_143
 
-// Generated version v0_137
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();
@@ -4564,7 +4589,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
@@ -4588,7 +4613,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:_colors.error);
@@ -4612,7 +4637,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
       return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
     }
@@ -4621,7 +4646,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     return textStyle.copyWith(color:_colors.error);
   });
 }

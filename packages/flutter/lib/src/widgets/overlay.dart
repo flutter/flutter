@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'lookup_boundary.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -280,7 +281,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// The [Overlay] widget uses a custom stack implementation, which is very
 /// similar to the [Stack] widget. The main use case of [Overlay] is related to
 /// navigation and being able to insert widgets on top of the pages in an app.
-/// To simply display a stack of widgets, consider using [Stack] instead.
+/// For layout purposes unrelated to navigation, consider using [Stack] instead.
 ///
 /// An [Overlay] widget requires a [Directionality] widget to be in scope, so
 /// that it can resolve direction-sensitive coordinates of any
@@ -338,7 +339,8 @@ class Overlay extends StatefulWidget {
   final Clip clipBehavior;
 
   /// The [OverlayState] from the closest instance of [Overlay] that encloses
-  /// the given context, and, in debug mode, will throw if one is not found.
+  /// the given context within the closest [LookupBoundary], and, in debug mode,
+  /// will throw if one is not found.
   ///
   /// In debug mode, if the `debugRequiredFor` argument is provided and an
   /// overlay isn't found, then this function will throw an exception containing
@@ -372,8 +374,13 @@ class Overlay extends StatefulWidget {
     final OverlayState? result = maybeOf(context, rootOverlay: rootOverlay);
     assert(() {
       if (result == null) {
+        final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorStateOfType<OverlayState>(context);
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
-          ErrorSummary('No Overlay widget found.'),
+          ErrorSummary('No Overlay widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+          if (hiddenByBoundary)
+            ErrorDescription(
+                'There is an ancestor Overlay widget, but it is hidden by a LookupBoundary.'
+            ),
           ErrorDescription('${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.'),
           ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.'),
           if (debugRequiredFor != null) DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
@@ -389,7 +396,7 @@ class Overlay extends StatefulWidget {
   }
 
   /// The [OverlayState] from the closest instance of [Overlay] that encloses
-  /// the given context, if any.
+  /// the given context within the closest [LookupBoundary], if any.
   ///
   /// Typical usage is as follows:
   ///
@@ -413,8 +420,8 @@ class Overlay extends StatefulWidget {
     bool rootOverlay = false,
   }) {
     return rootOverlay
-        ? context.findRootAncestorStateOfType<OverlayState>()
-        : context.findAncestorStateOfType<OverlayState>();
+        ? LookupBoundary.findRootAncestorStateOfType<OverlayState>(context)
+        : LookupBoundary.findAncestorStateOfType<OverlayState>(context);
   }
 
   @override

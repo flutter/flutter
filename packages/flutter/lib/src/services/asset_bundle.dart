@@ -247,17 +247,24 @@ abstract class CachingAssetBundle extends AssetBundle {
 /// An [AssetBundle] that loads resources using platform messages.
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(String key) {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
-    final ByteData? asset =
-        await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
-    if (asset == null) {
+    final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData())?.then((ByteData? asset) {
+      if (asset == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          _errorSummaryWithKey(key),
+          ErrorDescription('The asset does not exist or has empty data.'),
+        ]);
+      }
+      return asset;
+    });
+    if (future == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        _errorSummaryWithKey(key),
-        ErrorDescription('The asset does not exist or has empty data.'),
-      ]);
+          _errorSummaryWithKey(key),
+          ErrorDescription('The asset does not exist or has empty data.'),
+        ]);
     }
-    return asset;
+    return future;
   }
 
   @override

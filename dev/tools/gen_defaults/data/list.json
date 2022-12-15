@@ -1,5 +1,5 @@
 {
-  "version": "v0_137",
+  "version": "v0_143",
 
   "md.comp.list.list-item.container.color": "surface",
   "md.comp.list.list-item.container.elevation": "md.sys.elevation.level0",
@@ -43,6 +43,7 @@
   "md.comp.list.list-item.leading-image.width": 56.0,
   "md.comp.list.list-item.leading-video.shape": "md.sys.shape.corner.none",
   "md.comp.list.list-item.leading-video.width": 100.0,
+  "md.comp.list.list-item.one-line.container.height": 56.0,
   "md.comp.list.list-item.overline.color": "onSurfaceVariant",
   "md.comp.list.list-item.overline.text-style": "labelSmall",
   "md.comp.list.list-item.pressed.label-text.color": "onSurface",
@@ -54,12 +55,11 @@
   "md.comp.list.list-item.small.leading-video.height": 56.0,
   "md.comp.list.list-item.supporting-text.color": "onSurfaceVariant",
   "md.comp.list.list-item.supporting-text.text-style": "bodyMedium",
+  "md.comp.list.list-item.three-line.container.height": 88.0,
   "md.comp.list.list-item.trailing-icon.color": "onSurfaceVariant",
   "md.comp.list.list-item.trailing-icon.size": 24.0,
   "md.comp.list.list-item.trailing-supporting-text.color": "onSurfaceVariant",
   "md.comp.list.list-item.trailing-supporting-text.text-style": "labelSmall",
-  "md.comp.list.list-item.unselected.trailing-icon.color": "onSurface",
-  "md.comp.list.md.comp.list.list-item.one-line.container.height": 56.0,
-  "md.comp.list.md.comp.list.list-item.three-line.container.height": 88.0,
-  "md.comp.list.md.comp.list.list-item.two-line.container.height": 72.0
+  "md.comp.list.list-item.two-line.container.height": 72.0,
+  "md.comp.list.list-item.unselected.trailing-icon.color": "onSurface"
 }

@@ -1086,12 +1086,14 @@ abstract class WidgetController {
     );
   }
 
-  /// Creates a gesture with an initial down gesture at a particular point, and
-  /// returns the [TestGesture] object which you can use to continue the
-  /// gesture.
+  /// Creates a gesture with an initial appropriate starting gesture at a
+  /// particular point, and returns the [TestGesture] object which you can use
+  /// to continue the gesture. Usually, the starting gesture will be a down event,
+  /// but if [kind] is set to [PointerDeviceKind.trackpad], the gesture will start
+  /// with a panZoomStart gesture.
   ///
   /// You can use [createGesture] if your gesture doesn't begin with an initial
-  /// down gesture.
+  /// down or panZoomStart gesture.
   ///
   /// See also:
   ///  * [WidgetController.drag], a method to simulate a drag.
@@ -1110,7 +1112,11 @@ abstract class WidgetController {
       kind: kind,
       buttons: buttons,
     );
-    await result.down(downLocation);
+    if (kind == PointerDeviceKind.trackpad) {
+      await result.panZoomStart(downLocation);
+    } else {
+      await result.down(downLocation);
+    }
     return result;
   }
 

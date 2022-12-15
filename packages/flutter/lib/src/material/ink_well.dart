@@ -438,13 +438,15 @@ class InkResponse extends StatelessWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final double? radius;
 
-  /// The clipping radius of the containing rect. This is effective only if
-  /// [customBorder] is null.
+  /// The border radius of the containing rectangle. This is effective only if
+  /// [highlightShape] is [BoxShape.rectangle].
   ///
   /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? borderRadius;
 
-  /// The custom clip border which overrides [borderRadius].
+  /// The custom clip border.
+  ///
+  /// If this is null, the ink response will not clip its content.
   final ShapeBorder? customBorder;
 
   /// The color of the ink response when the parent widget is focused. If this
@@ -557,10 +559,12 @@ class InkResponse extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  /// {@template flutter.material.inkwell.onFocusChange}
   /// Handler called when the focus changes.
   ///
   /// Called with true if this widget's node gains focus, and false if it loses
   /// focus.
+  /// {@endtemplate}
   final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.widgets.Focus.autofocus}
@@ -834,6 +838,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       initStatesController();
     }
+    if (widget.customBorder != oldWidget.customBorder ||
+        widget.radius != oldWidget.radius ||
+        widget.borderRadius != oldWidget.borderRadius ||
+        widget.highlightShape != oldWidget.highlightShape) {
+      final InkHighlight? hoverHighLight = _highlights[_HighlightType.hover];
+      if (hoverHighLight != null) {
+        hoverHighLight.dispose();
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+      }
+      final InkHighlight? focusHighLight = _highlights[_HighlightType.focus];
+      if (focusHighLight != null) {
+        focusHighLight.dispose();
+        // Do not call updateFocusHighlights() here because it is called below
+      }
+    }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
       if (!enabled) {
@@ -999,7 +1018,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _shouldShowFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && _hasFocus;
@@ -1147,7 +1166,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && widget.canRequestFocus;

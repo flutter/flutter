@@ -191,18 +191,18 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   @override
   void didChangeDependencies() {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     // If we transition from accessible navigation to non-accessible navigation
     // and there is a SnackBar that would have timed out that has already
     // completed its timer, dismiss that SnackBar. If the timer hasn't finished
     // yet, let it timeout as normal.
     if ((_accessibleNavigation ?? false)
-        && !mediaQuery.accessibleNavigation
+        && !accessibleNavigation
         && _snackBarTimer != null
         && !_snackBarTimer!.isActive) {
       hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
     }
-    _accessibleNavigation = mediaQuery.accessibleNavigation;
+    _accessibleNavigation = accessibleNavigation;
     super.didChangeDependencies();
   }
 
@@ -244,7 +244,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   // SNACKBAR API
 
-  /// Shows a [SnackBar] across all registered [Scaffold]s.
+  /// Shows a [SnackBar] across all registered [Scaffold]s. Scaffolds register
+  /// to receive snack bars from their closest [ScaffoldMessenger] ancestor.
+  /// If there are several registered scaffolds the snack bar is shown
+  /// simultaneously on all of them.
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
@@ -432,7 +435,10 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 
   // MATERIAL BANNER API
 
-  /// Shows a [MaterialBanner] across all registered [Scaffold]s.
+  /// Shows a [MaterialBanner] across all registered [Scaffold]s. Scaffolds register
+  /// to receive material banners from their closest [ScaffoldMessenger] ancestor.
+  /// If there are several registered scaffolds the material banner is shown
+  /// simultaneously on all of them.
   ///
   /// A scaffold can show at most one material banner at a time. If this function is
   /// called while another material banner is already visible, the given material banner
@@ -562,8 +568,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    _accessibleNavigation = mediaQuery.accessibleNavigation;
+    _accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic>? route = ModalRoute.of(context);
@@ -576,8 +581,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
                 _snackBarController!.status == AnimationStatus.completed,
             );
             // Look up MediaQuery again in case the setting changed.
-            final MediaQueryData mediaQuery = MediaQuery.of(context);
-            if (mediaQuery.accessibleNavigation && snackBar.action != null) {
+            if (snackBar.action != null && MediaQuery.accessibleNavigationOf(context)) {
               return;
             }
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
@@ -1559,6 +1563,12 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    app. A bottom sheet can either be persistent, in which case it is shown
 ///    using the [ScaffoldState.showBottomSheet] method, or modal, in which case
 ///    it is shown using the [showModalBottomSheet] function.
+///  * [SnackBar], which is a lightweight message with an optional action which
+///    briefly displays at the bottom of the screen. Use the
+///    [ScaffoldMessengerState.showSnackBar] method to show snack bars.
+///  * [MaterialBanner], which displays an important, succinct message, at the
+///    top of the screen, below the app bar. Use the
+///    [ScaffoldMessengerState.showMaterialBanner] method to show material banners.
 ///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.io/design/layout/responsive-layout-grid.html>
 ///  * Cookbook: [Add a Drawer to a screen](https://flutter.dev/docs/cookbook/design/drawer)
@@ -1812,11 +1822,11 @@ class Scaffold extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to the surrounding
+  /// `MediaQuery.paddingOf(context)` that corresponds to the surrounding
   /// [TextDirection]. This ensures that the drag area for notched devices is
   /// not obscured. For example, if `TextDirection.of(context)` is set to
   /// [TextDirection.ltr], 20.0 will be added to
-  /// `MediaQuery.of(context).padding.left`.
+  /// `MediaQuery.paddingOf(context).left`.
   final double? drawerEdgeDragWidth;
 
   /// Determines if the [Scaffold.drawer] can be opened with a drag
@@ -2749,7 +2759,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -2784,7 +2793,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
 
     if (widget.appBar != null) {
-      final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
+      final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
       _appBarMaxHeight = AppBar.preferredHeightFor(context, widget.appBar!.preferredSize) + topPadding;
       assert(_appBarMaxHeight! >= 0.0 && _appBarMaxHeight!.isFinite);
       _addIfNonNull(
@@ -2961,14 +2970,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
 
     // The minimum insets for contents of the Scaffold to keep visible.
-    final EdgeInsets minInsets = mediaQuery.padding.copyWith(
-      bottom: _resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0,
+    final EdgeInsets minInsets = MediaQuery.paddingOf(context).copyWith(
+      bottom: _resizeToAvoidBottomInset ? MediaQuery.viewInsetsOf(context).bottom : 0.0,
     );
 
     // The minimum viewPadding for interactive elements positioned by the
     // Scaffold to keep within safe interactive areas.
-    final EdgeInsets minViewPadding = mediaQuery.viewPadding.copyWith(
-      bottom: _resizeToAvoidBottomInset && mediaQuery.viewInsets.bottom != 0.0 ? 0.0 : null,
+    final EdgeInsets minViewPadding = MediaQuery.viewPaddingOf(context).copyWith(
+      bottom: _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0 ? 0.0 : null,
     );
 
     // extendBody locked when keyboard is open

@@ -245,6 +245,15 @@ class ScrollToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
   }) : super(forward);
 }
 
+/// Scrolls up or down by page depending on the [forward] parameter.
+/// Extends the selection up or down by page based on the [forward] parameter.
+class ExtendSelectionByPageIntent extends DirectionalTextEditingIntent {
+  /// Creates a [ExtendSelectionByPageIntent].
+  const ExtendSelectionByPageIntent({
+    required bool forward,
+  }) : super(forward);
+}
+
 /// An [Intent] to select everything in the field.
 class SelectAllTextIntent extends Intent {
   /// Creates an instance of [SelectAllTextIntent].

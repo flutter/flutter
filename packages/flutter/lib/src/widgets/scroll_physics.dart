@@ -236,8 +236,8 @@ class ScrollPhysics {
   /// the overall scale between the global screen and local scrollable
   /// coordinate systems.
   ///
-  /// The default implementation is stateless, and simply provides a point-in-
-  /// time decision about how fast the scrollable is scrolling. It would always
+  /// The default implementation is stateless, and provides a point-in-time
+  /// decision about how fast the scrollable is scrolling. It would always
   /// return true for a scrollable that is animating back and forth at high
   /// velocity in a loop. It is assumed that callers will handle such
   /// a case, or that a custom stateful implementation would be written that
@@ -629,7 +629,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return BouncingScrollPhysics(parent: buildParent(ancestor));
+    return BouncingScrollPhysics(
+      parent: buildParent(ancestor),
+      decelerationRate: decelerationRate
+    );
   }
 
   /// The multiple applied to overscroll to make it appear that scrolling past
