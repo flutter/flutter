@@ -1090,7 +1090,7 @@ mixin TextSelectionDelegate {
   /// Start capturing text from camera to input.
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
-  /// will be hidden and the current selection will be scrolled into view.
+  /// will be hidden and will start capture text from camera.
   void captureText(SelectionChangedCause cause);
 }
 

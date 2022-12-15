@@ -166,10 +166,12 @@ void main() {
             primaryAnchor: Offset.zero,
           ),
           clipboardStatus: ClipboardStatus.pasteable,
+          liveTextStatus: LiveTextStatus.disabled,
           onCopy: () {},
           onCut: () {},
           onPaste: () {},
           onSelectAll: () {},
+          onCaptureText: () {},
         ),
       ),
     ));
