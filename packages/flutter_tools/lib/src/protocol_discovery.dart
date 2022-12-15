@@ -76,6 +76,7 @@ class ProtocolDiscovery {
     try {
       return await uris.first;
     } on StateError {
+      print('ProtocolDiscovery.uri StateError');
       return null;
     }
   }
@@ -99,7 +100,7 @@ class ProtocolDiscovery {
   Future<void> cancel() => _stopScrapingLogs();
 
   Future<void> _stopScrapingLogs() async {
-    print('### Stop scraping logs');
+    print('ProtocolDiscovery._stopScrapingLogss');
     await _uriStreamController.close();
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
@@ -110,38 +111,43 @@ class ProtocolDiscovery {
   }
 
   Uri? _getObservatoryUri(String line) {
+    print('ProtocolDiscovery._getOberservatoryUri: Got line $line');
+
     final Match? match = _getPatternMatch(line);
-    print('### Pattern match $match');
+
     if (match != null) {
+      print('ProtocolDiscovery._getOberservatoryUri: Got match ${match[1]}');
       return Uri.parse(match[1]!);
     }
+    print('ProtocolDiscovery._getOberservatoryUri: No match');
     return null;
   }
 
   void _handleLine(String line) {
-    print('### Protocol discovery line: "$line"');
+    print('ProtocolDiscovery._handleLine: Got line "$line"');
+
     Uri? uri;
     try {
       uri = _getObservatoryUri(line);
-      print('!1');
+      print('ProtocolDiscovery._handleLine: Got observatory URL "$uri"');
     } on FormatException catch (error, stackTrace) {
-      print('!2');
+      print('ProtocolDiscovery._handleLine: FormatException');
       _uriStreamController.addError(error, stackTrace);
     }
     if (uri == null || uri.host.isEmpty) {
-      print('!3');
+      print('ProtocolDiscovery._handleLine: Empty or null URI');
       return;
     }
 
-    print('!4');
 
     if (devicePort != null && uri.port != devicePort) {
-      print('!5');
+      print('ProtocolDiscovery._handleLine: Port mismatch');
       _logger.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
 
-    print('!6');
+    print('ProtocolDiscovery._handleLine: Adding URI to stream...');
+
     _uriStreamController.add(uri);
   }
 

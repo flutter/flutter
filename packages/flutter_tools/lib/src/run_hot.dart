@@ -411,23 +411,27 @@ class HotRunner extends ResidentRunner {
     ).send()));
 
     try {
-      print('###1');
+      print('HotRunner.run: Waiting on startup tasks...');
+
       final List<bool> results = await Future.wait(startupTasks);
-      print('###2');
+      
+      print('HotRunner.run: Got startup task results');
+
       if (!results.every((bool passed) => passed)) {
-        print('###3');
+        print('HotRunner.run: App failed to start');
         appFailedToStart();
         return 1;
       }
-      print('###4');
+      print('HotRunner.run: Caching initial dill compilation...');
       cacheInitialDillCompilation();
     } on Exception catch (err) {
-      print('###5');
+      print('HotRunner.run: Exception, app failed to start...');
       globals.printError(err.toString());
       appFailedToStart();
       return 1;
     }
-    print('###6');
+
+    print('HotRunner.run: Attaching...');
 
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,

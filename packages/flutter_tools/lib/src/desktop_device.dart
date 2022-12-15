@@ -127,12 +127,12 @@ abstract class DesktopDevice extends Device {
     final BuildMode buildMode = debuggingOptions.buildInfo.mode;
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     final String? executable = executablePathForDevice(package, buildMode);
-    print('#1. Executable path $executable');
+    print('DesktopDevice.startApp: Executable path $executable');
     if (executable == null) {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
-    print('#2');
+    print('DesktopDevice.startApp: #2');
 
     Process process;
     final List<String> command = <String>[
@@ -140,32 +140,36 @@ abstract class DesktopDevice extends Device {
       ...debuggingOptions.dartEntrypointArgs,
     ];
     try {
-      print('#3');
-      print('### Start process: $command');
+      print('DesktopDevice.startApp: command: "$command"');
 
       process = await _processManager.start(
         command,
         environment: _computeEnvironment(debuggingOptions, traceStartup, route),
       );
-      print('#4');
+
+      print('DesktopDevice.startApp: command started');
     } on ProcessException catch (e) {
-      print('#5');
+      print('DesktopDevice.startApp: caught ProcessException');
       _logger.printError('Unable to start executable "${command.join(' ')}": $e');
       rethrow;
     }
-    print('#6');
+
+    print('DesktopDevice.startApp: #3');
 
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
-    print('#7');
+
+    print('DesktopDevice.startApp: Initializing process..');
 
     _deviceLogReader.initializeProcess(process);
-    print('#8');
+
+    print('DesktopDevice.startApp: Initialized process');
+
 
     if (debuggingOptions.buildInfo.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    print('#9');
+    print('DesktopDevice.startApp: Discovering observatory protocol URL...');
 
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
@@ -174,29 +178,36 @@ abstract class DesktopDevice extends Device {
       logger: _logger,
     );
     try {
-    print('#10');
+      print('DesktopDevice.startApp: #4');
 
       final Uri? observatoryUri = await observatoryDiscovery.uri;
-      print('#11 $observatoryUri');
+      print('DesktopDevice.startApp: Observatory URL $observatoryUri');
 
       if (observatoryUri != null) {
-      print('#12');
+        print('DesktopDevice.startApp: Calling onAttached...');
+
         onAttached(package, buildMode, process);
         return LaunchResult.succeeded(observatoryUri: observatoryUri);
       }
-      print('#13');
+
+      print('DesktopDevice.startApp: error in debug connection');
 
       _logger.printError(
         'Error waiting for a debug connection: '
         'The log reader stopped unexpectedly, or never started.',
       );
     } on Exception catch (error) {
+      print('DesktopDevice.startApp: Exception caught in debug connection');
+
       _logger.printError('Error waiting for a debug connection: $error');
     } finally {
-    print('#14');
+      print('DesktopDevice.startApp: finally');
+
       await observatoryDiscovery.cancel();
     }
-    print('#15');
+
+    print('DesktopDevice.startApp: LaunchResult.failed');
+
     return LaunchResult.failed();
   }
 

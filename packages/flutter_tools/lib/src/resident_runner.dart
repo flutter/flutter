@@ -443,7 +443,7 @@ class FlutterDevice {
     await startEchoingDeviceLog();
 
     // Start the application.
-    print('##1');
+    print('FlutterDevice.runHot: Start app...');
     final Future<LaunchResult> futureResult = device!.startApp(
       package,
       mainPath: hotRunner.mainPath,
@@ -454,30 +454,31 @@ class FlutterDevice {
       ipv6: hotRunner.ipv6!,
       userIdentifier: userIdentifier,
     );
-    print('##2');
+    print('FlutterDevice.runHot: Awaiting start app...');
 
     final LaunchResult result = await futureResult;
-    print('##3');
+    print('FlutterDevice.runHot: Got launch result');
 
     if (!result.started) {
-      print('##4');
+      print('FlutterDevice.runHot: App not started');
+
       globals.printError('Error launching application on ${device!.name}.');
       await stopEchoingDeviceLog();
       return 2;
     }
     if (result.hasObservatory) {
-      print('##5');
+      print('FlutterDevice.runHot: App does has observatory');
       observatoryUris = Stream<Uri?>
         .value(result.observatoryUri)
         .asBroadcastStream();
     } else {
-      print('##6');
-
+      print('FlutterDevice.runHot: App does not has observatory');
       observatoryUris = const Stream<Uri>
         .empty()
         .asBroadcastStream();
     }
-    print('##7');
+
+    print('FlutterDevice.runHot: Done');
     return 0;
   }
 
