@@ -21,8 +21,12 @@ namespace flutter {
 
 DisplayListCanvasRecorder::DisplayListCanvasRecorder(const SkRect& bounds,
                                                      bool prepare_rtree)
-    : SkCanvasVirtualEnforcer(bounds.width(), bounds.height()),
-      builder_(sk_make_sp<DisplayListBuilder>(bounds, prepare_rtree)) {}
+    : SkCanvasVirtualEnforcer(0, 0),
+      builder_(sk_make_sp<DisplayListBuilder>(bounds, prepare_rtree)) {
+  // isEmpty protects us against NaN as we normalize any empty cull rects
+  SkIRect cull = bounds.isEmpty() ? SkIRect::MakeEmpty() : bounds.roundOut();
+  SkCanvasVirtualEnforcer::resetCanvas(cull);
+}
 
 sk_sp<DisplayList> DisplayListCanvasRecorder::Build() {
   CHECK_DISPOSE(nullptr);
@@ -57,6 +61,7 @@ void DisplayListCanvasRecorder::onClipRect(const SkRect& rect,
   CHECK_DISPOSE();
   builder_->clipRect(rect, clip_op,
                      edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
+  SkCanvasVirtualEnforcer::onClipRect(rect, clip_op, edge_style);
 }
 void DisplayListCanvasRecorder::onClipRRect(const SkRRect& rrect,
                                             SkClipOp clip_op,
@@ -64,6 +69,7 @@ void DisplayListCanvasRecorder::onClipRRect(const SkRRect& rrect,
   CHECK_DISPOSE();
   builder_->clipRRect(rrect, clip_op,
                       edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
+  SkCanvasVirtualEnforcer::onClipRRect(rrect, clip_op, edge_style);
 }
 void DisplayListCanvasRecorder::onClipPath(const SkPath& path,
                                            SkClipOp clip_op,
@@ -71,6 +77,7 @@ void DisplayListCanvasRecorder::onClipPath(const SkPath& path,
   CHECK_DISPOSE();
   builder_->clipPath(path, clip_op,
                      edge_style == ClipEdgeStyle::kSoft_ClipEdgeStyle);
+  SkCanvasVirtualEnforcer::onClipPath(path, clip_op, edge_style);
 }
 
 void DisplayListCanvasRecorder::willSave() {

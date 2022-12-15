@@ -74,7 +74,9 @@ DisplayListBuilder::DisplayListBuilder(const SkRect& cull_rect,
     accumulator_ = std::make_unique<RectBoundsAccumulator>();
   }
 
-  layer_stack_.emplace_back(SkM44(), SkMatrix::I(), cull_rect);
+  // isEmpty protects us against NaN as we normalize any empty cull rects
+  SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
+  layer_stack_.emplace_back(SkM44(), SkMatrix::I(), cull);
   current_layer_ = &layer_stack_.back();
 }
 
