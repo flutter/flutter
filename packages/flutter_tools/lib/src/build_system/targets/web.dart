@@ -335,6 +335,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.wasm'),
   ];
+
+  // TODO(jacksongardner): override `depfiles` once dart2wasm begins producing
+  // them: https://github.com/dart-lang/sdk/issues/50747
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
