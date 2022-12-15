@@ -1104,6 +1104,7 @@ void main() {
                     TestSemantics(
                       tooltip: 'Foo',
                       label: 'Bar',
+                      actions: <SemanticsAction>[SemanticsAction.longPress],
                       textDirection: TextDirection.ltr,
                     ),
                   ],
@@ -1147,6 +1148,7 @@ void main() {
                     TestSemantics(
                       tooltip: 'Foo',
                       label: 'Bar',
+                      actions: <SemanticsAction>[SemanticsAction.longPress],
                       textDirection: TextDirection.ltr,
                     ),
                   ],

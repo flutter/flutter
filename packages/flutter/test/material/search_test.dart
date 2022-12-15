@@ -620,7 +620,9 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.tap, SemanticsAction.longPress,
+                            ],
                             tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
