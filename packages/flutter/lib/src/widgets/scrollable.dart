@@ -757,7 +757,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // Returns the delta that should result from applying [event] with axis,
   // direction, and any modifiers specified by the ScrollBehavior taken into
-  // account for horizontal scrollers.
+  // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     late double delta;
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
