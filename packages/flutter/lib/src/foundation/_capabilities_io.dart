@@ -3,4 +3,6 @@
 // found in the LICENSE file.
 
 /// The dart:io implementation of [isCanvasKit]. This bool shouldn't be used outside of web.
-bool get isCanvasKit => false;
+bool get isCanvasKit {
+  throw UnimplementedError('isCanvasKit is not implemented for dart:io.');
+}

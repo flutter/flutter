@@ -1177,8 +1177,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'profile', renderer: 'canvaskit'),
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'release', renderer: 'html'),
 
-    // This test only needs to test when renderer=auto
-    () => _runWebE2eTest('capabilities_integration', buildMode: 'debug', renderer: 'auto'),
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'debug', renderer: 'auto'),
+    () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'profile', renderer: 'canvaskit'),
+    () => _runWebE2eTest('capabilities_integration_html', buildMode: 'release', renderer: 'html'),
 
     () => _runWebTreeshakeTest(),
 

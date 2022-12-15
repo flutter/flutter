@@ -11,13 +11,11 @@ import 'package:web_e2e_tests/capabilities_main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // App is run using 'web-renderer=auto'. Therefore, when the targetPlatform isDesktop,
+  // When the app is run using 'web-renderer=auto' and the targetPlatform isDesktop,
   // the app should be using canvasKit.
   final bool isDesktop = _isDesktop(defaultTargetPlatform);
 
-  testWidgets('Capabilities integration test',
-          (WidgetTester tester) async {
-
+  testWidgets('Capabilities integration test', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
     final Finder textFinder = find.byKey(const Key('isCanvaskit bool is true'));
