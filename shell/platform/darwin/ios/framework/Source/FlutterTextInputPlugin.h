@@ -7,7 +7,6 @@
 
 #import <UIKit/UIKit.h>
 
-#import "flutter/fml/memory/weak_ptr.h"
 #import "flutter/shell/platform/common/text_editing_delta.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
@@ -30,8 +29,8 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 @interface FlutterTextInputPlugin
     : NSObject <FlutterKeySecondaryResponder, UIIndirectScribbleInteractionDelegate>
 
-@property(nonatomic, assign) UIViewController* viewController;
-@property(nonatomic, assign) id<FlutterIndirectScribbleDelegate> indirectScribbleDelegate;
+@property(nonatomic, weak) UIViewController* viewController;
+@property(nonatomic, weak) id<FlutterIndirectScribbleDelegate> indirectScribbleDelegate;
 @property(nonatomic, strong)
     NSMutableDictionary<UIScribbleElementIdentifier, NSValue*>* scribbleElements;
 
@@ -125,7 +124,7 @@ FLUTTER_DARWIN_EXPORT
 @property(readwrite, copy) UITextRange* selectedTextRange;
 @property(nonatomic, strong) UITextRange* markedTextRange;
 @property(nonatomic, copy) NSDictionary* markedTextStyle;
-@property(nonatomic, assign) id<UITextInputDelegate> inputDelegate;
+@property(nonatomic, weak) id<UITextInputDelegate> inputDelegate;
 
 // UITextInputTraits
 @property(nonatomic) UITextAutocapitalizationType autocapitalizationType;
@@ -141,10 +140,10 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic) UITextSmartDashesType smartDashesType API_AVAILABLE(ios(11.0));
 @property(nonatomic, copy) UITextContentType textContentType API_AVAILABLE(ios(10.0));
 
-@property(nonatomic, assign) UIAccessibilityElement* backingTextInputAccessibilityObject;
+@property(nonatomic, weak) UIAccessibilityElement* backingTextInputAccessibilityObject;
 
 // Scribble Support
-@property(nonatomic, assign) id<FlutterViewResponder> viewResponder;
+@property(nonatomic, weak) id<FlutterViewResponder> viewResponder;
 @property(nonatomic) FlutterScribbleFocusStatus scribbleFocusStatus;
 @property(nonatomic, strong) NSArray<FlutterTextSelectionRect*>* selectionRects;
 - (void)resetScribbleInteractionStatusIfEnding;
