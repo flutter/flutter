@@ -4648,6 +4648,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "x86"
 
   - name: Mac_arm64 flutter_packaging
     recipe: packaging_v2/packaging_v2
