@@ -1114,10 +1114,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     assert(false);
   }
 
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-        'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
   @override
   void captureText(SelectionChangedCause cause) {
     assert(false);
