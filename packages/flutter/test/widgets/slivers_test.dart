@@ -1105,8 +1105,6 @@ void main() {
     await tester.tap(find.text('Index 1'));
     expect(firstTapped, 0);
     expect(secondTapped, 1);
-    expect(find.text('Index'), findsNWidgets(2));
-    expect(find.text('Separator'), findsNWidgets(1));
   });
 
   testWidgets('SliverList.separated has correct number of children', (WidgetTester tester) async {
