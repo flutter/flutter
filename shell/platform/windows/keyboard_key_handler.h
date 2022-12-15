@@ -47,6 +47,8 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
                               bool was_down,
                               KeyEventCallback callback) = 0;
 
+    virtual void SyncModifiersIfNeeded(int modifiers_state) = 0;
+
     virtual ~KeyboardKeyHandlerDelegate();
   };
 
@@ -57,6 +59,9 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
 
   // Add a delegate that handles events received by |KeyboardHook|.
   void AddDelegate(std::unique_ptr<KeyboardKeyHandlerDelegate> delegate);
+
+  // Synthesize modifier keys events if needed.
+  void SyncModifiersIfNeeded(int modifiers_state) override;
 
   // Handles a key event.
   //

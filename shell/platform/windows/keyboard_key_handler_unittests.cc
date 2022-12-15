@@ -87,6 +87,10 @@ class MockKeyHandlerDelegate
     callback_handler(hook_history->back().callback);
   }
 
+  virtual void SyncModifiersIfNeeded(int modifiers_state) {
+    // Do Nothing
+  }
+
   CallbackHandler callback_handler;
   int delegate_id;
   std::list<KeyboardHookCall>* hook_history;

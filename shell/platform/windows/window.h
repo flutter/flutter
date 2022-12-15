@@ -109,7 +109,8 @@ class Window : public KeyboardManager::WindowDelegate {
   virtual void OnPointerMove(double x,
                              double y,
                              FlutterPointerDeviceKind device_kind,
-                             int32_t device_id) = 0;
+                             int32_t device_id,
+                             int modifiers_state) = 0;
 
   // Called when the a mouse button, determined by |button|, goes down.
   virtual void OnPointerDown(double x,

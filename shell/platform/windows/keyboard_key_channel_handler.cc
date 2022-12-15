@@ -109,6 +109,10 @@ KeyboardKeyChannelHandler::KeyboardKeyChannelHandler(
 
 KeyboardKeyChannelHandler::~KeyboardKeyChannelHandler() = default;
 
+void KeyboardKeyChannelHandler::SyncModifiersIfNeeded(int modifiers_state) {
+  // Do nothing
+}
+
 void KeyboardKeyChannelHandler::KeyboardHook(
     int key,
     int scancode,
