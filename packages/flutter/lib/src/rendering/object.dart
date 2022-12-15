@@ -3164,13 +3164,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // the semantics subtree starting at the identified semantics boundary.
 
     final bool wasSemanticsBoundary = _semantics != null && (_cachedSemanticsConfiguration?.isSemanticBoundary ?? false);
-    _cachedSemanticsConfiguration = null;
-
-    bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
 
     bool mayProduceSiblingNodes =
       _cachedSemanticsConfiguration?.childConfigurationsDelegate != null ||
       _semanticsConfiguration.childConfigurationsDelegate != null;
+    _cachedSemanticsConfiguration = null;
+
+    bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
     RenderObject node = this;
 
     // The sibling nodes will be attached to the parent of immediate semantics
