@@ -4331,6 +4331,7 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
+    scheduler: luci
 
   - name: Linux flutter_packaging_beta
     recipe: packaging_v2/packaging_v2
