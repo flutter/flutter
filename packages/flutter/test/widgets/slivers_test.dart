@@ -1128,6 +1128,48 @@ void main() {
     expect(find.text('item'), findsNWidgets(2));
     expect(find.text('separator'), findsNWidgets(1));
   });
+
+  testWidgets('SliverList.list can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              children: <Widget>[
+                Material(
+                  color: Colors.yellow,
+                  child: InkWell(
+                    onTap: () => firstTapped++,
+                    child: const Text('Index 0'),
+                  ),
+                ),
+                Material(
+                  color: Colors.red,
+                  child: InkWell(
+                    onTap: () => secondTapped++,
+                    child: const Text('Index 1'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
    
   testWidgets('SliverFixedExtentList.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
@@ -1157,6 +1199,49 @@ void main() {
         ),
       ),
     ));
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+    testWidgets('SliverList.list can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverFixedExtentList.list(
+              itemExtent: 100,
+              children: <Widget>[
+                Material(
+                  color: Colors.yellow,
+                  child: InkWell(
+                    onTap: () => firstTapped++,
+                    child: const Text('Index 0'),
+                  ),
+                ),
+                Material(
+                  color: Colors.red,
+                  child: InkWell(
+                    onTap: () => secondTapped++,
+                    child: const Text('Index 1'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ));
+
     // Verify correct hit testing
     await tester.tap(find.text('Index 0'));
     expect(firstTapped, 1);

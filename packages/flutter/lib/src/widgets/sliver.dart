@@ -1059,8 +1059,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
-  /// /// {@tool snippet}
   ///
+  /// {@tool snippet}
   /// This example, which would be inserted into a [CustomScrollView.slivers]
   /// list, shows an infinite number of items in varying shades of blue:
   ///
@@ -1122,7 +1122,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   /// {@tool snippet}
   /// 
-  //  This example shows how to create [SliverList] whose [Container] items
+  //  This example shows how to create a [SliverList] whose [Container] items
   /// are separated by [Divider]s.
   ///
   /// ```dart
@@ -1139,7 +1139,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// ```
   /// {@end-tool}
   SliverList.separated({
-     super.key,
+    super.key,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     required NullableIndexedWidgetBuilder separatorBuilder,
@@ -1174,6 +1174,44 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
          semanticIndexCallback: (Widget _, int index) {
            return index.isEven ? index ~/ 2 : null;
          },
+       ));
+
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// This constructor uses a list of [Widget]s to build the sliver.
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverList.list(
+  ///   children: <Widget>[
+  ///     Text('Hello'),
+  ///     Text('World!'),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
+  SliverList.list({
+    super.key,
+    required List<Widget> children,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(delegate: SliverChildListDelegate(
+         children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ));
 
   @override
@@ -1299,6 +1337,51 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       ));
+
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// [SliverFixedExtentList] places its children in a linear array along the main
+  /// axis starting at offset zero and without gaps. Each child is forced to have
+  /// the [itemExtent] in the main axis and the
+  /// [SliverConstraints.crossAxisExtent] in the cross axis.
+  ///
+  /// This constructor uses a list of [Widget]s to build the sliver.
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverFixedExtentList.list(
+  ///   itemExtent: 50.0,
+  ///   children: <Widget>[
+  ///     Text('Hello'),
+  ///     Text('World!'),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
+  SliverFixedExtentList.list({
+    super.key,
+    required List<Widget> children,
+    required this.itemExtent,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(delegate: SliverChildListDelegate(
+         children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
