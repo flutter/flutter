@@ -112,7 +112,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   void OnPointerMove(double x,
                      double y,
                      FlutterPointerDeviceKind device_kind,
-                     int32_t device_id) override;
+                     int32_t device_id,
+                     int modifiers_state) override;
 
   // |WindowBindingHandlerDelegate|
   void OnPointerDown(double x,

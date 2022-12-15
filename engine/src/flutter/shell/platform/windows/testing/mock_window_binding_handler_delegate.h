@@ -23,8 +23,8 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
 
   MOCK_METHOD2(OnWindowSizeChanged, void(size_t, size_t));
   MOCK_METHOD0(OnWindowRepaint, void());
-  MOCK_METHOD4(OnPointerMove,
-               void(double, double, FlutterPointerDeviceKind, int32_t));
+  MOCK_METHOD5(OnPointerMove,
+               void(double, double, FlutterPointerDeviceKind, int32_t, int));
   MOCK_METHOD5(OnPointerDown,
                void(double,
                     double,

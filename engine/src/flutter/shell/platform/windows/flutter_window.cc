@@ -156,8 +156,10 @@ void FlutterWindow::OnPaint() {
 void FlutterWindow::OnPointerMove(double x,
                                   double y,
                                   FlutterPointerDeviceKind device_kind,
-                                  int32_t device_id) {
-  binding_handler_delegate_->OnPointerMove(x, y, device_kind, device_id);
+                                  int32_t device_id,
+                                  int modifiers_state) {
+  binding_handler_delegate_->OnPointerMove(x, y, device_kind, device_id,
+                                           modifiers_state);
 }
 
 void FlutterWindow::OnPointerDown(double x,

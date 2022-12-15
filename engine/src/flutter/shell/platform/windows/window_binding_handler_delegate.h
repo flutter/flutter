@@ -32,7 +32,8 @@ class WindowBindingHandlerDelegate {
   virtual void OnPointerMove(double x,
                              double y,
                              FlutterPointerDeviceKind device_kind,
-                             int32_t device_id) = 0;
+                             int32_t device_id,
+                             int modifiers_state) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
   // pressed. Typically called by currently configured WindowBindingHandler.

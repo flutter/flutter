@@ -187,7 +187,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   const bool is_event_down = action == WM_KEYDOWN || action == WM_SYSKEYDOWN;
 
   bool event_key_can_be_repeat = true;
-  UpdateLastSeenCritialKey(key, physical_key, sequence_logical_key);
+  UpdateLastSeenCriticalKey(key, physical_key, sequence_logical_key);
   // Synchronize the toggled states of critical keys (such as whether CapsLocks
   // is enabled). Toggled states can only be changed upon a down event, so if
   // the recorded toggled state does not match the true state, this function
@@ -197,16 +197,18 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   // After this function, all critical keys will have their toggled state
   // updated to the true state, while the critical keys whose toggled state have
   // been changed will be pressed regardless of their true pressed state.
-  // Updating the pressed state will be done by SynchronizeCritialPressedStates.
-  SynchronizeCritialToggledStates(key, is_event_down, &event_key_can_be_repeat);
+  // Updating the pressed state will be done by
+  // SynchronizeCriticalPressedStates.
+  SynchronizeCriticalToggledStates(key, is_event_down,
+                                   &event_key_can_be_repeat);
   // Synchronize the pressed states of critical keys (such as whether CapsLocks
   // is pressed).
   //
   // After this function, all critical keys except for the target key will have
   // their toggled state and pressed state matched with their true states. The
   // target key's pressed state will be updated immediately after this.
-  SynchronizeCritialPressedStates(key, physical_key, is_event_down,
-                                  event_key_can_be_repeat);
+  SynchronizeCriticalPressedStates(key, physical_key, is_event_down,
+                                   event_key_can_be_repeat);
 
   // Reassess the last logical record in case pressingRecords_ was modified
   // by the above synchronization methods.
@@ -317,8 +319,8 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   // received despite that GetKeyState says that CapsLock is not pressed. In
   // such case, post-event synchronization will synthesize a CapsLock up event
   // after the main event.
-  SynchronizeCritialPressedStates(key, physical_key, is_event_down,
-                                  event_key_can_be_repeat);
+  SynchronizeCriticalPressedStates(key, physical_key, is_event_down,
+                                   event_key_can_be_repeat);
 }
 
 void KeyboardKeyEmbedderHandler::KeyboardHook(
@@ -349,7 +351,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHook(
   }
 }
 
-void KeyboardKeyEmbedderHandler::UpdateLastSeenCritialKey(
+void KeyboardKeyEmbedderHandler::UpdateLastSeenCriticalKey(
     int virtual_key,
     uint64_t physical_key,
     uint64_t logical_key) {
@@ -360,7 +362,7 @@ void KeyboardKeyEmbedderHandler::UpdateLastSeenCritialKey(
   }
 }
 
-void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
+void KeyboardKeyEmbedderHandler::SynchronizeCriticalToggledStates(
     int event_virtual_key,
     bool is_event_down,
     bool* event_key_can_be_repeat) {
@@ -415,7 +417,7 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialToggledStates(
   }
 }
 
-void KeyboardKeyEmbedderHandler::SynchronizeCritialPressedStates(
+void KeyboardKeyEmbedderHandler::SynchronizeCriticalPressedStates(
     int event_virtual_key,
     int event_physical_key,
     bool is_event_down,
@@ -492,6 +494,72 @@ void KeyboardKeyEmbedderHandler::SynchronizeCritialPressedStates(
   }
 }
 
+void KeyboardKeyEmbedderHandler::SyncModifiersIfNeeded(int modifiers_state) {
+  // TODO(bleroux): consider exposing these constants in flutter_key_map.g.cc?
+  const uint64_t physical_shift_left =
+      windowsToPhysicalMap_.at(kScanCodeShiftLeft);
+  const uint64_t physical_shift_right =
+      windowsToPhysicalMap_.at(kScanCodeShiftRight);
+  const uint64_t logical_shift_left =
+      windowsToLogicalMap_.at(kKeyCodeShiftLeft);
+  const uint64_t physical_control_left =
+      windowsToPhysicalMap_.at(kScanCodeControlLeft);
+  const uint64_t physical_control_right =
+      windowsToPhysicalMap_.at(kScanCodeControlRight);
+  const uint64_t logical_control_left =
+      windowsToLogicalMap_.at(kKeyCodeControlLeft);
+
+  bool shift_pressed = (modifiers_state & kShift) != 0;
+  SynthesizeIfNeeded(physical_shift_left, physical_shift_right,
+                     logical_shift_left, shift_pressed);
+  bool control_pressed = (modifiers_state & kControl) != 0;
+  SynthesizeIfNeeded(physical_control_left, physical_control_right,
+                     logical_control_left, control_pressed);
+}
+
+void KeyboardKeyEmbedderHandler::SynthesizeIfNeeded(uint64_t physical_left,
+                                                    uint64_t physical_right,
+                                                    uint64_t logical_left,
+                                                    bool is_pressed) {
+  auto pressing_record_iter_left = pressingRecords_.find(physical_left);
+  bool left_pressed = pressing_record_iter_left != pressingRecords_.end();
+  auto pressing_record_iter_right = pressingRecords_.find(physical_right);
+  bool right_pressed = pressing_record_iter_right != pressingRecords_.end();
+  bool already_pressed = left_pressed || right_pressed;
+  bool synthesize_down = is_pressed && !already_pressed;
+  bool synthesize_up = !is_pressed && already_pressed;
+
+  if (synthesize_down) {
+    SendSynthesizeDownEvent(physical_left, logical_left);
+  }
+
+  if (synthesize_up && left_pressed) {
+    uint64_t known_logical = pressing_record_iter_left->second;
+    SendSynthesizeUpEvent(physical_left, known_logical);
+  }
+
+  if (synthesize_up && right_pressed) {
+    uint64_t known_logical = pressing_record_iter_right->second;
+    SendSynthesizeUpEvent(physical_right, known_logical);
+  }
+}
+
+void KeyboardKeyEmbedderHandler::SendSynthesizeDownEvent(uint64_t physical,
+                                                         uint64_t logical) {
+  SendEvent(
+      SynthesizeSimpleEvent(kFlutterKeyEventTypeDown, physical, logical, ""),
+      nullptr, nullptr);
+  pressingRecords_[physical] = logical;
+};
+
+void KeyboardKeyEmbedderHandler::SendSynthesizeUpEvent(uint64_t physical,
+                                                       uint64_t logical) {
+  SendEvent(
+      SynthesizeSimpleEvent(kFlutterKeyEventTypeUp, physical, logical, ""),
+      nullptr, nullptr);
+  pressingRecords_.erase(physical);
+};
+
 void KeyboardKeyEmbedderHandler::HandleResponse(bool handled, void* user_data) {
   PendingResponse* pending = reinterpret_cast<PendingResponse*>(user_data);
   auto callback = std::move(pending->callback);
@@ -516,8 +584,6 @@ void KeyboardKeyEmbedderHandler::InitCriticalKeys(
     };
   };
 
-  // TODO(dkwingsmt): Consider adding more critical keys here.
-  // https://github.com/flutter/flutter/issues/76736
   critical_keys_.emplace(VK_LSHIFT,
                          createCheckedKey(VK_LSHIFT, false, true, false));
   critical_keys_.emplace(VK_RSHIFT,
@@ -532,7 +598,6 @@ void KeyboardKeyEmbedderHandler::InitCriticalKeys(
                          createCheckedKey(VK_RMENU, true, true, false));
   critical_keys_.emplace(VK_LWIN, createCheckedKey(VK_LWIN, true, true, false));
   critical_keys_.emplace(VK_RWIN, createCheckedKey(VK_RWIN, true, true, false));
-
   critical_keys_.emplace(VK_CAPITAL,
                          createCheckedKey(VK_CAPITAL, false, true, true));
   critical_keys_.emplace(VK_SCROLL,
