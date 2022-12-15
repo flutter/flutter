@@ -8,7 +8,6 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Gradient, LineMetrics
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
