@@ -635,7 +635,7 @@ class FlutterValidator extends DoctorValidator {
   bool _filePathContainsDirPath(String directory, String file) {
     // calling .canonicalize() will normalize for alphabetic case and path
     // separators
-    return (_fileSystem.path.canonicalize(file))
+    return _fileSystem.path.canonicalize(file)
         .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
