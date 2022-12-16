@@ -101,7 +101,8 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
       case ContextMenuButtonType.captureText:
-        return localizations.scanTextButtonLabel;
+        // TODO(luckysmg): Maybe need a localizion label
+        return 'Capture Text';
       case ContextMenuButtonType.custom:
         return '';
     }
@@ -117,7 +118,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         return null;
       case ContextMenuButtonType.captureText:
 
-        /// TODO(luckysmg) need to get iOS scan text icon, but i didn't find it in CupertinoIcons.
+        // TODO(luckysmg): need to get iOS scan text icon, but i didn't find it in CupertinoIcons.
         return CupertinoIcons.switch_camera;
     }
   }

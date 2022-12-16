@@ -103,9 +103,6 @@ abstract class MaterialLocalizations {
   /// Label for "cut" edit buttons and menu items.
   String get cutButtonLabel;
 
-  /// Label for "Scan text" edit buttons and menu items.
-  String get scanTextButtonLabel;
-
   /// Label for OK buttons and menu items.
   String get okButtonLabel;
 
@@ -1086,9 +1083,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get cutButtonLabel => 'Cut';
-
-  @override
-  String get scanTextButtonLabel => 'Scan text';
 
   @override
   String get okButtonLabel => 'OK';
