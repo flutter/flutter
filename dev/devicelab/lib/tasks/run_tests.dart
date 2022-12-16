@@ -6,8 +6,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart';
+
 import '../framework/devices.dart';
 import '../framework/framework.dart';
+import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -250,6 +253,25 @@ abstract class RunOutputTask {
         });
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
+
+      final Directory crashesDir = Directory('/Users/loshar/Library/Logs/DiagnosticReports');
+      final List<FileSystemEntity> entities = await crashesDir.list().toList();
+      final Iterable<File> files = entities.whereType<File>();
+
+      final String? dumpDir = hostAgent.dumpDirectory?.path;
+      print('!!!! Dumping files to "$dumpDir"...');
+      if (dumpDir != null) {
+        for (final File file in files) {
+          if (file.path.contains('hello_world')) {
+            print('Copying crash "${file.path}"...');
+            file.copySync('$dumpDir/${basename(file.path)}');
+          } else {
+            print('Ignoring file "${file.path}"');
+          }
+        }
+      }
+      print('!!!! Dumped files');
+
       if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
       }
