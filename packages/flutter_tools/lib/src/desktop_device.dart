@@ -172,7 +172,7 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.buildInfo.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    print('DesktopDevice.startApp: Discovering observatory protocol URL...');
+    print('DesktopDevice.startApp: Creating ProtocolDiscovery...');
 
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,

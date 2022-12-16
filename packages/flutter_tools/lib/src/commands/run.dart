@@ -587,7 +587,7 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    print('####01');
+    print('RunCommand.runCommand');
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final BuildInfo buildInfo = await getBuildInfo();
@@ -631,7 +631,8 @@ class RunCommand extends RunCommandBase {
       );
     }
     globals.terminal.usesTerminalUi = true;
-    print('####02');
+
+    print('RunCommand.runCommand: Getting build mode...');
 
     final BuildMode buildMode = getBuildMode();
     for (final Device device in devices!) {
@@ -660,7 +661,6 @@ class RunCommand extends RunCommandBase {
         }
       }
     }
-    print('####03');
     List<String>? expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
@@ -678,14 +678,17 @@ class RunCommand extends RunCommandBase {
           platform: globals.platform,
         ),
     ];
-    print('####04');
+    print('RunCommand.runCommand: Creating runner...');
+
     final ResidentRunner runner = await createRunner(
       applicationBinaryPath: applicationBinaryPath,
       flutterDevices: flutterDevices,
       flutterProject: flutterProject,
       hotMode: hotMode,
     );
-    print('####05');
+
+    print('RunCommand.runCommand: Created runner');
+
     DateTime? appStartedTime;
     // Sync completer so the completing agent attaching to the resident doesn't
     // need to know about analytics.
@@ -714,26 +717,28 @@ class RunCommand extends RunCommandBase {
       }
     ));
     try {
-      print('####1');
+    print('RunCommand.runCommand: Running runner...');
+
       final int? result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         enableDevTools: stayResident && boolArgDeprecated(FlutterCommand.kEnableDevTools),
         route: route,
       );
-      print('####2');
+      print('RunCommand.runCommand: Ran runner, result $result...');
       handler?.stop();
       if (result != 0) {
-        print('####3');
+        print('RunCommand.runCommand: Non-zero runner result build mode, exiting...');
         throwToolExit(null, exitCode: result);
       }
     } on RPCError catch (error) {
-      print('####4');
+      print('RunCommand.runCommand: RPCError');
       if (error.code == RPCErrorCodes.kServiceDisappeared) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;
     } finally {
-      print('####5');
+      print('RunCommand.runCommand: finally');
+
       // However we exited from the runner, ensure the terminal has line mode
       // and echo mode enabled before we return the user to the shell.
       try {
@@ -742,7 +747,8 @@ class RunCommand extends RunCommandBase {
         // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
     }
-    print('####6');
+    print('RunCommand.runCommand: Returning FlutterCommandResult');
+
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String?>[

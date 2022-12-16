@@ -259,18 +259,18 @@ abstract class RunOutputTask {
       final Iterable<File> files = entities.whereType<File>();
 
       final String? dumpDir = hostAgent.dumpDirectory?.path;
-      print('!!!! Dumping files to "$dumpDir"...');
+      print('RunOutputTask.call: Dumping files to "$dumpDir"...');
       if (dumpDir != null) {
         for (final File file in files) {
           if (file.path.contains('hello_world')) {
-            print('Copying crash "${file.path}"...');
+            print('RunOutputTask.call: Copying crash "${file.path}"...');
             file.copySync('$dumpDir/${basename(file.path)}');
           } else {
-            print('Ignoring file "${file.path}"');
+            print('RunOutputTask.call: Ignoring file "${file.path}"');
           }
         }
       }
-      print('!!!! Dumped files');
+      print('RunOutputTask.call: Dumped files');
 
       if (runExitCode != null) {
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
