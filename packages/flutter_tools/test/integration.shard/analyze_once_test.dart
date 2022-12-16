@@ -231,7 +231,7 @@ void main() {
         'Analyzing',
         'unused_element',
         'only_throw_errors',
-        'missing_required_param'
+        'missing_required_param',
       ],
       exitMessageContains: '3 issues found.',
       exitCode: 1,
