@@ -279,6 +279,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Spasie';
 
   @override
@@ -722,6 +725,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'ምረጥ';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'ክፍተት';
@@ -1169,6 +1175,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'مفتاح الاختيار';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'مفتاح المسافة';
 
   @override
@@ -1612,6 +1621,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'ছিলেক্ট';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'স্পেচ';
@@ -2059,6 +2071,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seçin';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Boşluq';
 
   @override
@@ -2502,6 +2517,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Выбраць';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Прабел';
@@ -2949,6 +2967,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -3392,6 +3413,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'বেছে নিন';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -3839,6 +3863,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'tipka za razmak';
 
   @override
@@ -4282,6 +4309,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selecciona';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espai';
@@ -4729,6 +4759,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Vybrat';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Mezera';
 
   @override
@@ -5174,6 +5207,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Vælg';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Mellemrumstasten';
 
   @override
@@ -5617,6 +5653,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Auswählen';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Leertaste';
@@ -6101,6 +6140,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Επιλογή';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Διάστημα';
 
   @override
@@ -6544,6 +6586,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -7846,6 +7891,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selección';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espacio';
@@ -11496,6 +11544,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Vali';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Tühik';
 
   @override
@@ -11939,6 +11990,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Hautatu';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Zuriune-barra';
@@ -12386,6 +12440,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'انتخاب';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'فاصله';
 
   @override
@@ -12829,6 +12886,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Valitse';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Välilyönti';
@@ -13276,6 +13336,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Piliin';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Puwang';
 
   @override
@@ -13719,6 +13782,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Sélectionner';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espace';
@@ -14302,6 +14368,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seleccionar';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Espazo';
 
   @override
@@ -14745,6 +14814,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Auswählen';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Leertaste';
@@ -15192,6 +15264,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -15635,6 +15710,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'רווח';
@@ -16082,6 +16160,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -16525,6 +16606,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Odaberi';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Razmaknica';
@@ -16972,6 +17056,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Kiválasztás';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Szóköz';
 
   @override
@@ -17415,6 +17502,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Ընտրել';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Բացատ';
@@ -17862,6 +17952,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -18305,6 +18398,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Velja';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Bil';
@@ -18752,6 +18848,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seleziona';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Barra spaziatrice';
 
   @override
@@ -19195,6 +19294,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -19642,6 +19744,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -20085,6 +20190,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Бос орын';
@@ -20532,6 +20640,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -20975,6 +21086,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -21422,6 +21536,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => '선택';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => '스페이스';
 
   @override
@@ -21865,6 +21982,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Тандоо';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Боштук';
@@ -22312,6 +22432,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -22755,6 +22878,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Tarpas';
@@ -23202,6 +23328,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Atlasīt';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Atstarpes taustiņš';
 
   @override
@@ -23645,6 +23774,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -24092,6 +24224,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -24535,6 +24670,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Сонгох';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -24982,6 +25120,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'निवडा';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'स्पेस';
 
   @override
@@ -25425,6 +25566,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Pilih';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Ruang';
@@ -25872,6 +26016,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'ရွေးရန်';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'နေရာခြားခလုတ်';
 
   @override
@@ -26315,6 +26462,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Velg';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Mellomrom';
@@ -26762,6 +26912,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -27205,6 +27358,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selecteren';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Spatie';
@@ -27652,6 +27808,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Velg';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Mellomrom';
 
   @override
@@ -28095,6 +28254,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -28542,6 +28704,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -28985,6 +29150,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Spacja';
@@ -29432,6 +29600,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -29875,6 +30046,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selecionar';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espaço';
@@ -30461,6 +30635,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Spațiu';
 
   @override
@@ -30904,6 +31081,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Выбрать';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Пробел';
@@ -31351,6 +31531,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -31794,6 +31977,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Medzerník';
@@ -32241,6 +32427,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Izberi';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Preslednica';
 
   @override
@@ -32686,6 +32875,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -33129,6 +33321,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Тастер за размак';
@@ -33878,6 +34073,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Välj';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Blanksteg';
 
   @override
@@ -34321,6 +34519,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -34768,6 +34969,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -35211,6 +35415,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -35658,6 +35865,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -36101,6 +36311,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Piliin';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Puwang';
@@ -36548,6 +36761,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seç';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Boşluk';
 
   @override
@@ -36991,6 +37207,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Пробіл';
@@ -37438,6 +37657,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -37881,6 +38103,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Boʻsh joy';
@@ -38328,6 +38553,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Phím cách';
 
   @override
@@ -38771,6 +38999,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => '选择';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => '空格键';
@@ -39679,6 +39910,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Khetha';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
