@@ -1159,22 +1159,6 @@ public class FlutterActivityAndFragmentDelegateTest {
     assertNull(delegate.activePreDrawListener);
   }
 
-  @Test
-  public void usesFlutterEngineGroup() {
-    FlutterEngineGroup mockEngineGroup = mock(FlutterEngineGroup.class);
-    when(mockEngineGroup.createAndRunEngine(any(FlutterEngineGroup.Options.class)))
-        .thenReturn(mockFlutterEngine);
-    FlutterActivityAndFragmentDelegate.Host host =
-        mock(FlutterActivityAndFragmentDelegate.Host.class);
-    when(mockHost.getContext()).thenReturn(ctx);
-
-    FlutterActivityAndFragmentDelegate delegate =
-        new FlutterActivityAndFragmentDelegate(mockHost, mockEngineGroup);
-    delegate.onAttach(ctx);
-    FlutterEngine engineUnderTest = delegate.getFlutterEngine();
-    assertEquals(engineUnderTest, mockFlutterEngine);
-  }
-
   /**
    * Creates a mock {@link io.flutter.embedding.engine.FlutterEngine}.
    *
