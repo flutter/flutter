@@ -196,6 +196,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
           key: materialKey,
           type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
           elevation: elevation,
+          color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
           child: child == null
             ? null

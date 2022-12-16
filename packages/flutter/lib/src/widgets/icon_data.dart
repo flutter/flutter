@@ -93,3 +93,14 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
     return json;
   }
 }
+
+class _StaticIconProvider {
+  const _StaticIconProvider();
+}
+
+/// Annotation for classes that only provide static const [IconData] instances.
+///
+/// This is a hint to the font tree shaker to ignore the constant instances
+/// of [IconData] appearing in the class when tracking which code points
+/// should be retained in the bundled font.
+const Object staticIconProvider = _StaticIconProvider();

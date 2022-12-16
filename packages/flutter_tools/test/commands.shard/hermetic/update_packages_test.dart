@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -75,14 +74,6 @@ dependencies:
 ''';
 
 void main() {
-  testWithoutContext('kManuallyPinnedDependencies pins are actually pins', () {
-    expect(
-      kManuallyPinnedDependencies.values,
-      isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
-      reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
-    );
-  });
-
   group('update-packages', () {
     late FileSystem fileSystem;
     late Directory flutterSdk;

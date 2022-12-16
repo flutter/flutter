@@ -138,7 +138,7 @@ Hyper-V Requirements:      A hypervisor has been detected. Features required for
 /// The expected validation result object for
 /// a passing windows version test
 const ValidationResult validWindows10ValidationResult = ValidationResult(
-  ValidationType.installed,
+  ValidationType.success,
   <ValidationMessage>[],
   statusInfo: 'Installed version of Windows is version 10 or higher',
 );

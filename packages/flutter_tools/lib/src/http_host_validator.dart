@@ -110,7 +110,7 @@ class HttpHostValidator extends DoctorValidator {
 
     if (availabilityResults.every((_HostValidationResult result) => result.available)) {
       return ValidationResult(
-          ValidationType.installed,
+          ValidationType.success,
           messages..add(const ValidationMessage('All required HTTP hosts are available')),
       );
     }

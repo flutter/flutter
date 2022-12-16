@@ -53,6 +53,14 @@ const double _kIndicatorWidth = 64;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
+/// This example showcases [NavigationBar] label behaviors. When tapping on one
+/// of the label behavior options, the [labelBehavior] of the [NavigationBar]
+/// will be updated.
+///
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example shows a [NavigationBar] as it is used within a [Scaffold]
 /// widget when there are nested navigators that provide local navigation. The
 /// [NavigationBar] has four [NavigationDestination] widgets with different
@@ -60,7 +68,7 @@ const double _kIndicatorWidth = 64;
 /// item's index and displays a corresponding page with its own local navigator
 /// in the body of a [Scaffold].
 ///
-/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.1.dart **
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.2.dart **
 /// {@end-tool}
 /// See also:
 ///
@@ -266,6 +274,8 @@ class NavigationDestination extends StatelessWidget {
     super.key,
     required this.icon,
     this.selectedIcon,
+    this.indicatorColor,
+    this.indicatorShape,
     required this.label,
     this.tooltip,
   });
@@ -289,6 +299,12 @@ class NavigationDestination extends StatelessWidget {
   /// [MaterialState.selected]. If this is null, the default [IconThemeData]
   /// would use a size of 24.0 and [ColorScheme.onSurface].
   final Widget? selectedIcon;
+
+  /// The color of the [indicatorShape] when this destination is selected.
+  final Color? indicatorColor;
+
+  /// The shape of the selected inidicator.
+  final ShapeBorder? indicatorShape;
 
   /// The text label that appears below the icon of this
   /// [NavigationDestination].
@@ -335,8 +351,8 @@ class NavigationDestination extends StatelessWidget {
           children: <Widget>[
             NavigationIndicator(
               animation: animation,
-              color: navigationBarTheme.indicatorColor ?? defaults.indicatorColor!,
-              shape: navigationBarTheme.indicatorShape ?? defaults.indicatorShape!
+              color: indicatorColor ?? navigationBarTheme.indicatorColor ?? defaults.indicatorColor!,
+              shape: indicatorShape ?? navigationBarTheme.indicatorShape ?? defaults.indicatorShape!
             ),
             _StatusTransitionWidgetBuilder(
               animation: animation,
@@ -440,10 +456,10 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final double labelPadding;
     switch (info.labelBehavior) {
       case NavigationDestinationLabelBehavior.alwaysShow:
-        labelPadding = 10;
+        labelPadding = 8;
         break;
       case NavigationDestinationLabelBehavior.onlyShowSelected:
-        labelPadding = selected ? 10 : 0;
+        labelPadding = selected ? 8 : 0;
         break;
       case NavigationDestinationLabelBehavior.alwaysHide:
         labelPadding = 0;
