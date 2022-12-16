@@ -57,6 +57,7 @@ void main() {
     bool readOnly = false,
     bool obscured = false,
     TextStyle style = const TextStyle(fontSize: 10.0),
+      bool enableInteractiveSelection = true
   }) {
     return MaterialApp(
       home: Align(
@@ -82,6 +83,7 @@ void main() {
             readOnly: readOnly,
             textAlign: textAlign,
             obscureText: obscured,
+            enableInteractiveSelection: enableInteractiveSelection,
           ),
         ),
       ),
@@ -2051,22 +2053,6 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('horizontal movement', (WidgetTester tester) async {
-      controller.text = testText;
-      controller.selection = const TextSelection.collapsed(
-        offset: 0,
-      );
-
-      await tester.pumpWidget(buildEditableText());
-
-      for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowRight)) {
-        await sendKeyCombination(tester, activator);
-        await tester.pump();
-
-        expect(controller.selection, const TextSelection.collapsed(offset: 0));
-      }
-    }, variant: TargetPlatformVariant.all());
-
     testWidgets('select all non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
@@ -2284,6 +2270,92 @@ void main() {
               extentOffset: 17), // selection extends all the way down
           reason: selectAllDown.toString(),
         );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('select left', (WidgetTester tester) async {
+      const SingleActivator selectLeft =
+          SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(
+        offset: 5,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectLeft);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 4),
+        reason: selectLeft.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('select right', (WidgetTester tester) async {
+      const SingleActivator selectRight =
+          SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(
+        offset: 5,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectRight);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 6),
+        reason: selectRight.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets(
+        'select left should not expand selection if selection is disabled',
+        (WidgetTester tester) async {
+      const SingleActivator selectLeft =
+          SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(
+        offset: 5,
+      );
+
+      await tester
+          .pumpWidget(buildEditableText(enableInteractiveSelection: false));
+      await sendKeyCombination(tester, selectLeft);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 4), // should not expand selection
+        reason: selectLeft.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets(
+        'select right should not expand selection if selection is disabled',
+        (WidgetTester tester) async {
+      const SingleActivator selectRight =
+          SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      await tester
+          .pumpWidget(buildEditableText(enableInteractiveSelection: false));
+      await sendKeyCombination(tester, selectRight);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(
+            offset: 6,
+            affinity: TextAffinity.upstream), // should not expand selection
+        reason: selectRight.toString(),
+      );
     }, variant: TargetPlatformVariant.desktop());
   }, skip: !kIsWeb); // [intended] specific tests target web.
 }
