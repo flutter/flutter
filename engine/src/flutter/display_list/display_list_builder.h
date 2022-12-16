@@ -362,7 +362,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
  private:
   void checkForDeferredSave();
 
-  SkAutoTMalloc<uint8_t> storage_;
+  DisplayListStorage storage_;
   size_t used_ = 0;
   size_t allocated_ = 0;
   int op_count_ = 0;
