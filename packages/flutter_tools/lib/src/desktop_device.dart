@@ -132,7 +132,29 @@ abstract class DesktopDevice extends Device {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
-    print('DesktopDevice.startApp: #2');
+
+    print('DesktopDevice.startApp: Dumping entitlements...');
+
+    final codesign = await _processManager.start(
+      <String>[
+        'codesign',
+        '--display',
+        '--entitlements',
+        ':-',
+        executable,
+      ],
+    );
+    codesign.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) => print('codesign:stdout: $line'));
+    codesign.stderr
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) => print('codesign:stderr: $line'));
+    await codesign.exitCode;
+    print('codesign exit code: ${codesign.exitCode}');
+    print('DesktopDevice.startApp: Dumped entitlements...');
 
     Process process;
     final List<String> command = <String>[
@@ -194,6 +216,8 @@ abstract class DesktopDevice extends Device {
       }
 
       print('DesktopDevice.startApp: error in debug connection');
+
+
 
       _logger.printError(
         'Error waiting for a debug connection: '
