@@ -69,6 +69,10 @@ class TestApp {
     for (PointerData data in packet.data) {
       print('touch-input-view received tap: ${data.toStringFull()}');
 
+      if (data.change == PointerChange.down) {
+        this._backgroundColor = _yellow;
+      }
+
       if (data.change == PointerChange.down || data.change == PointerChange.move) {
         Incoming.fromSvcPath()
           ..connectToService(_responseListener)

@@ -44,7 +44,11 @@ class PortableUITest : public ::loop_fixture::RealLoop {
       "flutter_jit_runner.cm";
   static constexpr auto kFlutterRunnerEnvironment = "flutter_runner_env";
 
-  void SetUp();
+  void SetUp(bool build_realm = true);
+
+  // Calls the Build method for Realm Builder to build the realm
+  // Can only be called once, panics otherwise
+  void BuildRealm();
 
   // Attaches a client view to the scene, and waits for it to render.
   void LaunchClient();

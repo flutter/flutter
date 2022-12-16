@@ -13,6 +13,8 @@ dart_library("lib") {
   sources = [ "embedding-flutter-view.dart" ]
 
   deps = [
+    "//flutter/shell/platform/fuchsia/dart:args",
+    "//flutter/shell/platform/fuchsia/dart:vector_math",
     "//flutter/tools/fuchsia/dart:fuchsia_services",
     "//flutter/tools/fuchsia/dart:zircon",
     "//flutter/tools/fuchsia/fidl:fuchsia.ui.app",
