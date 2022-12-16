@@ -36,10 +36,11 @@ void PlatformView::DispatchPointerDataPacket(
       pointer_data_packet_converter_.Convert(std::move(packet)));
 }
 
-void PlatformView::DispatchSemanticsAction(int32_t id,
+void PlatformView::DispatchSemanticsAction(int32_t node_id,
                                            SemanticsAction action,
                                            fml::MallocMapping args) {
-  delegate_.OnPlatformViewDispatchSemanticsAction(id, action, std::move(args));
+  delegate_.OnPlatformViewDispatchSemanticsAction(node_id, action,
+                                                  std::move(args));
 }
 
 void PlatformView::SetSemanticsEnabled(bool enabled) {
