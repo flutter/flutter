@@ -37,6 +37,21 @@ static inline bool FlutterStandardFieldIsStandardType(uint8_t field) {
          field >= FlutterStandardFieldNil;
 }
 
+typedef enum {
+  FlutterStandardCodecObjcTypeNil,
+  FlutterStandardCodecObjcTypeNSNumber,
+  FlutterStandardCodecObjcTypeNSString,
+  FlutterStandardCodecObjcTypeFlutterStandardTypedData,
+  FlutterStandardCodecObjcTypeNSData,
+  FlutterStandardCodecObjcTypeNSArray,
+  FlutterStandardCodecObjcTypeNSDictionary,
+  FlutterStandardCodecObjcTypeUnknown,
+} FlutterStandardCodecObjcType;
+
+///////////////////////////////////////////////////////////////////////////////
+///\name Reader Helpers
+///@{
+
 void FlutterStandardCodecHelperReadAlignment(unsigned long* location,
                                              uint8_t alignment);
 
@@ -61,6 +76,34 @@ CFTypeRef FlutterStandardCodecHelperReadValueOfType(
     CFTypeRef (*ReadValue)(CFTypeRef),
     CFTypeRef (*ReadTypedDataOfType)(FlutterStandardField, CFTypeRef),
     CFTypeRef user_data);
+
+///@}
+
+///////////////////////////////////////////////////////////////////////////////
+///\name Writer Helpers
+///@{
+
+void FlutterStandardCodecHelperWriteByte(CFMutableDataRef data, uint8_t value);
+
+void FlutterStandardCodecHelperWriteBytes(CFMutableDataRef data,
+                                          const void* bytes,
+                                          unsigned long length);
+
+void FlutterStandardCodecHelperWriteSize(CFMutableDataRef data, uint32_t size);
+
+void FlutterStandardCodecHelperWriteAlignment(CFMutableDataRef data,
+                                              uint8_t alignment);
+
+void FlutterStandardCodecHelperWriteUTF8(CFMutableDataRef data,
+                                         CFStringRef value);
+
+void FlutterStandardCodecHelperWriteData(CFMutableDataRef data,
+                                         CFDataRef value);
+
+bool FlutterStandardCodecHelperWriteNumber(CFMutableDataRef data,
+                                           CFNumberRef number);
+
+///@}
 
 #if defined(__cplusplus)
 }
