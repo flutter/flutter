@@ -553,22 +553,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() {
-      return _pumpWidget(
-        binding.wrapWithDefaultView(widget),
-        duration,
-        phase,
-      );
+      binding.attachRootWidget(widget);
+      binding.scheduleFrame();
+      return binding.pump(duration, phase);
     });
-  }
-
-  Future<void> _pumpWidget(
-    Widget widget, [
-    Duration? duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-  ]) {
-    binding.attachRootWidget(widget);
-    binding.scheduleFrame();
-    return binding.pump(duration, phase);
   }
 
   @override
@@ -709,7 +697,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     // The interval following the last frame doesn't have to be within the fullDuration.
     Duration elapsed = Duration.zero;
     return TestAsyncUtils.guard<void>(() async {
-      binding.attachRootWidget(binding.wrapWithDefaultView(target));
+      binding.attachRootWidget(target);
       binding.scheduleFrame();
       while (elapsed < maxDuration) {
         await binding.pump(interval);
@@ -732,14 +720,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'therefore no restoration data has been collected to restore from. Did you forget to wrap '
       'your widget tree in a RootRestorationScope?',
     );
-    return TestAsyncUtils.guard<void>(() async {
-      final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
-      final TestRestorationData restorationData = binding.restorationManager.restorationData;
-      runApp(Container(key: UniqueKey()));
-      await pump();
-      binding.restorationManager.restoreFrom(restorationData);
-      return _pumpWidget(widget);
-    });
+    final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+    final TestRestorationData restorationData = binding.restorationManager.restorationData;
+    runApp(Container(key: UniqueKey()));
+    await pump();
+    binding.restorationManager.restoreFrom(restorationData);
+    return pumpWidget(widget);
   }
 
   /// Retrieves the current restoration data from the [RestorationManager].

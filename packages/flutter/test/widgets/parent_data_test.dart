@@ -274,7 +274,7 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      startsWith(
+      equalsIgnoringHashCodes(
         'Incorrect use of ParentDataWidget.\n'
         'The following ParentDataWidgets are providing parent data to the same RenderObject:\n'
         '- Positioned(left: 7.0, top: 6.0) (typically placed directly inside a Stack widget)\n'
@@ -283,7 +283,7 @@ void main() {
         'Usually, this indicates that at least one of the offending ParentDataWidgets listed '
         'above is not placed directly inside a compatible ancestor widget.\n'
         'The ownership chain for the RenderObject that received the parent data was:\n'
-        '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
+        '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← [root]',
       ),
     );
 
@@ -311,7 +311,7 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      startsWith(
+      equalsIgnoringHashCodes(
         'Incorrect use of ParentDataWidget.\n'
         'The ParentDataWidget Positioned(left: 7.0, top: 6.0) wants to apply ParentData of type '
         'StackParentData to a RenderObject, which has been set up to accept ParentData of '
@@ -320,7 +320,7 @@ void main() {
         'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
         'The offending Positioned is currently placed inside a Row widget.\n'
         'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← ', // End of chain omitted, not relevant for test.
+        '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← [root]',
       ),
     );
 
@@ -410,7 +410,7 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      startsWith(
+      equalsIgnoringHashCodes(
         'Incorrect use of ParentDataWidget.\n'
         'The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type '
         'FlexParentData to a RenderObject, which has been set up to accept ParentData of '
@@ -419,7 +419,7 @@ void main() {
         'Typically, Expanded widgets are placed directly inside Flex widgets.\n'
         'The offending Expanded is currently placed inside a Stack widget.\n'
         'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
+        '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← [root]',
       ),
     );
   });
