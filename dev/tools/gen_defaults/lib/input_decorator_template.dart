@@ -134,7 +134,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
+    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.focus.label-text')});
@@ -158,7 +158,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
+    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
     if(states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.focus.label-text')});
@@ -182,7 +182,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();${componentColor('md.comp.filled-text-field.focus.supporting-text') == componentColor('md.comp.filled-text-field.supporting-text') ? '' : '''
+    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();${componentColor('md.comp.filled-text-field.focus.supporting-text') == componentColor('md.comp.filled-text-field.supporting-text') ? '' : '''
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.focus.supporting-text')});
     }'''}${componentColor('md.comp.filled-text-field.hover.supporting-text') == componentColor('md.comp.filled-text-field.supporting-text') ? '' : '''
@@ -197,7 +197,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();${componentColor('md.comp.filled-text-field.error.focus.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''
+    final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();${componentColor('md.comp.filled-text-field.error.focus.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color:${componentColor('md.comp.filled-text-field.error.focus.supporting-text')});
     }'''}${componentColor('md.comp.filled-text-field.error.hover.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''

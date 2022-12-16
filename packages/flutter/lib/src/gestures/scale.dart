@@ -268,9 +268,10 @@ class _LineBetweenPointers {
 ///
 /// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
 /// calculates their focal point, indicated scale, and rotation. When a focal
-/// pointer is established, the recognizer calls [onStart]. As the focal point,
-/// scale, rotation change, the recognizer calls [onUpdate]. When the pointers
-/// are no longer in contact with the screen, the recognizer calls [onEnd].
+/// point is established, the recognizer calls [onStart]. As the focal point,
+/// scale, and rotation change, the recognizer calls [onUpdate]. When the
+/// pointers are no longer in contact with the screen, the recognizer calls
+/// [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
   ///

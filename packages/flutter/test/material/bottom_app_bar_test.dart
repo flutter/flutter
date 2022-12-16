@@ -197,8 +197,39 @@ void main() {
 
     final PhysicalShape physicalShape =
       tester.widget(find.byType(PhysicalShape).at(0));
+    final Material material = tester.widget(find.byType(Material).at(1));
 
     expect(physicalShape.color, const Color(0xff0000ff));
+    expect(material.color, null); /* no value in Material 2. */
+  });
+
+
+  testWidgets('color overrides theme color with Material 3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true).copyWith(
+          bottomAppBarColor: const Color(0xffffff00)),
+        home: Builder(
+          builder: (BuildContext context) {
+            return const Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  onPressed: null,
+                ),
+                bottomNavigationBar: BottomAppBar(
+                  color: Color(0xff0000ff),
+                ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final PhysicalShape physicalShape =
+      tester.widget(find.byType(PhysicalShape).at(0));
+    final Material material = tester.widget(find.byType(Material).at(1));
+
+    expect(physicalShape.color, const Color(0xff0000ff));
+    expect(material.color, const Color(0xff0000ff));
   });
 
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {

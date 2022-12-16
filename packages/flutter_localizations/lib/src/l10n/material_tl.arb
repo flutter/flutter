@@ -129,5 +129,6 @@
   "keyboardKeySpace": "Puwang",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu sa menu bar"
+  "menuBarMenuLabel": "Menu sa menu bar",
+  "currentDateLabel": "Date of today"
 }

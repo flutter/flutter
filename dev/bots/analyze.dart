@@ -143,6 +143,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('null initialized debug fields...');
   await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
+  printProgress('Taboo words...');
+  await verifyTabooDocumentation(flutterRoot);
+
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -1815,18 +1818,17 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
   final List<String> errors = <String>[];
   for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
-    for (int i = 0; i < lines.length; i += 1) {
-      final String line = lines[i];
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
       if (!line.contains(_kDebugOnlyAnnotation)) {
         continue;
       }
-      final String nextLine = lines[i + 1];
+      final String nextLine = lines[index + 1];
       if (_nullInitializedField.firstMatch(nextLine) == null) {
-        errors.add('${file.path} L$i');
+        errors.add('${file.path}:$index');
       }
     }
   }
-
   if (errors.isNotEmpty) {
     foundError(<String>[
      '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
@@ -1834,6 +1836,29 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
      'These fields should be written as:\n',
      'field = kDebugMode ? <DebugValue> : null;\n',
      'Errors were found in the following files:',
+      ...errors,
+    ]);
+  }
+}
+
+final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply)\b', caseSensitive: false);
+
+Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatches = 100 }) async {
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
+      final Match? match = tabooPattern.firstMatch(line);
+      if (match != null) {
+        errors.add('${file.path}:${index + 1}: Found use of the taboo word "${match.group(1)}" in documentation string.');
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    foundError(<String>[
+      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
+      '${bold}In many cases the word can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
       ...errors,
     ]);
   }

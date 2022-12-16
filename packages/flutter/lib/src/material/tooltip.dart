@@ -884,7 +884,7 @@ class _TooltipOverlay extends StatelessWidget {
       );
     }
     return Positioned.fill(
-      bottom: MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0,
+      bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,

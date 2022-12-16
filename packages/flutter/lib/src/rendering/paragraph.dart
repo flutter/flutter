@@ -136,8 +136,12 @@ class RenderParagraph extends RenderBox
     assert(value != null);
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
-      case RenderComparison.metadata:
         return;
+      case RenderComparison.metadata:
+        _textPainter.text = value;
+        _cachedCombinedSemanticsInfos = null;
+        markNeedsSemanticsUpdate();
+        break;
       case RenderComparison.paint:
         _textPainter.text = value;
         _cachedAttributedLabel = null;
