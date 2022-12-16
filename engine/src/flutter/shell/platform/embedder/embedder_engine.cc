@@ -193,7 +193,7 @@ bool EmbedderEngine::SetAccessibilityFeatures(int32_t flags) {
   return true;
 }
 
-bool EmbedderEngine::DispatchSemanticsAction(int id,
+bool EmbedderEngine::DispatchSemanticsAction(int node_id,
                                              flutter::SemanticsAction action,
                                              fml::MallocMapping args) {
   if (!IsValid()) {
@@ -203,7 +203,7 @@ bool EmbedderEngine::DispatchSemanticsAction(int id,
   if (!platform_view) {
     return false;
   }
-  platform_view->DispatchSemanticsAction(id, action, std::move(args));
+  platform_view->DispatchSemanticsAction(node_id, action, std::move(args));
   return true;
 }
 

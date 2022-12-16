@@ -144,14 +144,14 @@ class PlatformView {
     ///             event must be forwarded to the running root isolate hosted
     ///             by the engine on the UI thread.
     ///
-    /// @param[in]  id      The identifier of the accessibility node.
+    /// @param[in]  node_id The identifier of the accessibility node.
     /// @param[in]  action  The accessibility related action performed on the
     ///                     node of the specified ID.
     /// @param[in]  args    An optional list of argument that apply to the
     ///                     specified action.
     ///
     virtual void OnPlatformViewDispatchSemanticsAction(
-        int32_t id,
+        int32_t node_id,
         SemanticsAction action,
         fml::MallocMapping args) = 0;
 
@@ -406,12 +406,12 @@ class PlatformView {
   /// @brief      Used by embedders to dispatch an accessibility action to a
   ///             running isolate hosted by the engine.
   ///
-  /// @param[in]  id      The identifier of the accessibility node on which to
+  /// @param[in]  node_id The identifier of the accessibility node on which to
   ///                     perform the action.
   /// @param[in]  action  The action
   /// @param[in]  args    The arguments
   ///
-  void DispatchSemanticsAction(int32_t id,
+  void DispatchSemanticsAction(int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 

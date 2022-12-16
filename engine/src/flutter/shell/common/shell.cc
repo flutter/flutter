@@ -995,17 +995,17 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
 }
 
 // |PlatformView::Delegate|
-void Shell::OnPlatformViewDispatchSemanticsAction(int32_t id,
+void Shell::OnPlatformViewDispatchSemanticsAction(int32_t node_id,
                                                   SemanticsAction action,
                                                   fml::MallocMapping args) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
   task_runners_.GetUITaskRunner()->PostTask(
-      fml::MakeCopyable([engine = engine_->GetWeakPtr(), id, action,
+      fml::MakeCopyable([engine = engine_->GetWeakPtr(), node_id, action,
                          args = std::move(args)]() mutable {
         if (engine) {
-          engine->DispatchSemanticsAction(id, action, std::move(args));
+          engine->DispatchSemanticsAction(node_id, action, std::move(args));
         }
       }));
 }

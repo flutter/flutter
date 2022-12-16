@@ -1084,9 +1084,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(
-      int id, ui.SemanticsAction action, ByteData? args) {
+      int nodeId, ui.SemanticsAction action, ByteData? args) {
     invoke3<int, ui.SemanticsAction, ByteData?>(
-        _onSemanticsAction, _onSemanticsActionZone, id, action, args);
+        _onSemanticsAction, _onSemanticsActionZone, nodeId, action, args);
   }
 
   // TODO(dnfield): make this work on web.

@@ -33,7 +33,7 @@ typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef KeyDataCallback = bool Function(KeyData data);
 
 /// Signature for [PlatformDispatcher.onSemanticsAction].
-typedef SemanticsActionCallback = void Function(int id, SemanticsAction action, ByteData? args);
+typedef SemanticsActionCallback = void Function(int nodeId, SemanticsAction action, ByteData? args);
 
 /// Signature for responses to platform messages.
 ///
@@ -1089,10 +1089,10 @@ class PlatformDispatcher {
   }
 
   /// A callback that is invoked whenever the user requests an action to be
-  /// performed.
+  /// performed on a semantics node.
   ///
   /// This callback is used when the user expresses the action they wish to
-  /// perform based on the semantics supplied by updateSemantics.
+  /// perform based on the semantics node supplied by updateSemantics.
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
@@ -1128,11 +1128,11 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  void _dispatchSemanticsAction(int id, int action, ByteData? args) {
+  void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
     _invoke3<int, SemanticsAction, ByteData?>(
       onSemanticsAction,
       _onSemanticsActionZone,
-      id,
+      nodeId,
       SemanticsAction.values[action]!,
       args,
     );

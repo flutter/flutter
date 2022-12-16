@@ -278,13 +278,13 @@ bool RuntimeController::DispatchPointerDataPacket(
   return false;
 }
 
-bool RuntimeController::DispatchSemanticsAction(int32_t id,
+bool RuntimeController::DispatchSemanticsAction(int32_t node_id,
                                                 SemanticsAction action,
                                                 fml::MallocMapping args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->DispatchSemanticsAction(id, action,
+    platform_configuration->DispatchSemanticsAction(node_id, action,
                                                     std::move(args));
     return true;
   }

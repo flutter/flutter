@@ -515,8 +515,8 @@ public class FlutterRenderer implements TextureRegistry {
 
   // TODO(mattcarroll): describe the native behavior that this invokes
   public void dispatchSemanticsAction(
-      int id, int action, @Nullable ByteBuffer args, int argsPosition) {
-    flutterJNI.dispatchSemanticsAction(id, action, args, argsPosition);
+      int nodeId, int action, @Nullable ByteBuffer args, int argsPosition) {
+    flutterJNI.dispatchSemanticsAction(nodeId, action, args, argsPosition);
   }
 
   /**
