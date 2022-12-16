@@ -61,7 +61,7 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   nested_bytes_ = nested_op_count_ = 0;
   storage_.realloc(bytes);
   bool compatible = layer_stack_.back().is_group_opacity_compatible();
-  return sk_sp<DisplayList>(new DisplayList(storage_.release(), bytes, count,
+  return sk_sp<DisplayList>(new DisplayList(std::move(storage_), bytes, count,
                                             nested_bytes, nested_count,
                                             bounds(), compatible, rtree()));
 }

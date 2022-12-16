@@ -25,7 +25,7 @@ DisplayList::DisplayList()
       bounds_({0, 0, 0, 0}),
       can_apply_group_opacity_(true) {}
 
-DisplayList::DisplayList(uint8_t* ptr,
+DisplayList::DisplayList(DisplayListStorage&& storage,
                          size_t byte_count,
                          unsigned int op_count,
                          size_t nested_byte_count,
@@ -33,7 +33,7 @@ DisplayList::DisplayList(uint8_t* ptr,
                          const SkRect& bounds,
                          bool can_apply_group_opacity,
                          sk_sp<const DlRTree> rtree)
-    : storage_(ptr),
+    : storage_(std::move(storage)),
       byte_count_(byte_count),
       op_count_(op_count),
       nested_byte_count_(nested_byte_count),

@@ -215,6 +215,26 @@ class SaveLayerOptions {
   };
 };
 
+// Manages a buffer allocated with malloc.
+class DisplayListStorage {
+ public:
+  DisplayListStorage() = default;
+  DisplayListStorage(DisplayListStorage&&) = default;
+
+  uint8_t* get() const { return ptr_.get(); }
+
+  void realloc(size_t count) {
+    ptr_.reset(static_cast<uint8_t*>(std::realloc(ptr_.release(), count)));
+    FML_CHECK(ptr_);
+  }
+
+ private:
+  struct FreeDeleter {
+    void operator()(uint8_t* p) { std::free(p); }
+  };
+  std::unique_ptr<uint8_t, FreeDeleter> ptr_;
+};
+
 // The base class that contains a sequence of rendering operations
 // for dispatch to a Dispatcher. These objects must be instantiated
 // through an instance of DisplayListBuilder::build().
@@ -263,7 +283,7 @@ class DisplayList : public SkRefCnt {
   static void DisposeOps(uint8_t* ptr, uint8_t* end);
 
  private:
-  DisplayList(uint8_t* ptr,
+  DisplayList(DisplayListStorage&& ptr,
               size_t byte_count,
               unsigned int op_count,
               size_t nested_byte_count,
@@ -272,10 +292,7 @@ class DisplayList : public SkRefCnt {
               bool can_apply_group_opacity,
               sk_sp<const DlRTree> rtree);
 
-  struct SkFreeDeleter {
-    void operator()(uint8_t* p) { sk_free(p); }
-  };
-  std::unique_ptr<uint8_t, SkFreeDeleter> storage_;
+  DisplayListStorage storage_;
   size_t byte_count_;
   unsigned int op_count_;
 
