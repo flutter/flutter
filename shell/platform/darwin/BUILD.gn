@@ -47,6 +47,7 @@ source_set("flutter_channels_arc") {
     "common/framework/Source/FlutterChannels.mm",
     "common/framework/Source/FlutterCodecs.mm",
     "common/framework/Source/FlutterStandardCodec.mm",
+    "common/framework/Source/FlutterStandardCodecHelper.c",
     "common/framework/Source/FlutterStandardCodec_Internal.h",
   ]
 
