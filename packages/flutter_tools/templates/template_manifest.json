@@ -43,6 +43,7 @@
         "templates/app_shared/ios-objc.tmpl/Runner/AppDelegate.h",
         "templates/app_shared/ios-objc.tmpl/Runner/AppDelegate.m",
         "templates/app_shared/ios-objc.tmpl/Runner/main.m",
+        "templates/app_shared/ios-objc.tmpl/RunnerTests/RunnerTests.m.tmpl",
         "templates/app_shared/ios-swift.tmpl/Runner.xcodeproj/project.pbxproj.tmpl",
         "templates/app_shared/ios-swift.tmpl/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
         "templates/app_shared/ios-swift.tmpl/Runner/AppDelegate.swift",
