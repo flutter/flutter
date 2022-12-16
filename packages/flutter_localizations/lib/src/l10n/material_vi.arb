@@ -130,5 +130,6 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Trình đơn của thanh trình đơn",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

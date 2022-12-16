@@ -129,5 +129,6 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "মেনু বাৰ মেনু",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

@@ -129,5 +129,6 @@
   "keyboardKeyMetaMacOs": "Komandoa",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menu-barraren menua",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

@@ -49,8 +49,7 @@ class WindowsDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant WindowsApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {

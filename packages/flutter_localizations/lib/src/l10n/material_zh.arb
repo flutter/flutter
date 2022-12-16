@@ -130,5 +130,6 @@
   "keyboardKeyMetaMacOs": "⌘",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "菜单栏的菜单",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

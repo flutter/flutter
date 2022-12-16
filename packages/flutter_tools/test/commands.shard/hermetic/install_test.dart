@@ -148,7 +148,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   Future<bool> isAppInstalled(
-    IOSApp app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => false;
 
@@ -168,7 +168,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Future<bool> isAppInstalled(
-    AndroidApk app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => false;
 

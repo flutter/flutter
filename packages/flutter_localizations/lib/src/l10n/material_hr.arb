@@ -133,5 +133,6 @@
   "keyboardKeyMetaMacOs": "Naredba",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Izbornik trake izbornika",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

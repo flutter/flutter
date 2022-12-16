@@ -75,6 +75,7 @@ void main() {
         }
         final List<String> templatePaths = <String>[
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_integration_test'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_shared'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_test_widget'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'cocoapods'),
