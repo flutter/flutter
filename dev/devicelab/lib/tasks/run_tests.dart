@@ -254,21 +254,34 @@ abstract class RunOutputTask {
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
 
-      final Directory crashesDir = Directory('/Users/swarming/Library/Logs/DiagnosticReports');
-      final List<FileSystemEntity> entities = await crashesDir.list().toList();
-      final Iterable<File> files = entities.whereType<File>();
-
       final String? dumpDir = hostAgent.dumpDirectory?.path;
       print('RunOutputTask.call: Dumping files to "$dumpDir"...');
       if (dumpDir != null) {
-        for (final File file in files) {
-          if (file.path.contains('hello_world')) {
-            print('RunOutputTask.call: Copying crash "${file.path}"...');
-            file.copySync('$dumpDir/${basename(file.path)}');
-          } else {
-            print('RunOutputTask.call: Ignoring file "${file.path}"');
+        Future<void> copyFiles(Directory directory) async {
+          print('RunOutputTask.call: Copying files from ${directory.path}...');
+
+          try
+          {
+            final List<FileSystemEntity> entities = await directory.list().toList();
+            final Iterable<File> files = entities.whereType<File>();
+
+            for (final File file in files) {
+              if (file.path.contains('hello_world')) {
+                print('RunOutputTask.call: Copying "${file.path}"...');
+                file.copySync('$dumpDir/${basename(file.path)}');
+              } else {
+                print('RunOutputTask.call: Ignoring file "${file.path}"');
+              }
+            }
+          } catch (e) {
+            print('RunOutputTask.call: Copying files resulted in exception: $e');
           }
+
+          print('RunOutputTask.call: Copied files from ${directory.path}');
         }
+
+        await copyFiles(Directory('/Users/swarming/Library/Logs/DiagnosticReports'));
+        await copyFiles(Directory('/Users/swarming/Library/Logs/CrashReporter'));
       }
       print('RunOutputTask.call: Dumped files');
 
