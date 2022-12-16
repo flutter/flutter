@@ -145,7 +145,7 @@ static void PlaygroundKeyCallback(GLFWwindow* window,
                                   int scancode,
                                   int action,
                                   int mods) {
-  if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_RELEASE) {
+  if ((key == GLFW_KEY_ESCAPE) && action == GLFW_RELEASE) {
     if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_SUPER | GLFW_MOD_SHIFT)) {
       gShouldOpenNewPlaygrounds = false;
     }
@@ -227,7 +227,7 @@ bool Playground::OpenPlaygroundHere(
   ::glfwShowWindow(window);
 
   while (true) {
-    ::glfwWaitEventsTimeout(1.0 / 30.0);
+    ::glfwPollEvents();
 
     if (::glfwWindowShouldClose(window)) {
       return true;
