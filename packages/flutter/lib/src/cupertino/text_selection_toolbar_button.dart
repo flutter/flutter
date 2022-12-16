@@ -119,7 +119,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
        overflow: TextOverflow.ellipsis,
        style: _kToolbarButtonFontStyle.copyWith(
          color: onPressed != null
-             ? _kToolbarTextColor
+             ? _kToolbarTextColor.resolveFrom(context)
              : CupertinoColors.inactiveGray,
        ),
      );
