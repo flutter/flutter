@@ -88,7 +88,50 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
-    this.semanticLabel,
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
+       assert(autofocus != null),
+       semanticLabel = null;
+
+  /// Creates a Material Design checkbox with a semantic label.
+  ///
+  /// The checkbox itself does not maintain any state. Instead, when the state of
+  /// the checkbox changes, the widget calls the [onChanged] callback. Most
+  /// widgets that use a checkbox will listen for the [onChanged] callback and
+  /// rebuild the checkbox with a new [value] to update the visual appearance of
+  /// the checkbox.
+  ///
+  /// The following arguments are required:
+  ///
+  /// * [value], which determines whether the checkbox is checked. The [value]
+  ///   can only be null if [tristate] is true.
+  /// * [onChanged], which is called when the value of the checkbox should
+  ///   change. It can be set to null to disable the checkbox.
+  /// * [semanticLabel], which is announced when the checkbox received accessibility
+  ///   focus.
+  ///
+  /// The values of [tristate] and [autofocus] must not be null.
+  const Checkbox.withSemanticLabel({
+    super.key,
+    required this.value,
+    this.tristate = false,
+    required this.onChanged,
+    this.mouseCursor,
+    this.activeColor,
+    this.fillColor,
+    this.checkColor,
+    this.focusColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
+    this.visualDensity,
+    this.focusNode,
+    this.autofocus = false,
+    this.shape,
+    this.side,
+    this.isError = false,
+    required this.semanticLabel,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(autofocus != null);
