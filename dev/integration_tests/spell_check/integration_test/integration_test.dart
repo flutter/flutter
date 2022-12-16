@@ -177,7 +177,7 @@ void main() {
     expect(expectedTextSpanTreeFound, isTrue);
   });
 
-    test(
+  testWidgets(
       'fetchSpellCheckSuggestions returns null when there is a pending request on Android',
       () async {
     final String text =
