@@ -25,10 +25,9 @@ get help for a specific subcommand, run `felt help SUBCOMMAND`.
 The most useful subcommands are:
 
 - `felt build` - builds a local Flutter Web engine ready to be used by the
-  Flutter framework. To use the local engine build, build with
-  `felt build --host`, then pass `--local-engine=host_debug_unopt` to the
-  `flutter` command, or to `dev/bots/test.dart` when running a web shard, such
-  as `web_tests`.
+  Flutter framework. To use a locally built web sdk, build with `felt build`, 
+  then pass `--local-web-sdk=wasm_release` to the `flutter` command, or to 
+  `dev/bots/test.dart` when running a web shard, such as `web_tests`.
 - `felt test` - runs web engine tests. By default, this runs all tests using
   Chromium. Passing one or more paths to specific tests would run just the
   specified tests. Run `felt help test` for more options.
@@ -44,7 +43,7 @@ Builds the web engine, the runs a Flutter app using it:
 ```
 felt build
 cd path/to/some/app
-flutter --local-engine=host_debug_unopt run -d chrome
+flutter --local-web-sdk=wasm_release run -d chrome
 ```
 
 Runs all tests in Chromium:
