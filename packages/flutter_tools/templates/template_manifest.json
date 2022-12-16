@@ -115,6 +115,7 @@
         "templates/app_shared/macos.tmpl/Runner/Info.plist",
         "templates/app_shared/macos.tmpl/Runner/MainFlutterWindow.swift",
         "templates/app_shared/macos.tmpl/Runner/Release.entitlements",
+        "templates/app_shared/macos.tmpl/RunnerTests/RunnerTests.swift.tmpl",
         "templates/app_shared/projectName.iml.tmpl",
         "templates/app_shared/web/favicon.png.copy.tmpl",
         "templates/app_shared/web/icons/Icon-192.png.copy.tmpl",
