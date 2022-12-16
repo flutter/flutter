@@ -767,9 +767,9 @@ void main() {
         '--multi-root-scheme',
         'org-dartlang-sdk',
         '--multi-root',
-        'bin/cache/flutter_web_sdk/',
+        'bin/cache/flutter_web_sdk',
         '--multi-root',
-        'bin/cache/',
+        'bin/cache',
         '--libraries-spec',
         'bin/cache/flutter_web_sdk/libraries.json',
 
