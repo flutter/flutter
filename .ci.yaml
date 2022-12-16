@@ -3857,9 +3857,9 @@ targets:
       task_name: flutter_gallery_ios_sksl_warmup__transition_perf
 
   - name: Mac_ios spell_check_test
-    bringup: true
+    # bringup: true
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true # TESTING ONLY
     timeout: 60
     properties:
       tags: >
