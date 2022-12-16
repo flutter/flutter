@@ -34,7 +34,10 @@ impeller_shaders("shader_fixtures") {
 }
 
 scenec("scene_fixtures") {
-  geometry = [ "flutter_logo.glb" ]
+  geometry = [
+    "flutter_logo.glb",
+    "two_triangles.glb",
+  ]
   type = "gltf"
 }
 
@@ -79,6 +82,7 @@ test_fixtures("file_fixtures") {
     "table_mountain_py.png",
     "table_mountain_pz.png",
     "test_texture.frag",
+    "two_triangles.glb",
     "types.h",
     "wtf.otf",
   ]
