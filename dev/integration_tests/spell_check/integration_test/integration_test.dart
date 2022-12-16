@@ -179,7 +179,7 @@ void main() {
 
   testWidgets(
       'fetchSpellCheckSuggestions returns null when there is a pending request on Android',
-      () async {
+      (WidgetTester tester) async {
     final String text =
         'neaf niofenaifn iofn iefnaoeifn ifneoa finoiafn inf ionfieaon ienf ifn ieonfaiofneionf oieafn oifnaioe nioenfio nefaion oifan' *
             10;
