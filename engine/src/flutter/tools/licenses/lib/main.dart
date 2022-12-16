@@ -2121,8 +2121,11 @@ Future<void> main(List<String> arguments) async {
         system.exit(1);
       }
       // write to disk the list of files we did _not_ cover, so it's easier to catch in diffs
+      final String excluded = (_RepositoryDirectory._excluded.map(
+        (fs.IoNode node) => node.fullName,
+      ).toSet().toList()..sort()).join('\n');
       system.File(path.join(argResults['out'] as String, 'excluded_files')).writeAsStringSync(
-        (_RepositoryDirectory._excluded.map((fs.IoNode node) => node.fullName).toSet().toList()..sort()).join('\n'),
+        '$excluded\n',
       );
     }
   } catch (e, stack) {
