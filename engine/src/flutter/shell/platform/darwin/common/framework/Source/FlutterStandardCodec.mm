@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec_Internal.h"
 
 FLUTTER_ASSERT_ARC
@@ -338,30 +339,16 @@ using namespace flutter;
 }
 
 - (void)readBytes:(void*)destination length:(NSUInteger)length {
-  _range.length = length;
-  [_data getBytes:destination range:_range];
-  _range.location += _range.length;
+  FlutterStandardCodecHelperReadBytes(&_range.location, length, destination,
+                                      (__bridge CFDataRef)_data);
 }
 
 - (UInt8)readByte {
-  UInt8 value;
-  [self readBytes:&value length:1];
-  return value;
+  return FlutterStandardCodecHelperReadByte(&_range.location, (__bridge CFDataRef)_data);
 }
 
 - (UInt32)readSize {
-  UInt8 byte = [self readByte];
-  if (byte < 254) {
-    return (UInt32)byte;
-  } else if (byte == 254) {
-    UInt16 value;
-    [self readBytes:&value length:2];
-    return value;
-  } else {
-    UInt32 value;
-    [self readBytes:&value length:4];
-    return value;
-  }
+  return FlutterStandardCodecHelperReadSize(&_range.location, (__bridge CFDataRef)_data);
 }
 
 - (NSData*)readData:(NSUInteger)length {
@@ -372,86 +359,47 @@ using namespace flutter;
 }
 
 - (NSString*)readUTF8 {
-  NSData* bytes = [self readData:[self readSize]];
-  return [[NSString alloc] initWithData:bytes encoding:NSUTF8StringEncoding];
+  return (__bridge NSString*)FlutterStandardCodecHelperReadUTF8(&_range.location,
+                                                                (__bridge CFDataRef)_data);
 }
 
 - (void)readAlignment:(UInt8)alignment {
-  UInt8 mod = _range.location % alignment;
-  if (mod) {
-    _range.location += (alignment - mod);
-  }
-}
-
-- (FlutterStandardTypedData*)readTypedDataOfType:(FlutterStandardDataType)type {
-  UInt32 elementCount = [self readSize];
-  UInt8 elementSize = elementSizeForFlutterStandardDataType(type);
-  [self readAlignment:elementSize];
-  NSData* data = [self readData:elementCount * elementSize];
-  return [FlutterStandardTypedData typedDataWithData:data type:type];
+  FlutterStandardCodecHelperReadAlignment(&_range.location, alignment);
 }
 
 - (nullable id)readValue {
-  return [self readValueOfType:[self readByte]];
+  return (__bridge id)ReadValue((__bridge CFTypeRef)self);
+}
+
+static CFTypeRef ReadValue(CFTypeRef user_data) {
+  FlutterStandardReader* reader = (__bridge FlutterStandardReader*)user_data;
+  uint8_t type = FlutterStandardCodecHelperReadByte(&reader->_range.location,
+                                                    (__bridge CFDataRef)reader->_data);
+  return (__bridge CFTypeRef)[reader readValueOfType:type];
+}
+
+static CFTypeRef ReadTypedDataOfType(FlutterStandardField field, CFTypeRef user_data) {
+  FlutterStandardReader* reader = (__bridge FlutterStandardReader*)user_data;
+  unsigned long* location = &reader->_range.location;
+  CFDataRef data = (__bridge CFDataRef)reader->_data;
+  FlutterStandardDataType type = FlutterStandardDataTypeForField(field);
+
+  UInt64 elementCount = FlutterStandardCodecHelperReadSize(location, data);
+  UInt64 elementSize = elementSizeForFlutterStandardDataType(type);
+  FlutterStandardCodecHelperReadAlignment(location, elementSize);
+  UInt64 length = elementCount * elementSize;
+  NSRange range = NSMakeRange(*location, length);
+  // Note: subdataWithRange performs better than CFDataCreate and
+  // CFDataCreateBytesNoCopy crashes.
+  NSData* bytes = [(__bridge NSData*)data subdataWithRange:range];
+  *location += length;
+  return (__bridge CFTypeRef)[FlutterStandardTypedData typedDataWithData:bytes type:type];
 }
 
 - (nullable id)readValueOfType:(UInt8)type {
-  FlutterStandardField field = (FlutterStandardField)type;
-  switch (field) {
-    case FlutterStandardFieldNil:
-      return nil;
-    case FlutterStandardFieldTrue:
-      return @YES;
-    case FlutterStandardFieldFalse:
-      return @NO;
-    case FlutterStandardFieldInt32: {
-      SInt32 value;
-      [self readBytes:&value length:4];
-      return @(value);
-    }
-    case FlutterStandardFieldInt64: {
-      SInt64 value;
-      [self readBytes:&value length:8];
-      return @(value);
-    }
-    case FlutterStandardFieldFloat64: {
-      Float64 value;
-      [self readAlignment:8];
-      [self readBytes:&value length:8];
-      return [NSNumber numberWithDouble:value];
-    }
-    case FlutterStandardFieldIntHex:
-    case FlutterStandardFieldString:
-      return [self readUTF8];
-    case FlutterStandardFieldUInt8Data:
-    case FlutterStandardFieldInt32Data:
-    case FlutterStandardFieldInt64Data:
-    case FlutterStandardFieldFloat32Data:
-    case FlutterStandardFieldFloat64Data:
-      return [self readTypedDataOfType:FlutterStandardDataTypeForField(field)];
-    case FlutterStandardFieldList: {
-      UInt32 length = [self readSize];
-      NSMutableArray* array = [NSMutableArray arrayWithCapacity:length];
-      for (UInt32 i = 0; i < length; i++) {
-        id value = [self readValue];
-        [array addObject:(value == nil ? [NSNull null] : value)];
-      }
-      return array;
-    }
-    case FlutterStandardFieldMap: {
-      UInt32 size = [self readSize];
-      NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:size];
-      for (UInt32 i = 0; i < size; i++) {
-        id key = [self readValue];
-        id val = [self readValue];
-        [dict setObject:(val == nil ? [NSNull null] : val)
-                 forKey:(key == nil ? [NSNull null] : key)];
-      }
-      return dict;
-    }
-    default:
-      NSAssert(NO, @"Corrupted standard message");
-  }
+  return (__bridge id)FlutterStandardCodecHelperReadValueOfType(
+      &_range.location, (__bridge CFDataRef)_data, type, ReadValue, ReadTypedDataOfType,
+      (__bridge CFTypeRef)self);
 }
 @end
 
