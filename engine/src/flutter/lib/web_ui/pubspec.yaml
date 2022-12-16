@@ -23,6 +23,7 @@ dev_dependencies:
   http: 0.13.5
   http_multi_server: any
   image: 3.0.1
+  matcher: 0.12.14
   package_config: any
   path: 1.8.0
   pool: any
