@@ -444,20 +444,24 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       return false;
     }
     if (forward && focusedChild == sortedNodes.last) {
-      if (nearestScope.traversalEdgeBehavior == TraversalEdgeBehavior.leaveFlutterView) {
-        focusedChild!.unfocus();
-        return false;
+      switch (nearestScope.traversalEdgeBehavior) {
+        case TraversalEdgeBehavior.leaveFlutterView:
+          focusedChild!.unfocus();
+          return false;
+        case TraversalEdgeBehavior.closedLoop:
+          _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+          return true;
       }
-      _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
-      return true;
     }
     if (!forward && focusedChild == sortedNodes.first) {
-      if (nearestScope.traversalEdgeBehavior == TraversalEdgeBehavior.leaveFlutterView) {
-        focusedChild!.unfocus();
-        return false;
+      switch (nearestScope.traversalEdgeBehavior) {
+        case TraversalEdgeBehavior.leaveFlutterView:
+          focusedChild!.unfocus();
+          return false;
+        case TraversalEdgeBehavior.closedLoop:
+          _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+          return true;
       }
-      _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
-      return true;
     }
 
     final Iterable<FocusNode> maybeFlipped = forward ? sortedNodes : sortedNodes.reversed;

@@ -6002,8 +6002,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Focus(
-            focusNode: FocusScopeNode(),
+          child: FocusScope(
             child: Center(
               child: Column(
                 children: <Widget>[

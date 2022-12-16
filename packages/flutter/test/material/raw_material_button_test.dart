@@ -375,8 +375,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Focus(
-          focusNode: FocusScopeNode(),
+        home: FocusScope(
           child: Center(
             child: Column(
               children: <Widget>[

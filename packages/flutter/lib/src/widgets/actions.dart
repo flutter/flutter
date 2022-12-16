@@ -261,7 +261,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// if it's false.
   ///
   /// Concrete implementations may refine the type of [actionResult], since
-  /// they know type returned by [invoke].
+  /// they know the type returned by [invoke].
   KeyEventResult toKeyEventResult(T intent, covariant Object? actionResult) {
     return consumesKey(intent)
       ? KeyEventResult.handled

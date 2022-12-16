@@ -137,8 +137,7 @@ void main() {
     final FocusNode focusNode2 = FocusNode(debugLabel: 'InputChip 2');
     await tester.pumpWidget(
       wrapForChip(
-        child: Focus(
-          focusNode: FocusScopeNode(),
+        child: FocusScope(
           child: Column(
             children: <Widget>[
               InputChip(
