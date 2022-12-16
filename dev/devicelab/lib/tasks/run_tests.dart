@@ -242,10 +242,11 @@ abstract class RunOutputTask {
       run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .skipWhile(isExpectedStderr)
         .listen((String line) {
           print('run:stderr: $line');
-          stderr.add(line);
+          if (!isExpectedStderr(line)) {
+            stderr.add(line);
+          }
         });
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
