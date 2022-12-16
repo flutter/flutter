@@ -143,8 +143,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       anchor: anchor,
       isAbove: isAbove,
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: _kToolbarDividerColor,
+        decoration: BoxDecoration(
+          color: _kToolbarDividerColor.resolveFrom(context),
         ),
         child: child,
       ),
