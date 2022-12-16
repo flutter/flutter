@@ -53,8 +53,7 @@ std::shared_ptr<RuntimeStage> ComputePlaygroundTest::OpenAssetAsRuntimeStage(
 
 static std::string FormatWindowTitle(const std::string& test_name) {
   std::stringstream stream;
-  stream << "Impeller Playground for '" << test_name
-         << "' (Press ESC or 'q' to quit)";
+  stream << "Impeller Playground for '" << test_name << "' (Press ESC to quit)";
   return stream.str();
 }
 
