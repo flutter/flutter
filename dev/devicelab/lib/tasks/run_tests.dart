@@ -244,14 +244,14 @@ abstract class RunOutputTask {
             ready.complete();
           }
         });
-      run.stderr
+      final Stream<String> runStderr = run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
+        .asBroadcastStream();
+      runStderr.listen((String line) => print('run:stderr: $line'));
+      runStderr
         .skipWhile(isExpectedStderr)
-        .listen((String line) {
-          print('run:stderr: $line');
-          stderr.add(line);
-        });
+        .listen((String line) => stderr.add(line));
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null) {
