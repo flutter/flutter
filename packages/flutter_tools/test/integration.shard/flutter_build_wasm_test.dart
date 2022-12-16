@@ -14,7 +14,7 @@ void main() {
   late Directory tempDir;
   late String flutterBin;
   late Directory exampleAppDir;
-  
+
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_web_wasm_test.');
     flutterBin = fileSystem.path.join(
