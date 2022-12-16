@@ -787,13 +787,13 @@ public class FlutterJNI {
   }
 
   /** Sends a semantics action to Flutter's engine, without any additional arguments. */
-  public void dispatchSemanticsAction(int id, @NonNull AccessibilityBridge.Action action) {
-    dispatchSemanticsAction(id, action, null);
+  public void dispatchSemanticsAction(int nodeId, @NonNull AccessibilityBridge.Action action) {
+    dispatchSemanticsAction(nodeId, action, null);
   }
 
   /** Sends a semantics action to Flutter's engine, with additional arguments. */
   public void dispatchSemanticsAction(
-      int id, @NonNull AccessibilityBridge.Action action, @Nullable Object args) {
+      int nodeId, @NonNull AccessibilityBridge.Action action, @Nullable Object args) {
     ensureAttachedToNative();
 
     ByteBuffer encodedArgs = null;
@@ -802,7 +802,7 @@ public class FlutterJNI {
       encodedArgs = StandardMessageCodec.INSTANCE.encodeMessage(args);
       position = encodedArgs.position();
     }
-    dispatchSemanticsAction(id, action.value, encodedArgs, position);
+    dispatchSemanticsAction(nodeId, action.value, encodedArgs, position);
   }
 
   /**
@@ -815,14 +815,18 @@ public class FlutterJNI {
    */
   @UiThread
   public void dispatchSemanticsAction(
-      int id, int action, @Nullable ByteBuffer args, int argsPosition) {
+      int nodeId, int action, @Nullable ByteBuffer args, int argsPosition) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    nativeDispatchSemanticsAction(nativeShellHolderId, id, action, args, argsPosition);
+    nativeDispatchSemanticsAction(nativeShellHolderId, nodeId, action, args, argsPosition);
   }
 
   private native void nativeDispatchSemanticsAction(
-      long nativeShellHolderId, int id, int action, @Nullable ByteBuffer args, int argsPosition);
+      long nativeShellHolderId,
+      int nodeId,
+      int action,
+      @Nullable ByteBuffer args,
+      int argsPosition);
 
   /**
    * Instructs Flutter to enable/disable its semantics tree, which is used by Flutter to support
