@@ -2357,5 +2357,53 @@ void main() {
         reason: selectRight.toString(),
       );
     }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('select all left', (WidgetTester tester) async {
+      final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+      final SingleActivator selectAllLeft = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowLeft,
+              shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowLeft,
+              shift: true, alt: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(
+        offset: 5,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectAllLeft);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 0),
+        reason: selectAllLeft.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('select all right', (WidgetTester tester) async {
+      final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
+      final SingleActivator selectAllRight = isMacOS
+          ? const SingleActivator(LogicalKeyboardKey.arrowRight,
+              shift: true, meta: true)
+          : const SingleActivator(LogicalKeyboardKey.arrowRight,
+              shift: true, alt: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(
+        offset: 5,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectAllRight);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 7),
+        reason: selectAllRight.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
   }, skip: !kIsWeb); // [intended] specific tests target web.
 }

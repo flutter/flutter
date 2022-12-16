@@ -412,14 +412,10 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.pageUp, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.pageDown, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
@@ -452,6 +448,10 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
   // Hand backspace/delete events that do not depend on text layout (delete
