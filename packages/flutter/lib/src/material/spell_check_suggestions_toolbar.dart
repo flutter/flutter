@@ -42,7 +42,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// {@endtemplate}
   final Offset anchor;
 
-  /// The buttons that will be displayed in the spell check suggestions toolbar.
+  /// The [ContextMenuButtonItem]s that will be turned into the correct button
+  /// widgets and displayed in the spell check suggestions toolbar.
   final List<ContextMenuButtonItem> buttonItems;
 
   /// Builds the default Android Material spell check suggestions toolbar.
@@ -140,7 +141,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     final double softKeyboardViewInsetsBottom = mediaQueryData.viewInsets.bottom;
     final double paddingAbove = mediaQueryData.padding.top + _kToolbarScreenPadding;
-    // Makes up for the Padding above the Stack.
+    // Makes up for the Padding.
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(

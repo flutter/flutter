@@ -2581,8 +2581,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value.text == _value.text && value.composing == _value.composing) {
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
-    }
-    else {
+    } else {
       if (value.text != _value.text) {
         // Hide the toolbar if the text was changed, but only hide the toolbar
         // overlay; the selection handle's visibility will be handled
@@ -3714,7 +3713,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               context,
               this,
           );
-        }
+        },
     );
     return true;
   }

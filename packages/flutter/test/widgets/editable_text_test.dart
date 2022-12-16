@@ -13940,7 +13940,7 @@ void main() {
       expect(find.text('DELETE'), findsOneWidget);
     });
 
-    testWidgets('spell check suggestions toolbar buttons behave correctly changes composing region', (WidgetTester tester) async {
+    testWidgets('spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(

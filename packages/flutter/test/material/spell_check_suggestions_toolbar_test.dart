@@ -57,14 +57,13 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body:
-              SpellCheckSuggestionsToolbar(
-                anchor: const Offset(0.0, _kAnchor),
-                buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
-              ),
+          body: SpellCheckSuggestionsToolbar(
+            anchor: const Offset(0.0, _kAnchor),
+            buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
           ),
         ),
-      );
+      ),
+    );
 
     final double toolbarY = tester.getTopLeft(findSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
@@ -78,14 +77,13 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body:
-              SpellCheckSuggestionsToolbar(
-                anchor: const Offset(0.0, _kAnchor - _kTestToolbarOverlap),
-                buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
-              ),
+          body: SpellCheckSuggestionsToolbar(
+            anchor: const Offset(0.0, _kAnchor - _kTestToolbarOverlap),
+            buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell']),
           ),
         ),
-      );
+      ),
+    );
 
     final double toolbarY = tester.getTopLeft(findSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
