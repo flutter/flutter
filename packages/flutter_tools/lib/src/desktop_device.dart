@@ -152,8 +152,8 @@ abstract class DesktopDevice extends Device {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) => print('codesign:stderr: $line'));
-    await codesign.exitCode;
-    print('codesign exit code: ${codesign.exitCode}');
+    final int codesignExitCode = await codesign.exitCode;
+    print('codesign exit code: ${codesignExitCode}');
     print('DesktopDevice.startApp: Dumped entitlements...');
 
     Process process;
