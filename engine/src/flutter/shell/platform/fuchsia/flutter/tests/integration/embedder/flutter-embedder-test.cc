@@ -86,12 +86,8 @@ constexpr auto kTestUiStackRef = ChildRef{kTestUiStack};
 
 constexpr fuchsia_test_utils::Color kParentBackgroundColor = {0x00, 0x00, 0xFF,
                                                               0xFF};  // Blue
-constexpr fuchsia_test_utils::Color kParentTappedColor = {0x00, 0x00, 0x00,
-                                                          0xFF};  // Black
 constexpr fuchsia_test_utils::Color kChildBackgroundColor = {0xFF, 0x00, 0xFF,
                                                              0xFF};  // Pink
-constexpr fuchsia_test_utils::Color kChildTappedColor = {0xFF, 0xFF, 0x00,
-                                                         0xFF};  // Yellow
 
 // TODO(fxb/64201): Remove forced opacity colors when Flatland is enabled.
 constexpr fuchsia_test_utils::Color kOverlayBackgroundColor1 = {
@@ -160,60 +156,18 @@ class FlutterEmbedderTest : public ::loop_fixture::RealLoop,
           callback = nullptr,
       zx::duration timeout = kTestTimeout);
 
-  // Simulates a tap at location (x, y).
-  void InjectTap(int32_t x, int32_t y);
-
-  // Injects an input event, and posts a task to retry after
-  // `kTapRetryInterval`.
-  //
-  // We post the retry task because the first input event we send to Flutter may
-  // be lost. The reason the first event may be lost is that there is a race
-  // condition as the scene owner starts up.
-  //
-  // More specifically: in order for our app
-  // to receive the injected input, two things must be true before we inject
-  // touch input:
-  // * The Scenic root view must have been installed, and
-  // * The Input Pipeline must have received a viewport to inject touch into.
-  //
-  // The problem we have is that the `is_rendering` signal that we monitor only
-  // guarantees us the view is ready. If the viewport is not ready in Input
-  // Pipeline at that time, it will drop the touch event.
-  //
-  // TODO(fxbug.dev/96986): Improve synchronization and remove retry logic.
-  void TryInject(int32_t x, int32_t y);
-
  private:
   fuchsia::ui::scenic::Scenic* scenic() { return scenic_.get(); }
 
   void SetUpRealmBase();
 
-  // Registers a fake touch screen device with an injection coordinate space
-  // spanning [-1000, 1000] on both axes.
-  void RegisterTouchScreen();
-
   fuchsia::ui::scenic::ScenicPtr scenic_;
-  fuchsia::ui::test::input::RegistryPtr input_registry_;
-  fuchsia::ui::test::input::TouchScreenPtr fake_touchscreen_;
   fuchsia::ui::test::scene::ControllerPtr scene_provider_;
   fuchsia::ui::observation::geometry::ViewTreeWatcherPtr view_tree_watcher_;
 
   // Wrapped in optional since the view is not created until the middle of SetUp
   component_testing::RealmBuilder realm_builder_;
   std::unique_ptr<component_testing::RealmRoot> realm_;
-
-  // The typical latency on devices we've tested is ~60 msec. The retry interval
-  // is chosen to be a) Long enough that it's unlikely that we send a new tap
-  // while a previous tap is still being
-  //    processed. That is, it should be far more likely that a new tap is sent
-  //    because the first tap was lost, than because the system is just running
-  //    slowly.
-  // b) Short enough that we don't slow down tryjobs.
-  //
-  // The first property is important to avoid skewing the latency metrics that
-  // we collect. For an explanation of why a tap might be lost, see the
-  // documentation for TryInject().
-  static constexpr auto kTapRetryInterval = zx::sec(1);
 };
 
 void FlutterEmbedderTest::SetUpRealmBase() {
@@ -374,9 +328,6 @@ void FlutterEmbedderTest::LaunchParentViewInRealm(
   }
   realm_ = std::make_unique<RealmRoot>(realm_builder_.Build());
 
-  // Register fake touch screen device.
-  RegisterTouchScreen();
-
   // Instruct Test UI Stack to present parent-view's View.
   std::optional<zx_koid_t> view_ref_koid;
   scene_provider_ = realm_->Connect<fuchsia::ui::test::scene::Controller>();
@@ -443,36 +394,6 @@ bool FlutterEmbedderTest::TakeScreenshotUntil(
       timeout);
 }
 
-void FlutterEmbedderTest::RegisterTouchScreen() {
-  FML_LOG(INFO) << "Registering fake touch screen";
-  input_registry_ = realm_->Connect<fuchsia::ui::test::input::Registry>();
-  input_registry_.set_error_handler(
-      [](auto) { FML_LOG(ERROR) << "Error from input helper"; });
-  bool touchscreen_registered = false;
-  fuchsia::ui::test::input::RegistryRegisterTouchScreenRequest request;
-  request.set_device(fake_touchscreen_.NewRequest());
-  input_registry_->RegisterTouchScreen(
-      std::move(request),
-      [&touchscreen_registered]() { touchscreen_registered = true; });
-  RunLoopUntil([&touchscreen_registered] { return touchscreen_registered; });
-  FML_LOG(INFO) << "Touchscreen registered";
-}
-
-void FlutterEmbedderTest::InjectTap(int32_t x, int32_t y) {
-  fuchsia::ui::test::input::TouchScreenSimulateTapRequest tap_request;
-  tap_request.mutable_tap_location()->x = x;
-  tap_request.mutable_tap_location()->y = y;
-  fake_touchscreen_->SimulateTap(std::move(tap_request), [x, y]() {
-    FML_LOG(INFO) << "Tap injected at (" << x << ", " << y << ")";
-  });
-}
-
-void FlutterEmbedderTest::TryInject(int32_t x, int32_t y) {
-  InjectTap(x, y);
-  async::PostDelayedTask(
-      dispatcher(), [this, x, y] { TryInject(x, y); }, kTapRetryInterval);
-}
-
 TEST_F(FlutterEmbedderTest, Embedding) {
   LaunchParentViewInRealm();
 
@@ -485,53 +406,6 @@ TEST_F(FlutterEmbedderTest, Embedding) {
         EXPECT_GT(histogram[kParentBackgroundColor], 0u);
         EXPECT_GT(histogram[kChildBackgroundColor], 0u);
         EXPECT_GT(histogram[kParentBackgroundColor],
-                  histogram[kChildBackgroundColor]);
-      }));
-}
-
-TEST_F(FlutterEmbedderTest, HittestEmbedding) {
-  LaunchParentViewInRealm();
-
-  // Take screenshot until we see the child-view's embedded color.
-  ASSERT_TRUE(TakeScreenshotUntil(kChildBackgroundColor));
-
-  // Simulate a tap at the center of the child view.
-  TryInject(/* x = */ 0, /* y = */ 0);
-
-  // Take screenshot until we see the child-view's tapped color.
-  ASSERT_TRUE(TakeScreenshotUntil(
-      kChildTappedColor,
-      [](std::map<fuchsia_test_utils::Color, size_t> histogram) {
-        // Expect parent and child background colors, with parent color > child
-        // color.
-        EXPECT_GT(histogram[kParentBackgroundColor], 0u);
-        EXPECT_EQ(histogram[kChildBackgroundColor], 0u);
-        EXPECT_GT(histogram[kChildTappedColor], 0u);
-        EXPECT_GT(histogram[kParentBackgroundColor],
-                  histogram[kChildTappedColor]);
-      }));
-}
-
-TEST_F(FlutterEmbedderTest, HittestDisabledEmbedding) {
-  LaunchParentViewInRealm({"--no-hitTestable"});
-
-  // Take screenshots until we see the child-view's embedded color.
-  ASSERT_TRUE(TakeScreenshotUntil(kChildBackgroundColor));
-
-  // Simulate a tap at the center of the child view.
-  TryInject(/* x = */ 0, /* y = */ 0);
-
-  // The parent-view should change color.
-  ASSERT_TRUE(TakeScreenshotUntil(
-      kParentTappedColor,
-      [](std::map<fuchsia_test_utils::Color, size_t> histogram) {
-        // Expect parent and child background colors, with parent color > child
-        // color.
-        EXPECT_EQ(histogram[kParentBackgroundColor], 0u);
-        EXPECT_GT(histogram[kParentTappedColor], 0u);
-        EXPECT_GT(histogram[kChildBackgroundColor], 0u);
-        EXPECT_EQ(histogram[kChildTappedColor], 0u);
-        EXPECT_GT(histogram[kParentTappedColor],
                   histogram[kChildBackgroundColor]);
       }));
 }
@@ -552,35 +426,6 @@ TEST_F(FlutterEmbedderTest, EmbeddingWithOverlay) {
         EXPECT_GT(histogram[kParentBackgroundColor],
                   histogram[kChildBackgroundColor]);
         EXPECT_GT(overlay_pixel_count, histogram[kChildBackgroundColor]);
-      }));
-}
-
-TEST_F(FlutterEmbedderTest, HittestEmbeddingWithOverlay) {
-  LaunchParentViewInRealm({"--showOverlay"});
-
-  // Take screenshot until we see the child-view's embedded color.
-  ASSERT_TRUE(TakeScreenshotUntil(kChildBackgroundColor));
-
-  // The bottom-left corner of the overlay is at the center of the screen,
-  // which is at (0, 0) in the injection coordinate space. Inject a pointer
-  // event just outside the overlay's bounds, and ensure that it goes to the
-  // embedded view.
-  TryInject(/* x = */ -1, /* y = */ 1);
-
-  // Take screenshot until we see the child-view's tapped color.
-  ASSERT_TRUE(TakeScreenshotUntil(
-      kChildTappedColor,
-      [](std::map<fuchsia_test_utils::Color, size_t> histogram) {
-        // Expect parent, overlay and child background colors.
-        // With parent color > child color and overlay color > child color.
-        const size_t overlay_pixel_count = OverlayPixelCount(histogram);
-        EXPECT_GT(histogram[kParentBackgroundColor], 0u);
-        EXPECT_GT(overlay_pixel_count, 0u);
-        EXPECT_EQ(histogram[kChildBackgroundColor], 0u);
-        EXPECT_GT(histogram[kChildTappedColor], 0u);
-        EXPECT_GT(histogram[kParentBackgroundColor],
-                  histogram[kChildTappedColor]);
-        EXPECT_GT(overlay_pixel_count, histogram[kChildTappedColor]);
       }));
 }
 
