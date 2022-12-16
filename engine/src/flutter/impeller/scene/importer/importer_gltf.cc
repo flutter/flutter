@@ -189,7 +189,7 @@ static void ProcessNode(const tinygltf::Model& gltf,
   /// Children.
   ///
 
-  for (size_t node_i = 0; node_i < out_node.children.size(); node_i++) {
+  for (size_t node_i = 0; node_i < in_node.children.size(); node_i++) {
     auto child = std::make_unique<fb::NodeT>();
     ProcessNode(gltf, gltf.nodes[in_node.children[node_i]], *child);
     out_node.children.push_back(std::move(child));
