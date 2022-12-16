@@ -57,7 +57,7 @@ void main() {
     bool readOnly = false,
     bool obscured = false,
     TextStyle style = const TextStyle(fontSize: 10.0),
-      bool enableInteractiveSelection = true
+    bool enableInteractiveSelection = true
   }) {
     return MaterialApp(
       home: Align(
