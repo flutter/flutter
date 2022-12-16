@@ -79,8 +79,7 @@ import java.util.List;
  *
  * <pre>{@code
  * // Create and pre-warm a FlutterEngine.
- * FlutterEngineGroup group = new FlutterEngineGroup(context);
- * FlutterEngine flutterEngine = group.createAndRunDefaultEngine(context);
+ * FlutterEngine flutterEngine = new FlutterEngine(context);
  * flutterEngine
  *   .getDartExecutor()
  *   .executeDartEntrypoint(DartEntrypoint.createDefault());

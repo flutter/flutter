@@ -90,7 +90,6 @@ import java.util.List;
   private boolean isFirstFrameRendered;
   private boolean isAttached;
   private Integer previousVisibility;
-  @Nullable private FlutterEngineGroup engineGroup;
 
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
@@ -110,15 +109,8 @@ import java.util.List;
       };
 
   FlutterActivityAndFragmentDelegate(@NonNull Host host) {
-    this(host, null);
-  }
-
-  FlutterActivityAndFragmentDelegate(@NonNull Host host, @Nullable FlutterEngineGroup engineGroup) {
     this.host = host;
     this.isFirstFrameRendered = false;
-    if (engineGroup != null) {
-      this.engineGroup = engineGroup;
-    }
   }
 
   /**
@@ -306,16 +298,12 @@ import java.util.List;
         TAG,
         "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
             + " this FlutterFragment.");
-
-    FlutterEngineGroup group =
-        engineGroup == null
-            ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray())
-            : engineGroup;
     flutterEngine =
-        group.createAndRunEngine(
-            new FlutterEngineGroup.Options(host.getContext())
-                .setAutomaticallyRegisterPlugins(false)
-                .setWaitForRestorationData(host.shouldRestoreAndSaveState()));
+        new FlutterEngine(
+            host.getContext(),
+            host.getFlutterShellArgs().toArray(),
+            /*automaticallyRegisterPlugins=*/ false,
+            /*willProvideRestorationData=*/ host.shouldRestoreAndSaveState());
     isFlutterEngineFromHost = false;
   }
 

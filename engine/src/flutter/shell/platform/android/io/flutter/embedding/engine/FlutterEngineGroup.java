@@ -210,8 +210,7 @@ public class FlutterEngineGroup {
         platformViewsController, // PlatformViewsController.
         null, // String[]. The Dart VM has already started, this arguments will have no effect.
         automaticallyRegisterPlugins, // boolean.
-        waitForRestorationData, // boolean.
-        this);
+        waitForRestorationData); // boolean.
   }
 
   /** Options that control how a FlutterEngine should be created. */

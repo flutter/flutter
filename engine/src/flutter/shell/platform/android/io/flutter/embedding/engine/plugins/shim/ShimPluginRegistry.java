@@ -25,8 +25,7 @@ import java.util.Set;
  *
  * <pre>
  * // Create the FlutterEngine that will back the Flutter UI.
- * FlutterEngineGroup group = new FlutterEngineGroup(context);
- * FlutterEngine flutterEngine = group.createAndRunDefaultEngine(context);
+ * FlutterEngine flutterEngine = new FlutterEngine(context);
  *
  * // Create a ShimPluginRegistry and wrap the FlutterEngine with the shim.
  * ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine, platformViewsController);
