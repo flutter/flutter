@@ -112,6 +112,7 @@ namespace {
 // Types imported for the realm_builder library.
 using component_testing::ChildRef;
 using component_testing::ConfigValue;
+using component_testing::DirectoryContents;
 using component_testing::LocalComponent;
 using component_testing::LocalComponentHandles;
 using component_testing::ParentRef;
@@ -324,6 +325,57 @@ class FlutterTapTest : public FlutterTapTestBase {
 };
 
 class FlutterEmbedTapTest : public FlutterTapTestBase {
+ protected:
+  void SetUp() override {
+    PortableUITest::SetUp(false);
+
+    // Post a "just in case" quit task, if the test hangs.
+    async::PostDelayedTask(
+        dispatcher(),
+        [] {
+          FML_LOG(FATAL)
+              << "\n\n>> Test did not complete in time, terminating.  <<\n\n";
+        },
+        kTimeout);
+  }
+
+  void LaunchClientWithEmbeddedView() {
+    BuildRealm();
+
+    // Get the display dimensions.
+    FML_LOG(INFO) << "Waiting for scenic display info";
+    scenic_ = realm_root()->template Connect<fuchsia::ui::scenic::Scenic>();
+    scenic_->GetDisplayInfo([this](fuchsia::ui::gfx::DisplayInfo display_info) {
+      display_width_ = display_info.width_in_px;
+      display_height_ = display_info.height_in_px;
+      FML_LOG(INFO) << "Got display_width = " << display_width_
+                    << " and display_height = " << display_height_;
+    });
+    RunLoopUntil(
+        [this] { return display_width_ != 0 && display_height_ != 0; });
+
+    // Register input injection device.
+    FML_LOG(INFO) << "Registering input injection device";
+    RegisterTouchScreen();
+
+    PortableUITest::LaunchClientWithEmbeddedView();
+  }
+
+  // Helper method to add a component argument
+  // This will be written into an args.csv file that can be parsed and read
+  // by embedding-flutter-view.dart
+  //
+  // Note: You must call this method before LaunchClientWithEmbeddedView()
+  // Realm Builder will not allow you to create a new directory / file in a
+  // realm that's already been built
+  void AddComponentArgument(std::string component_arg) {
+    auto config_directory_contents = DirectoryContents();
+    config_directory_contents.AddFile("args.csv", component_arg);
+    realm_builder()->RouteReadOnlyDirectory(
+        "config-data", {kEmbeddingFlutterViewRef},
+        std::move(config_directory_contents));
+  }
+
  private:
   void ExtendRealm() override {
     FML_LOG(INFO) << "Extending realm";
@@ -392,6 +444,9 @@ TEST_P(FlutterTapTest, FlutterTap) {
         /*expected_y=*/static_cast<float>(display_height() / 4.0f),
         /*component_name=*/"touch-input-view");
   });
+
+  // There should be 1 injected tap
+  ASSERT_EQ(touch_injection_request_count(), 1);
 }
 
 INSTANTIATE_TEST_SUITE_P(FlutterEmbedTapTestParameterized,
@@ -405,19 +460,19 @@ TEST_P(FlutterEmbedTapTest, FlutterEmbedTap) {
   FML_LOG(INFO) << "Client launched";
 
   {
-    // Embedded child view takes up the left side of the screen
+    // Embedded child view takes up the center of the screen
     // Expect a response from the child view if we inject a tap there
-    InjectTap(-500, -500);
+    InjectTap(0, 0);
     RunLoopUntil([this] {
       return LastEventReceivedMatches(
-          /*expected_x=*/static_cast<float>(display_width() / 4.0f),
-          /*expected_y=*/static_cast<float>(display_height() / 4.0f),
+          /*expected_x=*/static_cast<float>(display_width() / 8.0f),
+          /*expected_y=*/static_cast<float>(display_height() / 8.0f),
           /*component_name=*/"touch-input-view");
     });
   }
 
   {
-    // Parent view takes up the right side of the screen
+    // Parent view takes up the rest of the screen
     // Validate that parent can still receive taps
     InjectTap(500, 500);
     RunLoopUntil([this] {
@@ -425,6 +480,64 @@ TEST_P(FlutterEmbedTapTest, FlutterEmbedTap) {
           /*expected_x=*/static_cast<float>(display_width() / (4.0f / 3.0f)),
           /*expected_y=*/static_cast<float>(display_height() / (4.0f / 3.0f)),
           /*component_name=*/"embedding-flutter-view");
+    });
+  }
+
+  // There should be 2 injected taps
+  ASSERT_EQ(touch_injection_request_count(), 2);
+}
+
+TEST_P(FlutterEmbedTapTest, FlutterEmbedHittestDisabled) {
+  FML_LOG(INFO) << "Initializing scene";
+  AddComponentArgument("--no-hitTestable");
+  LaunchClientWithEmbeddedView();
+  FML_LOG(INFO) << "Client launched";
+
+  // Embedded child view takes up the center of the screen
+  // hitTestable is turned off for the embedded child view
+  // Expect the parent (embedding-flutter-view) to respond if we inject a tap
+  // there
+  InjectTap(0, 0);
+  RunLoopUntil([this] {
+    return LastEventReceivedMatches(
+        /*expected_x=*/static_cast<float>(display_width() / 2.0f),
+        /*expected_y=*/static_cast<float>(display_height() / 2.0f),
+        /*component_name=*/"embedding-flutter-view");
+  });
+
+  // There should be 1 injected tap
+  ASSERT_EQ(touch_injection_request_count(), 1);
+}
+
+TEST_P(FlutterEmbedTapTest, FlutterEmbedOverlayEnabled) {
+  FML_LOG(INFO) << "Initializing scene";
+  AddComponentArgument("--showOverlay");
+  LaunchClientWithEmbeddedView();
+  FML_LOG(INFO) << "Client launched";
+
+  {
+    // The bottom-left corner of the overlay is at the center of the screen
+    // Expect the overlay / parent view to respond if we inject a tap there
+    // and not the embedded child view
+    InjectTap(0, 0);
+    RunLoopUntil([this] {
+      return LastEventReceivedMatches(
+          /*expected_x=*/static_cast<float>(display_width() / 2.0f),
+          /*expected_y=*/static_cast<float>(display_height() / 2.0f),
+          /*component_name=*/"embedding-flutter-view");
+    });
+  }
+
+  {
+    // The embedded child view is just outside of the bottom-left corner of the
+    // overlay
+    // Expect the embedded child view to still receive taps
+    InjectTap(-1, -1);
+    RunLoopUntil([this] {
+      return LastEventReceivedMatches(
+          /*expected_x=*/static_cast<float>(display_width() / 8.0f),
+          /*expected_y=*/static_cast<float>(display_height() / 8.0f),
+          /*component_name=*/"touch-input-view");
     });
   }
 

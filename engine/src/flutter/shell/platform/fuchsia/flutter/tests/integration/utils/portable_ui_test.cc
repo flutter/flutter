@@ -29,9 +29,16 @@ using fuchsia_test_utils::CheckViewExistsInSnapshot;
 
 }  // namespace
 
-void PortableUITest::SetUp() {
+void PortableUITest::SetUp(bool build_realm) {
   SetUpRealmBase();
   ExtendRealm();
+
+  if (build_realm) {
+    BuildRealm();
+  }
+}
+
+void PortableUITest::BuildRealm() {
   realm_ = std::make_unique<RealmRoot>(realm_builder_.Build());
 }
 

@@ -7,15 +7,37 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:args/args.dart';
 import 'package:fidl_fuchsia_ui_app/fidl_async.dart';
 import 'package:fidl_fuchsia_ui_views/fidl_async.dart';
 import 'package:fidl_fuchsia_ui_test_input/fidl_async.dart' as test_touch;
 import 'package:fuchsia_services/services.dart';
+import 'package:vector_math/vector_math_64.dart' as vector_math_64;
 import 'package:zircon/zircon.dart';
+
+final _argsCsvFilePath = '/config/data/args.csv';
 
 void main(List<String> args) {
   print('Launching embedding-flutter-view');
-  TestApp app = TestApp(ChildView.gfx(_launchGfxChildView()));
+
+  args = args + _GetArgsFromConfigFile();
+  final parser = ArgParser()
+    ..addFlag('showOverlay', defaultsTo: false)
+    ..addFlag('hitTestable', defaultsTo: true)
+    ..addFlag('focusable', defaultsTo: true);
+
+  final arguments = parser.parse(args);
+  for (final option in arguments.options) {
+    print('embedding-flutter-view args: $option: ${arguments[option]}');
+  }
+
+  TestApp app = TestApp(
+    ChildView.gfx(_launchGfxChildView()),
+    showOverlay: arguments['showOverlay'],
+    hitTestable: arguments['hitTestable'],
+    focusable: arguments['focusable'],
+  );
+
   app.run();
 }
 
@@ -24,14 +46,22 @@ class TestApp {
   static const _blue = Color.fromARGB(255, 0, 0, 255);
 
   final ChildView childView;
+  final bool showOverlay;
+  final bool hitTestable;
+  final bool focusable;
   final _responseListener = test_touch.TouchInputListenerProxy();
 
   Color _backgroundColor = _blue;
 
-  TestApp(this.childView) {}
+  TestApp(
+    this.childView,
+    {this.showOverlay = false,
+    this.hitTestable = true,
+    this.focusable = true}) {
+  }
 
   void run() {
-    childView.create((ByteData reply) {
+    childView.create(hitTestable, focusable, (ByteData reply) {
         // Set up window callbacks.
         window.onPointerDataPacket = (PointerDataPacket packet) {
           this.pointerDataPacket(packet);
@@ -67,13 +97,52 @@ class TestApp {
     final sceneBuilder = SceneBuilder()
       ..pushClipRect(physicalBounds)
       ..addPicture(Offset.zero, picture);
-    // Child view should take up half the screen
-    final childPhysicalSize = window.physicalSize * 0.5;
+
+    final childPhysicalSize = window.physicalSize * 0.25;
+    // Alignment.center
+    final windowCenter = size.center(Offset.zero);
+    final windowPhysicalCenter = window.physicalSize.center(Offset.zero);
+    final childPhysicalOffset = windowPhysicalCenter - childPhysicalSize.center(Offset.zero);
+
     sceneBuilder
+      ..pushTransform(
+        vector_math_64.Matrix4.translationValues(childPhysicalOffset.dx,
+                                                 childPhysicalOffset.dy,
+                                                 0.0).storage)
       ..addPlatformView(childView.viewId,
                         width: childPhysicalSize.width,
-                        height: size.height)
+                        height: childPhysicalSize.height)
       ..pop();
+
+    if (showOverlay) {
+      final containerSize = size * 0.5;
+      // Alignment.center
+      final containerOffset = windowCenter - containerSize.center(Offset.zero);
+
+      final overlaySize = containerSize * 0.5;
+      // Alignment.topRight
+      final overlayOffset = Offset(
+        containerOffset.dx + containerSize.width - overlaySize.width,
+        containerOffset.dy);
+      final overlayPhysicalSize = overlaySize * pixelRatio;
+      final overlayPhysicalOffset = overlayOffset * pixelRatio;
+      final overlayPhysicalBounds = overlayPhysicalOffset & overlayPhysicalSize;
+
+      final recorder = PictureRecorder();
+      final overlayCullRect = Offset.zero & overlayPhysicalSize; // in canvas physical coordinates
+      final canvas = Canvas(recorder, overlayCullRect);
+      canvas.scale(pixelRatio);
+
+      final paint = Paint()..color = Color.fromARGB(255, 0, 255, 0);
+      canvas.drawRect(Offset.zero & overlaySize, paint);
+
+      final overlayPicture = recorder.endRecording();
+      sceneBuilder
+        ..pushClipRect(overlayPhysicalBounds) // in window physical coordinates
+        ..addPicture(overlayPhysicalOffset, overlayPicture)
+        ..pop();
+    }
+
     sceneBuilder.pop();
     window.render(sceneBuilder.build());
   }
@@ -124,15 +193,18 @@ class ChildView {
     assert(viewId != null);
   }
 
-  void create(PlatformMessageResponseCallback callback) {
+  void create(
+    bool hitTestable,
+    bool focusable,
+    PlatformMessageResponseCallback callback) {
     // Construct the dart:ui platform message to create the view, and when the
     // return callback is invoked, build the scene. At that point, it is safe
     // to embed the child view in the scene.
     final viewOcclusionHint = Rect.zero;
     final Map<String, dynamic> args = <String, dynamic>{
       'viewId': viewId,
-      'hitTestable': true,
-      'focusable': true,
+      'hitTestable': hitTestable,
+      'focusable': focusable,
       'viewOcclusionHintLTRB': <double>[
         viewOcclusionHint.left,
         viewOcclusionHint.top,
@@ -172,4 +244,15 @@ ViewHolderToken _launchGfxChildView() {
   viewProvider.ctrl.close();
 
   return viewHolderToken;
+}
+
+List<String> _GetArgsFromConfigFile() {
+  List<String> args;
+  final f = File(_argsCsvFilePath);
+  if (!f.existsSync()) {
+    return List.empty();
+  }
+  final fileContentCsv = f.readAsStringSync();
+  args = fileContentCsv.split('\n');
+  return args;
 }
