@@ -254,7 +254,7 @@ abstract class RunOutputTask {
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
 
-      final Directory crashesDir = Directory('/Users/loshar/Library/Logs/DiagnosticReports');
+      final Directory crashesDir = Directory('/Users/swarming/Library/Logs/DiagnosticReports');
       final List<FileSystemEntity> entities = await crashesDir.list().toList();
       final Iterable<File> files = entities.whereType<File>();
 
