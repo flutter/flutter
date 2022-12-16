@@ -13,7 +13,7 @@ void main() {
   testWidgets('Capabilities integration test', (WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
-    final Finder textFinder = find.byKey(const Key('isCanvaskit bool is false'));
+    final Finder textFinder = find.byKey(const Key('isCanvasKit bool is false'));
     expect(textFinder, findsOneWidget);
     final Text text = tester.widget(textFinder);
     expect(text.data, 'The app is not canvasKit');
