@@ -292,7 +292,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final Artifacts artifacts = globals.artifacts!;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
-    final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.uri.toString();
+    final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.path;
 
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: TargetPlatform.web_javascript),
@@ -310,7 +310,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       '--multi-root-scheme',
       'org-dartlang-sdk',
       '--multi-root',
-      artifacts.getHostArtifact(HostArtifact.flutterWebSdk).uri.toString(),
+      artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       '--multi-root',
       dartSdkRoot,
       '--libraries-spec',
