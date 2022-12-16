@@ -164,3 +164,98 @@ CFTypeRef FlutterStandardCodecHelperReadValueOfType(
       assert(false);
   }
 }
+
+void FlutterStandardCodecHelperWriteByte(CFMutableDataRef data, uint8_t value) {
+  CFDataAppendBytes(data, &value, 1);
+}
+
+void FlutterStandardCodecHelperWriteBytes(CFMutableDataRef data,
+                                          const void* bytes,
+                                          unsigned long length) {
+  CFDataAppendBytes(data, bytes, length);
+}
+
+void FlutterStandardCodecHelperWriteSize(CFMutableDataRef data, uint32_t size) {
+  if (size < 254) {
+    FlutterStandardCodecHelperWriteByte(data, size);
+  } else if (size <= 0xffff) {
+    FlutterStandardCodecHelperWriteByte(data, 254);
+    UInt16 value = (UInt16)size;
+    FlutterStandardCodecHelperWriteBytes(data, &value, 2);
+  } else {
+    FlutterStandardCodecHelperWriteByte(data, 255);
+    FlutterStandardCodecHelperWriteBytes(data, &size, 4);
+  }
+}
+
+void FlutterStandardCodecHelperWriteAlignment(CFMutableDataRef data,
+                                              uint8_t alignment) {
+  uint8_t mod = CFDataGetLength(data) % alignment;
+  if (mod) {
+    for (int i = 0; i < (alignment - mod); i++) {
+      FlutterStandardCodecHelperWriteByte(data, 0);
+    }
+  }
+}
+
+void FlutterStandardCodecHelperWriteUTF8(CFMutableDataRef data,
+                                         CFStringRef value) {
+  const char* utf8 = CFStringGetCStringPtr(value, kCFStringEncodingUTF8);
+  if (utf8) {
+    size_t length = strlen(utf8);
+    FlutterStandardCodecHelperWriteSize(data, length);
+    FlutterStandardCodecHelperWriteBytes(data, utf8, length);
+  } else {
+    CFIndex length = CFStringGetLength(value);
+    CFIndex used_length = 0;
+    // UTF16 length times 3 will fit all UTF8.
+    CFIndex buffer_length = length * 3;
+    UInt8* buffer = (UInt8*)malloc(buffer_length * sizeof(UInt8));
+    CFStringGetBytes(value, CFRangeMake(0, length), kCFStringEncodingUTF8, 0,
+                     false, buffer, buffer_length, &used_length);
+    FlutterStandardCodecHelperWriteSize(data, used_length);
+    FlutterStandardCodecHelperWriteBytes(data, buffer, used_length);
+    free(buffer);
+  }
+}
+
+void FlutterStandardCodecHelperWriteData(CFMutableDataRef data,
+                                         CFDataRef value) {
+  const UInt8* bytes = CFDataGetBytePtr(value);
+  CFIndex length = CFDataGetLength(value);
+  FlutterStandardCodecHelperWriteBytes(data, bytes, length);
+}
+
+bool FlutterStandardCodecHelperWriteNumber(CFMutableDataRef data,
+                                           CFNumberRef number) {
+  bool success = false;
+  if (CFGetTypeID(number) == CFBooleanGetTypeID()) {
+    bool b = CFBooleanGetValue((CFBooleanRef)number);
+    FlutterStandardCodecHelperWriteByte(
+        data, (b ? FlutterStandardFieldTrue : FlutterStandardFieldFalse));
+    success = true;
+  } else if (CFNumberIsFloatType(number)) {
+    Float64 f;
+    success = CFNumberGetValue(number, kCFNumberFloat64Type, &f);
+    if (success) {
+      FlutterStandardCodecHelperWriteByte(data, FlutterStandardFieldFloat64);
+      FlutterStandardCodecHelperWriteAlignment(data, 8);
+      FlutterStandardCodecHelperWriteBytes(data, &f, 8);
+    }
+  } else if (CFNumberGetByteSize(number) <= 4) {
+    SInt32 n;
+    success = CFNumberGetValue(number, kCFNumberSInt32Type, &n);
+    if (success) {
+      FlutterStandardCodecHelperWriteByte(data, FlutterStandardFieldInt32);
+      FlutterStandardCodecHelperWriteBytes(data, &n, 4);
+    }
+  } else if (CFNumberGetByteSize(number) <= 8) {
+    SInt64 n;
+    success = CFNumberGetValue(number, kCFNumberSInt64Type, &n);
+    if (success) {
+      FlutterStandardCodecHelperWriteByte(data, FlutterStandardFieldInt64);
+      FlutterStandardCodecHelperWriteBytes(data, &n, 8);
+    }
+  }
+  return success;
+}
