@@ -37,7 +37,6 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
-{{#withPlatformChannelPluginHook}}
          <TestableReference
             skipped = "NO"
             parallelizable = "YES">
@@ -49,7 +48,6 @@
                ReferencedContainer = "container:Runner.xcodeproj">
             </BuildableReference>
          </TestableReference>
-{{/withPlatformChannelPluginHook}}
       </Testables>
    </TestAction>
    <LaunchAction

@@ -82,7 +82,6 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'module', 'common'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
-          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_example'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_shared'),
         ];

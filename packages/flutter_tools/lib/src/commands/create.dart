@@ -595,7 +595,7 @@ Your $application code is in $relativeAppMain.
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
     generatedCount += await generateApp(
-      <String>['app', 'app_test_widget', 'plugin_example'],
+      <String>['app', 'app_test_widget'],
       project.example.directory,
       templateContext,
       overwrite: overwrite,

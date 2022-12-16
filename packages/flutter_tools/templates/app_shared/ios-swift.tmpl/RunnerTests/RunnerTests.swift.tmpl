@@ -2,19 +2,19 @@ import Flutter
 import UIKit
 import XCTest
 
+{{#withPlatformChannelPluginHook}}
 @testable import {{pluginProjectName}}
+{{/withPlatformChannelPluginHook}}
 
+{{#withPlatformChannelPluginHook}}
 // This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
 //
-// IMPORTANT: Before these tests can be compiled and run, the following needs to be added to this
-// example application's Podfile, in the `target 'Runner' do` section:
-//     target 'RunnerTests' do
-//       inherit! :search_paths
-//     end
-// followed by running 'pod install' in the example/ios/ directory.
+// See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+{{/withPlatformChannelPluginHook}}
 
-class {{pluginClass}}Tests: XCTestCase {
+class RunnerTests: XCTestCase {
 
+{{#withPlatformChannelPluginHook}}
   func testGetPlatformVersion() {
     let plugin = {{pluginClass}}()
 
@@ -27,5 +27,13 @@ class {{pluginClass}}Tests: XCTestCase {
     }
     waitForExpectations(timeout: 1)
   }
+{{/withPlatformChannelPluginHook}}
+
+{{^withPlatformChannelPluginHook}}
+  func testExample() {
+    // If you add code to the Runner application, consider adding tests here.
+    // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+  }
+{{/withPlatformChannelPluginHook}}
 
 }
