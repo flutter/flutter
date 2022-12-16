@@ -25,11 +25,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
-import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import java.util.List;
@@ -325,35 +322,5 @@ public class FlutterEngineTest {
             /*automaticallyRegisterPlugins=*/ false);
 
     assertTrue(engineUnderTest.getDartExecutor().isExecutingDart());
-  }
-
-  @Test
-  public void passesEngineGroupToPlugins() throws NameNotFoundException {
-    Context packageContext = mock(Context.class);
-
-    when(mockContext.createPackageContext(any(), anyInt())).thenReturn(packageContext);
-    when(flutterJNI.isAttached()).thenReturn(true);
-
-    FlutterEngineGroup mockGroup = mock(FlutterEngineGroup.class);
-
-    FlutterEngine engineUnderTest =
-        new FlutterEngine(
-            mockContext,
-            mock(FlutterLoader.class),
-            flutterJNI,
-            new PlatformViewsController(),
-            /*dartVmArgs=*/ new String[] {},
-            /*automaticallyRegisterPlugins=*/ false,
-            /*waitForRestorationData=*/ false,
-            mockGroup);
-
-    PluginRegistry registry = engineUnderTest.getPlugins();
-    FlutterPlugin mockPlugin = mock(FlutterPlugin.class);
-    ArgumentCaptor<FlutterPlugin.FlutterPluginBinding> pluginBindingCaptor =
-        ArgumentCaptor.forClass(FlutterPlugin.FlutterPluginBinding.class);
-    registry.add(mockPlugin);
-    verify(mockPlugin).onAttachedToEngine(pluginBindingCaptor.capture());
-    assertNotNull(pluginBindingCaptor.getValue());
-    assertEquals(mockGroup, pluginBindingCaptor.getValue().getEngineGroup());
   }
 }

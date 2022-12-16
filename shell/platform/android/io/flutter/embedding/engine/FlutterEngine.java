@@ -9,7 +9,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -280,27 +279,6 @@ public class FlutterEngine {
       @Nullable String[] dartVmArgs,
       boolean automaticallyRegisterPlugins,
       boolean waitForRestorationData) {
-    this(
-        context,
-        flutterLoader,
-        flutterJNI,
-        platformViewsController,
-        dartVmArgs,
-        automaticallyRegisterPlugins,
-        waitForRestorationData,
-        null);
-  }
-
-  @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-  public FlutterEngine(
-      @NonNull Context context,
-      @Nullable FlutterLoader flutterLoader,
-      @NonNull FlutterJNI flutterJNI,
-      @NonNull PlatformViewsController platformViewsController,
-      @Nullable String[] dartVmArgs,
-      boolean automaticallyRegisterPlugins,
-      boolean waitForRestorationData,
-      @Nullable FlutterEngineGroup group) {
     AssetManager assetManager;
     try {
       assetManager = context.createPackageContext(context.getPackageName(), 0).getAssets();
@@ -369,8 +347,7 @@ public class FlutterEngine {
     this.platformViewsController.onAttachedToJNI();
 
     this.pluginRegistry =
-        new FlutterEngineConnectionRegistry(
-            context.getApplicationContext(), this, flutterLoader, group);
+        new FlutterEngineConnectionRegistry(context.getApplicationContext(), this, flutterLoader);
 
     localizationPlugin.sendLocalesToFlutter(context.getResources().getConfiguration());
 

@@ -97,8 +97,7 @@ import java.util.Set;
   FlutterEngineConnectionRegistry(
       @NonNull Context appContext,
       @NonNull FlutterEngine flutterEngine,
-      @NonNull FlutterLoader flutterLoader,
-      @Nullable FlutterEngineGroup group) {
+      @NonNull FlutterLoader flutterLoader) {
     this.flutterEngine = flutterEngine;
     pluginBinding =
         new FlutterPlugin.FlutterPluginBinding(
@@ -107,8 +106,7 @@ import java.util.Set;
             flutterEngine.getDartExecutor(),
             flutterEngine.getRenderer(),
             flutterEngine.getPlatformViewsController().getRegistry(),
-            new DefaultFlutterAssets(flutterLoader),
-            group);
+            new DefaultFlutterAssets(flutterLoader));
   }
 
   public void destroy() {
