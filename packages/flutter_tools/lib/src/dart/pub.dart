@@ -408,26 +408,26 @@ class _DefaultPub implements Pub {
     }
 
     try {
-      final io.Process process;
-      final io.Stdio? stdio = _stdio;
+      if (printProgress) {
+        final io.Stdio? stdio = _stdio;
+        if (stdio == null) {
+          // Let pub inherit stdio and output directly to the tool's stdout and stderr handles.
+          final io.Process process = await _processUtils.start(
+            pubCommand,
+            workingDirectory: _fileSystem.path.current,
+            environment: pubEnvironment,
+            mode: ProcessStartMode.inheritStdio,
+          );
 
-      if (stdio == null && printProgress) {
-        // Let pub inherit stdio and output directly to the tool's stdout and stderr handles.
-        process = await _processUtils.start(
-          pubCommand,
-          workingDirectory: _fileSystem.path.current,
-          environment: pubEnvironment,
-          mode: ProcessStartMode.inheritStdio,
-        );
-      } else {
-        // Omit [mode] parameter to send output to [process.stdout] and [process.stderr].
-        process = await _processUtils.start(
-          pubCommand,
-          workingDirectory: _fileSystem.path.current,
-          environment: pubEnvironment,
-        );
+          exitCode = await process.exitCode;
+        } else {
+          // Omit [mode] parameter to send output to [process.stdout] and [process.stderr].
+          final io.Process process = await _processUtils.start(
+            pubCommand,
+            workingDirectory: _fileSystem.path.current,
+            environment: pubEnvironment,
+          );
 
-        if (stdio != null && printProgress) {
           // Direct pub output to [Pub._stdio] for tests.
           final StreamSubscription<List<int>> stdoutSubscription =
               process.stdout.listen(stdio.stdout.add);
@@ -441,10 +441,19 @@ class _DefaultPub implements Pub {
 
           unawaited(stdoutSubscription.cancel());
           unawaited(stderrSubscription.cancel());
-        }
-      }
 
-      exitCode = await process.exitCode;
+          exitCode = await process.exitCode;
+        }
+      } else {
+        // [ProcessUtils.run] will send the output to [result.stdout] and [result.stderr], which we will ignore.
+        final RunResult result = await _processUtils.run(
+          pubCommand,
+          workingDirectory: _fileSystem.path.current,
+          environment: pubEnvironment,
+        );
+
+        exitCode = result.exitCode;
+      }
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
       if (exception is io.ProcessException) {

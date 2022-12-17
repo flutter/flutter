@@ -442,7 +442,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       upgrade: doUpgrade,
       offline: boolArgDeprecated('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
-      printProgress: true,
+      printProgress: false,
     );
 
     if (doUpgrade) {
@@ -536,7 +536,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
-            printProgress: true,
+            printProgress: false,
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;
