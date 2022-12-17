@@ -36,7 +36,7 @@ Future<void> buildWeb(
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = outputDirectoryPath == null
-      ? globals.fs.directory(getWebBuildDirectory())
+      ? globals.fs.directory(getWebBuildDirectory(isWasm))
       : globals.fs.directory(outputDirectoryPath);
   outputDirectory.createSync(recursive: true);
 

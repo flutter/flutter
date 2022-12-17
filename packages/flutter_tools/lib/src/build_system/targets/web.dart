@@ -392,6 +392,12 @@ class WebReleaseBundle extends Target {
       );
     }
 
+    if (isWasm) {
+      // TODO(jacksongardner): Enable icon tree shaking once dart2wasm can do a two-phase compile.
+      // https://github.com/flutter/flutter/issues/117248
+      environment.defines[kIconTreeShakerFlag] = 'false';
+    }
+
     createVersionFile(environment, environment.defines);
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);

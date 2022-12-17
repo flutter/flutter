@@ -26,7 +26,6 @@ void main() {
 
     processManager.runSync(<String>[
       flutterBin,
-      ...getLocalEngineArguments(),
       'create',
       '--platforms=web',
       'test_app',
@@ -45,7 +44,7 @@ void main() {
     final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
       exampleAppDir.path,
       'build',
-      'web'
+      'web_wasm'
     ));
     for (final String filename in const <String>[
       'dart2wasm_runtime.mjs',
