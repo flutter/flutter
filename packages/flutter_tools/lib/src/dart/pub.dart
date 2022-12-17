@@ -411,7 +411,8 @@ class _DefaultPub implements Pub {
       if (printProgress) {
         final io.Stdio? stdio = _stdio;
         if (stdio == null) {
-          // Let pub inherit stdio and output directly to the tool's stdout and stderr handles.
+          // Let pub inherit stdio and output directly to the tool's stdout and
+          // stderr handles.
           final io.Process process = await _processUtils.start(
             pubCommand,
             workingDirectory: _fileSystem.path.current,
@@ -421,7 +422,8 @@ class _DefaultPub implements Pub {
 
           exitCode = await process.exitCode;
         } else {
-          // Omit [mode] parameter to send output to [process.stdout] and [process.stderr].
+          // Omit [mode] parameter to send output to [process.stdout] and
+          // [process.stderr].
           final io.Process process = await _processUtils.start(
             pubCommand,
             workingDirectory: _fileSystem.path.current,
@@ -445,7 +447,14 @@ class _DefaultPub implements Pub {
           exitCode = await process.exitCode;
         }
       } else {
-        // [ProcessUtils.run] will send the output to [result.stdout] and [result.stderr], which we will ignore.
+        // Do not try to use [ProcessUtils.start] here, because it requires you
+        // to read all data out of the stdout and stderr streams. If you don't
+        // read the streams, it may appear to work fine on your platform but
+        // will block the tool's process on Windows.
+        // See https://api.dart.dev/stable/dart-io/Process/start.html
+        //
+        // [ProcessUtils.run] will send the output to [result.stdout] and
+        // [result.stderr], which we will ignore.
         final RunResult result = await _processUtils.run(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
