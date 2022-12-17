@@ -851,8 +851,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
           intent: matchedIntent,
         );
         if (action != null && action.isEnabled(matchedIntent)) {
-          final Object? actionResult = Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
-          return action.toKeyEventResult(matchedIntent, actionResult);
+          final Object? invokeResult = Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
+          return action.toKeyEventResult(matchedIntent, invokeResult);
         }
       }
     }

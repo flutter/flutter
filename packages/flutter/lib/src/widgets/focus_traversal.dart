@@ -1766,8 +1766,8 @@ class NextFocusAction extends Action<NextFocusIntent> {
   }
 
   @override
-  KeyEventResult toKeyEventResult(NextFocusIntent intent, bool actionResult) {
-    return actionResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
+  KeyEventResult toKeyEventResult(NextFocusIntent intent, bool invokeResult) {
+    return invokeResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
   }
 }
 
@@ -1801,8 +1801,8 @@ class PreviousFocusAction extends Action<PreviousFocusIntent> {
   }
 
   @override
-  KeyEventResult toKeyEventResult(PreviousFocusIntent intent, bool actionResult) {
-    return actionResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
+  KeyEventResult toKeyEventResult(PreviousFocusIntent intent, bool invokeResult) {
+    return invokeResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
   }
 }
 
