@@ -748,24 +748,13 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     // Only check for gestures if tooltip should be visible.
     if (_visible) {
-      if (_triggerMode == TooltipTriggerMode.tap) {
-        result = GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _handleTap,
-          child: result,
-        );
-      }
-      else {
-        // if _triggerMode is not tap exclude GestureDetector from semantics
-        // otherwise in cases the tooltip is used with a button the tap action
-        // on the button will be lost.
-        result = GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
-          excludeFromSemantics: true,
-          child: result,
-        );
-      }
+      result = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
+        onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
+        excludeFromSemantics: true,
+        child: result,
+      );
       // Only check for hovering if there is a mouse connected.
       if (_mouseIsConnected) {
         result = MouseRegion(
