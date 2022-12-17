@@ -5,6 +5,16 @@
 #include "flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.h"
 #include <stdint.h>
 
+#include <vector>
+
+#include "flutter/fml/logging.h"
+
+// The google-runtime-int lint suggests uint64_t in place of unsigned long,
+// however these functions are frequently used with NSUInteger, which is
+// defined as an unsigned long.
+//
+// NOLINTBEGIN(google-runtime-int)
+
 void FlutterStandardCodecHelperReadAlignment(unsigned long* location,
                                              uint8_t alignment) {
   uint8_t mod = *location % alignment;
@@ -25,7 +35,7 @@ void FlutterStandardCodecHelperReadBytes(unsigned long* location,
                                          void* destination,
                                          CFDataRef data) {
   CFRange range = CFRangeMake(*location, length);
-  CFDataGetBytes(data, range, destination);
+  CFDataGetBytes(data, range, static_cast<UInt8*>(destination));
   *location += length;
 }
 
@@ -59,7 +69,7 @@ static CFDataRef ReadDataNoCopy(unsigned long* location,
       kCFAllocatorDefault, CFDataGetBytePtr(data) + *location, length,
       kCFAllocatorNull);
   *location += length;
-  return CFAutorelease(result);
+  return static_cast<CFDataRef>(CFAutorelease(result));
 }
 
 CFStringRef FlutterStandardCodecHelperReadUTF8(unsigned long* location,
@@ -68,7 +78,7 @@ CFStringRef FlutterStandardCodecHelperReadUTF8(unsigned long* location,
   CFDataRef bytes = ReadDataNoCopy(location, size, data);
   CFStringRef result = CFStringCreateFromExternalRepresentation(
       kCFAllocatorDefault, bytes, kCFStringEncodingUTF8);
-  return CFAutorelease(result);
+  return static_cast<CFStringRef>(CFAutorelease(result));
 }
 
 // Peeks ahead to see if we are reading a standard type.  If so, recurse
@@ -161,7 +171,7 @@ CFTypeRef FlutterStandardCodecHelperReadValueOfType(
     }
     default:
       // Malformed message.
-      assert(false);
+      FML_DCHECK(false);
   }
 }
 
@@ -172,7 +182,7 @@ void FlutterStandardCodecHelperWriteByte(CFMutableDataRef data, uint8_t value) {
 void FlutterStandardCodecHelperWriteBytes(CFMutableDataRef data,
                                           const void* bytes,
                                           unsigned long length) {
-  CFDataAppendBytes(data, bytes, length);
+  CFDataAppendBytes(data, static_cast<const UInt8*>(bytes), length);
 }
 
 void FlutterStandardCodecHelperWriteSize(CFMutableDataRef data, uint32_t size) {
@@ -210,12 +220,12 @@ void FlutterStandardCodecHelperWriteUTF8(CFMutableDataRef data,
     CFIndex used_length = 0;
     // UTF16 length times 3 will fit all UTF8.
     CFIndex buffer_length = length * 3;
-    UInt8* buffer = (UInt8*)malloc(buffer_length * sizeof(UInt8));
+    std::vector<UInt8> buffer;
+    buffer.reserve(buffer_length);
     CFStringGetBytes(value, CFRangeMake(0, length), kCFStringEncodingUTF8, 0,
-                     false, buffer, buffer_length, &used_length);
+                     false, buffer.data(), buffer_length, &used_length);
     FlutterStandardCodecHelperWriteSize(data, used_length);
-    FlutterStandardCodecHelperWriteBytes(data, buffer, used_length);
-    free(buffer);
+    FlutterStandardCodecHelperWriteBytes(data, buffer.data(), used_length);
   }
 }
 
@@ -259,3 +269,5 @@ bool FlutterStandardCodecHelperWriteNumber(CFMutableDataRef data,
   }
   return success;
 }
+
+// NOLINTEND(google-runtime-int)
