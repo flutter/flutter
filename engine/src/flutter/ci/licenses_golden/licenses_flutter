@@ -2417,7 +2417,7 @@ ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterCh
 ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterChannelsTest.m + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterCodecs.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec.mm + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.c + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec_Internal.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h + ../../../flutter/LICENSE
@@ -4874,7 +4874,7 @@ FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterChan
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterChannelsTest.m
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterCodecs.mm
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec.mm
-FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.c
+FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.cc
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodecHelper.h
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterStandardCodec_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h
