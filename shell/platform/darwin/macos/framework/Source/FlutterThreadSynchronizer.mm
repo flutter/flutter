@@ -1,10 +1,12 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterThreadSynchronizer.h"
-#import "fml/synchronization/waitable_event.h"
 
 #import <QuartzCore/QuartzCore.h>
 
 #include <mutex>
 #include <vector>
+
+#import "flutter/fml/logging.h"
+#import "flutter/fml/synchronization/waitable_event.h"
 
 @interface FlutterThreadSynchronizer () {
   std::mutex _mutex;
@@ -23,7 +25,7 @@
 @implementation FlutterThreadSynchronizer
 
 - (void)drain {
-  assert([NSThread isMainThread]);
+  FML_DCHECK([NSThread isMainThread]);
 
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
