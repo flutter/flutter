@@ -61,8 +61,8 @@ class TestBox extends SizedBox {
 }
 
 const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xEB202020),
-  darkColor: Color(0xEBF7F7F7),
+  color: Color(0xEBF7F7F7),
+  darkColor: Color(0xEB202020),
 );
 
 void main() {
@@ -295,39 +295,63 @@ void main() {
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('draws dark buttons in dark mode and light button in light mode', (WidgetTester tester) async {
-    for (final Brightness brightness in Brightness.values) {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: Builder(
-              builder: (BuildContext context) {
-                return MediaQuery(
-                  data: MediaQuery.of(context).copyWith(platformBrightness: brightness),
-                  child: CupertinoTextSelectionToolbar(
-                    anchorAbove: const Offset(100.0, 0.0),
-                    anchorBelow: const Offset(100.0, 0.0),
-                    children: <Widget>[
-                      CupertinoTextSelectionToolbarButton.text(
-                        onPressed: () {},
-                        text: 'Button',
-                      ),
-                    ],
-                  ),
-                );
-              },
+  for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
+    for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
+      testWidgets('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          CupertinoApp(
+            theme: CupertinoThemeData(
+              brightness: themeBrightness,
+            ),
+            home: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(platformBrightness: mediaBrightness),
+                    child: CupertinoTextSelectionToolbar(
+                      anchorAbove: const Offset(100.0, 0.0),
+                      anchorBelow: const Offset(100.0, 0.0),
+                      children: <Widget>[
+                        CupertinoTextSelectionToolbarButton.text(
+                          onPressed: () {},
+                          text: 'Button',
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      final Finder buttonFinder = find.byType(CupertinoButton);
-      expect(find.byType(CupertinoButton), findsOneWidget);
-      final CupertinoButton button = tester.widget(buttonFinder);
-      expect(
-        button.color,
-        _kToolbarBackgroundColor,
-      );
+        final Finder buttonFinder = find.byType(CupertinoButton);
+        expect(buttonFinder, findsOneWidget);
+
+        final Finder decorationFinder = find.descendant(
+          of: find.byType(CupertinoButton),
+          matching: find.byType(DecoratedBox)
+        );
+        expect(decorationFinder, findsOneWidget);
+        final DecoratedBox decoratedBox = tester.widget(decorationFinder);
+        final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+
+        // Theme brightness is preferred, otherwise MediaQuery brightness is
+        // used. If both are null, defaults to light.
+        late final Brightness effectiveBrightness;
+        if (themeBrightness != null) {
+          effectiveBrightness = themeBrightness;
+        } else {
+          effectiveBrightness = mediaBrightness ?? Brightness.light;
+        }
+
+        expect(
+          boxDecoration.color!.value,
+          effectiveBrightness == Brightness.dark
+              ? _kToolbarBackgroundColor.darkColor.value
+              : _kToolbarBackgroundColor.color.value,
+        );
+      }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
     }
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+  }
 }
