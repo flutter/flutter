@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
 #import <Metal/Metal.h>
+
 #include <algorithm>
+
+#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
 @implementation FlutterSurfacePresentInfo
 @end
@@ -75,7 +78,7 @@
 }
 
 - (void)commit:(NSArray<FlutterSurfacePresentInfo*>*)surfaces {
-  assert([NSThread isMainThread]);
+  FML_DCHECK([NSThread isMainThread]);
 
   // Release all unused back buffer surfaces and replace them with front surfaces.
   [_backBufferCache replaceSurfaces:_frontSurfaces];
