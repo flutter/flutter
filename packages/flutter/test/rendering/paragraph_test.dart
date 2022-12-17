@@ -734,7 +734,7 @@ void main() {
     });
   });
 
-    test('Supports gesture recognizer semantics', () {
+  test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
         TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
@@ -745,7 +745,18 @@ void main() {
     );
     layout(paragraph);
 
-    paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    final List<SemanticsNode> children = <SemanticsNode>[];
+    node.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    expect(children.length, 4);
+    expect(children[0].getSemanticsData().actions, 0);
+    expect(children[1].getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(children[2].getSemanticsData().hasAction(SemanticsAction.longPress), true);
+    expect(children[3].getSemanticsData().hasAction(SemanticsAction.tap), true);
   });
 
   test('Supports empty text span with spell out', () {
