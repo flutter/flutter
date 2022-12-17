@@ -62,8 +62,4 @@ std::string ComputePlaygroundTest::GetWindowTitle() const {
   return FormatWindowTitle(flutter::testing::GetCurrentTestName());
 }
 
-Scalar ComputePlaygroundTest::GetSecondsElapsed() const {
-  return (fml::TimePoint::Now().ToEpochDelta() - start_time_).ToSecondsF();
-}
-
 }  // namespace impeller

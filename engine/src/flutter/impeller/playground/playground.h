@@ -8,6 +8,7 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_delta.h"
 
 #include "impeller/geometry/point.h"
 #include "impeller/renderer/renderer.h"
@@ -50,6 +51,10 @@ class Playground {
 
   Point GetContentScale() const;
 
+  /// @brief Get the amount of time elapsed from the start of the playground's
+  /// execution.
+  Scalar GetSecondsElapsed() const;
+
   std::shared_ptr<Context> GetContext() const;
 
   bool OpenPlaygroundHere(const Renderer::RenderCallback& render_callback);
@@ -79,6 +84,8 @@ class Playground {
 #else
   static const bool is_enabled_ = false;
 #endif  // IMPELLER_ENABLE_PLAYGROUND
+
+  fml::TimeDelta start_time_;
 
   struct GLFWInitializer;
   std::unique_ptr<GLFWInitializer> glfw_initializer_;

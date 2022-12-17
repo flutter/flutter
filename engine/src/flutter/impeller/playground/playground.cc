@@ -7,6 +7,7 @@
 #include <optional>
 #include <sstream>
 
+#include "fml/time/time_point.h"
 #include "impeller/image/decompressed_image.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/runtime_stage/runtime_stage.h"
@@ -126,6 +127,8 @@ void Playground::SetupWindow() {
     return;
   }
   renderer_ = std::move(renderer);
+
+  start_time_ = fml::TimePoint::Now().ToEpochDelta();
 }
 
 void Playground::TeardownWindow() {
@@ -163,6 +166,10 @@ ISize Playground::GetWindowSize() const {
 
 Point Playground::GetContentScale() const {
   return impl_->GetContentScale();
+}
+
+Scalar Playground::GetSecondsElapsed() const {
+  return (fml::TimePoint::Now().ToEpochDelta() - start_time_).ToSecondsF();
 }
 
 void Playground::SetCursorPosition(Point pos) {
