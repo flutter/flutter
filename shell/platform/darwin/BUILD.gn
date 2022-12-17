@@ -47,7 +47,7 @@ source_set("flutter_channels_arc") {
     "common/framework/Source/FlutterChannels.mm",
     "common/framework/Source/FlutterCodecs.mm",
     "common/framework/Source/FlutterStandardCodec.mm",
-    "common/framework/Source/FlutterStandardCodecHelper.c",
+    "common/framework/Source/FlutterStandardCodecHelper.cc",
     "common/framework/Source/FlutterStandardCodec_Internal.h",
   ]
 
@@ -60,6 +60,8 @@ source_set("flutter_channels_arc") {
   ]
 
   public_configs = [ "//flutter:config" ]
+
+  deps = [ "//flutter/fml" ]
 }
 
 test_fixtures("flutter_channels_fixtures") {
