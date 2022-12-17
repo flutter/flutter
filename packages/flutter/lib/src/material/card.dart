@@ -80,8 +80,8 @@ class Card extends StatelessWidget {
   ///
   /// If this property is null then [CardTheme.color] of [ThemeData.cardTheme]
   /// is used. If that's null, then [ThemeData.cardColor] is used when material2
-  /// is enabled, [Themedata.colorScheme.surface] is used when material 3
-  /// enabled.
+  /// is enabled, [ColorScheme.surface] of [Themedata.colorScheme] is used when
+  /// material 3 enabled.
   final Color? color;
 
   /// The color to paint the shadow below the card.
