@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
+
+#include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Internal.h"
 
@@ -108,8 +110,8 @@ FlutterUIPressProxy* keyEventWithPhase(UIPressPhase phase,
                                        const char* characters,
                                        const char* charactersIgnoringModifiers)
     API_AVAILABLE(ios(13.4)) {
-  assert(!(modifierFlags & kModifierFlagSidedMask) &&
-         "iOS doesn't supply modifier side flags, so don't create events with them.");
+  FML_DCHECK(!(modifierFlags & kModifierFlagSidedMask))
+      << "iOS doesn't supply modifier side flags, so don't create events with them.";
   UIKey* key =
       [[FakeUIKey alloc] initWithData:keyCode
                         modifierFlags:modifierFlags
