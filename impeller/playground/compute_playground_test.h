@@ -36,10 +36,6 @@ class ComputePlaygroundTest
   // |Playground|
   std::string GetWindowTitle() const override;
 
-  /// @brief Get the amount of time elapsed from the start of the playground
-  ///        test's execution.
-  Scalar GetSecondsElapsed() const;
-
  private:
   fml::TimeDelta start_time_;
 
