@@ -21,6 +21,7 @@
 #include "impeller/scene/mesh.h"
 #include "impeller/scene/scene.h"
 #include "third_party/flatbuffers/include/flatbuffers/verifier.h"
+#include "third_party/imgui/imgui.h"
 
 // #include "third_party/tinygltf/tiny_gltf.h"
 
@@ -65,7 +66,7 @@ TEST_P(SceneTest, CuboidUnlit) {
   OpenPlaygroundHere(callback);
 }
 
-TEST_P(SceneTest, GLTFScene) {
+TEST_P(SceneTest, FlutterLogo) {
   auto allocator = GetContext()->GetResourceAllocator();
 
   auto mapping =
@@ -99,6 +100,54 @@ TEST_P(SceneTest, GLTFScene) {
                       /* position */ rotation * start_position)
                       .LookAt(
                           /* target */ Vector3(),
+                          /* up */ {0, 1, 0});
+
+    scene.Render(render_target, camera);
+    return true;
+  };
+
+  OpenPlaygroundHere(callback);
+}
+
+TEST_P(SceneTest, TwoTriangles) {
+  auto allocator = GetContext()->GetResourceAllocator();
+
+  auto mapping =
+      flutter::testing::OpenFixtureAsMapping("two_triangles.glb.ipscene");
+  ASSERT_NE(mapping, nullptr);
+
+  std::optional<Node> gltf_scene =
+      Node::MakeFromFlatbuffer(*mapping, *allocator);
+  ASSERT_TRUE(gltf_scene.has_value());
+
+  auto scene = Scene(GetContext());
+  scene.GetRoot().AddChild(std::move(gltf_scene.value()));
+
+  Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+    Node& node = scene.GetRoot().GetChildren()[0];
+    node.SetLocalTransform(node.GetLocalTransform() *
+                           Matrix::MakeRotation(0.02, {0, 1, 0, 0}));
+
+    static ImVec2 mouse_pos_prev = ImGui::GetMousePos();
+    ImVec2 mouse_pos = ImGui::GetMousePos();
+    Vector2 mouse_diff =
+        Vector2(mouse_pos.x - mouse_pos_prev.x, mouse_pos.y - mouse_pos_prev.y);
+
+    static Vector3 position(0, 1, -5);
+    static Vector3 cam_position = position;
+    auto strafe =
+        Vector3(ImGui::IsKeyDown(ImGuiKey_D) - ImGui::IsKeyDown(ImGuiKey_A),
+                ImGui::IsKeyDown(ImGuiKey_E) - ImGui::IsKeyDown(ImGuiKey_Q),
+                ImGui::IsKeyDown(ImGuiKey_W) - ImGui::IsKeyDown(ImGuiKey_S));
+    position += strafe * 0.5;
+    cam_position = cam_position.Lerp(position, 0.02);
+
+    // Face towards the +Z direction (+X right, +Y up).
+    auto camera = Camera::MakePerspective(
+                      /* fov */ Degrees(60),
+                      /* position */ cam_position)
+                      .LookAt(
+                          /* target */ cam_position + Vector3(0, 0, 1),
                           /* up */ {0, 1, 0});
 
     scene.Render(render_target, camera);
