@@ -43,12 +43,14 @@ Node Node::MakeFromFlatbuffer(const fb::Scene& scene, Allocator& allocator) {
 Node Node::MakeFromFlatbuffer(const fb::Node& node, Allocator& allocator) {
   Node result;
 
-  Mesh mesh;
-  for (const auto* primitives : *node.mesh_primitives()) {
-    auto geometry = Geometry::MakeFromFlatbuffer(*primitives, allocator);
-    mesh.AddPrimitive({geometry, Material::MakeUnlit()});
+  if (node.mesh_primitives()) {
+    Mesh mesh;
+    for (const auto* primitives : *node.mesh_primitives()) {
+      auto geometry = Geometry::MakeFromFlatbuffer(*primitives, allocator);
+      mesh.AddPrimitive({geometry, Material::MakeUnlit()});
+    }
+    result.SetMesh(std::move(mesh));
   }
-  result.SetMesh(std::move(mesh));
 
   if (!node.children()) {
     return result;
