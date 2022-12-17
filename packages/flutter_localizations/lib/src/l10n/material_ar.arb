@@ -143,5 +143,6 @@
   "currentDateLabel": "Date of today",
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName"
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

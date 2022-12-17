@@ -130,7 +130,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -217,7 +217,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     _process?.kill();
@@ -236,7 +236,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(
-    covariant ApplicationPackage app,
+    ApplicationPackage? app,
     String? userIdentifier,
   ) {
     return LocalDevFSWriter(

@@ -1299,6 +1299,54 @@ void main() {
       expect(selection.end, 31);
     });
   });
+
+  test('can just update the gesture recognizer', () async {
+    final TapGestureRecognizer recognizerBefore = TapGestureRecognizer()..onTap = () {};
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(text: 'How are you \n', recognizer: recognizerBefore),
+      textDirection: TextDirection.ltr,
+    );
+
+    int semanticsUpdateCount = 0;
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
+      listener: () {
+        ++semanticsUpdateCount;
+      },
+    );
+
+    layout(paragraph);
+
+    expect((paragraph.text as TextSpan).recognizer, same(recognizerBefore));
+    final SemanticsNode nodeBefore = SemanticsNode();
+    paragraph.assembleSemanticsNode(nodeBefore, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(semanticsUpdateCount, 0);
+    List<SemanticsNode> children = <SemanticsNode>[];
+    nodeBefore.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    SemanticsData data = children.single.getSemanticsData();
+    expect(data.hasAction(SemanticsAction.longPress), false);
+    expect(data.hasAction(SemanticsAction.tap), true);
+
+    final LongPressGestureRecognizer recognizerAfter = LongPressGestureRecognizer()..onLongPress = () {};
+    paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
+
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    expect((paragraph.text as TextSpan).recognizer, same(recognizerAfter));
+    final SemanticsNode nodeAfter = SemanticsNode();
+    paragraph.assembleSemanticsNode(nodeAfter, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(semanticsUpdateCount, 1);
+    children = <SemanticsNode>[];
+    nodeAfter.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    data = children.single.getSemanticsData();
+    expect(data.hasAction(SemanticsAction.longPress), true);
+    expect(data.hasAction(SemanticsAction.tap), false);
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {

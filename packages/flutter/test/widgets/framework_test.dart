@@ -1183,13 +1183,13 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      equalsIgnoringHashCodes(
+      startsWith(
         'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]',
+        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });
@@ -1216,13 +1216,13 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      equalsIgnoringHashCodes(
+      startsWith(
         'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]',
+        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });

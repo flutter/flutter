@@ -79,14 +79,13 @@ void main() {
             expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
             expect(
               error.toStringDeep(),
-              equalsIgnoringHashCodes(
+              startsWith(
                 'FlutterError\n'
                 '   No Table widget found.\n'
                 '   Builder widgets require a Table widget ancestor.\n'
                 '   The specific widget that could not find a Table ancestor was:\n'
                 '     Builder\n'
-                '   The ownership chain for the affected widget is: "Builder ←\n'
-                '     [root]"\n',
+                '   The ownership chain for the affected widget is: "Builder ←', // End of ownership chain omitted, not relevant for test.
               ),
             );
           }
@@ -122,15 +121,20 @@ void main() {
             );
             expect(
               error.toStringDeep(),
-              equalsIgnoringHashCodes(
+              startsWith(
                 'FlutterError\n'
                 '   No MediaQuery widget ancestor found.\n'
                 '   Builder widgets require a MediaQuery widget ancestor.\n'
                 '   The specific widget that could not find a MediaQuery ancestor\n'
                 '   was:\n'
                 '     Builder\n'
-                '   The ownership chain for the affected widget is: "Builder ←\n'
-                '     [root]"\n'
+                '   The ownership chain for the affected widget is: "Builder ←' // Full chain omitted, not relevant for test.
+              ),
+            );
+            expect(
+              error.toStringDeep(),
+              endsWith(
+                '[root]"\n' // End of ownership chain.
                 '   No MediaQuery ancestor could be found starting from the context\n'
                 '   that was passed to MediaQuery.of(). This can happen because you\n'
                 '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'

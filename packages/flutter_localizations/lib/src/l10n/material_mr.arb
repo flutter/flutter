@@ -132,7 +132,11 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "मेनू बार मेनू",
   "currentDateLabel": "Date of today",
+<<<<<<< HEAD
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName"
+=======
+  "keyboardKeyShift": "Shift"
+>>>>>>> upstream/master
 }

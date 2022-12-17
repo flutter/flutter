@@ -131,7 +131,11 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "菜单栏的菜单",
   "currentDateLabel": "Date of today",
+<<<<<<< HEAD
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName"
+=======
+  "keyboardKeyShift": "Shift"
+>>>>>>> upstream/master
 }
