@@ -79,6 +79,19 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   }
 
   @override
+  Rect get semanticBounds {
+    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier.value;
+    final Rect originalRect = super.semanticBounds;
+    final Rect clippedRect = Rect.fromLTRB(
+      originalRect.left + clipDetails.left,
+      originalRect.top + clipDetails.top,
+      originalRect.right - clipDetails.right,
+      originalRect.bottom - clipDetails.bottom,
+    );
+    return clippedRect;
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     clipDetailsNotifier.addListener(markNeedsSemanticsUpdate);
@@ -94,16 +107,6 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
-  }
-
-  @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-
-    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier.value;
-    final Rect oldRect = node.rect;
-    node.rect = Rect.fromLTRB(oldRect.left + clipDetails.left, oldRect.top + clipDetails.top, oldRect.right - clipDetails.right, oldRect.bottom - clipDetails.bottom);
-
-    super.assembleSemanticsNode(node, config, children);
   }
 }
 
