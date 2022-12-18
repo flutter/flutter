@@ -230,7 +230,7 @@ class PosixProcessSignal extends ProcessSignal {
 ///   * by throwing an exception asynchronously, and
 ///   * by completing the Future stdout.done with an error.
 ///
-/// This class enapsulates all three so that we don't have to worry about it
+/// This class encapsulates all three so that we don't have to worry about it
 /// anywhere else.
 class Stdio {
   Stdio();

@@ -349,7 +349,6 @@ class _DefaultPub implements Pub {
       context: context,
       directory: directory,
       failureMessage: 'pub $command failed',
-      retry: !offline,
       flutterRootOverride: flutterRootOverride,
       printProgress: printProgress
     );
@@ -387,7 +386,6 @@ class _DefaultPub implements Pub {
     required String command,
     required bool printProgress,
     required PubContext context,
-    required bool retry,
     required String directory,
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
