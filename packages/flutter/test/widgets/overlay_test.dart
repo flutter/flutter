@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker/leak_tracker.dart';
 
 import 'semantics_tester.dart';
 
@@ -1194,53 +1193,39 @@ void main() {
       expect(error, isAssertionError);
     });
 
-    testWidgets(
-      'delayed dispose notifies listeners and disposes disposables',
-      (WidgetTester tester) async {
-        void flutterMemoryListener(ObjectEvent event) {
-          dispatchObjectEvent(event.toMap());
-        }
+    testWidgets('delayed dispose', (WidgetTester tester) async {
+      await tester.pumpWidget(emptyOverlay);
+      final OverlayState overlay = overlayKey.currentState! as OverlayState;
+      final List<bool> mountedLog = <bool>[];
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) => Container(),
+      );
+      entry.addListener(() {
+        mountedLog.add(entry.mounted);
+      });
 
-        MemoryAllocations.instance.addListener(flutterMemoryListener);
+      overlay.insert(entry);
+      await tester.pump();
+      expect(mountedLog, <bool>[true]);
 
-        await tester.runAsync(() async {
-          final Leaks leaks = await withLeakTracking(() async {
-            await tester.pumpWidget(emptyOverlay);
-            final OverlayState overlay = overlayKey.currentState! as OverlayState;
-            final List<bool> mountedLog = <bool>[];
-            final OverlayEntry entry = OverlayEntry(
-              builder: (BuildContext context) => Container(),
-            );
-            entry.addListener(() {
-              mountedLog.add(entry.mounted);
-            });
+      entry.remove();
+      // Call dispose on the entry. The listeners should be notified for one
+      // last time after this.
+      entry.dispose();
+      expect(mountedLog, <bool>[true]);
+      await tester.pump();
+      expect(mountedLog, <bool>[true, false]);
+      expect(tester.takeException(), isNull);
 
-            overlay.insert(entry);
-            await tester.pump();
-            expect(mountedLog, <bool>[true]);
-
-            entry.remove();
-            // Call dispose on the entry. The listeners should be notified for one
-            // last time after this.
-            entry.dispose();
-            expect(mountedLog, <bool>[true]);
-            await tester.pump();
-            expect(mountedLog, <bool>[true, false]);
-            expect(tester.takeException(), isNull);
-
-            // The entry is no longer usable.
-            Object? error;
-            try {
-              entry.addListener(() {  });
-            } catch (e) {
-              error = e;
-            }
-            expect(error, isAssertionError);
-          });
-          expect(leaks, isLeakFree);
-        });
-      },
-    );
+      // The entry is no longer usable.
+      Object? error;
+      try {
+        entry.addListener(() {  });
+      } catch (e) {
+        error = e;
+      }
+      expect(error, isAssertionError);
+    });
   });
 
   group('LookupBoundary', () {
