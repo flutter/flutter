@@ -192,6 +192,57 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       testCollector.collectNow();
     });
 
+    test('toByteData with decodeImageFromPixels on videoFrame formats', () async {
+      // This test ensures that toByteData() returns pixels that can be used by decodeImageFromPixels
+      // for the following videoFrame formats:
+      // [BGRX, I422, I420, I444, BGRA]
+      final DomResponse listingResponse = await httpFetch('/test_images/');
+      final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+
+      Future<ui.Image> testDecodeFromPixels(Uint8List pixels, int width, int height) async {
+        final Completer<ui.Image> completer = Completer<ui.Image>();
+        ui.decodeImageFromPixels(
+          pixels,
+          width,
+          height,
+          ui.PixelFormat.rgba8888,
+          (ui.Image image) {
+            completer.complete(image);
+          },
+        );
+        return completer.future;
+      }
+
+      // Sanity-check the test file list. If suddenly test files are moved or
+      // deleted, and the test server returns an empty list, or is missing some
+      // important test files, we want to know.
+      expect(testFiles, isNotEmpty);
+      expect(testFiles, contains(matches(RegExp(r'.*\.jpg'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.png'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.gif'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.webp'))));
+      expect(testFiles, contains(matches(RegExp(r'.*\.bmp'))));
+
+      for (final String testFile in testFiles) {
+        final DomResponse imageResponse = await httpFetch('/test_images/$testFile');
+        final Uint8List imageData = (await imageResponse.arrayBuffer() as ByteBuffer).asUint8List();
+        final ui.Codec codec = await skiaInstantiateImageCodec(imageData);
+        expect(codec.frameCount, greaterThan(0));
+        expect(codec.repetitionCount, isNotNull);
+
+        final ui.FrameInfo frame = await codec.getNextFrame();
+        final CkImage ckImage = frame.image as CkImage;
+        final ByteData imageBytes = await ckImage.toByteData();
+        expect(imageBytes.lengthInBytes, greaterThan(0));
+
+        final Uint8List pixels = imageBytes.buffer.asUint8List();
+        final ui.Image testImage = await testDecodeFromPixels(pixels, ckImage.width, ckImage.height);
+        expect(testImage, isNotNull);
+        codec.dispose();
+      }
+      // TODO(hterkelsen): Firefox and Safari do not currently support ImageDecoder.
+    }, skip: isFirefox || isSafari);
+
     test('CkImage.clone also clones the VideoFrame', () async {
       final CkBrowserImageDecoder image = await CkBrowserImageDecoder.create(
         data: kAnimatedGif,
