@@ -4,10 +4,10 @@
 
 import 'package:js/js.dart';
 
-/// This value is set by the engine. It is used to determine if the application is
-/// using canvaskit.
+// This value is set by the engine. It is used to determine if the application is
+// using canvaskit.
 @JS('window.flutterCanvasKit')
-external Object? get windowFlutterCanvasKit;
+external Object? get _windowFlutterCanvasKit;
 
 /// The web implementation of [isCanvasKit]
-bool get isCanvasKit => windowFlutterCanvasKit != null;
+bool get isCanvasKit => _windowFlutterCanvasKit != null;
