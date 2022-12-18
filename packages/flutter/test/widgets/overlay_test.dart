@@ -1204,7 +1204,7 @@ void main() {
         MemoryAllocations.instance.addListener(flutterMemoryListener);
 
         await tester.runAsync(() async {
-          await withLeakTracking(() async {
+          final leaks = await withLeakTracking(() async {
             await tester.pumpWidget(emptyOverlay);
             final OverlayState overlay = overlayKey.currentState! as OverlayState;
             final List<bool> mountedLog = <bool>[];
@@ -1236,7 +1236,8 @@ void main() {
               error = e;
             }
             expect(error, isAssertionError);
-          });
+          }, throwOnLeaks: false,);
+
         });
       },
     );
