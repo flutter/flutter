@@ -376,7 +376,9 @@ class CkImage implements ui.Image, StackTraceDebugger {
     ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
   }) {
     assert(_debugCheckIsNotDisposed());
-    if (videoFrame != null) {
+    // readPixelsFromVideoFrame currently does not convert I420, I444, I422
+    // videoFrame formats to RGBA
+    if (videoFrame != null && videoFrame!.format != 'I420' && videoFrame!.format != 'I444' && videoFrame!.format != 'I422') {
       return readPixelsFromVideoFrame(videoFrame!, format);
     } else {
       return _readPixelsFromSkImage(format);
