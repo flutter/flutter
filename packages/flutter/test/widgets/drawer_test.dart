@@ -321,7 +321,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
-    expect(semantics, includesNodeWith(label: 'Dismiss'));
+    expect(semantics, includesNodeWith(label: 'Scrim'));
 
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -348,8 +348,8 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
-    expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(semantics, includesNodeWith(label: 'Scrim'));
 
     semantics.dispose();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));

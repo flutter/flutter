@@ -196,7 +196,7 @@ class ModalBarrier extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [_SemanticsClipper], which utilizes the value inside to update the
+  ///  * [SemanticsClipper], which utilizes the value inside to update the
   /// [SemanticsNode.rect] for its child.
   /// {@endtemplate}
   final ValueNotifier<EdgeInsets>? clipDetailsNotifier;
