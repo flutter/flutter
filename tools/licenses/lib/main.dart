@@ -1854,9 +1854,7 @@ class _Progress {
   void update({bool flush = false}) {
     if (_lastUpdate == null || _lastUpdate!.elapsedMilliseconds >= millisecondsBetweenUpdates || flush) {
       _lastUpdate ??= Stopwatch();
-      if (quiet) {
-        system.stderr.write('.');
-      } else {
+      if (!quiet) {
         final String line = toString();
         system.stderr.write('\r$line');
         if (_lastLength > line.length) {
@@ -1881,13 +1879,14 @@ class _Progress {
   }
 }
 
-final RegExp _signaturePattern = RegExp(r'^Signature: (\w+)$', expectNoMatch: true);
+final RegExp _signaturePattern = RegExp(r'^Signature: (\w+)$', multiLine: true, expectNoMatch: true);
 
 /// Reads the signature from a golden file.
 String? _readSignature(String goldenPath) {
   try {
     final system.File goldenFile = system.File(goldenPath);
     if (!goldenFile.existsSync()) {
+      system.stderr.writeln('    Could not find signature file ($goldenPath).');
       return null;
     }
     final String goldenSignature = goldenFile.readAsStringSync();
@@ -1895,6 +1894,7 @@ String? _readSignature(String goldenPath) {
     if (goldenMatch != null) {
       return goldenMatch.group(1);
     }
+    system.stderr.writeln('    Signature file ($goldenPath) did not match expected pattern.');
   } on system.FileSystemException {
     system.stderr.writeln('    Failed to read signature file ($goldenPath).');
     return null;
@@ -1913,7 +1913,6 @@ void _writeSignature(String signature, system.IOSink sink) {
 //
 // Returns true if changes are detected.
 Future<bool> _computeLicenseToolChanges(_RepositoryDirectory root, { required String goldenSignaturePath, required String outputSignaturePath }) async {
-  system.stderr.writeln('Computing signature for license tool');
   final fs.Directory flutterNode = findChildDirectory(root.ioDirectory, 'flutter')!;
   final fs.Directory toolsNode = findChildDirectory(flutterNode, 'tools')!;
   final fs.Directory licenseNode = findChildDirectory(toolsNode, 'licenses')!;
@@ -1933,23 +1932,27 @@ Future<bool> _computeLicenseToolChanges(_RepositoryDirectory root, { required St
 Future<void> _collectLicensesForComponent(_RepositoryDirectory componentRoot, {
   required String inputGoldenPath,
   String? outputGoldenPath,
-  bool? writeSignature,
+  required bool writeSignature,
   required bool force,
   required bool quiet,
 }) async {
-  // Check whether the golden file matches the signature of the current contents of this directory.
-  final String? goldenSignature = _readSignature(inputGoldenPath);
   final String signature = await componentRoot.signature;
-  if (!force && goldenSignature == signature) {
-    system.stderr.writeln('    Skipping this component - no change in signature');
-    return;
+  if (writeSignature) {
+    // Check whether the golden file matches the signature of the current contents of this directory.
+    // (We only do this for components where we write the signature, since if there's no signature,
+    // there's no point trying to read it...)
+    final String? goldenSignature = _readSignature(inputGoldenPath);
+    if (!force && goldenSignature == signature) {
+      system.stderr.writeln('    Skipping this component - no change in signature');
+      return;
+    }
   }
 
   final _Progress progress = _Progress(componentRoot.fileCount, quiet: quiet);
 
   final system.File outFile = system.File(outputGoldenPath!);
   final system.IOSink sink = outFile.openWrite();
-  if (writeSignature!) {
+  if (writeSignature) {
     _writeSignature(signature, sink);
   }
 
