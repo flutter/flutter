@@ -74,6 +74,7 @@ pylint-2.7 --rcfile=.pylintrc \
   "build/" \
   "ci/" \
   "impeller/" \
+  "sky/" \
   "tools/gn" \
   "testing/"
 

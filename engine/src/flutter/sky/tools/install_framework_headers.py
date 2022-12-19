@@ -8,7 +8,6 @@ import argparse
 import errno
 import os
 import shutil
-import subprocess
 import sys
 
 
@@ -31,10 +30,10 @@ def main():
   # Remove old headers.
   try:
     shutil.rmtree(os.path.normpath(args.location))
-  except OSError as e:
+  except OSError as err:
     # Ignore only "not found" errors.
-    if e.errno != errno.ENOENT:
-      raise e
+    if err.errno != errno.ENOENT:
+      raise err
 
   # Create the directory to copy the files to.
   if not os.path.isdir(args.location):

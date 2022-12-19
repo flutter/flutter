@@ -343,9 +343,6 @@
 ../../../flutter/sky/tools/dist_dart_pkg.py
 ../../../flutter/sky/tools/install_framework_headers.py
 ../../../flutter/sky/tools/objcopy.py
-../../../flutter/sky/tools/roll/patch.py
-../../../flutter/sky/tools/roll/roll.py
-../../../flutter/sky/tools/roll/utils.py
 ../../../flutter/testing
 ../../../flutter/third_party/accessibility/README.md
 ../../../flutter/third_party/accessibility/ax/ax_enum_util_unittest.cc
