@@ -73,7 +73,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
+      label: const DefaultMaterialLocalizations().scrimLabel,
       actions: <SemanticsAction>[SemanticsAction.tap],
     ));
 
@@ -114,7 +114,7 @@ void main() {
             of: find.byType(DrawerController),
             matching: find.byWidgetPredicate((Widget widget) {
               return widget is Semantics
-                  && widget.properties.label == 'Dismiss';
+                  && widget.properties.label == 'Scrim';
             }),
           ),
           matching: find.byType(Container),
