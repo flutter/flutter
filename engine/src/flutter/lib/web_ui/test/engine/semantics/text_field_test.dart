@@ -4,6 +4,8 @@
 
 @TestOn('chrome || safari || firefox')
 
+import 'dart:typed_data';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
@@ -47,6 +49,11 @@ void testMain() {
       testTextEditing.debugTextEditingStrategyOverride = strategy;
       testTextEditing.configuration = singlelineConfig;
     });
+
+    /// Emulates sending of a message by the framework to the engine.
+    void sendFrameworkMessage(ByteData? message) {
+      testTextEditing.channel.handleTextInput(message, (ByteData? data) {});
+    }
 
   test('renders a text field', () async {
     semantics()
@@ -127,7 +134,7 @@ void testMain() {
       // TODO(yjbanov): https://github.com/flutter/flutter/issues/50754
       skip: browserEngine != BrowserEngine.blink);
 
-    test('Syncs editing state from framework', () async {
+    test('Syncs semantic state from framework', () async {
       semantics()
         ..debugOverrideTimestampFunction(() => _testTime)
         ..semanticsEnabled = true;
@@ -159,7 +166,6 @@ void testMain() {
       expect(domDocument.activeElement, flutterViewEmbedder.glassPaneElement);
       expect(appHostNode.activeElement, strategy.domElement);
       expect(textField.editableElement, strategy.domElement);
-      expect((textField.editableElement as dynamic).value, 'hello');
       expect(textField.editableElement.getAttribute('aria-label'), 'greeting');
       expect(textField.editableElement.style.width, '10px');
       expect(textField.editableElement.style.height, '15px');
@@ -174,7 +180,6 @@ void testMain() {
       expect(domDocument.activeElement, domDocument.body);
       expect(appHostNode.activeElement, null);
       expect(strategy.domElement, null);
-      expect((textField.editableElement as dynamic).value, 'bye');
       expect(textField.editableElement.getAttribute('aria-label'), 'farewell');
       expect(textField.editableElement.style.width, '12px');
       expect(textField.editableElement.style.height, '17px');
@@ -186,6 +191,92 @@ void testMain() {
       // so we should expect no engine-to-framework feedback.
       expect(changeCount, 0);
       expect(actionCount, 0);
+    });
+
+    test(
+        'Does not overwrite text value and selection editing state on semantic updates',
+        () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      strategy.enable(
+        singlelineConfig,
+        onChange: (_, __) {},
+        onAction: (_) {},
+      );
+
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+          value: 'hello',
+          textSelectionBase: 1,
+          textSelectionExtent: 3,
+          isFocused: true,
+          rect: const ui.Rect.fromLTWH(0, 0, 10, 15));
+
+      final TextField textField =
+          textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
+      final DomHTMLInputElement editableElement =
+          textField.editableElement as DomHTMLInputElement;
+
+      expect(editableElement, strategy.domElement);
+      expect(editableElement.value, '');
+      expect(editableElement.selectionStart, 0);
+      expect(editableElement.selectionEnd, 0);
+
+      strategy.disable();
+      semantics().semanticsEnabled = false;
+    });
+
+    test(
+        'Updates editing state when receiving framework messages from the text input channel',
+        () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      expect(domDocument.activeElement, domDocument.body);
+      expect(appHostNode.activeElement, null);
+
+      strategy.enable(
+        singlelineConfig,
+        onChange: (_, __) {},
+        onAction: (_) {},
+      );
+
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+          value: 'hello',
+          textSelectionBase: 1,
+          textSelectionExtent: 3,
+          isFocused: true,
+          rect: const ui.Rect.fromLTWH(0, 0, 10, 15));
+
+      final TextField textField =
+          textFieldSemantics.debugRoleManagerFor(Role.textField)! as TextField;
+      final DomHTMLInputElement editableElement =
+          textField.editableElement as DomHTMLInputElement;
+
+      // No updates expected on semantic updates
+      expect(editableElement, strategy.domElement);
+      expect(editableElement.value, '');
+      expect(editableElement.selectionStart, 0);
+      expect(editableElement.selectionEnd, 0);
+
+      // Update from framework
+      const MethodCall setEditingState =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'updated',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      // Editing state should now be updated
+      expect(editableElement.value, 'updated');
+      expect(editableElement.selectionStart, 2);
+      expect(editableElement.selectionEnd, 3);
+
+      strategy.disable();
+      semantics().semanticsEnabled = false;
     });
 
     test('Gives up focus after DOM blur', () async {
@@ -446,6 +537,8 @@ SemanticsObject createTextFieldSemantics({
   bool isFocused = false,
   bool isMultiline = false,
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
+  int textSelectionBase = 0,
+  int textSelectionExtent = 0,
 }) {
   final SemanticsTester tester = SemanticsTester(semantics());
   tester.updateNode(
@@ -458,6 +551,8 @@ SemanticsObject createTextFieldSemantics({
     hasTap: true,
     rect: rect,
     textDirection: ui.TextDirection.ltr,
+    textSelectionBase: textSelectionBase,
+    textSelectionExtent: textSelectionExtent
   );
   tester.apply();
   return tester.getSemanticsObject(0);
