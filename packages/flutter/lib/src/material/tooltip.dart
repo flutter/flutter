@@ -630,6 +630,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _entry?.remove();
     }
     _isConcealed = false;
+    _entry?.dispose();
     _entry = null;
     if (_mouseIsConnected) {
       Tooltip._revealLastTooltip();

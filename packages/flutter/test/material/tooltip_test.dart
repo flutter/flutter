@@ -4,11 +4,13 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -678,38 +680,49 @@ void main() {
   });
 
   testWidgets('Custom tooltip message textAlign', (WidgetTester tester) async {
-    Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
-      final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Tooltip(
-            key: tooltipKey,
-            textAlign: textAlign,
-            message: tooltipText,
-            child: Container(
-              width: 100.0,
-              height: 100.0,
-              color: Colors.green[500],
+    void flutterEventListener(ObjectEvent event) => dispatchObjectEvent(event.toMap());
+    MemoryAllocations.instance.addListener(flutterEventListener);
+
+    await tester.runAsync(() async {
+      final Leaks leaks = await withLeakTracking(() async {
+        Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
+          final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Tooltip(
+                key: tooltipKey,
+                textAlign: textAlign,
+                message: tooltipText,
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                  color: Colors.green[500],
+                ),
+              ),
             ),
-          ),
-        ),
-      );
-      tooltipKey.currentState?.ensureTooltipVisible();
-      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
-    }
+          );
+          tooltipKey.currentState?.ensureTooltipVisible();
+          await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+        }
 
-    // Default value should be TextAlign.start
-    await pumpTooltipWithTextAlign();
-    TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.start);
+        // Default value should be TextAlign.start
+        await pumpTooltipWithTextAlign();
+        TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.start);
 
-    await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.center);
+        await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
+        textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.center);
 
-    await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.end);
+        await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
+        textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.end);
+      });
+
+      expect(leaks, isLeakFree);
+    });
+
+    MemoryAllocations.instance.removeListener(flutterEventListener);
   });
 
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
