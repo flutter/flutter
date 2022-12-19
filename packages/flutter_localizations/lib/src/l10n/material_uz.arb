@@ -128,5 +128,7 @@
   "keyboardKeySpace": "Boʻsh joy",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menyu paneli"
+  "menuBarMenuLabel": "Menyu paneli",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

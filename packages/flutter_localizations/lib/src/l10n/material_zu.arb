@@ -128,5 +128,7 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Imenyu yebha yemenyu"
+  "menuBarMenuLabel": "Imenyu yebha yemenyu",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

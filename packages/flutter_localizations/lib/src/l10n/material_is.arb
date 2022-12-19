@@ -128,5 +128,7 @@
   "keyboardKeySpace": "Bil",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Valmyndarstika"
+  "menuBarMenuLabel": "Valmyndarstika",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

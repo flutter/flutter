@@ -129,5 +129,7 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu panel menu"
+  "menuBarMenuLabel": "Menu panel menu",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

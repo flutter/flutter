@@ -72,6 +72,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopieer';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Knip';
 
   @override
@@ -274,6 +277,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Spasie';
@@ -514,6 +520,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ቅዳ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ቁረጥ';
 
   @override
@@ -716,6 +725,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'ምረጥ';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'ክፍተት';
@@ -956,6 +968,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'نسخ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'قص';
 
   @override
@@ -1158,6 +1173,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'مفتاح الاختيار';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'مفتاح المسافة';
@@ -1398,6 +1416,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'কাট কৰক';
 
   @override
@@ -1600,6 +1621,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'ছিলেক্ট';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'স্পেচ';
@@ -1840,6 +1864,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopyalayın';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kəsin';
 
   @override
@@ -2042,6 +2069,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Seçin';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Boşluq';
@@ -2282,6 +2312,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Капіраваць';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Выразаць';
 
   @override
@@ -2484,6 +2517,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Выбраць';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Прабел';
@@ -2724,6 +2760,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Копиране';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Изрязване';
 
   @override
@@ -2926,6 +2965,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -3166,6 +3208,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'কপি করুন';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'কাট করুন';
 
   @override
@@ -3368,6 +3413,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'বেছে নিন';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -3608,6 +3656,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiraj';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Izreži';
 
   @override
@@ -3810,6 +3861,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'tipka za razmak';
@@ -4050,6 +4104,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copia';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Retalla';
 
   @override
@@ -4252,6 +4309,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selecciona';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espai';
@@ -4492,6 +4552,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopírovat';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Vyjmout';
 
   @override
@@ -4694,6 +4757,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Vybrat';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Mezera';
@@ -4934,6 +5000,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiér';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klip';
 
   @override
@@ -5136,6 +5205,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Vælg';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Mellemrumstasten';
@@ -5376,6 +5448,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopieren';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Ausschneiden';
 
   @override
@@ -5578,6 +5653,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Auswählen';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Leertaste';
@@ -5855,6 +5933,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Αντιγραφή';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Αποκοπή';
 
   @override
@@ -6057,6 +6138,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Επιλογή';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Διάστημα';
@@ -6297,6 +6381,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copy';
 
   @override
+  String get currentDateLabel => 'Today';
+
+  @override
   String get cutButtonLabel => 'Cut';
 
   @override
@@ -6499,6 +6586,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -7596,6 +7686,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copiar';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Cortar';
 
   @override
@@ -7798,6 +7891,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selección';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espacio';
@@ -11241,6 +11337,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopeeri';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Lõika';
 
   @override
@@ -11443,6 +11542,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Vali';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Tühik';
@@ -11683,6 +11785,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiatu';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Ebaki';
 
   @override
@@ -11885,6 +11990,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Hautatu';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Zuriune-barra';
@@ -12125,6 +12233,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کپی';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'برش';
 
   @override
@@ -12327,6 +12438,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'انتخاب';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'فاصله';
@@ -12567,6 +12681,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopioi';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Leikkaa';
 
   @override
@@ -12769,6 +12886,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Valitse';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Välilyönti';
@@ -13009,6 +13129,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopyahin';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'I-cut';
 
   @override
@@ -13211,6 +13334,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Piliin';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Puwang';
@@ -13451,6 +13577,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copier';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Couper';
 
   @override
@@ -13653,6 +13782,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Sélectionner';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espace';
@@ -14029,6 +14161,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copiar';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Cortar';
 
   @override
@@ -14231,6 +14366,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Seleccionar';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espazo';
@@ -14471,6 +14609,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopieren';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Ausschneiden';
 
   @override
@@ -14673,6 +14814,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Auswählen';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Leertaste';
@@ -14913,6 +15057,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'કૉપિ કરો';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'કાપો';
 
   @override
@@ -15115,6 +15262,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -15355,6 +15505,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'העתקה';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'גזירה';
 
   @override
@@ -15557,6 +15710,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'רווח';
@@ -15797,6 +15953,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'कॉपी करें';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'काटें';
 
   @override
@@ -15999,6 +16158,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -16239,6 +16401,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiraj';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Izreži';
 
   @override
@@ -16441,6 +16606,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Odaberi';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Razmaknica';
@@ -16681,6 +16849,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Másolás';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kivágás';
 
   @override
@@ -16883,6 +17054,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Kiválasztás';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Szóköz';
@@ -17123,6 +17297,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Պատճենել';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Կտրել';
 
   @override
@@ -17325,6 +17502,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Ընտրել';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Բացատ';
@@ -17565,6 +17745,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Salin';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Potong';
 
   @override
@@ -17767,6 +17950,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -18007,6 +18193,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Afrita';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klippa';
 
   @override
@@ -18209,6 +18398,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Velja';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Bil';
@@ -18449,6 +18641,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copia';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Taglia';
 
   @override
@@ -18651,6 +18846,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Seleziona';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Barra spaziatrice';
@@ -18891,6 +19089,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'コピー';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => '切り取り';
 
   @override
@@ -19093,6 +19294,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -19333,6 +19537,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'კოპირება';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ამოჭრა';
 
   @override
@@ -19535,6 +19742,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -19775,6 +19985,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Көшіру';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Қию';
 
   @override
@@ -19977,6 +20190,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Бос орын';
@@ -20217,6 +20433,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ចម្លង';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'កាត់';
 
   @override
@@ -20419,6 +20638,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -20659,6 +20881,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
@@ -20861,6 +21086,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -21101,6 +21329,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => '복사';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => '잘라냄';
 
   @override
@@ -21303,6 +21534,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => '선택';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => '스페이스';
@@ -21543,6 +21777,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Көчүрүү';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Кесүү';
 
   @override
@@ -21745,6 +21982,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Тандоо';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Боштук';
@@ -21985,6 +22225,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ສຳເນົາ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ຕັດ';
 
   @override
@@ -22187,6 +22430,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -22427,6 +22673,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopijuoti';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Iškirpti';
 
   @override
@@ -22629,6 +22878,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Tarpas';
@@ -22869,6 +23121,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopēt';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Izgriezt';
 
   @override
@@ -23071,6 +23326,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Atlasīt';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Atstarpes taustiņš';
@@ -23311,6 +23569,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Копирај';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Исечи';
 
   @override
@@ -23513,6 +23774,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -23753,6 +24017,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'പകർത്തുക';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'മുറിക്കുക';
 
   @override
@@ -23955,6 +24222,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -24195,6 +24465,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Хуулах';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Таслах';
 
   @override
@@ -24397,6 +24670,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Сонгох';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -24637,6 +24913,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'कॉपी करा';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'कट करा';
 
   @override
@@ -24839,6 +25118,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'निवडा';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'स्पेस';
@@ -25079,6 +25361,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Salin';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Potong';
 
   @override
@@ -25281,6 +25566,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Pilih';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Ruang';
@@ -25521,6 +25809,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
 
   @override
@@ -25723,6 +26014,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'ရွေးရန်';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'နေရာခြားခလုတ်';
@@ -25963,6 +26257,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiér';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
@@ -26165,6 +26462,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Velg';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Mellomrom';
@@ -26405,6 +26705,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'प्रतिलिपि गर्नुहोस्';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'काट्नुहोस्';
 
   @override
@@ -26607,6 +26910,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -26847,6 +27153,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiëren';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Knippen';
 
   @override
@@ -27049,6 +27358,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selecteren';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Spatie';
@@ -27289,6 +27601,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiér';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
@@ -27491,6 +27806,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Velg';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Mellomrom';
@@ -27731,6 +28049,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
 
   @override
@@ -27933,6 +28254,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -28173,6 +28497,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ਕੱਟ ਕਰੋ';
 
   @override
@@ -28375,6 +28702,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -28615,6 +28945,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiuj';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Wytnij';
 
   @override
@@ -28817,6 +29150,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Spacja';
@@ -29057,6 +29393,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کاپی';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'کم کړئ';
 
   @override
@@ -29259,6 +29598,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -29499,6 +29841,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copiar';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Cortar';
 
   @override
@@ -29701,6 +30046,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Selecionar';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espaço';
@@ -30080,6 +30428,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Copiați';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Decupați';
 
   @override
@@ -30282,6 +30633,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Spațiu';
@@ -30522,6 +30876,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Копировать';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Вырезать';
 
   @override
@@ -30724,6 +31081,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Выбрать';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Пробел';
@@ -30964,6 +31324,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'පිටපත් කරන්න';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'කපන්න';
 
   @override
@@ -31166,6 +31529,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -31406,6 +31772,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopírovať';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Vystrihnúť';
 
   @override
@@ -31608,6 +31977,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Medzerník';
@@ -31848,6 +32220,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiraj';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Izreži';
 
   @override
@@ -32050,6 +32425,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Izberi';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Preslednica';
@@ -32290,6 +32668,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopjo';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Prit';
 
   @override
@@ -32492,6 +32873,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -32732,6 +33116,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Копирај';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Исеци';
 
   @override
@@ -32934,6 +33321,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Тастер за размак';
@@ -33476,6 +33866,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopiera';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
@@ -33678,6 +34071,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Välj';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Blanksteg';
@@ -33918,6 +34314,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Nakili';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kata';
 
   @override
@@ -34120,6 +34519,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -34360,6 +34762,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'நகலெடு';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'வெட்டு';
 
   @override
@@ -34562,6 +34967,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -34802,6 +35210,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'కాపీ చేయి';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'కత్తిరించు';
 
   @override
@@ -35004,6 +35415,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -35244,6 +35658,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'คัดลอก';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'ตัด';
 
   @override
@@ -35446,6 +35863,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -35686,6 +36106,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopyahin';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'I-cut';
 
   @override
@@ -35888,6 +36311,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Piliin';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Puwang';
@@ -36128,6 +36554,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopyala';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kes';
 
   @override
@@ -36330,6 +36759,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Seç';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Boşluk';
@@ -36570,6 +37002,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Копіювати';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Вирізати';
 
   @override
@@ -36772,6 +37207,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Пробіл';
@@ -37012,6 +37450,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کاپی کریں';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'کٹ کریں';
 
   @override
@@ -37214,6 +37655,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -37454,6 +37898,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Nusxa olish';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Kesib olish';
 
   @override
@@ -37656,6 +38103,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Boʻsh joy';
@@ -37896,6 +38346,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Sao chép';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Cắt';
 
   @override
@@ -38098,6 +38551,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Phím cách';
@@ -38338,6 +38794,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get copyButtonLabel => '复制';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => '剪切';
 
   @override
@@ -38540,6 +38999,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => '选择';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => '空格键';
@@ -39243,6 +39705,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'Kopisha';
 
   @override
+  String get currentDateLabel => 'Date of today';
+
+  @override
   String get cutButtonLabel => 'Sika';
 
   @override
@@ -39445,6 +39910,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Khetha';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';

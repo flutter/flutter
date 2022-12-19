@@ -101,7 +101,7 @@ dependencies:
     sdk: flutter
 
 environment:
-  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  sdk: ">=2.0.0-dev.28.0 <4.0.0"
   flutter: ">=1.5.0"
 ''', flush: true);
 
@@ -215,6 +215,10 @@ public class DummyPluginAClass {
       final List<dynamic> dependencyGraph = jsonContent['dependencyGraph'] as List<dynamic>;
       const String kExpectedPluginsDependenciesContent =
         '['
+          '{'
+            '"name":"integration_test",'
+            '"dependencies":[]'
+          '},'
           '{'
             '"name":"plugin_a",'
             '"dependencies":["plugin_b","plugin_c","plugin_d"]'

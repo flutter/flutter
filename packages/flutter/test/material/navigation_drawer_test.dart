@@ -23,7 +23,7 @@ void main() {
           ),
           NavigationDrawerDestination(
             icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-            label: Text('Alarm',style: theme.textTheme.bodySmall),
+            label: Text('Alarm', style: theme.textTheme.bodySmall),
           ),
         ],
         onDestinationSelected: (int i) {
@@ -68,7 +68,7 @@ void main() {
             ),
             NavigationDrawerDestination(
               icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm',style: theme.textTheme.bodySmall),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
             ),
           ],
           onDestinationSelected: (int i) {},
@@ -97,7 +97,7 @@ void main() {
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-          label: Text('Alarm',style: theme.textTheme.bodySmall),
+          label: Text('Alarm', style: theme.textTheme.bodySmall),
         ),
       ],
     );
@@ -134,7 +134,7 @@ void main() {
               ),
               NavigationDrawerDestination(
                 icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-                label: Text('Alarm',style: theme.textTheme.bodySmall),
+                label: Text('Alarm', style: theme.textTheme.bodySmall),
               ),
             ],
             onDestinationSelected: (int i) {},
@@ -149,8 +149,8 @@ void main() {
     expect(_getMaterial(tester).surfaceTintColor,
         ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 1);
-    expect(_indicator(tester)?.color, const Color(0xff2196f3));
-    expect(_indicator(tester)?.shape, const StadiumBorder());
+    expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
@@ -169,7 +169,7 @@ void main() {
             ),
             NavigationDrawerDestination(
               icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm',style: theme.textTheme.bodySmall),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
             ),
           ],
         ),
@@ -222,6 +222,53 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = RoundedRectangleBorder();
+
+    Widget buildNavigationDrawer({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: NavigationDrawer(
+            indicatorColor: indicatorColor,
+            indicatorShape: indicatorShape,
+            children: <Widget>[
+              Text('Headline', style: theme.textTheme.bodyLarge),
+              const NavigationDrawerDestination(
+                icon: Icon(Icons.ac_unit),
+                label: Text('AC'),
+              ),
+              const NavigationDrawerDestination(
+                icon: Icon(Icons.access_alarm),
+                label: Text('Alarm'),
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+          body: Container(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationDrawer());
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+
+    await tester.pumpWidget(buildNavigationDrawer(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child) {
@@ -242,7 +289,7 @@ Material _getMaterial(WidgetTester tester) {
   );
 }
 
-ShapeDecoration? _indicator(WidgetTester tester) {
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
       .firstWidget<Container>(
         find.descendant(

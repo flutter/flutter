@@ -99,7 +99,7 @@ class TextSelectionToolbar extends StatelessWidget {
     final Offset anchorBelowPadded =
         anchorBelow + const Offset(0.0, _kToolbarContentDistanceBelow);
 
-    final double paddingAbove = MediaQuery.of(context).padding.top
+    final double paddingAbove = MediaQuery.paddingOf(context).top
         + _kToolbarScreenPadding;
     final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;

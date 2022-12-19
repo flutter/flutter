@@ -127,5 +127,7 @@
   "keyboardKeySpace": "Mellomrom",
   "keyboardKeyMetaMacOs": "Kommando",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Meny med menylinje"
+  "menuBarMenuLabel": "Meny med menylinje",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

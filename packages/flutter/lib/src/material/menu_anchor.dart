@@ -315,7 +315,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _position?.isScrollingNotifier.removeListener(_handleScroll);
     _position = Scrollable.maybeOf(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
-    final Size newSize = MediaQuery.of(context).size;
+    final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
       _root._close();
@@ -700,10 +700,10 @@ class MenuController {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts], to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuBar extends StatelessWidget {
   /// Creates a const [MenuBar].
   ///
@@ -789,10 +789,10 @@ class MenuBar extends StatelessWidget {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts] to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuItemButton extends StatefulWidget {
   /// Creates a const [MenuItemButton].
   ///
@@ -1796,21 +1796,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Offset menuPaddingOffset;
+    Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
-    switch (_anchor?._root._orientation ?? Axis.vertical) {
+    // Move the submenu over by the size of the menu padding, so that
+    // the first menu item aligns with the submenu button that opens it.
+    switch (_anchor?._orientation ?? Axis.vertical) {
       case Axis.horizontal:
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.right, 0);
+            menuPaddingOffset += Offset(menuPadding.right, 0);
             break;
           case TextDirection.ltr:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.left, 0);
+            menuPaddingOffset += Offset(-menuPadding.left, 0);
             break;
         }
         break;
       case Axis.vertical:
-        menuPaddingOffset = widget.alignmentOffset ?? Offset(0, -menuPadding.top);
+        menuPaddingOffset += Offset(0, -menuPadding.top);
         break;
     }
 
@@ -1900,24 +1902,13 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   EdgeInsets _computeMenuPadding(BuildContext context) {
-    final MenuStyle? themeStyle = MenuTheme.of(context).style;
-    final MenuStyle defaultStyle = _MenuDefaultsM3(context);
-
-    T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
-      return getProperty(widget.menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
-    }
-
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
-      return effectiveValue(
-        (MenuStyle? style) {
-          return getProperty(style)?.resolve(widget.statesController?.value ?? const <MaterialState>{});
-        },
-      );
-    }
-
-    return resolve<EdgeInsetsGeometry?>(
-          (MenuStyle? style) => style?.padding,
-        )?.resolve(Directionality.of(context)) ?? EdgeInsets.zero;
+    final MaterialStateProperty<EdgeInsetsGeometry?> insets =
+      widget.menuStyle?.padding ??
+      MenuTheme.of(context).style?.padding ??
+      _MenuDefaultsM3(context).padding!;
+    return insets
+      .resolve(widget.statesController?.value ?? const <MaterialState>{})!
+      .resolve(Directionality.of(context));
   }
 
   void _handleFocusChange() {
@@ -1983,9 +1974,6 @@ class _LocalizedShortcutLabeler {
     LogicalKeyboardKey.arrowUp: '↑',
     LogicalKeyboardKey.arrowDown: '↓',
     LogicalKeyboardKey.enter: '↵',
-    LogicalKeyboardKey.shift: '⇧',
-    LogicalKeyboardKey.shiftLeft: '⇧',
-    LogicalKeyboardKey.shiftRight: '⇧',
   };
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -2016,15 +2004,32 @@ class _LocalizedShortcutLabeler {
   /// Returns the label to be shown to the user in the UI when a
   /// [MenuSerializableShortcut] is used as a keyboard shortcut.
   ///
-  /// To keep the representation short, this will return graphical key
-  /// representations when it can. For instance, the default
-  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
-  /// arrows. When [defaultTargetPlatform] is [TargetPlatform.macOS] or
-  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
-  /// [LogicalKeyboardKey.control] will show as '˄', and
-  /// [LogicalKeyboardKey.alt] will show as '⌥'.
+  /// When [defaultTargetPlatform] is [TargetPlatform.macOS] or
+  /// [TargetPlatform.iOS], this will return graphical key representations when
+  /// it can. For instance, the default [LogicalKeyboardKey.shift] will return
+  /// '⇧', and the arrow keys will return arrows. The key
+  /// [LogicalKeyboardKey.meta] will show as '⌘', [LogicalKeyboardKey.control]
+  /// will show as '˄', and [LogicalKeyboardKey.alt] will show as '⌥'.
+  ///
+  /// The keys are joined by spaces on macOS and iOS, and by "+" on other
+  /// platforms.
   String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
     final ShortcutSerialization serialized = shortcut.serializeForMenu();
+    final String keySeparator;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // Use "⌃ ⇧ A" style on macOS and iOS.
+        keySeparator = ' ';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Use "Ctrl+Shift+A" style.
+        keySeparator = '+';
+        break;
+    }
     if (serialized.trigger != null) {
       final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
@@ -2060,7 +2065,7 @@ class _LocalizedShortcutLabeler {
       return <String>[
         ...modifiers,
         if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
-      ].join(' ');
+      ].join(keySeparator);
     } else if (serialized.character != null) {
       return serialized.character!;
     }
@@ -2175,7 +2180,16 @@ class _LocalizedShortcutLabeler {
     if (modifier == LogicalKeyboardKey.shift ||
         modifier == LogicalKeyboardKey.shiftLeft ||
         modifier == LogicalKeyboardKey.shiftRight) {
-      return _shortcutGraphicEquivalents[LogicalKeyboardKey.shift]!;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return localizations.keyboardKeyShift;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return '⇧';
+      }
     }
     throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
   }
@@ -3190,14 +3204,15 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_MenuLayout oldDelegate) {
-    return anchorRect != oldDelegate.anchorRect ||
-        textDirection != oldDelegate.textDirection ||
-        alignment != oldDelegate.alignment ||
-        alignmentOffset != oldDelegate.alignmentOffset ||
-        menuPosition != oldDelegate.menuPosition ||
-        orientation != oldDelegate.orientation ||
-        parentOrientation != oldDelegate.parentOrientation ||
-        !setEquals(avoidBounds, oldDelegate.avoidBounds);
+    return anchorRect != oldDelegate.anchorRect
+        || textDirection != oldDelegate.textDirection
+        || alignment != oldDelegate.alignment
+        || alignmentOffset != oldDelegate.alignmentOffset
+        || menuPosition != oldDelegate.menuPosition
+        || menuPadding != oldDelegate.menuPadding
+        || orientation != oldDelegate.orientation
+        || parentOrientation != oldDelegate.parentOrientation
+        || !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
@@ -3301,7 +3316,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final double dy = densityAdjustment.dy;
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
-        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+        .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
@@ -3430,7 +3445,7 @@ class _Submenu extends StatelessWidget {
     );
 
     final VisualDensity visualDensity =
-        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? VisualDensity.standard;
+        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? Theme.of(context).visualDensity;
     final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
@@ -3575,13 +3590,14 @@ bool _platformSupportsAccelerators() {
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.bottomStart,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.bottomStart,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -3617,11 +3633,12 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-      : super(
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: AlignmentDirectional.centerStart,
-        );
+    : super(
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: AlignmentDirectional.centerStart,
+    );
+
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -3752,20 +3769,21 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       const EdgeInsets.symmetric(horizontal: 12),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
 }
 
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.topEnd,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.topEnd,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 

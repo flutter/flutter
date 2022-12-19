@@ -52,6 +52,45 @@ Hotfix(s):                 7 Hotfix(s) Installed.
 Hyper-V Requirements:      A hypervisor has been detected. Features required for Hyper-V will not be displayed.
 ''';
 
+const String validWindows11CnStdOut = r'''
+主机名:           XXXXXXXXXXXX
+OS 名称:          Microsoft Windows 11 专业版
+OS 版本:          10.0.22621 暂缺 Build 22621
+OS 制造商:        Microsoft Corporation
+OS 配置:          独立工作站
+OS 构建类型:      Multiprocessor Free
+注册的所有人:     暂缺
+注册的组织:       暂缺
+产品 ID:          XXXXXXXXXXXX
+初始安装日期:     2022/11/9, 13:33:50
+系统启动时间:     2022/11/30, 13:36:47
+系统制造商:       ASUS
+系统型号:         System Product Name
+系统类型:         x64-based PC
+处理器:           安装了 1 个处理器。
+                  [01]: Intel64 Family 6 Model 151 Stepping 2 GenuineIntel ~3600 Mhz
+BIOS 版本:        American Megatrends Inc. 2103, 2022/9/30
+Windows 目录:     C:\WINDOWS
+系统目录:         C:\WINDOWS\system32
+启动设备:         \Device\HarddiskVolume1
+系统区域设置:     zh-cn;中文(中国)
+输入法区域设置:   zh-cn;中文(中国)
+时区:             (UTC+08:00) 北京，重庆，香港特别行政区，乌鲁木齐
+物理内存总量:     65,277 MB
+可用的物理内存:   55,333 MB
+虚拟内存: 最大值: 75,005 MB
+虚拟内存: 可用:   61,781 MB
+虚拟内存: 使用中: 13,224 MB
+页面文件位置:     C:\pagefile.sys
+域:               WORKGROUP
+登录服务器:       \\XXXXXXXXXXXX
+修补程序:         安装了 3 个修补程序。
+                  [01]: KB5020622
+                  [02]: KB5019980
+                  [03]: KB5019304
+Hyper-V 要求:     已检测到虚拟机监控程序。将不显示 Hyper-V 所需的功能。
+''';
+
 /// Example output from `systeminfo` from version != 10
 const String invalidWindowsStdOut = r'''
 Host Name:                 XXXXXXXXXXXX
@@ -99,7 +138,7 @@ Hyper-V Requirements:      A hypervisor has been detected. Features required for
 /// The expected validation result object for
 /// a passing windows version test
 const ValidationResult validWindows10ValidationResult = ValidationResult(
-  ValidationType.installed,
+  ValidationType.success,
   <ValidationMessage>[],
   statusInfo: 'Installed version of Windows is version 10 or higher',
 );
@@ -150,6 +189,36 @@ void main() {
     expect(result.statusInfo, validWindows10ValidationResult.statusInfo,
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
+
+  testWithoutContext(
+    'Successfully running windows version check on windows 11 CN',
+    () async {
+      final WindowsVersionValidator windowsVersionValidator =
+          WindowsVersionValidator(
+        processManager: FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <String>['systeminfo'],
+              stdout: validWindows11CnStdOut,
+            ),
+          ],
+        ),
+      );
+
+      final ValidationResult result = await windowsVersionValidator.validate();
+
+      expect(
+        result.type,
+        validWindows10ValidationResult.type,
+        reason: 'The ValidationResult type should be the same (installed)',
+      );
+      expect(
+        result.statusInfo,
+        validWindows10ValidationResult.statusInfo,
+        reason: 'The ValidationResult statusInfo messages should be the same',
+      );
+    },
+  );
 
   testWithoutContext('Failing to invoke the `systeminfo` command', () async {
     final WindowsVersionValidator windowsVersionValidator =
@@ -217,19 +286,24 @@ void main() {
     const String testStr = r'''
 OS Version:                10.0.19044 N/A Build 19044
 OSz Version:                10.0.19044 N/A Build 19044
-OS 6Version:                10.0.19044 N/A Build 19044
 OxS Version:                10.0.19044 N/A Build 19044
 OS Version:                10.19044 N/A Build 19044
 OS Version:                10.x.19044 N/A Build 19044
 OS Version:                10.0.19044 N/A Build 19044
 OS Version:                .0.19044 N/A Build 19044
+OS 版本:          10.0.22621 暂缺 Build 22621
 ''';
 
-    final RegExp regex =
-        RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
+    final RegExp regex = RegExp(
+      kWindowsOSVersionSemVerPattern,
+      multiLine: true,
+    );
     final Iterable<RegExpMatch> matches = regex.allMatches(testStr);
 
-    expect(matches.length, 2,
-        reason: 'There should be only two matches for the pattern provided');
+    expect(
+      matches.length,
+      3,
+      reason: 'There should be only two matches for the pattern provided',
+    );
   });
 }

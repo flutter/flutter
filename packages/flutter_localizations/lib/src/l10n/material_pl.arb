@@ -135,5 +135,7 @@
   "keyboardKeySpace": "Spacja",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Pasek menu"
+  "menuBarMenuLabel": "Pasek menu",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

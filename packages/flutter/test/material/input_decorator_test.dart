@@ -266,7 +266,7 @@ void main() {
     );
 
     // The label animates downwards from it's initial position
-    // above the input text. The animation's duration is 200ms.
+    // above the input text. The animation's duration is 167ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double labelY50ms = tester.getTopLeft(find.text('label')).dy;
@@ -297,7 +297,7 @@ void main() {
     );
 
     // The label animates upwards from it's initial position
-    // above the input text. The animation's duration is 200ms.
+    // above the input text. The animation's duration is 167ms.
     await tester.pump(const Duration(milliseconds: 50));
     final double labelY50ms = tester.getTopLeft(find.text('label')).dy;
     expect(labelY50ms, inExclusiveRange(12.0, 28.0));
@@ -564,7 +564,7 @@ void main() {
     );
 
     // The label animates downwards from it's initial position
-    // above the input text. The animation's duration is 200ms.
+    // above the input text. The animation's duration is 167ms.
     await tester.pump(const Duration(milliseconds: 50));
     final double labelY50ms = tester.getTopLeft(find.byKey(key)).dy;
     expect(labelY50ms, inExclusiveRange(12.0, 20.0));
@@ -605,7 +605,7 @@ void main() {
     );
 
     // The label animates upwards from it's initial position
-    // above the input text. The animation's duration is 200ms.
+    // above the input text. The animation's duration is 167ms.
         {
       await tester.pump(const Duration(milliseconds: 50));
       final double labelY50ms = tester.getTopLeft(find.byKey(key)).dy;
@@ -719,6 +719,55 @@ void main() {
       expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
 
+  });
+
+  testWidgets('InputDecorator floating label animation duration and curve', (WidgetTester tester) async {
+    Future<void> pumpInputDecorator({
+      required bool isFocused,
+    }) async {
+      return tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: isFocused,
+          decoration: const InputDecoration(
+            labelText: 'label',
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+          ),
+        ),
+      );
+    }
+    await pumpInputDecorator(isFocused: false);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+
+    // The label animates upwards and scales down.
+    // The animation duration is 167ms and the curve is fastOutSlowIn.
+    await pumpInputDecorator(isFocused: true);
+    await tester.pump(const Duration(milliseconds: 42));
+    expect(tester.getTopLeft(find.text('label')).dy, closeTo(18.06, 0.5));
+    await tester.pump(const Duration(milliseconds: 42));
+    expect(tester.getTopLeft(find.text('label')).dy, closeTo(13.78, 0.5));
+    await tester.pump(const Duration(milliseconds: 42));
+    expect(tester.getTopLeft(find.text('label')).dy, closeTo(12.31, 0.5));
+    await tester.pump(const Duration(milliseconds: 41));
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+
+    // If the animation changes direction without first reaching the
+    // AnimationStatus.completed or AnimationStatus.dismissed status,
+    // the CurvedAnimation stays on the same curve in the opposite direction.
+    // The pumpAndSettle is used to prevent this behavior.
+    await tester.pumpAndSettle();
+
+    // The label animates downwards and scales up.
+    // The animation duration is 167ms and the curve is fastOutSlowIn.
+    await pumpInputDecorator(isFocused: false);
+    await tester.pump(const Duration(milliseconds: 42));
+    expect(tester.getTopLeft(find.text('label')).dy, closeTo(13.94, 0.5));
+    await tester.pump(const Duration(milliseconds: 42));
+    expect(tester.getTopLeft(find.text('label')).dy, closeTo(18.22, 0.5));
+    await tester.pump(const Duration(milliseconds: 42));
+    expect(tester.getTopLeft(find.text('label')).dy, closeTo(19.69, 0.5));
+    await tester.pump(const Duration(milliseconds: 41));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
   });
 
   group('alignLabelWithHint', () {
@@ -1014,7 +1063,7 @@ void main() {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 200ms.
+    // The animation's duration is 167ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
@@ -1048,7 +1097,7 @@ void main() {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 200ms.
+    // The animation's duration is 167ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
@@ -1969,7 +2018,7 @@ void main() {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 200ms.
+    // The animation's duration is 167ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
@@ -2004,7 +2053,7 @@ void main() {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 200ms.
+    // The animation's duration is 167ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
@@ -2066,7 +2115,7 @@ void main() {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 200ms.
+    // The animation's duration is 167ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
@@ -2101,7 +2150,7 @@ void main() {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 200ms.
+    // The animation's duration is 167ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
@@ -3180,6 +3229,65 @@ void main() {
   testWidgets('FloatingLabelAlignment.toString()', (WidgetTester tester) async {
     expect(FloatingLabelAlignment.start.toString(), 'FloatingLabelAlignment.start');
     expect(FloatingLabelAlignment.center.toString(), 'FloatingLabelAlignment.center');
+  });
+
+  group('inputText width', () {
+    testWidgets('outline textField', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 12.0);
+      expect(tester.getTopRight(find.text('text')).dx, 788.0);
+    });
+    testWidgets('outline textField with prefix and suffix icons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.visibility),
+            suffixIcon: Icon(Icons.close),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 48.0);
+      expect(tester.getTopRight(find.text('text')).dx, 752.0);
+    });
+    testWidgets('filled textField', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            filled: true,
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 12.0);
+      expect(tester.getTopRight(find.text('text')).dx, 788.0);
+    });
+    testWidgets('filled textField with prefix and suffix icons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          useMaterial3: useMaterial3,
+          decoration: const InputDecoration(
+            filled: true,
+            prefixIcon: Icon(Icons.visibility),
+            suffixIcon: Icon(Icons.close),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+      expect(tester.getTopLeft(find.text('text')).dx, 48.0);
+      expect(tester.getTopRight(find.text('text')).dx, 752.0);
+    });
   });
 
   group('floatingLabelAlignment', () {
@@ -4453,17 +4561,17 @@ void main() {
 
     await pumpDecorator(hovering: true, filled: false);
     expect(getBorderColor(tester), equals(enabledBorderColor));
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 167));
     expect(getBorderColor(tester), equals(blendedHoverColor));
 
     await pumpDecorator(hovering: false, filled: false);
     expect(getBorderColor(tester), equals(blendedHoverColor));
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 167));
     expect(getBorderColor(tester), equals(enabledBorderColor));
 
     await pumpDecorator(hovering: false, filled: false, enabled: false);
     expect(getBorderColor(tester), equals(enabledBorderColor));
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 167));
     expect(getBorderColor(tester), equals(disabledColor));
 
     await pumpDecorator(hovering: true, filled: false, enabled: false);
@@ -4507,17 +4615,17 @@ void main() {
 
     await pumpDecorator(focused: true, filled: false);
     expect(getBorderColor(tester), equals(enabledBorderColor));
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 167));
     expect(getBorderColor(tester), equals(focusColor));
 
     await pumpDecorator(focused: false, filled: false);
     expect(getBorderColor(tester), equals(focusColor));
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 167));
     expect(getBorderColor(tester), equals(enabledBorderColor));
 
     await pumpDecorator(focused: false, filled: false, enabled: false);
     expect(getBorderColor(tester), equals(enabledBorderColor));
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 167));
     expect(getBorderColor(tester), equals(disabledColor));
 
     await pumpDecorator(focused: true, filled: false, enabled: false);
@@ -5602,8 +5710,8 @@ void main() {
 
     // Click for Focus.
     await tester.tap(find.byType(TextField));
-    // Default animation duration is 200 millisecond.
-    await tester.pumpFrames(target, const Duration(milliseconds: 100));
+    // Default animation duration is 167ms.
+    await tester.pumpFrames(target, const Duration(milliseconds: 80));
 
     expect(getLabelRect(tester).width, greaterThan(labelWidth));
     expect(getLabelRect(tester).width, lessThanOrEqualTo(floatedLabelWidth));

@@ -114,7 +114,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     }
 
     return ValidationResult(
-      _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
+      _hasIssues(messages) ? ValidationType.partial : ValidationType.success,
       messages,
       statusInfo: _userMessages.intellijStatusInfo(version),
     );

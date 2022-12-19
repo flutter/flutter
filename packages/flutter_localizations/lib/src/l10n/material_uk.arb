@@ -135,5 +135,7 @@
   "keyboardKeySpace": "Пробіл",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Панель меню"
+  "menuBarMenuLabel": "Панель меню",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

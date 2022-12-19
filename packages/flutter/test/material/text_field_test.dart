@@ -4375,6 +4375,47 @@ void main() {
     expect(prefixText.style, prefixStyle);
   });
 
+  testWidgets('TextField prefix and suffix create a sibling node', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: TextEditingController(text: 'some text'),
+          decoration: const InputDecoration(
+            prefixText: 'Prefix',
+            suffixText: 'Suffix',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 2,
+          textDirection: TextDirection.ltr,
+          label: 'Prefix',
+        ),
+        TestSemantics.rootChild(
+          id: 1,
+          textDirection: TextDirection.ltr,
+          value: 'some text',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+        ),
+        TestSemantics.rootChild(
+          id: 3,
+          textDirection: TextDirection.ltr,
+          label: 'Suffix',
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+  });
+
   testWidgets('TextField with specified suffixStyle', (WidgetTester tester) async {
     final TextStyle suffixStyle = TextStyle(
       color: Colors.pink[500],
@@ -7390,7 +7431,6 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     expect(exception.toString(), startsWith('No Material widget found.'));
-    expect(exception.toString(), endsWith(':\n  $textField\nThe ancestors of this widget were:\n  [root]'));
   });
 
   testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
