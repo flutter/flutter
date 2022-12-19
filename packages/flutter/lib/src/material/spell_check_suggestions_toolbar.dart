@@ -44,6 +44,12 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
   /// widgets and displayed in the spell check suggestions toolbar.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar.buttonItems], the list of
+  ///    [ContextMenuButtonItem]s that are used to build the buttons of the
+  ///    text selection toolbar.
   final List<ContextMenuButtonItem> buttonItems;
 
   /// Builds the default Android Material spell check suggestions toolbar.
@@ -61,9 +67,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ) {
     // Determine if composing region is misspelled.
     final SuggestionSpan? spanAtCursorIndex =
-      findSuggestionSpanAtCursorIndex(
+      editableTextState.findSuggestionSpanAtCursorIndex(
         editableTextState.currentTextEditingValue.selection.baseOffset,
-        editableTextState.spellCheckResults!.suggestionSpans,
     );
 
     if (spanAtCursorIndex == null) {
@@ -115,18 +120,19 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
           onPressed: buttonItem.onPressed,
           alignment: Alignment.centerLeft,
-          child: Text(AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem)),
+          child: Text(
+            AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem),
+            style: buttonItem.type == ContextMenuButtonType.delete ? const TextStyle(color: Colors.blue) : null,
+          ),
         );
 
-      if (buttonItem.type == ContextMenuButtonType.delete) {
-        return DecoratedBox(
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
-          child: button.copyWith(
-            child: Text(AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem), style: const TextStyle(color: Colors.blue)),
-          )
-        );
+      if (buttonItem.type != ContextMenuButtonType.delete) {
+        return button;
       }
-      return button;
+      return DecoratedBox(
+        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.grey))),
+        child: button,
+      );
     }).toList();
   }
 

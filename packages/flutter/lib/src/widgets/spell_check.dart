@@ -340,38 +340,3 @@ void _addComposingRegionTextSpans(
     )
   );
 }
-
-// Methods for showing spell check suggestions for misspelled words in toolbar:
-
-/// Finds specified [SuggestionSpan] that matches the provided index using
-/// binary search.
-SuggestionSpan? findSuggestionSpanAtCursorIndex(
-  int cursorIndex,
-  List<SuggestionSpan> suggestionSpans,
-) {
-  if (suggestionSpans.last.range.end < cursorIndex) {
-    // Cursor index is out of range that suggestionSpans covers.
-    return null;
-  }
-
-  int leftIndex = 0;
-  int rightIndex = suggestionSpans.length - 1;
-  int midIndex = 0;
-
-  while (leftIndex <= rightIndex) {
-    midIndex = ((leftIndex + rightIndex) / 2).floor();
-    final int currentSpanStart = suggestionSpans[midIndex].range.start;
-    final int currentSpanEnd = suggestionSpans[midIndex].range.end;
-
-    if (cursorIndex <= currentSpanEnd && cursorIndex >= currentSpanStart) {
-      return suggestionSpans[midIndex];
-    }
-    else if (cursorIndex <= currentSpanStart) {
-      rightIndex = midIndex - 1;
-    }
-    else {
-      leftIndex = midIndex + 1;
-    }
-  }
-  return null;
-}
