@@ -130,5 +130,6 @@
   "keyboardKeyMetaMacOs": "Käsk",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menüüriba menüü",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

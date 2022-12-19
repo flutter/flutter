@@ -3342,6 +3342,61 @@ void main() {
       expect(find.text('forth'), findsOneWidget);
     });
 
+    //Regression test for https://github.com/flutter/flutter/issues/115887
+    testWidgets('Complex case 2', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
+      );
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('initial'), findsNothing);
+      // Push pageless route to second page route
+      navigator.currentState!.push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const Text('second-pageless1'),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      // Now the history should look like [initial, second, second-pageless1].
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsNothing);
+      expect(find.text('second-pageless1'), findsOneWidget);
+      expect(myPages.length, 2);
+
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pumpAndSettle();
+
+      // Now the history should look like [second, second-pageless1].
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsNothing);
+      expect(find.text('second-pageless1'), findsOneWidget);
+      expect(myPages.length, 1);
+
+      // Pop the pageless route.
+      navigator.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(myPages.length, 1);
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('second-pageless1'), findsNothing);
+    });
+
     testWidgets('complex case 1 - with always remove transition delegate', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       final AlwaysRemoveTransitionDelegate transitionDelegate = AlwaysRemoveTransitionDelegate();

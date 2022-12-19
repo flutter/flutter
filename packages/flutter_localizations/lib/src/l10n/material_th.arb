@@ -130,5 +130,6 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "เมนูในแถบเมนู",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }
