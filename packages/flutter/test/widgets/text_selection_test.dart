@@ -370,7 +370,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
+  testWidgets('a touch drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     final int pointerValue = tester.nextPointer;
@@ -386,9 +386,9 @@ void main() {
 
     expect(tapCount, 0);
     expect(singleTapUpCount, 0);
-    expect(dragStartCount, 0);
-    expect(dragUpdateCount, 0);
-    expect(dragEndCount, 0);
+    expect(dragStartCount, 1);
+    expect(dragUpdateCount, 1);
+    expect(dragEndCount, 1);
   });
 
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
