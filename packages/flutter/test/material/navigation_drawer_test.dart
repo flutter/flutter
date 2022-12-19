@@ -230,13 +230,13 @@ void main() {
     await tester.pump(); 
     await tester.pump(const Duration(seconds: 1));
 
-    // Safe area padding at top and side.
+    // Safe area padding on the top and sides.
     expect(
       tester.getTopLeft(find.widgetWithText(NavigationDrawerDestination,'Label0')),
       const Offset(20.0, 20.0),
     );
 
-    // No Safe area padding at bottom.
+    // No Safe area padding at the bottom.
     expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, windowHeight);
    });
 
