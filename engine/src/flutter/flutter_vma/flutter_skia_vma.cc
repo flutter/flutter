@@ -212,7 +212,7 @@ void FlutterSkiaVulkanMemoryAllocator::getAllocInfo(
   if (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT & memFlags) {
     flags |= skgpu::VulkanAlloc::kMappable_Flag;
   }
-  if (!SkToBool(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT & memFlags)) {
+  if (!(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT & memFlags)) {
     flags |= skgpu::VulkanAlloc::kNoncoherent_Flag;
   }
   if (VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT & memFlags) {
