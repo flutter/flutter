@@ -2846,6 +2846,50 @@ void main() {
     expect(transform.getColumn(0)[0], 1.0);
   });
 
+  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = RoundedRectangleBorder();
+
+    Widget buildNavigationRail({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    useIndicator: true,
+                    indicatorColor: indicatorColor,
+                    indicatorShape: indicatorShape,
+                    selectedIndex: 0,
+                    destinations: _destinations(),
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationRail());
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+
+    await tester.pumpWidget(buildNavigationRail(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
+  });
+
   group('Material 2', () {
     // Original Material 2 tests. Remove this group after `useMaterial3` has been deprecated.
     testWidgets('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
@@ -4655,7 +4699,6 @@ void main() {
       final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
       expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
     });
-
   }); // End Material 2 group
 }
 
@@ -4877,4 +4920,13 @@ Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}
       ),
     ),
   );
+}
+
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }

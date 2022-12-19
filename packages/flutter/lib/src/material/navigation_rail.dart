@@ -110,6 +110,7 @@ class NavigationRail extends StatefulWidget {
     this.minExtendedWidth,
     this.useIndicator,
     this.indicatorColor,
+    this.indicatorShape,
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
@@ -306,7 +307,17 @@ class NavigationRail extends StatefulWidget {
 
   /// Overrides the default value of [NavigationRail]'s selection indicator color,
   /// when [useIndicator] is true.
+  ///
+  /// If this is null, [NavigationRailThemeData.indicatorColor] is used. If
+  /// that is null, defaults to [ColorScheme.secondaryContainer].
   final Color? indicatorColor;
+
+  /// Overrides the default value of [NavigationRail]'s selection indicator shape,
+  /// when [useIndicator] is true.
+  ///
+  /// If this is null, [NavigationRailThemeData.indicatorShape] is used. If
+  /// that is null, defaults to [StadiumBorder].
+  final ShapeBorder? indicatorShape;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
@@ -396,7 +407,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? defaults.labelType!;
     final bool useIndicator = widget.useIndicator ?? navigationRailTheme.useIndicator ?? defaults.useIndicator!;
     final Color? indicatorColor = widget.indicatorColor ?? navigationRailTheme.indicatorColor ?? defaults.indicatorColor;
-    final ShapeBorder? indicatorShape = navigationRailTheme.indicatorShape ?? defaults.indicatorShape;
+    final ShapeBorder? indicatorShape = widget.indicatorShape ?? navigationRailTheme.indicatorShape ?? defaults.indicatorShape;
 
     // For backwards compatibility, in M2 the opacity of the unselected icons needs
     // to be set to the default if it isn't in the given theme. This can be removed
@@ -900,6 +911,8 @@ class NavigationRailDestination {
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,
+    this.indicatorColor,
+    this.indicatorShape,
     required this.label,
     this.padding,
   }) : selectedIcon = selectedIcon ?? icon,
@@ -932,6 +945,12 @@ class NavigationRailDestination {
   ///  * [NavigationRailDestination.icon], for a description of how to pair
   ///    icons.
   final Widget selectedIcon;
+
+  /// The color of the [indicatorShape] when this destination is selected.
+  final Color? indicatorColor;
+
+  /// The shape of the selection inidicator.
+  final ShapeBorder? indicatorShape;
 
   /// The label for the destination.
   ///
