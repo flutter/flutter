@@ -129,5 +129,7 @@
   "keyboardKeySpace": "Tühik",
   "keyboardKeyMetaMacOs": "Käsk",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menüüriba menüü"
+  "menuBarMenuLabel": "Menüüriba menüü",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

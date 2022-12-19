@@ -129,5 +129,7 @@
   "keyboardKeySpace": "Mellemrumstasten",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menuen for menulinjen"
+  "menuBarMenuLabel": "Menuen for menulinjen",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

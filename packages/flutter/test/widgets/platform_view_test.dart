@@ -2486,7 +2486,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         onPlatformViewCreatedCallBack(createdPlatformViewId);
@@ -2495,7 +2495,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2535,7 +2535,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['Center', 'SizedBox', 'PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['Center', 'SizedBox', 'PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         // 'create' should not have been called by PlatformViewLink, since its
@@ -2580,7 +2580,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         // Layout should have triggered a create call. Simulate the callback
@@ -2592,7 +2592,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2678,7 +2678,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         onPlatformViewCreatedCallBack(createdPlatformViewId);
@@ -2687,7 +2687,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);

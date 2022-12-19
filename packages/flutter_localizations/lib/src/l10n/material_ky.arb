@@ -128,5 +128,7 @@
   "keyboardKeySpace": "Боштук",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Меню тилкеси менюсу"
+  "menuBarMenuLabel": "Меню тилкеси менюсу",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

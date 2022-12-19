@@ -128,5 +128,7 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Мени на лентата со мени"
+  "menuBarMenuLabel": "Мени на лентата со мени",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

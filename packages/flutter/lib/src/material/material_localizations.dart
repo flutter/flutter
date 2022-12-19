@@ -160,6 +160,9 @@ abstract class MaterialLocalizations {
   /// as a hint text in the text field.
   String get searchFieldLabel;
 
+  /// Label indicating that a given date is the current date.
+  String get currentDateLabel;
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -579,6 +582,9 @@ abstract class MaterialLocalizations {
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.select].
   String get keyboardKeySelect;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.shift].
+  String get keyboardKeyShift;
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.space].
   String get keyboardKeySpace;
@@ -1016,6 +1022,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get searchFieldLabel => 'Search';
 
   @override
+  String get currentDateLabel => 'Today';
+
+  @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';
 
   @override
@@ -1314,6 +1323,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';

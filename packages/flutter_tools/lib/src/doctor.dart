@@ -303,7 +303,7 @@ class Doctor {
         case ValidationType.notAvailable:
           lineBuffer.write('is not available.');
           break;
-        case ValidationType.installed:
+        case ValidationType.success:
           lineBuffer.write('is fully installed.');
           break;
       }
@@ -320,7 +320,7 @@ class Doctor {
       ));
       buffer.writeln();
 
-      if (result.type != ValidationType.installed) {
+      if (result.type != ValidationType.success) {
         missingComponent = true;
       }
     }
@@ -400,7 +400,7 @@ class Doctor {
         case ValidationType.notAvailable:
           issues += 1;
           break;
-        case ValidationType.installed:
+        case ValidationType.success:
           break;
       }
       if (sendEvent) {
@@ -549,13 +549,16 @@ class FlutterValidator extends DoctorValidator {
       buffer.writeln(_userMessages.flutterBinariesDoNotRun);
       if (_platform.isLinux) {
         buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
+      } else if (_platform.isMacOS && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
+        buffer.writeln('Flutter requires the Rosetta translation environment on ARM Macs. Try running:');
+        buffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
       }
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
     ValidationType valid;
     if (messages.every((ValidationMessage message) => message.isInformation)) {
-      valid = ValidationType.installed;
+      valid = ValidationType.success;
     } else {
       // The issues for this validator stem from broken git configuration of the local install;
       // in that case, make it clear that it is fine to continue, but freshness check/upgrades
@@ -619,7 +622,7 @@ class FlutterValidator extends DoctorValidator {
       );
     }
     final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
-    if (!resolvedFlutterPath.contains(flutterRoot)) {
+    if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
       final String hint = 'Warning: `$binary` on your path resolves to '
           '$resolvedFlutterPath, which is not inside your current Flutter '
           'SDK checkout at $flutterRoot. Consider adding $flutterBinDir to '
@@ -627,6 +630,13 @@ class FlutterValidator extends DoctorValidator {
       return ValidationMessage.hint(hint);
     }
     return null;
+  }
+
+  bool _filePathContainsDirPath(String directory, String file) {
+    // calling .canonicalize() will normalize for alphabetic case and path
+    // separators
+    return _fileSystem.path.canonicalize(file)
+        .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
@@ -697,13 +707,13 @@ class DeviceValidator extends DoctorValidator {
     } else if (diagnostics.isNotEmpty) {
       installedMessages.addAll(diagnosticMessages);
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );
     } else {
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );

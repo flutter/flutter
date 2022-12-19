@@ -129,5 +129,7 @@
   "keyboardKeySpace": "Boşluk",
   "keyboardKeyMetaMacOs": "Komut",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menü çubuğu menüsü"
+  "menuBarMenuLabel": "Menü çubuğu menüsü",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

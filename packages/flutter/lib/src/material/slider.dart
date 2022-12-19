@@ -41,7 +41,7 @@ enum _SliderType { material, adaptive }
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// {@tool dartpad}
-/// ![A slider widget, consisting of 5 divisions and showing the default value
+/// ![A legacy slider widget, consisting of 5 divisions and showing the default value
 /// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
 ///
 /// The Sliders value is part of the Stateful widget subclass to change the value
@@ -51,10 +51,17 @@ enum _SliderType { material, adaptive }
 /// {@end-tool}
 ///
 /// {@tool dartpad}
+/// This sample shows the creation of a [Slider] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/sliders/overview.
+///
+/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example shows a [Slider] widget using the [Slider.secondaryTrackValue]
 /// to show a secondary track in the slider.
 ///
-/// ** See code in examples/api/lib/material/slider/slider.1.dart **
+/// ** See code in examples/api/lib/material/slider/slider.2.dart **
 /// {@end-tool}
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
@@ -819,7 +826,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
     // in range_slider.dart.
-    Size screenSize() => MediaQuery.of(context).size;
+    Size screenSize() => MediaQuery.sizeOf(context);
 
     VoidCallback? handleDidGainAccessibilityFocus;
     switch (theme.platform) {
@@ -840,7 +847,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
 
     final Map<ShortcutActivator, Intent> shortcutMap;
-    switch (MediaQuery.of(context).navigationMode) {
+    switch (MediaQuery.navigationModeOf(context)) {
       case NavigationMode.directional:
         shortcutMap = _directionalNavShortcutMap;
         break;
@@ -854,8 +861,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       // This needs to be updated when accessibility
       // guidelines are available on the material specs page
       // https://m3.material.io/components/sliders/accessibility.
-      ? math.min(MediaQuery.of(context).textScaleFactor, 1.3)
-      : MediaQuery.of(context).textScaleFactor;
+      ? math.min(MediaQuery.textScaleFactorOf(context), 1.3)
+      : MediaQuery.textScaleFactorOf(context);
 
     return Semantics(
       container: true,
@@ -987,7 +994,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
-      gestureSettings: MediaQuery.of(context).gestureSettings,
+      gestureSettings: MediaQuery.gestureSettingsOf(context),
     );
   }
 
@@ -1011,7 +1018,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..gestureSettings = MediaQuery.of(context).gestureSettings;
+      ..gestureSettings = MediaQuery.gestureSettingsOf(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }

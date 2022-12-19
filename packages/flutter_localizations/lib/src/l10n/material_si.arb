@@ -128,5 +128,7 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "මෙනු තීරු මෙනුව"
+  "menuBarMenuLabel": "මෙනු තීරු මෙනුව",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

@@ -129,5 +129,7 @@
   "keyboardKeySpace": "Διάστημα",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Μενού γραμμής μενού"
+  "menuBarMenuLabel": "Μενού γραμμής μενού",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

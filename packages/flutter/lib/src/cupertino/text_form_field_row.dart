@@ -13,7 +13,7 @@ import 'text_field.dart';
 /// Creates a [CupertinoFormRow] containing a [FormField] that wraps
 /// a [CupertinoTextField].
 ///
-/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// A [Form] ancestor is not required. The [Form] allows one to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.

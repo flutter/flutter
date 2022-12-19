@@ -425,7 +425,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   Size _dialogSize(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
       case DatePickerEntryMode.calendarOnly:
@@ -456,11 +456,11 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     final TextTheme textTheme = theme.textTheme;
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
-    final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
 
     final String dateText = localizations.formatMediumDate(_selectedDate.value);
     final Color onPrimarySurface = colorScheme.brightness == Brightness.light
@@ -1316,9 +1316,8 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    final Orientation orientation = mediaQuery.orientation;
-    final double textScaleFactor = math.min(mediaQuery.textScaleFactor, 1.3);
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ColorScheme colors = Theme.of(context).colorScheme;
     final Color onPrimarySurface = colors.brightness == Brightness.light
@@ -1367,7 +1366,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
               : localizations.dateRangePickerHelpText.toUpperCase()
             ),
         );
-        size = mediaQuery.size;
+        size = MediaQuery.sizeOf(context);
         insetPadding = EdgeInsets.zero;
         shape = const RoundedRectangleBorder();
         elevation = 0;
@@ -1499,7 +1498,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     final TextTheme textTheme = theme.textTheme;
     final Color headerForeground = colorScheme.brightness == Brightness.light
         ? colorScheme.onPrimary
@@ -1539,7 +1538,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           bottom: PreferredSize(
             preferredSize: const Size(double.infinity, 64),
             child: Row(children: <Widget>[
-              SizedBox(width: MediaQuery.of(context).size.width < 360 ? 42 : 72),
+              SizedBox(width: MediaQuery.sizeOf(context).width < 360 ? 42 : 72),
               Expanded(
                 child: Semantics(
                   label: '$helpText $startDateText to $endDateText',
@@ -2017,7 +2016,7 @@ class _DayHeaders extends StatelessWidget {
 
     return Container(
       constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).orientation == Orientation.landscape
+        maxWidth: MediaQuery.orientationOf(context) == Orientation.landscape
           ? _maxCalendarWidthLandscape
           : _maxCalendarWidthPortrait,
         maxHeight: _monthItemRowHeight,
@@ -2348,7 +2347,8 @@ class _MonthItemState extends State<_MonthItem> {
     // day of month before the rest of the date, as they are looking
     // for the day of month. To do that we prepend day of month to the
     // formatted full date.
-    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}';
+    final String semanticLabelSuffix = DateUtils.isSameDay(widget.currentDate, dayToBuild) ? ', ${localizations.currentDateLabel}' : '';
+    String semanticLabel = '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix';
     if (isSelectedDayStart) {
       semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
     } else if (isSelectedDayEnd) {
@@ -2468,7 +2468,7 @@ class _MonthItemState extends State<_MonthItem> {
       paddedDayItems.addAll(weekList);
     }
 
-    final double maxWidth = MediaQuery.of(context).orientation == Orientation.landscape
+    final double maxWidth = MediaQuery.orientationOf(context) == Orientation.landscape
       ? _maxCalendarWidthLandscape
       : _maxCalendarWidthPortrait;
     return Column(
@@ -2622,7 +2622,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     final TextTheme textTheme = theme.textTheme;
 
     final Color onPrimarySurfaceColor = colorScheme.brightness == Brightness.light

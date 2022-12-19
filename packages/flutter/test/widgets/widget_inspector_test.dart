@@ -18,6 +18,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -3549,7 +3550,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(59));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -3559,7 +3560,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(97));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -3586,7 +3587,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(59));
+      expect(location.line, equals(60));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -3596,7 +3597,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(97));
+      expect(location.line, equals(98));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -4276,11 +4277,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element element = tester.element(find.byType(Directionality).first);
         Element? root;
         element.visitAncestorElements((Element ancestor) {
-          if (root == null) {
-            root = ancestor;
-            // Stop traversing ancestors.
-            return false;
-          }
+          root = ancestor;
           return true;
         });
         expect(root, isNotNull);
@@ -4436,6 +4433,36 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         crossAxisAlignment = crossAxisAlignmentProperties['description']! as String;
         expect(mainAxisAlignment, equals('center'));
         expect(crossAxisAlignment, equals('start'));
+      });
+
+      testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError',(WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/115228
+        const Key leafKey = ValueKey<String>('ColoredBox');
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: CupertinoPageScaffold(
+              child: Builder(
+                builder: (BuildContext context) => ColoredBox(key: leafKey, color: CupertinoTheme.of(context).primaryColor),
+              ),
+            ),
+          ),
+        );
+
+        final Element leaf = tester.element(find.byKey(leafKey));
+        service.setSelection(leaf, group);
+        final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
+        final String id = service.toId(diagnostic, group)!;
+
+        Object? error;
+        try {
+          await service.testExtension(
+            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+          );
+        } catch (e) {
+          error = e;
+        }
+        expect(error, isNull);
       });
     });
 

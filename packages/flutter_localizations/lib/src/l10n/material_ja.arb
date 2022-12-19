@@ -129,5 +129,7 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "メニューバーのメニュー"
+  "menuBarMenuLabel": "メニューバーのメニュー",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

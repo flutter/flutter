@@ -15,6 +15,7 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
 import 'material_state.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -278,10 +279,14 @@ class ListTile extends StatelessWidget {
     this.selectedColor,
     this.iconColor,
     this.textColor,
+    this.titleTextStyle,
+    this.subtitleTextStyle,
+    this.leadingAndTrailingTextStyle,
     this.contentPadding,
     this.enabled = true,
     this.onTap,
     this.onLongPress,
+    this.onFocusChange,
     this.mouseCursor,
     this.selected = false,
     this.focusColor,
@@ -363,6 +368,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null then its value is based on [ListTileTheme.dense].
   ///
   /// Dense list tiles default to a smaller height.
+  ///
+  /// It is not recommended to set [dense] to true when [ThemeData.useMaterial3] is true.
   final bool? dense;
 
   /// Defines how compact the list tile's layout will be.
@@ -420,6 +427,28 @@ class ListTile extends StatelessWidget {
   ///   [ListTileThemeData].
   final Color? textColor;
 
+  /// The text style for ListTile's [title].
+  ///
+  /// If this property is null, then [ListTileThemeData.titleTextStyle] is used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.bodyLarge]
+  /// will be used. Otherwise, If ListTile style is [ListTileStyle.list],
+  /// [TextTheme.titleMedium] will be used and if ListTile style is [ListTileStyle.drawer],
+  /// [TextTheme.bodyLarge] will be used.
+  final TextStyle? titleTextStyle;
+
+  /// The text style for ListTile's [subtitle].
+  ///
+  /// If this property is null, then [ListTileThemeData.subtitleTextStyle] is used.
+  /// If that is also null, [TextTheme.bodyMedium] will be used.
+  final TextStyle? subtitleTextStyle;
+
+  /// The text style for ListTile's [leading] and [trailing].
+  ///
+  /// If this property is null, then [ListTileThemeData.leadingAndTrailingTextStyle] is used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.labelSmall]
+  /// will be used, otherwise [TextTheme.bodyMedium] will be used.
+  final TextStyle? leadingAndTrailingTextStyle;
+
   /// Defines the font used for the [title].
   ///
   /// If this property is null then [ListTileThemeData.style] is used. If that
@@ -455,6 +484,9 @@ class ListTile extends StatelessWidget {
   ///
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback? onLongPress;
+
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
 
   /// {@template flutter.material.ListTile.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -584,91 +616,16 @@ class ListTile extends StatelessWidget {
     ];
   }
 
-  Color? _iconColor(ThemeData theme, ListTileThemeData tileTheme) {
-    if (!enabled) {
-      return theme.disabledColor;
-    }
-
-    if (selected) {
-      return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
-    }
-
-    final Color? color = iconColor
-      ?? tileTheme.iconColor
-      ?? theme.listTileTheme.iconColor
-      // If [ThemeData.useMaterial3] is set to true the disabled icon color
-      // will be set to Theme.colorScheme.onSurface(0.38), if false, defaults to null,
-      // as described in: https://m3.material.io/components/icon-buttons/specs.
-      ?? (theme.useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : null);
-    if (color != null) {
-      return color;
-    }
-
-    switch (theme.brightness) {
-      case Brightness.light:
-        // For the sake of backwards compatibility, the default for unselected
-        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-        return Colors.black45;
-      case Brightness.dark:
-        return null; // null - use current icon theme color
-    }
-  }
-
-  Color? _textColor(ThemeData theme, ListTileThemeData tileTheme, Color? defaultColor) {
-    if (!enabled) {
-      return theme.disabledColor;
-    }
-
-    if (selected) {
-      return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
-    }
-
-    return textColor ?? tileTheme.textColor ?? theme.listTileTheme.textColor ?? defaultColor;
-  }
-
   bool _isDenseLayout(ThemeData theme, ListTileThemeData tileTheme) {
     return dense ?? tileTheme.dense ?? theme.listTileTheme.dense ?? false;
   }
 
-  TextStyle _titleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle;
-    switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
-      case ListTileStyle.drawer:
-        textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyLarge!;
-        break;
-      case ListTileStyle.list:
-        textStyle = theme.useMaterial3 ? theme.textTheme.titleMedium! : theme.textTheme.titleMedium!;
-        break;
-    }
-    final Color? color = _textColor(theme, tileTheme, textStyle.color);
-    return _isDenseLayout(theme, tileTheme)
-      ? textStyle.copyWith(fontSize: 13.0, color: color)
-      : textStyle.copyWith(color: color);
-  }
-
-  TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyMedium!;
-    final Color? color = _textColor(
-      theme,
-      tileTheme,
-      theme.useMaterial3 ? theme.textTheme.bodySmall!.color : theme.textTheme.bodySmall!.color,
-    );
-    return _isDenseLayout(theme, tileTheme)
-      ? textStyle.copyWith(color: color, fontSize: 12.0)
-      : textStyle.copyWith(color: color);
-  }
-
-  TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyMedium!;
-    final Color? color = _textColor(theme, tileTheme, textStyle.color);
-    return textStyle.copyWith(color: color);
-  }
-
-  Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme) {
+  // TODO(TahaTesser): Refactor this to support list tile states.
+  Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme, ListTileThemeData defaults) {
     final Color? color = selected
       ? selectedTileColor ?? tileTheme.selectedTileColor ?? theme.listTileTheme.selectedTileColor
       : tileColor ?? tileTheme.tileColor ?? theme.listTileTheme.tileColor;
-    return color ?? Colors.transparent;
+    return color ?? defaults.tileColor!;
   }
 
   @override
@@ -676,23 +633,63 @@ class ListTile extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
-    final IconThemeData iconThemeData = IconThemeData(color: _iconColor(theme, tileTheme));
+    final ListTileStyle listTileStyle = style
+      ?? tileTheme.style
+      ?? theme.listTileTheme.style
+      ?? ListTileStyle.list;
+    final ListTileThemeData defaults = theme.useMaterial3
+        ? _LisTileDefaultsM3(context)
+        : _LisTileDefaultsM2(context, listTileStyle);
+    final Set<MaterialState> states = <MaterialState>{
+      if (!enabled) MaterialState.disabled,
+      if (selected) MaterialState.selected,
+    };
 
-    TextStyle? leadingAndTrailingTextStyle;
+    Color? resolveColor(Color? explicitColor, Color? selectedColor, Color? enabledColor, [Color? disabledColor]) {
+      return _IndividualOverrides(
+        explicitColor: explicitColor,
+        selectedColor: selectedColor,
+        enabledColor: enabledColor,
+        disabledColor: disabledColor,
+      ).resolve(states);
+    }
+
+    final Color? effectiveIconColor = resolveColor(iconColor, selectedColor, iconColor)
+      ?? resolveColor(tileTheme.iconColor, tileTheme.selectedColor, tileTheme.iconColor)
+      ?? resolveColor(theme.listTileTheme.iconColor, theme.listTileTheme.selectedColor, theme.listTileTheme.iconColor)
+      ?? resolveColor(defaults.iconColor, defaults.selectedColor, defaults.iconColor, theme.disabledColor);
+    final Color? effectiveColor = resolveColor(textColor, selectedColor, textColor)
+      ?? resolveColor(tileTheme.textColor, tileTheme.selectedColor, tileTheme.textColor)
+      ?? resolveColor(theme.listTileTheme.textColor, theme.listTileTheme.selectedColor, theme.listTileTheme.textColor)
+      ?? resolveColor(defaults.textColor, defaults.selectedColor, defaults.textColor, theme.disabledColor);
+    final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
+
+    TextStyle? leadingAndTrailingStyle;
     if (leading != null || trailing != null) {
-      leadingAndTrailingTextStyle = _trailingAndLeadingTextStyle(theme, tileTheme);
+      leadingAndTrailingStyle = leadingAndTrailingTextStyle
+        ?? tileTheme.leadingAndTrailingTextStyle
+        ?? defaults.leadingAndTrailingTextStyle!;
+      final Color? leadingAndTrailingTextColor = effectiveColor;
+      leadingAndTrailingStyle = leadingAndTrailingStyle.copyWith(color: leadingAndTrailingTextColor);
     }
 
     Widget? leadingIcon;
     if (leading != null) {
       leadingIcon = AnimatedDefaultTextStyle(
-        style: leadingAndTrailingTextStyle!,
+        style: leadingAndTrailingStyle!,
         duration: kThemeChangeDuration,
         child: leading!,
       );
     }
 
-    final TextStyle titleStyle = _titleTextStyle(theme, tileTheme);
+    TextStyle titleStyle = titleTextStyle
+      ?? tileTheme.titleTextStyle
+      ?? defaults.titleTextStyle!;
+    final Color? titleColor = effectiveColor;
+    titleStyle = titleStyle.copyWith(
+      color: titleColor,
+      fontSize: _isDenseLayout(theme, tileTheme) ? 13.0 : null,
+    );
     final Widget titleText = AnimatedDefaultTextStyle(
       style: titleStyle,
       duration: kThemeChangeDuration,
@@ -702,7 +699,14 @@ class ListTile extends StatelessWidget {
     Widget? subtitleText;
     TextStyle? subtitleStyle;
     if (subtitle != null) {
-      subtitleStyle = _subtitleTextStyle(theme, tileTheme);
+      subtitleStyle = subtitleTextStyle
+        ?? tileTheme.subtitleTextStyle
+        ?? defaults.subtitleTextStyle!;
+      final Color? subtitleColor = effectiveColor ?? theme.textTheme.bodySmall!.color;
+      subtitleStyle = subtitleStyle.copyWith(
+        color: subtitleColor,
+        fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
+      );
       subtitleText = AnimatedDefaultTextStyle(
         style: subtitleStyle,
         duration: kThemeChangeDuration,
@@ -713,7 +717,7 @@ class ListTile extends StatelessWidget {
     Widget? trailingIcon;
     if (trailing != null) {
       trailingIcon = AnimatedDefaultTextStyle(
-        style: leadingAndTrailingTextStyle!,
+        style: leadingAndTrailingStyle!,
         duration: kThemeChangeDuration,
         child: trailing!,
       );
@@ -724,20 +728,19 @@ class ListTile extends StatelessWidget {
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? defaultContentPadding;
-
-    final Set<MaterialState> states = <MaterialState>{
+    // Show basic cursor when ListTile isn't enabled or gesture callbacks are null.
+    final Set<MaterialState> mouseStates = <MaterialState>{
       if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
-      if (selected) MaterialState.selected,
     };
-
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
-      ?? tileTheme.mouseCursor?.resolve(states)
-      ?? MaterialStateMouseCursor.clickable.resolve(states);
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates)
+      ?? tileTheme.mouseCursor?.resolve(mouseStates)
+      ?? MaterialStateMouseCursor.clickable.resolve(mouseStates);
 
     return InkWell(
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      onFocusChange: onFocusChange,
       mouseCursor: effectiveMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
@@ -752,7 +755,7 @@ class ListTile extends StatelessWidget {
         child: Ink(
           decoration: ShapeDecoration(
             shape: shape ?? tileTheme.shape ?? const Border(),
-            color: _tileBackgroundColor(theme, tileTheme),
+            color: _tileBackgroundColor(theme, tileTheme, defaults),
           ),
           child: SafeArea(
             top: false,
@@ -769,8 +772,8 @@ class ListTile extends StatelessWidget {
                 visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
                 isThreeLine: isThreeLine,
                 textDirection: textDirection,
-                titleBaselineType: titleStyle.textBaseline!,
-                subtitleBaselineType: subtitleStyle?.textBaseline,
+                titleBaselineType: titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
+                subtitleBaselineType: subtitleStyle?.textBaseline ?? defaults.subtitleTextStyle!.textBaseline!,
                 horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
                 minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? 4,
                 minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? 40,
@@ -813,6 +816,36 @@ class ListTile extends StatelessWidget {
     properties.add(DoubleProperty('horizontalTitleGap', horizontalTitleGap, defaultValue: null));
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
+  }
+}
+
+class _IndividualOverrides extends MaterialStateProperty<Color?> {
+  _IndividualOverrides({
+    this.explicitColor,
+    this.enabledColor,
+    this.selectedColor,
+    this.disabledColor,
+  });
+
+  final Color? explicitColor;
+  final Color? enabledColor;
+  final Color? selectedColor;
+  final Color? disabledColor;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    if (explicitColor is MaterialStateColor) {
+      return MaterialStateProperty.resolveAs<Color?>(explicitColor, states);
+    }
+
+    if (states.contains(MaterialState.disabled)) {
+      return disabledColor;
+    }
+    if (states.contains(MaterialState.selected)) {
+      return selectedColor;
+    }
+
+    return enabledColor;
   }
 }
 
@@ -1338,3 +1371,87 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     return false;
   }
 }
+
+class _LisTileDefaultsM2 extends ListTileThemeData {
+  _LisTileDefaultsM2(this.context, ListTileStyle style)
+    : _themeData = Theme.of(context),
+      _textTheme = Theme.of(context).textTheme,
+      super(
+        shape: const Border(),
+        style: style,
+      );
+
+  final BuildContext context;
+  final ThemeData _themeData;
+  final TextTheme _textTheme;
+
+  @override
+  Color? get tileColor =>  Colors.transparent;
+
+  @override
+  TextStyle? get titleTextStyle {
+    switch (style!) {
+      case ListTileStyle.drawer:
+        return _textTheme.bodyLarge;
+      case ListTileStyle.list:
+        return _textTheme.titleMedium;
+    }
+  }
+
+  @override
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+
+  @override
+  TextStyle? get leadingAndTrailingTextStyle => _textTheme.bodyMedium;
+
+  @override
+  Color? get selectedColor => _themeData.colorScheme.primary;
+
+  @override
+  Color? get iconColor {
+    switch (_themeData.brightness) {
+      case Brightness.light:
+        // For the sake of backwards compatibility, the default for unselected
+        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+        return Colors.black45;
+      case Brightness.dark:
+        return null; // null, Use current icon theme color
+    }
+  }
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - LisTile
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_143
+
+class _LisTileDefaultsM3 extends ListTileThemeData {
+  const _LisTileDefaultsM3(this.context)
+    : super(shape: const RoundedRectangleBorder());
+
+  final BuildContext context;
+
+  @override
+  Color? get tileColor => Theme.of(context).colorScheme.surface;
+
+  @override
+  TextStyle? get titleTextStyle => Theme.of(context).textTheme.bodyLarge;
+
+  @override
+  TextStyle? get subtitleTextStyle => Theme.of(context).textTheme.bodyMedium;
+
+  @override
+  TextStyle? get leadingAndTrailingTextStyle => Theme.of(context).textTheme.labelSmall;
+
+  @override
+  Color? get selectedColor => Theme.of(context).colorScheme.primary;
+
+  @override
+  Color? get iconColor => Theme.of(context).colorScheme.onSurface;
+}
+
+// END GENERATED TOKEN PROPERTIES - LisTile

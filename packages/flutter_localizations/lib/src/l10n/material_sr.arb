@@ -132,5 +132,7 @@
   "keyboardKeySpace": "Тастер за размак",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Мени трака менија"
+  "menuBarMenuLabel": "Мени трака менија",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

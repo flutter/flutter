@@ -129,5 +129,7 @@
   "keyboardKeySpace": "Espai",
   "keyboardKeyMetaMacOs": "Ordre",
   "keyboardKeyMetaWindows": "Windows",
-  "menuBarMenuLabel": "Menú de la barra de menú"
+  "menuBarMenuLabel": "Menú de la barra de menú",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

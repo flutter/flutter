@@ -132,5 +132,7 @@
   "keyboardKeySpace": "tipka za razmak",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Meni trake menija"
+  "menuBarMenuLabel": "Meni trake menija",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

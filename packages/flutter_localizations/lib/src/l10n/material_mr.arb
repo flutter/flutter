@@ -130,5 +130,7 @@
   "keyboardKeySpace": "स्पेस",
   "keyboardKeyMetaMacOs": "कमांड",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "मेनू बार मेनू"
+  "menuBarMenuLabel": "मेनू बार मेनू",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

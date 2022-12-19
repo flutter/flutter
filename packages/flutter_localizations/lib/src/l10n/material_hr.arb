@@ -132,5 +132,7 @@
   "keyboardKeySpace": "Razmaknica",
   "keyboardKeyMetaMacOs": "Naredba",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Izbornik trake izbornika"
+  "menuBarMenuLabel": "Izbornik trake izbornika",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

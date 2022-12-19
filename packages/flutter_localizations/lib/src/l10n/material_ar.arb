@@ -139,5 +139,7 @@
   "keyboardKeySpace": "مفتاح المسافة",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "قائمة شريط القوائم"
+  "menuBarMenuLabel": "قائمة شريط القوائم",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

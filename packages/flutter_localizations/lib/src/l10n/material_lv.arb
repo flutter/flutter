@@ -130,5 +130,7 @@
   "keyboardKeySpace": "Atstarpes taustiņš",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Windows",
-  "menuBarMenuLabel": "Izvēļņu joslas izvēlne"
+  "menuBarMenuLabel": "Izvēļņu joslas izvēlne",
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }
