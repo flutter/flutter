@@ -124,7 +124,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
             AdaptiveTextSelectionToolbar.getButtonLabel(context, buttonItem),
             style: buttonItem.type == ContextMenuButtonType.delete ? const TextStyle(color: Colors.blue) : null,
           ),
-        );
+      );
 
       if (buttonItem.type != ContextMenuButtonType.delete) {
         return button;
