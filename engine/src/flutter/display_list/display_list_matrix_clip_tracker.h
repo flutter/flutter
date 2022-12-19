@@ -10,8 +10,11 @@
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkM44.h"
+#include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRRect.h"
+#include "third_party/skia/include/core/SkRect.h"
+#include "third_party/skia/include/core/SkScalar.h"
 
 namespace flutter {
 
