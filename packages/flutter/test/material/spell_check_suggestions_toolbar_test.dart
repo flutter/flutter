@@ -9,10 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 const double _kAnchor = 200;
 // Amount for toolbar to overlap bottom padding for testing.
 const double _kTestToolbarOverlap = 10;
-// Same padding values as SpellCheckSuggestionsToolbar.
-const double _kHandleSize = 22.0;
-const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
-const double _kToolbarScreenPadding = 8;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -52,7 +48,7 @@ void main() {
   testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
     const double expectedToolbarY =
-        _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding;
+        _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - TextSelectionToolbar.kToolbarScreenPadding;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -72,7 +68,7 @@ void main() {
   testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor with padding accounted for.
     const double expectedToolbarY =
-        _kAnchor + (2 * _kToolbarContentDistanceBelow) - _kToolbarScreenPadding - _kTestToolbarOverlap;
+        _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - TextSelectionToolbar.kToolbarScreenPadding - _kTestToolbarOverlap;
 
     await tester.pumpWidget(
       MaterialApp(

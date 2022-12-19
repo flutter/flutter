@@ -13861,26 +13861,195 @@ void main() {
     testWidgets(
       'Error thrown when spell check enabled but no default spell check service available',
         (WidgetTester tester) async {
-        tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
-          false;
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        false;
 
-        await tester.pumpWidget(
-            EditableText(
-                controller: TextEditingController(text: 'A'),
-                focusNode: FocusNode(),
-                style: const TextStyle(),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                cursorOpacityAnimates: true,
-                autofillHints: null,
-                spellCheckConfiguration:
-                  const SpellCheckConfiguration(
-                    misspelledTextStyle: TextField.materialMisspelledTextStyle,
-                ),
-            ));
+      await tester.pumpWidget(
+          EditableText(
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+              ),
+          ));
 
         expect(tester.takeException(), isA<AssertionError>());
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+    });
+
+    testWidgets(
+      'findSuggestionSpanAtCursorIndex finds correct span with cursor in middle of a word',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 21;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      // Omitting actual text in results for brevity. Same for following tests that test the findSuggestionSpanAtCursorIndex method.
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, equals(expectedSpan));
+    });
+
+    testWidgets(
+        'findSuggestionSpanAtCursorIndex finds correct span with cursor on edge of a word',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 23;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, equals(expectedSpan));
+    });
+
+    testWidgets(
+        'findSuggestionSpanAtCursorIndex finds no span when cursor out of range of spans',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 33;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, isNull);
+    });
+
+    testWidgets(
+        'findSuggestionSpanAtCursorIndex finds no span when word correctly spelled',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 5;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, isNull);
     });
 
     testWidgets('can show spell check suggestions toolbar when there are spell check results', (WidgetTester tester) async {
@@ -14155,7 +14324,6 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     this.onCut,
   });
 
-  static const double _kToolbarContentDistanceBelow = 20.0;
   static const double _kToolbarContentDistance = 8.0;
 
   final VoidCallback? onPaste;
@@ -14183,7 +14351,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     );
     final Offset anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
     );
     return _CustomTextSelectionToolbar(
       anchorAbove: anchorAbove,

@@ -9,16 +9,8 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'material.dart';
 import 'spell_check_suggestions_toolbar_layout_delegate.dart';
+import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
-
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// viewport. Same values as TextSelectionToolbar.
-const double _kToolbarScreenPadding = 8.0;
-const double _kHandleSize = 22.0;
-
-// Padding between the toolbar and the anchor. Eyeballed on Pixel 4 emulator
-// running Android API 31.
-const double _kToolbarContentDistanceBelow = _kHandleSize - 3.0;
 
 // The default height of the SpellCheckSuggestionsToolbar, which
 // assumes there are the maximum number of spell check suggestions available, 3.
@@ -51,6 +43,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ///    [ContextMenuButtonItem]s that are used to build the buttons of the
   ///    text selection toolbar.
   final List<ContextMenuButtonItem> buttonItems;
+
+  /// Padding between the toolbar and the anchor. Eyeballed on Pixel 4 emulator
+  /// running Android API 31.
+  static const double kToolbarContentDistanceBelow = TextSelectionToolbar.kHandleSize - 3.0;
 
   /// Builds the default Android Material spell check suggestions toolbar.
   static Widget _spellCheckSuggestionsToolbarBuilder(BuildContext context, Widget child) {
@@ -143,19 +139,19 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
         _kDefaultToolbarHeight - (48.0 * (4 - buttonItems.length));
     // Incorporate the padding distance between the content and toolbar.
     final Offset anchorPadded =
-        anchor + const Offset(0.0, _kToolbarContentDistanceBelow);
+        anchor + const Offset(0.0, kToolbarContentDistanceBelow);
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     final double softKeyboardViewInsetsBottom = mediaQueryData.viewInsets.bottom;
-    final double paddingAbove = mediaQueryData.padding.top + _kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryData.padding.top + TextSelectionToolbar.kToolbarScreenPadding;
     // Makes up for the Padding.
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+    final Offset localAdjustment = Offset(TextSelectionToolbar.kToolbarScreenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
-        _kToolbarContentDistanceBelow,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding + softKeyboardViewInsetsBottom,
+        TextSelectionToolbar.kToolbarScreenPadding,
+        kToolbarContentDistanceBelow,
+        TextSelectionToolbar.kToolbarScreenPadding,
+        TextSelectionToolbar.kToolbarScreenPadding + softKeyboardViewInsetsBottom,
       ),
       child: CustomSingleChildLayout(
         delegate: SpellCheckSuggestionsToolbarLayoutDelegate(
