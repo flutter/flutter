@@ -227,7 +227,7 @@ void main() {
       ),
     );
     scaffoldKey.currentState!.openDrawer();
-    await tester.pump(); 
+    await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     // Safe area padding on the top and sides.
