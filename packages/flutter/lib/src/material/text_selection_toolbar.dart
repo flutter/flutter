@@ -75,7 +75,7 @@ class TextSelectionToolbar extends StatelessWidget {
   /// child Widget will contain all of the [children].
   /// {@endtemplate}
   final ToolbarBuilder toolbarBuilder;
-  
+
   /// Minimal padding from all edges of the selection toolbar to all edges of the
   /// viewport.
   ///
