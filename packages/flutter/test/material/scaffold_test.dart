@@ -2674,6 +2674,48 @@ void main() {
     expect(find.byKey(bottomSheetKey), findsNothing);
     expect(find.byType(StatefulBuilder), findsOneWidget);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/117004
+  testWidgets('can rebuild and remove bottomSheet at the same time', (WidgetTester tester) async {
+    bool alternateUI = false;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            theme: alternateUI ? ThemeData.light() : ThemeData.dark(),
+            home: Scaffold(
+              bottomSheet: alternateUI
+                  ? null
+                  : Container(
+                      width: double.infinity,
+                      height: 100,
+                      color: Colors.blue,
+                      child: const Text('BottomSheet'),
+                    ),
+              body: Center(
+                child: Text('$alternateUI'),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    alternateUI = !alternateUI;
+                  });
+                },
+                tooltip: 'Change UI',
+                child: const Icon(Icons.add),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
