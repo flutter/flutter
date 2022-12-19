@@ -26,10 +26,10 @@ export 'gesture_settings.dart' show DeviceGestureSettings;
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
 typedef GestureMultiDragStartCallback = Drag? Function(Offset position);
 
-/// Signature for `buttonsEventFilter` in [MultiDragGestureRecognizer].
+/// Signature for `allowedButtonsFilter` in [MultiDragGestureRecognizer].
 /// Used to filter the input buttons of the pointer event.
-/// The parameter `int buttons` comes from [PointerEvent.buttons].
-typedef ButtonsEventFilter = bool Function(int buttons);
+/// The parameter `buttons` comes from [PointerEvent.buttons].
+typedef AllowedButtonsFilter = bool Function(int buttons);
 
 /// Per-pointer state for a [MultiDragGestureRecognizer].
 ///
@@ -228,8 +228,8 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    ButtonsEventFilter? buttonsEventFilter,
-  }): _buttonsEventFilter = buttonsEventFilter ?? _defaultButtonAcceptBehavior;
+    AllowedButtonsFilter? allowedButtonsFilter,
+  }): _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
@@ -237,7 +237,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   /// [Drag] object returned by this callback.
   GestureMultiDragStartCallback? onStart;
 
-  /// {@template flutter.gestures.multidrag._buttonsEventFilter}
+  /// {@template flutter.gestures.multidrag._allowedButtonsFilter}
   /// Called when interaction starts. This limits the dragging behavior
   /// for custom clicks (such as scroll click). Its parameter comes
   /// from [PointerEvent.buttons].
@@ -254,9 +254,9 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   ///
   /// Defaults to primary button only.
   /// {@endtemplate}
-  final ButtonsEventFilter _buttonsEventFilter;
+  final AllowedButtonsFilter _allowedButtonsFilter;
 
-  // The default value for [buttonsEventFilter].
+  // The default value for [allowedButtonsFilter].
   // Accept the input if, and only if, [kPrimaryButton] is pressed.
   static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
 
@@ -362,7 +362,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   @protected
   bool isPointerAllowed(PointerDownEvent event) {
     // Check for mouse button, then device kind.
-    return _buttonsEventFilter(event.buttons) && super.isPointerAllowed(event);
+    return _allowedButtonsFilter(event.buttons) && super.isPointerAllowed(event);
   }
 
   @override
@@ -419,7 +419,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    super.buttonsEventFilter,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -477,7 +477,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    super.buttonsEventFilter,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -535,7 +535,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    super.buttonsEventFilter,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -646,7 +646,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    super.buttonsEventFilter,
+    super.allowedButtonsFilter,
   }) : assert(delay != null);
 
   /// The amount of time the pointer must remain in the same place for the drag

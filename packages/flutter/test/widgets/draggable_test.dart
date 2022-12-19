@@ -3196,12 +3196,12 @@ void main() {
     expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
   });
 
-  testWidgets('Test buttonsEventFilter', (WidgetTester tester) async {
-    Widget build(bool Function(int buttons)? buttonsEventFilter) {
+  testWidgets('Test allowedButtonsFilter', (WidgetTester tester) async {
+    Widget build(bool Function(int buttons)? allowedButtonsFilter) {
       return MaterialApp(
         home: Draggable<int>(
           key: UniqueKey(),
-          buttonsEventFilter: buttonsEventFilter,
+          allowedButtonsFilter: allowedButtonsFilter,
           feedback: const Text('Dragging'),
           child: const Text('Source'),
         ),

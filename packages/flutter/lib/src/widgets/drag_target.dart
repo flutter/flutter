@@ -179,7 +179,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.ignoringFeedbackPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
-    this.buttonsEventFilter,
+    this.allowedButtonsFilter,
   }) : assert(child != null),
        assert(feedback != null),
        assert(ignoringFeedbackSemantics != null),
@@ -360,8 +360,8 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [HitTestBehavior.deferToChild].
   final HitTestBehavior hitTestBehavior;
 
-  /// {@macro flutter.gestures.multidrag._buttonsEventFilter}
-  final ButtonsEventFilter? buttonsEventFilter;
+  /// {@macro flutter.gestures.multidrag._allowedButtonsFilter}
+  final AllowedButtonsFilter? allowedButtonsFilter;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
@@ -371,11 +371,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     switch (affinity) {
       case Axis.horizontal:
-        return HorizontalMultiDragGestureRecognizer(buttonsEventFilter: buttonsEventFilter)..onStart = onStart;
+        return HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
       case Axis.vertical:
-        return VerticalMultiDragGestureRecognizer(buttonsEventFilter: buttonsEventFilter)..onStart = onStart;
+        return VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
       case null:
-        return ImmediateMultiDragGestureRecognizer(buttonsEventFilter: buttonsEventFilter)..onStart = onStart;
+        return ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
     }
   }
 
@@ -413,7 +413,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.ignoringFeedbackSemantics,
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
-    super.buttonsEventFilter,
+    super.allowedButtonsFilter,
   });
 
   /// Whether haptic feedback should be triggered on drag start.
@@ -426,7 +426,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
 
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer(delay: delay, buttonsEventFilter: buttonsEventFilter)
+    return DelayedMultiDragGestureRecognizer(delay: delay, allowedButtonsFilter: allowedButtonsFilter)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
         if (result != null && hapticFeedbackOnStart) {
