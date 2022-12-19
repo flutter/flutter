@@ -109,16 +109,6 @@ class RenderSemanticsClipper extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
   }
-
-  @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-
-    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier!.value;
-    final Rect oldRect = node.rect;
-    node.rect = Rect.fromLTRB(oldRect.left + clipDetails.left, oldRect.top + clipDetails.top, oldRect.right - clipDetails.right, oldRect.bottom - clipDetails.bottom);
-
-    super.assembleSemanticsNode(node, config, children);
-  }
 }
 
 /// A widget that prevents the user from interacting with widgets behind itself.
