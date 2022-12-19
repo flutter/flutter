@@ -4,6 +4,56 @@
 
 namespace impeller.fb;
 
+//-----------------------------------------------------------------------------
+/// Materials.
+///
+
+struct Color {
+  r: float;
+  g: float;
+  b: float;
+  a: float;
+}
+
+/// A compressed texture for Flutter to decode. The `bytes` field takes
+/// precedent over the `uri` field.
+table Texture {
+  /// A Flutter asset URI for an image file to import and decode.
+  uri: string;
+  /// Compressed image bytes for Flutter to decode. If this field is not empty,
+  /// it takes precedent over the `uri` field for sourcing the texture.
+  bytes: [ubyte];
+}
+
+enum MaterialType:byte {
+  kUnlit,
+  kPhysicallyBased,
+}
+
+/// The final color of each material component is the texture color multiplied
+/// by the factor of the component.
+/// Texture fields are indices into the `Scene`->`textures` array. All textures
+/// are optional -- a texture index value of -1 indicates no texture.
+table  Material {
+  // When the `MaterialType` is `kUnlit`, only the `base_color` fields are used.
+  type: MaterialType;
+
+  base_color_factor: Color;
+  base_color_texture: int = -1;
+
+  metallic_factor: float = 0;
+  roughness_factor: float = 0.5;
+  metallic_roughness_texture: int = -1;  // Red=Metallic, Green=Roughness.
+
+  normal_texture: int = -1;  // Tangent space normal map.
+
+  occlusion_texture: int = -1;
+}
+
+//-----------------------------------------------------------------------------
+/// Geometry.
+///
+
 struct Vec2 {
   x: float;
   y: float;
@@ -22,17 +72,6 @@ struct Vec4 {
   w: float;
 }
 
-struct Color {
-  r: float;
-  g: float;
-  b: float;
-  a: float;
-}
-
-struct Matrix {
-  m: [float:16];
-}
-
 // This attribute layout is expected to be identical to that within
 // `impeller/scene/shaders/geometry.vert`.
 struct Vertex {
@@ -42,6 +81,27 @@ struct Vertex {
   texture_coords: Vec2;
   color: Color;
 }
+
+table UnskinnedVertexBuffer {
+  vertices: [Vertex];
+}
+
+struct SkinnedVertex {
+  vertex: Vertex;
+  /// Four joint indices corresponding to this mesh's skin transforms. These
+  /// are floats instead of ints because this vertex data is uploaded directly
+  /// to the GPU, and float attributes work for all Impeller backends.
+  joints: Vec4;
+  /// Four weight values that specify the influence of the corresponding
+  /// joints.
+  weights: Vec4;
+}
+
+table SkinnedVertexBuffer {
+  vertices: [SkinnedVertex];
+}
+
+union VertexBuffer { UnskinnedVertexBuffer, SkinnedVertexBuffer }
 
 enum IndexType:byte {
   k16Bit,
@@ -54,31 +114,69 @@ table Indices {
   type: IndexType;
 }
 
-table Texture {
-  // TODO(bdero): Allow optional image data embedding.
-  uri: string;
-}
-
-table Material {
-  base_color_factor: Color;
-  base_color_texture: Texture;
-  // TODO(bdero): PBR textures.
-}
-
 table MeshPrimitive {
-  vertices: [Vertex];
+  vertices: VertexBuffer;
   indices: Indices;
   material: Material;
 }
 
+//-----------------------------------------------------------------------------
+/// Animations.
+///
+
+table TranslationKeyframes {
+  values: [Vec3];
+}
+
+table RotationKeyframes {
+  values: [Vec4];
+}
+
+table ScaleKeyframes {
+  values: [Vec3];
+}
+
+union Keyframes { TranslationKeyframes, RotationKeyframes, ScaleKeyframes }
+
+table Channel {
+  node: int;  // Index into `Scene`->`nodes`.
+  timeline: [float];
+  keyframes: Keyframes;
+}
+
+table Animation {
+  name: string;
+  channels: [Channel];
+}
+
+table Skin {
+  joints: [int];  // Index into `Scene`->`nodes`.
+  inverse_bind_matrices: [Matrix];
+  /// The root joint of the skeleton.
+  skeleton: int;  // Index into `Scene`->`nodes`.
+}
+
+//-----------------------------------------------------------------------------
+/// Scene graph.
+///
+
+struct Matrix {
+  m: [float:16];
+}
+
 table Node {
-  children: [Node];
+  name: string;
+  children: [int];  // Index into `Scene`->`nodes`.
   transform: Matrix;
   mesh_primitives: [MeshPrimitive];
+  skin: Skin;
 }
 
 table Scene {
-  children: [Node];
+  children: [int];  // Index into `Scene`->`nodes`.
+  nodes: [Node];
+  textures: [Texture];  // Textures may be reused across different materials.
+  animations: [Animation];
 }
 
 root_type Scene;

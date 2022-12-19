@@ -73,9 +73,9 @@ TEST_P(SceneTest, FlutterLogo) {
       flutter::testing::OpenFixtureAsMapping("flutter_logo.glb.ipscene");
   ASSERT_NE(mapping, nullptr);
 
-  std::optional<Node> gltf_scene =
+  std::shared_ptr<Node> gltf_scene =
       Node::MakeFromFlatbuffer(*mapping, *allocator);
-  ASSERT_TRUE(gltf_scene.has_value());
+  ASSERT_NE(gltf_scene, nullptr);
 
   std::shared_ptr<UnlitMaterial> material = Material::MakeUnlit();
   auto color_baked = CreateTextureForFixture("flutter_logo_baked.png");
@@ -83,11 +83,12 @@ TEST_P(SceneTest, FlutterLogo) {
   material->SetVertexColorWeight(0);
 
   ASSERT_EQ(gltf_scene->GetChildren().size(), 1u);
-  ASSERT_EQ(gltf_scene->GetChildren()[0].GetMesh().GetPrimitives().size(), 1u);
-  gltf_scene->GetChildren()[0].GetMesh().GetPrimitives()[0].material = material;
+  ASSERT_EQ(gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives().size(), 1u);
+  gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives()[0].material =
+      material;
 
   auto scene = Scene(GetContext());
-  scene.GetRoot().AddChild(std::move(gltf_scene.value()));
+  scene.GetRoot().AddChild(std::move(gltf_scene));
   scene.GetRoot().SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
 
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
@@ -116,15 +117,15 @@ TEST_P(SceneTest, TwoTriangles) {
       flutter::testing::OpenFixtureAsMapping("two_triangles.glb.ipscene");
   ASSERT_NE(mapping, nullptr);
 
-  std::optional<Node> gltf_scene =
+  std::shared_ptr<Node> gltf_scene =
       Node::MakeFromFlatbuffer(*mapping, *allocator);
-  ASSERT_TRUE(gltf_scene.has_value());
+  ASSERT_NE(gltf_scene, nullptr);
 
   auto scene = Scene(GetContext());
-  scene.GetRoot().AddChild(std::move(gltf_scene.value()));
+  scene.GetRoot().AddChild(std::move(gltf_scene));
 
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
-    Node& node = scene.GetRoot().GetChildren()[0];
+    Node& node = *scene.GetRoot().GetChildren()[0];
     node.SetLocalTransform(node.GetLocalTransform() *
                            Matrix::MakeRotation(0.02, {0, 1, 0, 0}));
 

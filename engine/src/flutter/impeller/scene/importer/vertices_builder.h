@@ -57,7 +57,7 @@ class VerticesBuilder {
 
   VerticesBuilder();
 
-  void WriteFBVertices(std::vector<fb::Vertex>& vertices) const;
+  void WriteFBVertices(fb::MeshPrimitiveT& primitive) const;
 
   void SetAttributeFromBuffer(AttributeType attribute,
                               ComponentType component_type,

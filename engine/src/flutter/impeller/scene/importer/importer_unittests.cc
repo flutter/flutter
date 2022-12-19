@@ -21,21 +21,23 @@ TEST(ImporterTest, CanParseGLTF) {
   ASSERT_TRUE(ParseGLTF(*mapping, scene));
 
   ASSERT_EQ(scene.children.size(), 1u);
-  auto& node = *scene.children[0];
+  auto& node = scene.nodes[scene.children[0]];
 
-  Matrix node_transform = ToMatrix(*node.transform);
+  Matrix node_transform = ToMatrix(*node->transform);
   ASSERT_MATRIX_NEAR(node_transform, Matrix());
 
-  ASSERT_EQ(node.mesh_primitives.size(), 1u);
-  auto& mesh = *node.mesh_primitives[0];
+  ASSERT_EQ(node->mesh_primitives.size(), 1u);
+  auto& mesh = *node->mesh_primitives[0];
   ASSERT_EQ(mesh.indices->count, 918u);
 
   uint16_t first_index =
       *reinterpret_cast<uint16_t*>(mesh.indices->data.data());
   ASSERT_EQ(first_index, 45u);
 
-  ASSERT_EQ(mesh.vertices.size(), 260u);
-  auto& vertex = mesh.vertices[0];
+  ASSERT_EQ(mesh.vertices.type, fb::VertexBuffer::UnskinnedVertexBuffer);
+  auto& vertices = mesh.vertices.AsUnskinnedVertexBuffer()->vertices;
+  ASSERT_EQ(vertices.size(), 260u);
+  auto& vertex = vertices[0];
 
   Vector3 position = ToVector3(vertex.position());
   ASSERT_VECTOR3_NEAR(position, Vector3(-0.0100185, -0.522907, -0.133178));

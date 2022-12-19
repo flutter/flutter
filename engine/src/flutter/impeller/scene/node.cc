@@ -16,50 +16,76 @@
 namespace impeller {
 namespace scene {
 
-std::optional<Node> Node::MakeFromFlatbuffer(fml::Mapping& mapping,
-                                             Allocator& allocator) {
+std::shared_ptr<Node> Node::MakeFromFlatbuffer(fml::Mapping& mapping,
+                                               Allocator& allocator) {
   flatbuffers::Verifier verifier(mapping.GetMapping(), mapping.GetSize());
   if (!fb::VerifySceneBuffer(verifier)) {
-    return std::nullopt;
+    VALIDATION_LOG << "Failed to unpack scene: Scene flatbuffer is invalid.";
+    return nullptr;
   }
 
   return Node::MakeFromFlatbuffer(*fb::GetScene(mapping.GetMapping()),
                                   allocator);
 }
 
-Node Node::MakeFromFlatbuffer(const fb::Scene& scene, Allocator& allocator) {
-  Node result;
-
-  if (!scene.children()) {
-    return result;
+std::shared_ptr<Node> Node::MakeFromFlatbuffer(const fb::Scene& scene,
+                                               Allocator& allocator) {
+  auto result = std::make_shared<Node>();
+  if (!scene.nodes() || !scene.children()) {
+    return result;  // The scene is empty.
   }
-  for (const auto* child : *scene.children()) {
-    result.AddChild(Node::MakeFromFlatbuffer(*child, allocator));
+
+  // Initialize nodes for unpacking the entire scene.
+  std::vector<std::shared_ptr<Node>> scene_nodes;
+  scene_nodes.reserve(scene.nodes()->size());
+  for (size_t node_i = 0; node_i < scene.nodes()->size(); node_i++) {
+    scene_nodes.push_back(std::make_shared<Node>());
+  }
+
+  // Connect children to the root node.
+  for (int child : *scene.children()) {
+    if (child < 0 || static_cast<size_t>(child) >= scene_nodes.size()) {
+      VALIDATION_LOG << "Scene child index out of range.";
+      continue;
+    }
+    result->AddChild(scene_nodes[child]);
+  }
+  // TODO(bdero): Unpack animations.
+
+  // Unpack each node.
+  for (size_t node_i = 0; node_i < scene.nodes()->size(); node_i++) {
+    scene_nodes[node_i]->UnpackFromFlatbuffer(*scene.nodes()->Get(node_i),
+                                              scene_nodes, allocator);
   }
 
   return result;
 }
 
-Node Node::MakeFromFlatbuffer(const fb::Node& node, Allocator& allocator) {
-  Node result;
-
-  if (node.mesh_primitives()) {
+void Node::UnpackFromFlatbuffer(
+    const fb::Node& source_node,
+    const std::vector<std::shared_ptr<Node>>& scene_nodes,
+    Allocator& allocator) {
+  if (source_node.mesh_primitives()) {
     Mesh mesh;
-    for (const auto* primitives : *node.mesh_primitives()) {
+    for (const auto* primitives : *source_node.mesh_primitives()) {
       auto geometry = Geometry::MakeFromFlatbuffer(*primitives, allocator);
       mesh.AddPrimitive({geometry, Material::MakeUnlit()});
     }
-    result.SetMesh(std::move(mesh));
+    SetMesh(std::move(mesh));
   }
 
-  if (!node.children()) {
-    return result;
-  }
-  for (const auto* child : *node.children()) {
-    result.AddChild(Node::MakeFromFlatbuffer(*child, allocator));
+  if (!source_node.children()) {
+    return;
   }
 
-  return result;
+  // Wire up graph connections.
+  for (int child : *source_node.children()) {
+    if (child < 0 || static_cast<size_t>(child) >= scene_nodes.size()) {
+      VALIDATION_LOG << "Node child index out of range.";
+      continue;
+    }
+    AddChild(scene_nodes[child]);
+  }
 }
 
 Node::Node() = default;
@@ -96,24 +122,20 @@ Matrix Node::GetGlobalTransform() const {
   return local_transform_;
 }
 
-bool Node::AddChild(Node node) {
-  if (node.parent_ != nullptr) {
+bool Node::AddChild(std::shared_ptr<Node> node) {
+  // This ensures that cycles are impossible.
+  if (node->parent_ != nullptr) {
     VALIDATION_LOG
         << "Cannot add a node as a child which already has a parent.";
     return false;
   }
-  node.parent_ = this;
+  node->parent_ = this;
   children_.push_back(std::move(node));
-
-  Node& ref = children_.back();
-  for (Node& child : ref.children_) {
-    child.parent_ = &ref;
-  }
 
   return true;
 }
 
-std::vector<Node>& Node::GetChildren() {
+std::vector<std::shared_ptr<Node>>& Node::GetChildren() {
   return children_;
 }
 
@@ -131,7 +153,7 @@ bool Node::Render(SceneEncoder& encoder, const Matrix& parent_transform) const {
   mesh_.Render(encoder, transform);
 
   for (auto& child : children_) {
-    if (!child.Render(encoder, transform)) {
+    if (!child->Render(encoder, transform)) {
       return false;
     }
   }
