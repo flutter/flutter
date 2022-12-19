@@ -267,7 +267,7 @@ Container _scrim(WidgetTester tester) {
         of: find.byType(DrawerController),
         matching: find.byWidgetPredicate((Widget widget) {
           return widget is Semantics
-              && widget.properties.label == 'Dismiss';
+              && widget.properties.label == 'Scrim';
         }),
       ),
       matching: find.byType(Container),
