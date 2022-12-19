@@ -680,8 +680,7 @@ void main() {
   });
 
   testWidgets('Custom tooltip message textAlign', (WidgetTester tester) async {
-    void flutterEventListener(ObjectEvent event) => dispatchObjectEvent(event.toMap());
-    MemoryAllocations.instance.addListener(flutterEventListener);
+    _directFlutterEventsToLeakTracker();
 
     await tester.runAsync(() async {
       final Leaks leaks = await withLeakTracking(() async {
@@ -722,7 +721,7 @@ void main() {
       expect(leaks, isLeakFree);
     });
 
-    MemoryAllocations.instance.removeListener(flutterEventListener);
+    _stopDirectingFlutterEventsToLeakTracker();
   });
 
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
@@ -967,7 +966,7 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
 
     // Tooltip is dismissed after showDuration expired
@@ -1744,7 +1743,7 @@ void main() {
     expect(semanticEvents, unorderedEquals(<dynamic>[
       <String, dynamic>{
         'type': 'longPress',
-        'nodeId': findDebugSemantics(object).id,
+        'nodeId': _findDebugSemantics(object).id,
         'data': <String, dynamic>{},
       },
       <String, dynamic>{
@@ -1837,7 +1836,7 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
   });
 
@@ -1847,10 +1846,10 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureLongPress(tester, tooltip);
+    await _testGestureLongPress(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
   });
 
@@ -1860,7 +1859,7 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1870,10 +1869,10 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureLongPress(tester, tooltip);
+    await _testGestureLongPress(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1883,13 +1882,13 @@ void main() {
 
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, onTriggered: onTriggered);
     Finder tooltip = find.byType(Tooltip);
-    await testGestureLongPress(tester, tooltip);
+    await _testGestureLongPress(tester, tooltip);
     expect(onTriggeredCalled, true);
 
     onTriggeredCalled = false;
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, onTriggered: onTriggered);
     tooltip = find.byType(Tooltip);
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(onTriggeredCalled, true);
   });
 
@@ -1972,7 +1971,17 @@ Future<void> setWidgetForTooltipMode(
   );
 }
 
-Future<void> testGestureLongPress(WidgetTester tester, Finder tooltip) async {
+void _flutterEventToLeakTracker(ObjectEvent event) => dispatchObjectEvent(event.toMap());
+
+void _directFlutterEventsToLeakTracker() {
+  MemoryAllocations.instance.addListener(_flutterEventToLeakTracker);
+}
+
+void _stopDirectingFlutterEventsToLeakTracker() {
+  MemoryAllocations.instance.removeListener(_flutterEventToLeakTracker);
+}
+
+Future<void> _testGestureLongPress(WidgetTester tester, Finder tooltip) async {
   final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip));
   await tester.pump();
   await tester.pump(kLongPressTimeout);
@@ -1980,14 +1989,14 @@ Future<void> testGestureLongPress(WidgetTester tester, Finder tooltip) async {
   await tester.pump();
 }
 
-Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
+Future<void> _testGestureTap(WidgetTester tester, Finder tooltip) async {
   await tester.tap(tooltip);
   await tester.pump(const Duration(milliseconds: 10));
 }
 
-SemanticsNode findDebugSemantics(RenderObject object) {
+SemanticsNode _findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null) {
     return object.debugSemantics!;
   }
-  return findDebugSemantics(object.parent! as RenderObject);
+  return _findDebugSemantics(object.parent! as RenderObject);
 }
