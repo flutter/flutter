@@ -129,5 +129,6 @@
   "keyboardKeyMetaMacOs": "Əmr",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menyu paneli menyusu",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

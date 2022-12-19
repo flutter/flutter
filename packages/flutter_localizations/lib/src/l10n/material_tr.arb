@@ -130,5 +130,6 @@
   "keyboardKeyMetaMacOs": "Komut",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menü çubuğu menüsü",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "keyboardKeyShift": "Shift"
 }

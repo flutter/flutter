@@ -285,7 +285,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
+      // A plugin example depends on the plugin itself, and integration_test.
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 2);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
