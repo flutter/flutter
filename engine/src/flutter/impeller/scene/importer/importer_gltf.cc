@@ -93,7 +93,7 @@ static bool ProcessMeshPrimitive(const tinygltf::Model& gltf,
                                      accessor.count);            // count
     }
 
-    builder.WriteFBVertices(mesh_primitive.vertices);
+    builder.WriteFBVertices(mesh_primitive);
   }
 
   //---------------------------------------------------------------------------
@@ -136,6 +136,9 @@ static bool ProcessMeshPrimitive(const tinygltf::Model& gltf,
 static void ProcessNode(const tinygltf::Model& gltf,
                         const tinygltf::Node& in_node,
                         fb::NodeT& out_node) {
+  out_node.name = in_node.name;
+  out_node.children = in_node.children;
+
   //---------------------------------------------------------------------------
   /// Transform.
   ///
@@ -184,16 +187,6 @@ static void ProcessNode(const tinygltf::Model& gltf,
       out_node.mesh_primitives.push_back(std::move(mesh_primitive));
     }
   }
-
-  //---------------------------------------------------------------------------
-  /// Children.
-  ///
-
-  for (size_t node_i = 0; node_i < in_node.children.size(); node_i++) {
-    auto child = std::make_unique<fb::NodeT>();
-    ProcessNode(gltf, gltf.nodes[in_node.children[node_i]], *child);
-    out_node.children.push_back(std::move(child));
-  }
 }
 
 bool ParseGLTF(const fml::Mapping& source_mapping, fb::SceneT& out_scene) {
@@ -218,10 +211,12 @@ bool ParseGLTF(const fml::Mapping& source_mapping, fb::SceneT& out_scene) {
   }
 
   const tinygltf::Scene& scene = gltf.scenes[gltf.defaultScene];
-  for (size_t node_i = 0; node_i < scene.nodes.size(); node_i++) {
+  out_scene.children = scene.nodes;
+
+  for (size_t node_i = 0; node_i < gltf.nodes.size(); node_i++) {
     auto node = std::make_unique<fb::NodeT>();
-    ProcessNode(gltf, gltf.nodes[scene.nodes[node_i]], *node);
-    out_scene.children.push_back(std::move(node));
+    ProcessNode(gltf, gltf.nodes[node_i], *node);
+    out_scene.nodes.push_back(std::move(node));
   }
 
   return true;

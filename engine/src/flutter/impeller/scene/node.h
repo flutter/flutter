@@ -20,10 +20,10 @@ namespace scene {
 
 class Node final {
  public:
-  static std::optional<Node> MakeFromFlatbuffer(fml::Mapping& mapping,
-                                                Allocator& allocator);
-  static Node MakeFromFlatbuffer(const fb::Scene& scene, Allocator& allocator);
-  static Node MakeFromFlatbuffer(const fb::Node& node, Allocator& allocator);
+  static std::shared_ptr<Node> MakeFromFlatbuffer(fml::Mapping& mapping,
+                                                  Allocator& allocator);
+  static std::shared_ptr<Node> MakeFromFlatbuffer(const fb::Scene& scene,
+                                                  Allocator& allocator);
 
   Node();
   ~Node();
@@ -37,8 +37,8 @@ class Node final {
   void SetGlobalTransform(Matrix transform);
   Matrix GetGlobalTransform() const;
 
-  bool AddChild(Node child);
-  std::vector<Node>& GetChildren();
+  bool AddChild(std::shared_ptr<Node> child);
+  std::vector<std::shared_ptr<Node>>& GetChildren();
 
   void SetMesh(Mesh mesh);
   Mesh& GetMesh();
@@ -49,11 +49,19 @@ class Node final {
   Matrix local_transform_;
 
  private:
+  void UnpackFromFlatbuffer(
+      const fb::Node& node,
+      const std::vector<std::shared_ptr<Node>>& scene_nodes,
+      Allocator& allocator);
+
+  bool is_root_ = false;
   Node* parent_ = nullptr;
-  std::vector<Node> children_;
+  std::vector<std::shared_ptr<Node>> children_;
   Mesh mesh_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Node);
+
+  friend Scene;
 };
 
 }  // namespace scene
