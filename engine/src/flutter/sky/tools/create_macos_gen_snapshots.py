@@ -24,7 +24,7 @@ def main():
   parser.add_argument('--x64-out-dir', type=str)
   parser.add_argument('--arm64-out-dir', type=str)
   parser.add_argument('--armv7-out-dir', type=str)
-  parser.add_argument('--zip', action="store_true", default=False)
+  parser.add_argument('--zip', action='store_true', default=False)
 
   args = parser.parse_args()
 

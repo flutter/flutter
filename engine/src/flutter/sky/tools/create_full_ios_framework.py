@@ -13,7 +13,7 @@ import shutil
 import subprocess
 import sys
 
-from create_xcframework import create_xcframework
+from create_xcframework import create_xcframework  # pylint: disable=import-error
 
 DSYMUTIL = os.path.join(
     os.path.dirname(__file__), '..', '..', '..', 'buildtools', 'mac-x64',
@@ -39,8 +39,8 @@ def main():
   parser.add_argument('--arm64-out-dir', type=str, required=True)
   parser.add_argument('--simulator-x64-out-dir', type=str, required=True)
   parser.add_argument('--simulator-arm64-out-dir', type=str, required=False)
-  parser.add_argument('--strip', action="store_true", default=False)
-  parser.add_argument('--dsym', action="store_true", default=False)
+  parser.add_argument('--strip', action='store_true', default=False)
+  parser.add_argument('--dsym', action='store_true', default=False)
 
   args = parser.parse_args()
 
@@ -108,9 +108,10 @@ def main():
   process_framework(args, dst, framework, framework_binary)
   generate_gen_snapshot(args, dst, x64_out_dir, arm64_out_dir)
   zip_archive(dst)
+  return 0
 
 
-def create_framework(
+def create_framework(  # pylint: disable=too-many-arguments
     args, dst, framework, arm64_framework, simulator_framework,
     simulator_x64_framework, simulator_arm64_framework
 ):
@@ -122,7 +123,7 @@ def create_framework(
     return 1
 
   if not os.path.isfile(simulator_x64_dylib):
-    print('Cannot find iOS simulator dylib at %s' % simulator_dylib)
+    print('Cannot find iOS simulator dylib at %s' % simulator_x64_dylib)
     return 1
 
   shutil.rmtree(framework, True)
@@ -143,12 +144,12 @@ def create_framework(
     process_framework(
         args, dst, simulator_framework, simulator_framework_binary
     )
-    simulator_framework = simulator_framework
   else:
     simulator_framework = simulator_x64_framework
 
-  # Create XCFramework from the arm-only fat framework and the arm64/x64 simulator frameworks, or just the
-  # x64 simulator framework if only that one exists.
+  # Create XCFramework from the arm-only fat framework and the arm64/x64
+  # simulator frameworks, or just the x64 simulator framework if only that one
+  # exists.
   xcframeworks = [simulator_framework, framework]
   create_xcframework(location=dst, name='Flutter', frameworks=xcframeworks)
 
@@ -158,10 +159,12 @@ def create_framework(
       framework_binary
   ])
 
+  return 0
+
 
 def embed_codesign_configuration(config_path, contents):
-  with open(config_path, 'w') as f:
-    f.write('\n'.join(contents) + '\n')
+  with open(config_path, 'w') as file:
+    file.write('\n'.join(contents) + '\n')
 
 
 def zip_archive(dst):
@@ -189,7 +192,7 @@ def zip_archive(dst):
       'without_entitlements.txt',
   ],
                         cwd=dst)
-  if (os.path.exists(os.path.join(dst, 'Flutter.dSYM'))):
+  if os.path.exists(os.path.join(dst, 'Flutter.dSYM')):
     subprocess.check_call(['zip', '-r', 'Flutter.dSYM.zip', 'Flutter.dSYM'],
                           cwd=dst)
 
@@ -204,7 +207,7 @@ def process_framework(args, dst, framework, framework_binary):
     unstripped_out = os.path.join(dst, 'Flutter.unstripped')
     shutil.copyfile(framework_binary, unstripped_out)
 
-    subprocess.check_call(["strip", "-x", "-S", framework_binary])
+    subprocess.check_call(['strip', '-x', '-S', framework_binary])
 
 
 def generate_gen_snapshot(args, dst, x64_out_dir, arm64_out_dir):
