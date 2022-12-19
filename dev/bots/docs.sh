@@ -151,4 +151,4 @@ fi
 
 # Zip docs
 cd "$FLUTTER_ROOT/dev/docs"
-zip api_docs.zip doc
+zip -r api_docs.zip doc
