@@ -77,6 +77,7 @@ class BottomSheet extends StatefulWidget {
     this.onDragStart,
     this.onDragEnd,
     this.backgroundColor,
+    this.alignment,
     this.elevation,
     this.shape,
     this.clipBehavior,
@@ -149,6 +150,9 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Defaults to null and falls back to [Material]'s default.
   final ShapeBorder? shape;
+
+  /// Alignment of the bottom sheet when not full width
+  Alignment? alignment;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -296,7 +300,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
     if (constraints != null) {
       bottomSheet = Align(
-        alignment: Alignment.bottomCenter,
+        alignment: widget.alignment ?? Alignment.bottomCenter,
         heightFactor: 1.0,
         child: ConstrainedBox(
           constraints: constraints,
