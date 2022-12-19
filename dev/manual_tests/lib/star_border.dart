@@ -228,28 +228,6 @@ class OptionModel extends ChangeNotifier {
   }
 }
 
-class LabeledCheckbox extends StatelessWidget {
-  const LabeledCheckbox({super.key, required this.label, this.onChanged, this.value});
-
-  final String label;
-  final ValueChanged<bool?>? onChanged;
-  final bool? value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Checkbox(
-          onChanged: onChanged,
-          value: value,
-        ),
-        Text(label),
-      ],
-    );
-  }
-}
-
 class Options extends StatefulWidget {
   const Options(this.model, {super.key});
 
