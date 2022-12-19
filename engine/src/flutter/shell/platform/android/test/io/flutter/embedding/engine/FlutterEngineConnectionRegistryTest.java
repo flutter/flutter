@@ -40,7 +40,7 @@ public class FlutterEngineConnectionRegistryTest {
     FakeFlutterPlugin fakePlugin2 = new FakeFlutterPlugin();
 
     FlutterEngineConnectionRegistry registry =
-        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
 
     // Verify that the registry doesn't think it contains our plugin yet.
     assertFalse(registry.has(fakePlugin1.getClass()));
@@ -86,7 +86,7 @@ public class FlutterEngineConnectionRegistryTest {
 
     // Set up the environment to get the required internal data
     FlutterEngineConnectionRegistry registry =
-        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
     FakeActivityAwareFlutterPlugin fakePlugin = new FakeActivityAwareFlutterPlugin();
     registry.add(fakePlugin);
     registry.attachToActivity(appComponent, lifecycle);
@@ -129,7 +129,7 @@ public class FlutterEngineConnectionRegistryTest {
 
     // Test attachToActivity with an Activity that has no Intent.
     FlutterEngineConnectionRegistry registry =
-        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader);
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
     registry.attachToActivity(appComponent, mock(Lifecycle.class));
     verify(platformViewsController).setSoftwareRendering(false);
 
