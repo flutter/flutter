@@ -53,7 +53,17 @@ std::shared_ptr<VertexBufferGeometry> Geometry::MakeFromFlatbuffer(
       break;
   }
 
-  const size_t vertices_bytes = mesh.vertices()->size() * sizeof(fb::Vertex);
+  if (mesh.vertices_type() == fb::VertexBuffer::SkinnedVertexBuffer) {
+    VALIDATION_LOG << "Skinned meshes not yet supported.";
+    return nullptr;
+  }
+  if (mesh.vertices_type() != fb::VertexBuffer::UnskinnedVertexBuffer) {
+    VALIDATION_LOG << "Invalid vertex buffer type.";
+    return nullptr;
+  }
+
+  const auto* vertices = mesh.vertices_as_UnskinnedVertexBuffer()->vertices();
+  const size_t vertices_bytes = vertices->size() * sizeof(fb::Vertex);
   const size_t indices_bytes = mesh.indices()->data()->size();
   if (vertices_bytes == 0 || indices_bytes == 0) {
     return nullptr;
@@ -67,7 +77,7 @@ std::shared_ptr<VertexBufferGeometry> Geometry::MakeFromFlatbuffer(
   buffer->SetLabel("Mesh vertices+indices");
 
   const uint8_t* vertices_start =
-      reinterpret_cast<const uint8_t*>(mesh.vertices()->Get(0));
+      reinterpret_cast<const uint8_t*>(vertices->Get(0));
   const uint8_t* indices_start =
       reinterpret_cast<const uint8_t*>(mesh.indices()->data()->Data());
 

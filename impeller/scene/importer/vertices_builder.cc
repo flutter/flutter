@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <limits>
+#include <memory>
 #include <type_traits>
 
 #include "flutter/fml/logging.h"
@@ -18,13 +19,15 @@ namespace importer {
 
 VerticesBuilder::VerticesBuilder() = default;
 
-void VerticesBuilder::WriteFBVertices(std::vector<fb::Vertex>& vertices) const {
-  vertices.resize(0);
+void VerticesBuilder::WriteFBVertices(fb::MeshPrimitiveT& primitive) const {
+  auto vertex_buffer = fb::UnskinnedVertexBufferT();
+  vertex_buffer.vertices.resize(0);
   for (auto& v : vertices_) {
-    vertices.push_back(fb::Vertex(
+    vertex_buffer.vertices.push_back(fb::Vertex(
         ToFBVec3(v.position), ToFBVec3(v.normal), ToFBVec4(v.tangent),
         ToFBVec2(v.texture_coords), ToFBColor(v.color)));
   }
+  primitive.vertices.Set(std::move(vertex_buffer));
 }
 
 /// @brief  Reads a numeric component from `source` and returns a 32bit float.

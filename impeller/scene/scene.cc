@@ -16,7 +16,9 @@ namespace impeller {
 namespace scene {
 
 Scene::Scene(std::shared_ptr<Context> context)
-    : scene_context_(std::make_unique<SceneContext>(std::move(context))){};
+    : scene_context_(std::make_unique<SceneContext>(std::move(context))) {
+  root_.is_root_ = true;
+};
 
 Node& Scene::GetRoot() {
   return root_;
