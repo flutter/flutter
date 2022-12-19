@@ -605,8 +605,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// by its parent (usually a [Scaffold]).
   ///
   /// If constraints are specified (either in this property or in the
-  /// theme), the bottom sheet will be aligned to the bottom-center of
-  /// the available space. Otherwise, no alignment is applied.
+  /// theme), the bottom sheet will be aligned to [alignment] if passed in, 
+  /// or bottom-center in not passed in, of the available space. 
+  /// Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
 
   /// Specifies the color of the modal barrier that darkens everything below the
