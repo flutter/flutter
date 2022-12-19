@@ -199,6 +199,47 @@ void main() {
     expect(find.text('Label10'), findsNothing);
    });
 
+  testWidgets('Safe Area test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const double windowHeight = 300;
+    widgetSetup(tester, 500, windowHeight: windowHeight);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          theme: ThemeData.light(),
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: NavigationDrawer(
+                  children: <Widget>[
+                    for(int i = 0; i < 10; i++)
+                      NavigationDrawerDestination(
+                        icon: const Icon(Icons.ac_unit),
+                        label: Text('Label$i'),
+                      ),
+                  ],
+                  onDestinationSelected: (int i) {},
+                ),
+            body: Container(),
+          ),
+        ),
+      ),
+    );
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(); 
+    await tester.pump(const Duration(seconds: 1));
+
+    // Safe area padding at top and side.
+    expect(
+      tester.getTopLeft(find.widgetWithText(NavigationDrawerDestination,'Label0')),
+      const Offset(20.0, 20.0),
+    );
+
+    // No Safe area padding at bottom.
+    expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, windowHeight);
+   });
+
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());

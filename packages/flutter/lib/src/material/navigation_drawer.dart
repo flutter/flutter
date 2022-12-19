@@ -165,6 +165,7 @@ class NavigationDrawer extends StatelessWidget {
       surfaceTintColor: surfaceTintColor,
       elevation: elevation,
       child: SafeArea(
+        bottom: false,
         child: ListView(
           children: wrappedChildren,
         ),
