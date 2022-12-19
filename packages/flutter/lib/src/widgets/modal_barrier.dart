@@ -353,7 +353,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// "Double tap to close bottom sheet".
   ///
   /// If this value is null, the default onTapHint will be applied, resulting
-  /// in the annoucement of 'Double tap to activate'.
+  /// in the announcement of 'Double tap to activate'.
   final String? semanticsOnTapHint;
 
   @override

@@ -790,7 +790,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
   /// The semantic hint text that informs users what will happen if they
-  /// tap on the widget.annouced in the format of 'Double tap to ...'.
+  /// tap on the widget. Announced in the format of 'Double tap to ...'.
   ///
   /// If the field is null, the default hint will be used, which results in
   /// announcement of 'Double tap to activate'.
