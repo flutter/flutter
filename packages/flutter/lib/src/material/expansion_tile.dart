@@ -425,7 +425,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               trailing: widget.trailing ?? _buildTrailingIcon(context),
             ),
           ),
-          ClipRect(
+          Flexible(child: ClipRect(
             child: Align(
               alignment: widget.expandedAlignment
                 ?? expansionTileTheme.expandedAlignment
@@ -433,6 +433,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               heightFactor: _heightFactor.value,
               child: child,
             ),
+           ),
           ),
         ],
       ),

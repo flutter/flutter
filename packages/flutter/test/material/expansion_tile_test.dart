@@ -666,4 +666,35 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
   });
+
+  testWidgets('ExpansionTile should allow flex widgets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              title: const Text('title'),
+                children: <Widget>[
+                  Expanded(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: <Widget>[
+                        for (int i = 0; i < 300; ++i)
+                          ListTile(title: Text('Tile $i')),
+                      ],
+                    ),
+                  ),
+                ])
+          ),
+        ),
+      ),
+    );
+  final Finder expansionTile = find.byType(ExpansionTile);
+  expect(expansionTile, findsOneWidget);
+  await tester.tap(find.text('title'));
+  await tester.pumpAndSettle();
+  final Finder listView = find.byType(ListView);
+  expect(listView, findsOneWidget);
+  });
+
 }
