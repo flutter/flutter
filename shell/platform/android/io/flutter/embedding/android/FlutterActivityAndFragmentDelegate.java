@@ -90,6 +90,7 @@ import java.util.List;
   private boolean isFirstFrameRendered;
   private boolean isAttached;
   private Integer previousVisibility;
+  @Nullable private FlutterEngineGroup engineGroup;
 
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
@@ -109,8 +110,13 @@ import java.util.List;
       };
 
   FlutterActivityAndFragmentDelegate(@NonNull Host host) {
+    this(host, null);
+  }
+
+  FlutterActivityAndFragmentDelegate(@NonNull Host host, @Nullable FlutterEngineGroup engineGroup) {
     this.host = host;
     this.isFirstFrameRendered = false;
+    this.engineGroup = engineGroup;
   }
 
   /**
@@ -220,6 +226,21 @@ import java.util.List;
     return activity;
   }
 
+  private FlutterEngineGroup.Options addEntrypointOptions(FlutterEngineGroup.Options options) {
+    String appBundlePathOverride = host.getAppBundlePath();
+    if (appBundlePathOverride == null || appBundlePathOverride.isEmpty()) {
+      appBundlePathOverride = FlutterInjector.instance().flutterLoader().findAppBundlePath();
+    }
+
+    DartExecutor.DartEntrypoint dartEntrypoint =
+        new DartExecutor.DartEntrypoint(
+            appBundlePathOverride, host.getDartEntrypointFunctionName());
+    return options
+        .setDartEntrypoint(dartEntrypoint)
+        .setInitialRoute(host.getInitialRoute())
+        .setDartEntrypointArgs(host.getDartEntrypointArgs());
+  }
+
   /**
    * Obtains a reference to a FlutterEngine to back this delegate and its {@code host}.
    *
@@ -277,17 +298,9 @@ import java.util.List;
                 + "'");
       }
 
-      String appBundlePathOverride = host.getAppBundlePath();
-      if (appBundlePathOverride == null || appBundlePathOverride.isEmpty()) {
-        appBundlePathOverride = FlutterInjector.instance().flutterLoader().findAppBundlePath();
-      }
-
-      DartExecutor.DartEntrypoint dartEntrypoint =
-          new DartExecutor.DartEntrypoint(
-              appBundlePathOverride, host.getDartEntrypointFunctionName());
       flutterEngine =
           flutterEngineGroup.createAndRunEngine(
-              host.getContext(), dartEntrypoint, host.getInitialRoute());
+              addEntrypointOptions(new FlutterEngineGroup.Options(host.getContext())));
       isFlutterEngineFromHost = false;
       return;
     }
@@ -298,12 +311,17 @@ import java.util.List;
         TAG,
         "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
             + " this FlutterFragment.");
+
+    FlutterEngineGroup group =
+        engineGroup == null
+            ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray())
+            : engineGroup;
     flutterEngine =
-        new FlutterEngine(
-            host.getContext(),
-            host.getFlutterShellArgs().toArray(),
-            /*automaticallyRegisterPlugins=*/ false,
-            /*willProvideRestorationData=*/ host.shouldRestoreAndSaveState());
+        group.createAndRunEngine(
+            addEntrypointOptions(
+                new FlutterEngineGroup.Options(host.getContext())
+                    .setAutomaticallyRegisterPlugins(false)
+                    .setWaitForRestorationData(host.shouldRestoreAndSaveState())));
     isFlutterEngineFromHost = false;
   }
 

@@ -247,10 +247,14 @@ public class FlutterActivityAndFragmentDelegateTest {
     FlutterEngineGroup flutterEngineGroup = mock(FlutterEngineGroup.class);
     FlutterEngineGroupCache.getInstance().put("my_flutter_engine_group", flutterEngineGroup);
 
+    List<String> entryPointArgs = new ArrayList<>();
+    entryPointArgs.add("entrypoint-arg");
+
     // Adjust fake host to request cached engine group.
     when(mockHost.getCachedEngineGroupId()).thenReturn("my_flutter_engine_group");
     when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(null);
     when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
+    when(mockHost.getDartEntrypointArgs()).thenReturn(entryPointArgs);
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
@@ -263,8 +267,15 @@ public class FlutterActivityAndFragmentDelegateTest {
     // event.
     // Note: "/fake/path" and "main" come from `setUp()`.
     DartExecutor.DartEntrypoint entrypoint = new DartExecutor.DartEntrypoint("/fake/path", "main");
-    verify(flutterEngineGroup, times(1))
-        .createAndRunEngine(mockHost.getContext(), entrypoint, mockHost.getInitialRoute());
+    ArgumentCaptor<FlutterEngineGroup.Options> optionsCaptor =
+        ArgumentCaptor.forClass(FlutterEngineGroup.Options.class);
+    verify(flutterEngineGroup, times(1)).createAndRunEngine(optionsCaptor.capture());
+    assertEquals(mockHost.getContext(), optionsCaptor.getValue().getContext());
+    assertEquals(entrypoint, optionsCaptor.getValue().getDartEntrypoint());
+    assertEquals(mockHost.getInitialRoute(), optionsCaptor.getValue().getInitialRoute());
+    assertNotNull(optionsCaptor.getValue().getDartEntrypointArgs());
+    assertEquals(1, optionsCaptor.getValue().getDartEntrypointArgs().size());
+    assertEquals("entrypoint-arg", optionsCaptor.getValue().getDartEntrypointArgs().get(0));
   }
 
   @Test(expected = IllegalStateException.class)
@@ -1157,6 +1168,22 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onCreateView(null, null, null, 0, shouldDelayFirstAndroidViewDraw);
 
     assertNull(delegate.activePreDrawListener);
+  }
+
+  @Test
+  public void usesFlutterEngineGroup() {
+    FlutterEngineGroup mockEngineGroup = mock(FlutterEngineGroup.class);
+    when(mockEngineGroup.createAndRunEngine(any(FlutterEngineGroup.Options.class)))
+        .thenReturn(mockFlutterEngine);
+    FlutterActivityAndFragmentDelegate.Host host =
+        mock(FlutterActivityAndFragmentDelegate.Host.class);
+    when(mockHost.getContext()).thenReturn(ctx);
+
+    FlutterActivityAndFragmentDelegate delegate =
+        new FlutterActivityAndFragmentDelegate(mockHost, mockEngineGroup);
+    delegate.onAttach(ctx);
+    FlutterEngine engineUnderTest = delegate.getFlutterEngine();
+    assertEquals(engineUnderTest, mockFlutterEngine);
   }
 
   /**
