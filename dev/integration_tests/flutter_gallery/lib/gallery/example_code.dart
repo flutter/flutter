@@ -117,7 +117,7 @@ DropdownButton<String>(
 
 // START buttons_icon
 // Member variable holding toggle value.
-bool value = true;
+late bool value = true;
 
 // Toggleable icon button.
 IconButton(
