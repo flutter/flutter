@@ -475,7 +475,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         ],
       ),
     );
-  } 
+  }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
