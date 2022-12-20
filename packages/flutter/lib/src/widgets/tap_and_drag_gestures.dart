@@ -25,7 +25,7 @@ double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
 //   state as long as it continues to track a pointer.
 // * If a [PointerMoveEvent] is tracked that has moved a sufficient global distance
 //   from the initial [PointerDownEvent] and it came before a [PointerUpEvent], then
-//   this recognizer moves from the [possible] state to [accepted].
+//   when this recognizer wins the arena, it will move from the [possible] state to [accepted].
 // * If a [PointerUpEvent] is tracked before the pointer has moved a sufficient global
 //   distance to be considered a drag, then this recognizer moves from the [possible]
 //   state to [ready].
@@ -667,13 +667,12 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// screen) or a drag (e.g. if the pointer was not dragged far enough to
 /// be considered a drag.
 ///
-/// It will not immediately declare victory for every tap that it
-/// recognizes, but it will declare victory for every drag it recognizes.
+/// It will not immediately declare victory for every tap or drag that it
+/// recognizes.
 ///
 /// The recognizer will declare victory when all other recognizer's in
 /// the arena have lost, if the timer of [kPressTimeout] elapses and a tap
-/// series greater than 1 is being tracked, or until the pointer has moved
-/// a sufficient global distance from the origin to be considered a drag.
+/// series greater than 1 is being tracked.
 ///
 /// If this recognizer loses the arena (either by declaring defeat or by
 /// another recognizer declaring victory) while the pointer is contacting the
@@ -693,8 +692,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 ///
 /// When competing against [DragGestureRecognizer], if the pointer does not move a sufficient
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
-/// pointer does travel enough distance then the recognizer that entered the arena first will win.
-/// The gesture detected in this case is a drag.
+/// pointer does travel enough distance then the [TapAndDragGestureRecognizer] will lose because
+/// the [DragGestureRecognizer] will declare self-victory when the drag threshold is met.
 class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
@@ -957,12 +956,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _checkTapDown(currentDown!);
     }
 
-    // resolve(GestureDisposition.accepted) may be called when the [PointerMoveEvent] has
-    // moved a sufficient global distance.
-    if (_dragState == _DragState.accepted) {
-      if (_start != null) {
-        _acceptDrag(_start!);
-      }
+    if (_start != null) {
+      _acceptDrag(_start!);
     }
 
     if (currentUp != null) {
@@ -986,7 +981,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
             if (currentDown != null) {
-              _dragState = _DragState.accepted;
               _acceptDrag(currentDown!);
               _checkDragEnd();
             }
@@ -1045,7 +1039,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _checkDrag(event);
 
         // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
-        // received.
+        // received that moves the pointer a sufficient global distance to be considered a drag.
         if (_start != null && _sentTapDown) {
           _acceptDrag(_start!);
         }
@@ -1088,6 +1082,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   String get debugDescription => 'tap_and_drag';
 
   void _acceptDrag(PointerEvent event) {
+    _dragState = _DragState.accepted;
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
     }
@@ -1116,8 +1111,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     ).distance * 1.sign;
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
       _start = event;
-      _dragState = _DragState.accepted;
-      resolve(GestureDisposition.accepted);
     }
   }
 
