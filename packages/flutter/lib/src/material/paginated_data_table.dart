@@ -73,7 +73,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.onSelectAll,
     @Deprecated(
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
-      'This feature was deprecated after v3.5.0-10.0.pre.',
+      'This feature was deprecated after v3.7.0-5.0.pre.',
     )
     double? dataRowHeight,
     double? dataRowMinHeight,
@@ -170,7 +170,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// specified.
   @Deprecated(
     'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
-    'This feature was deprecated after v3.5.0-10.0.pre.',
+    'This feature was deprecated after v3.7.0-5.0.pre.',
   )
   double? get dataRowHeight => dataRowMinHeight == dataRowMaxHeight ? dataRowMinHeight : null;
 
