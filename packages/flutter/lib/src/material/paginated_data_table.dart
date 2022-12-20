@@ -103,7 +103,7 @@ class PaginatedDataTable extends StatefulWidget {
        assert(headingRowHeight != null),
        assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.'),
+         'dataRowHeight $dataRowHeight must not be set if dataRowMinHeight $dataRowMinHeight or dataRowMaxHeight $dataRowMaxHeight are set.'),
        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight ?? kMinInteractiveDimension,
        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight ?? kMinInteractiveDimension,
        assert(horizontalMargin != null),

@@ -57,7 +57,7 @@ class DataTableThemeData with Diagnosticable {
     this.checkboxHorizontalMargin,
   }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.'),
+         'dataRowHeight $dataRowHeight must not be set if dataRowMinHeight $dataRowMinHeight or dataRowMaxHeight $dataRowMaxHeight are set.'),
        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
@@ -154,7 +154,6 @@ class DataTableThemeData with Diagnosticable {
     return DataTableThemeData(
       decoration: Decoration.lerp(a.decoration, b.decoration, t),
       dataRowColor: MaterialStateProperty.lerp<Color?>(a.dataRowColor, b.dataRowColor, t, Color.lerp),
-      dataRowHeight: lerpDouble(a.dataRowHeight, b.dataRowHeight, t),
       dataRowMinHeight: lerpDouble(a.dataRowMinHeight, b.dataRowMinHeight, t),
       dataRowMaxHeight: lerpDouble(a.dataRowMaxHeight, b.dataRowMaxHeight, t),
       dataTextStyle: TextStyle.lerp(a.dataTextStyle, b.dataTextStyle, t),
@@ -172,7 +171,6 @@ class DataTableThemeData with Diagnosticable {
   int get hashCode => Object.hash(
     decoration,
     dataRowColor,
-    dataRowHeight,
     dataRowMinHeight,
     dataRowMaxHeight,
     dataTextStyle,
@@ -196,7 +194,6 @@ class DataTableThemeData with Diagnosticable {
     return other is DataTableThemeData
       && other.decoration == decoration
       && other.dataRowColor == dataRowColor
-      && other.dataRowHeight == dataRowHeight
       && other.dataRowMinHeight == dataRowMinHeight
       && other.dataRowMaxHeight == dataRowMaxHeight
       && other.dataTextStyle == dataTextStyle
@@ -214,7 +211,6 @@ class DataTableThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
-    properties.add(DoubleProperty('dataRowHeight', dataRowHeight, defaultValue: null));
     properties.add(DoubleProperty('dataRowMinHeight', dataRowMinHeight, defaultValue: null));
     properties.add(DoubleProperty('dataRowMaxHeight', dataRowMaxHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('dataTextStyle', dataTextStyle, defaultValue: null));

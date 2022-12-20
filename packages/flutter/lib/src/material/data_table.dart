@@ -424,7 +424,7 @@ class DataTable extends StatelessWidget {
        assert(clipBehavior != null),
        assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight must not be set if dataRowMinHeight or dataRowMaxHeight are set.'),
+         'dataRowHeight $dataRowHeight must not be set if dataRowMinHeight $dataRowMinHeight or dataRowMaxHeight $dataRowMaxHeight are set.'),
        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
        _onlyTextColumn = _initOnlyTextColumn(columns);

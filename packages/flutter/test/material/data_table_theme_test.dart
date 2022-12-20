@@ -96,20 +96,6 @@ void main() {
     expect(description[11], 'checkboxHorizontalMargin: 6.0');
   });
 
-  testWidgets('DataTableThemeData implements debugFillProperties - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const DataTableThemeData(
-      dataRowHeight: 51.0,
-    ).debugFillProperties(builder);
-
-    final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
-
-    expect(description[0], 'dataRowHeight: 51.0');
-  });
-
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
