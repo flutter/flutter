@@ -418,9 +418,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: SizedBox(
-          width: 0.0,
-          height: 0.0,
+        child: SizedBox.shrink(
           child: PageView(
             children: kStates.map<Widget>((String state) => Text(state)).toList(),
           ),
