@@ -167,7 +167,7 @@ void main() {
         child: ListView(
           itemExtent: 200.0,
           children: List<Widget>.generate(20, (int i) {
-            return Container(
+            return ColoredBox(
               color: Colors.green,
               child: Text('$i'),
             );
@@ -176,7 +176,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box.size.height, equals(200.0));
 
     expect(find.text('0'), findsOneWidget);

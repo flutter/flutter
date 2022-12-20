@@ -52,7 +52,7 @@ void main() {
         final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
-          Container(
+          ColoredBox(
             key: outerKey,
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(

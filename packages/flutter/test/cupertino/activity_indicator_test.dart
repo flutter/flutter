@@ -37,9 +37,9 @@ void main() {
           data: const MediaQueryData(),
           child: RepaintBoundary(
             key: key,
-            child: Container(
+            child: const ColoredBox(
               color: CupertinoColors.white,
-              child: const CupertinoActivityIndicator(
+              child: CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
               ),
@@ -60,9 +60,9 @@ void main() {
           data: const MediaQueryData(platformBrightness: Brightness.dark),
           child: RepaintBoundary(
             key: key,
-            child: Container(
+            child: const ColoredBox(
               color: CupertinoColors.black,
-              child: const CupertinoActivityIndicator(
+              child: CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
               ),
@@ -84,9 +84,9 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(
+            child: CupertinoActivityIndicator.partiallyRevealed(
               progress: 0,
             ),
           ),
@@ -106,9 +106,9 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(
+            child: CupertinoActivityIndicator.partiallyRevealed(
               progress: 0.5,
             ),
           ),
@@ -128,9 +128,9 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(),
+            child: CupertinoActivityIndicator.partiallyRevealed(),
           ),
         ),
       ),
@@ -165,9 +165,9 @@ void main() {
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator(
+            child: CupertinoActivityIndicator(
               animating: false,
               color: Color(0xFF5D3FD3),
               radius: 100,

@@ -56,9 +56,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   selected = !selected;
                 });
               },
-              child: Container(
+              child: const ColoredBox(
                 color: Colors.blue,
-                child: const Center(child: Text('Tap me')),
+                child: Center(child: Text('Tap me')),
               ),
             ),
           ),
