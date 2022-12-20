@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list_matrix_clip_tracker.h"
 #include "gtest/gtest.h"
+#include "third_party/skia/include/core/SkPath.h"
 
 namespace flutter {
 namespace testing {
@@ -223,6 +224,128 @@ TEST(DisplayListMatrixClipTracker, Rotate) {
   ASSERT_EQ(tracker2.local_cull_rect(), local_cull_rect);
   ASSERT_EQ(tracker2.matrix_3x3(), rotated_matrix);
   ASSERT_EQ(tracker2.matrix_4x4(), rotated_m44);
+}
+
+TEST(DisplayListMatrixClipTracker, Transform2DAffine) {
+  const SkRect cull_rect = SkRect::MakeLTRB(20, 20, 60, 60);
+  const SkMatrix matrix = SkMatrix::Scale(4, 4);
+  const SkM44 m44 = SkM44::Scale(4, 4);
+
+  const SkMatrix transformed_matrix =
+      SkMatrix::Concat(matrix, SkMatrix::MakeAll(2, 0, 5,  //
+                                                 0, 2, 6,  //
+                                                 0, 0, 1));
+  const SkM44 transformed_m44 = SkM44(transformed_matrix);
+  const SkRect local_cull_rect = SkRect::MakeLTRB(0, -0.5, 5, 4.5);
+
+  DisplayListMatrixClipTracker tracker1(cull_rect, matrix);
+  DisplayListMatrixClipTracker tracker2(cull_rect, m44);
+  tracker1.transform2DAffine(2, 0, 5,  //
+                             0, 2, 6);
+  tracker2.transform2DAffine(2, 0, 5,  //
+                             0, 2, 6);
+  ASSERT_FALSE(tracker1.using_4x4_matrix());
+  ASSERT_EQ(tracker1.device_cull_rect(), cull_rect);
+  ASSERT_EQ(tracker1.local_cull_rect(), local_cull_rect);
+  ASSERT_EQ(tracker1.matrix_3x3(), transformed_matrix);
+  ASSERT_EQ(tracker1.matrix_4x4(), transformed_m44);
+
+  ASSERT_FALSE(tracker2.using_4x4_matrix());
+  ASSERT_EQ(tracker2.device_cull_rect(), cull_rect);
+  ASSERT_EQ(tracker2.local_cull_rect(), local_cull_rect);
+  ASSERT_EQ(tracker2.matrix_3x3(), transformed_matrix);
+  ASSERT_EQ(tracker2.matrix_4x4(), transformed_m44);
+}
+
+TEST(DisplayListMatrixClipTracker, TransformFullPerspectiveUsing3x3Matrix) {
+  const SkRect cull_rect = SkRect::MakeLTRB(20, 20, 60, 60);
+  const SkMatrix matrix = SkMatrix::Scale(4, 4);
+  const SkM44 m44 = SkM44::Scale(4, 4);
+
+  const SkMatrix transformed_matrix =
+      SkMatrix::Concat(matrix, SkMatrix::MakeAll(2, 0, 5,  //
+                                                 0, 2, 6,  //
+                                                 0, 0, 1));
+  const SkM44 transformed_m44 = SkM44(transformed_matrix);
+  const SkRect local_cull_rect = SkRect::MakeLTRB(0, -0.5, 5, 4.5);
+
+  DisplayListMatrixClipTracker tracker1(cull_rect, matrix);
+  DisplayListMatrixClipTracker tracker2(cull_rect, m44);
+  tracker1.transformFullPerspective(2, 0, 0, 5,  //
+                                    0, 2, 0, 6,  //
+                                    0, 0, 1, 0,  //
+                                    0, 0, 0, 1);
+  tracker2.transformFullPerspective(2, 0, 0, 5,  //
+                                    0, 2, 0, 6,  //
+                                    0, 0, 1, 0,  //
+                                    0, 0, 0, 1);
+  ASSERT_FALSE(tracker1.using_4x4_matrix());
+  ASSERT_EQ(tracker1.device_cull_rect(), cull_rect);
+  ASSERT_EQ(tracker1.local_cull_rect(), local_cull_rect);
+  ASSERT_EQ(tracker1.matrix_3x3(), transformed_matrix);
+  ASSERT_EQ(tracker1.matrix_4x4(), transformed_m44);
+
+  ASSERT_FALSE(tracker2.using_4x4_matrix());
+  ASSERT_EQ(tracker2.device_cull_rect(), cull_rect);
+  ASSERT_EQ(tracker2.local_cull_rect(), local_cull_rect);
+  ASSERT_EQ(tracker2.matrix_3x3(), transformed_matrix);
+  ASSERT_EQ(tracker2.matrix_4x4(), transformed_m44);
+}
+
+TEST(DisplayListMatrixClipTracker, TransformFullPerspectiveUsing4x4Matrix) {
+  const SkRect cull_rect = SkRect::MakeLTRB(20, 20, 60, 60);
+  const SkMatrix matrix = SkMatrix::Scale(4, 4);
+  const SkM44 m44 = SkM44::Scale(4, 4);
+
+  const SkM44 transformed_m44 = SkM44(m44, SkM44(2, 0, 0, 5,  //
+                                                 0, 2, 0, 6,  //
+                                                 0, 0, 1, 7,  //
+                                                 0, 0, 0, 1));
+  const SkRect local_cull_rect = SkRect::MakeLTRB(0, -0.5, 5, 4.5);
+
+  DisplayListMatrixClipTracker tracker1(cull_rect, matrix);
+  DisplayListMatrixClipTracker tracker2(cull_rect, m44);
+  tracker1.transformFullPerspective(2, 0, 0, 5,  //
+                                    0, 2, 0, 6,  //
+                                    0, 0, 1, 7,  //
+                                    0, 0, 0, 1);
+  tracker2.transformFullPerspective(2, 0, 0, 5,  //
+                                    0, 2, 0, 6,  //
+                                    0, 0, 1, 7,  //
+                                    0, 0, 0, 1);
+  ASSERT_TRUE(tracker1.using_4x4_matrix());
+  ASSERT_EQ(tracker1.device_cull_rect(), cull_rect);
+  ASSERT_EQ(tracker1.local_cull_rect(), local_cull_rect);
+  ASSERT_EQ(tracker1.matrix_4x4(), transformed_m44);
+
+  ASSERT_TRUE(tracker2.using_4x4_matrix());
+  ASSERT_EQ(tracker2.device_cull_rect(), cull_rect);
+  ASSERT_EQ(tracker2.local_cull_rect(), local_cull_rect);
+  ASSERT_EQ(tracker2.matrix_4x4(), transformed_m44);
+}
+
+TEST(DisplayListMatrixClipTracker, ClipPathWithInvertFillType) {
+  SkRect cull_rect = SkRect::MakeLTRB(0, 0, 100.0, 100.0);
+  DisplayListMatrixClipTracker builder(cull_rect, SkMatrix::I());
+  SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
+  clip.setFillType(SkPathFillType::kInverseWinding);
+  builder.clipPath(clip, SkClipOp::kIntersect, false);
+
+  ASSERT_EQ(builder.local_cull_rect(), cull_rect);
+  ASSERT_EQ(builder.device_cull_rect(), cull_rect);
+}
+
+TEST(DisplayListMatrixClipTracker, DiffClipPathWithInvertFillType) {
+  SkRect cull_rect = SkRect::MakeLTRB(0, 0, 100.0, 100.0);
+  DisplayListMatrixClipTracker tracker(cull_rect, SkMatrix::I());
+
+  SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
+  clip.setFillType(SkPathFillType::kInverseWinding);
+  SkRect clip_bounds = SkRect::MakeLTRB(8.2, 9.3, 22.4, 27.7);
+  tracker.clipPath(clip, SkClipOp::kDifference, false);
+
+  ASSERT_EQ(tracker.local_cull_rect(), clip_bounds);
+  ASSERT_EQ(tracker.device_cull_rect(), clip_bounds);
 }
 
 }  // namespace testing
