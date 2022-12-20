@@ -1565,14 +1565,11 @@ class LogMessage {
 }
 
 /// The method by which the Flutter app was launched.
-class LaunchMode {
+enum LaunchMode {
+  run._('run'),
+  attach._('attach');
+
   const LaunchMode._(this._value);
-
-  /// The app was launched via `flutter run`.
-  static const LaunchMode run = LaunchMode._('run');
-
-  /// The app was launched via `flutter attach`.
-  static const LaunchMode attach = LaunchMode._('attach');
 
   final String _value;
 

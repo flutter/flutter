@@ -5,6 +5,7 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
@@ -319,16 +320,134 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // See scaffold.dart
 
+typedef _SizeChangeCallback<Size> = void Function(Size);
 
-// MODAL BOTTOM SHEETS
-class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetLayout(this.progress, this.isScrollControlled);
+class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 
-  final double progress;
+  const _BottomSheetLayoutWithSizeListener({
+    required this.animationValue,
+    required this.isScrollControlled,
+    required this.onChildSizeChanged,
+    super.child,
+  }) : assert(animationValue != null);
+
+  final double animationValue;
   final bool isScrollControlled;
+  final _SizeChangeCallback<Size> onChildSizeChanged;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  _RenderBottomSheetLayoutWithSizeListener createRenderObject(BuildContext context) {
+    return _RenderBottomSheetLayoutWithSizeListener(
+      animationValue: animationValue,
+      isScrollControlled: isScrollControlled,
+      onChildSizeChanged: onChildSizeChanged,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBottomSheetLayoutWithSizeListener renderObject) {
+    renderObject.onChildSizeChanged = onChildSizeChanged;
+    renderObject.animationValue = animationValue;
+    renderObject.isScrollControlled = isScrollControlled;
+  }
+}
+
+class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
+  _RenderBottomSheetLayoutWithSizeListener({
+    RenderBox? child,
+    required _SizeChangeCallback<Size> onChildSizeChanged,
+    required double animationValue,
+    required bool isScrollControlled,
+  }) : assert(animationValue != null),
+       _animationValue = animationValue,
+       _isScrollControlled = isScrollControlled,
+       _onChildSizeChanged = onChildSizeChanged,
+       super(child);
+
+  Size _lastSize = Size.zero;
+
+  _SizeChangeCallback<Size> get onChildSizeChanged => _onChildSizeChanged;
+  _SizeChangeCallback<Size> _onChildSizeChanged;
+    set onChildSizeChanged(_SizeChangeCallback<Size> newCallback) {
+    assert(newCallback != null);
+    if (_onChildSizeChanged == newCallback) {
+      return;
+    }
+
+    _onChildSizeChanged = newCallback;
+    markNeedsLayout();
+  }
+
+  double get animationValue => _animationValue;
+  double _animationValue;
+  set animationValue(double newValue) {
+    assert(newValue != null);
+    if (_animationValue == newValue) {
+      return;
+    }
+
+    _animationValue = newValue;
+    markNeedsLayout();
+  }
+
+  bool get isScrollControlled => _isScrollControlled;
+  bool _isScrollControlled;
+  set isScrollControlled(bool newValue) {
+    assert(newValue != null);
+    if (_isScrollControlled == newValue) {
+      return;
+    }
+
+    _isScrollControlled = newValue;
+    markNeedsLayout();
+  }
+
+  Size _getSize(BoxConstraints constraints) {
+    return constraints.constrain(constraints.biggest);
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _getSize(constraints);
+  }
+
+    BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
@@ -338,14 +457,26 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     );
   }
 
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    return Offset(0.0, size.height - childSize.height * progress);
+  Offset _getPositionForChild(Size size, Size childSize) {
+    return Offset(0.0, size.height - childSize.height * animationValue);
   }
 
   @override
-  bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
-    return progress != oldDelegate.progress;
+  void performLayout() {
+    size = _getSize(constraints);
+    if (child != null) {
+      final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+      child!.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = _getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child!.size);
+      final Size childSize = childConstraints.isTight ? childConstraints.smallest : child!.size;
+
+      if (_lastSize != childSize) {
+        _lastSize = childSize;
+        _onChildSizeChanged.call(_lastSize);
+      }
+    }
   }
 }
 
@@ -390,6 +521,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
       case TargetPlatform.windows:
         return localizations.dialogLabel;
     }
+  }
+
+  EdgeInsets _getNewClipDetails(Size topLayerSize) {
+    return EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);
   }
 
   void handleDragStart(DragStartDetails details) {
@@ -443,8 +578,14 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           label: routeLabel,
           explicitChildNodes: true,
           child: ClipRect(
-            child: CustomSingleChildLayout(
-              delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
+            child: _BottomSheetLayoutWithSizeListener(
+              onChildSizeChanged: (Size size) {
+                widget.route._didChangeBarrierSemanticsClip(
+                  _getNewClipDetails(size),
+                );
+              },
+              animationValue: animationValue,
+              isScrollControlled: widget.isScrollControlled,
               child: child,
             ),
           ),
@@ -516,6 +657,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     required this.builder,
     this.capturedThemes,
     this.barrierLabel,
+    this.barrierOnTapHint,
     this.backgroundColor,
     this.elevation,
     this.shape,
@@ -646,6 +788,35 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Default is false.
   final bool useSafeArea;
 
+  /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
+  /// The semantic hint text that informs users what will happen if they
+  /// tap on the widget. Announced in the format of 'Double tap to ...'.
+  ///
+  /// If the field is null, the default hint will be used, which results in
+  /// announcement of 'Double tap to activate'.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], which uses this field as onTapHint when it has an onTap action.
+  final String? barrierOnTapHint;
+
+  final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
+
+  /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
+  /// the barrier for this [ModalBottomSheetRoute] should be clipped.
+  ///
+  /// returns true if the clipDetails did change and false otherwise.
+  bool _didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
+    if (_clipDetailsNotifier.value == newClipDetails) {
+      return false;
+    }
+    _clipDetailsNotifier.value = newClipDetails;
+    return true;
+  }
+
   @override
   Duration get transitionDuration => _bottomSheetEnterDuration;
 
@@ -710,6 +881,35 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }
+
+  @override
+  Widget buildModalBarrier() {
+    if (barrierColor != null && barrierColor.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
+      assert(barrierColor != barrierColor.withOpacity(0.0));
+      final Animation<Color?> color = animation!.drive(
+        ColorTween(
+          begin: barrierColor.withOpacity(0.0),
+          end: barrierColor, // changedInternalState is called if barrierColor updates
+        ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
+      );
+      return AnimatedModalBarrier(
+        color: color,
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+        barrierSemanticsDismissible: semanticsDismissible,
+        clipDetailsNotifier: _clipDetailsNotifier,
+        semanticsOnTapHint: barrierOnTapHint,
+      );
+    } else {
+      return ModalBarrier(
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
+        barrierSemanticsDismissible: semanticsDismissible,
+        clipDetailsNotifier: _clipDetailsNotifier,
+        semanticsOnTapHint: barrierOnTapHint,
+      );
+    }
+  }
 }
 
 // TODO(guidezpl): Look into making this public. A copy of this class is in
@@ -739,11 +939,11 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
        assert(curve != null);
 
   /// The progress value at which [curve] should begin.
-  ///
-  /// This defaults to [Curves.easeOutCubic].
   final double startingPoint;
 
   /// The curve to use when [startingPoint] is reached.
+  ///
+  /// This defaults to [Curves.easeOutCubic].
   final Curve curve;
 
   @override
@@ -844,11 +1044,13 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMaterialLocalizations(context));
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+  final MaterialLocalizations localizations = MaterialLocalizations.of(context);
   return navigator.push(ModalBottomSheetRoute<T>(
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierLabel: localizations.scrimLabel,
+    barrierOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
     backgroundColor: backgroundColor,
     elevation: elevation,
     shape: shape,

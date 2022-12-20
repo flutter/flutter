@@ -20,6 +20,7 @@ import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
+import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -800,6 +801,32 @@ class TextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.wavy,
   );
 
+  /// Default builder for the spell check suggestions toolbar in the Material
+  /// style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
+  //     builder configured to show a spell check suggestions toolbar.
+  @visibleForTesting
+  static Widget defaultSpellCheckSuggestionsToolbarBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final Offset anchor =
+      SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
+    final List<ContextMenuButtonItem>? buttonItems =
+      SpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+
+    if (buttonItems == null){
+      return const SizedBox.shrink();
+    }
+
+    return SpellCheckSuggestionsToolbar(
+      anchor: anchor,
+      buttonItems: buttonItems,
+    );
+  }
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -1192,7 +1219,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? TextField.materialMisspelledTextStyle)
+              ?? TextField.materialMisspelledTextStyle,
+            spellCheckSuggestionsToolbarBuilder:
+              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
+          )
         : const SpellCheckConfiguration.disabled();
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;

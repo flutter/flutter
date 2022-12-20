@@ -159,6 +159,8 @@ export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/snack_bar_theme.dart';
+export 'src/material/spell_check_suggestions_toolbar.dart';
+export 'src/material/spell_check_suggestions_toolbar_layout_delegate.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
 export 'src/material/switch_list_tile.dart';

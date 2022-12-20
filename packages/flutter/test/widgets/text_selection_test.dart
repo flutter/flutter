@@ -618,6 +618,27 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on Android', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    renderEditable.selection = const TextSelection(baseOffset: 2, extentOffset: 6);
+    renderEditable.hasFocus = true;
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
+
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
@@ -1568,6 +1589,7 @@ class FakeEditableTextState extends EditableTextState {
   final GlobalKey _editableKey = GlobalKey();
   bool showToolbarCalled = false;
   bool toggleToolbarCalled = false;
+  bool showSpellCheckSuggestionsToolbarCalled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -1582,6 +1604,12 @@ class FakeEditableTextState extends EditableTextState {
   void toggleToolbar([bool hideHandles = true]) {
     toggleToolbarCalled = true;
     return;
+  }
+
+  @override
+  bool showSpellCheckSuggestionsToolbar() {
+    showSpellCheckSuggestionsToolbarCalled = true;
+    return true;
   }
 
   @override

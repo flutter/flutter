@@ -484,9 +484,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: SizedBox(
-            height: 0.0,
-            width: 0.0,
+          child: SizedBox.shrink(
             child: Scaffold(
               appBar: AppBar(
                 title: const Text('X'),

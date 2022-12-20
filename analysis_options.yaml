@@ -98,7 +98,7 @@ linter:
     - deprecated_consistency
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
     - directives_ordering
-    # - discarded_futures # not yet tested
+    # - discarded_futures # too many false positives, similar to unawaited_futures
     # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
     - empty_catches
     - empty_constructor_bodies
@@ -170,7 +170,7 @@ linter:
     - prefer_is_not_empty
     - prefer_is_not_operator
     - prefer_iterable_whereType
-    # - prefer_mixin # Has false positives, see https://github.com/dart-lang/linter/issues/3018
+    # - prefer_mixin # has false positives, see https://github.com/dart-lang/linter/issues/3018
     # - prefer_null_aware_method_calls # "call()" is confusing to people new to the language since it's not documented anywhere
     - prefer_null_aware_operators
     - prefer_relative_imports
@@ -181,10 +181,10 @@ linter:
     - provide_deprecation_message
     # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
-    # - require_trailing_commas # blocked on https://github.com/dart-lang/sdk/issues/47441
+    # - require_trailing_commas # would be nice, but requires a lot of manual work: 10,000+ code locations would need to be reformatted by hand after bulk fix is applied
     - secure_pubspec_urls
     - sized_box_for_whitespace
-    # - sized_box_shrink_expand # not yet tested
+    - sized_box_shrink_expand
     - slash_for_doc_comments
     - sort_child_properties_last
     - sort_constructors_first
@@ -222,8 +222,8 @@ linter:
     - unsafe_html
     - use_build_context_synchronously
     # - use_colored_box # not yet tested
-    # - use_decorated_box # not yet tested
-    # - use_enums # not yet tested
+    # - use_decorated_box # leads to bugs: DecoratedBox and Container are not equivalent (Container inserts extra padding)
+    - use_enums
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
     - use_if_null_to_convert_nulls_to_bools

@@ -93,6 +93,8 @@ class NavigationBar extends StatelessWidget {
     this.elevation,
     this.shadowColor,
     this.surfaceTintColor,
+    this.indicatorColor,
+    this.indicatorShape,
     this.height,
     this.labelBehavior,
   }) :  assert(destinations != null && destinations.length >= 2),
@@ -157,6 +159,20 @@ class NavigationBar extends StatelessWidget {
   /// See [Material.surfaceTintColor] for more details on how this
   /// overlay is applied.
   final Color? surfaceTintColor;
+
+  /// The color of the [indicatorShape] when this destination is selected.
+  ///
+  /// If null, [NavigationBarThemeData.indicatorColor] is used. If that
+  /// is also null and [ThemeData.useMaterial3] is true, [ColorScheme.secondaryContainer]
+  /// is used. Otherwise, [ColorScheme.secondary] with an opacity of 0.24 is used.
+  final Color? indicatorColor;
+
+  /// The shape of the selected inidicator.
+  ///
+  /// If null, [NavigationBarThemeData.indicatorShape] is used. If that
+  /// is also null and [ThemeData.useMaterial3] is true, [StadiumBorder] is used.
+  /// Otherwise, [RoundedRectangleBorder] with a circular border radius of 16 is used.
+  final ShapeBorder? indicatorShape;
 
   /// The height of the [NavigationBar] itself.
   ///
@@ -224,6 +240,8 @@ class NavigationBar extends StatelessWidget {
                         totalNumberOfDestinations: destinations.length,
                         selectedAnimation: animation,
                         labelBehavior: effectiveLabelBehavior,
+                        indicatorColor: indicatorColor,
+                        indicatorShape: indicatorShape,
                         onTap: _handleTap(i),
                         child: destinations[i],
                       );
@@ -274,8 +292,6 @@ class NavigationDestination extends StatelessWidget {
     super.key,
     required this.icon,
     this.selectedIcon,
-    this.indicatorColor,
-    this.indicatorShape,
     required this.label,
     this.tooltip,
   });
@@ -300,12 +316,6 @@ class NavigationDestination extends StatelessWidget {
   /// would use a size of 24.0 and [ColorScheme.onSurface].
   final Widget? selectedIcon;
 
-  /// The color of the [indicatorShape] when this destination is selected.
-  final Color? indicatorColor;
-
-  /// The shape of the selected inidicator.
-  final ShapeBorder? indicatorShape;
-
   /// The text label that appears below the icon of this
   /// [NavigationDestination].
   ///
@@ -324,12 +334,13 @@ class NavigationDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
     const Set<MaterialState> unselectedState = <MaterialState>{};
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
-    final Animation<double> animation = _NavigationDestinationInfo.of(context).selectedAnimation;
+    final Animation<double> animation = info.selectedAnimation;
 
     return _NavigationDestinationBuilder(
       label: label,
@@ -351,8 +362,8 @@ class NavigationDestination extends StatelessWidget {
           children: <Widget>[
             NavigationIndicator(
               animation: animation,
-              color: indicatorColor ?? navigationBarTheme.indicatorColor ?? defaults.indicatorColor!,
-              shape: indicatorShape ?? navigationBarTheme.indicatorShape ?? defaults.indicatorShape!
+              color: info.indicatorColor ?? navigationBarTheme.indicatorColor ?? defaults.indicatorColor!,
+              shape: info.indicatorShape ?? navigationBarTheme.indicatorShape ?? defaults.indicatorShape!
             ),
             _StatusTransitionWidgetBuilder(
               animation: animation,
@@ -532,6 +543,8 @@ class _NavigationDestinationInfo extends InheritedWidget {
     required this.totalNumberOfDestinations,
     required this.selectedAnimation,
     required this.labelBehavior,
+    required this.indicatorColor,
+    required this.indicatorShape,
     required this.onTap,
     required super.child,
   });
@@ -587,6 +600,16 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// Can be used to show all labels (the default), show only the selected
   /// label, or hide all labels.
   final NavigationDestinationLabelBehavior labelBehavior;
+
+  /// The color of the selection indicator.
+  ///
+  /// This is used by destinations to override the indicator color.
+  final Color? indicatorColor;
+
+  /// The shape of the selection indicator.
+  ///
+  /// This is used by destinations to override the indicator shape.
+  final ShapeBorder? indicatorShape;
 
   /// The callback that should be called when this destination is tapped.
   ///

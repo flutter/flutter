@@ -1568,7 +1568,7 @@ class _BackLabel extends StatelessWidget {
   // null here and unused.
   Widget _buildPreviousTitleWidget(BuildContext context, String? previousTitle, Widget? child) {
     if (previousTitle == null) {
-      return const SizedBox(height: 0.0, width: 0.0);
+      return const SizedBox.shrink();
     }
 
     Text textWidget = Text(
@@ -1602,7 +1602,7 @@ class _BackLabel extends StatelessWidget {
         builder: _buildPreviousTitleWidget,
       );
     } else {
-      return const SizedBox(height: 0.0, width: 0.0);
+      return const SizedBox.shrink();
     }
   }
 }
