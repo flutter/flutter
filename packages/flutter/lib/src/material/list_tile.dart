@@ -100,7 +100,7 @@ enum ListTileControlAffinity {
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: const Material(
 ///     child: ListTile(

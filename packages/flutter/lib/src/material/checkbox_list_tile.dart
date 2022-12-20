@@ -50,7 +50,7 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: CheckboxListTile(

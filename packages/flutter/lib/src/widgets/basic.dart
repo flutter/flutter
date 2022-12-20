@@ -1274,7 +1274,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 /// top right corner pinned to its original position.
 ///
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.black,
 ///   child: Transform(
 ///     alignment: Alignment.topRight,

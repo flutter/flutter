@@ -81,7 +81,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///       final double opacity = (value / 1000).clamp(0, 1);
   ///       return Opacity(opacity: opacity, child: child);
   ///     },
-  ///     child: Container(
+  ///     child: ColoredBox(
   ///       color: Colors.red,
   ///       child: const Text('Hello, Animation'),
   ///     ),
@@ -100,7 +100,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///     opacity: Animation<double>.fromValueListenable(_scrollPosition, transformer: (double value) {
   ///       return (value / 1000).clamp(0, 1);
   ///     }),
-  ///     child: Container(
+  ///     child: ColoredBox(
   ///       color: Colors.red,
   ///       child: const Text('Hello, Animation'),
   ///     ),
