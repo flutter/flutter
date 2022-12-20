@@ -53,6 +53,8 @@ dependency_overrides:
     path: ../../../third_party/dart/third_party/pkg/http/pkgs/http
   http_parser:
     path: ../../../third_party/dart/third_party/pkg/http_parser
+  js:
+    path: ../../../third_party/dart/pkg/js
   litetest:
     path: ../litetest
   meta:
