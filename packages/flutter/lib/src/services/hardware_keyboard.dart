@@ -26,34 +26,33 @@ export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
 /// Only a limited number of modes are supported, which are enumerated as
 /// static members of this class. Manual constructing of this class is
 /// prohibited.
-@immutable
-class KeyboardLockMode {
-  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
-  // members of this class, therefore constructing is prohibited.
-  const KeyboardLockMode._(this.logicalKey);
-
-  /// The logical key that triggers this lock mode.
-  final LogicalKeyboardKey logicalKey;
-
+enum KeyboardLockMode {
   /// Represents the number lock mode on the keyboard.
   ///
   /// On supporting systems, enabling number lock mode usually allows key
   /// presses of the number pad to input numbers, instead of acting as up, down,
   /// left, right, page up, end, etc.
-  static const KeyboardLockMode numLock = KeyboardLockMode._(LogicalKeyboardKey.numLock);
+  numLock._(LogicalKeyboardKey.numLock),
 
   /// Represents the scrolling lock mode on the keyboard.
   ///
   /// On supporting systems and applications (such as a spreadsheet), enabling
   /// scrolling lock mode usually allows key presses of the cursor keys to
   /// scroll the document instead of the cursor.
-  static const KeyboardLockMode scrollLock = KeyboardLockMode._(LogicalKeyboardKey.scrollLock);
+  scrollLock._(LogicalKeyboardKey.scrollLock),
 
   /// Represents the capital letters lock mode on the keyboard.
   ///
   /// On supporting systems, enabling capital lock mode allows key presses of
   /// the letter keys to input uppercase letters instead of lowercase.
-  static const KeyboardLockMode capsLock = KeyboardLockMode._(LogicalKeyboardKey.capsLock);
+  capsLock._(LogicalKeyboardKey.capsLock);
+
+  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
+  // members of this class, therefore constructing is prohibited.
+  const KeyboardLockMode._(this.logicalKey);
+
+  /// The logical key that triggers this lock mode.
+  final LogicalKeyboardKey logicalKey;
 
   static final Map<int, KeyboardLockMode> _knownLockModes = <int, KeyboardLockMode>{
     numLock.logicalKey.keyId: numLock,
