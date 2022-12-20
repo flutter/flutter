@@ -17,7 +17,7 @@ in vec2 v_position;
 
 out vec4 frag_color;
 
-const int kSampleCount = 5;
+const int kSampleCount = 4;
 
 float RRectDistance(vec2 sample_position, vec2 half_size) {
   vec2 space = abs(sample_position) - half_size + frag_info.corner_radius;
@@ -37,8 +37,8 @@ float RRectShadowX(vec2 sample_position, vec2 half_size) {
       sqrt(max(0, frag_info.corner_radius * frag_info.corner_radius -
                       space * space));
 
-  // Map the linear distance field to the analytical Gaussian integral.
-  vec2 integral = IPVec2GaussianIntegral(
+  // Map the linear distance field to the approximate Gaussian integral.
+  vec2 integral = IPVec2FastGaussianIntegral(
       sample_position.x + vec2(-rrect_distance, rrect_distance),
       frag_info.blur_sigma);
   return integral.y - integral.x;
