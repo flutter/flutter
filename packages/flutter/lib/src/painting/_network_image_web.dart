@@ -103,10 +103,7 @@ class NetworkImage
     return collector;
   }
 
-  // TODO(garyq): We should eventually support custom decoding of network images on Web as
-  // well, see https://github.com/flutter/flutter/issues/42789.
-  //
-  // Web does not support decoding network images to a specified size. The decode parameter
+  // Html renderer does not support decoding network images to a specified size. The decode parameter
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
@@ -121,16 +118,18 @@ class NetworkImage
 
     // We use a different method when headers are set because the
     // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
-    if (key.headers?.isNotEmpty ?? false) {
+    if (isCanvasKit || (key.headers?.isNotEmpty ?? false)) {
       final Completer<DomXMLHttpRequest> completer =
           Completer<DomXMLHttpRequest>();
       final DomXMLHttpRequest request = httpRequestFactory();
 
       request.open('GET', key.url, true);
       request.responseType = 'arraybuffer';
-      key.headers!.forEach((String header, String value) {
-        request.setRequestHeader(header, value);
-      });
+      if (key.headers?.isNotEmpty ?? false) {
+        key.headers!.forEach((String header, String value) {
+          request.setRequestHeader(header, value);
+        });
+      }
 
       request.addEventListener('load', allowInterop((DomEvent e) {
         final int? status = request.status;
