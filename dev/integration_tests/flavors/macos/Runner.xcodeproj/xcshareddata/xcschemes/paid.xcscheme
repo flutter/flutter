@@ -69,7 +69,7 @@
       </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
-      buildConfiguration = "Debug Free">
+      buildConfiguration = "Debug Paid">
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release Paid"
