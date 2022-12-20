@@ -29,21 +29,23 @@ vec2 IPVec2Erf(vec2 x) {
   return sign(x) * (1 - 1 / (b * b * b * b));
 }
 
-/// Indefinite integral of the Gaussian function (with constant range 0->1).
+/// The indefinite integral of the Gaussian function.
+/// Uses a very close approximation of Erf.
 float IPGaussianIntegral(float x, float sigma) {
   // ( 1 + erf( x * (sqrt(2) / (2 * sigma) ) ) / 2
-  // Because this sigmoid is always > 1, we remap it (n * 1.07 - 0.07)
-  // so that it always fades to zero before it reaches the blur radius.
-  return 0.535 * IPErf(x * (kHalfSqrtTwo / sigma)) + 0.465;
+  return (1 + IPErf(x * (kHalfSqrtTwo / sigma))) * 0.5;
 }
 
-/// Vec2 variation for the indefinite integral of the Gaussian function (with
-/// constant range 0->1).
+/// Vec2 variation for the indefinite integral of the Gaussian function.
+/// Uses a very close approximation of Erf.
 vec2 IPVec2GaussianIntegral(vec2 x, float sigma) {
   // ( 1 + erf( x * (sqrt(2) / (2 * sigma) ) ) / 2
-  // Because this sigmoid is always > 1, we remap it (n * 1.07 - 0.07)
-  // so that it always fades to zero before it reaches the blur radius.
-  return 0.535 * IPVec2Erf(x * (kHalfSqrtTwo / sigma)) + 0.465;
+  return (1 + IPVec2Erf(x * (kHalfSqrtTwo / sigma))) * 0.5;
+}
+
+/// Simpler (but less accurate) approximation of the Gaussian integral.
+vec2 IPVec2FastGaussianIntegral(vec2 x, float sigma) {
+  return 1 / (1 + exp(-kSqrtThree / sigma * x));
 }
 
 /// Simple logistic sigmoid with a domain of [-1, 1] and range of [0, 1].
