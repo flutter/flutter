@@ -1036,12 +1036,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       if (_dragState == _DragState.accepted) {
         _checkDragUpdate(event);
       } else if (_dragState == _DragState.possible) {
-        if (_start != null) {
-          // The recognizer will stop checking for a drag if it has already identified the
-          // start of a drag.
-          return;
+        if (_start == null) {
+          // Only check for a drag if the start of a drag was not already identified.
+          _checkDrag(event);
         }
-        _checkDrag(event);
 
         // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
         // received that moves the pointer a sufficient global distance to be considered a drag.
