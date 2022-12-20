@@ -2170,7 +2170,6 @@ class TextSelectionGestureDetectorBuilder {
           editableText.hideToolbar();
           editableText.showSpellCheckSuggestionsToolbar();
           if (isShiftPressedValid) {
-            _isShiftTapping = true;
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
             return;
           }
