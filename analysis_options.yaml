@@ -184,7 +184,7 @@ linter:
     # - require_trailing_commas # blocked on https://github.com/dart-lang/sdk/issues/47441
     - secure_pubspec_urls
     - sized_box_for_whitespace
-    # - sized_box_shrink_expand # not yet tested
+    - sized_box_shrink_expand
     - slash_for_doc_comments
     - sort_child_properties_last
     - sort_constructors_first

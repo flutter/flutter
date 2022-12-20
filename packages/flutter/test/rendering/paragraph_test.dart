@@ -810,7 +810,7 @@ void main() {
   test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
     final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
       TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
-      const WidgetSpan(child: SizedBox(width: 0, height: 0)),
+      const WidgetSpan(child: SizedBox.shrink()),
       TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
     ]);
     final List<RenderBox> renderBoxes = <RenderBox>[

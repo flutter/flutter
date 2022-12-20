@@ -475,9 +475,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: GridView.count(
               crossAxisCount: 4,
               children: List<Widget>.generate(20, (int i) {

@@ -285,9 +285,7 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: SizedBox(
-        width: 0.0,
-        height: 0.0,
+      child: SizedBox.shrink(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -707,9 +705,7 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: SizedBox(
-        width: 0.0,
-        height: 0.0,
+      child: SizedBox.shrink(
         child: Row(
           textDirection: TextDirection.ltr,
           mainAxisSize: MainAxisSize.min,
@@ -1130,9 +1126,7 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: SizedBox(
-        width: 0.0,
-        height: 0.0,
+      child: SizedBox.shrink(
         child: Row(
           textDirection: TextDirection.rtl,
           mainAxisSize: MainAxisSize.min,
