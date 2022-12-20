@@ -23,12 +23,12 @@ import 'vmservice.dart';
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
 /// A description of the kind of workflow the device supports.
-class Category {
-  const Category._(this.value);
+enum Category {
+  web._('web'),
+  desktop._('desktop'),
+  mobile._('mobile');
 
-  static const Category web = Category._('web');
-  static const Category desktop = Category._('desktop');
-  static const Category mobile = Category._('mobile');
+  const Category._(this.value);
 
   final String value;
 
@@ -36,7 +36,7 @@ class Category {
   String toString() => value;
 
   static Category? fromString(String category) {
-    return <String, Category>{
+    return const <String, Category>{
       'web': web,
       'desktop': desktop,
       'mobile': mobile,
@@ -45,17 +45,17 @@ class Category {
 }
 
 /// The platform sub-folder that a device type supports.
-class PlatformType {
-  const PlatformType._(this.value);
+enum PlatformType {
+  web._('web'),
+  android._('android'),
+  ios._('ios'),
+  linux._('linux'),
+  macos._('macos'),
+  windows._('windows'),
+  fuchsia._('fuchsia'),
+  custom._('custom');
 
-  static const PlatformType web = PlatformType._('web');
-  static const PlatformType android = PlatformType._('android');
-  static const PlatformType ios = PlatformType._('ios');
-  static const PlatformType linux = PlatformType._('linux');
-  static const PlatformType macos = PlatformType._('macos');
-  static const PlatformType windows = PlatformType._('windows');
-  static const PlatformType fuchsia = PlatformType._('fuchsia');
-  static const PlatformType custom = PlatformType._('custom');
+  const PlatformType._(this.value);
 
   final String value;
 
@@ -63,7 +63,7 @@ class PlatformType {
   String toString() => value;
 
   static PlatformType? fromString(String platformType) {
-    return <String, PlatformType>{
+    return const <String, PlatformType>{
       'web': web,
       'android': android,
       'ios': ios,
