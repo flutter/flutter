@@ -640,9 +640,7 @@ class _RailDestination extends StatelessWidget {
               children: <Widget>[
                 iconPart,
                 // For semantics when label is not showing,
-                SizedBox(
-                  width: 0,
-                  height: 0,
+                SizedBox.shrink(
                   child: Visibility.maintain(
                     visible: false,
                     child: label,

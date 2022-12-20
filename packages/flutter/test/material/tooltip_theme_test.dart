@@ -133,10 +133,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -191,10 +188,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -251,10 +245,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -320,10 +311,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -391,10 +379,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -448,10 +433,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -500,10 +482,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   ),
                 );
               },
@@ -556,10 +535,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   ),
                 );
               },
@@ -715,10 +691,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   );
                 },
               ),
@@ -755,10 +728,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   );
                 },
               ),

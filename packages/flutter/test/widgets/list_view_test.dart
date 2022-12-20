@@ -347,9 +347,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: ListView(
               padding: const EdgeInsets.all(8.0),
               children: const <Widget>[
