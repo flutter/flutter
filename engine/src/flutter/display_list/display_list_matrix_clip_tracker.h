@@ -44,9 +44,20 @@ class DisplayListMatrixClipTracker {
   void rotate(SkScalar degrees) { current_->rotate(degrees); }
   void transform(const SkM44& m44);
   void transform(const SkMatrix& matrix) { current_->transform(matrix); }
+  // clang-format off
+  void transform2DAffine(
+      SkScalar mxx, SkScalar mxy, SkScalar mxt,
+      SkScalar myx, SkScalar myy, SkScalar myt);
+  void transformFullPerspective(
+      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt);
+  // clang-format on
   void setTransform(const SkMatrix& matrix) { current_->setTransform(matrix); }
   void setTransform(const SkM44& m44);
   void setIdentity() { current_->setIdentity(); }
+  bool mapRect(SkRect* rect) const { return current_->mapRect(*rect, rect); }
 
   void clipRect(const SkRect& rect, SkClipOp op, bool is_aa) {
     current_->clipBounds(rect, op, is_aa);
@@ -77,6 +88,8 @@ class DisplayListMatrixClipTracker {
     virtual void setTransform(const SkMatrix& matrix) = 0;
     virtual void setTransform(const SkM44& m44) = 0;
     virtual void setIdentity() = 0;
+    virtual bool mapRect(const SkRect& rect, SkRect* mapped) const = 0;
+    virtual bool canBeInverted() const = 0;
 
     virtual void clipBounds(const SkRect& clip, SkClipOp op, bool is_aa);
 
@@ -84,7 +97,6 @@ class DisplayListMatrixClipTracker {
     Data(const SkRect& rect) : cull_rect_(rect) {}
 
     virtual bool has_perspective() const = 0;
-    virtual bool map_rect(const SkRect& rect, SkRect* mapped) const = 0;
 
     SkRect cull_rect_;
   };

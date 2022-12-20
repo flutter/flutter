@@ -39,12 +39,13 @@ class Data4x4 : public DisplayListMatrixClipTracker::Data {
   void setTransform(const SkMatrix& matrix) override { m44_ = SkM44(matrix); }
   void setTransform(const SkM44& m44) override { m44_ = m44; }
   void setIdentity() override { m44_.setIdentity(); }
+  bool mapRect(const SkRect& rect, SkRect* mapped) const override {
+    return m44_.asM33().mapRect(mapped, rect);
+  }
+  bool canBeInverted() const override { return m44_.asM33().invert(nullptr); }
 
  protected:
   bool has_perspective() const override;
-  bool map_rect(const SkRect& rect, SkRect* mapped) const override {
-    return m44_.asM33().mapRect(mapped, rect);
-  }
 
  private:
   SkM44 m44_;
@@ -80,12 +81,13 @@ class Data3x3 : public DisplayListMatrixClipTracker::Data {
     FML_CHECK(false) << "SkM44 was set without upgrading Data";
   }
   void setIdentity() override { matrix_.setIdentity(); }
+  bool mapRect(const SkRect& rect, SkRect* mapped) const override {
+    return matrix_.mapRect(mapped, rect);
+  }
+  bool canBeInverted() const override { return matrix_.invert(nullptr); }
 
  protected:
   bool has_perspective() const override { return matrix_.hasPerspective(); }
-  bool map_rect(const SkRect& rect, SkRect* mapped) const override {
-    return matrix_.mapRect(mapped, rect);
-  }
 
  private:
   SkMatrix matrix_;
@@ -103,20 +105,63 @@ static bool is_3x3(const SkM44& m) {
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     const SkRect& cull_rect,
     const SkMatrix& matrix) {
-  saved_.emplace_back(std::make_unique<Data3x3>(matrix, cull_rect));
+  // isEmpty protects us against NaN as we normalize any empty cull rects
+  SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
+  saved_.emplace_back(std::make_unique<Data3x3>(matrix, cull));
   current_ = saved_.back().get();
 }
 
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     const SkRect& cull_rect,
     const SkM44& m44) {
+  // isEmpty protects us against NaN as we normalize any empty cull rects
+  SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
   if (is_3x3(m44)) {
-    saved_.emplace_back(std::make_unique<Data3x3>(m44.asM33(), cull_rect));
+    saved_.emplace_back(std::make_unique<Data3x3>(m44.asM33(), cull));
   } else {
-    saved_.emplace_back(std::make_unique<Data4x4>(m44, cull_rect));
+    saved_.emplace_back(std::make_unique<Data4x4>(m44, cull));
   }
   current_ = saved_.back().get();
 }
+
+// clang-format off
+void DisplayListMatrixClipTracker::transform2DAffine(
+    SkScalar mxx, SkScalar mxy, SkScalar mxt,
+    SkScalar myx, SkScalar myy, SkScalar myt) {
+  if (!current_->is_4x4()) {
+    transform(SkMatrix::MakeAll(mxx, mxy, mxt,
+                                myx, myy, myt,
+                                0,   0,   1));
+  } else {
+    transform(SkM44(mxx, mxy, 0, mxt,
+                    myx, myy, 0, myt,
+                    0,   0,   1, 0,
+                    0,   0,   0, 1));
+  }
+}
+void DisplayListMatrixClipTracker::transformFullPerspective(
+    SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+    SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+    SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+    SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) {
+  if (!current_->is_4x4()) {
+    if (                        mxz == 0 &&
+                                myz == 0 &&
+        mzx == 0 && mzy == 0 && mzz == 1 && mzt == 0 &&
+                                mwz == 0) {
+        transform(SkMatrix::MakeAll(mxx, mxy, mxt,
+                                    myx, myy, myt,
+                                    mwx, mwy, mwt));
+        return;
+    }
+  }
+
+  transform(SkM44(mxx, mxy, mxz, mxt,
+                  myx, myy, myz, myt,
+                  mzx, mzy, mzz, mzt,
+                  mwx, mwy, mwz, mwt));
+}
+// clang-format on
 
 void DisplayListMatrixClipTracker::save() {
   if (current_->is_4x4()) {
@@ -183,6 +228,19 @@ void DisplayListMatrixClipTracker::clipRRect(const SkRRect& rrect,
 void DisplayListMatrixClipTracker::clipPath(const SkPath& path,
                                             SkClipOp op,
                                             bool is_aa) {
+  // Map "kDifference of inverse path" to "kIntersect of the original path" and
+  // map "kIntersect of inverse path" to "kDifference of the original path"
+  if (path.isInverseFillType()) {
+    switch (op) {
+      case SkClipOp::kIntersect:
+        op = SkClipOp::kDifference;
+        break;
+      case SkClipOp::kDifference:
+        op = SkClipOp::kIntersect;
+        break;
+    }
+  }
+
   SkRect bounds;
   switch (op) {
     case SkClipOp::kIntersect:
@@ -202,11 +260,14 @@ bool DisplayListMatrixClipTracker::Data::content_culled(
   if (cull_rect_.isEmpty() || content_bounds.isEmpty()) {
     return true;
   }
+  if (!canBeInverted()) {
+    return true;
+  }
   if (has_perspective()) {
     return false;
   }
   SkRect mapped;
-  map_rect(content_bounds, &mapped);
+  mapRect(content_bounds, &mapped);
   return !mapped.intersects(cull_rect_);
 }
 
@@ -228,7 +289,7 @@ void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
         break;
       }
       SkRect rect;
-      map_rect(clip, &rect);
+      mapRect(clip, &rect);
       if (is_aa) {
         rect.roundOut(&rect);
       }
@@ -242,7 +303,7 @@ void DisplayListMatrixClipTracker::Data::clipBounds(const SkRect& clip,
         break;
       }
       SkRect rect;
-      if (map_rect(clip, &rect)) {
+      if (mapRect(clip, &rect)) {
         // This technique only works if it is rect -> rect
         if (is_aa) {
           SkIRect rounded;
