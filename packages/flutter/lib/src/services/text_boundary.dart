@@ -126,7 +126,7 @@ class LineBoundary extends TextBoundary {
 /// A text boundary that uses paragraphs as logical boundaries.
 ///
 /// A paragraph is defined as the range between line terminators. If no
-/// line terminator exist then the paragraph boundary is the entire document.
+/// line terminators exist then the paragraph boundary is the entire document.
 class ParagraphBoundary extends TextBoundary {
   /// Creates a [ParagraphBoundary] with the text.
   const ParagraphBoundary(this._text);
@@ -148,15 +148,15 @@ class ParagraphBoundary extends TextBoundary {
     );
   }
 
-  // Returns the [TextRange] representing a paragraph that bounds the given
-  // `textPosition`. The `textPosition` is bounded by either a line terminator
-  // in each direction of the text, or if there is no line terminator in a given
-  // direction then the bound extends to the start/end of the document in that
-  // direction. The returning range includes the line terminator.
+  /// Returns the [TextRange] representing a paragraph that bounds the given
+  /// `position`. The `position` is bounded by either a line terminator
+  /// in each direction of the text, or if there is no line terminator in a given
+  /// direction then the bound extends to the start/end of the document in that
+  /// direction. The returned range includes the line terminator.
   @override
   TextRange getTextBoundaryAt(TextPosition position) {
     final Iterator<int> codeUnitIter = _text.codeUnits.iterator;
-    final int tappedTextOffset = position.offset;
+    final int targetTextOffset = position.offset;
 
     int graphemeStart = 0;
     int graphemeEnd = 0;
@@ -165,14 +165,14 @@ class ParagraphBoundary extends TextBoundary {
       final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
       graphemeEnd += currentCodeUnit.length;
       if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(graphemeEnd - currentCodeUnit.length))) {
-        if (graphemeEnd - currentCodeUnit.length == position.offset) {
+        if (graphemeEnd - currentCodeUnit.length == targetTextOffset) {
           continue;
         }
-        if (graphemeEnd < tappedTextOffset) {
+        if (graphemeEnd < targetTextOffset) {
           // The target text position has not been passed yet but we arrived at a
           // line terminator.
           graphemeStart = graphemeEnd - currentCodeUnit.length;
-        } else if (graphemeEnd > tappedTextOffset) {
+        } else if (graphemeEnd > targetTextOffset) {
           // The target text position was passed. This means that the target position
           // is contained inside of a paragraph boundary.
           break;
