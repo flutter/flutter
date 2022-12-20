@@ -67,16 +67,15 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
 }
 
 DisplayListBuilder::DisplayListBuilder(const SkRect& cull_rect,
-                                       bool prepare_rtree) {
+                                       bool prepare_rtree)
+    : tracker_(cull_rect, SkMatrix::I()) {
   if (prepare_rtree) {
     accumulator_ = std::make_unique<RTreeBoundsAccumulator>();
   } else {
     accumulator_ = std::make_unique<RectBoundsAccumulator>();
   }
 
-  // isEmpty protects us against NaN as we normalize any empty cull rects
-  SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
-  layer_stack_.emplace_back(SkM44(), SkMatrix::I(), cull);
+  layer_stack_.emplace_back();
   current_layer_ = &layer_stack_.back();
 }
 
@@ -440,9 +439,10 @@ void DisplayListBuilder::checkForDeferredSave() {
 }
 
 void DisplayListBuilder::save() {
-  layer_stack_.emplace_back(current_layer_);
+  layer_stack_.emplace_back();
   current_layer_ = &layer_stack_.back();
   current_layer_->has_deferred_save_op_ = true;
+  tracker_.save();
   accumulator()->save();
 }
 
@@ -455,6 +455,7 @@ void DisplayListBuilder::restore() {
     // on the stack.
     LayerInfo layer_info = layer_stack_.back();
 
+    tracker_.restore();
     layer_stack_.pop_back();
     current_layer_ = &layer_stack_.back();
     bool is_unbounded = layer_info.is_unbounded();
@@ -463,7 +464,7 @@ void DisplayListBuilder::restore() {
     // current accumulator and adjust it as required based on the filter.
     std::shared_ptr<const DlImageFilter> filter = layer_info.filter();
     if (filter) {
-      const SkRect* clip = &current_layer_->clip_bounds();
+      const SkRect clip = tracker_.device_cull_rect();
       if (!accumulator()->restore(
               [filter = filter, matrix = getTransform()](const SkRect& input,
                                                          SkRect& output) {
@@ -473,7 +474,7 @@ void DisplayListBuilder::restore() {
                 output.set(output_bounds);
                 return ret;
               },
-              clip)) {
+              &clip)) {
         is_unbounded = true;
       }
     } else {
@@ -544,11 +545,12 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
       // We will fill the clip of the outer layer when we restore
       AccumulateUnbounded();
     }
-    layer_stack_.emplace_back(current_layer_, save_layer_offset, true,
+    layer_stack_.emplace_back(save_layer_offset, true,
                               current_.getImageFilter());
   } else {
-    layer_stack_.emplace_back(current_layer_, save_layer_offset, true, nullptr);
+    layer_stack_.emplace_back(save_layer_offset, true, nullptr);
   }
+  tracker_.save();
   accumulator()->save();
   current_layer_ = &layer_stack_.back();
   if (options.renders_with_attributes()) {
@@ -566,7 +568,7 @@ void DisplayListBuilder::saveLayer(const SkRect* bounds,
   // use them as the temporary layer bounds during rendering the layer, so
   // we set them as if a clip operation were performed.
   if (bounds) {
-    intersect(*bounds);
+    tracker_.clipRect(*bounds, SkClipOp::kIntersect, false);
   }
   if (backdrop) {
     // A backdrop will affect up to the entire surface, bounded by the clip
@@ -590,8 +592,7 @@ void DisplayListBuilder::translate(SkScalar tx, SkScalar ty) {
       (tx != 0.0 || ty != 0.0)) {
     checkForDeferredSave();
     Push<TranslateOp>(0, 1, tx, ty);
-    current_layer_->matrix().preTranslate(tx, ty);
-    current_layer_->update_matrix33();
+    tracker_.translate(tx, ty);
   }
 }
 void DisplayListBuilder::scale(SkScalar sx, SkScalar sy) {
@@ -599,16 +600,14 @@ void DisplayListBuilder::scale(SkScalar sx, SkScalar sy) {
       (sx != 1.0 || sy != 1.0)) {
     checkForDeferredSave();
     Push<ScaleOp>(0, 1, sx, sy);
-    current_layer_->matrix().preScale(sx, sy);
-    current_layer_->update_matrix33();
+    tracker_.scale(sx, sy);
   }
 }
 void DisplayListBuilder::rotate(SkScalar degrees) {
   if (SkScalarMod(degrees, 360.0) != 0.0) {
     checkForDeferredSave();
     Push<RotateOp>(0, 1, degrees);
-    current_layer_->matrix().preConcat(SkMatrix::RotateDeg(degrees));
-    current_layer_->update_matrix33();
+    tracker_.rotate(degrees);
   }
 }
 void DisplayListBuilder::skew(SkScalar sx, SkScalar sy) {
@@ -616,8 +615,7 @@ void DisplayListBuilder::skew(SkScalar sx, SkScalar sy) {
       (sx != 0.0 || sy != 0.0)) {
     checkForDeferredSave();
     Push<SkewOp>(0, 1, sx, sy);
-    current_layer_->matrix().preConcat(SkMatrix::Skew(sx, sy));
-    current_layer_->update_matrix33();
+    tracker_.skew(sx, sy);
   }
 }
 
@@ -636,11 +634,8 @@ void DisplayListBuilder::transform2DAffine(
     Push<Transform2DAffineOp>(0, 1,
                               mxx, mxy, mxt,
                               myx, myy, myt);
-    current_layer_->matrix().preConcat(SkM44(mxx, mxy,  0,  mxt,
-                                             myx, myy,  0,  myt,
-                                             0,   0,   1,   0,
-                                             0,   0,   0,   1));
-    current_layer_->update_matrix33();
+    tracker_.transform2DAffine(mxx, mxy, mxt,
+                               myx, myy, myt);
   }
 }
 // full 4x4 transform in row major order
@@ -665,19 +660,17 @@ void DisplayListBuilder::transformFullPerspective(
                                      myx, myy, myz, myt,
                                      mzx, mzy, mzz, mzt,
                                      mwx, mwy, mwz, mwt);
-    current_layer_->matrix().preConcat(SkM44(mxx, mxy, mxz, mxt,
-                                             myx, myy, myz, myt,
-                                             mzx, mzy, mzz, mzt,
-                                             mwx, mwy, mwz, mwt));
-    current_layer_->update_matrix33();
+    tracker_.transformFullPerspective(mxx, mxy, mxz, mxt,
+                                      myx, myy, myz, myt,
+                                      mzx, mzy, mzz, mzt,
+                                      mwx, mwy, mwz, mwt);
   }
 }
 // clang-format on
 void DisplayListBuilder::transformReset() {
   checkForDeferredSave();
   Push<TransformResetOp>(0, 0);
-  current_layer_->matrix().setIdentity();
-  current_layer_->update_matrix33();
+  tracker_.setIdentity();
 }
 void DisplayListBuilder::transform(const SkMatrix* matrix) {
   if (matrix != nullptr) {
@@ -704,12 +697,12 @@ void DisplayListBuilder::clipRect(const SkRect& rect,
   switch (clip_op) {
     case SkClipOp::kIntersect:
       Push<ClipIntersectRectOp>(0, 1, rect, is_aa);
-      intersect(rect);
       break;
     case SkClipOp::kDifference:
       Push<ClipDifferenceRectOp>(0, 1, rect, is_aa);
       break;
   }
+  tracker_.clipRect(rect, clip_op, is_aa);
 }
 void DisplayListBuilder::clipRRect(const SkRRect& rrect,
                                    SkClipOp clip_op,
@@ -721,12 +714,12 @@ void DisplayListBuilder::clipRRect(const SkRRect& rrect,
     switch (clip_op) {
       case SkClipOp::kIntersect:
         Push<ClipIntersectRRectOp>(0, 1, rrect, is_aa);
-        intersect(rrect.getBounds());
         break;
       case SkClipOp::kDifference:
         Push<ClipDifferenceRRectOp>(0, 1, rrect, is_aa);
         break;
     }
+    tracker_.clipRRect(rrect, clip_op, is_aa);
   }
 }
 void DisplayListBuilder::clipPath(const SkPath& path,
@@ -753,48 +746,16 @@ void DisplayListBuilder::clipPath(const SkPath& path,
   switch (clip_op) {
     case SkClipOp::kIntersect:
       Push<ClipIntersectPathOp>(0, 1, path, is_aa);
-      if (!path.isInverseFillType()) {
-        intersect(path.getBounds());
-      }
       break;
     case SkClipOp::kDifference:
       Push<ClipDifferencePathOp>(0, 1, path, is_aa);
-      // Map "kDifference of inverse path" to "kIntersect of the original path".
-      if (path.isInverseFillType()) {
-        intersect(path.getBounds());
-      }
       break;
   }
-}
-void DisplayListBuilder::intersect(const SkRect& rect) {
-  SkRect dev_clip_bounds = getTransform().mapRect(rect);
-  if (!current_layer_->clip_bounds().intersect(dev_clip_bounds)) {
-    current_layer_->clip_bounds().setEmpty();
-  }
-}
-SkRect DisplayListBuilder::getLocalClipBounds() {
-  SkM44 inverse;
-  if (current_layer_->matrix().invert(&inverse)) {
-    SkRect dev_bounds;
-    current_layer_->clip_bounds().roundOut(&dev_bounds);
-    return inverse.asM33().mapRect(dev_bounds);
-  }
-  return kMaxCullRect;
+  tracker_.clipPath(path, clip_op, is_aa);
 }
 
 bool DisplayListBuilder::quickReject(const SkRect& bounds) const {
-  if (bounds.isEmpty()) {
-    return true;
-  }
-  SkMatrix matrix = getTransform();
-  // We don't need the inverse, but this method tells us if the matrix
-  // is singular in which case we can reject all rendering.
-  if (!matrix.invert(nullptr)) {
-    return true;
-  }
-  SkRect dev_bounds;
-  matrix.mapRect(bounds).roundOut(&dev_bounds);
-  return !current_layer_->clip_bounds().intersects(dev_bounds);
+  return tracker_.content_culled(bounds);
 }
 
 void DisplayListBuilder::drawPaint() {
@@ -1357,7 +1318,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
 }
 
 void DisplayListBuilder::AccumulateUnbounded() {
-  accumulator()->accumulate(current_layer_->clip_bounds());
+  accumulator()->accumulate(tracker_.device_cull_rect());
 }
 
 void DisplayListBuilder::AccumulateOpBounds(SkRect& bounds,
@@ -1369,8 +1330,8 @@ void DisplayListBuilder::AccumulateOpBounds(SkRect& bounds,
   }
 }
 void DisplayListBuilder::AccumulateBounds(SkRect& bounds) {
-  getTransform().mapRect(&bounds);
-  if (bounds.intersect(current_layer_->clip_bounds())) {
+  tracker_.mapRect(&bounds);
+  if (bounds.intersect(tracker_.device_cull_rect())) {
     accumulator()->accumulate(bounds);
   }
 }
