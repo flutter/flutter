@@ -88,7 +88,7 @@ void FlutterCompositor::PresentPlatformView(FlutterView* default_base_view,
 
   FML_DCHECK(platform_view) << "Platform view not found for id: " << platform_view_id;
 
-  CGFloat scale = platform_view.layer.contentsScale;
+  CGFloat scale = default_base_view.layer.contentsScale;
   platform_view.frame = CGRectMake(layer->offset.x / scale, layer->offset.y / scale,
                                    layer->size.width / scale, layer->size.height / scale);
   if (platform_view.superview == nil) {
