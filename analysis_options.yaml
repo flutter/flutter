@@ -88,7 +88,7 @@ linter:
     # - cascade_invocations # doesn't match the typical style of this repo
     - cast_nullable_to_non_nullable
     # - close_sinks # not reliable enough
-    # - collection_methods_unrelated_type # not yet tested
+    - collection_methods_unrelated_type # not yet tested
     - combinators_ordering
     # - comment_references # blocked on https://github.com/dart-lang/linter/issues/1142
     - conditional_uri_does_not_exist
