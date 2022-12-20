@@ -98,7 +98,7 @@ linter:
     - deprecated_consistency
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
     - directives_ordering
-    # - discarded_futures # not yet tested
+    # - discarded_futures # too many false positives, similar to unawaited_futures
     # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
     - empty_catches
     - empty_constructor_bodies
@@ -170,7 +170,7 @@ linter:
     - prefer_is_not_empty
     - prefer_is_not_operator
     - prefer_iterable_whereType
-    # - prefer_mixin # Has false positives, see https://github.com/dart-lang/linter/issues/3018
+    # - prefer_mixin # has false positives, see https://github.com/dart-lang/linter/issues/3018
     # - prefer_null_aware_method_calls # "call()" is confusing to people new to the language since it's not documented anywhere
     - prefer_null_aware_operators
     - prefer_relative_imports
