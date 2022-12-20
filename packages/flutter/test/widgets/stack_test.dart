@@ -783,21 +783,27 @@ void main() {
     await tester.pumpWidget(
       Stack(),
     );
+    final String exception = tester.takeException().toString();
+
     expect(
-      tester.takeException().toString(),
+      exception, startsWith(
       'No Directionality widget found.\n'
       "Stack widgets require a Directionality widget ancestor to resolve the 'alignment' argument.\n"
       "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction.\n"
       'The specific widget that could not find a Directionality ancestor was:\n'
       '  Stack\n'
-      'The ownership chain for the affected widget is: "Stack ← [root]"\n'
+      'The ownership chain for the affected widget is: "Stack ← ', // Omitted full ownership chain because it is not relevant for the test.
+    ));
+    expect(
+      exception, endsWith(
+      '← [root]"\n' // End of ownership chain.
       'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
       'top of your application widget tree. It determines the ambient reading direction and is used, for '
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
       'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
       'Instead of providing a Directionality widget, another solution would be passing a non-directional '
       "'alignment', or an explicit 'textDirection', to the Stack.",
-    );
+    ));
   });
 
   testWidgets('Can update clipBehavior of IndexedStack',

@@ -82,7 +82,7 @@ class FakeDevice extends Device {
   final String name;
 
   @override
-  Future<LaunchResult> startApp(covariant ApplicationPackage package, {
+  Future<LaunchResult> startApp(ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,
@@ -93,13 +93,13 @@ class FakeDevice extends Device {
   }) async => _launchResult;
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {
+  Future<bool> stopApp(ApplicationPackage? app, {
     String? userIdentifier,
   }) async => true;
 
   @override
   Future<bool> uninstallApp(
-  covariant ApplicationPackage app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async => true;
 

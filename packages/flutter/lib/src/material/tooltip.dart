@@ -751,7 +751,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
         onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
-        excludeFromSemantics: true,
+        excludeFromSemantics: _excludeFromSemantics,
         child: result,
       );
       // Only check for hovering if there is a mouse connected.

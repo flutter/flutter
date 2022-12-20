@@ -366,6 +366,15 @@ targets:
         ["firebaselab"]
       task_name: release_smoke_test
 
+  - name: Linux flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     enabled_branches:
@@ -2586,6 +2595,27 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__start_up
 
+  - name: Mac flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Mac_arm64 flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "arm64"
+
   - name: Mac flutter_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
@@ -4272,7 +4302,6 @@ targets:
 
   - name: Windows run_release_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -4686,6 +4715,15 @@ targets:
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
 
+  - name: Windows flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4734,7 +4772,6 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4748,11 +4785,12 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "x86"
 
 
   - name: Mac_arm64 flutter_packaging
@@ -4763,7 +4801,6 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4779,7 +4816,6 @@ targets:
     enabled_branches:
       - beta
       - stable
-      - main
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4792,7 +4828,6 @@ targets:
     bringup: true
     enabled_branches:
       - beta
-      - main
     presubmit: false
     timeout: 60
     properties:

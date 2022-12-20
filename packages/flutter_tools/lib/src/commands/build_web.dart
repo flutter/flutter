@@ -19,7 +19,7 @@ class BuildWebCommand extends BuildSubCommand {
     required FileSystem fileSystem,
     required bool verboseHelp,
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
-    addTreeShakeIconsFlag(enabledByDefault: false);
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesOutputDir();
     usesPubOption();
@@ -41,6 +41,10 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Generate a sourcemap file. These can be used by browsers '
             'to view and debug the original source code of a compiled and minified Dart '
             'application.'
+    );
+    argParser.addFlag(
+      'wasm',
+      help: 'Compile to WebAssembly rather than Javascript (experimental).'
     );
 
     argParser.addOption('pwa-strategy',
@@ -140,6 +144,7 @@ class BuildWebCommand extends BuildSubCommand {
       stringArgDeprecated('pwa-strategy')!,
       boolArgDeprecated('source-maps'),
       boolArgDeprecated('native-null-assertions'),
+      boolArgDeprecated('wasm'),
       baseHref: baseHref,
       dart2jsOptimization: stringArgDeprecated('dart2js-optimization'),
       outputDirectoryPath: outputDirectoryPath,
