@@ -8,7 +8,7 @@
 // while the _AnimatedIconData interface which used to deliver the icon data is
 // kept private.
 
-part of '../animated_icons.dart';
+part of material_animated_icons;
 
 /// Identifier for the supported Material Design animated icons.
 ///

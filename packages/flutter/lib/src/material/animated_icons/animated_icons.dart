@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of '../animated_icons.dart';
+part of material_animated_icons;
 
 // The code for drawing animated icons is kept in a private API, as we are not
 // yet ready for exposing a public API for (partial) vector graphics support.

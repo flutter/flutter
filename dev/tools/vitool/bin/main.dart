@@ -36,7 +36,7 @@ void main(List<String> args) {
   parser.addOption(
       'part-of',
       abbr: 'p',
-      help: "Library path to add a dart 'part of' clause for.",
+      help: "Library name to add a dart 'part of' clause for.",
   );
 
   parser.addOption(
@@ -80,7 +80,7 @@ void main(List<String> args) {
   }
 
   if (argResults.wasParsed('part-of')) {
-    generatedSb.write("part of '${argResults['part-of']}';\n");
+    generatedSb.write('part of ${argResults['part-of']};\n');
   }
 
   final Animation animation = Animation.fromFrameData(frames);
