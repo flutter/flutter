@@ -103,7 +103,7 @@
 		A9987E4174B38E41820C3697 /* libPods-Free App.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Free App.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CADFDE69E11F94E130E2A47A /* Pods-Free App.debug free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug free.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"; sourceTree = "<group>"; };
 		F383D4B62938029D00598432 /* Paid App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Paid App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F383D4B72938029E00598432 /* Free App Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Free App Info.plist"; path = "/Users/stephenwallen/Development/flutter/flutter/dev/integration_tests/flavors/macos/Free App Info.plist"; sourceTree = "<absolute>"; };
+		F383D4B72938029E00598432 /* Free App Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Free App Info.plist"; sourceTree = "<group>"; };
 		F3ADFB692951303300135EA2 /* Paid AppDebug Free.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Paid AppDebug Free.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
