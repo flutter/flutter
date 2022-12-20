@@ -78,7 +78,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(
+              child: ColoredBox(
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
@@ -151,7 +151,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(
+              child: ColoredBox(
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),

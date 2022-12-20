@@ -68,7 +68,7 @@ import 'viewport.dart';
 ///         body: PageView(
 ///           controller: _pageController,
 ///           children: <Widget>[
-///             Container(
+///             ColoredBox(
 ///               color: Colors.red,
 ///               child: Center(
 ///                 child: ElevatedButton(
@@ -85,7 +85,7 @@ import 'viewport.dart';
 ///                 ),
 ///               ),
 ///             ),
-///             Container(
+///             ColoredBox(
 ///               color: Colors.blue,
 ///               child: Center(
 ///                 child: ElevatedButton(

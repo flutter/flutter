@@ -208,7 +208,7 @@ Widget buildDropdownWithHint({
     selectedItemBuilder: enableSelectedItemBuilder
       ? (BuildContext context) {
           return menuItems.map<Widget>((String item) {
-            return Container(
+            return ColoredBox(
               color: const Color(0xff00ff00),
               child: Text(item),
             );
