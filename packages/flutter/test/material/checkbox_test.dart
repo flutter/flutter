@@ -196,7 +196,7 @@ void main() {
       child: Theme(
         data: theme,
         child: Material(
-          child: Checkbox.withSemanticLabel(
+          child: Checkbox(
             semanticLabel: 'checkbox',
             value: true,
             onChanged: (bool? b) { },
