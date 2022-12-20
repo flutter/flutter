@@ -106,19 +106,19 @@ class SemanticsController {
 
   /// Attemps to find a [SemanticsNode] with the given `action` as close to the
   /// [SemanticsNode] of `finder` as possible.
-  /// 
+  ///
   /// The [SemanticsNode] directly related to an [Element] is not necessarily
   /// the one that can be acted upon. This method finds the directly related
   /// node and checks whether it supports the given `action`. If the directly
   /// related node does not support the given `action`, then the closest
   /// descendent of that node that does support the `action` is returned.
-  /// 
+  ///
   /// Will throw a [StateError] if:
   /// * No results are returned from `finder`
   /// * More than result is returned from `finder`
   /// * The [SemanticsNode] of `finder` or its descendant nodes do not support
   ///   `action`
-  /// 
+  ///
   /// See also:
   /// * [find]
   /// * [findWithAnyAction]
@@ -145,20 +145,20 @@ class SemanticsController {
 
   /// Attemps to find a [SemanticsNode] with any of the given `actions` as
   /// close to the [SemanticsNode] of `finder` as possible.
-  /// 
+  ///
   /// The [SemanticsNode] directly related to an [Element] is not necessarily
   /// the one that can be acted upon. This method finds the directly related
   /// node and checks whether it supports any of the given `actions`. If the
   /// directly related node does not support any of the given `actions`, then
   /// the closest descendent of that node that does support at least one of
   /// the `actions` is returned.
-  /// 
+  ///
   /// Will throw a [StateError] if:
   /// * No results are returned from `finder`
   /// * More than result is returned from `finder`
   /// * The [SemanticsNode] of `finder` or its descendant nodes do not support
   ///   at least one action in `actions`
-  /// 
+  ///
   /// See also:
   /// * [find]
   /// * [findWithAction]

@@ -935,7 +935,7 @@ void main() {
           containsAllInOrder(expectedMatchers));
       });
     });
-  
+
     group('actions', () {
       testWidgets('performAction with unsupported action throws StateError', (WidgetTester tester) async {
         await tester.pumpWidget(Semantics());
@@ -1161,7 +1161,7 @@ void main() {
         // Get focus onto the text field
         tester.semantics.tap(find.byType(TextField));
         await tester.pump();
-        
+
         tester.semantics.moveCursorBackwardByCharacter(find.byType(TextField));
         await tester.pump();
         expectUnselectedIndex(currentIndex - 1);
@@ -1176,7 +1176,7 @@ void main() {
         await tester.pump();
         expectUnselectedIndex(currentIndex - 5);
         currentIndex -= 5;
-        
+
         tester.semantics.moveCursorForwardByCharacter(find.byType(TextField));
         await tester.pump();
         expectUnselectedIndex(currentIndex + 1);
@@ -1204,7 +1204,7 @@ void main() {
         // Get focus onto the text field
         tester.semantics.tap(find.byType(TextField));
         await tester.pump();
-        
+
         tester.semantics.moveCursorBackwardByCharacter(find.byType(TextField), true);
         await tester.pump();
         expectSelectedIndex(currentIndex - 1);
@@ -1219,7 +1219,7 @@ void main() {
         await tester.pump();
         expectSelectedIndex(currentIndex - 5);
         currentIndex -= 5;
-        
+
         tester.semantics.moveCursorForwardByCharacter(find.byType(TextField), true);
         await tester.pump();
         expectSelectedIndex(currentIndex + 1);
@@ -1277,7 +1277,7 @@ void main() {
             onCopy: () => invoked = true,
           ),
         ));
-        
+
         tester.semantics.copy(find.bySemanticsLabel('test'));
         expect(invoked, isTrue);
       });
@@ -1290,7 +1290,7 @@ void main() {
             onCut: () => invoked = true,
           ),
         ));
-        
+
         tester.semantics.cut(find.bySemanticsLabel('test'));
         expect(invoked, isTrue);
       });
@@ -1303,7 +1303,7 @@ void main() {
             onPaste: () => invoked = true,
           ),
         ));
-        
+
         tester.semantics.paste(find.bySemanticsLabel('test'));
         expect(invoked, isTrue);
       });
@@ -1364,7 +1364,7 @@ void main() {
         bool invoked = false;
         await tester.pumpWidget(MaterialApp(
           home: Semantics(label: 'test', customSemanticsActions: <CustomSemanticsAction, void Function()>{
-            customAction:() => invoked = true,   
+            customAction:() => invoked = true,
           },),
         ));
 
