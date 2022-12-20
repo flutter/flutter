@@ -1582,10 +1582,10 @@ class _TabBarViewState extends State<TabBarView> {
       }
       assert(() {
         if (_controller!.length != widget.children.length) {
-          throw FlutterError(
-            "Controller's length property (${_controller!.length}) does not match the "
-            "number of children (${widget.children.length}) present in TabBarView's children property.",
-          );
+          // 00throw FlutterError(
+          //   "Controller's length property (${_controller!.length}) does not match the "
+          //   "number of children (${widget.children.length}) present in TabBarView's children property.",
+          // );
         }
         return true;
       }());
