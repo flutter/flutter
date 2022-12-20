@@ -360,7 +360,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -370,9 +370,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipRect(
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -442,7 +442,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -458,9 +458,9 @@ void main() {
                       bottomLeft: Radius.elliptical(2.5, 12.0),
                       bottomRight: Radius.elliptical(15.0, 6.0),
                     ),
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -491,7 +491,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -501,9 +501,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipOval(
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -534,7 +534,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -549,9 +549,9 @@ void main() {
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
                     ),
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -581,7 +581,7 @@ void main() {
   Center genPhysicalModel(Clip clipBehavior) {
     return Center(
       child: RepaintBoundary(
-        child: Container(
+        child: ColoredBox(
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
@@ -594,7 +594,7 @@ void main() {
                   borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                   color: Colors.red,
                   clipBehavior: clipBehavior,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.white,
                     child: RepaintBoundary(
                       child: Center(
@@ -645,7 +645,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -657,7 +657,7 @@ void main() {
                   child: PhysicalModel(
                     borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                     color: Colors.red,
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.white,
                       child: RepaintBoundary(
                         child: Center(
@@ -686,7 +686,7 @@ void main() {
   Center genPhysicalShape(Clip clipBehavior) {
     return Center(
       child: RepaintBoundary(
-        child: Container(
+        child: ColoredBox(
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
@@ -703,7 +703,7 @@ void main() {
                   ),
                   clipBehavior: clipBehavior,
                   color: Colors.red,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.white,
                     child: RepaintBoundary(
                       child: Center(
@@ -752,7 +752,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -768,7 +768,7 @@ void main() {
                       ),
                     ),
                     color: Colors.red,
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.white,
                       child: RepaintBoundary(
                         child: Center(

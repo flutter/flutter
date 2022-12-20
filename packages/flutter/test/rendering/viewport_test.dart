@@ -1874,7 +1874,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Container(
+          child: ColoredBox(
             color: const Color(0xFF000000),
             child: Column(
               children: <Widget>[

@@ -67,9 +67,9 @@ class ContextMenuExample extends StatelessWidget {
                 child: const Text('Delete'),
               ),
             ],
-            child: Container(
+            child: const ColoredBox(
               color: CupertinoColors.systemYellow,
-              child: const FlutterLogo(size: 500.0),
+              child: FlutterLogo(size: 500.0),
             ),
           ),
         ),

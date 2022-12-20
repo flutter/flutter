@@ -14301,7 +14301,7 @@ class _CustomTextSelectionToolbar extends StatelessWidget {
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       toolbarBuilder: (BuildContext context, Widget child) {
-        return Container(
+        return ColoredBox(
           color: Colors.pink,
           child: child,
         );

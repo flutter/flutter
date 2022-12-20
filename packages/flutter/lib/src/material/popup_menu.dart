@@ -574,7 +574,7 @@ class _PopupMenu<T> extends StatelessWidget {
       );
       Widget item = route.items[i];
       if (route.initialValue != null && route.items[i].represents(route.initialValue)) {
-        item = Container(
+        item = ColoredBox(
           color: Theme.of(context).highlightColor,
           child: item,
         );

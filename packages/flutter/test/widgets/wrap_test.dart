@@ -897,7 +897,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: IntrinsicHeight(
-            child: Container(
+            child: ColoredBox(
               color: Colors.green,
               child: Wrap(
                 children: <Widget>[
@@ -929,7 +929,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: IntrinsicWidth(
-            child: Container(
+            child: ColoredBox(
               color: Colors.green,
               child: Wrap(
                 direction: Axis.vertical,

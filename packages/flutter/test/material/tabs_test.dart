@@ -78,7 +78,7 @@ class _NestedTabBarContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.blue,
       child: Column(
         children: <Widget>[

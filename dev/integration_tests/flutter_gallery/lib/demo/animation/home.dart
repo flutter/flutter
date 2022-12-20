@@ -520,7 +520,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
 
     final List<Widget> headings = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
-      headings.add(Container(
+      headings.add(ColoredBox(
           color: _kAppBackgroundColor,
           child: ClipRect(
             child: _AllSectionsView(

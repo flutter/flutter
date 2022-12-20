@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: Column(
           children: <Widget>[
-            Container(color: Colors.grey.shade200, child: Options(_model)),
+            ColoredBox(color: Colors.grey.shade200, child: Options(_model)),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

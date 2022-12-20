@@ -536,7 +536,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pumpWidget(
         RepaintBoundary(
           key: repaintBoundaryKey,
-          child: Container(
+          child: ColoredBox(
             color: Colors.grey,
             child: Transform(
               transform: mainTransform,
@@ -544,7 +544,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 textDirection: TextDirection.ltr,
                 child: WidgetInspector(
                   selectButtonBuilder: null,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.white,
                     child: Center(
                       child: Container(
@@ -3862,7 +3862,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pumpWidget(
         Center(
           child: RepaintBoundaryWithDebugPaint(
-            child: Container(
+            child: ColoredBox(
               key: outerContainerKey,
               color: Colors.white,
               child: Padding(
@@ -3881,10 +3881,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                         bottomLeft: Radius.elliptical(2.5, 12.0),
                         bottomRight: Radius.elliptical(15.0, 6.0),
                       ),
-                      child: Container(
+                      child: ColoredBox(
                         key: redContainerKey,
                         color: Colors.red,
-                        child: Container(
+                        child: ColoredBox(
                           key: whiteContainerKey,
                           color: Colors.white,
                           child: RepaintBoundary(
@@ -4166,14 +4166,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: Center(
             child: Row(
-              children: <Widget>[
+              children: const <Widget>[
                 Flexible(
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.green,
-                    child: const Text('a'),
+                    child: Text('a'),
                   ),
                 ),
-                const Text('b'),
+                Text('b'),
               ],
             ),
           ),

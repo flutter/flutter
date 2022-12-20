@@ -49,7 +49,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _updateSize(),
-      child: Container(
+      child: ColoredBox(
         color: Colors.amberAccent,
         child: AnimatedSize(
           curve: Curves.easeIn,

@@ -69,7 +69,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         onPointerDown: _incrementDown,
         onPointerMove: _updateLocation,
         onPointerUp: _incrementUp,
-        child: Container(
+        child: ColoredBox(
           color: Colors.lightBlueAccent,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

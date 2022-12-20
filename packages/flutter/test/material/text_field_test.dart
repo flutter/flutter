@@ -11639,7 +11639,7 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: Container(
+          body: ColoredBox(
             color: Colors.grey,
             child: Center(
               child: Container(

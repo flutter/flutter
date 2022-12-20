@@ -125,7 +125,7 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: FocusTraversalGroup(
         policy: OrderedTraversalPolicy(),

@@ -901,7 +901,7 @@ void main() {
       children: <Widget>[
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
-        Container(color: Colors.green, child: SizedBox(key: key)),
+        ColoredBox(color: Colors.green, child: SizedBox(key: key)),
       ],
     );
     await tester.pumpWidget(stack);
@@ -1234,7 +1234,7 @@ void main() {
       children: <Widget>[
         Container(),
         Container(key: GlobalKey()),
-        Container(color: Colors.green, child: Container()),
+        ColoredBox(color: Colors.green, child: Container()),
         Container(key: GlobalKey()),
         Container(),
       ],
@@ -1252,11 +1252,10 @@ void main() {
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├Container(bg: MaterialColor(primary value: Color(0xff4caf50)))\n'
-        '│└ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
-        '│ └Container\n'
-        '│  └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
-        '│   └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
+        '├ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        '│└Container\n'
+        '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
+        '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'

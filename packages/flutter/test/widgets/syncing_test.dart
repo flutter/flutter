@@ -50,9 +50,9 @@ void main() {
 
   testWidgets('no change', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Container(
+      ColoredBox(
         color: Colors.blue,
-        child: Container(
+        child: ColoredBox(
           color: Colors.blue,
           child: TestWidget(
             persistentState: 1,
@@ -69,9 +69,9 @@ void main() {
     expect(state.updates, equals(0));
 
     await tester.pumpWidget(
-      Container(
+      ColoredBox(
         color: Colors.blue,
-        child: Container(
+        child: ColoredBox(
           color: Colors.blue,
           child: TestWidget(
             persistentState: 2,
@@ -90,9 +90,9 @@ void main() {
 
   testWidgets('remove one', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Container(
+      ColoredBox(
         color: Colors.blue,
-        child: Container(
+        child: ColoredBox(
           color: Colors.blue,
           child: TestWidget(
             persistentState: 10,
@@ -109,7 +109,7 @@ void main() {
     expect(state.updates, equals(0));
 
     await tester.pumpWidget(
-      Container(
+      ColoredBox(
         color: Colors.green,
         child: TestWidget(
           persistentState: 11,

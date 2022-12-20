@@ -242,7 +242,7 @@ void main() {
                   Container(
                     color: Colors.red,
                   ),
-                  Container(
+                  ColoredBox(
                     color: Colors.green,
                     child: TextField(
                       controller: textController,

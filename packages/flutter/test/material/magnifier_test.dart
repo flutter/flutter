@@ -119,17 +119,18 @@ void main() {
         ));
 
         await tester.pumpWidget(
-          Container(
+          ColoredBox(
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
               home: Center(
-                  child: Container(
-                key: textField,
-                width: 10,
-                height: 10,
-                color: Colors.red,
-                child: const Placeholder(),
-              )),
+                child: Container(
+                  key: textField,
+                  width: 10,
+                  height: 10,
+                  color: Colors.red,
+                  child: const Placeholder(),
+                ),
+              ),
             ),
           ),
         );
