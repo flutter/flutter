@@ -104,7 +104,6 @@
 		CADFDE69E11F94E130E2A47A /* Pods-Free App.debug free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug free.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"; sourceTree = "<group>"; };
 		F383D4B62938029D00598432 /* Paid App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Paid App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F383D4B72938029E00598432 /* Free App Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Free App Info.plist"; sourceTree = "<group>"; };
-		F3ADFB692951303300135EA2 /* Paid AppDebug Free.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Paid AppDebug Free.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,7 +140,6 @@
 		33CC10E42044A3C60003C045 = {
 			isa = PBXGroup;
 			children = (
-				F3ADFB692951303300135EA2 /* Paid AppDebug Free.entitlements */,
 				33FAB671232836740065AC1E /* Runner */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				33CC10EE2044A3C60003C045 /* Products */,
@@ -650,7 +648,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = "Paid AppDebug Free.entitlements";
+				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Free App Info.plist";
