@@ -39,7 +39,7 @@ std::optional<Rect> RRectShadowContents::GetCoverage(
     return std::nullopt;
   }
 
-  Scalar radius = Radius{sigma_}.radius;
+  Scalar radius = sigma_.sigma * 2;
 
   auto ltrb = rect_->GetLTRB();
   Rect bounds = Rect::MakeLTRB(ltrb[0] - radius, ltrb[1] - radius,
@@ -59,7 +59,7 @@ bool RRectShadowContents::Render(const ContentContext& renderer,
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
 
-  auto blur_radius = Radius{sigma_}.radius;
+  auto blur_radius = sigma_.sigma * 2;
   auto positive_rect = rect_->GetPositive();
   {
     auto left = -blur_radius;

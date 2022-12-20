@@ -16,4 +16,7 @@ const float kSqrtTwoPi = 2.50662827463;
 // sqrt(2) / 2 == 1 / sqrt(2)
 const float kHalfSqrtTwo = 0.70710678118;
 
+// sqrt(3)
+const float kSqrtThree = 1.73205080757;
+
 #endif
