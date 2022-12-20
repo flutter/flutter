@@ -939,11 +939,11 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
        assert(curve != null);
 
   /// The progress value at which [curve] should begin.
-  ///
-  /// This defaults to [Curves.easeOutCubic].
   final double startingPoint;
 
   /// The curve to use when [startingPoint] is reached.
+  ///
+  /// This defaults to [Curves.easeOutCubic].
   final Curve curve;
 
   @override
