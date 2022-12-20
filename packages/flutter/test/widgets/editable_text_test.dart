@@ -14076,6 +14076,50 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       );
     });
   });
+
+  // Regression test for: https://github.com/flutter/flutter/issues/117418.
+  testWidgets('can handle the partial selection of a multi-code-unit glyph', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          showSelectionHandles: true,
+          autofocus: true,
+          focusNode: FocusNode(),
+          style: Typography.material2018().black.titleMedium!,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          textAlign: TextAlign.right,
+          minLines: 2,
+          maxLines: 2,
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(EditableText), '12345');
+    await tester.pumpAndSettle();
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    state.userUpdateTextEditingValue(
+      const TextEditingValue(
+        // This is an extended grapheme cluster made up of several code units,
+        // which has length 8.  A selection from 0-1 does not fully select it.
+        text: '👨‍👩‍👦',
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: 1,
+        ),
+      ),
+      SelectionChangedCause.keyboard,
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  });
 }
 
 class UnsettableController extends TextEditingController {

@@ -3204,8 +3204,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         rectToReveal = targetOffset.rect;
       } else {
         final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(selection);
-        rectToReveal = selection.baseOffset < selection.extentOffset ?
-          selectionBoxes.last : selectionBoxes.first;
+        // selectionBoxes may be empty if, for example, the selection does not
+        // encompass a full character, like if it only contained part of an
+        // extended grapheme cluster.
+        if (selectionBoxes.isEmpty) {
+          rectToReveal = targetOffset.rect;
+        } else {
+          rectToReveal = selection.baseOffset < selection.extentOffset ?
+            selectionBoxes.last : selectionBoxes.first;
+        }
       }
 
       if (withAnimation) {
