@@ -434,49 +434,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     return _buildIcon(context);
   }
 
-  Widget _buildChild(BuildContext context, Widget? child){
-    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final ShapeBorder expansionTileBorder = _border.value ?? const Border(
-            top: BorderSide(color: Colors.transparent),
-            bottom: BorderSide(color: Colors.transparent),
-          );
-    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
-
-    return Container(
-      clipBehavior: clipBehavior,
-      decoration: ShapeDecoration(
-        color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
-        shape: expansionTileBorder,
-      ),
-      child:  Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          ListTileTheme.merge(
-            iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
-            textColor: _headerColor.value,
-            child: ListTile(
-              onTap: _handleTap,
-              contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
-              leading: widget.leading ?? _buildLeadingIcon(context),
-              title: widget.title,
-              subtitle: widget.subtitle,
-              trailing: widget.trailing ?? _buildTrailingIcon(context),
-            ),
-          ),
-        ClipRect(
-            child: Align(
-              alignment: widget.expandedAlignment
-                ?? expansionTileTheme.expandedAlignment
-                ?? Alignment.center,
-              heightFactor: _heightFactor.value,
-              child: child,
-            ),
-           ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
