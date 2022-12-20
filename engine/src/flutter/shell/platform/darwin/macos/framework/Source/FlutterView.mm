@@ -106,6 +106,12 @@
   [_reshapeListener viewDidReshape:self];
 }
 
+- (BOOL)layer:(CALayer*)layer
+    shouldInheritContentsScale:(CGFloat)newScale
+                    fromWindow:(NSWindow*)window {
+  return YES;
+}
+
 - (void)shutdown {
   [_threadSynchronizer shutdown];
 }
