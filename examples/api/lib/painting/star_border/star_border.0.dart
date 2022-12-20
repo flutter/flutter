@@ -66,7 +66,7 @@ class _StarBorderExampleState extends State<StarBorderExample> {
       ),
       child: ListView(
         children: <Widget>[
-          Container(
+          ColoredBox(
             color: Colors.grey.shade200,
             child: Options(_model),
           ),

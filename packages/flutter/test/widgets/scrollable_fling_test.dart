@@ -17,7 +17,7 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     theme: ThemeData(
       platform: platform,
     ),
-    home: Container(
+    home: ColoredBox(
       color: const Color(0xFF111111),
       child: ListView.builder(
         dragStartBehavior: DragStartBehavior.down,

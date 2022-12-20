@@ -207,7 +207,7 @@ void main() {
                 constrained: false,
                 scaleEnabled: false,
                 transformationController: transformationController,
-                child: const SizedBox(width: 0.0, height: 0.0),
+                child: const SizedBox.shrink(),
               ),
             ),
           ),

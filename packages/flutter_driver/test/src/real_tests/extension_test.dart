@@ -1150,9 +1150,7 @@ void main() {
       home: Material(
         child: Column(children: const<Widget> [
           Text('Hello ', key: Key('widgetOne')),
-          SizedBox(
-            height: 0,
-            width: 0,
+          SizedBox.shrink(
             child: Text('World!', key: Key('widgetTwo')),
           ),
         ]),

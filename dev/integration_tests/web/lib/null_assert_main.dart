@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: enable_null_safety
+
 // @dart = 2.8
 
 import 'null_enabled_api.dart';

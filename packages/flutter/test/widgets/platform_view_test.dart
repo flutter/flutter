@@ -96,9 +96,7 @@ void main() {
 
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
