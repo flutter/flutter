@@ -222,7 +222,7 @@ linter:
     - unsafe_html
     - use_build_context_synchronously
     # - use_colored_box # not yet tested
-    # - use_decorated_box # not yet tested
+    # - use_decorated_box # leads to bugs: DecoratedBox and Container are not equivalent (Container inserts extra padding)
     # - use_enums # not yet tested
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
