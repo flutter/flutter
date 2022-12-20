@@ -73,13 +73,51 @@ class ExpansionTile extends StatefulWidget {
     this.collapsedShape,
     this.clipBehavior,
     this.controlAffinity,
-  }) : assert(initiallyExpanded != null),
+  }) : child = null,
+  assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
            'are aligned in a column, not a row. Try to use another constant.',
        );
+
+  /// a constructor for the [ExpansionTile] that allows a single [child] instead of a list of [children].
+  const ExpansionTile.single({
+    super.key,
+    this.leading,
+    required this.title,
+    this.subtitle,
+    this.onExpansionChanged,
+    required this.child,
+    this.trailing,
+    this.initiallyExpanded = false,
+    this.maintainState = false,
+    this.tilePadding,
+    this.expandedCrossAxisAlignment,
+    this.expandedAlignment,
+    this.childrenPadding,
+    this.backgroundColor,
+    this.collapsedBackgroundColor,
+    this.textColor,
+    this.collapsedTextColor,
+    this.iconColor,
+    this.collapsedIconColor,
+    this.shape,
+    this.collapsedShape,
+    this.clipBehavior,
+    this.controlAffinity,
+  }) : children = const <Widget>[],
+       assert(initiallyExpanded != null),
+       assert(maintainState != null),
+       assert(
+       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+       'CrossAxisAlignment.baseline is not supported since the expanded children '
+           'are aligned in a column, not a row. Try to use another constant.',
+       );
+
+  /// child of the [ExpansionTile] when using the [ExpansionTile.single] constructor.
+  final Widget? child;
 
   /// A widget to display before the title.
   ///
@@ -396,6 +434,49 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     return _buildIcon(context);
   }
 
+  Widget _buildChild(BuildContext context, Widget? child){
+    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
+    final ShapeBorder expansionTileBorder = _border.value ?? const Border(
+            top: BorderSide(color: Colors.transparent),
+            bottom: BorderSide(color: Colors.transparent),
+          );
+    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
+
+    return Container(
+      clipBehavior: clipBehavior,
+      decoration: ShapeDecoration(
+        color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
+        shape: expansionTileBorder,
+      ),
+      child:  Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ListTileTheme.merge(
+            iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
+            textColor: _headerColor.value,
+            child: ListTile(
+              onTap: _handleTap,
+              contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
+              leading: widget.leading ?? _buildLeadingIcon(context),
+              title: widget.title,
+              subtitle: widget.subtitle,
+              trailing: widget.trailing ?? _buildTrailingIcon(context),
+            ),
+          ),
+        ClipRect(
+            child: Align(
+              alignment: widget.expandedAlignment
+                ?? expansionTileTheme.expandedAlignment
+                ?? Alignment.center,
+              heightFactor: _heightFactor.value,
+              child: child,
+            ),
+           ),
+        ],
+      ),
+    );
+  } 
+
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
@@ -425,7 +506,15 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               trailing: widget.trailing ?? _buildTrailingIcon(context),
             ),
           ),
-          Flexible(child: ClipRect(
+       if (widget.child != null) Flexible(child: ClipRect(
+            child: Align(
+              alignment: widget.expandedAlignment
+                ?? expansionTileTheme.expandedAlignment
+                ?? Alignment.center,
+              heightFactor: _heightFactor.value,
+              child: child,
+            ),
+           ),) else ClipRect(
             child: Align(
               alignment: widget.expandedAlignment
                 ?? expansionTileTheme.expandedAlignment
@@ -434,7 +523,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               child: child,
             ),
            ),
-          ),
         ],
       ),
     );
@@ -486,9 +574,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         enabled: !closed,
         child: Padding(
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
-          child: Column(
+          child: widget.child?? Column(
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-            children: widget.children,
+            children:widget.children,
           ),
         ),
       ),
@@ -496,7 +584,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
     return AnimatedBuilder(
       animation: _controller.view,
-      builder: _buildChildren,
+      builder:_buildChildren,
       child: shouldRemoveChildren ? null : result,
     );
   }
