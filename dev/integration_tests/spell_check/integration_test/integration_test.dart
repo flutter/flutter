@@ -176,26 +176,4 @@ void main() {
 
     expect(expectedTextSpanTreeFound, isTrue);
   });
-
-  testWidgets(
-      'fetchSpellCheckSuggestions returns null when there is a pending request on Android',
-      (WidgetTester tester) async {
-    final String text =
-        'neaf niofenaifn iofn iefnaoeifn ifneoa finoiafn inf ionfieaon ienf ifn ieonfaiofneionf oieafn oifnaioe nioenfio nefaion oifan' *
-            10;
-
-    defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
-
-    final String modifiedText = text.substring(5);
-
-    final List<SuggestionSpan>? spellCheckSuggestionSpans =
-        await defaultSpellCheckService.fetchSpellCheckSuggestions(
-            locale, modifiedText);
-
-    expect(spellCheckSuggestionSpans, isNull);
-
-    // We expect it to be rare for the first request to complete before the
-    // second, so no text should be saved as of now.
-    expect(defaultSpellCheckService.lastSavedResults, null);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 }
