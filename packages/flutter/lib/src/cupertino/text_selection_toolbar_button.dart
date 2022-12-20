@@ -140,7 +140,11 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
           ),
         );
       } else {
-        child = Icon(icon, size: _kToolbarButtonIconSize);
+        child = Icon(
+          icon,
+          size: _kToolbarButtonIconSize,
+          color: CupertinoColors.white,
+        );
       }
     }
 
