@@ -133,17 +133,74 @@ class ParagraphBoundary extends TextBoundary {
 
   final String _text;
 
+  /// Returns the [TextPosition] representing the start position of the paragraph that
+  /// bounds the given `position`. The returned [TextPosition] is at the front of the leading
+  /// line terminator that encloses the desired paragraph.
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    final Iterator<int> codeUnitIter = _text.codeUnits.iterator;
+    final int targetTextOffset = position.offset;
+
+    int currentTextPosition = 0;
+    // If there is no line terminator then the default leading text position
+    // will be at the begining of the document.
+    int lastLineTerminatorPosition = 0;
+
+    while(codeUnitIter.moveNext()) {
+      final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
+      currentTextPosition += currentCodeUnit.length;
+      if (currentTextPosition > targetTextOffset) {
+        break;
+      }
+      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(currentTextPosition - currentCodeUnit.length))) {
+        if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
+          continue;
+        }
+        if (currentTextPosition < targetTextOffset) {
+          // The target text position has not been passed yet but we arrived at a
+          // line terminator. Offset the position by the length of the line terminator
+          // to include it within the boundary.
+          lastLineTerminatorPosition = currentTextPosition - currentCodeUnit.length;
+        }
+      }
+    }
+
     return TextPosition(
-      offset: getTextBoundaryAt(position).start,
+      offset: lastLineTerminatorPosition,
     );
   }
 
+  /// Returns the [TextPosition] representing the start position of the paragraph that
+  /// bounds the given `position`. The returned [TextPosition] is at the back of the trailing
+  /// line terminator that encloses the desired paragraph.
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    final Iterator<int> codeUnitIter = _text.codeUnits.iterator;
+    final int targetTextOffset = position.offset;
+
+    int currentTextPosition = 0;
+    // If there is no line terminator then the default trailing text position
+    // will be at the end of the document.
+    int lastLineTerminatorPosition = _text.length;
+
+    while(codeUnitIter.moveNext()) {
+      final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
+      currentTextPosition += currentCodeUnit.length;
+      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(currentTextPosition - currentCodeUnit.length))) {
+        if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
+          continue;
+        }
+        if (currentTextPosition > targetTextOffset) {
+          // The target text position was passed. This means that the target position
+          // is contained inside of a paragraph boundary.
+          lastLineTerminatorPosition = currentTextPosition;
+          break;
+        }
+      }
+    }
+
     return TextPosition(
-      offset: getTextBoundaryAt(position).end,
+      offset: lastLineTerminatorPosition,
       affinity: TextAffinity.upstream,
     );
   }
@@ -152,7 +209,7 @@ class ParagraphBoundary extends TextBoundary {
   /// `position`. The `position` is bounded by either a line terminator
   /// in each direction of the text, or if there is no line terminator in a given
   /// direction then the bound extends to the start/end of the document in that
-  /// direction. The returned range includes the line terminator.
+  /// direction. The returned range includes the line terminator in both directions.
   @override
   TextRange getTextBoundaryAt(TextPosition position) {
     final Iterator<int> codeUnitIter = _text.codeUnits.iterator;
@@ -170,7 +227,8 @@ class ParagraphBoundary extends TextBoundary {
         }
         if (graphemeEnd < targetTextOffset) {
           // The target text position has not been passed yet but we arrived at a
-          // line terminator.
+          // line terminator. Offset the position by the length of the line terminator
+          // to include it within the boundary.
           graphemeStart = graphemeEnd - currentCodeUnit.length;
         } else if (graphemeEnd > targetTextOffset) {
           // The target text position was passed. This means that the target position

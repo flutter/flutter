@@ -65,11 +65,10 @@ abstract class TextLayoutMetrics {
       case 0xC: // form feed
       case 0xD: // carriage return
       case 0x85: // new line
-        break;
+        return true;
       default:
         return false;
     }
-    return true;
   }
 
   /// {@template flutter.services.TextLayoutMetrics.getLineAtOffset}
