@@ -141,6 +141,8 @@
 
         "templates/app_test_widget/test/widget_test.dart.tmpl",
 
+        "templates/app_integration_test/integration_test/plugin_integration_test.dart.tmpl",
+
         "templates/cocoapods/Podfile-ios-objc",
         "templates/cocoapods/Podfile-ios-swift",
         "templates/cocoapods/Podfile-macos",

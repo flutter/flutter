@@ -4277,11 +4277,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element element = tester.element(find.byType(Directionality).first);
         Element? root;
         element.visitAncestorElements((Element ancestor) {
-          if (root == null) {
-            root = ancestor;
-            // Stop traversing ancestors.
-            return false;
-          }
+          root = ancestor;
           return true;
         });
         expect(root, isNotNull);

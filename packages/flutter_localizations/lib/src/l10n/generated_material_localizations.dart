@@ -51,6 +51,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Terug';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Skakel oor na kalender';
 
   @override
@@ -70,6 +73,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopieer';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Knip';
@@ -276,6 +282,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Spasie';
 
   @override
@@ -390,6 +399,12 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'STOOR';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -493,6 +508,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ተመለስ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'ወደ የቀን መቁጠሪያ ቀይር';
 
   @override
@@ -512,6 +530,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'ቅዳ';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ቁረጥ';
@@ -718,6 +739,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'ምረጥ';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'ክፍተት';
 
   @override
@@ -832,6 +856,12 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'አስቀምጥ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -935,6 +965,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'رجوع';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'التبديل إلى التقويم';
 
   @override
@@ -954,6 +987,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'نسخ';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'قص';
@@ -1160,6 +1196,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'مفتاح الاختيار';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'مفتاح المسافة';
 
   @override
@@ -1274,6 +1313,12 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'حفظ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -1377,6 +1422,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'উভতি যাওক';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'কেলেণ্ডাৰলৈ সলনি কৰক';
 
   @override
@@ -1396,6 +1444,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'কাট কৰক';
@@ -1602,6 +1653,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'ছিলেক্ট';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'স্পেচ';
 
   @override
@@ -1716,6 +1770,12 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ছেভ কৰক';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -1819,6 +1879,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Geri';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Təqvimə keçin';
 
   @override
@@ -1838,6 +1901,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopyalayın';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kəsin';
@@ -2044,6 +2110,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seçin';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Boşluq';
 
   @override
@@ -2158,6 +2227,12 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'YADDA SAXLAYIN';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -2261,6 +2336,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Пераключыцца на каляндар';
 
   @override
@@ -2280,6 +2358,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Капіраваць';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Выразаць';
@@ -2486,6 +2567,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Выбраць';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Прабел';
 
   @override
@@ -2600,6 +2684,12 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ЗАХАВАЦЬ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -2703,6 +2793,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Превключване към календара';
 
   @override
@@ -2722,6 +2815,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копиране';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Изрязване';
@@ -2928,6 +3024,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -3042,6 +3141,12 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ЗАПАЗВАНЕ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -3145,6 +3250,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ফিরে যান';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'ক্যালেন্ডার মোডে বদল করুন';
 
   @override
@@ -3164,6 +3272,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'কপি করুন';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'কাট করুন';
@@ -3370,6 +3481,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'বেছে নিন';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -3484,6 +3598,12 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'সেভ করুন';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -3587,6 +3707,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Nazad';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Prebacite na kalendar';
 
   @override
@@ -3606,6 +3729,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiraj';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izreži';
@@ -3812,6 +3938,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'tipka za razmak';
 
   @override
@@ -3926,6 +4055,12 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SAČUVAJ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -4029,6 +4164,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Enrere';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Canvia al calendari';
 
   @override
@@ -4048,6 +4186,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copia';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Retalla';
@@ -4254,6 +4395,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Selecciona';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Espai';
 
   @override
@@ -4368,6 +4512,12 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'DESA';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -4471,6 +4621,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zpět';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Přepnout na kalendář';
 
   @override
@@ -4490,6 +4643,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopírovat';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Vyjmout';
@@ -4696,6 +4852,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Vybrat';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Mezera';
 
   @override
@@ -4810,6 +4969,12 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ULOŽIT';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -4913,6 +5078,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tilbage';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Skift til kalender';
 
   @override
@@ -4932,6 +5100,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiér';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klip';
@@ -5138,6 +5309,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Vælg';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Mellemrumstasten';
 
   @override
@@ -5252,6 +5426,12 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'GEM';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -5355,6 +5535,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zurück';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Zum Kalender wechseln';
 
   @override
@@ -5374,6 +5557,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopieren';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
@@ -5580,6 +5766,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Auswählen';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Leertaste';
 
   @override
@@ -5692,6 +5881,12 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'SPEICHERN';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -5834,6 +6029,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Πίσω';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Εναλλαγή σε ημερολόγιο';
 
   @override
@@ -5853,6 +6051,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Αντιγραφή';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Αποκοπή';
@@ -6059,6 +6260,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Επιλογή';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Διάστημα';
 
   @override
@@ -6173,6 +6377,12 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ΑΠΟΘΗΚΕΥΣΗ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -6276,6 +6486,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Back';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Switch to calendar';
 
   @override
@@ -6295,6 +6508,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copy';
+
+  @override
+  String get currentDateLabel => 'Today';
 
   @override
   String get cutButtonLabel => 'Cut';
@@ -6501,6 +6717,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -6613,6 +6832,12 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Save';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteContentName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -7575,6 +7800,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atrás';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Cambiar a calendario';
 
   @override
@@ -7594,6 +7822,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copiar';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
@@ -7800,6 +8031,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Selección';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Espacio';
 
   @override
@@ -7912,6 +8146,12 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'GUARDAR';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -11220,6 +11460,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tagasi';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Kalendrile lülitumine';
 
   @override
@@ -11239,6 +11482,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopeeri';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Lõika';
@@ -11445,6 +11691,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Vali';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Tühik';
 
   @override
@@ -11559,6 +11808,12 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SALVESTA';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -11662,6 +11917,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atzera';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Aldatu egutegiaren modura';
 
   @override
@@ -11681,6 +11939,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiatu';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ebaki';
@@ -11887,6 +12148,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Hautatu';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Zuriune-barra';
 
   @override
@@ -12001,6 +12265,12 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'GORDE';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -12104,6 +12374,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'برگشت';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'رفتن به تقویم';
 
   @override
@@ -12123,6 +12396,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'کپی';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'برش';
@@ -12329,6 +12605,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'انتخاب';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'فاصله';
 
   @override
@@ -12443,6 +12722,12 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ذخیره';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -12546,6 +12831,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Takaisin';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Vaihda kalenteriin';
 
   @override
@@ -12565,6 +12853,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopioi';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Leikkaa';
@@ -12771,6 +13062,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Valitse';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Välilyönti';
 
   @override
@@ -12885,6 +13179,12 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'TALLENNA';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -12988,6 +13288,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Bumalik';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Lumipat sa kalendaryo';
 
   @override
@@ -13007,6 +13310,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopyahin';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'I-cut';
@@ -13213,6 +13519,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Piliin';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Puwang';
 
   @override
@@ -13327,6 +13636,12 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'I-SAVE';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -13430,6 +13745,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Retour';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => "Passer à l'agenda";
 
   @override
@@ -13449,6 +13767,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copier';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Couper';
@@ -13655,6 +13976,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Sélectionner';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Espace';
 
   @override
@@ -13767,6 +14091,12 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ENREGISTRER';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -14008,6 +14338,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atrás';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Cambiar ao modo de calendario';
 
   @override
@@ -14027,6 +14360,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copiar';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
@@ -14233,6 +14569,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seleccionar';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Espazo';
 
   @override
@@ -14347,6 +14686,12 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'GARDAR';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -14450,6 +14795,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zurück';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Zum Kalender wechseln';
 
   @override
@@ -14469,6 +14817,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopieren';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
@@ -14675,6 +15026,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Auswählen';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Leertaste';
 
   @override
@@ -14789,6 +15143,12 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SPEICHERN';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -14892,6 +15252,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'પાછળ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'કૅલેન્ડર મોડ પર સ્વિચ કરો';
 
   @override
@@ -14911,6 +15274,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'કૉપિ કરો';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'કાપો';
@@ -15117,6 +15483,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -15231,6 +15600,12 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'સાચવો';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -15334,6 +15709,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'הקודם';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'מעבר למצב היומן';
 
   @override
@@ -15353,6 +15731,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'העתקה';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'גזירה';
@@ -15559,6 +15940,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'רווח';
 
   @override
@@ -15673,6 +16057,12 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'שמירה';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -15776,6 +16166,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'वापस जाएं';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'कैलेंडर पर जाएं';
 
   @override
@@ -15795,6 +16188,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'कॉपी करें';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'काटें';
@@ -16001,6 +16397,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -16115,6 +16514,12 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेव करें';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
@@ -16218,6 +16623,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Natrag';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Prijeđite na kalendar';
 
   @override
@@ -16237,6 +16645,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiraj';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izreži';
@@ -16443,6 +16854,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Odaberi';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Razmaknica';
 
   @override
@@ -16557,6 +16971,12 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SPREMI';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -16660,6 +17080,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Vissza';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Váltás naptárra';
 
   @override
@@ -16679,6 +17102,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Másolás';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kivágás';
@@ -16885,6 +17311,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Kiválasztás';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Szóköz';
 
   @override
@@ -16999,6 +17428,12 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'MENTÉS';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -17102,6 +17537,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Հետ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Անցնել օրացույցին';
 
   @override
@@ -17121,6 +17559,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Պատճենել';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Կտրել';
@@ -17327,6 +17768,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Ընտրել';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Բացատ';
 
   @override
@@ -17441,6 +17885,12 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ՊԱՀԵԼ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -17544,6 +17994,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Kembali';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Beralih ke kalender';
 
   @override
@@ -17563,6 +18016,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Salin';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Potong';
@@ -17769,6 +18225,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -17883,6 +18342,12 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SIMPAN';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -17986,6 +18451,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Til baka';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Skipta yfir í dagatal';
 
   @override
@@ -18005,6 +18473,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Afrita';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klippa';
@@ -18211,6 +18682,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Velja';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Bil';
 
   @override
@@ -18325,6 +18799,12 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'VISTA';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -18428,6 +18908,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Indietro';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Passa al calendario';
 
   @override
@@ -18447,6 +18930,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copia';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Taglia';
@@ -18653,6 +19139,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seleziona';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Barra spaziatrice';
 
   @override
@@ -18767,6 +19256,12 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SALVA';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -18870,6 +19365,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '戻る';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'カレンダーに切り替え';
 
   @override
@@ -18889,6 +19387,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'コピー';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '切り取り';
@@ -19095,6 +19596,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -19209,6 +19713,12 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '保存';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
@@ -19312,6 +19822,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'უკან';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'კალენდარზე გადართვა';
 
   @override
@@ -19331,6 +19844,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'კოპირება';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ამოჭრა';
@@ -19537,6 +20053,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -19651,6 +20170,12 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'შენახვა';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -19754,6 +20279,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Артқа';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Күнтізбеге ауысу';
 
   @override
@@ -19773,6 +20301,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Көшіру';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Қию';
@@ -19979,6 +20510,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Бос орын';
 
   @override
@@ -20093,6 +20627,12 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'САҚТАУ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -20196,6 +20736,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ថយក្រោយ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'ប្ដូរទៅ​ប្រតិទិន';
 
   @override
@@ -20215,6 +20758,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'ចម្លង';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'កាត់';
@@ -20421,6 +20967,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -20535,6 +21084,12 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'រក្សាទុក';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
@@ -20638,6 +21193,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca4}\u{cbf}\u{cb0}\u{cc1}\u{c97}\u{cbf}';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => '\u{c95}\u{ccd}\u{caf}\u{cbe}\u{cb2}\u{cc6}\u{c82}\u{ca1}\u{cb0}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
@@ -20657,6 +21215,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -20863,6 +21424,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -20977,6 +21541,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '\u{c89}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -21080,6 +21650,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '뒤로';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => '캘린더 모드로 전환';
 
   @override
@@ -21099,6 +21672,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => '복사';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '잘라냄';
@@ -21305,6 +21881,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => '선택';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => '스페이스';
 
   @override
@@ -21419,6 +21998,12 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '저장';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
@@ -21522,6 +22107,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Артка';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Жылнаамага которулуңуз';
 
   @override
@@ -21541,6 +22129,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Көчүрүү';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Кесүү';
@@ -21747,6 +22338,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Тандоо';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Боштук';
 
   @override
@@ -21861,6 +22455,12 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'САКТОО';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -21964,6 +22564,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ກັບຄືນ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'ສະຫຼັບໄປປະຕິທິນ';
 
   @override
@@ -21983,6 +22586,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'ສຳເນົາ';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ຕັດ';
@@ -22189,6 +22795,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -22303,6 +22912,12 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ບັນທຶກ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -22406,6 +23021,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atgal';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Perjungti į kalendorių';
 
   @override
@@ -22425,6 +23043,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopijuoti';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Iškirpti';
@@ -22631,6 +23252,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Tarpas';
 
   @override
@@ -22745,6 +23369,12 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'IŠSAUGOTI';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -22848,6 +23478,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atpakaļ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Pārslēgties uz kalendāru';
 
   @override
@@ -22867,6 +23500,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopēt';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izgriezt';
@@ -23073,6 +23709,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Atlasīt';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Atstarpes taustiņš';
 
   @override
@@ -23187,6 +23826,12 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SAGLABĀT';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -23290,6 +23935,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Префрли на календар';
 
   @override
@@ -23309,6 +23957,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копирај';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Исечи';
@@ -23515,6 +24166,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -23629,6 +24283,12 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ЗАЧУВАЈ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -23732,6 +24392,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'മടങ്ങുക';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'കലണ്ടറിലേക്ക് മാറുക';
 
   @override
@@ -23751,6 +24414,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'പകർത്തുക';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'മുറിക്കുക';
@@ -23957,6 +24623,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -24071,6 +24740,12 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'സംരക്ഷിക്കുക';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -24174,6 +24849,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Буцах';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Календарь луу сэлгэх';
 
   @override
@@ -24193,6 +24871,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Хуулах';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Таслах';
@@ -24399,6 +25080,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Сонгох';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -24513,6 +25197,12 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ХАДГАЛАХ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -24616,6 +25306,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'मागे';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'कॅलेंडरवर स्विच करा';
 
   @override
@@ -24635,6 +25328,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'कॉपी करा';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'कट करा';
@@ -24841,6 +25537,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'निवडा';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'स्पेस';
 
   @override
@@ -24955,6 +25654,12 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेव्ह करा';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
@@ -25058,6 +25763,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Kembali';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Tukar kepada kalendar';
 
   @override
@@ -25077,6 +25785,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Salin';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Potong';
@@ -25283,6 +25994,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Pilih';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Ruang';
 
   @override
@@ -25397,6 +26111,12 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SIMPAN';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -25500,6 +26220,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'နောက်သို့';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'ပြက္ခဒိန်သို့ ပြောင်းရန်';
 
   @override
@@ -25519,6 +26242,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
@@ -25725,6 +26451,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'ရွေးရန်';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'နေရာခြားခလုတ်';
 
   @override
@@ -25839,6 +26568,12 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'သိမ်းရန်';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -25942,6 +26677,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tilbake';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Bytt til kalender';
 
   @override
@@ -25961,6 +26699,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiér';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
@@ -26167,6 +26908,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Velg';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Mellomrom';
 
   @override
@@ -26281,6 +27025,12 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'LAGRE';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -26384,6 +27134,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'पछाडि जानुहोस्';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'पात्रो मोड प्रयोग गर्नुहोस्';
 
   @override
@@ -26403,6 +27156,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'प्रतिलिपि गर्नुहोस्';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'काट्नुहोस्';
@@ -26609,6 +27365,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -26723,6 +27482,12 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेभ गर्नुहोस्';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -26826,6 +27591,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Terug';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Overschakelen naar kalender';
 
   @override
@@ -26845,6 +27613,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiëren';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Knippen';
@@ -27051,6 +27822,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Selecteren';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Spatie';
 
   @override
@@ -27165,6 +27939,12 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'OPSLAAN';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -27268,6 +28048,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tilbake';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Bytt til kalender';
 
   @override
@@ -27287,6 +28070,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiér';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
@@ -27493,6 +28279,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Velg';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Mellomrom';
 
   @override
@@ -27607,6 +28396,12 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'LAGRE';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -27710,6 +28505,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ପଛକୁ ଫେରନ୍ତୁ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'କ୍ୟାଲେଣ୍ଡରକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ';
 
   @override
@@ -27729,6 +28527,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
@@ -27935,6 +28736,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -28049,6 +28853,12 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ସେଭ୍ କରନ୍ତୁ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -28152,6 +28962,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ਪਿੱਛੇ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => "ਕੈਲੰਡਰ 'ਤੇ ਜਾਓ";
 
   @override
@@ -28171,6 +28984,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ਕੱਟ ਕਰੋ';
@@ -28377,6 +29193,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -28491,6 +29310,12 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ਰੱਖਿਅਤ ਕਰੋ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -28594,6 +29419,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Wstecz';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Przełącz na kalendarz';
 
   @override
@@ -28613,6 +29441,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiuj';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Wytnij';
@@ -28819,6 +29650,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Spacja';
 
   @override
@@ -28933,6 +29767,12 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ZAPISZ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -29036,6 +29876,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'شاته';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Switch to calendar';
 
   @override
@@ -29055,6 +29898,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'کاپی';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'کم کړئ';
@@ -29261,6 +30107,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -29375,6 +30224,12 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SAVE';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -29478,6 +30333,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Voltar';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Mudar para agenda';
 
   @override
@@ -29497,6 +30355,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copiar';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
@@ -29703,6 +30564,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Selecionar';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Espaço';
 
   @override
@@ -29815,6 +30679,12 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'SALVAR';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -30059,6 +30929,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Înapoi';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Comutați la calendar';
 
   @override
@@ -30078,6 +30951,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Copiați';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Decupați';
@@ -30284,6 +31160,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Spațiu';
 
   @override
@@ -30398,6 +31277,12 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SALVAȚI';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -30501,6 +31386,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Переключиться на календарь';
 
   @override
@@ -30520,6 +31408,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копировать';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Вырезать';
@@ -30726,6 +31617,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Выбрать';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Пробел';
 
   @override
@@ -30840,6 +31734,12 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'СОХРАНИТЬ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -30943,6 +31843,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ආපසු';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'දින දර්ශනය වෙත මාරු වන්න';
 
   @override
@@ -30962,6 +31865,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'පිටපත් කරන්න';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'කපන්න';
@@ -31168,6 +32074,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -31282,6 +32191,12 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'සුරකින්න';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -31385,6 +32300,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Späť';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Prepnúť na kalendár';
 
   @override
@@ -31404,6 +32322,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopírovať';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Vystrihnúť';
@@ -31610,6 +32531,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Medzerník';
 
   @override
@@ -31724,6 +32648,12 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ULOŽIŤ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -31827,6 +32757,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Nazaj';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Preklop na koledar';
 
   @override
@@ -31846,6 +32779,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiraj';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izreži';
@@ -32052,6 +32988,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Izberi';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Preslednica';
 
   @override
@@ -32166,6 +33105,12 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SHRANI';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -32269,6 +33214,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Prapa';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Kalo te kalendari';
 
   @override
@@ -32288,6 +33236,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopjo';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Prit';
@@ -32494,6 +33445,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -32608,6 +33562,12 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'RUAJ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -32711,6 +33671,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Пређите на календар';
 
   @override
@@ -32730,6 +33693,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копирај';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Исеци';
@@ -32936,6 +33902,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Тастер за размак';
 
   @override
@@ -33048,6 +34017,12 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'САЧУВАЈ';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -33455,6 +34430,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tillbaka';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Byt till kalender';
 
   @override
@@ -33474,6 +34452,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopiera';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
@@ -33680,6 +34661,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Välj';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Blanksteg';
 
   @override
@@ -33794,6 +34778,12 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SPARA';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -33897,6 +34887,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Rudi Nyuma';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Badili utumie hali ya kalenda';
 
   @override
@@ -33916,6 +34909,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Nakili';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kata';
@@ -34122,6 +35118,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -34236,6 +35235,12 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'HIFADHI';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -34339,6 +35344,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'முந்தைய பக்கம்';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'கேலெண்டருக்கு மாற்று';
 
   @override
@@ -34358,6 +35366,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'நகலெடு';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'வெட்டு';
@@ -34564,6 +35575,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -34678,6 +35692,12 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'சேமி';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
 
   @override
@@ -34781,6 +35801,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'వెనుకకు';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'క్యాలెండర్‌కు మారండి';
 
   @override
@@ -34800,6 +35823,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'కాపీ చేయి';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'కత్తిరించు';
@@ -35006,6 +36032,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -35120,6 +36149,12 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'సేవ్ చేయి';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -35223,6 +36258,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'กลับ';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'เปลี่ยนเป็นปฏิทิน';
 
   @override
@@ -35242,6 +36280,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'คัดลอก';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ตัด';
@@ -35448,6 +36489,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -35562,6 +36606,12 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'บันทึก';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -35665,6 +36715,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Bumalik';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Lumipat sa kalendaryo';
 
   @override
@@ -35684,6 +36737,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopyahin';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'I-cut';
@@ -35890,6 +36946,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Piliin';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Puwang';
 
   @override
@@ -36004,6 +37063,12 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'I-SAVE';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -36107,6 +37172,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Geri';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Takvime geç';
 
   @override
@@ -36126,6 +37194,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopyala';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kes';
@@ -36332,6 +37403,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seç';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Boşluk';
 
   @override
@@ -36446,6 +37520,12 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'KAYDET';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -36549,6 +37629,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Перейти до календаря';
 
   @override
@@ -36568,6 +37651,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Копіювати';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Вирізати';
@@ -36774,6 +37860,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Пробіл';
 
   @override
@@ -36888,6 +37977,12 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ЗБЕРЕГТИ';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -36991,6 +38086,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'پیچھے';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'کیلنڈر پر سوئچ کریں';
 
   @override
@@ -37010,6 +38108,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'کاپی کریں';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'کٹ کریں';
@@ -37216,6 +38317,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -37330,6 +38434,12 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'محفوظ کریں';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
@@ -37433,6 +38543,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Orqaga';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Taqvimda ochish';
 
   @override
@@ -37452,6 +38565,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Nusxa olish';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kesib olish';
@@ -37658,6 +38774,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Boʻsh joy';
 
   @override
@@ -37772,6 +38891,12 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'SAQLASH';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -37875,6 +39000,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Quay lại';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Chuyển sang lịch';
 
   @override
@@ -37894,6 +39022,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Sao chép';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cắt';
@@ -38100,6 +39231,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Phím cách';
 
   @override
@@ -38214,6 +39348,12 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'LƯU';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
+
+  @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
@@ -38317,6 +39457,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '返回';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => '切换到日历模式';
 
   @override
@@ -38336,6 +39479,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => '复制';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '剪切';
@@ -38542,6 +39688,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => '选择';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => '空格键';
 
   @override
@@ -38654,6 +39803,12 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '保存';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -39222,6 +40377,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Emuva';
 
   @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
   String get calendarModeButtonLabel => 'Shintshela kukhalenda';
 
   @override
@@ -39241,6 +40399,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get copyButtonLabel => 'Kopisha';
+
+  @override
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Sika';
@@ -39447,6 +40608,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Khetha';
 
   @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
   String get keyboardKeySpace => 'Space';
 
   @override
@@ -39559,6 +40723,12 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'LONDOLOZA';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;

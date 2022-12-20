@@ -258,7 +258,7 @@ class AndroidValidator extends DoctorValidator {
     }
 
     // Success.
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 }
 
@@ -327,7 +327,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {

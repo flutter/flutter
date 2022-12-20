@@ -2047,7 +2047,10 @@ void main() {
                             children: <TestSemantics>[
                               TestSemantics(
                                 tooltip: 'Delete',
-                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.tap,
+                                  SemanticsAction.longPress
+                                ],
                                 textDirection: TextDirection.ltr,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isButton,

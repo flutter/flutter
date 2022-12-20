@@ -672,6 +672,7 @@ void main() {
           tooltip: 'Previous month',
           isButton: true,
           hasTapAction: true,
+          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -680,6 +681,7 @@ void main() {
           tooltip: 'Next month',
           isButton: true,
           hasTapAction: true,
+          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -697,7 +699,7 @@ void main() {
           isFocusable: true,
         ));
         expect(tester.getSemantics(find.text('3')), matchesSemantics(
-          label: '3, Sunday, January 3, 2016',
+          label: '3, Sunday, January 3, 2016, Today',
           hasTapAction: true,
           isFocusable: true,
         ));

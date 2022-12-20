@@ -129,5 +129,10 @@
   "keyboardKeySpace": "Szóköz",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menüsor menüje"
+  "menuBarMenuLabel": "Menüsor menüje",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

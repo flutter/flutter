@@ -751,7 +751,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
         onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
-        excludeFromSemantics: true,
+        excludeFromSemantics: _excludeFromSemantics,
         child: result,
       );
       // Only check for hovering if there is a mouse connected.
@@ -884,7 +884,7 @@ class _TooltipOverlay extends StatelessWidget {
       );
     }
     return Positioned.fill(
-      bottom: MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0,
+      bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,

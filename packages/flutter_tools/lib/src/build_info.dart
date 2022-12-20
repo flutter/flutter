@@ -13,6 +13,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
+import 'web/compile.dart';
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -35,6 +36,7 @@ class BuildInfo {
     List<String>? dartDefines,
     this.bundleSkSLPath,
     List<String>? dartExperiments,
+    this.webRenderer = WebRendererMode.autoDetect,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     this.dartDefineConfigJsonMap,
@@ -123,6 +125,9 @@ class BuildInfo {
 
   /// A list of Dart experiments.
   final List<String> dartExperiments;
+
+  /// When compiling to web, which web renderer mode we are using (html, canvaskit, auto)
+  final WebRendererMode webRenderer;
 
   /// The name of a file where flutter assemble will output performance
   /// information in a JSON format.
@@ -606,8 +611,9 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   Artifacts artifacts,
 ) {
   // Handle single-arch local engines.
-  if (artifacts is LocalEngineArtifacts) {
-    final String localEngineName = artifacts.localEngineName;
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    final String localEngineName = localEngineInfo.localEngineName;
     if (localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
@@ -628,8 +634,9 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
 /// The default set of macOS device architectures to build for.
 List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   // Handle single-arch local engines.
-  if (artifacts is LocalEngineArtifacts) {
-    if (artifacts.localEngineName.contains('_arm64')) {
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    if (localEngineInfo.localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
     return <DarwinArch>[ DarwinArch.x86_64 ];
@@ -855,6 +862,10 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
+FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
+  return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
+}
+
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
@@ -903,8 +914,8 @@ String getMacOSBuildDirectory() {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'web');
+String getWebBuildDirectory([bool isWasm = false]) {
+  return globals.fs.path.join(getBuildDirectory(), isWasm ? 'web_wasm' : 'web');
 }
 
 /// Returns the Linux build output directory.

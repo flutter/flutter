@@ -1327,6 +1327,9 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+          label: 'Dismiss',
+          textDirection: TextDirection.ltr,
           children: <TestSemantics>[
             TestSemantics(
               flags: <SemanticsFlag>[

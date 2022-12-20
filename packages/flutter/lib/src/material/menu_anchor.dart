@@ -131,6 +131,7 @@ class MenuAnchor extends StatefulWidget {
     this.anchorTapClosesMenu = false,
     this.onOpen,
     this.onClose,
+    this.crossAxisUnconstrained = true,
     required this.menuChildren,
     this.builder,
     this.child,
@@ -212,6 +213,14 @@ class MenuAnchor extends StatefulWidget {
 
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
+
+  /// Determine if the menu panel can be wrapped by a [UnconstrainedBox] which allows
+  /// the panel to render at its "natural" size.
+  ///
+  /// Defaults to true as it allows developers to render the menu panel at the
+  /// size it should be. When it is set to false, it can be useful when the menu should
+  /// be constrained in both main axis and cross axis, such as a [DropdownMenu].
+  final bool crossAxisUnconstrained;
 
   /// A list of children containing the menu items that are the contents of the
   /// menu surrounded by this [MenuAnchor].
@@ -306,7 +315,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _position?.isScrollingNotifier.removeListener(_handleScroll);
     _position = Scrollable.maybeOf(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
-    final Size newSize = MediaQuery.of(context).size;
+    final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
       _root._close();
@@ -516,6 +525,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                     menuPosition: position,
                     clipBehavior: widget.clipBehavior,
                     menuChildren: widget.menuChildren,
+                    crossAxisUnconstrained: widget.crossAxisUnconstrained,
                   ),
                 ),
                 to: overlay.context,
@@ -690,10 +700,10 @@ class MenuController {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts], to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuBar extends StatelessWidget {
   /// Creates a const [MenuBar].
   ///
@@ -779,10 +789,10 @@ class MenuBar extends StatelessWidget {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts] to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuItemButton extends StatefulWidget {
   /// Creates a const [MenuItemButton].
   ///
@@ -791,6 +801,7 @@ class MenuItemButton extends StatefulWidget {
     super.key,
     this.onPressed,
     this.onHover,
+    this.requestFocusOnHover = true,
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
@@ -816,6 +827,11 @@ class MenuItemButton extends StatefulWidget {
   /// The value passed to the callback is true if a pointer has entered button
   /// area and false if a pointer has exited.
   final ValueChanged<bool>? onHover;
+
+  /// Determine if hovering can request focus.
+  ///
+  /// Defaults to true.
+  final bool requestFocusOnHover;
 
   /// Handler called when the focus changes.
   ///
@@ -1064,7 +1080,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleHover(bool hovering) {
     widget.onHover?.call(hovering);
-    if (hovering) {
+    if (hovering && widget.requestFocusOnHover) {
       assert(_debugMenuInfo('Requesting focus for $_focusNode from hover'));
       _focusNode.requestFocus();
     }
@@ -1780,21 +1796,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Offset menuPaddingOffset;
+    Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
-    switch (_anchor?._root._orientation ?? Axis.vertical) {
+    // Move the submenu over by the size of the menu padding, so that
+    // the first menu item aligns with the submenu button that opens it.
+    switch (_anchor?._orientation ?? Axis.vertical) {
       case Axis.horizontal:
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.right, 0);
+            menuPaddingOffset += Offset(menuPadding.right, 0);
             break;
           case TextDirection.ltr:
-            menuPaddingOffset = widget.alignmentOffset ?? Offset(-menuPadding.left, 0);
+            menuPaddingOffset += Offset(-menuPadding.left, 0);
             break;
         }
         break;
       case Axis.vertical:
-        menuPaddingOffset = widget.alignmentOffset ?? Offset(0, -menuPadding.top);
+        menuPaddingOffset += Offset(0, -menuPadding.top);
         break;
     }
 
@@ -1884,24 +1902,13 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   EdgeInsets _computeMenuPadding(BuildContext context) {
-    final MenuStyle? themeStyle = MenuTheme.of(context).style;
-    final MenuStyle defaultStyle = _MenuDefaultsM3(context);
-
-    T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
-      return getProperty(widget.menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
-    }
-
-    T? resolve<T>(MaterialStateProperty<T>? Function(MenuStyle? style) getProperty) {
-      return effectiveValue(
-        (MenuStyle? style) {
-          return getProperty(style)?.resolve(widget.statesController?.value ?? const <MaterialState>{});
-        },
-      );
-    }
-
-    return resolve<EdgeInsetsGeometry?>(
-          (MenuStyle? style) => style?.padding,
-        )?.resolve(Directionality.of(context)) ?? EdgeInsets.zero;
+    final MaterialStateProperty<EdgeInsetsGeometry?> insets =
+      widget.menuStyle?.padding ??
+      MenuTheme.of(context).style?.padding ??
+      _MenuDefaultsM3(context).padding!;
+    return insets
+      .resolve(widget.statesController?.value ?? const <MaterialState>{})!
+      .resolve(Directionality.of(context));
   }
 
   void _handleFocusChange() {
@@ -1967,9 +1974,6 @@ class _LocalizedShortcutLabeler {
     LogicalKeyboardKey.arrowUp: '↑',
     LogicalKeyboardKey.arrowDown: '↓',
     LogicalKeyboardKey.enter: '↵',
-    LogicalKeyboardKey.shift: '⇧',
-    LogicalKeyboardKey.shiftLeft: '⇧',
-    LogicalKeyboardKey.shiftRight: '⇧',
   };
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -2000,15 +2004,32 @@ class _LocalizedShortcutLabeler {
   /// Returns the label to be shown to the user in the UI when a
   /// [MenuSerializableShortcut] is used as a keyboard shortcut.
   ///
-  /// To keep the representation short, this will return graphical key
-  /// representations when it can. For instance, the default
-  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
-  /// arrows. When [defaultTargetPlatform] is [TargetPlatform.macOS] or
-  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
-  /// [LogicalKeyboardKey.control] will show as '˄', and
-  /// [LogicalKeyboardKey.alt] will show as '⌥'.
+  /// When [defaultTargetPlatform] is [TargetPlatform.macOS] or
+  /// [TargetPlatform.iOS], this will return graphical key representations when
+  /// it can. For instance, the default [LogicalKeyboardKey.shift] will return
+  /// '⇧', and the arrow keys will return arrows. The key
+  /// [LogicalKeyboardKey.meta] will show as '⌘', [LogicalKeyboardKey.control]
+  /// will show as '˄', and [LogicalKeyboardKey.alt] will show as '⌥'.
+  ///
+  /// The keys are joined by spaces on macOS and iOS, and by "+" on other
+  /// platforms.
   String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
     final ShortcutSerialization serialized = shortcut.serializeForMenu();
+    final String keySeparator;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // Use "⌃ ⇧ A" style on macOS and iOS.
+        keySeparator = ' ';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Use "Ctrl+Shift+A" style.
+        keySeparator = '+';
+        break;
+    }
     if (serialized.trigger != null) {
       final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
@@ -2044,7 +2065,7 @@ class _LocalizedShortcutLabeler {
       return <String>[
         ...modifiers,
         if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
-      ].join(' ');
+      ].join(keySeparator);
     } else if (serialized.character != null) {
       return serialized.character!;
     }
@@ -2159,7 +2180,16 @@ class _LocalizedShortcutLabeler {
     if (modifier == LogicalKeyboardKey.shift ||
         modifier == LogicalKeyboardKey.shiftLeft ||
         modifier == LogicalKeyboardKey.shiftRight) {
-      return _shortcutGraphicEquivalents[LogicalKeyboardKey.shift]!;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return localizations.keyboardKeyShift;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return '⇧';
+      }
     }
     throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
   }
@@ -2424,7 +2454,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }
@@ -2455,7 +2488,10 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
       final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
-      policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
+      }
+      return false;
     }
     return false;
   }
@@ -3168,14 +3204,15 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_MenuLayout oldDelegate) {
-    return anchorRect != oldDelegate.anchorRect ||
-        textDirection != oldDelegate.textDirection ||
-        alignment != oldDelegate.alignment ||
-        alignmentOffset != oldDelegate.alignmentOffset ||
-        menuPosition != oldDelegate.menuPosition ||
-        orientation != oldDelegate.orientation ||
-        parentOrientation != oldDelegate.parentOrientation ||
-        !setEquals(avoidBounds, oldDelegate.avoidBounds);
+    return anchorRect != oldDelegate.anchorRect
+        || textDirection != oldDelegate.textDirection
+        || alignment != oldDelegate.alignment
+        || alignmentOffset != oldDelegate.alignmentOffset
+        || menuPosition != oldDelegate.menuPosition
+        || menuPadding != oldDelegate.menuPadding
+        || orientation != oldDelegate.orientation
+        || parentOrientation != oldDelegate.parentOrientation
+        || !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
@@ -3198,6 +3235,7 @@ class _MenuPanel extends StatefulWidget {
     required this.menuStyle,
     this.clipBehavior = Clip.none,
     required this.orientation,
+    this.crossAxisUnconstrained = true,
     required this.children,
   });
 
@@ -3208,6 +3246,13 @@ class _MenuPanel extends StatefulWidget {
   ///
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
+
+  /// Determine if a [UnconstrainedBox] can be applied to the menu panel to allow it to render
+  /// at its "natural" size.
+  ///
+  /// Defaults to true. When it is set to false, it can be useful when the menu should
+  /// be constrained in both main-axis and cross-axis, such as a [DropdownMenu].
+  final bool crossAxisUnconstrained;
 
   /// The layout orientation of this panel.
   final Axis orientation;
@@ -3271,7 +3316,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final double dy = densityAdjustment.dy;
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
-        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+        .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
 
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
@@ -3297,37 +3342,44 @@ class _MenuPanelState extends State<_MenuPanel> {
         );
       }
     }
-    return ConstrainedBox(
-      constraints: effectiveConstraints,
-      child: UnconstrainedBox(
-        constrainedAxis: widget.orientation,
+
+    Widget menuPanel = _intrinsicCrossSize(
+      child: Material(
+        elevation: elevation,
+        shape: shape,
+        color: backgroundColor,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
         clipBehavior: Clip.hardEdge,
-        alignment: AlignmentDirectional.centerStart,
-        child: _intrinsicCrossSize(
-          child: Material(
-            elevation: elevation,
-            shape: shape,
-            color: backgroundColor,
-            shadowColor: shadowColor,
-            surfaceTintColor: surfaceTintColor,
-            type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-            clipBehavior: Clip.hardEdge,
-            child: Padding(
-              padding: resolvedPadding,
-              child: SingleChildScrollView(
-                scrollDirection: widget.orientation,
-                child: Flex(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  textDirection: Directionality.of(context),
-                  direction: widget.orientation,
-                  mainAxisSize: MainAxisSize.min,
-                  children: widget.children,
-                ),
-              ),
+        child: Padding(
+          padding: resolvedPadding,
+          child: SingleChildScrollView(
+            scrollDirection: widget.orientation,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              textDirection: Directionality.of(context),
+              direction: widget.orientation,
+              mainAxisSize: MainAxisSize.min,
+              children: widget.children,
             ),
           ),
         ),
       ),
+    );
+
+    if (widget.crossAxisUnconstrained) {
+      menuPanel = UnconstrainedBox(
+        constrainedAxis: widget.orientation,
+        clipBehavior: Clip.hardEdge,
+        alignment: AlignmentDirectional.centerStart,
+        child: menuPanel,
+      );
+    }
+
+    return ConstrainedBox(
+      constraints: effectiveConstraints,
+      child: menuPanel,
     );
   }
 
@@ -3349,6 +3401,7 @@ class _Submenu extends StatelessWidget {
     required this.menuPosition,
     required this.alignmentOffset,
     required this.clipBehavior,
+    this.crossAxisUnconstrained = true,
     required this.menuChildren,
   });
 
@@ -3357,6 +3410,7 @@ class _Submenu extends StatelessWidget {
   final Offset? menuPosition;
   final Offset alignmentOffset;
   final Clip clipBehavior;
+  final bool crossAxisUnconstrained;
   final List<Widget> menuChildren;
 
   @override
@@ -3391,7 +3445,7 @@ class _Submenu extends StatelessWidget {
     );
 
     final VisualDensity visualDensity =
-        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? VisualDensity.standard;
+        effectiveValue((MenuStyle? style) => style?.visualDensity) ?? Theme.of(context).visualDensity;
     final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
@@ -3454,6 +3508,7 @@ class _Submenu extends StatelessWidget {
                         menuStyle: menuStyle,
                         clipBehavior: clipBehavior,
                         orientation: anchor._orientation,
+                        crossAxisUnconstrained: crossAxisUnconstrained,
                         children: menuChildren,
                       ),
                     ),
@@ -3535,13 +3590,14 @@ bool _platformSupportsAccelerators() {
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.bottomStart,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.bottomStart,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -3577,11 +3633,12 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-      : super(
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: AlignmentDirectional.centerStart,
-        );
+    : super(
+      animationDuration: kThemeChangeDuration,
+      enableFeedback: true,
+      alignment: AlignmentDirectional.centerStart,
+    );
+
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -3712,20 +3769,21 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       const EdgeInsets.symmetric(horizontal: 12),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
 }
 
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
-      : super(
-          elevation: const MaterialStatePropertyAll<double?>(3.0),
-          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-          alignment: AlignmentDirectional.topEnd,
-        );
+    : super(
+      elevation: const MaterialStatePropertyAll<double?>(3.0),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.topEnd,
+    );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 

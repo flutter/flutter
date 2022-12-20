@@ -409,7 +409,6 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
   OutlinedBorder? resolve(Set<MaterialState> states);
 }
 
-
 /// Defines a [TextStyle] that is also a [MaterialStateProperty].
 ///
 /// This class exists to enable widgets with [TextStyle] valued properties

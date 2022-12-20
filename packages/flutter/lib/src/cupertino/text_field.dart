@@ -1224,7 +1224,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     }
 
     final bool enabled = widget.enabled ?? true;
-    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
+    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.devicePixelRatioOf(context), 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null)
