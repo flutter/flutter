@@ -2,7 +2,7 @@ name: external_ui
 description: A test of Flutter integrating external UIs.
 
 environment:
-  sdk: ">=2.17.0-0 <4.0.0"
+  sdk: '>=2.19.0-0 <4.0.0'
 
 dependencies:
   flutter:
