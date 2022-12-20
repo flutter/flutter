@@ -684,7 +684,7 @@ Matcher matchesSemantics({
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), hasSemantics(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), containsSemantics(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
