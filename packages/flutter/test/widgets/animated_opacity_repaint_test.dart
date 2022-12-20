@@ -12,7 +12,7 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
     final Tween<double> opacityTween = Tween<double>(begin: 0, end: 1);
     await tester.pumpWidget(
-        ColoredBox(
+      ColoredBox(
         color: Colors.red,
         child: FadeTransition(
           opacity: controller.drive(opacityTween),

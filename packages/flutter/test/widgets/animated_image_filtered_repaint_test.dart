@@ -12,7 +12,7 @@ void main() {
   testWidgets('ImageFiltered avoids repainting child as it animates', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
-        ColoredBox(
+      ColoredBox(
         color: Colors.red,
         child: ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -24,7 +24,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
-        ColoredBox(
+      ColoredBox(
         color: Colors.red,
         child: ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
