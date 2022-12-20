@@ -42,6 +42,10 @@ class BuildWebCommand extends BuildSubCommand {
             'to view and debug the original source code of a compiled and minified Dart '
             'application.'
     );
+    argParser.addFlag(
+      'wasm',
+      help: 'Compile to WebAssembly rather than Javascript (experimental).'
+    );
 
     argParser.addOption('pwa-strategy',
       defaultsTo: kOfflineFirst,
@@ -140,6 +144,7 @@ class BuildWebCommand extends BuildSubCommand {
       stringArgDeprecated('pwa-strategy')!,
       boolArgDeprecated('source-maps'),
       boolArgDeprecated('native-null-assertions'),
+      boolArgDeprecated('wasm'),
       baseHref: baseHref,
       dart2jsOptimization: stringArgDeprecated('dart2js-optimization'),
       outputDirectoryPath: outputDirectoryPath,
