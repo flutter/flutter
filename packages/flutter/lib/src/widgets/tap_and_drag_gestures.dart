@@ -667,7 +667,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// screen) or a drag (e.g. if the pointer was not dragged far enough to
 /// be considered a drag.
 ///
-/// It will not immediately declare victory for every tap or drag that it
+/// This recognizer will not immediately declare victory for every tap or drag that it
 /// recognizes.
 ///
 /// The recognizer will declare victory when all other recognizer's in
