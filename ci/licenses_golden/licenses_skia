@@ -1,4 +1,4 @@
-Signature: 12cc5c5f5a3c1d55f747d0b16a21c8f5
+Signature: 6d39cce895bafdb306803e27dbd7058c
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8288,6 +8288,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/GpuTypes.h + ../../../third_party/
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/ImageProvider.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkAlignedStorage.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkTypeTraits.h + ../../../third_party/skia/LICENSE
@@ -8443,7 +8444,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.cpp + ../../../
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteUtils.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteUtils.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteUtilsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.cpp + ../../../third_party/skia/LICENSE
@@ -8455,7 +8457,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanTexture.h + ../../..
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/vk/VulkanUtils.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/vk/VulkanUtilsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkEmptyShader.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderBase.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLModuleLoader.cpp + ../../../third_party/skia/LICENSE
@@ -8494,6 +8496,7 @@ FILE: ../../../third_party/skia/include/gpu/GpuTypes.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/graphite/ImageProvider.h
 FILE: ../../../third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h
+FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteUtils.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h
 FILE: ../../../third_party/skia/include/private/SkAlignedStorage.h
 FILE: ../../../third_party/skia/include/private/SkTypeTraits.h
@@ -8649,7 +8652,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCaps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanCommandBuffer.h
-FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteUtils.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteUtils.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteUtilsPriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanQueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanResourceProvider.cpp
@@ -8661,7 +8665,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanTexture.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/FixedCountBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/LinearTolerances.h
-FILE: ../../../third_party/skia/src/gpu/vk/VulkanUtils.h
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanUtilsPriv.h
 FILE: ../../../third_party/skia/src/shaders/SkEmptyShader.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShaderBase.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLModuleLoader.cpp
