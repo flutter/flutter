@@ -533,7 +533,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
           child: widget.child?? Column(
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-            children:widget.children,
+            children: widget.children,
           ),
         ),
       ),
@@ -541,7 +541,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
     return AnimatedBuilder(
       animation: _controller.view,
-      builder:_buildChildren,
+      builder: _buildChildren,
       child: shouldRemoveChildren ? null : result,
     );
   }

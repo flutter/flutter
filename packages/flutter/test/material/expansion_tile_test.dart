@@ -666,5 +666,4 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
   });
-
 }
