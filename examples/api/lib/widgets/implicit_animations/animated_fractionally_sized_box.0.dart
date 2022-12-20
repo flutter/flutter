@@ -47,7 +47,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         child: SizedBox(
           width: 200,
           height: 200,
-          child: Container(
+          child: ColoredBox(
             color: Colors.red,
             child: AnimatedFractionallySizedBox(
               widthFactor: selected ? 0.25 : 0.75,
@@ -55,9 +55,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               alignment: selected ? Alignment.topLeft : Alignment.bottomRight,
               duration: const Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
-              child: Container(
+              child: const ColoredBox(
                 color: Colors.blue,
-                child: const FlutterLogo(size: 75),
+                child: FlutterLogo(size: 75),
               ),
             ),
           ),

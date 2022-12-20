@@ -10,9 +10,9 @@ void main() {
   testWidgets('RenderOpacity avoids repainting and does not drop layer at fully opaque', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
-      Container(
+      const ColoredBox(
         color: Colors.red,
-        child: const Opacity(
+        child: Opacity(
           opacity: 0.0,
           child: TestWidget(),
         ),
@@ -22,9 +22,9 @@ void main() {
     expect(RenderTestObject.paintCount, 0);
 
     await tester.pumpWidget(
-      Container(
+      const ColoredBox(
         color: Colors.red,
-        child: const Opacity(
+        child: Opacity(
           opacity: 0.1,
           child: TestWidget(),
         ),
@@ -34,9 +34,9 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
-      Container(
+      const ColoredBox(
         color: Colors.red,
-        child: const Opacity(
+        child: Opacity(
           opacity: 1,
           child: TestWidget(),
         ),
@@ -50,9 +50,9 @@ void main() {
     RenderTestObject.paintCount = 0;
 
     await tester.pumpWidget(
-      Container(
+      const ColoredBox(
         color: Colors.red,
-        child: const Opacity(
+        child: Opacity(
           opacity: 0.5,
           child: TestWidget(),
         ),
@@ -62,9 +62,9 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
-      Container(
+      const ColoredBox(
         color: Colors.red,
-        child: const Opacity(
+        child: Opacity(
           opacity: 0.0,
           child: TestWidget(),
         ),
