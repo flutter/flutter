@@ -14,15 +14,7 @@ import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// viewport.
-const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
-
-const double _kHandleSize = 22.0;
-
-// Padding between the toolbar and the anchor.
-const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// A fully-functional Material-style text selection toolbar.
@@ -84,6 +76,26 @@ class TextSelectionToolbar extends StatelessWidget {
   /// {@endtemplate}
   final ToolbarBuilder toolbarBuilder;
 
+  /// Minimal padding from all edges of the selection toolbar to all edges of the
+  /// viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which uses this same value for its
+  ///    padding from the edges of the viewport.
+  static const double kToolbarScreenPadding = 8.0;
+
+  /// The size of the text selection handles.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which references this value to calculate
+  ///    the padding between the toolbar and anchor.
+  static const double kHandleSize = 22.0;
+
+  /// Padding between the toolbar and the anchor.
+  static const double kToolbarContentDistanceBelow = kHandleSize - 2.0;
+
   // Build the default Android Material text selection menu toolbar.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
     return _TextSelectionToolbarContainer(
@@ -97,21 +109,21 @@ class TextSelectionToolbar extends StatelessWidget {
     final Offset anchorAbovePadded =
         anchorAbove - const Offset(0.0, _kToolbarContentDistance);
     final Offset anchorBelowPadded =
-        anchorBelow + const Offset(0.0, _kToolbarContentDistanceBelow);
+        anchorBelow + const Offset(0.0, kToolbarContentDistanceBelow);
 
     final double paddingAbove = MediaQuery.paddingOf(context).top
-        + _kToolbarScreenPadding;
+        + kToolbarScreenPadding;
     final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
     // Makes up for the Padding above the Stack.
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+    final Offset localAdjustment = Offset(kToolbarScreenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
         paddingAbove,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
+        kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
         delegate: TextSelectionToolbarLayoutDelegate(

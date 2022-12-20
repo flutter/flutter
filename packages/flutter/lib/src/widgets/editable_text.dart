@@ -1947,7 +1947,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// These results will be updated via calls to spell check through a
   /// [SpellCheckService] and used by this widget to build the [TextSpan] tree
   /// for text input and menus for replacement suggestions of misspelled words.
-  SpellCheckResults? _spellCheckResults;
+  SpellCheckResults? spellCheckResults;
+
+  bool get _spellCheckResultsReceived => spellCheckEnabled && spellCheckResults != null && spellCheckResults!.suggestionSpans.isNotEmpty;
 
   /// Whether to create an input connection with the platform for text editing
   /// or not.
@@ -2188,6 +2190,63 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
+  }
+
+  /// Replace composing region with specified text.
+  void replaceComposingRegion(SelectionChangedCause cause, String text) {
+    // Replacement cannot be performed if the text is read only or obscured.
+    assert(!widget.readOnly && !widget.obscureText);
+
+    _replaceText(ReplaceTextIntent(textEditingValue, text, textEditingValue.composing, cause));
+
+    if (cause == SelectionChangedCause.toolbar) {
+      // Schedule a call to bringIntoView() after renderEditable updates.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          bringIntoView(textEditingValue.selection.extent);
+        }
+      });
+      hideToolbar();
+    }
+  }
+
+  /// Finds specified [SuggestionSpan] that matches the provided index using
+  /// binary search.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], the Material style spell check
+  ///    suggestions toolbar that uses this method to render the correct
+  ///    suggestions in the toolbar for a misspelled word.
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    if (!_spellCheckResultsReceived
+        || spellCheckResults!.suggestionSpans.last.range.end < cursorIndex) {
+      // No spell check results have been recieved or the cursor index is out
+      // of range that suggestionSpans covers.
+      return null;
+    }
+
+    final List<SuggestionSpan> suggestionSpans = spellCheckResults!.suggestionSpans;
+    int leftIndex = 0;
+    int rightIndex = suggestionSpans.length - 1;
+    int midIndex = 0;
+
+    while (leftIndex <= rightIndex) {
+      midIndex = ((leftIndex + rightIndex) / 2).floor();
+      final int currentSpanStart = suggestionSpans[midIndex].range.start;
+      final int currentSpanEnd = suggestionSpans[midIndex].range.end;
+
+      if (cursorIndex <= currentSpanEnd && cursorIndex >= currentSpanStart) {
+        return suggestionSpans[midIndex];
+      }
+      else if (cursorIndex <= currentSpanStart) {
+        rightIndex = midIndex - 1;
+      }
+      else {
+        leftIndex = midIndex + 1;
+      }
+    }
+    return null;
   }
 
   /// Infers the [SpellCheckConfiguration] used to perform spell check.
@@ -2562,9 +2621,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // `selection` is the only change.
       _handleSelectionChanged(value.selection, (_textInputConnection?.scribbleInProgress ?? false) ? SelectionChangedCause.scribble : SelectionChangedCause.keyboard);
     } else {
-      // Only hide the toolbar overlay, the selection handle's visibility will be handled
-      // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
-      hideToolbar(false);
+      if (value.text != _value.text) {
+        // Hide the toolbar if the text was changed, but only hide the toolbar
+        // overlay; the selection handle's visibility will be handled
+        // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
+        hideToolbar(false);
+      }
       _currentPromptRectRange = null;
 
       final bool revealObscuredInput = _hasInputConnection
@@ -3256,17 +3318,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         'Locale must be specified in widget or Localization widget must be in scope',
       );
 
-      final List<SuggestionSpan>? spellCheckResults = await
+      final List<SuggestionSpan>? suggestions = await
         _spellCheckConfiguration
           .spellCheckService!
             .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (spellCheckResults == null) {
+      if (suggestions == null) {
         // The request to fetch spell check suggestions was canceled due to ongoing request.
         return;
       }
 
-      _spellCheckResults = SpellCheckResults(text, spellCheckResults);
+      spellCheckResults = SpellCheckResults(text, suggestions);
       renderEditable.text = buildTextSpan();
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -3663,6 +3725,38 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       showToolbar();
     }
+  }
+
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  bool showSpellCheckSuggestionsToolbar() {
+    if (!spellCheckEnabled
+        || widget.readOnly
+        || _selectionOverlay == null
+        || !_spellCheckResultsReceived) {
+      // Only attempt to show the spell check suggestions toolbar if there
+      // is a toolbar specified and spell check suggestions available to show.
+      return false;
+    }
+
+    assert(
+      _spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder != null,
+      'spellCheckSuggestionsToolbarBuilder must be defined in '
+      'SpellCheckConfiguration to show a toolbar with spell check '
+      'suggestions',
+    );
+
+    _selectionOverlay!
+      .showSpellCheckSuggestionsToolbar(
+        (BuildContext context) {
+          return _spellCheckConfiguration
+            .spellCheckSuggestionsToolbarBuilder!(
+              context,
+              this,
+          );
+        },
+    );
+    return true;
   }
 
   /// Shows the magnifier at the position given by `positionToShow`,
@@ -4321,9 +4415,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ],
       );
     }
-    final bool spellCheckResultsReceived = spellCheckEnabled && _spellCheckResults != null;
     final bool withComposing = !widget.readOnly && _hasFocus;
-    if (spellCheckResultsReceived) {
+    if (_spellCheckResultsReceived) {
       // If the composing range is out of range for the current text, ignore it to
       // preserve the tree integrity, otherwise in release mode a RangeError will
       // be thrown and this EditableText will be built with a broken subtree.
@@ -4336,7 +4429,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         composingRegionOutOfRange,
         widget.style,
         _spellCheckConfiguration.misspelledTextStyle!,
-        _spellCheckResults!,
+        spellCheckResults!,
       );
     }
 
