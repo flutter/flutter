@@ -1154,9 +1154,6 @@ Future<void> _runWebLongRunningTests() async {
         driver: path.join('test_driver', 'integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
-        // This test intentionally fails and prints stack traces in the browser
-        // logs. To avoid confusion, silence browser output.
-        silenceBrowserOutput: true,
       ),
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
@@ -1164,9 +1161,6 @@ Future<void> _runWebLongRunningTests() async {
         driver: path.join('test_driver', 'extended_integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
-        // This test intentionally fails and prints stack traces in the browser
-        // logs. To avoid confusion, silence browser output.
-        silenceBrowserOutput: true,
       ),
     ],
 
