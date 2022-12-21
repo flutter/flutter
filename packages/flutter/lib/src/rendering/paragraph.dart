@@ -1589,7 +1589,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       case TextGranularity.word:
         final String text = range.textInside(fullText);
         final TextBoundary textBoundary = WordBoundary(this).until((int offset, bool forward) {
-          return (forward ? offset == 0 : offset >= text.length)
+          return (forward ? offset >= text.length : offset == 0)
               || !TextLayoutMetrics.isWhitespace(text.codeUnitAt(forward ? offset - 1 : offset));
         });
         newPosition = _beyondTextBoundary(targetedEdge, forward, textBoundary);
@@ -1620,8 +1620,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return result;
   }
 
-  // These 2 methods are copied from editable_text.dart. Ideally the code can
-  // be shared.
   TextPosition _beyondTextBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
     final int newOffset = forward
       ? textBoundary.getTrailingTextBoundaryAt(extent.offset) ?? range.end

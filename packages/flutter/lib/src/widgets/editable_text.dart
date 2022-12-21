@@ -3892,7 +3892,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return WordBoundary(renderEditable).until((int offset, bool forward) {
           final int? codeUnit = renderEditable.text?.codeUnitAt(forward ? offset - 1 : offset);
           // TODO(LongCatIsLooong): Anything that's not a letter or digit should
-          // be skipped, according to the Android implementation.
+          // be skipped, according to the Android "WordIterator" class
+          // implementation.
           return codeUnit == null || !TextLayoutMetrics.isWhitespace(codeUnit);
         },
       );
@@ -4830,9 +4831,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       }
     }
 
-    final bool shouldTargetBase = isExpand && intent.forward
-      ? selection.baseOffset > selection.extentOffset
-      : selection.baseOffset < selection.extentOffset;
+    final bool shouldTargetBase = isExpand && (intent.forward ? selection.baseOffset > selection.extentOffset : selection.baseOffset < selection.extentOffset);
     final TextPosition newExtent = applyTextBoundary(shouldTargetBase ? selection.base : extent, intent.forward, textBoundary());
     final TextSelection newSelection = collapseSelection || (!isExpand && newExtent.offset == selection.baseOffset)
       ? TextSelection.fromPosition(newExtent)
