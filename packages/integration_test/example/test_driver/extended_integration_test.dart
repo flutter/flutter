@@ -14,8 +14,8 @@ Future<void> main() async {
       List<int> screenshotBytes, [
       Map<String, Object?>? args,
     ]) async {
-      // Return false if the screenshot is invalid:
-      // https://github.com/flutter/flutter/issues/117077
+      // Return false if the screenshot is invalid.
+      // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120
 
       // Here is an example of using an argument that was passed in via the
       // optional 'args' Map.
