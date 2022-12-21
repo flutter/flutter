@@ -1,4 +1,4 @@
-Signature: 5c20bd29083c2e2592fad7aaa286845b
+Signature: e70d1ac599b32e56724c063b45d07980
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8350,6 +8350,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/PipelineData.h + ../../../thi
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Precompile.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Precompile.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/PrecompileBasePriv.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/PublicPrecompile.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/PublicPrecompile.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/QueueManager.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h + ../../../third_party/skia/LICENSE
@@ -8559,6 +8561,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/PipelineData.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Precompile.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Precompile.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PrecompileBasePriv.h
+FILE: ../../../third_party/skia/src/gpu/graphite/PublicPrecompile.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/PublicPrecompile.h
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/QueueManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/RecorderPriv.h
