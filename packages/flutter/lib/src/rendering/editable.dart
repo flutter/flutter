@@ -2871,8 +2871,15 @@ class _TextHighlightPainter extends RenderEditablePainter {
     );
 
     for (final TextBox box in boxes) {
+      // Hack for extending highlight to line terminators.
+      print(box);
+      TextBox extendedBox = box;
+      if (extendedBox.left == extendedBox.right) {
+        print('line terminator');
+        extendedBox = TextBox.fromLTRBD(box.right, box.top, box.left + 100.0, box.bottom, box.direction);
+      }
       canvas.drawRect(
-        box.toRect().shift(renderEditable._paintOffset)
+        extendedBox.toRect().shift(renderEditable._paintOffset)
           .intersect(Rect.fromLTWH(0, 0, textPainter.width, textPainter.height)),
         highlightPaint,
       );
