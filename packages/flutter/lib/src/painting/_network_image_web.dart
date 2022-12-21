@@ -116,16 +116,18 @@ class NetworkImage
 
     final Uri resolved = Uri.base.resolve(key.url);
 
+    final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
+
     // We use a different method when headers are set because the
     // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
-    if (isCanvasKit || (key.headers?.isNotEmpty ?? false)) {
+    if (isCanvasKit || containsNetworkImageHeaders) {
       final Completer<DomXMLHttpRequest> completer =
           Completer<DomXMLHttpRequest>();
       final DomXMLHttpRequest request = httpRequestFactory();
 
       request.open('GET', key.url, true);
       request.responseType = 'arraybuffer';
-      if (key.headers?.isNotEmpty ?? false) {
+      if (containsNetworkImageHeaders) {
         key.headers!.forEach((String header, String value) {
           request.setRequestHeader(header, value);
         });

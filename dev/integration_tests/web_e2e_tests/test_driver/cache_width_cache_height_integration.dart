@@ -33,9 +33,7 @@ class LoadTestImageProvider extends ImageProvider<Object> {
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Image.network uses cacheWidth and cacheHeight',
-          (WidgetTester tester) async {
-
+  testWidgets('Image.network uses cacheWidth and cacheHeight', (WidgetTester tester) async {
     const int expectedCacheHeight = 9;
     const int expectedCacheWidth = 11;
     await tester.pumpAndSettle();
@@ -58,7 +56,6 @@ void main() {
 
     final ImageProvider resizeImage = image.image;
     expect(image.image, isA<ResizeImage>());
-    expect(called, false);
 
     final LoadTestImageProvider testProvider = LoadTestImageProvider(image.image);
     final ImageStreamCompleter streamCompleter = testProvider.testLoad(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
