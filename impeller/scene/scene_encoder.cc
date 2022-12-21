@@ -9,7 +9,6 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/scene/scene_context.h"
 #include "impeller/scene/scene_encoder.h"
-#include "impeller/scene/shaders/geometry.vert.h"
 
 namespace impeller {
 namespace scene {
@@ -32,16 +31,15 @@ static void EncodeCommand(const SceneContext& scene_context,
   cmd.stencil_reference =
       0;  // TODO(bdero): Configurable stencil ref per-command.
 
-  cmd.BindVertices(scene_command.geometry->GetVertexBuffer(
-      *scene_context.GetContext()->GetResourceAllocator()));
+  cmd.pipeline = scene_context.GetPipeline(
+      PipelineKey{scene_command.geometry->GetGeometryType(),
+                  scene_command.material->GetMaterialType()},
+      scene_command.material->GetContextOptions(render_pass));
 
-  cmd.pipeline =
-      scene_command.material->GetPipeline(scene_context, render_pass);
+  scene_command.geometry->BindToCommand(
+      scene_context, host_buffer, view_transform * scene_command.transform,
+      cmd);
   scene_command.material->BindToCommand(scene_context, host_buffer, cmd);
-
-  GeometryVertexShader::VertInfo info;
-  info.mvp = view_transform * scene_command.transform;
-  GeometryVertexShader::BindVertInfo(cmd, host_buffer.EmplaceUniform(info));
 
   render_pass.AddCommand(std::move(cmd));
 }

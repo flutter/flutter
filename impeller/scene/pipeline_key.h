@@ -1,0 +1,41 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#pragma once
+
+#include "flutter/fml/hash_combine.h"
+
+namespace impeller {
+namespace scene {
+
+enum class GeometryType {
+  kUnskinned = 0,
+  kLastType = kUnskinned,
+};
+enum class MaterialType {
+  kUnlit = 0,
+  kLastType = kUnlit,
+};
+
+struct PipelineKey {
+  GeometryType geometry_type = GeometryType::kUnskinned;
+  MaterialType material_type = MaterialType::kUnlit;
+
+  struct Hash {
+    constexpr std::size_t operator()(const PipelineKey& o) const {
+      return fml::HashCombine(o.geometry_type, o.material_type);
+    }
+  };
+
+  struct Equal {
+    constexpr bool operator()(const PipelineKey& lhs,
+                              const PipelineKey& rhs) const {
+      return lhs.geometry_type == rhs.geometry_type &&
+             lhs.material_type == rhs.material_type;
+    }
+  };
+};
+
+}  // namespace scene
+}  // namespace impeller

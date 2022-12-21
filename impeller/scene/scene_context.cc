@@ -4,6 +4,9 @@
 
 #include "impeller/scene/scene_context.h"
 #include "impeller/renderer/formats.h"
+#include "impeller/scene/material.h"
+#include "impeller/scene/shaders/unlit.frag.h"
+#include "impeller/scene/shaders/unskinned.vert.h"
 
 namespace impeller {
 namespace scene {
@@ -26,25 +29,15 @@ void SceneContextOptions::ApplyToPipelineDescriptor(
   desc.SetPrimitiveType(primitive_type);
 }
 
-template <typename PipelineT>
-static std::unique_ptr<PipelineT> CreateDefaultPipeline(
-    const Context& context) {
-  auto desc = PipelineT::Builder::MakeDefaultPipelineDescriptor(context);
-  if (!desc.has_value()) {
-    return nullptr;
-  }
-  // Apply default ContentContextOptions to the descriptor.
-  SceneContextOptions{}.ApplyToPipelineDescriptor(*desc);
-  return std::make_unique<PipelineT>(context, desc);
-}
-
 SceneContext::SceneContext(std::shared_ptr<Context> context)
     : context_(std::move(context)) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
 
-  unlit_pipeline_[{}] = CreateDefaultPipeline<UnlitPipeline>(*context_);
+  pipelines_[{PipelineKey{GeometryType::kUnskinned, MaterialType::kUnlit}}] =
+      MakePipelineVariants<UnskinnedVertexShader, UnlitFragmentShader>(
+          *context_);
 
   {
     impeller::TextureDescriptor texture_descriptor;
@@ -71,6 +64,18 @@ SceneContext::SceneContext(std::shared_ptr<Context> context)
 }
 
 SceneContext::~SceneContext() = default;
+
+std::shared_ptr<Pipeline<PipelineDescriptor>> SceneContext::GetPipeline(
+    PipelineKey key,
+    SceneContextOptions opts) const {
+  if (!IsValid()) {
+    return nullptr;
+  }
+  if (auto found = pipelines_.find(key); found != pipelines_.end()) {
+    return found->second->GetPipeline(opts);
+  }
+  return nullptr;
+}
 
 bool SceneContext::IsValid() const {
   return is_valid_;

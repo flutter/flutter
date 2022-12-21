@@ -15,8 +15,7 @@
 #include "impeller/renderer/vertex_buffer.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
-#include "impeller/scene/shaders/geometry.vert.h"
-#include "third_party/flatbuffers/include/flatbuffers/vector.h"
+#include "impeller/scene/shaders/unskinned.vert.h"
 
 namespace impeller {
 namespace scene {
@@ -111,8 +110,14 @@ void CuboidGeometry::SetSize(Vector3 size) {
   size_ = size;
 }
 
+// |Geometry|
+GeometryType CuboidGeometry::GetGeometryType() const {
+  return GeometryType::kUnskinned;
+}
+
+// |Geometry|
 VertexBuffer CuboidGeometry::GetVertexBuffer(Allocator& allocator) const {
-  VertexBufferBuilder<GeometryVertexShader::PerVertexData, uint16_t> builder;
+  VertexBufferBuilder<UnskinnedVertexShader::PerVertexData, uint16_t> builder;
   // Layout: position, normal, tangent, uv
   builder.AddVertices({
       // Front.
@@ -132,6 +137,19 @@ VertexBuffer CuboidGeometry::GetVertexBuffer(Allocator& allocator) const {
   return builder.CreateVertexBuffer(allocator);
 }
 
+// |Geometry|
+void CuboidGeometry::BindToCommand(const SceneContext& scene_context,
+                                   HostBuffer& buffer,
+                                   const Matrix& transform,
+                                   Command& command) const {
+  command.BindVertices(
+      GetVertexBuffer(*scene_context.GetContext()->GetResourceAllocator()));
+
+  UnskinnedVertexShader::VertInfo info;
+  info.mvp = transform;
+  UnskinnedVertexShader::BindVertInfo(command, buffer.EmplaceUniform(info));
+}
+
 //------------------------------------------------------------------------------
 /// VertexBufferGeometry
 ///
@@ -144,8 +162,27 @@ void VertexBufferGeometry::SetVertexBuffer(VertexBuffer vertex_buffer) {
   vertex_buffer_ = std::move(vertex_buffer);
 }
 
+// |Geometry|
+GeometryType VertexBufferGeometry::GetGeometryType() const {
+  return GeometryType::kUnskinned;
+}
+
+// |Geometry|
 VertexBuffer VertexBufferGeometry::GetVertexBuffer(Allocator& allocator) const {
   return vertex_buffer_;
+}
+
+// |Geometry|
+void VertexBufferGeometry::BindToCommand(const SceneContext& scene_context,
+                                         HostBuffer& buffer,
+                                         const Matrix& transform,
+                                         Command& command) const {
+  command.BindVertices(
+      GetVertexBuffer(*scene_context.GetContext()->GetResourceAllocator()));
+
+  UnskinnedVertexShader::VertInfo info;
+  info.mvp = transform;
+  UnskinnedVertexShader::BindVertInfo(command, buffer.EmplaceUniform(info));
 }
 
 }  // namespace scene
