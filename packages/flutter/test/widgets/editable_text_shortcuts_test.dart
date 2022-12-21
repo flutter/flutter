@@ -793,7 +793,7 @@ void main() {
 
         testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
-          // Place the caret at the beginning of the 3rd line.
+          // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
             offset: 40,
             affinity: TextAffinity.upstream,
@@ -825,12 +825,11 @@ void main() {
           await tester.pumpWidget(buildEditableText());
           await sendKeyCombination(tester, lineModifierBackspace());
 
-          expect(controller.text, testSoftwrapText);
-
           expect(
             controller.selection,
             const TextSelection.collapsed(offset: 40),
           );
+          expect(controller.text, testSoftwrapText);
         }, variant: TargetPlatformVariant.all());
 
         testWidgets('readonly', (WidgetTester tester) async {
@@ -974,7 +973,7 @@ void main() {
 
         testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
-          // Place the caret at the beginning of the 3rd line.
+          // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
             offset: 40,
             affinity: TextAffinity.upstream,
@@ -1213,7 +1212,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 21,
-              affinity: TextAffinity.upstream,
             ));
           }, variant: TargetPlatformVariant.all());
 
@@ -1228,7 +1226,6 @@ void main() {
 
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
-              affinity: TextAffinity.upstream,
             ));
           }, variant: allExceptApple);
 
@@ -1339,7 +1336,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 46, // After "to".
-              affinity: TextAffinity.upstream,
             ));
 
             // "good" to "come" is selected.
@@ -1352,7 +1348,6 @@ void main() {
             await tester.pump();
             expect(controller.selection, const TextSelection.collapsed(
               offset: 28, // After "good".
-              affinity: TextAffinity.upstream,
             ));
           }, variant: allExceptApple);
 
@@ -1716,8 +1711,7 @@ void main() {
       await tester.pump();
 
       expect(controller.selection, const TextSelection.collapsed(
-        offset: 10,
-        affinity: TextAffinity.upstream,
+        offset: 10, // after the first "the"
       ));
     }, variant: macOSOnly);
 
@@ -1788,7 +1782,6 @@ void main() {
       await tester.pump();
       expect(controller.selection, const TextSelection.collapsed(
         offset: 46, // After "to".
-        affinity: TextAffinity.upstream,
       ));
 
       // "good" to "come" is selected.
@@ -1801,7 +1794,6 @@ void main() {
       await tester.pump();
       expect(controller.selection, const TextSelection.collapsed(
         offset: 28, // After "good".
-        affinity: TextAffinity.upstream,
       ));
     }, variant: macOSOnly);
 

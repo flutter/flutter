@@ -1583,21 +1583,25 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     switch (granularity) {
       case TextGranularity.character:
         final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(CharacterBoundary(text), targetedEdge, forward);
+        newPosition = _beyondTextBoundary(targetedEdge, forward, CharacterBoundary(text));
         result = SelectionResult.end;
         break;
       case TextGranularity.word:
         final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(WhitespaceBoundary(text) + WordBoundary(this), targetedEdge, forward);
+        final TextBoundary textBoundary = WordBoundary(this).until((int offset, bool forward) {
+          return (forward ? offset == 0 : offset >= text.length)
+              || !TextLayoutMetrics.isWhitespace(text.codeUnitAt(forward ? offset - 1 : offset));
+        });
+        newPosition = _beyondTextBoundary(targetedEdge, forward, textBoundary);
         result = SelectionResult.end;
         break;
       case TextGranularity.line:
-        newPosition = _getNextPosition(LineBreak(this), targetedEdge, forward);
+        newPosition = _toTextBoundary(targetedEdge, forward, LineBoundary(this));
         result = SelectionResult.end;
         break;
       case TextGranularity.document:
         final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(DocumentBoundary(text), targetedEdge, forward);
+        newPosition = _beyondTextBoundary(targetedEdge, forward, DocumentBoundary(text));
         if (forward && newPosition.offset == range.end) {
           result = SelectionResult.next;
         } else if (!forward && newPosition.offset == range.start) {
@@ -1616,15 +1620,34 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return result;
   }
 
-  TextPosition _getNextPosition(TextBoundary boundary, TextPosition position, bool forward) {
-    if (forward) {
-      return _clampTextPosition(
-        (PushTextPosition.forward + boundary).getTrailingTextBoundaryAt(position)
-      );
+  // These 2 methods are copied from editable_text.dart. Ideally the code can
+  // be shared.
+  TextPosition _beyondTextBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
+    final int newOffset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(extent.offset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(extent.offset - 1) ?? range.start;
+    return TextPosition(offset: newOffset);
+  }
+
+  TextPosition _toTextBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
+    assert(extent.offset >= 0);
+    final int caretOffset;
+    switch (extent.affinity) {
+      case TextAffinity.upstream:
+        if (extent.offset < 1 && !forward) {
+          assert (extent.offset == 0);
+          return const TextPosition(offset: 0);
+        }
+        caretOffset = math.max(0, extent.offset - 1);
+        break;
+      case TextAffinity.downstream:
+        caretOffset = extent.offset;
+        break;
     }
-    return _clampTextPosition(
-      (PushTextPosition.backward + boundary).getLeadingTextBoundaryAt(position),
-    );
+    final int offset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? range.start;
+    return TextPosition(offset: offset);
   }
 
   MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {

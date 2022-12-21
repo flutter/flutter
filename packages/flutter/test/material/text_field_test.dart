@@ -9546,7 +9546,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 56, affinity: TextAffinity.upstream),
+      // arrowRight always sets the affinity to downstream.
+      const TextSelection.collapsed(offset: 56),
     );
 
     // Keep moving out.
@@ -9556,7 +9557,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 62, affinity: TextAffinity.upstream),
+      const TextSelection.collapsed(offset: 62),
     );
     for (int i = 0; i < (66 - 62); i += 1) {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -9564,7 +9565,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      const TextSelection.collapsed(offset: 66),
     ); // We're at the edge now.
 
     await tester.pumpAndSettle();
