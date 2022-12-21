@@ -3251,7 +3251,6 @@ targets:
 
   - name: Mac_arm64_android run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     runIf:
       - dev/**
