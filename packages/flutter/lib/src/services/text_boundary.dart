@@ -152,7 +152,12 @@ class ParagraphBoundary extends TextBoundary {
       if (currentTextPosition > targetTextOffset) {
         break;
       }
-      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(currentTextPosition - currentCodeUnit.length))) {
+      if (TextLayoutMetrics.isLineTerminator(codeUnitIter.current)) {
+        if (codeUnitIter.current == 0xD && _text.codeUnitAt(currentTextPosition) == 0xA) {
+          // Do not create a new boundary when a carriage return is followed by a line feed.
+          // The boundary will be created at the line feed.
+          continue;
+        }
         if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
           continue;
         }
@@ -186,7 +191,12 @@ class ParagraphBoundary extends TextBoundary {
     while(codeUnitIter.moveNext()) {
       final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
       currentTextPosition += currentCodeUnit.length;
-      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(currentTextPosition - currentCodeUnit.length))) {
+      if (TextLayoutMetrics.isLineTerminator(codeUnitIter.current)) {
+        if (codeUnitIter.current == 0xD && _text.codeUnitAt(currentTextPosition) == 0xA) {
+          // Do not create a new boundary when a carriage return is followed by a line feed.
+          // The boundary will be created at the line feed.
+          continue;
+        }
         if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
           continue;
         }
@@ -221,7 +231,12 @@ class ParagraphBoundary extends TextBoundary {
     while(codeUnitIter.moveNext()) {
       final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
       graphemeEnd += currentCodeUnit.length;
-      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(graphemeEnd - currentCodeUnit.length))) {
+      if (TextLayoutMetrics.isLineTerminator(codeUnitIter.current)) {
+        if (codeUnitIter.current == 0xD && _text.codeUnitAt(graphemeEnd) == 0xA) {
+          // Do not create a new boundary when a carriage return is followed by a line feed.
+          // The boundary will be created at the line feed.
+          continue;
+        }
         if (graphemeEnd - currentCodeUnit.length == targetTextOffset) {
           continue;
         }
