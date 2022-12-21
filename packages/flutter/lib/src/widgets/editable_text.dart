@@ -4830,22 +4830,18 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
       }
     }
 
-    final bool targetBase = isExpand
-      && (intent.forward ? selection.baseOffset > selection.extentOffset : selection.baseOffset < selection.extentOffset);
-    final TextPosition newExtent = applyTextBoundary(targetBase ? selection.base : extent, intent.forward, textBoundary());
+    final bool shouldTargetBase = isExpand && intent.forward
+      ? selection.baseOffset > selection.extentOffset
+      : selection.baseOffset < selection.extentOffset;
+    final TextPosition newExtent = applyTextBoundary(shouldTargetBase ? selection.base : extent, intent.forward, textBoundary());
     final TextSelection newSelection = collapseSelection || (!isExpand && newExtent.offset == selection.baseOffset)
       ? TextSelection.fromPosition(newExtent)
       : isExpand ? selection.expandTo(newExtent, extentAtIndex || selection.isCollapsed) : selection.extendTo(newExtent);
 
-    final bool collapseToBase = intent.collapseAtReversal
+    final bool shouldCollapseToBase = intent.collapseAtReversal
       && (selection.baseOffset - selection.extentOffset) * (selection.baseOffset - newSelection.extentOffset) < 0;
-    final TextSelection newRange = collapseToBase
-      ? TextSelection.fromPosition(selection.base)
-      : newSelection;
-    return Actions.invoke(
-      context!,
-      UpdateSelectionIntent(state._value, newRange, SelectionChangedCause.keyboard),
-    );
+    final TextSelection newRange = shouldCollapseToBase ? TextSelection.fromPosition(selection.base) : newSelection;
+    return Actions.invoke(context!, UpdateSelectionIntent(state._value, newRange, SelectionChangedCause.keyboard));
   }
 
   @override
