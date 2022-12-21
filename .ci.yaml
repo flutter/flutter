@@ -2609,7 +2609,6 @@ targets:
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging_v2/packaging_v2
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
