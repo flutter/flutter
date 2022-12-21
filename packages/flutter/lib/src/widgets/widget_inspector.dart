@@ -3684,3 +3684,67 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     );
   }
 }
+
+class _WidgetFactory {
+  const _WidgetFactory();
+}
+
+/// Annotation which marks a function as a widget factory for the purpose of
+/// widget creation tracking.
+///
+/// When widget creation tracking is enabled, the framework tracks the source
+/// code location of the constructor call for each widget instance. This
+/// information is used by the DevTools to provide an improved developer
+/// experience. For example, it allows the Flutter inspector to present the
+/// widget tree in a manner similar to how the UI was defined in your source
+/// code.
+///
+/// [Widget] constructors are automatically instrumented to track the source
+/// code location of constructor calls. However, there are cases where
+/// a function acts as a sort of a constructor for a widget and a call to such
+/// a function should be considered as the creation location for the returned
+/// widget instance.
+///
+/// Annotating a function with this annotation marks the function as a widget
+/// factory. The framework will then instrument that function in the same way
+/// as it does for [Widget] constructors.
+///
+/// Note that the function **must not** have optional positional parameters for
+/// tracking to work correctly.
+///
+/// Currently this annotation is only supported on extension methods.
+///
+/// {@tool snippet}
+///
+/// This example shows how to use the [widgetFactory] annotation to mark an
+/// extension method as a widget factory:
+///
+/// ```dart
+/// extension PaddingModifier on Widget {
+///   @widgetFactory
+///   Widget padding(EdgeInsetsGeometry padding) {
+///     return Padding(padding: padding, child: this);
+///   }
+/// }
+/// ```
+///
+/// When using the above extension method, the framework will track the
+/// creation location of the [Padding] widget instance as the source code
+/// location where the `padding` extension method was called:
+///
+/// ```dart
+/// // continuing from previous example...
+///
+/// Widget build(BuildContext context) {
+///   return Text('Hello World!')
+///     .padding(EdgeInsets.all(8));
+/// }
+/// ```
+///
+/// {@end-tool}
+///
+/// See also:
+///
+/// * the documentation for [Track widget creation](https://docs.flutter.dev/development/tools/devtools/inspector#track-widget-creation).
+// ignore: library_private_types_in_public_api
+const _WidgetFactory widgetFactory = _WidgetFactory();
