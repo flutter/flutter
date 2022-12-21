@@ -10,6 +10,7 @@
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture.h"
+#include "impeller/scene/pipeline_key.h"
 
 namespace impeller {
 namespace scene {
@@ -47,16 +48,15 @@ class Material {
 
   void SetTranslucent(bool is_translucent);
 
-  virtual std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
-      const SceneContext& scene_context,
-      const RenderPass& pass) const = 0;
+  SceneContextOptions GetContextOptions(const RenderPass& pass) const;
+
+  virtual MaterialType GetMaterialType() const = 0;
+
   virtual void BindToCommand(const SceneContext& scene_context,
                              HostBuffer& buffer,
                              Command& command) const = 0;
 
  protected:
-  SceneContextOptions GetContextOptions(const RenderPass& pass) const;
-
   BlendConfig blend_config_;
   StencilConfig stencil_config_;
   bool is_translucent_ = false;
@@ -73,9 +73,7 @@ class UnlitMaterial final : public Material {
   void SetVertexColorWeight(Scalar weight);
 
   // |Material|
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
-      const SceneContext& scene_context,
-      const RenderPass& pass) const override;
+  MaterialType GetMaterialType() const override;
 
   // |Material|
   void BindToCommand(const SceneContext& scene_context,
@@ -104,9 +102,7 @@ class StandardMaterial final : public Material {
   void SetEnvironmentMap(std::shared_ptr<Texture> environment_map);
 
   // |Material|
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
-      const SceneContext& scene_context,
-      const RenderPass& pass) const override;
+  MaterialType GetMaterialType() const override;
 
   // |Material|
   void BindToCommand(const SceneContext& scene_context,
