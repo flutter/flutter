@@ -54,6 +54,7 @@ void main() {
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
       debugImageLabel: 'test.png',
+      devicePixelRatio: 3.0,
     );
 
     // Make sure that we don't report an identical image size info if we
@@ -65,6 +66,7 @@ void main() {
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
       debugImageLabel: 'test.png',
+      devicePixelRatio: 3.0,
     );
     await binding.endOfFrame;
 
@@ -90,6 +92,7 @@ void main() {
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
       debugImageLabel: 'test.png',
+      devicePixelRatio: 3.0,
     );
 
     paintImage(
@@ -97,6 +100,7 @@ void main() {
       rect: const Rect.fromLTWH(50.0, 75.0, 300.0, 300.0),
       image: image,
       debugImageLabel: 'test.png',
+      devicePixelRatio: 3.0,
     );
     await binding.endOfFrame;
 

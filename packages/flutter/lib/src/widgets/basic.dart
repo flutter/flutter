@@ -15,6 +15,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'view.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -5980,6 +5981,7 @@ class RawImage extends LeafRenderObjectWidget {
       invertColors: invertColors,
       isAntiAlias: isAntiAlias,
       filterQuality: filterQuality,
+      devicePixelRatio: View.maybeOf(context)?.devicePixelRatio,
     );
   }
 
@@ -6007,7 +6009,8 @@ class RawImage extends LeafRenderObjectWidget {
       ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
       ..invertColors = invertColors
       ..isAntiAlias = isAntiAlias
-      ..filterQuality = filterQuality;
+      ..filterQuality = filterQuality
+      ..devicePixelRatio = View.maybeOf(context)?.devicePixelRatio;
   }
 
   @override

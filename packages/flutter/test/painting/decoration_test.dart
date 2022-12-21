@@ -169,7 +169,7 @@ void main() {
     });
 
     final TestCanvas canvas = TestCanvas();
-    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero, devicePixelRatio: 1.2);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should not be invoked during the call to boxPainter.paint
@@ -189,7 +189,7 @@ void main() {
       });
 
       final TestCanvas canvas = TestCanvas();
-      const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+      const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero, devicePixelRatio: 1.2);
       boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
       // The onChanged callback should be invoked asynchronously.
@@ -213,7 +213,7 @@ void main() {
     });
 
     final TestCanvas canvas = TestCanvas();
-    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
+    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero, devicePixelRatio: 1.2);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should be invoked asynchronously.
@@ -310,7 +310,7 @@ void main() {
     final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
     final TestCanvas canvas = TestCanvas();
-    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
+    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0), devicePixelRatio: 1.2));
 
     final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
     expect(call.isMethod, isTrue);
@@ -352,6 +352,7 @@ void main() {
     try {
       boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(
         size: Size(100.0, 100.0),
+        devicePixelRatio: 1.2,
       ));
     } on FlutterError catch (e) {
       error = e;
@@ -374,7 +375,8 @@ void main() {
       '     match text direction, scale 0.5, opacity 0.5,\n'
       '     FilterQuality.low, invert colors, use anti-aliasing)\n'
       '   The ImageConfiguration was:\n'
-      '     ImageConfiguration(size: Size(100.0, 100.0))\n',
+      '     ImageConfiguration(devicePixelRatio: 1.2, size: Size(100.0,\n'
+      '     100.0))\n'
     );
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
 
@@ -391,7 +393,7 @@ void main() {
       TestCanvas(),
       Rect.largest,
       Path(),
-      ImageConfiguration.empty,
+      const ImageConfiguration(devicePixelRatio: 1.2),
     );
     // Yield so that the exception callback gets called before we check it.
     await null;
@@ -524,6 +526,7 @@ void main() {
         scale: scale,
         alignment: Alignment.bottomRight,
         fit: BoxFit.none,
+        devicePixelRatio: 1.2,
       );
 
       const Size imageSize = Size(100.0, 100.0);
@@ -566,6 +569,7 @@ void main() {
         scale: scale,
         alignment: Alignment.bottomRight,
         fit: BoxFit.scaleDown,
+        devicePixelRatio: 1.2,
       );
 
       const Size imageSize = Size(100.0, 100.0);
@@ -607,6 +611,7 @@ void main() {
       scale: 2.0,
       alignment: Alignment.bottomRight,
       fit: BoxFit.scaleDown,
+      devicePixelRatio: 1.2,
     );
 
     const Size imageSize = Size(100.0, 100.0);
@@ -656,6 +661,7 @@ void main() {
         image: image,
         scale: 3.0,
         fit: boxFit,
+        devicePixelRatio: 1.2,
       );
 
       final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
@@ -680,7 +686,7 @@ void main() {
     final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
     final TestCanvas canvas = TestCanvas();
-    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
+    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0), devicePixelRatio: 1.2));
 
     final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
     // The image should scale down to Size(25.0, 25.0) from Size(100.0, 100.0)
@@ -707,7 +713,7 @@ void main() {
 
     final DecorationImagePainter painter = DecorationImage(image: provider).createPainter(() {});
     final Canvas canvas = TestCanvas();
-    painter.paint(canvas, Rect.zero, Path(), ImageConfiguration.empty);
+    painter.paint(canvas, Rect.zero, Path(), const ImageConfiguration(devicePixelRatio: 1.2));
 
     expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount + 1);
     painter.dispose();

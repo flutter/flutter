@@ -44,6 +44,7 @@ class RenderImage extends RenderBox {
     bool invertColors = false,
     bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.low,
+    double? devicePixelRatio,
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
@@ -65,7 +66,8 @@ class RenderImage extends RenderBox {
        _invertColors = invertColors,
        _textDirection = textDirection,
        _isAntiAlias = isAntiAlias,
-       _filterQuality = filterQuality {
+       _filterQuality = filterQuality,
+       _devicePixelRatio = devicePixelRatio {
     _updateColorFilter();
   }
 
@@ -208,6 +210,18 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
+  /// The device pixel ratio of the [FlutterView] into which the image is
+  /// drawn.
+  double? get devicePixelRatio => _devicePixelRatio;
+  double? _devicePixelRatio;
+  set devicePixelRatio(double? value) {
+    assert(value != null);
+    if (value == _devicePixelRatio) {
+      return;
+    }
+    _devicePixelRatio = value;
+    markNeedsPaint();
+  }
 
   /// Used to combine [color] with this image.
   ///
@@ -447,6 +461,7 @@ class RenderImage extends RenderBox {
       canvas: context.canvas,
       rect: offset & size,
       image: _image!,
+      devicePixelRatio: devicePixelRatio,
       debugImageLabel: debugImageLabel,
       scale: _scale,
       opacity: _opacity?.value ?? 1.0,

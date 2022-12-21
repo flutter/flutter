@@ -10,7 +10,6 @@ import 'package:flutter/scheduler.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
-import 'binding.dart';
 import 'borders.dart';
 import 'box_fit.dart';
 import 'debug.dart';
@@ -337,6 +336,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image!.image,
+      devicePixelRatio: configuration.devicePixelRatio,
       debugImageLabel: _image!.debugLabel,
       scale: _details.scale * _image!.scale,
       colorFilter: _details.colorFilter,
@@ -424,6 +424,10 @@ void debugFlushLastFrameImageSizeInfo() {
 ///
 ///  * `image`: The image to paint onto the canvas.
 ///
+///  * `devicePixelRatio`: The device pixel ratio of the [FlutterView] into
+///     which the image will be drawn. Can be obtained via
+///     `View.of(context).devicePixelRation`.
+///
 ///  * `scale`: The number of image pixels for each logical pixel.
 ///
 ///  * `opacity`: The opacity to paint the image onto the canvas with.
@@ -486,6 +490,7 @@ void paintImage({
   required Canvas canvas,
   required Rect rect,
   required ui.Image image,
+  double? devicePixelRatio,
   String? debugImageLabel,
   double scale = 1.0,
   double opacity = 1.0,
@@ -557,14 +562,12 @@ void paintImage({
   // Set to true if we added a saveLayer to the canvas to invert/flip the image.
   bool invertedCanvas = false;
   // Output size and destination rect are fully calculated.
-  if (!kReleaseMode) {
+  if (!kReleaseMode && devicePixelRatio != null) {
     final ImageSizeInfo sizeInfo = ImageSizeInfo(
       // Some ImageProvider implementations may not have given this.
       source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
-      // It's ok to use this instead of a MediaQuery because if this changes,
-      // whatever is aware of the MediaQuery will be repainting the image anyway.
-      displaySize: outputSize * PaintingBinding.instance.window.devicePixelRatio,
+      displaySize: outputSize * devicePixelRatio,
     );
     assert(() {
       if (debugInvertOversizedImages &&

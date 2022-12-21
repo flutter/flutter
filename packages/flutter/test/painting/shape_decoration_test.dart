@@ -79,7 +79,7 @@ void main() {
       ),
     );
     final BoxPainter painter = decoration.createBoxPainter(() { log.add(0); });
-    expect((Canvas canvas) => painter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0))), paintsAssertion);
+    expect((Canvas canvas) => painter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0), devicePixelRatio: 3.0)), paintsAssertion);
     expect(
       (Canvas canvas) {
         return painter.paint(
@@ -88,6 +88,7 @@ void main() {
           const ImageConfiguration(
             size: Size(1000.0, 1000.0),
             textDirection: TextDirection.rtl,
+            devicePixelRatio: 3.0
           ),
         );
       },
@@ -102,6 +103,7 @@ void main() {
           const ImageConfiguration(
             size: Size(100.0, 200.0),
             textDirection: TextDirection.ltr,
+            devicePixelRatio: 3.0
           ),
         );
       },
