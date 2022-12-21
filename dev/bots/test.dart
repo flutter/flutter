@@ -1182,6 +1182,11 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'profile', renderer: 'canvaskit'),
     () => _runWebE2eTest('capabilities_integration_html', buildMode: 'release', renderer: 'html'),
 
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    // CacheWidth and CacheHeight are only currently supported in CanvasKit mode, so we don't run the test in HTML mode.
+    () => _runWebE2eTest('cache_width_cache_height_integration', buildMode: 'debug', renderer: 'auto'),
+    () => _runWebE2eTest('cache_width_cache_height_integration', buildMode: 'profile', renderer: 'canvaskit'),
+
     () => _runWebTreeshakeTest(),
 
     () => _runFlutterDriverWebTest(
