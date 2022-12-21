@@ -16,6 +16,7 @@ impeller_component("scene") {
     "mesh.h",
     "node.cc",
     "node.h",
+    "pipeline_key.h",
     "scene.cc",
     "scene.h",
     "scene_context.cc",

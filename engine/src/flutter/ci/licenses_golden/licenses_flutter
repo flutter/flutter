@@ -1626,14 +1626,15 @@ ORIGIN: ../../../flutter/impeller/scene/mesh.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/mesh.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/node.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/node.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/scene/pipeline_key.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/scene.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/scene.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/scene_context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/scene_context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/scene_encoder.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/scene_encoder.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/scene/shaders/geometry.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/shaders/unlit.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/scene/shaders/unskinned.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart + ../../../flutter/LICENSE
@@ -4075,14 +4076,15 @@ FILE: ../../../flutter/impeller/scene/mesh.cc
 FILE: ../../../flutter/impeller/scene/mesh.h
 FILE: ../../../flutter/impeller/scene/node.cc
 FILE: ../../../flutter/impeller/scene/node.h
+FILE: ../../../flutter/impeller/scene/pipeline_key.h
 FILE: ../../../flutter/impeller/scene/scene.cc
 FILE: ../../../flutter/impeller/scene/scene.h
 FILE: ../../../flutter/impeller/scene/scene_context.cc
 FILE: ../../../flutter/impeller/scene/scene_context.h
 FILE: ../../../flutter/impeller/scene/scene_encoder.cc
 FILE: ../../../flutter/impeller/scene/scene_encoder.h
-FILE: ../../../flutter/impeller/scene/shaders/geometry.vert
 FILE: ../../../flutter/impeller/scene/shaders/unlit.frag
+FILE: ../../../flutter/impeller/scene/shaders/unskinned.vert
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.h
 FILE: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart

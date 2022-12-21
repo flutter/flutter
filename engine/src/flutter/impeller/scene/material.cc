@@ -6,6 +6,7 @@
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
+#include "impeller/scene/pipeline_key.h"
 #include "impeller/scene/scene_context.h"
 #include "impeller/scene/shaders/unlit.frag.h"
 
@@ -64,10 +65,8 @@ void UnlitMaterial::SetVertexColorWeight(Scalar weight) {
 }
 
 // |Material|
-std::shared_ptr<Pipeline<PipelineDescriptor>> UnlitMaterial::GetPipeline(
-    const SceneContext& scene_context,
-    const RenderPass& pass) const {
-  return scene_context.GetUnlitPipeline(GetContextOptions(pass));
+MaterialType UnlitMaterial::GetMaterialType() const {
+  return MaterialType::kUnlit;
 }
 
 // |Material|
@@ -75,11 +74,10 @@ void UnlitMaterial::BindToCommand(const SceneContext& scene_context,
                                   HostBuffer& buffer,
                                   Command& command) const {
   // Uniform buffer.
-  UnlitPipeline::FragmentShader::FragInfo info;
+  UnlitFragmentShader::FragInfo info;
   info.color = color_;
   info.vertex_color_weight = vertex_color_weight_;
-  UnlitPipeline::FragmentShader::BindFragInfo(command,
-                                              buffer.EmplaceUniform(info));
+  UnlitFragmentShader::BindFragInfo(command, buffer.EmplaceUniform(info));
 
   // Textures.
   SamplerDescriptor sampler_descriptor;
@@ -87,7 +85,7 @@ void UnlitMaterial::BindToCommand(const SceneContext& scene_context,
   sampler_descriptor.min_filter = MinMagFilter::kLinear;
   sampler_descriptor.mag_filter = MinMagFilter::kLinear;
   sampler_descriptor.mip_filter = MipFilter::kLinear;
-  UnlitPipeline::FragmentShader::BindBaseColorTexture(
+  UnlitFragmentShader::BindBaseColorTexture(
       command,
       color_texture_ ? color_texture_ : scene_context.GetPlaceholderTexture(),
       scene_context.GetContext()->GetSamplerLibrary()->GetSampler(
@@ -134,10 +132,9 @@ void StandardMaterial::SetEnvironmentMap(
 }
 
 // |Material|
-std::shared_ptr<Pipeline<PipelineDescriptor>> StandardMaterial::GetPipeline(
-    const SceneContext& scene_context,
-    const RenderPass& pass) const {
-  return nullptr;
+MaterialType StandardMaterial::GetMaterialType() const {
+  // TODO(bdero): Replace this once a PBR shader has landed.
+  return MaterialType::kUnlit;
 }
 
 // |Material|

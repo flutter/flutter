@@ -8,7 +8,7 @@ impeller_shaders("shaders") {
   name = "scene"
 
   shaders = [
-    "geometry.vert",
+    "unskinned.vert",
     "unlit.frag",
   ]
 }
