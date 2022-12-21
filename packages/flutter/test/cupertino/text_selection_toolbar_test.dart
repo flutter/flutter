@@ -26,10 +26,10 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
     ValueNotifier<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
     final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
-      _kArrowScreenPadding + mediaQuery.padding.left,
-      mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
+      _kArrowScreenPadding + mediaQueryPadding.left,
+      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
     );
     final Offset anchorAbove = Offset(
       anchorX,
@@ -178,6 +178,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(findOverflowNextButton(), findsOneWidget);
+    expect(findOverflowBackButton(), findsNothing);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final double spacerWidth = 1.0 / tester.binding.window.devicePixelRatio;
+    final double dividerWidth = 1.0 / tester.binding.window.devicePixelRatio;
+    const double borderRadius = 8.0; // Should match _kToolbarBorderRadius
+    final double width = 7 * TestBox.itemWidth + 6 * (dividerWidth + 2 * spacerWidth) + 2 * borderRadius;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: width,
+            child: CupertinoTextSelectionToolbar(
+              anchorAbove: const Offset(50.0, 100.0),
+              anchorBelow: const Offset(50.0, 200.0),
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // All children fit on the screen, so they are all rendered.
+    expect(find.byType(TestBox), findsNWidgets(children.length));
+    expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 

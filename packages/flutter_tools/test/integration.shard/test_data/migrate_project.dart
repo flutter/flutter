@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Timeout(Duration(seconds: 600))
+library;
 
 import 'dart:io';
 import 'package:file/file.dart';

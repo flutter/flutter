@@ -131,5 +131,9 @@
   "keyboardKeyMetaMacOs": "Comando",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menú de la barra de menú",
-  "currentDateLabel": "Date of today"
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

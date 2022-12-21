@@ -382,11 +382,11 @@ class DrawerController extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// `MediaQuery.paddingOf(context)` that corresponds to [alignment].
   /// This ensures that the drag area for notched devices is not obscured. For
   /// example, if [alignment] is set to [DrawerAlignment.start] and
   /// `TextDirection.of(context)` is set to [TextDirection.ltr],
-  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  /// 20.0 will be added to `MediaQuery.paddingOf(context).left`.
   final double? edgeDragWidth;
 
   /// Whether or not the drawer is opened or closed.
@@ -680,7 +680,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final EdgeInsets padding = MediaQuery.of(context).padding;
     final TextDirection textDirection = Directionality.of(context);
     final bool isDesktop;
     switch (Theme.of(context).platform) {
@@ -698,6 +697,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
+      final EdgeInsets padding = MediaQuery.paddingOf(context);
       switch (textDirection) {
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +

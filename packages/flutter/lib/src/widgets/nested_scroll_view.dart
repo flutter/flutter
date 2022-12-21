@@ -903,7 +903,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     goIdle();
     updateUserScrollDirection(

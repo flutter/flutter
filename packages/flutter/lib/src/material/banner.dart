@@ -293,7 +293,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
     assert(widget.actions.isNotEmpty);
 
@@ -399,7 +399,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       onDismiss: () {
         ScaffoldMessenger.of(context).removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
       },
-      child: mediaQueryData.accessibleNavigation
+      child: accessibleNavigation
           ? materialBanner
           : SlideTransition(
         position: slideOutAnimation,
@@ -408,7 +408,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final Widget materialBannerTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       materialBannerTransition = materialBanner;
     } else {
       materialBannerTransition = AnimatedBuilder(

@@ -53,7 +53,7 @@ typedef CupertinoToolbarBuilder = Widget Function(
 class _CupertinoToolbarButtonDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    return SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
   }
 }
 
@@ -103,7 +103,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
 
-  // Add the visial vertical line spacer between children buttons.
+  // Add the visual vertical line spacer between children buttons.
   static List<Widget> _addChildrenSpacers(List<Widget> children) {
     final List<Widget> nextChildren = <Widget>[];
     for (int i = 0; i < children.length; i++) {
@@ -132,9 +132,9 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
-    final double paddingAbove = mediaQuery.padding.top + _kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryPadding.top + _kToolbarScreenPadding;
     final double toolbarHeightNeeded = paddingAbove
         + _kToolbarContentDistance
         + _kToolbarHeight;
@@ -142,8 +142,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 
     // The arrow, which points to the anchor, has some margin so it can't get
     // too close to the horizontal edges of the screen.
-    final double leftMargin = _kArrowScreenPadding + mediaQuery.padding.left;
-    final double rightMargin = mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding;
+    final double leftMargin = _kArrowScreenPadding + mediaQueryPadding.left;
+    final double rightMargin = MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding;
 
     final Offset anchorAboveAdjusted = Offset(
       clampDouble(anchorAbove.dx, leftMargin, rightMargin),
@@ -480,7 +480,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           onPressed: _handlePreviousPage,
           text: '◀',
         ),
-        dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
+        dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
         nextButton: CupertinoTextSelectionToolbarButton.text(
           onPressed: _handleNextPage,
           text: '▶',
@@ -801,8 +801,9 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       double paginationButtonsWidth = 0.0;
       if (currentPage == 0) {
         // If this is the last child, it's ok to fit without a forward button.
+        // Note childCount doesn't include slotted children which come before the list ones.
         paginationButtonsWidth =
-            i == childCount - 1 ? 0.0 : _nextButton!.size.width;
+            i == childCount + 2 ? 0.0 : _nextButton!.size.width;
       } else {
         paginationButtonsWidth = subsequentPageButtonsWidth;
       }

@@ -756,7 +756,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           actionsForegroundColor: CupertinoTheme.of(context).primaryColor,
           transitionBetweenRoutes: widget.transitionBetweenRoutes,
           heroTag: widget.heroTag,
-          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+          persistentHeight: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
         ),
@@ -1104,7 +1104,7 @@ class _PersistentNavigationBar extends StatelessWidget {
     }
 
     return SizedBox(
-      height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+      height: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
       child: SafeArea(
         bottom: false,
         child: paddedToolbar,
@@ -1568,7 +1568,7 @@ class _BackLabel extends StatelessWidget {
   // null here and unused.
   Widget _buildPreviousTitleWidget(BuildContext context, String? previousTitle, Widget? child) {
     if (previousTitle == null) {
-      return const SizedBox(height: 0.0, width: 0.0);
+      return const SizedBox.shrink();
     }
 
     Text textWidget = Text(
@@ -1602,7 +1602,7 @@ class _BackLabel extends StatelessWidget {
         builder: _buildPreviousTitleWidget,
       );
     } else {
-      return const SizedBox(height: 0.0, width: 0.0);
+      return const SizedBox.shrink();
     }
   }
 }
@@ -1772,7 +1772,7 @@ class _NavigationBarTransition extends StatelessWidget {
     // can actually be outside the linearly lerp'ed Rect in the middle of
     // the animation, such as the topLargeTitle.
     return SizedBox(
-      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.of(context).padding.top,
+      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
       width: double.infinity,
       child: Stack(
         children: children,

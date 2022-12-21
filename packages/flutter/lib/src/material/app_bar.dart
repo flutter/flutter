@@ -220,6 +220,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    this.forceMaterialTransparency = false,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(notificationPredicate != null),
@@ -789,6 +790,21 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [SystemChrome.setSystemUIOverlayStyle]
   final SystemUiOverlayStyle? systemOverlayStyle;
 
+  /// {@template flutter.material.appbar.forceMaterialTransparency}
+  /// Forces the AppBar's Material widget type to be [MaterialType.transparency]
+  /// (instead of Material's default type).
+  ///
+  /// This will remove the visual display of [backgroundColor] and [elevation],
+  /// and affect other characteristics of the AppBar's Material widget.
+  ///
+  /// Provided for cases where the app bar is to be transparent, and gestures
+  /// must pass through the app bar to widgets beneath the app bar (i.e. with
+  /// [Scaffold.extendBodyBehindAppBar] set to true).
+  ///
+  /// Defaults to false.
+  /// {@endtemplate}
+  final bool forceMaterialTransparency;
+
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
       assert(theme.platform != null);
@@ -1193,6 +1209,9 @@ class _AppBarState extends State<AppBar> {
         child: Material(
           color: backgroundColor,
           elevation: effectiveElevation,
+          type: widget.forceMaterialTransparency
+              ? MaterialType.transparency
+              : MaterialType.canvas,
           shadowColor: widget.shadowColor
             ?? appBarTheme.shadowColor
             ?? defaults.shadowColor,
@@ -1249,6 +1268,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.toolbarTextStyle,
     required this.titleTextStyle,
     required this.systemOverlayStyle,
+    required this.forceMaterialTransparency,
   }) : assert(primary || topPadding == 0.0),
        assert(
          !floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
@@ -1290,6 +1310,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final TextStyle? titleTextStyle;
   final SystemUiOverlayStyle? systemOverlayStyle;
   final double _bottomHeight;
+  final bool forceMaterialTransparency;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1362,6 +1383,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         toolbarTextStyle: toolbarTextStyle,
         titleTextStyle: titleTextStyle,
         systemOverlayStyle: systemOverlayStyle,
+        forceMaterialTransparency: forceMaterialTransparency,
       ),
     );
     return appBar;
@@ -1401,7 +1423,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || backwardsCompatibility != oldDelegate.backwardsCompatibility
         || toolbarTextStyle != oldDelegate.toolbarTextStyle
         || titleTextStyle != oldDelegate.titleTextStyle
-        || systemOverlayStyle != oldDelegate.systemOverlayStyle;
+        || systemOverlayStyle != oldDelegate.systemOverlayStyle
+        || forceMaterialTransparency != oldDelegate.forceMaterialTransparency;
   }
 
   @override
@@ -1550,6 +1573,7 @@ class SliverAppBar extends StatefulWidget {
     this.toolbarTextStyle,
     this.titleTextStyle,
     this.systemOverlayStyle,
+    this.forceMaterialTransparency = false,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -2038,6 +2062,11 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   final SystemUiOverlayStyle? systemOverlayStyle;
 
+  /// {@macro flutter.material.appbar.forceMaterialTransparency}
+  ///
+  /// This property is used to configure an [AppBar].
+  final bool forceMaterialTransparency;
+
   @override
   State<SliverAppBar> createState() => _SliverAppBarState();
 }
@@ -2097,7 +2126,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
-    final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
+    final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
       : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;
@@ -2146,6 +2175,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           toolbarTextStyle: widget.toolbarTextStyle,
           titleTextStyle: widget.titleTextStyle,
           systemOverlayStyle: widget.systemOverlayStyle,
+          forceMaterialTransparency: widget.forceMaterialTransparency,
         ),
       ),
     );
@@ -2211,7 +2241,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   Widget build(BuildContext context) {
     late final ThemeData theme = Theme.of(context);
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
-    final double topPadding = primary ? MediaQuery.of(context).viewPadding.top : 0;
+    final double topPadding = primary ? MediaQuery.viewPaddingOf(context).top : 0;
     final double collapsedHeight = settings.minExtent - topPadding;
     final double scrollUnderHeight = settings.maxExtent - settings.minExtent;
     final _ScrollUnderFlexibleConfig config;

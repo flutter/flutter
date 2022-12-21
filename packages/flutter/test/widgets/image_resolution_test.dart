@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';

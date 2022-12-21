@@ -190,7 +190,7 @@ class KernelSnapshot extends Target {
     // Force linking of the platform for desktop embedder targets since these
     // do not correctly load the core snapshots in debug mode.
     // See https://github.com/flutter/flutter/issues/44724
-    bool forceLinkPlatform;
+    final bool forceLinkPlatform;
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
