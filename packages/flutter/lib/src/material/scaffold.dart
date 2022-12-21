@@ -2230,7 +2230,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             child: DraggableScrollableActuator(
               child: StatefulBuilder(
                 key: _currentBottomSheetKey,
-                builder: (BuildContext context, StateSetter setState) => widget.bottomSheet!,
+                builder: (BuildContext context, StateSetter setState) {
+                  return widget.bottomSheet ?? const SizedBox.shrink();
+                },
               ),
             ),
           );
