@@ -135,19 +135,19 @@ PipelineDescriptor& PipelineDescriptor::SetStencilPixelFormat(
 }
 
 PipelineDescriptor& PipelineDescriptor::SetDepthStencilAttachmentDescriptor(
-    DepthAttachmentDescriptor desc) {
+    std::optional<DepthAttachmentDescriptor> desc) {
   depth_attachment_descriptor_ = desc;
   return *this;
 }
 
 PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
-    StencilAttachmentDescriptor front_and_back) {
+    std::optional<StencilAttachmentDescriptor> front_and_back) {
   return SetStencilAttachmentDescriptors(front_and_back, front_and_back);
 }
 
 PipelineDescriptor& PipelineDescriptor::SetStencilAttachmentDescriptors(
-    StencilAttachmentDescriptor front,
-    StencilAttachmentDescriptor back) {
+    std::optional<StencilAttachmentDescriptor> front,
+    std::optional<StencilAttachmentDescriptor> back) {
   front_stencil_attachment_descriptor_ = front;
   back_stencil_attachment_descriptor_ = back;
   return *this;
