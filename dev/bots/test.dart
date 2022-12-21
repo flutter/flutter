@@ -1138,7 +1138,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
-    for (String buildMode in _kAllBuildModes) ...[
+    for (String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
         target: path.join('test_driver', 'failure.dart'),
