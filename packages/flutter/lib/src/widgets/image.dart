@@ -288,8 +288,9 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// memory usage of [ImageCache].
 ///
 /// In the case where a network image is used on the Web platform, the
-/// `cacheWidth` and `cacheHeight` parameters are ignored as the Web engine
-/// delegates image decoding of network images to the Web, which does not support
+/// `cacheWidth` and `cacheHeight` parameters are only supported when the application is
+/// running with the CanvasKit renderer. When the application is using the HTML renderer,
+/// the web engine delegates image decoding of network images to the Web, which does not support
 /// custom decode sizes.
 ///
 /// See also:
