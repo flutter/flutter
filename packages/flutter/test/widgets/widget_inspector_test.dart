@@ -11,8 +11,8 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
-
 @TestOn('!chrome')
+library;
 
 import 'dart:convert';
 import 'dart:math';

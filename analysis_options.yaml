@@ -95,7 +95,7 @@ linter:
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     - curly_braces_in_flow_control_structures
-    # - dangling_library_doc_comments # not yet tested
+    - dangling_library_doc_comments
     - depend_on_referenced_packages
     - deprecated_consistency
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
@@ -116,7 +116,7 @@ linter:
     - iterable_contains_unrelated_type
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
-    # - library_annotations # not yet tested
+    - library_annotations
     - library_names
     - library_prefixes
     - library_private_types_in_public_api
