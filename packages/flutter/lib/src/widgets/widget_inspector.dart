@@ -3734,11 +3734,8 @@ class _WidgetFactory {
 ///
 /// ```dart
 /// // continuing from previous example...
-///
-/// Widget build(BuildContext context) {
-///   return Text('Hello World!')
-///     .padding(EdgeInsets.all(8));
-/// }
+/// const Text('Hello World!')
+///     .padding(const EdgeInsets.all(8));
 /// ```
 ///
 /// {@end-tool}
