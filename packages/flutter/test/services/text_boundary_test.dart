@@ -147,21 +147,26 @@ void main() {
   });
 
   test('paragraph boundary works', () {
-    const String text = 'abcd efg hi\njklmno\npqrstuv';
-    const ParagraphBoundary boundary = ParagraphBoundary(text);
+    const String textA= 'abcd efg hi\njklmno\npqrstuv';
+    const ParagraphBoundary boundaryA = ParagraphBoundary(textA);
 
     // Position enclosed inside of paragraph, 'abcd efg h|i\n'.
     const TextPosition position = TextPosition(offset: 10);
 
     // The range includes the line terminator.
-    expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
-    expect(boundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: 12, affinity: TextAffinity.upstream));
+    expect(boundaryA.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
+    expect(boundaryA.getTrailingTextBoundaryAt(position), const TextPosition(offset: 12, affinity: TextAffinity.upstream));
 
     // This text includes a carriage return followed by a line feed.
-    const String otherText = 'abcd efg hi\r\njklmno\npqrstuv';
-    const ParagraphBoundary otherBoundary = ParagraphBoundary(otherText);
-    expect(otherBoundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
-    expect(otherBoundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));  
+    const String textB = 'abcd efg hi\r\njklmno\npqrstuv';
+    const ParagraphBoundary boundaryB = ParagraphBoundary(textB);
+    expect(boundaryB.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
+    expect(boundaryB.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));
+
+    const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
+    const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
+    expect(boundaryC.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
+    expect(boundaryC.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));
   });
 
   test('document boundary works', () {
