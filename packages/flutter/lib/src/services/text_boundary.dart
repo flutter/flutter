@@ -11,7 +11,7 @@ import 'text_layout_metrics.dart';
 // Examples can assume:
 // late TextLayoutMetrics textLayout;
 // late TextSpan text;
-// bool isWhitespace(int? codeUnit) => throw StateError();
+// bool isWhitespace(int? codeUnit) => true;
 
 /// Signature for a predicate that takes an offset into a UTF-16 string, and a
 /// boolean that indicates the search direction.

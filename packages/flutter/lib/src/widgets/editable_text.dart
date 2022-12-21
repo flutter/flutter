@@ -3875,7 +3875,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // control character, we define that these control characters themselves are
     // still part of the previous line, but also exclude them from the
     // the line boundary range since they're non-printing. IOW, no additional
-    // processing needed.
+    // processing needed since the LineBoundary class does exactly that.
     return forward
       ? TextPosition(offset: textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? _value.text.length, affinity: TextAffinity.upstream)
       : TextPosition(offset: textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? 0);
@@ -3891,8 +3891,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       return WordBoundary(renderEditable).until((int offset, bool forward) {
           final int? codeUnit = renderEditable.text?.codeUnitAt(forward ? offset - 1 : offset);
-          // Anything that's not a letter or digit should be skipped, according
-          // to the Android implementation.
+          // TODO(LongCatIsLooong): Anything that's not a letter or digit should
+          // be skipped, according to the Android implementation.
           return codeUnit == null || !TextLayoutMetrics.isWhitespace(codeUnit);
         },
       );
@@ -4708,10 +4708,9 @@ class _CodeUnitBoundary extends TextBoundary {
   final String _text;
 
   @override
-  int getLeadingTextBoundaryAt(int position) => position.clamp(0, _text.length);
-
+  int getLeadingTextBoundaryAt(int position) => position.clamp(0, _text.length); // ignore_clamp_double_lint
   @override
-  int getTrailingTextBoundaryAt(int position) => (position + 1).clamp(0, _text.length);
+  int getTrailingTextBoundaryAt(int position) => (position + 1).clamp(0, _text.length); // ignore_clamp_double_lint
 }
 
 // -------------------------------  Text Actions -------------------------------
@@ -4732,7 +4731,6 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     // Expands the selection to ensure the range covers full graphemes.
     final TextBoundary atomicBoundary = state._characterBoundary();
     if (!selection.isCollapsed) {
-      final TextRange selection = state._value.selection;
       // Expands the selection to ensure the range covers full graphemes.
       final TextRange range = TextRange(
         start: atomicBoundary.getLeadingTextBoundaryAt(selection.start) ?? state._value.text.length,
@@ -4918,7 +4916,7 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
   }
 
   @override
-  bool get isActionEnabled => state.widget.selectionEnabled && state._value.selection.isValid;
+  bool get isActionEnabled => state._value.selection.isValid;
 }
 
 class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
