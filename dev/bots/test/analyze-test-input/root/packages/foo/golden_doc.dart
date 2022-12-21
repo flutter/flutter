@@ -35,7 +35,7 @@
 /// ```
 /// {@end-tool}
 ///
-
+String? foo;
 // Other comments
 // matchesGoldenFile('comment.png');
 

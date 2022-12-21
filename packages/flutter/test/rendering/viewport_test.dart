@@ -8,6 +8,7 @@
 // (or vice versa).
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui' as ui;
 
