@@ -2223,7 +2223,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         assert(_dismissedBottomSheets.isEmpty);
       }
 
-      Widget lastBottomSheet = widget.bottomSheet!;
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) {
           return NotificationListener<DraggableScrollableNotification>(
@@ -2232,11 +2231,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
               child: StatefulBuilder(
                 key: _currentBottomSheetKey,
                 builder: (BuildContext context, StateSetter setState) {
-                  if (widget.bottomSheet == null) {
-                    return lastBottomSheet;
-                  }
-                  lastBottomSheet = widget.bottomSheet!;
-                  return widget.bottomSheet!;
+                  return widget.bottomSheet ?? const SizedBox.shrink();
                 },
               ),
             ),
