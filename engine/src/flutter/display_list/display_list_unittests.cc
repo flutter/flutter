@@ -1226,13 +1226,17 @@ TEST(DisplayList, FlutterSvgIssue661BoundsWereEmpty) {
   sk_sp<DisplayList> display_list = builder.Build();
   // Prior to the fix, the bounds were empty.
   EXPECT_FALSE(display_list->bounds().isEmpty());
-  // These are the expected bounds, but testing float values can be
-  // flaky wrt minor changes in the bounds calculations. If this
-  // line has to be revised too often as the DL implementation is
-  // improved and maintained, then we can eliminate this test and
-  // just rely on the "rounded out" bounds test that follows.
-  EXPECT_EQ(display_list->bounds(),
-            SkRect::MakeLTRB(0, 0.00189208984375, 99.9839630127, 100));
+  // These are just inside and outside of the expected bounds, but
+  // testing float values can be flaky wrt minor changes in the bounds
+  // calculations. If these lines have to be revised too often as the DL
+  // implementation is improved and maintained, then we can eliminate
+  // this test and just rely on the "rounded out" bounds test that follows.
+  SkRect min_bounds = SkRect::MakeLTRB(0, 0.00191, 99.983, 100);
+  SkRect max_bounds = SkRect::MakeLTRB(0, 0.00189, 99.985, 100);
+  ASSERT_TRUE(max_bounds.contains(min_bounds));
+  EXPECT_TRUE(max_bounds.contains(display_list->bounds()));
+  EXPECT_TRUE(display_list->bounds().contains(min_bounds));
+
   // This is the more practical result. The bounds are "almost" 0,0,100x100
   EXPECT_EQ(display_list->bounds().roundOut(), SkIRect::MakeWH(100, 100));
   EXPECT_EQ(display_list->op_count(), 19u);
