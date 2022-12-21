@@ -15,6 +15,7 @@ import 'package:flutter/semantics.dart';
 
 import 'debug.dart';
 import 'layer.dart';
+import 'proxy_box.dart';
 
 export 'package:flutter/foundation.dart' show
   DiagnosticPropertiesBuilder,
@@ -3252,6 +3253,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final Map<SemanticsConfiguration, _InterestingSemanticsFragment> configToFragment = <SemanticsConfiguration, _InterestingSemanticsFragment>{};
     final List<_InterestingSemanticsFragment> mergeUpFragments = <_InterestingSemanticsFragment>[];
     final List<List<_InterestingSemanticsFragment>> siblingMergeFragmentGroups = <List<_InterestingSemanticsFragment>>[];
+    final bool hasTags = config.tagsForChildren?.isNotEmpty ?? false;
     visitChildrenForSemantics((RenderObject renderChild) {
       assert(!_needsLayout);
       final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
@@ -3267,7 +3269,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
       for (final _InterestingSemanticsFragment fragment in parentFragment.mergeUpFragments) {
         fragment.addAncestor(this);
-        fragment.addTags(config.tagsForChildren);
+        if (hasTags) {
+          fragment.addTags(config.tagsForChildren!);
+        }
         if (hasChildConfigurationsDelegate && fragment.config != null) {
           // This fragment need to go through delegate to determine whether it
           // merge up or not.
@@ -3283,7 +3287,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         for (final List<_InterestingSemanticsFragment> siblingMergeGroup in parentFragment.siblingMergeGroups) {
           for (final _InterestingSemanticsFragment siblingMergingFragment in siblingMergeGroup) {
             siblingMergingFragment.addAncestor(this);
-            siblingMergingFragment.addTags(config.tagsForChildren);
+            if (hasTags) {
+              siblingMergingFragment.addTags(config.tagsForChildren!);
+            }
           }
           siblingMergeFragmentGroups.add(siblingMergeGroup);
         }
@@ -3296,7 +3302,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       for (final _InterestingSemanticsFragment fragment in mergeUpFragments) {
         fragment.markAsExplicit();
       }
-    } else if (hasChildConfigurationsDelegate && childConfigurations.isNotEmpty) {
+    } else if (hasChildConfigurationsDelegate) {
       final ChildSemanticsConfigurationsResult result = config.childConfigurationsDelegate!(childConfigurations);
       mergeUpFragments.addAll(
         result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) {
@@ -4195,10 +4201,10 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   Set<SemanticsTag>? _tagsForChildren;
 
   /// Tag all children produced by [compileChildren] with `tags`.
-  void addTags(Iterable<SemanticsTag>? tags) {
-    if (tags == null || tags.isEmpty) {
-      return;
-    }
+  ///
+  /// `tags` must not be empty.
+  void addTags(Iterable<SemanticsTag> tags) {
+    assert(tags.isNotEmpty);
     _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren!.addAll(tags);
   }
@@ -4605,6 +4611,12 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       _ensureConfigIsWritable();
       _config.absorb(fragment.config!);
     }
+  }
+
+  @override
+  void addTags(Iterable<SemanticsTag> tags) {
+    super.addTags(tags);
+    tags.forEach(_config.addTagForChildren);
   }
 
   void _ensureConfigIsWritable() {

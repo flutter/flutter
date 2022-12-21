@@ -3805,7 +3805,8 @@ class SemanticsConfiguration {
   /// which of them should be merged upwards into the parent SemanticsNode.
   ///
   /// The input list of [SemanticsConfiguration]s can be empty if the rendering
-  /// object of this semantics configuration is a leaf node.
+  /// object of this semantics configuration is a leaf node or child rendering
+  /// objects do not contribute to the semantics.
   ChildSemanticsConfigurationsDelegate? get childConfigurationsDelegate => _childConfigurationsDelegate;
   ChildSemanticsConfigurationsDelegate? _childConfigurationsDelegate;
   set childConfigurationsDelegate(ChildSemanticsConfigurationsDelegate? value) {

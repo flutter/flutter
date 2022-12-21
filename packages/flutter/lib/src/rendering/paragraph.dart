@@ -1054,12 +1054,8 @@ class RenderParagraph extends RenderBox
       config.childConfigurationsDelegate = (List<SemanticsConfiguration> childConfigs) {
         final List<AttributedString> cachedStrings = _cachedAttributedLabels ??=  <AttributedString>[];
         final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
-        final Iterator<SemanticsConfiguration> iterator = childConfigs.iterator;
-        if (!iterator.moveNext()) {
-          // TODO: implements.
-          throw UnimplementedError();
-        }
         int placeholderIndex = 0;
+        int childConfigsIndex = 0;
         if (cachedStrings.isNotEmpty) {
           int textSpanLabelIndex = 0;
           bool seenTextSpan = false;
@@ -1067,23 +1063,33 @@ class RenderParagraph extends RenderBox
             if (info.isPlaceholder) {
               if (seenTextSpan) {
                 final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+                textSpanConfig.textDirection = textDirection;
                 textSpanConfig.attributedLabel = cachedStrings[textSpanLabelIndex];
                 builder.markAsMergeUp(textSpanConfig);
                 textSpanLabelIndex += 1;
+                seenTextSpan = false;
               }
-              while (iterator.current.tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
-                builder.markAsMergeUp(iterator.current);
-                if (!iterator.moveNext()) {
-                  break;
-                }
+              while (childConfigsIndex < childConfigs.length &&
+                     childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+                builder.markAsMergeUp(childConfigs[childConfigsIndex]);
+                childConfigsIndex += 1;
               }
               placeholderIndex += 1;
               continue;
             }
             seenTextSpan = true;
           }
-          assert(seenTextSpan && textSpanLabelIndex == cachedStrings.length - 1);
-          assert(!seenTextSpan && textSpanLabelIndex == cachedStrings.length);
+          assert(
+            () {
+              if (seenTextSpan) {
+                return textSpanLabelIndex == cachedStrings.length - 1;
+              } else {
+                return textSpanLabelIndex == cachedStrings.length;
+              }
+            }(),
+            'all cached strings must be used',
+          );
+
           if (seenTextSpan) {
             final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
             textSpanConfig.attributedLabel = cachedStrings.last;
@@ -1099,6 +1105,7 @@ class RenderParagraph extends RenderBox
               // placeholder spans.
               if (buffer != null) {
                 final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+                textSpanConfig.textDirection = textDirection;
                 textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
                 builder.markAsMergeUp(textSpanConfig);
                 cachedStrings.add(textSpanConfig.attributedLabel);
@@ -1106,11 +1113,10 @@ class RenderParagraph extends RenderBox
                 offset = 0;
                 attributes = null;
               }
-              while (iterator.current.tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
-                builder.markAsMergeUp(iterator.current);
-                if (!iterator.moveNext()) {
-                  break;
-                }
+              while (childConfigsIndex < childConfigs.length &&
+                  childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+                builder.markAsMergeUp(childConfigs[childConfigsIndex]);
+                childConfigsIndex += 1;
               }
               placeholderIndex += 1;
               continue;
