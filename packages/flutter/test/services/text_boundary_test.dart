@@ -163,10 +163,12 @@ void main() {
     expect(boundaryB.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
     expect(boundaryB.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));
 
+    // This text includes a series of line terminators.
     const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
+    const TextPosition positionC = TextPosition(offset: 16);
     const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
-    expect(boundaryC.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
-    expect(boundaryC.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));
+    expect(boundaryC.getLeadingTextBoundaryAt(positionC), const TextPosition(offset: 14));
+    expect(boundaryC.getTrailingTextBoundaryAt(positionC), const TextPosition(offset: 18, affinity: TextAffinity.upstream));
   });
 
   test('document boundary works', () {
