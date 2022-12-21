@@ -57,7 +57,7 @@ class DataTableThemeData with Diagnosticable {
     this.checkboxHorizontalMargin,
   }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight $dataRowHeight must not be set if dataRowMinHeight $dataRowMinHeight or dataRowMaxHeight $dataRowMaxHeight are set.'),
+         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
