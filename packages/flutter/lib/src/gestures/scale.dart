@@ -15,11 +15,18 @@ export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEve
 export 'recognizer.dart' show DragStartBehavior;
 export 'velocity_tracker.dart' show Velocity;
 
+/// The default conversion factor when treating mouse scrolling as scaling.
+///
+/// The value was arbitrarily chosen to feel natural for most mousewheels on
+/// all supported platforms.
+const double kDefaultMouseScrollToScaleFactor = 200;
+
 /// The default conversion factor when treating trackpad scrolling as scaling.
 ///
-/// This factor matches the default [InteractiveViewer.scaleFactor] of 200 and
-/// the convention that scrolling up means zooming in.
-const Offset kDefaultTrackpadScrollToScaleFactor = Offset(0, -1/200);
+/// This factor matches the default [kDefaultMouseScrollToScaleFactor] of 200 to
+/// feel natural for most trackpads, and the convention that scrolling up means
+/// zooming in.
+const Offset kDefaultTrackpadScrollToScaleFactor = Offset(0, -1/kDefaultMouseScrollToScaleFactor);
 
 /// The possible states of a [ScaleGestureRecognizer].
 enum _ScaleState {
@@ -384,6 +391,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Defaults to false.
   /// {@endtemplate}
   bool trackpadScrollCausesScale;
+
   /// {@template flutter.gestures.scale.trackpadScrollToScaleFactor}
   /// A factor to control the direction and magnitude of scale when converting
   /// trackpad scrolling.
@@ -395,6 +403,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Defaults to [kDefaultTrackpadScrollToScaleFactor].
   /// {@endtemplate}
   Offset trackpadScrollToScaleFactor;
+
   late Offset _initialFocalPoint;
   Offset? _currentFocalPoint;
   late double _initialSpan;

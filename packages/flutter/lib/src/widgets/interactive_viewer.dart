@@ -85,7 +85,7 @@ class InteractiveViewer extends StatefulWidget {
     this.onInteractionUpdate,
     this.panEnabled = true,
     this.scaleEnabled = true,
-    this.scaleFactor = 200.0,
+    this.scaleFactor = kDefaultMouseScrollToScaleFactor,
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
@@ -304,8 +304,7 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Determines the amount of scale to be performed per pointer scroll.
   ///
-  /// Defaults to 200.0, which was arbitrarily chosen to feel natural for most
-  /// trackpads and mousewheels on all supported platforms.
+  /// Defaults to [kDefaultMouseScrollToScaleFactor].
   ///
   /// Increasing this value above the default causes scaling to feel slower,
   /// while decreasing it causes scaling to feel faster.
