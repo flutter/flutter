@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../framework/framework.dart';
+import '../framework/ios.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -59,7 +60,10 @@ class PluginTest {
       }
       section('Test plugin');
       if (runFlutterTest) {
-        await plugin.test();
+        await plugin.runFlutterTest();
+        if (!dartOnlyPlugin) {
+          await plugin.example.runNativeTests(buildTarget);
+        }
       }
       section('Create Flutter app');
       final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
@@ -73,7 +77,7 @@ class PluginTest {
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
         if (runFlutterTest) {
           section('Test app');
-          await app.test();
+          await app.runFlutterTest();
         }
       } finally {
         await plugin.delete();
@@ -97,6 +101,10 @@ class _FlutterProject {
   String get rootPath => path.join(parent.path, name);
 
   File get pubspecFile => File(path.join(rootPath, 'pubspec.yaml'));
+
+  _FlutterProject get example {
+    return _FlutterProject(Directory(path.join(rootPath)), 'example');
+  }
 
   Future<void> addPlugin(String plugin, {String? pluginPath}) async {
     final File pubspec = pubspecFile;
@@ -151,10 +159,40 @@ class $dartPluginClass {
     }
   }
 
-  Future<void> test() async {
+  Future<void> runFlutterTest() async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('test');
     });
+  }
+
+  Future<void> runNativeTests(String buildTarget) async {
+    // Native unit tests rely on building the app first to generate necessary
+    // build files.
+    await build(buildTarget, validateNativeBuildProject: false);
+
+    if (buildTarget == 'ios') {
+      await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+        if (!await runXcodeTests(
+          platformDirectory: path.join(rootPath, 'ios'),
+          destination: 'id=$deviceId',
+          configuration: 'Debug',
+          testName: 'native_plugin_unit_tests_ios',
+          skipCodesign: true,
+        )) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+      });
+    } else if (buildTarget == 'macos') {
+      if (!await runXcodeTests(
+        platformDirectory: path.join(rootPath, 'macos'),
+        destination: 'platform=macOS',
+        configuration: 'Debug',
+        testName: 'native_plugin_unit_tests_macos',
+        skipCodesign: true,
+      )) {
+        throw TaskResult.failure('Platform unit tests failed');
+      }
+    }
   }
 
   static Future<_FlutterProject> create(
