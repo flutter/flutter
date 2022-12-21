@@ -32,7 +32,7 @@ void main() {
     expect(material.borderRadius, null);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -221,12 +221,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     Material material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, null); //default
+    expect(material.shadowColor, Colors.transparent); //default
 
     await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
 
     await tester.pumpWidget(buildFrame(themeShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation

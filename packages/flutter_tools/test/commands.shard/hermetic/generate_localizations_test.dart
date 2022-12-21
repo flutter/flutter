@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -18,10 +16,10 @@ import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger logger;
-  Artifacts artifacts;
-  FakeProcessManager processManager;
+  late FileSystem fileSystem;
+  late BufferLogger logger;
+  late Artifacts artifacts;
+  late FakeProcessManager processManager;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -197,7 +195,7 @@ void main() {
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           'format',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
@@ -243,7 +241,7 @@ format: true
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
-          'HostArtifact.engineDartBinary',
+          'Artifact.engineDartBinary',
           'format',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
           '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',

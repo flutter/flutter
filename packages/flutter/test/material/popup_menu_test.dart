@@ -1200,7 +1200,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1284,7 +1288,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1403,7 +1411,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -2443,7 +2455,7 @@ void main() {
                       value: 1,
                       child: Builder(
                         builder: (BuildContext context) {
-                          mediaQueryPadding = MediaQuery.of(context).padding;
+                          mediaQueryPadding = MediaQuery.paddingOf(context);
                           return Text('-1-' * 500); // A long long text string.
                         },
                       ),
@@ -3014,7 +3026,7 @@ void main() {
   });
 }
 
-class TestApp extends StatefulWidget {
+class TestApp extends StatelessWidget {
   const TestApp({
     super.key,
     required this.textDirection,
@@ -3024,11 +3036,6 @@ class TestApp extends StatefulWidget {
   final TextDirection textDirection;
   final Widget? child;
 
-  @override
-  State<TestApp> createState() => _TestAppState();
-}
-
-class _TestAppState extends State<TestApp> {
   @override
   Widget build(BuildContext context) {
     return Localizations(
@@ -3040,14 +3047,14 @@ class _TestAppState extends State<TestApp> {
       child: MediaQuery(
         data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
         child: Directionality(
-          textDirection: widget.textDirection,
+          textDirection: textDirection,
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               assert(settings.name == '/');
               return MaterialPageRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) => Material(
-                  child: widget.child,
+                  child: child,
                 ),
               );
             },

@@ -48,9 +48,10 @@ enum ButtonBarLayoutBehavior {
 /// This class is planned to be deprecated in a future release.
 /// Please use one or more of these buttons and associated themes instead:
 ///
-///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
+///  * [FilledButton], [FilledButtonTheme], [FilledButtonThemeData],
 ///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
+///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttonTheme]. The Material theme's button theme data
@@ -234,7 +235,7 @@ class ButtonThemeData with Diagnosticable {
   /// Defaults to [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
-  /// Simply a convenience that returns [minWidth] and [height] as a
+  /// Convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object.
   BoxConstraints get constraints {
     return BoxConstraints(

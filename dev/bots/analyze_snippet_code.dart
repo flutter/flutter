@@ -443,7 +443,7 @@ class _SnippetChecker {
 
   /// The directory for the dart:ui code to be analyzed with the flutter code.
   ///
-  /// If this is null, then no dart:ui code is included in the analysis.  It
+  /// If this is null, then no dart:ui code is included in the analysis. It
   /// defaults to the location inside of the flutter bin/cache directory that
   /// contains the dart:ui code supplied by the engine.
   final Directory? _dartUiLocation;
@@ -457,6 +457,7 @@ class _SnippetChecker {
     '// ignore_for_file: directives_ordering',
     '// ignore_for_file: prefer_final_locals',
     '// ignore_for_file: unnecessary_import',
+    '// ignore_for_file: unreachable_from_main',
     '// ignore_for_file: unused_element',
     '// ignore_for_file: unused_local_variable',
   ];
@@ -980,6 +981,13 @@ class _SnippetChecker {
   /// Invokes the analyzer on the given [directory] and returns the stdout (with some lines filtered).
   List<String> _runAnalyzer() {
     _createConfigurationFiles();
+    // Run pub get to avoid output from getting dependencies in the analyzer
+    // output.
+    Process.runSync(
+      _flutter,
+      <String>['pub', 'get'],
+      workingDirectory: _tempDirectory.absolute.path,
+    );
     final ProcessResult result = Process.runSync(
       _flutter,
       <String>['--no-wrap', 'analyze', '--no-preamble', '--no-congratulate', '.'],
@@ -1006,7 +1014,7 @@ class _SnippetChecker {
     if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
       stdout.removeAt(0);
     }
-    if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter pub get" in ')) {
+    if (stdout.isNotEmpty && stdout.first.isEmpty) {
       stdout.removeAt(0);
     }
     return stdout;

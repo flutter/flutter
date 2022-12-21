@@ -108,6 +108,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Future<T?> get completed => _transitionCompleter.future;
   final Completer<T?> _transitionCompleter = Completer<T?>();
 
+  /// Handle to the performance mode request.
+  ///
+  /// When the route is animating, the performance mode is requested. It is then
+  /// disposed when the animation ends. Requesting [DartPerformanceMode.latency]
+  /// indicates to the engine that the transition is latency sensitive and to delay
+  /// non-essential work while this handle is active.
+  PerformanceModeRequestHandle? _performanceModeRequestHandle;
+
   /// {@template flutter.widgets.TransitionRoute.transitionDuration}
   /// The duration the transition going forwards.
   ///
@@ -134,20 +142,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// {@endtemplate}
   bool get opaque;
 
-  /// {@template flutter.widgets.TransitionRoute.preferRasterization}
-  /// Whether the route transition will prefer to animate a rasterized
-  /// snapshot of the entering/exiting routes.
+  /// {@template flutter.widgets.TransitionRoute.allowSnapshotting}
+  /// Whether the route transition will prefer to animate a snapshot of the
+  /// entering/exiting routes.
   ///
   /// When this value is true, certain route transitions (such as the Android
-  /// zoom page transition) will rasterize the entering and exiting routes.
-  /// These textures are then animated in place of the underlying widgets to
+  /// zoom page transition) will snapshot the entering and exiting routes.
+  /// These snapshots are then animated in place of the underlying widgets to
   /// improve performance of the transition.
   ///
   /// Generally this means that animations that occur on the entering/exiting
   /// route while the route animation plays may appear frozen - unless they
   /// are a hero animation or something that is drawn in a separate overlay.
   /// {@endtemplate}
-  bool get preferRasterization => true;
+  bool get allowSnapshotting => true;
 
   // This ensures that if we got to the dismissed state while still current,
   // we will still be disposed when we are eventually popped.
@@ -221,12 +229,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = opaque;
         }
+        _performanceModeRequestHandle?.dispose();
+        _performanceModeRequestHandle = null;
         break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         if (overlayEntries.isNotEmpty) {
           overlayEntries.first.opaque = false;
         }
+        _performanceModeRequestHandle ??=
+          SchedulerBinding.instance
+            .requestPerformanceMode(ui.DartPerformanceMode.latency);
         break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
@@ -236,6 +249,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         if (!isActive) {
           navigator!.finalizeRoute(this);
           _popFinalized = true;
+          _performanceModeRequestHandle?.dispose();
+          _performanceModeRequestHandle = null;
         }
         break;
     }
@@ -419,7 +434,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// If true, and `nextRoute.canTransitionFrom()` is true, then the
   /// [ModalRoute.buildTransitions] `secondaryAnimation` will run from 0.0 - 1.0
-  /// when [nextRoute] is pushed on top of this one.  Similarly, if
+  /// when [nextRoute] is pushed on top of this one. Similarly, if
   /// the [nextRoute] is popped off of this route, the
   /// `secondaryAnimation` will run from 1.0 - 0.0.
   ///
@@ -465,6 +480,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
     _animation?.removeStatusListener(_handleStatusChanged);
+    _performanceModeRequestHandle?.dispose();
+    _performanceModeRequestHandle = null;
     if (willDisposeAnimationController) {
       _controller?.dispose();
     }
@@ -511,7 +528,7 @@ class LocalHistoryEntry {
 /// A mixin used by routes to handle back navigations internally by popping a list.
 ///
 /// When a [Navigator] is instructed to pop, the current route is given an
-/// opportunity to handle the pop internally. A `LocalHistoryRoute` handles the
+/// opportunity to handle the pop internally. A [LocalHistoryRoute] handles the
 /// pop internally if its list of local history entries is non-empty. Rather
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
 /// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
@@ -1319,7 +1336,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// background color, one could say:
   ///
   /// ```dart
-  /// Color get barrierColor => Theme.of(navigator.context).backgroundColor;
+  /// Color get barrierColor => Theme.of(navigator.context).colorScheme.background;
   /// ```
   ///
   /// {@end-tool}
@@ -1458,7 +1475,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
   /// like [showDialog]. The scoped [WillPopCallback] list makes it possible
-  /// for ModalRoute descendants to collectively define the value of `willPop`.
+  /// for ModalRoute descendants to collectively define the value of [willPop].
   ///
   /// See also:
   ///
@@ -1634,7 +1651,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// close button.
   ///
   /// This getter returns true if there is at least one active route below it,
-  /// or there is at least one [LocalHistoryEntry] with `impliesAppBarDismissal`
+  /// or there is at least one [LocalHistoryEntry] with [impliesAppBarDismissal]
   /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
@@ -1647,6 +1664,37 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // one of the builders
   late OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
+    Widget barrier = buildModalBarrier();
+    if (filter != null) {
+      barrier = BackdropFilter(
+        filter: filter!,
+        child: barrier,
+      );
+    }
+    barrier = IgnorePointer(
+      ignoring: animation!.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
+                animation!.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
+      child: barrier,
+    );
+    if (semanticsDismissible && barrierDismissible) {
+      // To be sorted after the _modalScope.
+      barrier = Semantics(
+        sortKey: const OrdinalSortKey(1.0),
+        child: barrier,
+      );
+    }
+    return barrier;
+  }
+
+  /// Build the barrier for this [ModalRoute], subclasses can override
+  /// this method to create their own barrier with customized features such as
+  /// color or accessibility focus size.
+  ///
+  /// See also:
+  /// * [ModalBarrier], which is typically used to build a barrier.
+  /// * [ModalBottomSheetRoute], which overrides this method to build a
+  ///   customized barrier.
+  Widget buildModalBarrier() {
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) { // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != barrierColor!.withOpacity(0.0));
@@ -1669,24 +1717,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         barrierSemanticsDismissible: semanticsDismissible,
       );
     }
-    if (filter != null) {
-      barrier = BackdropFilter(
-        filter: filter!,
-        child: barrier,
-      );
-    }
-    barrier = IgnorePointer(
-      ignoring: animation!.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-                animation!.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
-      child: barrier,
-    );
-    if (semanticsDismissible && barrierDismissible) {
-      // To be sorted after the _modalScope.
-      barrier = Semantics(
-        sortKey: const OrdinalSortKey(1.0),
-        child: barrier,
-      );
-    }
+
     return barrier;
   }
 
@@ -1749,7 +1780,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   bool get maintainState => true;
 
   @override
-  bool get preferRasterization => false;
+  bool get allowSnapshotting => false;
 }
 
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the
@@ -2053,7 +2084,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// This function takes a `pageBuilder` which is used to build the primary
 /// content of the route (typically a dialog widget). Content below the dialog
 /// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
-/// does not share a context with the location that `showGeneralDialog` is
+/// does not share a context with the location that [showGeneralDialog] is
 /// originally called from. Use a [StatefulBuilder] or a custom
 /// [StatefulWidget] if the dialog needs to update dynamically. The
 /// `pageBuilder` argument can not be null.

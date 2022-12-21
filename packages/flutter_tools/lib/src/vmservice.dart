@@ -187,7 +187,7 @@ Future<vm_service.VmService> setUpVmService(
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
-  final List<Future<vm_service.Success>> registrationRequests = <Future<vm_service.Success>>[];
+  final List<Future<vm_service.Success?>> registrationRequests = <Future<vm_service.Success?>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback('reloadSources', (Map<String, Object?> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
@@ -289,10 +289,8 @@ Future<vm_service.VmService> setUpVmService(
     // thrown if we're already subscribed.
     registrationRequests.add(vmService
       .streamListen(vm_service.EventStreams.kExtension)
-      // TODO(srawlins): Fix this static issue,
-      // https://github.com/flutter/flutter/issues/105750.
-      // ignore: body_might_complete_normally_catch_error
-      .catchError((Object? error) {}, test: (Object? error) => error is vm_service.RPCError)
+      .then<vm_service.Success?>((vm_service.Success success) => success)
+      .catchError((Object? error) => null, test: (Object? error) => error is vm_service.RPCError)
     );
   }
 
@@ -493,7 +491,7 @@ class FlutterVmService {
   ///
   /// This method will only return data if `--cache-sksl` was provided as a
   /// flutter run argument, and only then on physical devices.
-  Future<Map<String, Object>?> getSkSLs({
+  Future<Map<String, Object?>?> getSkSLs({
     required String viewId,
   }) async {
     final vm_service.Response? response = await callMethodWrapper(
@@ -505,7 +503,7 @@ class FlutterVmService {
     if (response == null) {
       return null;
     }
-    return response.json?['SkSLs'] as Map<String, Object>?;
+    return response.json?['SkSLs'] as Map<String, Object?>?;
   }
 
   /// Flush all tasks on the UI thread for an attached Flutter view.
@@ -557,7 +555,7 @@ class FlutterVmService {
   /// for rasterization which is not reflective of how long the frame takes in
   /// production. This is primarily intended to be used to identify the layers
   /// that result in the most raster perf degradation.
-  Future<Map<String, Object>?> renderFrameWithRasterStats({
+  Future<Map<String, Object?>?> renderFrameWithRasterStats({
     required String? viewId,
     required String? uiIsolateId,
   }) async {
@@ -568,7 +566,7 @@ class FlutterVmService {
         'viewId': viewId,
       },
     );
-    return response?.json as Map<String, Object>?;
+    return response?.json;
   }
 
   Future<String> flutterDebugDumpApp({

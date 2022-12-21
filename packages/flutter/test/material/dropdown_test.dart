@@ -11,6 +11,7 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
+library;
 
 import 'dart:math' as math;
 
@@ -208,7 +209,7 @@ Widget buildDropdownWithHint({
     selectedItemBuilder: enableSelectedItemBuilder
       ? (BuildContext context) {
           return menuItems.map<Widget>((String item) {
-            return Container(
+            return ColoredBox(
               color: const Color(0xff00ff00),
               child: Text(item),
             );
@@ -399,18 +400,21 @@ void main() {
     Widget build() {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: Navigator(
-          initialRoute: '/',
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return Material(
-                  child: buildFrame(value: 'one', onChanged: didChangeValue),
-                );
-              },
-            );
-          },
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          child: Navigator(
+            initialRoute: '/',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return Material(
+                    child: buildFrame(value: 'one', onChanged: didChangeValue),
+                  );
+                },
+              );
+            },
+          ),
         ),
       );
     }
@@ -1008,7 +1012,7 @@ void main() {
     await tester.tap(find.byKey(buttonKey));
     await tester.pump();
 
-    final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
     // Make sure there is no overscroll
     expect(scrollController.offset, scrollController.position.maxScrollExtent);
 
@@ -1324,6 +1328,9 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+          label: 'Dismiss',
+          textDirection: TextDirection.ltr,
           children: <TestSemantics>[
             TestSemantics(
               flags: <SemanticsFlag>[
@@ -1851,7 +1858,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1887,7 +1894,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1924,7 +1931,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -1961,7 +1968,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+      final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
       assert(scrollPosition != null);
@@ -3063,7 +3070,7 @@ void main() {
     await tester.tap(find.text('0'));
     await tester.pumpAndSettle();
 
-    ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
     // The scrollbar shouldn't show if the list fits into the screen.
     expect(scrollController.position.maxScrollExtent, 0);
     expect(find.byType(Scrollbar), isNot(paints..rect()));
@@ -3079,7 +3086,7 @@ void main() {
     await tester.tap(find.text('0'));
     await tester.pumpAndSettle();
 
-    scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)))!;
+    scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
     // The scrollbar is shown when the list is longer than the height of the screen.
     expect(scrollController.position.maxScrollExtent > 0, isTrue);
     expect(find.byType(Scrollbar), paints..rect());

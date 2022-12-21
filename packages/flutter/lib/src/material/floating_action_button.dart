@@ -62,7 +62,7 @@ enum _FloatingActionButtonType {
 ///
 /// {@tool dartpad}
 /// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
+/// [Scaffold], with a pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
@@ -804,7 +804,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_143
 
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)
@@ -850,13 +850,13 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   ShapeBorder? get shape {
     switch (type) {
       case _FloatingActionButtonType.regular:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
       case _FloatingActionButtonType.small:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(12.0), topRight: Radius.circular(12.0), bottomLeft: Radius.circular(12.0), bottomRight: Radius.circular(12.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
       case _FloatingActionButtonType.large:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0), bottomLeft: Radius.circular(28.0), bottomRight: Radius.circular(28.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
       case _FloatingActionButtonType.extended:
-       return const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)));
+       return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
      }
   }
 

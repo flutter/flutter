@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
@@ -101,7 +102,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   final _CupertinoTextFieldState _state;
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapDragUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -119,7 +120,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   }
 
   @override
-  void onDragSelectionEnd(DragEndDetails details) {
+  void onDragSelectionEnd(TapDragEndDetails details) {
     _state._requestKeyboard();
   }
 }
@@ -140,7 +141,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// {@macro flutter.widgets.EditableText.onChanged}
 ///
 /// {@tool dartpad}
-/// This example shows how to set the initial value of the `CupertinoTextField` using
+/// This example shows how to set the initial value of the [CupertinoTextField] using
 /// a [controller] that already contains some text.
 ///
 /// ** See code in examples/api/lib/cupertino/text_field/cupertino_text_field.0.dart **
@@ -182,7 +183,7 @@ class CupertinoTextField extends StatefulWidget {
   /// the number of lines. In this mode, the intrinsic height of the widget will
   /// grow as the number of lines of text grows. By default, it is `1`, meaning
   /// this is a single-line text field and will scroll horizontally when
-  /// overflown. [maxLines] must not be zero.
+  /// it overflows. [maxLines] must not be zero.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -214,7 +215,7 @@ class CupertinoTextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration = _kDefaultRoundedBorderDecoration,
-    this.padding = const EdgeInsets.all(6.0),
+    this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
     this.placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,
@@ -234,7 +235,11 @@ class CupertinoTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -273,6 +278,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
@@ -313,31 +319,7 @@ class CupertinoTextField extends StatefulWidget {
        ),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
-           (obscureText
-               ? (readOnly
-                   // No point in even offering "Select All" in a read-only obscured
-                   // field.
-                   ? const ToolbarOptions()
-                   // Writable, but obscured.
-                   : const ToolbarOptions(
-                       selectAll: true,
-                       paste: true,
-                     ))
-               : (readOnly
-                   // Read-only, not obscured.
-                   ? const ToolbarOptions(
-                       selectAll: true,
-                       copy: true,
-                     )
-                   // Writable, not obscured.
-                   : const ToolbarOptions(
-                       copy: true,
-                       cut: true,
-                       selectAll: true,
-                       paste: true,
-                     )));
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Creates a borderless iOS-style text field.
   ///
@@ -351,7 +333,7 @@ class CupertinoTextField extends StatefulWidget {
   /// the number of lines. In this mode, the intrinsic height of the widget will
   /// grow as the number of lines of text grows. By default, it is `1`, meaning
   /// this is a single-line text field and will scroll horizontally when
-  /// overflown. [maxLines] must not be zero.
+  /// it overflows. [maxLines] must not be zero.
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
@@ -380,7 +362,7 @@ class CupertinoTextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration,
-    this.padding = const EdgeInsets.all(6.0),
+    this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
     this.placeholderStyle = _kDefaultPlaceholderStyle,
     this.prefix,
@@ -397,7 +379,11 @@ class CupertinoTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -436,6 +422,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(textAlign != null),
@@ -477,31 +464,7 @@ class CupertinoTextField extends StatefulWidget {
        assert(clipBehavior != null),
        assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       toolbarOptions = toolbarOptions ??
-           (obscureText
-               ? (readOnly
-                   // No point in even offering "Select All" in a read-only obscured
-                   // field.
-                   ? const ToolbarOptions()
-                   // Writable, but obscured.
-                   : const ToolbarOptions(
-                       selectAll: true,
-                       paste: true,
-                     ))
-               : (readOnly
-                   // Read-only, not obscured.
-                   ? const ToolbarOptions(
-                       selectAll: true,
-                       copy: true,
-                     )
-                   // Writable, not obscured.
-                   : const ToolbarOptions(
-                       copy: true,
-                       cut: true,
-                       selectAll: true,
-                       paste: true,
-                     )));
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Controls the text being edited.
   ///
@@ -605,7 +568,11 @@ class CupertinoTextField extends StatefulWidget {
   /// If not set, select all and paste will default to be enabled. Copy and cut
   /// will be disabled if [obscureText] is true. If [readOnly] is true,
   /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  final ToolbarOptions? toolbarOptions;
 
   /// {@macro flutter.material.InputDecorator.textAlignVertical}
   final TextAlignVertical? textAlignVertical;
@@ -787,6 +754,21 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoAdaptiveTextSelectionToolbar], which is built by default.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return CupertinoAdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
   /// {@macro flutter.widgets.magnifier.intro}
@@ -794,12 +776,14 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
-  /// platforms. If it is desired to supress the magnifier, consider passing
+  /// platforms. If it is desired to suppress the magnifier, consider passing
   /// [TextMagnifierConfiguration.disabled].
   ///
-  // TODO(antholeole): https://github.com/flutter/flutter/issues/108041
-  // once the magnifier PR lands, I should enrich this area of the
-  // docs with images of what a magnifier is.
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the magnifier that this text field uses.
+  ///
+  /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
+  /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
@@ -872,14 +856,14 @@ class CupertinoTextField extends StatefulWidget {
     magnifierBuilder: (
     BuildContext context,
     MagnifierController controller,
-    ValueNotifier<MagnifierOverlayInfoBearer> magnifierOverlayInfoBearer
+    ValueNotifier<MagnifierInfo> magnifierInfo
   ) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
         return CupertinoTextMagnifier(
         controller: controller,
-        magnifierOverlayInfoBearer: magnifierOverlayInfoBearer,
+        magnifierInfo: magnifierInfo,
       );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -920,7 +904,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _CupertinoTextFieldSelectionGestureDetectorBuilder(state: this);
+    _selectionGestureDetectorBuilder = _CupertinoTextFieldSelectionGestureDetectorBuilder(
+      state: this,
+    );
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1031,16 +1017,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress
-            || cause == SelectionChangedCause.drag) {
-          _editableText.bringIntoView(selection.extent);
-        }
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        if (cause == SelectionChangedCause.drag) {
+        if (cause == SelectionChangedCause.longPress
+            || cause == SelectionChangedCause.drag) {
           _editableText.bringIntoView(selection.extent);
         }
         break;
@@ -1151,7 +1133,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
                       child: Text(
                         widget.placeholder!,
                         maxLines: widget.maxLines,
-                        overflow: TextOverflow.ellipsis,
+                        overflow: placeholderStyle.overflow ?? TextOverflow.ellipsis,
                         style: placeholderStyle,
                         textAlign: widget.textAlign,
                       ),
@@ -1226,12 +1208,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-        textSelectionControls ??= cupertinoTextSelectionControls;
+        textSelectionControls ??= cupertinoTextSelectionHandleControls;
         break;
 
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
@@ -1242,7 +1224,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     }
 
     final bool enabled = widget.enabled ?? true;
-    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
+    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.devicePixelRatioOf(context), 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null)
@@ -1380,6 +1362,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            contextMenuBuilder: widget.contextMenuBuilder,
             spellCheckConfiguration: spellCheckConfiguration,
           ),
         ),

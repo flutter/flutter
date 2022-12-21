@@ -274,7 +274,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
-        label: 'Enter Date\nmm/dd/yyyy',
+        label: 'Enter Date',
         isTextField: true,
         isFocused: true,
         value: '01/15/2016',

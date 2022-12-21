@@ -15,7 +15,7 @@ const String kStateFileName = '.flutter_conductor_state.json';
 
 const String betaPostReleaseMsg = """
   'Ensure the following post release steps are complete:',
-  '\t 1. Post announcement to discord',
+  '\t 1. Post announcement to discord and press the publish button',
   '\t\t Discord: ${globals.discordReleaseChannel}',
   '\t 2. Post announcement flutter release hotline chat room',
   '\t\t Chatroom: ${globals.flutterReleaseHotline}',
@@ -28,7 +28,7 @@ const String stablePostReleaseMsg = """
   '\t\t Best practices: ${globals.hotfixDocumentationBestPractices}',
   '\t 2. Post announcement to flutter-announce group',
   '\t\t Flutter Announce: ${globals.flutterAnnounceGroup}',
-  '\t 3. Post announcement to discord',
+  '\t 3. Post announcement to discord and press the publish button',
   '\t\t Discord: ${globals.discordReleaseChannel}',
   '\t 4. Post announcement flutter release hotline chat room',
   '\t\t Chatroom: ${globals.flutterReleaseHotline}',
@@ -149,6 +149,10 @@ String phaseInstructions(pb.ConductorState state) {
         return <String>[
           'There are no engine cherrypicks, so issue `conductor next` to continue',
           'to the next step.',
+          '\n',
+          '******************************************************',
+          '* Create a new entry in http://go/release-eng-retros *',
+          '******************************************************',
         ].join('\n');
       }
       return <String>[

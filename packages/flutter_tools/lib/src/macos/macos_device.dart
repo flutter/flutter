@@ -52,7 +52,7 @@ class MacOSDevice extends DesktopDevice {
 
   @override
   Future<String> get targetPlatformDisplayName async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       return 'darwin-arm64';
     } else {
       return 'darwin-x64';
@@ -65,8 +65,7 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant MacOSApp package, {
+  Future<void> buildForDevice({
     required BuildInfo buildInfo,
     String? mainPath,
   }) async {

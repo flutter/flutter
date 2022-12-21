@@ -215,7 +215,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(find.text('top'), findsOneWidget);
 
-    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle')))!.position;
+    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle'))).position;
     expect(position.viewportDimension, 600.0);
     expect(position.pixels, 0.0);
 

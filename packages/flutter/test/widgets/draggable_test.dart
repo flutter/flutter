@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -3192,8 +3193,6 @@ void main() {
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1), isA<Draggable<int>>());
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).child, widget1);
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).feedback, widget2);
-    expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).dragAnchor, DragAnchor.child);
-    expect(const LongPressDraggable<int>(feedback: widget2, dragAnchor: DragAnchor.pointer, child: widget1).dragAnchor, DragAnchor.pointer);
     expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
   });
 }

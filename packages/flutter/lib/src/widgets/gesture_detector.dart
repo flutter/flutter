@@ -215,11 +215,11 @@ class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
   /// Pan and scale callbacks cannot be used simultaneously because scale is a
-  /// superset of pan. Simply use the scale callbacks instead.
+  /// superset of pan. Use the scale callbacks instead.
   ///
   /// Horizontal and vertical drag callbacks cannot be used simultaneously
-  /// because a combination of a horizontal and vertical drag is a pan. Simply
-  /// use the pan callbacks instead.
+  /// because a combination of a horizontal and vertical drag is a pan.
+  /// Use the pan callbacks instead.
   ///
   /// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
   ///
@@ -970,10 +970,14 @@ class GestureDetector extends StatelessWidget {
   /// detecting screens.
   final GestureForcePressEndCallback? onForcePressEnd;
 
-  /// How this gesture detector should behave during hit testing.
+  /// How this gesture detector should behave during hit testing when deciding
+  /// how the hit test propagates to children and whether to consider targets
+  /// behind this one.
   ///
   /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
   /// [HitTestBehavior.translucent] if child is null.
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   final HitTestBehavior? behavior;
 
   /// Whether to exclude these gestures from the semantics tree. For
@@ -1013,7 +1017,7 @@ class GestureDetector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
 
     if (onTapDown != null ||
         onTapUp != null ||

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('browser')
+library;
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 // Originally here: https://github.com/flutter/engine/pull/28808
 void main() {
   test('Web library environment define exists', () {
-    expect(const bool.fromEnvironment('dart.library.html'), isTrue);
+    expect(const bool.fromEnvironment('dart.library.js_util'), isTrue);
     expect(const bool.fromEnvironment('dart.library.someFooLibrary'), isFalse);
   });
 }

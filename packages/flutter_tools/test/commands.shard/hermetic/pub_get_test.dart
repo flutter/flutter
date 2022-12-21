@@ -114,6 +114,22 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
+  testUsingContext('pub get throws error on missing directory', () async {
+    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+
+    try {
+      await commandRunner.run(<String>['get', 'missing_dir']);
+      fail('expected an exception');
+    } on Exception catch (e) {
+      expect(e.toString(), contains('Expected to find project root in missing_dir'));
+    }
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
   testUsingContext('pub get triggers localizations generation when generate: true', () async {
     final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')
       ..createSync();
@@ -169,17 +185,18 @@ class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
     required PubContext context,
-    String? directory,
+    required FlutterProject project,
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
+    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
   }) async {
-    fileSystem.directory(directory)
+    fileSystem.directory(project.directory)
       .childDirectory('.dart_tool')
       .childFile('package_config.json')
       ..createSync(recursive: true)

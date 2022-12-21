@@ -15,7 +15,6 @@ import 'package:stream_channel/stream_channel.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -44,16 +43,11 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.icudtlPath,
     required this.compileExpression,
     required this.fontConfigManager,
+    required this.uriConverter,
   })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
         assert(!debuggingOptions.startPaused || enableObservatory),
         _gotProcessObservatoryUri = enableObservatory
-            ? Completer<Uri?>() : (Completer<Uri?>()..complete()),
-        _operatingSystemUtils = OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+            ? Completer<Uri?>() : (Completer<Uri?>()..complete());
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
@@ -71,13 +65,13 @@ class FlutterTesterTestDevice extends TestDevice {
   final String? icudtlPath;
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
+  final UriConverter? uriConverter;
 
   final Completer<Uri?> _gotProcessObservatoryUri;
   final Completer<int> _exitCode = Completer<int>();
 
   Process? _process;
   HttpServer? _server;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   /// Starts the device.
   ///
@@ -94,13 +88,6 @@ class FlutterTesterTestDevice extends TestDevice {
     _server = await bind(host, /*port*/ 0);
     logger.printTrace('test $id: test harness socket server is running at port:${_server!.port}');
     final List<String> command = <String>[
-      // Until an arm64 flutter tester binary is available, force to run in Rosetta
-      // to avoid "unexpectedly got a signal in sigtramp" crash.
-      // https://github.com/flutter/flutter/issues/88106
-      if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) ...<String>[
-        '/usr/bin/arch',
-        '-x86_64',
-      ],
       shellPath,
       if (enableObservatory) ...<String>[
         // Some systems drive the _FlutterPlatform class in an unusual way, where
@@ -124,7 +111,8 @@ class FlutterTesterTestDevice extends TestDevice {
       '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
-      '--enable-dart-profiling',
+      if (debuggingOptions.enableDartProfiling)
+        '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
@@ -177,7 +165,10 @@ class FlutterTesterTestDevice extends TestDevice {
         Uri? forwardingUri;
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-          final DartDevelopmentService dds = await startDds(detectedUri);
+          final DartDevelopmentService dds = await startDds(
+            detectedUri,
+            uriConverter: uriConverter,
+          );
           forwardingUri = dds.uri;
           logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
         } else {
@@ -254,12 +245,13 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @visibleForTesting
   @protected
-  Future<DartDevelopmentService> startDds(Uri uri) {
+  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) {
     return DartDevelopmentService.startDartDevelopmentService(
       uri,
       serviceUri: _ddsServiceUri,
       enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
       ipv6: host!.type == InternetAddressType.IPv6,
+      uriConverter: uriConverter,
     );
   }
 
@@ -357,7 +349,7 @@ StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {
       .pipe(webSocket);
   webSocket
       // We're only communicating with string encoded JSON.
-      .map<String?>((dynamic message) => message as String?)
+      .map<String>((dynamic message) => message as String)
       .pipe(controller.local.sink);
 
   return controller.foreign;

@@ -267,7 +267,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   @override
   void initState() {
     super.initState();
-    _firstRowIndex = PageStorage.of(context)?.readState(context) as int? ?? widget.initialFirstRowIndex ?? 0;
+    _firstRowIndex = PageStorage.maybeOf(context)?.readState(context) as int? ?? widget.initialFirstRowIndex ?? 0;
     widget.source.addListener(_handleDataSourceChanged);
     _handleDataSourceChanged();
   }

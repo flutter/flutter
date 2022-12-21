@@ -231,7 +231,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       scrollExtentMin: 0.0,
-      scrollPosition: 394.3,
+      scrollPosition: 380.2,
       scrollExtentMax: 520.0,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
@@ -280,7 +280,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       scrollExtentMin: 0.0,
-      scrollPosition: 394.3,
+      scrollPosition: 380.2,
       scrollExtentMax: double.infinity,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
@@ -292,7 +292,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       scrollExtentMin: 0.0,
-      scrollPosition: 788.6,
+      scrollPosition: 760.4,
       scrollExtentMax: double.infinity,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,

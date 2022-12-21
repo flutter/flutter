@@ -757,15 +757,6 @@ class AnimationController extends Animation<double>
     return result;
   }
 
-  /// Update the simulation without restarting the animation.
-  ///
-  /// The current simulation will be replaced with the provided [Simulation].
-  /// It is only valid to call this when an animation is currently underway.
-  void updateSimulation(Simulation simulation) {
-    assert(isAnimating);
-    _simulation = simulation;
-  }
-
   /// Stops running this animation.
   ///
   /// This does not trigger any notifications. The animation stops in its
@@ -851,7 +842,13 @@ class AnimationController extends Animation<double>
   String toStringDetails() {
     final String paused = isAnimating ? '' : '; paused';
     final String ticker = _ticker == null ? '; DISPOSED' : (_ticker!.muted ? '; silenced' : '');
-    final String label = debugLabel == null ? '' : '; for $debugLabel';
+    String label = '';
+    assert(() {
+      if (debugLabel != null) {
+        label = '; for $debugLabel';
+      }
+      return true;
+    }());
     final String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
     return '$more$paused$ticker$label';
   }

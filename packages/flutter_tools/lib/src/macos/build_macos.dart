@@ -36,7 +36,8 @@ Future<void> buildMacOS({
   required bool verboseLogging,
   SizeAnalyzer? sizeAnalyzer,
 }) async {
-  if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
+  final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
+  if (xcodeWorkspace == null) {
     throwToolExit('No macOS desktop project configured. '
       'See https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.');
@@ -54,9 +55,7 @@ Future<void> buildMacOS({
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  if (!migration.run()) {
-    throwToolExit('Could not migrate project file');
-  }
+  migration.run();
 
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
@@ -84,15 +83,15 @@ Future<void> buildMacOS({
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter!.getInfo(
+  final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
   );
-  final String? scheme = projectInfo.schemeFor(buildInfo);
+  final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {
-    projectInfo.reportFlavorNotFoundAndExit();
+    projectInfo!.reportFlavorNotFoundAndExit();
   }
-  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
+  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
@@ -108,7 +107,7 @@ Future<void> buildMacOS({
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',
-      '-workspace', flutterProject.macos.xcodeWorkspace.path,
+      '-workspace', xcodeWorkspace.path,
       '-configuration', configuration,
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,

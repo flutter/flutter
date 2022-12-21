@@ -17,7 +17,7 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     theme: ThemeData(
       platform: platform,
     ),
-    home: Container(
+    home: ColoredBox(
       color: const Color(0xFF111111),
       child: ListView.builder(
         dragStartBehavior: DragStartBehavior.down,
@@ -48,7 +48,7 @@ void main() {
     // Before changing these values, ensure the fling results in a distance that
     // makes sense. See issue for more context.
     expect(androidResult, greaterThan(394.0));
-    expect(androidResult, lessThan(408.2));
+    expect(androidResult, lessThan(395.0));
 
     await pumpTest(tester, TargetPlatform.linux);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
@@ -85,11 +85,12 @@ void main() {
     final double macOSResult = getCurrentOffset();
 
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
+    expect(macOSResult, lessThan(androidResult)); // Android is slipperier than macOS
     expect(linuxResult, lessThan(iOSResult)); // iOS is slipperier than Linux
-    expect(linuxResult, lessThan(macOSResult)); // macOS is slipperier than Linux
+    expect(macOSResult, lessThan(linuxResult)); // Linux is slipperier than macOS
     expect(windowsResult, lessThan(iOSResult)); // iOS is slipperier than Windows
-    expect(windowsResult, lessThan(macOSResult)); // macOS is slipperier than Windows
+    expect(macOSResult, lessThan(windowsResult)); // Windows is slipperier than macOS
     expect(windowsResult, equals(androidResult));
     expect(windowsResult, equals(androidResult));
     expect(linuxResult, equals(androidResult));
@@ -152,6 +153,6 @@ void main() {
     expect(log, equals(<String>['tap 21']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 21', 'tap 49']));
+    expect(log, equals(<String>['tap 21', 'tap 48']));
   });
 }

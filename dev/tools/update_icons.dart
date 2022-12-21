@@ -18,6 +18,7 @@ const String _iconsTemplatePathOption = 'icons-template';
 const String _newCodepointsPathOption = 'new-codepoints';
 const String _oldCodepointsPathOption = 'old-codepoints';
 const String _fontFamilyOption = 'font-family';
+const String _classNameOption = 'class-name';
 const String _enforceSafetyChecks = 'enforce-safety-checks';
 const String _dryRunOption = 'dry-run';
 
@@ -25,6 +26,7 @@ const String _defaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 const String _defaultNewCodepointsPath = 'codepoints';
 const String _defaultOldCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
 const String _defaultFontFamily = 'MaterialIcons';
+const String _defaultClassName = 'Icons';
 const String _defaultDemoFilePath = '/tmp/new_icons_demo.dart';
 
 const String _beginGeneratedMark = '// BEGIN GENERATED ICONS';
@@ -211,6 +213,7 @@ void main(List<String> args) {
     iconsTemplateContents,
     newTokenPairMap,
     argResults[_fontFamilyOption] as String,
+    argResults[_classNameOption] as String,
     argResults[_enforceSafetyChecks] as bool,
   );
 
@@ -245,6 +248,9 @@ ArgResults _handleArguments(List<String> args) {
     ..addOption(_fontFamilyOption,
         defaultsTo: _defaultFontFamily,
         help: 'The font family to use for the IconData constants')
+    ..addOption(_classNameOption,
+        defaultsTo: _defaultClassName,
+        help: 'The containing class for all icons')
     ..addFlag(_enforceSafetyChecks,
         defaultsTo: true,
         help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable')
@@ -280,10 +286,12 @@ String _regenerateIconsFile(
     String templateFileContents,
     Map<String, String> tokenPairMap,
     String fontFamily,
+    String className,
     bool enforceSafetyChecks,
   ) {
   final List<Icon> newIcons = tokenPairMap.entries
-      .map((MapEntry<String, String> entry) => Icon(entry, fontFamily: fontFamily))
+      .map((MapEntry<String, String> entry) =>
+        Icon(entry, fontFamily: fontFamily, className: className))
       .toList();
   newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
@@ -309,7 +317,8 @@ String _regenerateIconsFile(
             final Icon iOSIcon = newIcons.firstWhere(
                 (Icon icon) => icon.id == '${ids[1]}$style',
                 orElse: () => throw ids[1]);
-            platformAdaptiveDeclarations.add(Icon.platformAdaptiveDeclaration('$flutterId$style', agnosticIcon, iOSIcon),
+            platformAdaptiveDeclarations.add(
+              agnosticIcon.platformAdaptiveDeclaration('$flutterId$style', iOSIcon),
             );
           } catch (e) {
             if (style == '') {
@@ -433,7 +442,10 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
 
 class Icon {
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
-  Icon(MapEntry<String, String> tokenPair, {this.fontFamily = _defaultFontFamily}) {
+  Icon(MapEntry<String, String> tokenPair, {
+    this.fontFamily = _defaultFontFamily,
+    this.className = _defaultClassName,
+  }) {
     id = tokenPair.key;
     hexCodepoint = tokenPair.value;
 
@@ -485,6 +497,7 @@ class Icon {
   late String hexCodepoint; // e.g. e547
   late String htmlSuffix = ''; // The suffix for the 'material-icons' HTML class.
   String fontFamily; // The IconData font family.
+  String className; // The containing class.
 
   String get name => shortId.replaceAll('_', ' ').trim();
 
@@ -493,7 +506,7 @@ class Icon {
   String get dartDoc =>
       '<i class="material-icons$htmlSuffix md-36">$shortId</i> &#x2014; $family icon named "$name"$style';
 
-  String get usage => 'Icon(Icons.$flutterId),';
+  String get usage => 'Icon($className.$flutterId),';
 
   String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId)
       ? ', matchTextDirection: true'
@@ -508,10 +521,10 @@ class Icon {
   $declaration
 ''';
 
-  static String platformAdaptiveDeclaration(String fullFlutterId, Icon agnosticIcon, Icon iOSIcon) => '''
+  String platformAdaptiveDeclaration(String fullFlutterId, Icon iOSIcon) => '''
 
-  /// Platform-adaptive icon for ${agnosticIcon.dartDoc} and ${iOSIcon.dartDoc}.;
-  IconData get $fullFlutterId => !_isCupertino() ? Icons.${agnosticIcon.flutterId} : Icons.${iOSIcon.flutterId};
+  /// Platform-adaptive icon for $dartDoc and ${iOSIcon.dartDoc}.;
+  IconData get $fullFlutterId => !_isCupertino() ? $className.$flutterId : $className.${iOSIcon.flutterId};
 ''';
 
   @override

@@ -229,9 +229,9 @@ void main() {
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>[
         'Analyzing',
-        "info $analyzerSeparator The declaration '_incrementCounter' isn't",
-        'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-        "warning $analyzerSeparator The parameter 'onPressed' is required",
+        'unused_element',
+        'only_throw_errors',
+        'missing_required_param',
       ],
       exitMessageContains: '3 issues found.',
       exitCode: 1,
@@ -339,7 +339,7 @@ int analyze() {}
     );
   });
 
-  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 1.', () async {
+  testWithoutContext('analyze once only fatal-infos has warning issue finally exit code 0.', () async {
     const String warningSourceCode = '''
 int analyze() {}
 ''';
@@ -354,6 +354,30 @@ analyzer:
     fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
     await runCommand(
       arguments: <String>['analyze','--no-pub', '--fatal-infos', '--no-fatal-warnings'],
+      statusTextContains: <String>[
+        'warning',
+        'missing_return',
+      ],
+      exitMessageContains: '1 issue found.',
+    );
+  });
+
+
+  testWithoutContext('analyze once only fatal-warnings has warning issue finally exit code 1.', () async {
+    const String warningSourceCode = '''
+int analyze() {}
+''';
+
+    final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
+    optionsFile.writeAsStringSync('''
+analyzer:
+  errors:
+    missing_return: warning
+  ''');
+
+    fileSystem.directory(projectPath).childFile('main.dart').writeAsStringSync(warningSourceCode);
+    await runCommand(
+      arguments: <String>['analyze','--no-pub', '--no-fatal-infos', '--fatal-warnings'],
       statusTextContains: <String>[
         'warning',
         'missing_return',
@@ -441,7 +465,7 @@ class _MyHomePageState extends State<MyHomePage> {
 const String pubspecYamlSrc = r'''
 name: flutter_project
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.1.0 <4.0.0"
 
 dependencies:
   flutter:

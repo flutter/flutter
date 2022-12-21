@@ -102,7 +102,7 @@ class Scrollbar extends StatelessWidget {
     this.isAlwaysShown,
     @Deprecated(
       'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     this.showTrackOnHover,
     @Deprecated(
@@ -168,7 +168,7 @@ class Scrollbar extends StatelessWidget {
   /// should be used instead.
   @Deprecated(
     'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-    'This feature was deprecated after v2.9.0-1.0.pre.',
+    'This feature was deprecated after v3.4.0-19.0.pre.',
   )
   final bool? showTrackOnHover;
 
@@ -399,7 +399,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _colorScheme = theme.colorScheme;
-    _scrollbarTheme = theme.scrollbarTheme;
+    _scrollbarTheme = ScrollbarTheme.of(context);
     switch (theme.platform) {
       case TargetPlatform.android:
         _useAndroidScrollbar = true;
@@ -427,7 +427,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ?? (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
-      ..padding = MediaQuery.of(context).padding
+      ..padding = MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..ignorePointer = !enableGestures;
   }

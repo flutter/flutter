@@ -66,13 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: Column(
           children: <Widget>[
-            Container(color: Colors.grey.shade200, child: Options(_model)),
+            ColoredBox(color: Colors.grey.shade200, child: Options(_model)),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,
@@ -80,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue.shade100,
                       shape: lerpBorder(
                         StarBorder.polygon(
-                          side: const BorderSide(strokeAlign: StrokeAlign.center, width: 2),
+                          side: const BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 2),
                           sides: _model.points,
                           pointRounding: _model.pointRounding,
                           rotation: _model.rotation,
@@ -94,7 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Text('Polygon'),
                   ),
                   Container(
-                    key: UniqueKey(),
                     alignment: Alignment.center,
                     width: 300,
                     height: 200,
@@ -102,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.blue.shade100,
                       shape: lerpBorder(
                         StarBorder(
-                          side: const BorderSide(strokeAlign: StrokeAlign.center, width: 2),
+                          side: const BorderSide(strokeAlign: BorderSide.strokeAlignCenter, width: 2),
                           points: _model.points,
                           innerRadiusRatio: _model.innerRadiusRatio,
                           pointRounding: _model.pointRounding,
@@ -227,28 +225,6 @@ class OptionModel extends ChangeNotifier {
     _innerRadiusRatio = defaultModel._innerRadiusRatio;
     _points = defaultModel.points;
     notifyListeners();
-  }
-}
-
-class LabeledCheckbox extends StatelessWidget {
-  const LabeledCheckbox({super.key, required this.label, this.onChanged, this.value});
-
-  final String label;
-  final ValueChanged<bool?>? onChanged;
-  final bool? value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Checkbox(
-          onChanged: onChanged,
-          value: value,
-        ),
-        Text(label),
-      ],
-    );
   }
 }
 

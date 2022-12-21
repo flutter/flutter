@@ -50,7 +50,7 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: CheckboxListTile(
@@ -176,6 +176,7 @@ class CheckboxListTile extends StatelessWidget {
     this.side,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
   }) : assert(tristate != null),
        assert(tristate || value != null),
@@ -275,7 +276,7 @@ class CheckboxListTile extends StatelessWidget {
   /// This value will surround the [Checkbox], [title], [subtitle], and [secondary]
   /// widgets in [CheckboxListTile].
   ///
-  /// When the value is null, the `contentPadding` is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  /// When the value is null, the [contentPadding] is `EdgeInsets.symmetric(horizontal: 16.0)`.
   final EdgeInsetsGeometry? contentPadding;
 
   /// If true the checkbox's [value] can be true, false, or null.
@@ -319,6 +320,9 @@ class CheckboxListTile extends StatelessWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.material.ListTile.enableFeedback}
   ///
@@ -401,6 +405,7 @@ class CheckboxListTile extends StatelessWidget {
         tileColor: tileColor,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
       ),
     );

@@ -517,7 +517,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       final OverlayState overlayState = Overlay.of(
         context,
         debugRequiredFor: widget,
-      )!;
+      );
       overlayState.insert(_entry!);
     }
     SemanticsService.tooltip(_tooltipMessage);
@@ -573,7 +573,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final OverlayState overlayState = Overlay.of(
       context,
       debugRequiredFor: widget,
-    )!;
+    );
 
     final RenderBox box = context.findRenderObject()! as RenderBox;
     final Offset target = box.localToGlobal(
@@ -751,7 +751,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
         onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
-        excludeFromSemantics: true,
+        excludeFromSemantics: _excludeFromSemantics,
         child: result,
       );
       // Only check for hovering if there is a mouse connected.
@@ -884,7 +884,7 @@ class _TooltipOverlay extends StatelessWidget {
       );
     }
     return Positioned.fill(
-      bottom: MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0,
+      bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,

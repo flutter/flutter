@@ -336,6 +336,8 @@ abstract class Gradient {
 
 /// A 2D linear gradient.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=gYNTcgZVcWw}
+///
 /// This class is used by [BoxDecoration] to represent linear gradients. This
 /// abstracts out the arguments to the [ui.Gradient.linear] constructor from
 /// the `dart:ui` library.
@@ -579,7 +581,7 @@ class LinearGradient extends Gradient {
 /// which will make the rendered gradient appear to be pointed or directed in the
 /// direction of the [focal] point. This is only important if [focal] and [center]
 /// are not equal or [focalRadius] > 0.0 (as this case is visually identical to a
-/// normal radial gradient).  One important case to avoid is having [focal] and
+/// normal radial gradient). One important case to avoid is having [focal] and
 /// [center] both resolve to [Offset.zero] when [focalRadius] > 0.0. In such a case,
 /// a valid shader cannot be created by the framework.
 ///
@@ -687,7 +689,7 @@ class RadialGradient extends Gradient {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radialWithFocal.png)
   final TileMode tileMode;
 
-  /// The focal point of the gradient.  If specified, the gradient will appear
+  /// The focal point of the gradient. If specified, the gradient will appear
   /// to be focused along the vector from [center] to focal.
   ///
   /// See [center] for a description of how the coordinates are mapped.

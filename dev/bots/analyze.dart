@@ -143,6 +143,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('null initialized debug fields...');
   await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
+  printProgress('Taboo words...');
+  await verifyTabooDocumentation(flutterRoot);
+
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -201,6 +204,10 @@ Future<void> run(List<String> arguments) async {
   } finally {
     outDir.deleteSync(recursive: true);
   }
+
+  // Ensure gen_default links the correct files
+  printProgress('Correct file names in gen_defaults.dart...');
+  await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
 }
 
 
@@ -274,6 +281,56 @@ Future<void> verifyNoDoubleClamp(String workingDirectory) async {
     foundError(<String>[
       ...errors,
       '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
+    ]);
+  }
+}
+
+/// Verify Token Templates are mapped to correct file names while generating
+/// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.
+Future<void> verifyTokenTemplatesUpdateCorrectFiles(String workingDirectory) async {
+  final List<String> errors = <String>[];
+
+  String getMaterialDirPath(List<String> lines) {
+    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
+    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
+    return path.join(workingDirectory, relativePath);
+  }
+
+  String getFileName(String line) {
+    const String materialLibString = r"'$materialLib/";
+    final String leftClamp = line.substring(line.indexOf(materialLibString) + materialLibString.length);
+    return leftClamp.substring(0, leftClamp.indexOf("'"));
+  }
+
+  final String genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
+  final File file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
+  final List<String> lines = file.readAsLinesSync();
+  final String materialDirPath = getMaterialDirPath(lines);
+  bool atLeastOneTargetLineExists = false;
+
+  for (final String line in lines) {
+    if (line.contains('updateFile();')) {
+      atLeastOneTargetLineExists = true;
+      final String fileName = getFileName(line);
+      final String filePath = path.join(materialDirPath, fileName);
+      final File file = File(filePath);
+
+      if (!file.existsSync()) {
+        errors.add('file $filePath does not exist.');
+      }
+    }
+  }
+
+  assert(atLeastOneTargetLineExists, 'No lines exist that this test expects to '
+      'verify. Check if the target file is correct or remove this test');
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    final String s = errors.length > 1 ? 's' : '';
+    final String itThem = errors.length > 1 ? 'them' : 'it';
+    foundError(<String>[
+      ...errors,
+      '${bold}Please correct the file name$s or remove $itThem from /dev/tools/gen_defaults/bin/gen_defaults.dart$reset',
     ]);
   }
 }
@@ -1761,18 +1818,17 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
   final List<String> errors = <String>[];
   for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
-    for (int i = 0; i < lines.length; i += 1) {
-      final String line = lines[i];
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
       if (!line.contains(_kDebugOnlyAnnotation)) {
         continue;
       }
-      final String nextLine = lines[i + 1];
+      final String nextLine = lines[index + 1];
       if (_nullInitializedField.firstMatch(nextLine) == null) {
-        errors.add('${file.path} L$i');
+        errors.add('${file.path}:$index');
       }
     }
   }
-
   if (errors.isNotEmpty) {
     foundError(<String>[
      '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
@@ -1780,6 +1836,29 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
      'These fields should be written as:\n',
      'field = kDebugMode ? <DebugValue> : null;\n',
      'Errors were found in the following files:',
+      ...errors,
+    ]);
+  }
+}
+
+final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply)\b', caseSensitive: false);
+
+Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatches = 100 }) async {
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      final String line = lines[index];
+      final Match? match = tabooPattern.firstMatch(line);
+      if (match != null) {
+        errors.add('${file.path}:${index + 1}: Found use of the taboo word "${match.group(1)}" in documentation string.');
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    foundError(<String>[
+      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
+      '${bold}In many cases the word can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
       ...errors,
     ]);
   }

@@ -73,6 +73,8 @@ class AnnotationResult<T> {
   }
 }
 
+const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
+
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -135,6 +137,17 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+  /// Creates an instance of Layer.
+  Layer() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterRenderingLibrary,
+        className: '$Layer',
+        object: this,
+      );
+    }
+  }
+
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
   static int _nextCallbackId = 0;
 
@@ -320,6 +333,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _engineLayer?.dispose();
     _engineLayer = null;
   }
@@ -530,7 +546,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// should search for annotations, or if the layer has its own annotations to
   /// add.
   ///
-  /// The default implementation simply returns `false`, which means neither
+  /// The default implementation always returns `false`, which means neither
   /// the layer nor its children has annotations, and the annotation search
   /// is not absorbed either (see below for explanation).
   ///
@@ -586,7 +602,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns null if no matching annotations are found.
   ///
-  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// By default this method calls [findAnnotations] with `onlyFirst:
   /// true` and returns the annotation of the first result. Prefer overriding
   /// [findAnnotations] instead of this method, because during an annotation
   /// search, only [findAnnotations] is recursively called, while custom
@@ -612,7 +628,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns a result with empty entries if no matching annotations are found.
   ///
-  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// By default this method calls [findAnnotations] with `onlyFirst:
   /// false` and returns the annotations of its result. Prefer overriding
   /// [findAnnotations] instead of this method, because during an annotation
   /// search, only [findAnnotations] is recursively called, while custom
@@ -634,9 +650,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Override this method to upload this layer to the engine.
-  ///
-  /// Return the engine layer for retained rendering. When there's no
-  /// corresponding engine layer, null is returned.
   @protected
   void addToScene(ui.SceneBuilder builder);
 
@@ -1803,13 +1816,14 @@ class ColorFilterLayer extends ContainerLayer {
 }
 
 /// A composite layer that applies an [ImageFilter] to its children.
-class ImageFilterLayer extends ContainerLayer {
+class ImageFilterLayer extends OffsetLayer {
   /// Creates a layer that applies an [ImageFilter] to its children.
   ///
   /// The [imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.
   ImageFilterLayer({
     ui.ImageFilter? imageFilter,
+    super.offset,
   }) : _imageFilter = imageFilter;
 
   /// The image filter to apply to children.
@@ -1831,6 +1845,7 @@ class ImageFilterLayer extends ContainerLayer {
     assert(imageFilter != null);
     engineLayer = builder.pushImageFilter(
       imageFilter!,
+      offset: offset,
       oldLayer: _engineLayer as ui.ImageFilterEngineLayer?,
     );
     addChildrenToScene(builder);
@@ -2403,7 +2418,9 @@ class LayerLink {
   Size? leaderSize;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  }
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].
@@ -2485,6 +2502,8 @@ class LeaderLayer extends ContainerLayer {
         Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder);
     if (offset != Offset.zero) {

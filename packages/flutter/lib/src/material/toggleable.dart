@@ -305,6 +305,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// build method - potentially after wrapping it in other widgets.
   Widget buildToggleable({
     FocusNode? focusNode,
+    Function(bool)? onFocusChange,
     bool autofocus = false,
     required MaterialStateProperty<MouseCursor> mouseCursor,
     required Size size,
@@ -314,16 +315,17 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       actions: _actionMap,
       focusNode: focusNode,
       autofocus: autofocus,
+      onFocusChange: onFocusChange,
       enabled: isInteractive,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
       mouseCursor: mouseCursor.resolve(states),
       child: GestureDetector(
         excludeFromSemantics: !isInteractive,
-        onTapDown: _handleTapDown,
-        onTap: _handleTap,
-        onTapUp: _handleTapEnd,
-        onTapCancel: _handleTapEnd,
+        onTapDown: isInteractive ? _handleTapDown : null,
+        onTap: isInteractive ? _handleTap : null,
+        onTapUp: isInteractive ? _handleTapEnd : null,
+        onTapCancel: isInteractive ? _handleTapEnd : null,
         child: Semantics(
           enabled: isInteractive,
           child: CustomPaint(
@@ -559,7 +561,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
           focusColor,
           reactionFocusFade.value,
         )!;
-      final Offset center = Offset.lerp(downPosition ?? origin, origin, reaction.value)!;
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,
@@ -568,7 +569,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
           ? splashRadius
           : radialReactionRadiusTween.evaluate(reaction);
       if (reactionRadius > 0.0) {
-        canvas.drawCircle(center + offset, reactionRadius, reactionPaint);
+        canvas.drawCircle(origin + offset, reactionRadius, reactionPaint);
       }
     }
   }

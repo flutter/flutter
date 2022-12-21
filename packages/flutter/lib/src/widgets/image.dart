@@ -53,7 +53,7 @@ export 'package:flutter/painting.dart' show
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0,
+    devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0,
     locale: Localizations.maybeLocaleOf(context),
     textDirection: Directionality.maybeOf(context),
     size: size,
@@ -870,6 +870,7 @@ class Image extends StatefulWidget {
 
   /// The rendering quality of the image.
   ///
+  /// {@template flutter.widgets.image.filterQuality}
   /// If the image is of a high quality and its pixels are perfectly aligned
   /// with the physical screen pixels, extra quality enhancement may not be
   /// necessary. If so, then [FilterQuality.none] would be the most efficient.
@@ -884,6 +885,7 @@ class Image extends StatefulWidget {
   ///
   ///  * [FilterQuality], the enum containing all possible filter quality
   ///    options.
+  /// {@endtemplate}
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
@@ -1104,7 +1106,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.maybeOf(context)?.invertColors
+    _invertColors = MediaQuery.maybeInvertColorsOf(context)
         ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
@@ -1171,7 +1173,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _replaceImage({required ImageInfo? info}) {
-    _imageInfo?.dispose();
+    final ImageInfo? oldImageInfo = _imageInfo;
+    SchedulerBinding.instance.addPostFrameCallback((_) => oldImageInfo?.dispose());
     _imageInfo = info;
   }
 

@@ -9,10 +9,12 @@ import groovy.json.JsonSlurper
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
+def object = null;
+String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
 // Note: if this logic is changed, also change the logic in app_plugin_loader.gradle.
 def pluginsFile = new File(moduleProjectRoot, '.flutter-plugins-dependencies')
 if (pluginsFile.exists()) {
-    def object = new JsonSlurper().parseText(pluginsFile.text)
+    object = new JsonSlurper().parseText(pluginsFile.text)
     assert object instanceof Map
     assert object.plugins instanceof Map
     assert object.plugins.android instanceof List
@@ -35,6 +37,17 @@ if (pluginsFile.exists()) {
 
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
+        p.subprojects { subproject ->
+            if (object != null && object.plugins != null && object.plugins.android != null
+                    && object.plugins.android.name.contains(subproject.name)) {
+                File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
+                        + "plugins_build_output" + File.separator + subproject.name);
+                if (!androidPluginBuildOutputDir.exists()) {
+                    androidPluginBuildOutputDir.mkdirs()
+                }
+                subproject.buildDir = androidPluginBuildOutputDir
+            }
+        }
         def _mainModuleName = binding.variables['mainModuleName']
         if (_mainModuleName != null && !_mainModuleName.empty) {
             p.ext.mainModuleName = _mainModuleName

@@ -872,6 +872,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.checked != null) {
       config.isChecked = properties.checked;
     }
+    if (properties.mixed != null) {
+      config.isCheckStateMixed = properties.mixed;
+    }
     if (properties.selected != null) {
       config.isSelected = properties.selected!;
     }

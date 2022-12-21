@@ -145,12 +145,16 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// parent widgets that also support this [Intent].
   ///
   /// {@tool dartpad}
-  /// This sample implements a custom text input field that handles the
-  /// [DeleteCharacterIntent] intent, as well as a US telephone number input
-  /// widget that consists of multiple text fields for area code, prefix and line
-  /// number. When the backspace key is pressed, the phone number input widget
-  /// sends the focus to the preceding text field when the currently focused
-  /// field becomes empty.
+  /// This sample shows how to implement a rudimentary `CopyableText` widget
+  /// that responds to Ctrl-C by copying its own content to the clipboard.
+  ///
+  /// if `CopyableText` is to be provided in a package, developers using the
+  /// widget may want to change how copying is handled. As the author of the
+  /// package, you can enable that by making the corresponding [Action]
+  /// overridable. In the second part of the code sample, three `CopyableText`
+  /// widgets are used to build a verification code widget which overrides the
+  /// "copy" action by copying the combined numbers from all three `CopyableText`
+  /// widgets.
   ///
   /// ** See code in examples/api/lib/widgets/actions/action.action_overridable.0.dart **
   /// {@end-tool}
@@ -260,7 +264,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if an override of `invoke` returned an `int`, then it might
+  /// For instance, if an override of [invoke] returned an `int`, then it might
   /// be defined like so:
   ///
   /// ```dart
@@ -479,7 +483,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if an override of `invoke` returned an `int`, then it might
+  /// For instance, if an override of [invoke] returned an `int`, then it might
   /// be defined like so:
   ///
   /// ```dart
@@ -537,7 +541,13 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(T intent) => onInvoke(intent);
 }
 
-/// An action dispatcher that simply invokes the actions given to it.
+/// An action dispatcher that invokes the actions given to it.
+///
+/// The [invokeAction] method on this class directly calls the [Action.invoke]
+/// method on the [Action] object.
+///
+/// For [ContextAction] actions, if no `context` is provided, the
+/// [BuildContext] of the [primaryFocus] is used instead.
 ///
 /// See also:
 ///
@@ -580,6 +590,8 @@ class ActionDispatcher with Diagnosticable {
 
 /// A widget that establishes an [ActionDispatcher] and a map of [Intent] to
 /// [Action] to be used by its descendants when invoking an [Action].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XawP1i314WM}
 ///
 /// Actions are typically invoked using [Actions.invoke] with the context
 /// containing the ambient [Actions] widget.
@@ -1073,6 +1085,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.onShowHoverHighlight,
     this.onFocusChange,
     this.mouseCursor = MouseCursor.defer,
+    this.includeFocusSemantics = true,
     required this.child,
   })  : assert(enabled != null),
         assert(autofocus != null),
@@ -1128,6 +1141,11 @@ class FocusableActionDetector extends StatefulWidget {
   /// The [mouseCursor] defaults to [MouseCursor.defer], deferring the choice of
   /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
+
+  /// Whether to include semantics from [Focus].
+  ///
+  /// Defaults to true.
+  final bool includeFocusSemantics;
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
@@ -1218,7 +1236,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+      final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
       switch (mode) {
         case NavigationMode.traditional:
           return target.enabled;
@@ -1259,7 +1277,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return widget.enabled;
@@ -1289,6 +1307,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         descendantsAreTraversable: widget.descendantsAreTraversable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
+        includeSemantics: widget.includeFocusSemantics,
         child: widget.child,
       ),
     );

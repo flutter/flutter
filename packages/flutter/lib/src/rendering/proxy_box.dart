@@ -24,7 +24,7 @@ export 'package:flutter/gestures.dart' show
 
 /// A base class for render boxes that resemble their children.
 ///
-/// A proxy box has a single child and simply mimics all the properties of that
+/// A proxy box has a single child and mimics all the properties of that
 /// child by calling through to the child for each function in the render box
 /// protocol. For example, a proxy box determines its size by asking its child
 /// to layout with the same constraints and then matching the size.
@@ -41,7 +41,7 @@ export 'package:flutter/gestures.dart' show
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   /// Creates a proxy render box.
   ///
-  /// Proxy render boxes are rarely created directly because they simply proxy
+  /// Proxy render boxes are rarely created directly because they proxy
   /// the render box protocol to [child]. Instead, consider using one of the
   /// subclasses.
   RenderProxyBox([RenderBox? child]) {
@@ -173,7 +173,12 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
     RenderBox? child,
   }) : super(child);
 
-  /// How to behave during hit testing.
+  /// How to behave during hit testing when deciding how the hit test propagates
+  /// to children and whether to consider targets behind this one.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   HitTestBehavior behavior;
 
   @override
@@ -864,7 +869,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive because it requires painting the child into an intermediate
-/// buffer. For the value 0.0, the child is simply not painted at all. For the
+/// buffer. For the value 0.0, the child is not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
   /// Creates a partially transparent render object.
@@ -883,7 +888,10 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0 && _alpha < 255);
+  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
+
+  @override
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   int _alpha;
 
@@ -912,7 +920,7 @@ class RenderOpacity extends RenderProxyBox {
     if (didNeedCompositing != alwaysNeedsCompositing) {
       markNeedsCompositingBitsUpdate();
     }
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics) {
       markNeedsSemanticsUpdate();
     }
@@ -940,27 +948,18 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child == null) {
-      return;
-    }
-    if (_alpha == 0) {
-      // No need to keep the layer. We'll create a new one if necessary.
-      layer = null;
-      return;
-    }
-    if (_alpha == 255) {
-      // No need to keep the layer. We'll create a new one if necessary.
-      layer = null;
-      return super.paint(context, offset);
-    }
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer layer = oldLayer ?? OpacityLayer();
+    layer.alpha = _alpha;
+    return layer;
+  }
 
-    assert(needsCompositing);
-    layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
-    assert(() {
-      layer!.debugCreator = debugCreator;
-      return true;
-    }());
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null || _alpha == 0) {
+      return;
+    }
+    super.paint(context, offset);
   }
 
   @override
@@ -1060,7 +1059,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     _alpha = ui.Color.getAlphaFromOpacity(opacity.value);
     if (oldAlpha != _alpha) {
       final bool? wasRepaintBoundary = _currentlyIsRepaintBoundary;
-      _currentlyIsRepaintBoundary = _alpha! > 0 && _alpha! < 255;
+      _currentlyIsRepaintBoundary = _alpha! > 0;
       if (child != null && wasRepaintBoundary != _currentlyIsRepaintBoundary) {
         markNeedsCompositingBitsUpdate();
       }
@@ -1514,6 +1513,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
         ..layout();
       return true;
     }());
+  }
+
+  @override
+  void dispose() {
+    _debugText?.dispose();
+    _debugText = null;
+    super.dispose();
   }
 }
 
@@ -4353,6 +4359,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.checked != null) {
       config.isChecked = _properties.checked;
     }
+    if (_properties.mixed != null) {
+      config.isCheckStateMixed = _properties.mixed;
+    }
     if (_properties.toggled != null) {
       config.isToggled = _properties.toggled;
     }
@@ -4991,7 +5000,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Size? leaderSize = link.leaderSize;
     assert(
-      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
+      link.leaderSize != null || link.leader == null || leaderAnchor == Alignment.topLeft,
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',

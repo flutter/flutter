@@ -59,6 +59,7 @@ import 'package:flutter/widgets.dart';
 /// See also:
 ///
 ///  * [Icon], used to show these icons.
+@staticIconProvider
 class CupertinoIcons {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.
@@ -187,14 +188,14 @@ class CupertinoIcons {
   ///  * [check_mark_circled], which is similar, but not filled in.
   static const IconData check_mark_circled_solid = IconData(0xf3ff, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// <i class='cupertino-icons md-36'>circle</i> &#x2014; Cupertino icon for an empty circle (a ring).  An un-selected radio button.
+  /// <i class='cupertino-icons md-36'>circle</i> &#x2014; Cupertino icon for an empty circle (a ring). An un-selected radio button.
   ///
   /// See also:
   ///
   ///  * [circle_filled], which is similar but filled in.
   static const IconData circle = IconData(0xf401, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// <i class='cupertino-icons md-36'>circle_fill</i> &#x2014; Cupertino icon for a filled circle.  The circle is surrounded by a ring.  A selected radio button.
+  /// <i class='cupertino-icons md-36'>circle_fill</i> &#x2014; Cupertino icon for a filled circle. The circle is surrounded by a ring. A selected radio button.
   /// This is the same icon as [circle_fill] in cupertino_icons 1.0.0+.
   ///
   /// See also:

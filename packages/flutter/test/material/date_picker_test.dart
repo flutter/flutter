@@ -62,9 +62,11 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTime?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
+    bool useMaterial3 = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -112,6 +114,11 @@ void main() {
   }
 
   group('showDatePicker Dialog', () {
+    testWidgets('Material3 uses sentence case labels', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.text('Select date'), findsOneWidget);
+      }, useMaterial3: true);
+    });
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
       cancelText = 'nope';
       confirmText = 'yep';
@@ -815,11 +822,18 @@ void main() {
           label: 'SELECT DATE\nFri, Jan 15',
         ));
 
+        expect(tester.getSemantics(find.text('3')), matchesSemantics(
+          label: '3, Sunday, January 3, 2016, Today',
+          hasTapAction: true,
+          isFocusable: true,
+        ));
+
         // Input mode toggle button
         expect(tester.getSemantics(switchToInputIcon), matchesSemantics(
           tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
+          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -863,6 +877,7 @@ void main() {
           tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
+          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,

@@ -22,7 +22,7 @@ import 'theme_data.dart';
 /// A Material Design "elevated button".
 ///
 /// Use elevated buttons to add dimension to otherwise mostly flat
-/// layouts, e.g.  in long busy lists of content, or in wide
+/// layouts, e.g. in long busy lists of content, or in wide
 /// spaces. Avoid using elevated buttons on already-elevated content
 /// such as dialogs or cards.
 ///
@@ -33,7 +33,7 @@ import 'theme_data.dart';
 /// background is the [ButtonStyle.backgroundColor].
 ///
 /// The elevated button's default style is defined by
-/// [defaultStyleOf].  The style of this elevated button can be
+/// [defaultStyleOf]. The style of this elevated button can be
 /// overridden with its [style] parameter. The style of all elevated
 /// buttons in a subtree can be overridden with the
 /// [ElevatedButtonTheme], and the style of all of the elevated
@@ -54,8 +54,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [TextButton], a simple flat button without a shadow.
-///  * [OutlinedButton], a [TextButton] with a border outline.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
@@ -93,6 +95,7 @@ class ElevatedButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _ElevatedButtonWithIcon;
@@ -249,7 +252,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// each state, and "others" means all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.of(context).textScaleFactor` and the names of the
+  /// `MediaQuery.textScaleFactorOf(context)` and the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
@@ -391,7 +394,7 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     const EdgeInsets.symmetric(horizontal: 16),
     const EdgeInsets.symmetric(horizontal: 8),
     const EdgeInsets.symmetric(horizontal: 4),
-    MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+    MediaQuery.textScaleFactorOf(context),
   );
 }
 
@@ -480,6 +483,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
@@ -496,7 +500,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.textScaleFactorOf(context),
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
@@ -512,7 +516,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.maybeOf(context)?.textScaleFactor ?? 1;
+    final double scale = MediaQuery.textScaleFactorOf(context);
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -528,7 +532,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_143
 
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   _ElevatedButtonDefaultsM3(this.context)
@@ -580,11 +584,11 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color>? get shadowColor =>
-    ButtonStyleButton.allOrNull<Color>(_colors.shadow);
+    MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    ButtonStyleButton.allOrNull<Color>(_colors.surfaceTint);
+    MaterialStatePropertyAll<Color>(_colors.surfaceTint);
 
   @override
   MaterialStateProperty<double>? get elevation =>
@@ -606,23 +610,23 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
+    MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(64.0, 40.0));
+    const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
-    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    const MaterialStatePropertyAll<Size>(Size.infinite);
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>

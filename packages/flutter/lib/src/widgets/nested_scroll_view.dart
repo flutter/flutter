@@ -686,12 +686,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
   }
 
-  // TODO(Piinks): https://github.com/flutter/flutter/issues/100748
-  @override
-  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
-    return null;
-  }
-
   ScrollActivity createOuterBallisticScrollActivity(double velocity) {
     // This function creates a ballistic scroll for the outer scrollable.
     //
@@ -909,7 +903,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     goIdle();
     updateUserScrollDirection(
@@ -1094,7 +1091,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   void updateParent() {
     _outerPosition?.setParent(
-      _parent ?? PrimaryScrollController.of(_state.context),
+      _parent ?? PrimaryScrollController.maybeOf(_state.context),
     );
   }
 
@@ -1365,12 +1362,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       simulation,
       mode: _NestedBallisticScrollActivityMode.independent,
     ));
-  }
-
-  // TODO(Piinks): see https://github.com/flutter/flutter/issues/100748
-  @override
-  Simulation? updateBallisticAnimation(double initVelocity, double initPosition) {
-    return null;
   }
 
   ScrollActivity createBallisticScrollActivity(

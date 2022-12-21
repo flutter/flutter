@@ -263,8 +263,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// The default way to convert an option to a string in
   /// [displayStringForOption].
   ///
-  /// Simply uses the `toString` method on the option.
-  static String defaultStringForOption(dynamic option) {
+  /// Uses the `toString` method of the given `option`.
+  static String defaultStringForOption(Object? option) {
     return option.toString();
   }
 
@@ -438,7 +438,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
           );
         },
       );
-      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget)!.insert(newFloatingOptions);
+      Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(newFloatingOptions);
       _floatingOptions = newFloatingOptions;
     } else {
       _floatingOptions = null;

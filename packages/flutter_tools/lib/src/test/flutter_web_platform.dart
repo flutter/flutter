@@ -188,7 +188,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
     'lib',
     'dev_compiler',
     'kernel',
@@ -198,7 +198,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
     'lib',
     'dev_compiler',
     'web',
@@ -344,7 +344,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
-      final Map<String, Object> body = json.decode(await request.readAsString()) as Map<String, Object>;
+      final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
       final Uri goldenKey = Uri.parse(body['key']! as String);
       final Uri testUri = Uri.parse(body['testUri']! as String);
       final num width = body['width']! as num;
@@ -352,9 +352,9 @@ class FlutterWebPlatform extends PlatformPlugin {
       Uint8List bytes;
 
       try {
-        final ChromeTab chromeTab = await (_browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
+        final ChromeTab chromeTab = (await _browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
           return tab.url.contains(_browserManager!._browser.url!);
-        }) as FutureOr<ChromeTab>);
+        }))!;
         final WipConnection connection = await chromeTab.connect();
         final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
           // Clip the screenshot to include only the element.
@@ -685,16 +685,13 @@ class BrowserManager {
     );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then((int? browserExitCode) {
+    unawaited(chrome.onExit.then<Object?>((int? browserExitCode) {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
-    })
-    // TODO(srawlins): Fix this static issue,
-    // https://github.com/flutter/flutter/issues/105750.
-    // ignore: body_might_complete_normally_catch_error
-    .catchError((Object error, StackTrace stackTrace) {
+    }).catchError((Object error, StackTrace stackTrace) {
       if (!completer.isCompleted) {
         completer.completeError(error, stackTrace);
       }
+      return null;
     }));
     unawaited(future.then((WebSocketChannel webSocket) {
       if (completer.isCompleted) {

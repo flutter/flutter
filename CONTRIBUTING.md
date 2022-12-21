@@ -159,7 +159,7 @@ To contribute API documentation, an excellent command of the English language is
 We have a [whole section in our style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc)
 that you should read before you write API documentation. It includes notes on the "Flutter Voice", such as our word and grammar conventions.
 
-In general, a really productive way to improve documentation is to use Flutter and stop any time your have a question: find the answer, then
+In general, a really productive way to improve documentation is to use Flutter and stop any time you have a question: find the answer, then
 document the answer where you first looked for it.
 
 We also keep [a list of areas that need better API documentation](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22d%3A+api+docs%22+sort%3Areactions-%2B1-desc).

@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/constants.dart';
@@ -50,7 +51,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
+    final MaterialInkController material = Material.of(tester.element(buttonFinder));
     expect(material, paintsExactlyCountTimes(#drawRect, 1));
 
     // ignore: avoid_dynamic_calls
@@ -81,7 +82,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    final MaterialInkController material = Material.of(tester.element(buttonFinder))!;
+    final MaterialInkController material = Material.of(tester.element(buttonFinder));
     expect(material, paintsExactlyCountTimes(#drawPaint, 1));
   },
     skip: kIsWeb, // [intended] shaders are not yet supported for web.
