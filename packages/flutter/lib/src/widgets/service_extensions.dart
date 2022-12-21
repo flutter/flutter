@@ -418,7 +418,7 @@ enum WidgetInspectorServiceExtensions {
 
   /// Name of service extension that, when called, will return the
   /// [DiagnosticsNode] data for the currently selected [Element] in the summary
-  /// tree, which only includes [Element]s created in user code.
+  /// tree, which only includes [Element]s created by user code.
   ///
   /// If the selected [Element] does not exist in the summary tree, the first
   /// ancestor in the summary tree for the currently selected [Element] will be
