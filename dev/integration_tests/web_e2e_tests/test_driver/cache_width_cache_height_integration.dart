@@ -35,19 +35,22 @@ void main() {
 
   testWidgets('Image.network uses cacheWidth and cacheHeight',
           (WidgetTester tester) async {
+
+    const int expectedCacheHeight = 9;
+    const int expectedCacheWidth = 11;
     await tester.pumpAndSettle();
 
     final Image image = Image.network(
       'assets/packages/flutter_gallery_assets/assets/icons/material/material.png',
-      cacheHeight: 10,
-      cacheWidth: 10,
+      cacheHeight: 9,
+      cacheWidth: 11,
     );
 
     bool called = false;
 
     Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
-      expect(cacheWidth, 10);
-      expect(cacheHeight, 10);
+      expect(cacheHeight, expectedCacheHeight);
+      expect(cacheWidth, expectedCacheWidth);
       expect(allowUpscaling, false);
       called = true;
       return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
@@ -61,11 +64,19 @@ void main() {
     final ImageStreamCompleter streamCompleter = testProvider.testLoad(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
 
     final Completer<void> completer = Completer<void>();
+    int? imageInfoCachedWidth;
+    int? imageInfoCachedHeight;
     streamCompleter.addListener(ImageStreamListener((ImageInfo imageInfo, bool syncCall) {
+      imageInfoCachedWidth = imageInfo.image.width;
+      imageInfoCachedHeight = imageInfo.image.height;
       completer.complete();
     }));
     await completer.future;
 
+    expect(imageInfoCachedHeight, isNotNull);
+    expect(imageInfoCachedHeight, expectedCacheHeight);
+    expect(imageInfoCachedWidth, isNotNull);
+    expect(imageInfoCachedWidth, expectedCacheWidth);
     expect(called, true);
   });
 }
