@@ -156,6 +156,12 @@ void main() {
     // The range includes the line terminator.
     expect(boundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
     expect(boundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: 12, affinity: TextAffinity.upstream));
+
+    // This text includes a carriage return followed by a line feed.
+    const String otherText = 'abcd efg hi\r\njklmno\npqrstuv';
+    const ParagraphBoundary otherBoundary = ParagraphBoundary(otherText);
+    expect(otherBoundary.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
+    expect(otherBoundary.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));  
   });
 
   test('document boundary works', () {
