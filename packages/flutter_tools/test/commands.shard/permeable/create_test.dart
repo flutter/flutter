@@ -2429,6 +2429,53 @@ void main() {
     androidIdentifier: 'com.example.flutter_project');
   });
 
+  testUsingContext('plugin includes native unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platforms=ios,macos', projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('example')
+        .childDirectory('ios')
+        .childDirectory('RunnerTests')
+        .childFile('RunnerTests.swift'), exists);
+    expect(projectDir
+        .childDirectory('example')
+        .childDirectory('macos')
+        .childDirectory('RunnerTests')
+        .childFile('RunnerTests.swift'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Logger: () => logger,
+  });
+
+  testUsingContext('plugin includes native Ojb-C unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platforms=ios',
+      '-i', 'objc',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('example')
+        .childDirectory('ios')
+        .childDirectory('RunnerTests')
+        .childFile('RunnerTests.m'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
   testUsingContext('create a module with --platforms throws error.', () async {
     Cache.flutterRoot = '../..';
 
