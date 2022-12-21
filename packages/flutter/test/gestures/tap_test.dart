@@ -313,6 +313,7 @@ void main() {
     tester.route(down1);
     expect(tapsRecognized, 0);
 
+
     tester.route(up2);
     expect(tapsRecognized, 0);
     GestureBinding.instance.gestureArena.sweep(2);
