@@ -316,6 +316,7 @@ class FixedExtentMetrics extends FixedScrollMetrics {
     required super.viewportDimension,
     required super.axisDirection,
     required this.itemIndex,
+    required super.devicePixelRatio,
   });
 
   @override
@@ -326,6 +327,7 @@ class FixedExtentMetrics extends FixedScrollMetrics {
     double? viewportDimension,
     AxisDirection? axisDirection,
     int? itemIndex,
+    double? devicePixelRatio,
   }) {
     return FixedExtentMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -334,6 +336,7 @@ class FixedExtentMetrics extends FixedScrollMetrics {
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       itemIndex: itemIndex ?? this.itemIndex,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
 
@@ -399,6 +402,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
     double? viewportDimension,
     AxisDirection? axisDirection,
     int? itemIndex,
+    double? devicePixelRatio,
   }) {
     return FixedExtentMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -407,6 +411,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext impleme
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       itemIndex: itemIndex ?? this.itemIndex,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
 }
@@ -505,8 +510,8 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     // Scenario 3:
     // If there's no velocity and we're already at where we intend to land,
     // do nothing.
-    if (velocity.abs() < tolerance.velocity
-        && (settlingPixels - metrics.pixels).abs() < tolerance.distance) {
+    if (velocity.abs() < toleranceFor(position).velocity
+        && (settlingPixels - metrics.pixels).abs() < toleranceFor(position).distance) {
       return null;
     }
 
@@ -519,7 +524,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
         metrics.pixels,
         settlingPixels,
         velocity,
-        tolerance: tolerance,
+        tolerance: toleranceFor(position),
       );
     }
 
@@ -530,7 +535,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       metrics.pixels,
       settlingPixels,
       velocity,
-      tolerance.velocity * velocity.sign,
+      toleranceFor(position).velocity * velocity.sign,
     );
   }
 }

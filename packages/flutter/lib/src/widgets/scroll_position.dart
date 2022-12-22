@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_activity.dart';
@@ -19,6 +20,7 @@ import 'scroll_context.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'view.dart';
 
 export 'scroll_activity.dart' show ScrollHoldController;
 
@@ -241,6 +243,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     context.setIgnorePointer(activity!.shouldIgnorePointer);
     isScrollingNotifier.value = activity!.isScrolling;
   }
+
+  @override
+  double get devicePixelRatio => MediaQuery.maybeDevicePixelRatioOf(context.storageContext) ?? View.of(context.storageContext).devicePixelRatio;
 
   /// Update the scroll position ([pixels]) to a given pixel value.
   ///
