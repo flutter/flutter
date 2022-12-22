@@ -439,6 +439,7 @@ void main() {
             ignoredActions: ignoredAccessibilityFocusActions,
             actions: <AndroidSemanticsAction>[
               AndroidSemanticsAction.click,
+              AndroidSemanticsAction.longClick,
             ],
           ),
         );
