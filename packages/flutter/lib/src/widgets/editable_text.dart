@@ -50,6 +50,7 @@ export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesTy
 
 // Examples can assume:
 // late BuildContext context;
+// late WidgetTester tester;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -1233,6 +1234,18 @@ class EditableText extends StatefulWidget {
   /// By default, [onSubmitted] is called after [onChanged] when the user
   /// has finalized editing; or, if the default behavior has been overridden,
   /// after [onEditingComplete]. See [onEditingComplete] for details.
+  ///
+  /// ## Testing
+  /// The following is the recommended way to trigger [onSubmitted] in a test:
+  ///
+  /// ```dart
+  /// await tester.testTextInput.receiveAction(TextInputAction.done);
+  /// ```
+  ///
+  /// Sending a `LogicalKeyboardKey.enter` via `tester.sendKeyEvent` will not
+  /// trigger [onSubmitted]. This is because on a real device, the engine
+  /// translates the enter key to a done action, but `tester.sendKeyEvent` sends
+  /// the key to the framework only.
   /// {@endtemplate}
   final ValueChanged<String>? onSubmitted;
 
