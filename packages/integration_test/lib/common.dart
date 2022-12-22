@@ -17,7 +17,7 @@ import 'dart:convert';
 /// 
 /// The optional Map of arguments can be passed from the 
 /// `binding.takeScreenshot(<name>, <args>)` callsite in the integration test,
-/// and then they can be used in the `onScreenshot` handler that is defined by
+/// and then the arguments can be used in the `onScreenshot` handler that is defined by
 /// the Flutter driver. This Map should contain primitive types that are able to
 /// be serialized from the browser to the Flutter driver.
 ///
