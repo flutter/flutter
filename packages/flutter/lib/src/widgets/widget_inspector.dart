@@ -2733,16 +2733,31 @@ class _WidgetInspectorState extends State<WidgetInspector>
       });
     }
   }
+  void _inspect(Object? object){
+    developer.inspect(object);
 
+    final _Location? location = _getCreationLocation(object);
+    print('LOCATION: $location');
+    if(location != null) {
+
+      developer.postEvent(
+        'navigate',
+        {
+          'file': location.file,
+          'line': location.line,
+          'column': location.column,
+        },
+        stream: 'toolEvent',
+      );
+    }
+  }
   void _handleTap() {
     if (!isSelectMode) {
       return;
     }
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
-
-      // Notify debuggers to open an inspector on the object.
-      developer.inspect(selection.current);
+      _inspect(selection.current);
     }
     setState(() {
       // Only exit select mode if there is a button to return to select mode.
