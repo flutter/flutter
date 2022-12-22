@@ -1713,9 +1713,9 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_android flavors_test
-    bringup: true
+    # bringup: true -- TESTING ONLY
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true # false -- TESTING ONLY
     timeout: 60
     properties:
       tags: >
