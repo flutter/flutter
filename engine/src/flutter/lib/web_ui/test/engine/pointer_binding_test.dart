@@ -23,13 +23,15 @@ typedef _ContextTestBody<T> = void Function(T);
 void _testEach<T extends _BasicEventContext>(
   Iterable<T> contexts,
   String description,
-  _ContextTestBody<T> body,
+  _ContextTestBody<T> body, {
+    Object? skip,
+  }
 ) {
   for (final T context in contexts) {
     if (context.isSupported) {
       test('${context.name} $description', () {
         body(context);
-      });
+      }, skip: skip);
     }
   }
 }
@@ -388,6 +390,8 @@ void testMain() {
     expect(event.buttons, equals(1));
     expect(event.client.x, equals(100));
     expect(event.client.y, equals(101));
+    expect(event.offset.x, equals(100));
+    expect(event.offset.y, equals(101));
 
     event = expectCorrectType(
         context.mouseDown(clientX: 110, clientY: 111, button: 2, buttons: 2));
@@ -849,7 +853,7 @@ void testMain() {
       packets.clear();
 
       // Release the pointer on the semantics placeholder.
-      domWindow.dispatchEvent(context.primaryUp(
+      glassPane.dispatchEvent(context.primaryUp(
         clientX: 100.0,
         clientY: 200.0,
       ));
@@ -865,6 +869,7 @@ void testMain() {
 
       semanticsPlaceholder.remove();
     },
+    skip: isFirefox, // https://bugzilla.mozilla.org/show_bug.cgi?id=1804190
   );
 
   // BUTTONED ADAPTERS
@@ -2472,7 +2477,7 @@ void testMain() {
       packets.clear();
 
       // Move outside the glasspane.
-      domWindow.dispatchEvent(context.primaryMove(
+      glassPane.dispatchEvent(context.primaryMove(
         clientX: 900.0,
         clientY: 1900.0,
       ));
@@ -2484,7 +2489,7 @@ void testMain() {
       packets.clear();
 
       // Release outside the glasspane.
-      domWindow.dispatchEvent(context.primaryUp(
+      glassPane.dispatchEvent(context.primaryUp(
         clientX: 1000.0,
         clientY: 2000.0,
       ));
@@ -3351,6 +3356,7 @@ class _MouseEventContext extends _BasicEventContext
     final List<dynamic> eventArgs = <dynamic>[
       type,
       <String, dynamic>{
+        'bubbles': true,
         'buttons': buttons,
         'button': button,
         'clientX': clientX,
@@ -3569,6 +3575,7 @@ class _PointerEventContext extends _BasicEventContext
     String? pointerType,
   }) {
     return createDomPointerEvent('pointerup', <String, dynamic>{
+      'bubbles': true,
       'pointerId': pointer,
       'button': button,
       'buttons': buttons,

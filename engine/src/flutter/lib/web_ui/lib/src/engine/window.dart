@@ -12,8 +12,7 @@ import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../engine.dart' show registerHotRestartListener, renderer;
-import 'browser_detection.dart';
+import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
 import 'dom.dart';
 import 'navigation/history.dart';
 import 'navigation/js_url_strategy.dart';
@@ -55,6 +54,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     registerHotRestartListener(() {
       _browserHistory?.dispose();
       renderer.clearFragmentProgramCache();
+      _dimensionsProvider.close();
     });
   }
 
@@ -207,6 +207,16 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
         const ui.ViewConfiguration();
   }
 
+  late DimensionsProvider _dimensionsProvider;
+  void configureDimensionsProvider(DimensionsProvider dimensionsProvider) {
+    _dimensionsProvider = dimensionsProvider;
+  }
+
+  @override
+  double get devicePixelRatio => _dimensionsProvider.getDevicePixelRatio();
+
+  Stream<ui.Size?> get onResize => _dimensionsProvider.onResize;
+
   @override
   ui.Size get physicalSize {
     if (_physicalSize == null) {
@@ -232,38 +242,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     }());
 
     if (!override) {
-      double windowInnerWidth;
-      double windowInnerHeight;
-      final DomVisualViewport? viewport = domWindow.visualViewport;
-
-      if (viewport != null) {
-        if (operatingSystem == OperatingSystem.iOs) {
-          /// Chrome on iOS reports incorrect viewport.height when app
-          /// starts in portrait orientation and the phone is rotated to
-          /// landscape.
-          ///
-          /// We instead use documentElement clientWidth/Height to read
-          /// accurate physical size. VisualViewport api is only used during
-          /// text editing to make sure inset is correctly reported to
-          /// framework.
-          final double docWidth =
-              domDocument.documentElement!.clientWidth;
-          final double docHeight =
-              domDocument.documentElement!.clientHeight;
-          windowInnerWidth = docWidth * devicePixelRatio;
-          windowInnerHeight = docHeight * devicePixelRatio;
-        } else {
-          windowInnerWidth = viewport.width! * devicePixelRatio;
-          windowInnerHeight = viewport.height! * devicePixelRatio;
-        }
-      } else {
-        windowInnerWidth = domWindow.innerWidth! * devicePixelRatio;
-        windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
-      }
-      _physicalSize = ui.Size(
-        windowInnerWidth,
-        windowInnerHeight,
-      );
+      _physicalSize = _dimensionsProvider.computePhysicalSize();
     }
   }
 
@@ -273,21 +252,10 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   }
 
   void computeOnScreenKeyboardInsets(bool isEditingOnMobile) {
-    double windowInnerHeight;
-    final DomVisualViewport? viewport = domWindow.visualViewport;
-    if (viewport != null) {
-      if (operatingSystem == OperatingSystem.iOs && !isEditingOnMobile) {
-        windowInnerHeight =
-            domDocument.documentElement!.clientHeight * devicePixelRatio;
-      } else {
-        windowInnerHeight = viewport.height! * devicePixelRatio;
-      }
-    } else {
-      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
-    }
-    final double bottomPadding = _physicalSize!.height - windowInnerHeight;
-    _viewInsets =
-        WindowPadding(bottom: bottomPadding, left: 0, right: 0, top: 0);
+    _viewInsets = _dimensionsProvider.computeKeyboardInsets(
+      _physicalSize!.height,
+      isEditingOnMobile,
+    );
   }
 
   /// Uses the previous physical size and current innerHeight/innerWidth
@@ -305,26 +273,16 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   /// height: 658 width: 393
   /// height: 368 width: 393
   bool isRotation() {
-    double height = 0;
-    double width = 0;
-    if (domWindow.visualViewport != null) {
-      height =
-          domWindow.visualViewport!.height! * devicePixelRatio;
-      width = domWindow.visualViewport!.width! * devicePixelRatio;
-    } else {
-      height = domWindow.innerHeight! * devicePixelRatio;
-      width = domWindow.innerWidth! * devicePixelRatio;
-    }
-
     // This method compares the new dimensions with the previous ones.
     // Return false if the previous dimensions are not set.
     if (_physicalSize != null) {
+      final ui.Size current = _dimensionsProvider.computePhysicalSize();
       // First confirm both height and width are effected.
-      if (_physicalSize!.height != height && _physicalSize!.width != width) {
+      if (_physicalSize!.height != current.height && _physicalSize!.width != current.width) {
         // If prior to rotation height is bigger than width it should be the
         // opposite after the rotation and vice versa.
-        if ((_physicalSize!.height > _physicalSize!.width && height < width) ||
-            (_physicalSize!.width > _physicalSize!.height && width < height)) {
+        if ((_physicalSize!.height > _physicalSize!.width && current.height < current.width) ||
+            (_physicalSize!.width > _physicalSize!.height && current.width < current.height)) {
           // Rotation detected
           return true;
         }

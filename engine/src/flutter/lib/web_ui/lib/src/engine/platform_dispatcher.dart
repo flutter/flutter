@@ -84,6 +84,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
     _addFontSizeObserver();
+    _addLocaleChangedListener();
     registerHotRestartListener(dispose);
   }
 
@@ -112,6 +113,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void dispose() {
     _removeBrightnessMediaQueryListener();
     _disconnectFontSizeObserver();
+    _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
   }
 
@@ -742,6 +744,29 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    observe when this value changes.
   @override
   List<ui.Locale> get locales => configuration.locales;
+
+  // A subscription to the 'languagechange' event of 'window'.
+  DomSubscription? _onLocaleChangedSubscription;
+
+  /// Configures the [_onLocaleChangedSubscription].
+  void _addLocaleChangedListener() {
+    if (_onLocaleChangedSubscription != null) {
+      return;
+    }
+    updateLocales(); // First time, for good measure.
+    _onLocaleChangedSubscription =
+      DomSubscription(domWindow, 'languagechange', allowInterop((DomEvent _) {
+        // Update internal config, then propagate the changes.
+        updateLocales();
+        invokeOnLocaleChanged();
+      }));
+  }
+
+  /// Removes the [_onLocaleChangedSubscription].
+  void _removeLocaleChangedListener() {
+    _onLocaleChangedSubscription?.cancel();
+    _onLocaleChangedSubscription = null;
+  }
 
   /// Performs the platform-native locale resolution.
   ///
