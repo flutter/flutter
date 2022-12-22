@@ -10,7 +10,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui
     show
         ClipOp,
-        FlutterView,
         Image,
         ImageByteFormat,
         Paragraph,
@@ -31,7 +30,6 @@ import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'service_extensions.dart';
-import 'view.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
@@ -2728,8 +2726,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // on the edge of the display. If the pointer is being dragged off the edge
     // of the display we do not want to select anything. A user can still select
     // a widget that is only at the exact screen margin by tapping.
-    final ui.FlutterView view = View.of(context);
-    final Rect bounds = (Offset.zero & (view.physicalSize / view.devicePixelRatio)).deflate(_kOffScreenMargin);
+    final Rect bounds = (Offset.zero & (WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
       setState(() {
         selection.clear();
