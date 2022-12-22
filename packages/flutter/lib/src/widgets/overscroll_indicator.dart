@@ -602,8 +602,12 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 }
 
 enum _StretchDirection {
-  down,
-  up
+  /// The [trailing] direction indicates that the content will be stretched toward 
+  /// the trailing edge.
+  trailing,
+  /// The [leading] direction indicates that the content will be stretched toward
+  /// the leading edge.
+  leading,
 }
 
 /// A Material Design visual indication that a scroll view has overscrolled.
@@ -696,7 +700,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
   OverscrollNotification? _lastOverscrollNotification;
 
   double _totalOverscroll = 0.0;
-  _StretchDirection _stretchDirection = _StretchDirection.down;
+  _StretchDirection _stretchDirection = _StretchDirection.trailing;
 
   bool _accepted = true;
 
@@ -722,7 +726,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
             _totalOverscroll += notification.overscroll;
-            _stretchDirection = _totalOverscroll > 0 ? _StretchDirection.down : _StretchDirection.up;
+            _stretchDirection = _totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
 
             // We clamp the overscroll amount relative to the length of the viewport,
             // which is the furthest distance a single pointer could pull on the
@@ -749,19 +753,19 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     // Accounts for reversed scrollables by checking the AxisDirection
     switch (widget.axisDirection) {
       case AxisDirection.up:
-        return stretchDirection == _StretchDirection.down
+        return stretchDirection == _StretchDirection.trailing
             ? AlignmentDirectional.topCenter
             : AlignmentDirectional.bottomCenter;
       case AxisDirection.right:
-        return stretchDirection == _StretchDirection.down
+        return stretchDirection == _StretchDirection.trailing
             ? Alignment.centerRight
             : Alignment.centerLeft;
       case AxisDirection.down:
-        return stretchDirection == _StretchDirection.down
+        return stretchDirection == _StretchDirection.trailing
             ? AlignmentDirectional.bottomCenter
             : AlignmentDirectional.topCenter;
       case AxisDirection.left:
-        return stretchDirection == _StretchDirection.down
+        return stretchDirection == _StretchDirection.trailing
             ? Alignment.centerLeft
             : Alignment.centerRight;
     }
