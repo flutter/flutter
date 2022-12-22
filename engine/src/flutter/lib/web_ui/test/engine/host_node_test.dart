@@ -15,7 +15,7 @@ void testMain() {
   domDocument.body!.append(rootNode);
 
   group('ShadowDomHostNode', () {
-    final HostNode hostNode = ShadowDomHostNode(rootNode, '14px monospace');
+    final HostNode hostNode = ShadowDomHostNode(rootNode);
 
     test('Initializes and attaches a shadow root', () {
       expect(domInstanceOfString(hostNode.node, 'ShadowRoot'), isTrue);
@@ -33,90 +33,30 @@ void testMain() {
     });
 
     test('Attaches a stylesheet to the shadow root', () {
-      final DomElement? style =
-          hostNode.querySelector('#flt-internals-stylesheet');
+      final DomElement firstChild =
+          (hostNode.node as DomShadowRoot).childNodes.toList()[0] as DomElement;
 
-      expect(style, isNotNull);
-      expect(style!.tagName, equalsIgnoringCase('style'));
-    });
-
-    test('(Self-test) hasCssRule can extract rules', () {
-      final DomElement? style =
-          hostNode.querySelector('#flt-internals-stylesheet');
-
-      final bool hasRule = hasCssRule(style,
-          selector: '.flt-text-editing::placeholder',
-          declaration: 'opacity: 0');
-
-      final bool hasFakeRule = hasCssRule(style,
-          selector: 'input::selection', declaration: 'color: #fabada;');
-
-      expect(hasRule, isTrue);
-      expect(hasFakeRule, isFalse);
-    });
-
-    test('Attaches outrageous text styles to flt-scene-host', () {
-      final DomElement? style =
-          hostNode.querySelector('#flt-internals-stylesheet');
-
-      final bool hasColorRed = hasCssRule(style,
-          selector: 'flt-scene-host', declaration: 'color: red');
-
-      bool hasFont = false;
-      if (isSafari) {
-        // Safari expands the shorthand rules, so we check for all we've set (separately).
-        hasFont = hasCssRule(style,
-                selector: 'flt-scene-host',
-                declaration: 'font-family: monospace') &&
-            hasCssRule(style,
-                selector: 'flt-scene-host', declaration: 'font-size: 14px');
-      } else {
-        hasFont = hasCssRule(style,
-            selector: 'flt-scene-host', declaration: 'font: 14px monospace');
-      }
-
-      expect(hasColorRed, isTrue,
-          reason: 'Should make foreground color red within scene host.');
-      expect(hasFont, isTrue, reason: 'Should pass default css font.');
+      expect(firstChild.tagName, equalsIgnoringCase('style'));
     });
 
     test('Attaches styling to remove password reveal icons on Edge', () {
-      final DomElement? style =
-          hostNode.querySelector('#flt-internals-stylesheet');
+      final DomElement? edgeStyleElement = hostNode.querySelector('#ms-reveal');
 
-      // Check that style.sheet! contains input::-ms-reveal rule
-      final bool hidesRevealIcons = hasCssRule(style,
-          selector: 'input::-ms-reveal', declaration: 'display: none');
-
-      final bool codeRanInFakeyBrowser = hasCssRule(style,
-          selector: 'input.fallback-for-fakey-browser-in-ci',
-          declaration: 'display: none');
-
-      if (codeRanInFakeyBrowser) {
-        print('Please, fix https://github.com/flutter/flutter/issues/116302');
-      }
-
-      expect(hidesRevealIcons || codeRanInFakeyBrowser, isTrue,
-          reason: 'In Edge, stylesheet must contain "input::-ms-reveal" rule.');
+      expect(edgeStyleElement, isNotNull);
+      expect(edgeStyleElement!.innerText, 'input::-ms-reveal {display: none;}');
     }, skip: !isEdge);
 
     test('Does not attach the Edge-specific style tag on non-Edge browsers',
         () {
-      final DomElement? style =
-          hostNode.querySelector('#flt-internals-stylesheet');
-
-      // Check that style.sheet! contains input::-ms-reveal rule
-      final bool hidesRevealIcons = hasCssRule(style,
-          selector: 'input::-ms-reveal', declaration: 'display: none');
-
-      expect(hidesRevealIcons, isFalse);
+      final DomElement? edgeStyleElement = hostNode.querySelector('#ms-reveal');
+      expect(edgeStyleElement, isNull);
     }, skip: isEdge);
 
     _runDomTests(hostNode);
   });
 
   group('ElementHostNode', () {
-    final HostNode hostNode = ElementHostNode(rootNode, '');
+    final HostNode hostNode = ElementHostNode(rootNode);
 
     test('Initializes and attaches a child element', () {
       expect(domInstanceOfString(hostNode.node, 'Element'), isTrue);
@@ -171,26 +111,4 @@ void _runDomTests(HostNode hostNode) {
       expect(found[1], target);
     });
   });
-}
-
-/// Finds out whether a given CSS Rule ([selector] { [declaration]; }) exists in a [styleSheet].
-bool hasCssRule(
-  DomElement? styleSheet, {
-  required String selector,
-  required String declaration,
-}) {
-  assert(styleSheet != null);
-  assert((styleSheet! as DomHTMLStyleElement).sheet != null);
-
-  // regexr.com/740ff
-  final RegExp ruleLike =
-      RegExp('[^{]*(?:$selector)[^{]*{[^}]*(?:$declaration)[^}]*}');
-
-  final DomCSSStyleSheet sheet =
-      (styleSheet! as DomHTMLStyleElement).sheet! as DomCSSStyleSheet;
-
-  // Check that the cssText of any rule matches the ruleLike RegExp.
-  return sheet.cssRules
-      .map((DomCSSRule rule) => rule.cssText)
-      .any((String rule) => ruleLike.hasMatch(rule));
 }
