@@ -12,16 +12,12 @@ import '../engine.dart' show registerHotRestartListener;
 import 'browser_detection.dart';
 import 'dom.dart';
 import 'platform_dispatcher.dart';
-import 'pointer_binding/event_position_helper.dart';
 import 'pointer_converter.dart';
 import 'safe_browser_api.dart';
 import 'semantics.dart';
 
-/// Set this flag to true to log all the browser events.
+/// Set this flag to true to see all the fired events in the console.
 const bool _debugLogPointerEvents = false;
-
-/// Set this to true to log all the events sent to the Flutter framework.
-const bool _debugLogFlutterEvents = false;
 
 /// The signature of a callback that handles pointer events.
 typedef _PointerDataCallback = void Function(Iterable<ui.PointerData>);
@@ -151,16 +147,13 @@ class PointerBinding {
     _pointerDataConverter.clearPointerState();
   }
 
-  // TODO(dit): remove old API fallbacks, https://github.com/flutter/flutter/issues/116141
   _BaseAdapter _createAdapter() {
     if (_detector.hasPointerEvents) {
       return _PointerAdapter(_onPointerData, glassPaneElement, _pointerDataConverter, _keyboardConverter);
     }
-    // Fallback for Safari Mobile < 13. To be removed.
     if (_detector.hasTouchEvents) {
       return _TouchAdapter(_onPointerData, glassPaneElement, _pointerDataConverter, _keyboardConverter);
     }
-    // Fallback for Safari Desktop < 13. To be removed.
     if (_detector.hasMouseEvents) {
       return _MouseAdapter(_onPointerData, glassPaneElement, _pointerDataConverter, _keyboardConverter);
     }
@@ -169,11 +162,6 @@ class PointerBinding {
 
   void _onPointerData(Iterable<ui.PointerData> data) {
     final ui.PointerDataPacket packet = ui.PointerDataPacket(data: data.toList());
-    if (_debugLogFlutterEvents) {
-      for(final ui.PointerData datum in data) {
-        print('fw:${datum.change}    ${datum.physicalX},${datum.physicalY}');
-      }
-    }
     EnginePlatformDispatcher.instance.invokeOnPointerDataPacket(packet);
   }
 }
@@ -312,10 +300,9 @@ abstract class _BaseAdapter {
       if (_debugLogPointerEvents) {
         if (domInstanceOfString(event, 'PointerEvent')) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
-          final ui.Offset offset = computeEventOffsetToTarget(event, glassPaneElement);
           print('${pointerEvent.type}    '
-              '${offset.dx.toStringAsFixed(1)},'
-              '${offset.dy.toStringAsFixed(1)}');
+              '${pointerEvent.clientX.toStringAsFixed(1)},'
+              '${pointerEvent.clientY.toStringAsFixed(1)}');
         } else {
           print(event.type);
         }
@@ -452,7 +439,6 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     }
 
     final List<ui.PointerData> data = <ui.PointerData>[];
-    final ui.Offset offset = computeEventOffsetToTarget(event, glassPaneElement);
     _pointerDataConverter.convert(
       data,
       change: ui.PointerChange.hover,
@@ -460,8 +446,8 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       kind: kind,
       signalKind: ui.PointerSignalKind.scroll,
       device: _mouseDeviceId,
-      physicalX: offset.dx * ui.window.devicePixelRatio,
-      physicalY: offset.dy * ui.window.devicePixelRatio,
+      physicalX: event.clientX * ui.window.devicePixelRatio,
+      physicalY: event.clientY * ui.window.devicePixelRatio,
       buttons: event.buttons!.toInt(),
       pressure: 1.0,
       pressureMax: 1.0,
@@ -748,7 +734,6 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       _callback(pointerData);
     });
 
-    // Why `domWindow` you ask? See this fiddle: https://jsfiddle.net/ditman/7towxaqp
     _addPointerEventListener(domWindow, 'pointermove', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
@@ -776,7 +761,6 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     }, useCapture: false, checkModifiers: false);
 
-    // TODO(dit): This must happen in the glassPane, https://github.com/flutter/flutter/issues/116561
     _addPointerEventListener(domWindow, 'pointerup', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
@@ -789,8 +773,6 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         }
       }
     });
-
-    // TODO(dit): Synthesize a "cancel" event when 'pointerup' happens outside of the glassPane, https://github.com/flutter/flutter/issues/116561
 
     // A browser fires cancel event if it concludes the pointer will no longer
     // be able to generate events (example: device is deactivated)
@@ -824,7 +806,6 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     final double tilt = _computeHighestTilt(event);
     final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
     final num? pressure = event.pressure;
-    final ui.Offset offset = computeEventOffsetToTarget(event, glassPaneElement);
     _pointerDataConverter.convert(
       data,
       change: details.change,
@@ -832,8 +813,8 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       kind: kind,
       signalKind: ui.PointerSignalKind.none,
       device: _getPointerId(event),
-      physicalX: offset.dx * ui.window.devicePixelRatio,
-      physicalY: offset.dy * ui.window.devicePixelRatio,
+      physicalX: event.clientX * ui.window.devicePixelRatio,
+      physicalY: event.clientY * ui.window.devicePixelRatio,
       buttons: details.buttons,
       pressure:  pressure == null ? 0.0 : pressure.toDouble(),
       pressureMax: 1.0,
@@ -853,10 +834,6 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         return coalescedEvents;
       }
     }
-    // Important: coalesced events lack the `eventTarget` property (because they're
-    // being handled in a deferred way).
-    //
-    // See the "Note" here: https://developer.mozilla.org/en-US/docs/Web/API/Event/currentTarget
     return <DomPointerEvent>[event];
   }
 
@@ -1020,7 +997,6 @@ class _TouchAdapter extends _BaseAdapter {
       timeStamp: timeStamp,
       signalKind: ui.PointerSignalKind.none,
       device: touch.identifier!.toInt(),
-      // Account for zoom/scroll in the TouchEvent
       physicalX: touch.clientX * ui.window.devicePixelRatio,
       physicalY: touch.clientY * ui.window.devicePixelRatio,
       buttons: pressed ? _kPrimaryMouseButton : 0,
@@ -1104,7 +1080,6 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       _callback(pointerData);
     });
 
-    // Why `domWindow` you ask? See this fiddle: https://jsfiddle.net/ditman/7towxaqp
     _addMouseEventListener(domWindow, 'mousemove', (DomMouseEvent event) {
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _SanitizedDetails? up = _sanitizer.sanitizeMissingRightClickUp(buttons: event.buttons!.toInt());
@@ -1125,7 +1100,6 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       }
     }, useCapture: false);
 
-    // TODO(dit): This must happen in the glassPane, https://github.com/flutter/flutter/issues/116561
     _addMouseEventListener(domWindow, 'mouseup', (DomMouseEvent event) {
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _SanitizedDetails? sanitizedDetails = _sanitizer.sanitizeUpEvent(buttons: event.buttons?.toInt());
@@ -1150,7 +1124,6 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     assert(data != null);
     assert(event != null);
     assert(details != null);
-    final ui.Offset offset = computeEventOffsetToTarget(event, glassPaneElement);
     _pointerDataConverter.convert(
       data,
       change: details.change,
@@ -1158,8 +1131,8 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       kind: ui.PointerDeviceKind.mouse,
       signalKind: ui.PointerSignalKind.none,
       device: _mouseDeviceId,
-      physicalX: offset.dx * ui.window.devicePixelRatio,
-      physicalY: offset.dy * ui.window.devicePixelRatio,
+      physicalX: event.clientX * ui.window.devicePixelRatio,
+      physicalY: event.clientY * ui.window.devicePixelRatio,
       buttons: details.buttons,
       pressure: 1.0,
       pressureMax: 1.0,
