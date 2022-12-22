@@ -14398,6 +14398,28 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('does not crash when didChangeMetrics is called after unmounting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography.material2018().black.titleMedium!,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Disposes the EditableText.
+    await tester.pumpWidget(const Placeholder());
+
+    // Shouldn't crash.
+    state.didChangeMetrics();
+  });
 }
 
 class UnsettableController extends TextEditingController {
