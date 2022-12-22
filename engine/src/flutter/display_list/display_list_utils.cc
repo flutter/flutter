@@ -107,7 +107,7 @@ sk_sp<SkColorFilter> SkPaintDispatchHelper::makeColorFilter() const {
   return invert_filter;
 }
 
-void RectBoundsAccumulator::accumulate(const SkRect& r) {
+void RectBoundsAccumulator::accumulate(const SkRect& r, int index) {
   if (r.fLeft < r.fRight && r.fTop < r.fBottom) {
     rect_.accumulate(r.fLeft, r.fTop);
     rect_.accumulate(r.fRight, r.fBottom);
@@ -143,7 +143,7 @@ void RectBoundsAccumulator::pop_and_accumulate(SkRect& layer_bounds,
   saved_rects_.pop_back();
 
   if (clip == nullptr || layer_bounds.intersect(*clip)) {
-    accumulate(layer_bounds);
+    accumulate(layer_bounds, -1);
   }
 }
 
@@ -174,9 +174,10 @@ SkRect RectBoundsAccumulator::AccumulationRect::bounds() const {
              : SkRect::MakeEmpty();
 }
 
-void RTreeBoundsAccumulator::accumulate(const SkRect& r) {
+void RTreeBoundsAccumulator::accumulate(const SkRect& r, int index) {
   if (r.fLeft < r.fRight && r.fTop < r.fBottom) {
     rects_.push_back(r);
+    rect_indices_.push_back(index);
   }
 }
 void RTreeBoundsAccumulator::save() {
@@ -206,10 +207,13 @@ bool RTreeBoundsAccumulator::restore(
       success = false;
     }
     if (clip == nullptr || original.intersect(*clip)) {
-      rects_[previous_size++] = original;
+      rect_indices_[previous_size] = rect_indices_[i];
+      rects_[previous_size] = original;
+      previous_size++;
     }
   }
   rects_.resize(previous_size);
+  rect_indices_.resize(previous_size);
   return success;
 }
 
@@ -217,17 +221,15 @@ SkRect RTreeBoundsAccumulator::bounds() const {
   FML_DCHECK(saved_offsets_.empty());
   RectBoundsAccumulator accumulator;
   for (auto& rect : rects_) {
-    accumulator.accumulate(rect);
+    accumulator.accumulate(rect, 0);
   }
   return accumulator.bounds();
 }
 
 sk_sp<DlRTree> RTreeBoundsAccumulator::rtree() const {
   FML_DCHECK(saved_offsets_.empty());
-  DlRTreeFactory factory;
-  sk_sp<DlRTree> rtree = factory.getInstance();
-  rtree->insert(rects_.data(), rects_.size());
-  return rtree;
+  return sk_make_sp<DlRTree>(rects_.data(), rects_.size(), rect_indices_.data(),
+                             [](int id) { return id >= 0; });
 }
 
 }  // namespace flutter

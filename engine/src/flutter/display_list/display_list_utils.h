@@ -251,7 +251,7 @@ class BoundsAccumulator {
 
   virtual ~BoundsAccumulator() = default;
 
-  virtual void accumulate(const SkRect& r) = 0;
+  virtual void accumulate(const SkRect& r, int index = 0) = 0;
 
   /// Save aside the rects/bounds currently being accumulated and start
   /// accumulating a new set of rects/bounds. When restore is called,
@@ -296,7 +296,7 @@ class RectBoundsAccumulator final : public virtual BoundsAccumulator {
  public:
   void accumulate(SkScalar x, SkScalar y) { rect_.accumulate(x, y); }
   void accumulate(const SkPoint& p) { rect_.accumulate(p.fX, p.fY); }
-  void accumulate(const SkRect& r) override;
+  void accumulate(const SkRect& r, int index) override;
 
   bool is_empty() const { return rect_.is_empty(); }
   bool is_not_empty() const { return rect_.is_not_empty(); }
@@ -344,7 +344,7 @@ class RectBoundsAccumulator final : public virtual BoundsAccumulator {
 
 class RTreeBoundsAccumulator final : public virtual BoundsAccumulator {
  public:
-  void accumulate(const SkRect& r) override;
+  void accumulate(const SkRect& r, int index) override;
   void save() override;
   void restore() override;
 
@@ -362,6 +362,7 @@ class RTreeBoundsAccumulator final : public virtual BoundsAccumulator {
 
  private:
   std::vector<SkRect> rects_;
+  std::vector<int> rect_indices_;
   std::vector<size_t> saved_offsets_;
 };
 

@@ -109,6 +109,7 @@ if (enable_unittests) {
       "display_list_matrix_clip_tracker_unittests.cc",
       "display_list_paint_unittests.cc",
       "display_list_path_effect_unittests.cc",
+      "display_list_rtree_unittests.cc",
       "display_list_unittests.cc",
       "display_list_utils_unittests.cc",
       "display_list_vertices_unittests.cc",

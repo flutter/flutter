@@ -366,7 +366,8 @@ class DisplayListBuilder final : public virtual Dispatcher,
   DisplayListStorage storage_;
   size_t used_ = 0;
   size_t allocated_ = 0;
-  int op_count_ = 0;
+  int render_op_count_ = 0;
+  int op_index_ = 0;
 
   // bytes and ops from |drawPicture| and |drawDisplayList|
   size_t nested_bytes_ = 0;
@@ -387,10 +388,10 @@ class DisplayListBuilder final : public virtual Dispatcher,
 
   class LayerInfo {
    public:
-    explicit LayerInfo(size_t save_layer_offset = 0,
+    explicit LayerInfo(size_t save_offset = 0,
                        bool has_layer = false,
                        std::shared_ptr<const DlImageFilter> filter = nullptr)
-        : save_layer_offset_(save_layer_offset),
+        : save_offset_(save_offset),
           has_layer_(has_layer),
           cannot_inherit_opacity_(false),
           has_compatible_op_(false),
@@ -403,7 +404,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
     // the records inside the saveLayer that may impact how the saveLayer
     // is handled (e.g., |cannot_inherit_opacity| == false).
     // This offset is only valid if |has_layer| is true.
-    size_t save_layer_offset() const { return save_layer_offset_; }
+    size_t save_offset() const { return save_offset_; }
 
     bool has_layer() const { return has_layer_; }
     bool cannot_inherit_opacity() const { return cannot_inherit_opacity_; }
@@ -461,7 +462,7 @@ class DisplayListBuilder final : public virtual Dispatcher,
     bool is_unbounded() const { return is_unbounded_; }
 
    private:
-    size_t save_layer_offset_;
+    size_t save_offset_;
     bool has_layer_;
     bool cannot_inherit_opacity_;
     bool has_compatible_op_;
