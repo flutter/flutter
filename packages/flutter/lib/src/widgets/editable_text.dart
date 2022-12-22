@@ -50,6 +50,7 @@ export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesTy
 
 // Examples can assume:
 // late BuildContext context;
+// late WidgetTester tester;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
