@@ -103,7 +103,6 @@
 		A9987E4174B38E41820C3697 /* libPods-Free App.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Free App.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CADFDE69E11F94E130E2A47A /* Pods-Free App.debug free.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug free.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"; sourceTree = "<group>"; };
 		F383D4B62938029D00598432 /* Paid App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Paid App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F383D4B72938029E00598432 /* Free App Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Free App Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,7 +143,6 @@
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				33CC10EE2044A3C60003C045 /* Products */,
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
-				F383D4B72938029E00598432 /* Free App Info.plist */,
 				A04A00ABC8C742B7FEF93A1D /* Pods */,
 			);
 			sourceTree = "<group>";
@@ -629,7 +627,7 @@
 		33CC111C2044C6BA0003C045 /* Debug Free */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = "Debug Free";
@@ -651,13 +649,12 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "Free App Info.plist";
+				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
-				PRODUCT_FLAVOR = free;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -674,13 +671,12 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "Free App Info.plist";
+				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
-				PRODUCT_FLAVOR = free;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -754,9 +750,9 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_FLAVOR = paid;
-				PRODUCT_NAME = "Free App";
+				PRODUCT_NAME = "Paid App";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -772,13 +768,12 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "Free App Info.plist";
+				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
-				PRODUCT_FLAVOR = paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -789,7 +784,7 @@
 		F383D4BB293802D100598432 /* Debug Paid */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = "Debug Paid";
@@ -854,9 +849,9 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_FLAVOR = paid;
-				PRODUCT_NAME = "Free App";
+				PRODUCT_NAME = "Paid App";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
@@ -871,13 +866,12 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Release.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "Free App Info.plist";
+				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
-				PRODUCT_FLAVOR = paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
