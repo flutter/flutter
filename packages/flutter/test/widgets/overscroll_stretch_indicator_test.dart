@@ -21,6 +21,7 @@ void main() {
     bool reverse = false,
     TextDirection textDirection = TextDirection.ltr,
     double boxHeight = 250.0,
+    double boxWidth = 300.0,
     ScrollPhysics? physics,
   }) {
     final AxisDirection axisDirection;
@@ -55,19 +56,19 @@ void main() {
                   color: const Color(0xD0FF0000),
                   key: box1Key,
                   height: boxHeight,
-                  width: 300.0,
+                  width: boxWidth,
                 )),
                 SliverToBoxAdapter(child: Container(
                   color: const Color(0xFFFFFF00),
                   key: box2Key,
                   height: boxHeight,
-                  width: 300.0,
+                  width: boxWidth,
                 )),
                 SliverToBoxAdapter(child: Container(
                   color: const Color(0xFF6200EA),
                   key: box3Key,
                   height: boxHeight,
-                  width: 300.0,
+                  width: boxWidth,
                 )),
               ],
             ),
@@ -842,5 +843,76 @@ void main() {
     expect(box1.localToGlobal(Offset.zero), Offset.zero);
     expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 100.0));
     expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
+  });
+
+  testWidgets('Stretch overscroll horizontally, change direction mid scroll', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(
+        box1Key,
+        box2Key,
+        box3Key,
+        controller,
+        // Setting the `boxWidth` to 100.0 will make the boxes fit in the
+        // scrollable viewport.
+        boxWidth: 100,
+        // To make the scroll view in the test still scrollable, we need to add
+        // the `AlwaysScrollableScrollPhysics`.
+        physics: const AlwaysScrollableScrollPhysics(),
+        axis: Axis.horizontal,
+      ),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll the start
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    await tester.pumpAndSettle();
+
+    // The boxes should now be at different locations because of the scaling.
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(102.0));
+    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(205.0));
+
+    // Move the pointer up a miniscule amount to trigger a directional change.
+    await gesture.moveBy(const Offset(-20.0, 0.0));
+    await tester.pumpAndSettle();
+
+
+    // The boxes should remain roughly at the same locations, since the pointer
+    // didn't move far.
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(102.0));
+    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(205.0));
+
+    // Now make the pointer overscroll to the end
+    await gesture.moveBy(const Offset(-1200.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(box1.localToGlobal(Offset.zero).dx, lessThan(-19.0));
+    expect(box2.localToGlobal(Offset.zero).dx, lessThan(85.0));
+    expect(box3.localToGlobal(Offset.zero).dx, lessThan(188.0));
+
+    // Release the pointer
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Now the boxes should be back to their original locations.
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
   });
 }
