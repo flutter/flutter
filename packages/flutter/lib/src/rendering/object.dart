@@ -3308,8 +3308,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         result.mergeUp.map<_InterestingSemanticsFragment>((SemanticsConfiguration config) {
           final _InterestingSemanticsFragment? fragment = configToFragment[config];
           if (fragment == null) {
-            // Incomplete fragment can't be fork since it always needs to be
-            // merged.
+            // Parent fragment of Incomplete fragments can't be a forking
+            // fragment since they need to be merged.
             producesForkingFragment = false;
             return _IncompleteSemanticsFragment(config: config, owner: this);
           }
@@ -4298,6 +4298,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+/// An fragment that only carries partial information that must not form a
+/// explicit semantics node without merging into another
+/// _SwitchableSemanticsFragment.
+///
+/// This fragment is generated from synthetic SemanticsConfiguration returned from
+/// [SemanticsConfiguration.childConfigurationsDelegate].
 class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
   _IncompleteSemanticsFragment({
     required this.config,
@@ -4307,8 +4313,7 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
-    // This fragment must be a leaf node.
-    assert(false);
+    throw FlutterError('This fragment must be a leaf node');
   }
 
   @override
@@ -4616,6 +4621,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   void addTags(Iterable<SemanticsTag> tags) {
     super.addTags(tags);
+    // _ContainerSemanticsFragments add their tags to child fragments through
+    // this method. This fragment must make sure its _config is in sync.
     tags.forEach(_config.addTagForChildren);
   }
 
