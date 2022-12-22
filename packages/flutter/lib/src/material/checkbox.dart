@@ -342,10 +342,12 @@ class Checkbox extends StatefulWidget {
   /// Must not be null. Defaults to false.
   final bool isError;
 
+  /// {@template flutter.material.checkbox.semanticLabel}
   /// The semantic label for the checkobox that will be announced by screen readers.
   ///
   /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
+  /// {@endtemplate}
   final String? semanticLabel;
 
   /// The width of a checkbox widget.
