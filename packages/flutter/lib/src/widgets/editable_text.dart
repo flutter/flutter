@@ -43,6 +43,7 @@ import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
 import 'ticker_provider.dart';
+import 'view.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/services.dart' show SelectionChangedCause, SmartDashesType, SmartQuotesType, TextEditingValue, TextInputType, TextSelection;
@@ -3303,17 +3304,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void didChangeMetrics() {
-    if (_lastBottomViewInset != WidgetsBinding.instance.window.viewInsets.bottom) {
+    if (!mounted) {
+      return;
+    }
+    final ui.FlutterView view = View.of(context);
+    if (_lastBottomViewInset != view.viewInsets.bottom) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
       });
-      if (_lastBottomViewInset < WidgetsBinding.instance.window.viewInsets.bottom) {
+      if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
         _scheduleShowCaretOnScreen(withAnimation: false);
       }
     }
-    _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
+    _lastBottomViewInset = view.viewInsets.bottom;
   }
 
   Future<void> _performSpellCheck(final String text) async {
@@ -3516,7 +3521,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
-      _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
+      _lastBottomViewInset = View.of(context).viewInsets.bottom;
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
