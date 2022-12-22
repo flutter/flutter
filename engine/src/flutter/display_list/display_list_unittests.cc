@@ -273,12 +273,12 @@ TEST(DisplayList, SingleOpDisplayListsCompareToEachOther) {
 TEST(DisplayList, SingleOpDisplayListsAreEqualWhetherOrNotToPrepareRtree) {
   for (auto& group : allGroups) {
     for (size_t i = 0; i < group.variants.size(); i++) {
-      DisplayListBuilder buider1(/*prepare_rtree=*/false);
-      DisplayListBuilder buider2(/*prepare_rtree=*/true);
-      group.variants[i].invoker(buider1);
-      group.variants[i].invoker(buider2);
-      sk_sp<DisplayList> dl1 = buider1.Build();
-      sk_sp<DisplayList> dl2 = buider2.Build();
+      DisplayListBuilder builder1(/*prepare_rtree=*/false);
+      DisplayListBuilder builder2(/*prepare_rtree=*/true);
+      group.variants[i].invoker(builder1);
+      group.variants[i].invoker(builder2);
+      sk_sp<DisplayList> dl1 = builder1.Build();
+      sk_sp<DisplayList> dl2 = builder2.Build();
 
       auto desc = group.op_name + "(variant " + std::to_string(i + 1) + " )";
       ASSERT_EQ(dl1->op_count(false), dl2->op_count(false)) << desc;
@@ -286,8 +286,8 @@ TEST(DisplayList, SingleOpDisplayListsAreEqualWhetherOrNotToPrepareRtree) {
       ASSERT_EQ(dl1->op_count(true), dl2->op_count(true)) << desc;
       ASSERT_EQ(dl1->bytes(true), dl2->bytes(true)) << desc;
       ASSERT_EQ(dl1->bounds(), dl2->bounds()) << desc;
-      ASSERT_TRUE(dl1->Equals(*dl2)) << desc;
-      ASSERT_TRUE(dl2->Equals(*dl1)) << desc;
+      ASSERT_TRUE(DisplayListsEQ_Verbose(dl1, dl2)) << desc;
+      ASSERT_TRUE(DisplayListsEQ_Verbose(dl2, dl2)) << desc;
       ASSERT_EQ(dl1->rtree().get(), nullptr) << desc;
       ASSERT_NE(dl2->rtree().get(), nullptr) << desc;
     }
@@ -1240,7 +1240,7 @@ TEST(DisplayList, FlutterSvgIssue661BoundsWereEmpty) {
   // This is the more practical result. The bounds are "almost" 0,0,100x100
   EXPECT_EQ(display_list->bounds().roundOut(), SkIRect::MakeWH(100, 100));
   EXPECT_EQ(display_list->op_count(), 19u);
-  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 304u);
+  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 352u);
 }
 
 TEST(DisplayList, TranslateAffectsCurrentTransform) {
@@ -1795,7 +1795,7 @@ static void test_rtree(const sk_sp<const DlRTree>& rtree,
   rtree->search(query, &indices);
   EXPECT_EQ(indices, expected_indices);
   EXPECT_EQ(indices.size(), expected_indices.size());
-  std::list<SkRect> rects = rtree->searchNonOverlappingDrawnRects(query);
+  std::list<SkRect> rects = rtree->searchAndConsolidateRects(query);
   // ASSERT_EQ(rects.size(), expected_indices.size());
   auto iterator = rects.cbegin();
   for (int i : expected_indices) {
@@ -2494,6 +2494,118 @@ TEST(DisplayList, RTreeOfClippedSaveLayerFilterScene) {
 
   // Hitting both drawRect calls
   test_rtree(rtree, {19, 19, 51, 51}, rects, {0, 1});
+}
+
+TEST(DisplayList, RTreeRenderCulling) {
+  DisplayListBuilder main_builder(true);
+  main_builder.drawRect({0, 0, 10, 10});
+  main_builder.drawRect({20, 0, 30, 10});
+  main_builder.drawRect({0, 20, 10, 30});
+  main_builder.drawRect({20, 20, 30, 30});
+  auto main = main_builder.Build();
+
+  {  // No rects
+    SkRect cull_rect = {11, 11, 19, 19};
+
+    DisplayListBuilder expected_builder;
+    auto expected = expected_builder.Build();
+
+    DisplayListBuilder culling_builder(cull_rect);
+    main->RenderTo(&culling_builder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected));
+
+    DisplayListCanvasRecorder culling_recorder(cull_rect);
+    main->RenderTo(&culling_recorder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_recorder.Build(), expected));
+  }
+
+  {  // Rect 1
+    SkRect cull_rect = {9, 9, 19, 19};
+
+    DisplayListBuilder expected_builder;
+    expected_builder.drawRect({0, 0, 10, 10});
+    auto expected = expected_builder.Build();
+
+    DisplayListBuilder culling_builder(cull_rect);
+    main->RenderTo(&culling_builder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected));
+
+    DisplayListCanvasRecorder culling_recorder(cull_rect);
+    main->RenderTo(&culling_recorder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_recorder.Build(), expected));
+  }
+
+  {  // Rect 2
+    SkRect cull_rect = {11, 9, 21, 19};
+
+    DisplayListBuilder expected_builder;
+    expected_builder.drawRect({20, 0, 30, 10});
+    auto expected = expected_builder.Build();
+
+    DisplayListBuilder culling_builder(cull_rect);
+    main->RenderTo(&culling_builder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected));
+
+    DisplayListCanvasRecorder culling_recorder(cull_rect);
+    main->RenderTo(&culling_recorder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_recorder.Build(), expected));
+  }
+
+  {  // Rect 3
+    SkRect cull_rect = {9, 11, 19, 21};
+
+    DisplayListBuilder expected_builder;
+    expected_builder.drawRect({0, 20, 10, 30});
+    auto expected = expected_builder.Build();
+
+    DisplayListBuilder culling_builder(cull_rect);
+    main->RenderTo(&culling_builder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected));
+
+    DisplayListCanvasRecorder culling_recorder(cull_rect);
+    main->RenderTo(&culling_recorder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_recorder.Build(), expected));
+  }
+
+  {  // Rect 4
+    SkRect cull_rect = {11, 11, 21, 21};
+
+    DisplayListBuilder expected_builder;
+    expected_builder.drawRect({20, 20, 30, 30});
+    auto expected = expected_builder.Build();
+
+    DisplayListBuilder culling_builder(cull_rect);
+    main->RenderTo(&culling_builder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), expected));
+
+    DisplayListCanvasRecorder culling_recorder(cull_rect);
+    main->RenderTo(&culling_recorder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_recorder.Build(), expected));
+  }
+
+  {  // All 4 rects
+    SkRect cull_rect = {9, 9, 21, 21};
+
+    DisplayListBuilder culling_builder(cull_rect);
+    main->RenderTo(&culling_builder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_builder.Build(), main));
+
+    DisplayListCanvasRecorder culling_recorder(cull_rect);
+    main->RenderTo(&culling_recorder);
+
+    EXPECT_TRUE(DisplayListsEQ_Verbose(culling_recorder.Build(), main));
+  }
 }
 
 }  // namespace testing

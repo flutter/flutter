@@ -304,7 +304,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
   return {
       {"Save(Layer)+Restore",
        {
-           {5, 104, 5, 104,
+           {5, 112, 5, 112,
             [](DisplayListBuilder& b) {
               b.saveLayer(nullptr, SaveLayerOptions::kNoAttributes,
                           &kTestCFImageFilter1);
@@ -320,7 +320,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
            // attributes to be distributed to the children. To prevent those
            // cases we include at least one clip operation and 2 overlapping
            // rendering primitives between each save/restore pair.
-           {5, 88, 5, 88,
+           {5, 96, 5, 96,
             [](DisplayListBuilder& b) {
               b.save();
               b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
@@ -328,7 +328,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               b.drawRect({10, 10, 20, 20});
               b.restore();
             }},
-           {5, 88, 5, 88,
+           {5, 96, 5, 96,
             [](DisplayListBuilder& b) {
               b.saveLayer(nullptr, false);
               b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
@@ -336,7 +336,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               b.drawRect({10, 10, 20, 20});
               b.restore();
             }},
-           {5, 88, 5, 88,
+           {5, 96, 5, 96,
             [](DisplayListBuilder& b) {
               b.saveLayer(nullptr, true);
               b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
@@ -344,7 +344,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               b.drawRect({10, 10, 20, 20});
               b.restore();
             }},
-           {5, 104, 5, 104,
+           {5, 112, 5, 112,
             [](DisplayListBuilder& b) {
               b.saveLayer(&kTestBounds, false);
               b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
@@ -352,7 +352,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               b.drawRect({10, 10, 20, 20});
               b.restore();
             }},
-           {5, 104, 5, 104,
+           {5, 112, 5, 112,
             [](DisplayListBuilder& b) {
               b.saveLayer(&kTestBounds, true);
               b.clipRect({0, 0, 25, 25}, SkClipOp::kIntersect, true);
@@ -369,7 +369,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
            //   b.drawRect({10, 10, 20, 20});
            //   b.restore();
            // }},
-           {5, 104, 5, 104,
+           {5, 112, 5, 112,
             [](DisplayListBuilder& b) {
               b.saveLayer(nullptr, SaveLayerOptions::kWithAttributes,
                           &kTestCFImageFilter1);
@@ -378,7 +378,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               b.drawRect({10, 10, 20, 20});
               b.restore();
             }},
-           {5, 120, 5, 120,
+           {5, 128, 5, 128,
             [](DisplayListBuilder& b) {
               b.saveLayer(&kTestBounds, SaveLayerOptions::kNoAttributes,
                           &kTestCFImageFilter1);
@@ -387,7 +387,7 @@ std::vector<DisplayListInvocationGroup> CreateAllSaveRestoreOps() {
               b.drawRect({10, 10, 20, 20});
               b.restore();
             }},
-           {5, 120, 5, 120,
+           {5, 128, 5, 128,
             [](DisplayListBuilder& b) {
               b.saveLayer(&kTestBounds, SaveLayerOptions::kWithAttributes,
                           &kTestCFImageFilter1);

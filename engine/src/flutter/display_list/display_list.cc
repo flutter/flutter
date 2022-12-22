@@ -38,31 +38,144 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
       op_count_(op_count),
       nested_byte_count_(nested_byte_count),
       nested_op_count_(nested_op_count),
+      unique_id_(next_unique_id()),
       bounds_(bounds),
       can_apply_group_opacity_(can_apply_group_opacity),
-      rtree_(std::move(rtree)) {
-  static std::atomic<uint32_t> next_id{1};
-  do {
-    unique_id_ = next_id.fetch_add(+1, std::memory_order_relaxed);
-  } while (unique_id_ == 0);
-}
+      rtree_(std::move(rtree)) {}
 
 DisplayList::~DisplayList() {
   uint8_t* ptr = storage_.get();
   DisposeOps(ptr, ptr + byte_count_);
 }
 
+uint32_t DisplayList::next_unique_id() {
+  static std::atomic<uint32_t> next_id{1};
+  uint32_t id;
+  do {
+    id = next_id.fetch_add(+1, std::memory_order_relaxed);
+  } while (id == 0);
+  return id;
+}
+
+class Culler {
+ public:
+  virtual bool init(DispatchContext& context) = 0;
+  virtual void update(DispatchContext& context) = 0;
+};
+class NopCuller : public Culler {
+ public:
+  static NopCuller instance;
+
+  bool init(DispatchContext& context) override {
+    // Setting next_render_index to 0 means that
+    // all rendering ops will be at or after that
+    // index so they will execute and all restore
+    // indices will be after it as well so all
+    // clip and transform operations will execute.
+    context.next_render_index = 0;
+    return true;
+  }
+  void update(DispatchContext& context) override {}
+};
+NopCuller NopCuller::instance = NopCuller();
+class VectorCuller : public Culler {
+ public:
+  VectorCuller(const DlRTree* rtree, const std::vector<int>& rect_indices)
+      : rtree_(rtree), cur_(rect_indices.begin()), end_(rect_indices.end()) {}
+
+  bool init(DispatchContext& context) override {
+    if (cur_ < end_) {
+      context.next_render_index = rtree_->id(*cur_++);
+      return true;
+    } else {
+      // Setting next_render_index to MAX_INT means that
+      // all rendering ops will be "before" that index and
+      // they will skip themselves and all clip and transform
+      // ops will see that the next render index is not
+      // before the next restore index (even if both are MAX_INT)
+      // and so they will also not execute.
+      // None of this really matters because returning false
+      // here should cause the Dispatch operation to abort,
+      // but this value is conceptually correct if that short
+      // circuit optimization isn't used.
+      context.next_render_index = std::numeric_limits<int>::max();
+      return false;
+    }
+  }
+  void update(DispatchContext& context) override {
+    if (++context.cur_index > context.next_render_index) {
+      while (cur_ < end_) {
+        context.next_render_index = rtree_->id(*cur_++);
+        if (context.next_render_index >= context.cur_index) {
+          // It should be rare that we have duplicate indices
+          // but if we do, then having a while loop is a cheap
+          // insurance for those cases.
+          // The main cause of duplicate indices is when a
+          // DrawDisplayListOp was added to this DisplayList and
+          // both are computing an R-Tree, in which case the
+          // builder method will forward all of the child
+          // DisplayList's rects to this R-Tree with the same
+          // op_index.
+          return;
+        }
+      }
+      context.next_render_index = std::numeric_limits<int>::max();
+    }
+  }
+
+ private:
+  const DlRTree* rtree_;
+  std::vector<int>::const_iterator cur_;
+  std::vector<int>::const_iterator end_;
+};
+
+void DisplayList::Dispatch(Dispatcher& ctx) const {
+  uint8_t* ptr = storage_.get();
+  Dispatch(ctx, ptr, ptr + byte_count_, NopCuller::instance);
+}
+void DisplayList::Dispatch(Dispatcher& ctx, const SkRect& cull_rect) const {
+  if (cull_rect.isEmpty()) {
+    return;
+  }
+  if (cull_rect.contains(bounds())) {
+    Dispatch(ctx);
+    return;
+  }
+  const DlRTree* rtree = this->rtree().get();
+  FML_DCHECK(rtree != nullptr);
+  if (rtree == nullptr) {
+    FML_LOG(ERROR) << "dispatched with culling rect on DL with no rtree";
+    Dispatch(ctx);
+    return;
+  }
+  uint8_t* ptr = storage_.get();
+  std::vector<int> rect_indices;
+  rtree->search(cull_rect, &rect_indices);
+  VectorCuller culler(rtree, rect_indices);
+  Dispatch(ctx, ptr, ptr + byte_count_, culler);
+}
+
 void DisplayList::Dispatch(Dispatcher& dispatcher,
                            uint8_t* ptr,
-                           uint8_t* end) const {
+                           uint8_t* end,
+                           Culler& culler) const {
+  DispatchContext context = {
+      .dispatcher = dispatcher,
+      .cur_index = 0,
+      // next_render_index will be initialized by culler.init()
+      .next_restore_index = std::numeric_limits<int>::max(),
+  };
+  if (!culler.init(context)) {
+    return;
+  }
   while (ptr < end) {
     auto op = reinterpret_cast<const DLOp*>(ptr);
     ptr += op->size;
     FML_DCHECK(ptr <= end);
     switch (op->type) {
-#define DL_OP_DISPATCH(name)                                \
-  case DisplayListOpType::k##name:                          \
-    static_cast<const name##Op*>(op)->dispatch(dispatcher); \
+#define DL_OP_DISPATCH(name)                             \
+  case DisplayListOpType::k##name:                       \
+    static_cast<const name##Op*>(op)->dispatch(context); \
     break;
 
       FOR_EACH_DISPLAY_LIST_OP(DL_OP_DISPATCH)
@@ -73,6 +186,7 @@ void DisplayList::Dispatch(Dispatcher& dispatcher,
         FML_DCHECK(false);
         return;
     }
+    culler.update(context);
   }
 }
 
@@ -172,12 +286,20 @@ void DisplayList::RenderTo(DisplayListBuilder* builder,
   if (!builder) {
     return;
   }
-  Dispatch(*builder);
+  if (has_rtree()) {
+    Dispatch(*builder, builder->getLocalClipBounds());
+  } else {
+    Dispatch(*builder);
+  }
 }
 
 void DisplayList::RenderTo(SkCanvas* canvas, SkScalar opacity) const {
   DisplayListCanvasDispatcher dispatcher(canvas, opacity);
-  Dispatch(dispatcher);
+  if (has_rtree()) {
+    Dispatch(dispatcher, canvas->getLocalClipBounds());
+  } else {
+    Dispatch(dispatcher);
+  }
 }
 
 bool DisplayList::Equals(const DisplayList* other) const {
