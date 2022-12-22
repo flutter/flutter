@@ -364,7 +364,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final OffsetPair delta = _pendingDragOffset;
-      final Duration timestamp = _lastPendingEventTimestamp!;
+      final Duration? timestamp = _lastPendingEventTimestamp;
       final Matrix4? transform = _lastTransform;
       final Offset localUpdateDelta;
       switch (dragStartBehavior) {
@@ -451,7 +451,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkStart(Duration timestamp, int pointer) {
+  void _checkStart(Duration? timestamp, int pointer) {
     assert(_initialButtons == kPrimaryButton);
     if (onStart != null) {
       final DragStartDetails details = DragStartDetails(
