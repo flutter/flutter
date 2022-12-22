@@ -36,7 +36,7 @@ enum ValidationType {
   missing,
   partial,
   notAvailable,
-  installed,
+  success,
 }
 
 enum ValidationMessageType {
@@ -116,7 +116,7 @@ class GroupedValidator extends DoctorValidator {
     for (final ValidationResult result in results) {
       statusInfo ??= result.statusInfo;
       switch (result.type) {
-        case ValidationType.installed:
+        case ValidationType.success:
           if (mergedType == ValidationType.missing) {
             mergedType = ValidationType.partial;
           }
@@ -127,7 +127,7 @@ class GroupedValidator extends DoctorValidator {
           break;
         case ValidationType.crash:
         case ValidationType.missing:
-          if (mergedType == ValidationType.installed) {
+          if (mergedType == ValidationType.success) {
             mergedType = ValidationType.partial;
           }
           break;
@@ -142,7 +142,7 @@ class GroupedValidator extends DoctorValidator {
 
 @immutable
 class ValidationResult {
-  /// [ValidationResult.type] should only equal [ValidationResult.installed]
+  /// [ValidationResult.type] should only equal [ValidationResult.success]
   /// if no [messages] are hints or errors.
   const ValidationResult(this.type, this.messages, { this.statusInfo });
 
@@ -171,7 +171,7 @@ class ValidationResult {
         return '[☠]';
       case ValidationType.missing:
         return '[✗]';
-      case ValidationType.installed:
+      case ValidationType.success:
         return '[✓]';
       case ValidationType.notAvailable:
       case ValidationType.partial:
@@ -186,7 +186,7 @@ class ValidationResult {
         return globals.terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.missing:
         return globals.terminal.color(leadingBox, TerminalColor.red);
-      case ValidationType.installed:
+      case ValidationType.success:
         return globals.terminal.color(leadingBox, TerminalColor.green);
       case ValidationType.notAvailable:
       case ValidationType.partial:
@@ -202,7 +202,7 @@ class ValidationResult {
         return 'crash';
       case ValidationType.missing:
         return 'missing';
-      case ValidationType.installed:
+      case ValidationType.success:
         return 'installed';
       case ValidationType.notAvailable:
         return 'notAvailable';

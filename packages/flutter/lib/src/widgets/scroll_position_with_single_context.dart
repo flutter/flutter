@@ -177,7 +177,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     required Duration duration,
     required Curve curve,
   }) {
-    if (nearEqual(to, pixels, physics.tolerance.distance)) {
+    if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
       // Skip the animation, go straight to the position as we are already close.
       jumpTo(to);
       return Future<void>.value();
@@ -213,7 +213,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     final double targetPixels = math.min(
       math.max(pixels + delta, minScrollExtent),

@@ -541,7 +541,13 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(T intent) => onInvoke(intent);
 }
 
-/// An action dispatcher that simply invokes the actions given to it.
+/// An action dispatcher that invokes the actions given to it.
+///
+/// The [invokeAction] method on this class directly calls the [Action.invoke]
+/// method on the [Action] object.
+///
+/// For [ContextAction] actions, if no `context` is provided, the
+/// [BuildContext] of the [primaryFocus] is used instead.
 ///
 /// See also:
 ///
@@ -584,6 +590,8 @@ class ActionDispatcher with Diagnosticable {
 
 /// A widget that establishes an [ActionDispatcher] and a map of [Intent] to
 /// [Action] to be used by its descendants when invoking an [Action].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XawP1i314WM}
 ///
 /// Actions are typically invoked using [Actions.invoke] with the context
 /// containing the ambient [Actions] widget.
@@ -1077,6 +1085,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.onShowHoverHighlight,
     this.onFocusChange,
     this.mouseCursor = MouseCursor.defer,
+    this.includeFocusSemantics = true,
     required this.child,
   })  : assert(enabled != null),
         assert(autofocus != null),
@@ -1132,6 +1141,11 @@ class FocusableActionDetector extends StatefulWidget {
   /// The [mouseCursor] defaults to [MouseCursor.defer], deferring the choice of
   /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
+
+  /// Whether to include semantics from [Focus].
+  ///
+  /// Defaults to true.
+  final bool includeFocusSemantics;
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
@@ -1222,7 +1236,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+      final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
       switch (mode) {
         case NavigationMode.traditional:
           return target.enabled;
@@ -1263,7 +1277,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return widget.enabled;
@@ -1293,6 +1307,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         descendantsAreTraversable: widget.descendantsAreTraversable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
+        includeSemantics: widget.includeFocusSemantics,
         child: widget.child,
       ),
     );

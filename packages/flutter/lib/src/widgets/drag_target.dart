@@ -447,7 +447,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
 
   @override
   void didChangeDependencies() {
-    _recognizer!.gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     super.didChangeDependencies();
   }
 

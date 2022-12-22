@@ -822,11 +822,18 @@ void main() {
           label: 'SELECT DATE\nFri, Jan 15',
         ));
 
+        expect(tester.getSemantics(find.text('3')), matchesSemantics(
+          label: '3, Sunday, January 3, 2016, Today',
+          hasTapAction: true,
+          isFocusable: true,
+        ));
+
         // Input mode toggle button
         expect(tester.getSemantics(switchToInputIcon), matchesSemantics(
           tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
+          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -870,6 +877,7 @@ void main() {
           tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
+          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,

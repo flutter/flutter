@@ -946,7 +946,6 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ```dart
 /// ListView(
-///   shrinkWrap: true,
 ///   padding: const EdgeInsets.all(20.0),
 ///   children: const <Widget>[
 ///     Text("I'm dedicating every day to you"),
@@ -961,7 +960,6 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ```dart
 /// CustomScrollView(
-///   shrinkWrap: true,
 ///   slivers: <Widget>[
 ///     SliverPadding(
 ///       padding: const EdgeInsets.all(20.0),

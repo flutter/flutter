@@ -44,6 +44,87 @@ void main() {
       ),
     );
   }
+
+  group('iOS: do not delete/backspace events', () {
+    final TargetPlatformVariant iOS = TargetPlatformVariant.only(TargetPlatform.iOS);
+    final FocusNode editable = FocusNode();
+    final FocusNode spy = FocusNode();
+
+    testWidgets('backspace with and without word modifier', (WidgetTester tester) async {
+      tester.binding.testTextInput.unregister();
+      addTearDown(tester.binding.testTextInput.register);
+
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(
+          editableFocusNode: editable,
+          spyFocusNode: spy,
+        ),
+      );
+      editable.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+      for (int altShiftState = 0; altShiftState < 1 << 2; altShiftState += 1) {
+        final bool alt = altShiftState & 0x1 != 0;
+        final bool shift = altShiftState & 0x2 != 0;
+        await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.backspace, alt: alt, shift: shift));
+      }
+      await tester.pump();
+
+      expect(state.lastIntent, isNull);
+    }, variant: iOS);
+
+    testWidgets('delete with and without word modifier', (WidgetTester tester) async {
+      tester.binding.testTextInput.unregister();
+      addTearDown(tester.binding.testTextInput.register);
+
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(
+          editableFocusNode: editable,
+          spyFocusNode: spy,
+        ),
+      );
+      editable.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+      for (int altShiftState = 0; altShiftState < 1 << 2; altShiftState += 1) {
+        final bool alt = altShiftState & 0x1 != 0;
+        final bool shift = altShiftState & 0x2 != 0;
+        await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.delete, alt: alt, shift: shift));
+      }
+      await tester.pump();
+
+      expect(state.lastIntent, isNull);
+    }, variant: iOS);
+
+    testWidgets('Exception: deleting to line boundary is handled by the framework', (WidgetTester tester) async {
+      tester.binding.testTextInput.unregister();
+      addTearDown(tester.binding.testTextInput.register);
+
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(
+          editableFocusNode: editable,
+          spyFocusNode: spy,
+        ),
+      );
+      editable.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+      for (int keyState = 0; keyState < 1 << 2; keyState += 1) {
+        final bool shift = keyState & 0x1 != 0;
+        final LogicalKeyboardKey key = keyState & 0x2 != 0 ? LogicalKeyboardKey.delete : LogicalKeyboardKey.backspace;
+
+        state.lastIntent = null;
+        final SingleActivator activator = SingleActivator(key, meta: true, shift: shift);
+        await sendKeyCombination(tester, activator);
+        await tester.pump();
+        expect(state.lastIntent, isA<DeleteToLineBreakIntent>(), reason: '$activator');
+      }
+    }, variant: iOS);
+  }, skip: kIsWeb); // [intended] specific tests target non-web.
+
   group('macOS does not accept shortcuts if focus under EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
@@ -400,6 +481,10 @@ class ActionSpyState extends State<ActionSpy> {
     ExtendSelectionVerticallyToAdjacentLineIntent: CallbackAction<ExtendSelectionVerticallyToAdjacentLineIntent>(onInvoke: _captureIntent),
     ExtendSelectionToDocumentBoundaryIntent: CallbackAction<ExtendSelectionToDocumentBoundaryIntent>(onInvoke: _captureIntent),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: CallbackAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(onInvoke: _captureIntent),
+
+    DeleteToLineBreakIntent: CallbackAction<DeleteToLineBreakIntent>(onInvoke: _captureIntent),
+    DeleteToNextWordBoundaryIntent: CallbackAction<DeleteToNextWordBoundaryIntent>(onInvoke: _captureIntent),
+    DeleteCharacterIntent: CallbackAction<DeleteCharacterIntent>(onInvoke: _captureIntent),
   };
 
   // ignore: use_setters_to_change_properties

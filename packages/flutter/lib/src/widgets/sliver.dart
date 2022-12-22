@@ -417,7 +417,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// boundaries so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short
   /// snippet of text), it might be more efficient to not add a repaint boundary
-  /// and simply repaint the children during scrolling.
+  /// and instead always repaint the children during scrolling.
   ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
@@ -632,7 +632,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// boundaries so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short
   /// snippet of text), it might be more efficient to not add a repaint boundary
-  /// and simply repaint the children during scrolling.
+  /// and instead always repaint the children during scrolling.
   ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
@@ -1681,7 +1681,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive because it requires painting the sliver child into an intermediate
-/// buffer. For the value 0.0, the sliver child is simply not painted at all.
+/// buffer. For the value 0.0, the sliver child is not painted at all.
 /// For the value 1.0, the sliver child is painted immediately without an
 /// intermediate buffer.
 ///

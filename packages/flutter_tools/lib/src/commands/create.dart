@@ -323,8 +323,7 @@ class CreateCommand extends CreateBase {
       linux: includeLinux,
       macos: includeMacos,
       windows: includeWindows,
-      // Enable null safety everywhere.
-      dartSdkVersionBounds: "'>=$dartSdk <3.0.0'",
+      dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
       implementationTests: boolArgDeprecated('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
@@ -596,7 +595,7 @@ Your $application code is in $relativeAppMain.
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
     generatedCount += await generateApp(
-      <String>['app', 'app_test_widget'],
+      <String>['app', 'app_test_widget', 'app_integration_test'],
       project.example.directory,
       templateContext,
       overwrite: overwrite,
