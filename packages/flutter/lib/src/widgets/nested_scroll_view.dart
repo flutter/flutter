@@ -1423,7 +1423,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  void pointerScroll(double delta) {
+  void pointerScroll(double delta, { bool animatePointerScroll = false }) {
+    // TODO(Piinks): Add implementation for animated pointer if proven out in
+    //  ScrollPositionWithSingleContext
     return coordinator.pointerScroll(delta);
   }
 
