@@ -602,7 +602,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 }
 
 enum _StretchDirection {
-  /// The [trailing] direction indicates that the content will be stretched toward 
+  /// The [trailing] direction indicates that the content will be stretched toward
   /// the trailing edge.
   trailing,
   /// The [leading] direction indicates that the content will be stretched toward
