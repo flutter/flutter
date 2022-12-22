@@ -727,6 +727,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   void _handleDragCancel() {
+    if (_gestureDetectorKey.currentContext == null) {
+      // The cancel was caused by the GestureDetector getting disposed, which
+      // means we will get disposed momentarily as well and shouldn't do
+      // any work.
+      return;
+    }
     // _hold might be null if the drag started.
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
