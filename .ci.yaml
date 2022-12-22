@@ -79,7 +79,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
-      xcode: 14a5294e # xcode 14.0 beta 5
+      xcode: 14c18 # xcode 14.2
   mac_arm64:
     properties:
       dependencies: >-
@@ -89,7 +89,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: arm64
-      xcode: 14a5294e # xcode 14.0 beta 5
+      xcode: 14c18 # xcode 14.2
   mac_x64:
     properties:
       dependencies: >-
@@ -99,7 +99,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 14a5294e # xcode 14.0 beta 5
+      xcode: 14c18 # xcode 14.2
   mac_android:
     properties:
       dependencies: >-
@@ -125,26 +125,26 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       cpu: x86
       device_os: iOS-15
-      xcode: 14a5294e
+      xcode: 14c18
   mac_arm64_ios:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "none"}
         ]
       os: Mac-12
       cpu: arm64
       device_os: iOS-15
-      xcode: 14a5294e
+      xcode: 14c18
   windows:
     properties:
       dependencies: >-
@@ -2394,7 +2394,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "xcode", "version": "14c18"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -2406,7 +2406,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2443,7 +2443,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2463,7 +2463,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2483,7 +2483,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2503,7 +2503,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2519,7 +2519,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2533,7 +2533,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2556,7 +2556,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2575,7 +2575,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2589,7 +2589,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2624,7 +2624,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "xcode", "version": "14c18"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -2662,7 +2662,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "android_sdk", "version": "version:33v6"}
@@ -2733,7 +2733,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "xcode", "version": "14c18"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -2747,7 +2747,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2815,7 +2815,7 @@ targets:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2848,7 +2848,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "xcode", "version": "14c18"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -2862,7 +2862,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2880,7 +2880,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2932,7 +2932,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2950,7 +2950,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -2972,7 +2972,7 @@ targets:
       cpu: arm64
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -2996,7 +2996,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3022,7 +3022,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3048,7 +3048,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3074,7 +3074,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:98.1"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3132,7 +3132,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "xcode", "version": "14c18"}
         ]
       tags: >
         ["framework", "hostonly", "shard", "mac"]
@@ -3285,7 +3285,6 @@ targets:
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3294,7 +3293,6 @@ targets:
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3303,7 +3301,6 @@ targets:
 
   - name: Mac_ios backdrop_filter_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3312,7 +3309,6 @@ targets:
 
   - name: Mac_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3321,7 +3317,6 @@ targets:
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3330,7 +3325,6 @@ targets:
 
   - name: Mac_ios complex_layout_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3339,7 +3333,6 @@ targets:
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3348,7 +3341,6 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3357,7 +3349,6 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_bad_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     bringup: true
     timeout: 60
     properties:
@@ -3367,7 +3358,6 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_bad_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3376,7 +3366,6 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3385,7 +3374,6 @@ targets:
 
   - name: Mac_ios color_filter_and_fade_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3394,7 +3382,6 @@ targets:
 
   - name: Mac_ios color_filter_and_fade_perf_impeller_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3403,7 +3390,6 @@ targets:
 
   - name: Mac_ios imagefiltered_transform_animation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3412,7 +3398,6 @@ targets:
 
   - name: Mac_ios imagefiltered_transform_animation_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3422,7 +3407,6 @@ targets:
   - name: Mac_ios external_ui_integration_test_ios
     bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3432,7 +3416,6 @@ targets:
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3441,7 +3424,6 @@ targets:
 
   - name: Mac_ios flavors_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3450,7 +3432,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3459,7 +3440,6 @@ targets:
 
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3468,7 +3448,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3477,7 +3456,6 @@ targets:
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3486,7 +3464,6 @@ targets:
 
   - name: Mac_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3495,7 +3472,6 @@ targets:
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3515,7 +3491,6 @@ targets:
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3526,7 +3501,6 @@ targets:
 
   - name: Mac_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3535,7 +3509,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3544,7 +3517,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3553,7 +3525,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_keyboard_resize
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3562,7 +3533,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3571,7 +3541,6 @@ targets:
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3580,7 +3549,6 @@ targets:
 
   - name: Mac_arm64_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3589,7 +3557,6 @@ targets:
 
   - name: Mac_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3598,7 +3565,6 @@ targets:
 
   - name: Mac_arm64_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3607,7 +3573,6 @@ targets:
 
   - name: Mac_ios ios_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3616,7 +3581,6 @@ targets:
 
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3625,7 +3589,6 @@ targets:
 
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3634,7 +3597,6 @@ targets:
 
   - name: Mac_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3643,7 +3605,6 @@ targets:
 
   - name: Mac_arm64_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3652,7 +3613,6 @@ targets:
 
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
     timeout: 60
     properties:
@@ -3663,7 +3623,6 @@ targets:
   - name: Mac_ios microbenchmarks_impeller_ios
     recipe: devicelab/devicelab_drone
     bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3672,7 +3631,6 @@ targets:
 
   - name: Mac_ios native_platform_view_ui_tests_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3681,7 +3639,6 @@ targets:
 
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3690,7 +3647,6 @@ targets:
 
   - name: Mac_ios new_gallery_impeller_ios__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3699,7 +3655,6 @@ targets:
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3708,7 +3663,6 @@ targets:
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3717,7 +3671,6 @@ targets:
 
   - name: Mac_ios platform_channel_sample_test_swift
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3726,7 +3679,6 @@ targets:
 
   - name: Mac_ios platform_channels_benchmarks_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3735,7 +3687,6 @@ targets:
 
   - name: Mac_ios platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3744,7 +3695,6 @@ targets:
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3753,7 +3703,6 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3762,7 +3711,6 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3771,7 +3719,6 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     bringup: true
     timeout: 60
     properties:
@@ -3781,7 +3728,6 @@ targets:
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3790,7 +3736,6 @@ targets:
 
   - name: Mac_ios simple_animation_perf_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3799,7 +3744,6 @@ targets:
 
   - name: Mac_ios simple_animation_perf_impeller_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3808,7 +3752,6 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3817,7 +3760,6 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3826,7 +3768,6 @@ targets:
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3835,7 +3776,6 @@ targets:
 
   - name: Mac_ios fullscreen_textfield_perf_impeller_ios__e2e_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3844,7 +3784,6 @@ targets:
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3853,7 +3792,6 @@ targets:
 
   - name: Mac_ios tiles_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3862,7 +3800,6 @@ targets:
 
   - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3871,7 +3808,6 @@ targets:
 
   - name: Mac_ios flutter_gallery__transition_perf_e2e_impeller_ios
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3880,7 +3816,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3890,7 +3825,6 @@ targets:
   - name: Mac_ios spell_check_test
     bringup: true
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3903,7 +3837,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3922,7 +3856,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3941,7 +3875,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3969,12 +3903,11 @@ targets:
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3988,7 +3921,6 @@ targets:
 
   - name: Mac_arm64_ios run_release_test_macos
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
