@@ -7,13 +7,19 @@ import 'dart:convert';
 
 /// A callback to use with [integrationDriver].
 ///
-/// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)` and
-/// a PNG byte buffer.
+/// The callback receives the name of screenshot passed to `binding.takeScreenshot(<name>)`,
+/// a PNG byte buffer representing the screenshot, and an optional Map of arguments.
 ///
 /// The callback returns `true` if the test passes or `false` otherwise.
 ///
 /// You can use this callback to store the bytes locally in a file or upload them to a service
 /// that compares the image against a gold or baseline version.
+/// 
+/// The optional Map of arguments can be passed from the 
+/// `binding.takeScreenshot(<name>, <args>)` callsite in the integration test,
+/// and then they can be used in the `onScreenshot` handler that is defined by
+/// the Flutter driver. This Map should contain primitive types that are able to
+/// be serialized from the browser to the Flutter driver.
 ///
 /// Since the function is executed on the host driving the test, you can access any environment
 /// variable from it.
