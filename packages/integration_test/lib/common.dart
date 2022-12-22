@@ -14,8 +14,8 @@ import 'dart:convert';
 ///
 /// You can use this callback to store the bytes locally in a file or upload them to a service
 /// that compares the image against a gold or baseline version.
-/// 
-/// The optional Map of arguments can be passed from the 
+///
+/// The optional Map of arguments can be passed from the
 /// `binding.takeScreenshot(<name>, <args>)` callsite in the integration test,
 /// and then the arguments can be used in the `onScreenshot` handler that is defined by
 /// the Flutter driver. This Map should contain primitive types that are able to
