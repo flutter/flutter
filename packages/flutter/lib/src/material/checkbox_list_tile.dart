@@ -178,60 +178,7 @@ class CheckboxListTile extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-  }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null),
-       checkboxSemanticLabel = null;
-
-  /// Creates a combination of a list tile and a checkbox.
-  ///
-  /// The checkbox tile itself does not maintain any state. Instead, when the
-  /// state of the checkbox changes, the widget calls the [onChanged] callback.
-  /// Most widgets that use a checkbox will listen for the [onChanged] callback
-  /// and rebuild the checkbox tile with a new [value] to update the visual
-  /// appearance of the checkbox.
-  ///
-  /// The following arguments are required:
-  ///
-  /// * [value], which determines whether the checkbox is checked. The [value]
-  ///   can only be null if [tristate] is true.
-  /// * [onChanged], which is called when the value of the checkbox should
-  ///   change. It can be set to null to disable the checkbox.
-  /// * [checkboxSemanticLabel], which is announced in addition to title to
-  ///   if provided to provide more information.
-  ///
-  /// The value of [tristate] must not be null.
-  const CheckboxListTile.withCheckboxSemanticLabel({
-    super.key,
-    required this.value,
-    required this.onChanged,
-    this.activeColor,
-    this.checkColor,
-    this.enabled,
-    this.tileColor,
-    this.title,
-    this.subtitle,
-    this.isThreeLine = false,
-    this.dense,
-    this.secondary,
-    this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
-    this.autofocus = false,
-    this.contentPadding,
-    this.tristate = false,
-    this.shape,
-    this.checkboxShape,
-    this.selectedTileColor,
-    this.side,
-    this.visualDensity,
-    this.focusNode,
-    this.onFocusChange,
-    this.enableFeedback,
-    required this.checkboxSemanticLabel,
+    this.checkboxSemanticLabel,
   }) : assert(tristate != null),
        assert(tristate || value != null),
        assert(isThreeLine != null),
@@ -392,7 +339,7 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
-  /// {@template flutter.material.checkbox.semanticLabel}
+  /// {@macro flutter.material.checkbox.semanticLabel}
   final String? checkboxSemanticLabel;
 
   void _handleValueChange() {

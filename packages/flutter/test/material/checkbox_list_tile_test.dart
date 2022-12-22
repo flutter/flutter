@@ -545,7 +545,7 @@ void main() {
     final List<dynamic> log = <dynamic>[];
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(wrap(
-      child: CheckboxListTile.withCheckboxSemanticLabel(
+      child: CheckboxListTile(
         value: true,
         onChanged: (bool? value) { log.add(value); },
         title: const Text('Hello'),
