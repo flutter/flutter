@@ -1893,7 +1893,6 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface_factory.dar
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/text.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/util.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/vertices.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/viewport_metrics.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/clipboard.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/color_filter.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/configuration.dart + ../../../flutter/LICENSE
@@ -4344,7 +4343,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/surface_factory.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/util.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/vertices.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/viewport_metrics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/clipboard.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/configuration.dart
