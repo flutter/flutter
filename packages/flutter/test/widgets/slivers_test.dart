@@ -1168,7 +1168,7 @@ void main() {
     expect(firstTapped, 0);
     expect(secondTapped, 1);
   });
-   
+
   testWidgets('SliverFixedExtentList.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
