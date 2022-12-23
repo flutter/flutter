@@ -3952,7 +3952,7 @@ void main() {
     final Key buttonKey = UniqueKey();
     EdgeInsets? padding;
 
-    Widget build() => buildFrame(buttonKey: buttonKey, items: menuItems, onChanged: onChanged, padding: padding);
+    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged, padding: padding);
 
     await tester.pumpWidget(build());
     final RenderBox buttonBoxNoPadding = tester.renderObject<RenderBox>(find.byKey(buttonKey));
