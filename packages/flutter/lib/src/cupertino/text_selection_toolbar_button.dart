@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/cupertino/icons.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -16,7 +17,7 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   fontWeight: FontWeight.w400,
 );
 
-const double _kToolbarButtonIconSize = 16.0;
+const double _kToolbarButtonIconSize = 18.0;
 
 // Colors extracted from https://developer.apple.com/design/resources/.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
@@ -118,17 +119,51 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     }
   }
 
+  bool _shouldOnlyShowIcon() {
+    return buttonItem?.type == ContextMenuButtonType.captureText;
+  }
+
+  IconData? _getButtonIcon() {
+    if (buttonItem == null) {
+      return null;
+    }
+    switch (buttonItem!.type) {
+      case ContextMenuButtonType.cut:
+      case ContextMenuButtonType.copy:
+      case ContextMenuButtonType.paste:
+      case ContextMenuButtonType.selectAll:
+      case ContextMenuButtonType.delete:
+      case ContextMenuButtonType.custom:
+        return null;
+      case ContextMenuButtonType.captureText:
+        return CupertinoIcons.doc_text_viewfinder;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Widget child = this.child ?? Text(
-       text ?? getButtonLabel(context, buttonItem!),
-       overflow: TextOverflow.ellipsis,
-       style: _kToolbarButtonFontStyle.copyWith(
-         color: onPressed != null
-             ? _kToolbarTextColor.resolveFrom(context)
-             : CupertinoColors.inactiveGray,
-       ),
-     );
+    final Widget child;
+    if (this.child != null) {
+      child = this.child!;
+    } else {
+      if (_shouldOnlyShowIcon()) {
+        child = Icon(
+          _getButtonIcon(),
+          size: _kToolbarButtonIconSize,
+          color: _kToolbarTextColor.resolveFrom(context),
+        );
+      } else {
+        child = Text(
+          text ?? getButtonLabel(context, buttonItem!),
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle.copyWith(
+            color: onPressed != null
+                ? _kToolbarTextColor.resolveFrom(context)
+                : CupertinoColors.inactiveGray,
+          ),
+        );
+      }
+    }
 
     return CupertinoButton(
       borderRadius: null,
