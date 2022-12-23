@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../engine.dart' show buildMode, registerHotRestartListener, renderer;
+import '../engine.dart' show buildMode, renderer, window;
 import 'browser_detection.dart';
 import 'configuration.dart';
 import 'dom.dart';
@@ -14,11 +14,10 @@ import 'host_node.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding.dart';
-import 'safe_browser_api.dart';
 import 'semantics.dart';
 import 'text_editing/text_editing.dart';
-import 'util.dart';
-import 'window.dart';
+import 'view_embedder/dimensions_provider/dimensions_provider.dart';
+import 'view_embedder/embedding_strategy/embedding_strategy.dart';
 
 /// Controls the placement and lifecycle of a Flutter view on the web page.
 ///
@@ -34,34 +33,37 @@ import 'window.dart';
 /// - [sceneHostElement], the anchor that provides a stable location in the DOM
 ///   tree for the [sceneElement].
 /// - [semanticsHostElement], hosts the ARIA-annotated semantics tree.
+///
+/// This class is currently a singleton, but it'll possibly need to morph to have
+/// multiple instances in a multi-view scenario. (One ViewEmbedder per FlutterView).
 class FlutterViewEmbedder {
-  FlutterViewEmbedder() {
-    assert(() {
-      _setupHotRestart();
-      return true;
-    }());
+  /// Creates a FlutterViewEmbedder.
+  ///
+  /// The incoming [hostElement] parameter specifies the root element in the DOM
+  /// into which Flutter will be rendered.
+  ///
+  /// The hostElement is abstracted by an [EmbeddingStrategy] instance, which has
+  /// different behavior depending on the `hostElement` value:
+  ///
+  /// - A `null` `hostElement` will cause Flutter to take over the whole page.
+  /// - A non-`null` `hostElement` will render flutter inside that element.
+  FlutterViewEmbedder({DomElement? hostElement})
+      : _embeddingStrategy =
+            EmbeddingStrategy.create(hostElement: hostElement) {
+    // Configure the EngineWindow so it knows how to measure itself.
+    // TODO(dit): Refactor ownership according to new design, https://github.com/flutter/flutter/issues/117098
+    window.configureDimensionsProvider(DimensionsProvider.create(
+      hostElement: hostElement,
+    ));
+
     reset();
-    assert(() {
-      _registerHotRestartCleanUp();
-      return true;
-    }());
   }
 
+  /// Abstracts all the DOM manipulations required to embed a Flutter app in an user-supplied `hostElement`.
+  final EmbeddingStrategy _embeddingStrategy;
+
   // The tag name for the root view of the flutter app (glass-pane)
-  static const String _glassPaneTagName = 'flt-glass-pane';
-
-  /// Listens to window resize events
-  DomSubscription? _resizeSubscription;
-
-  /// Listens to window locale events.
-  DomSubscription? _localeSubscription;
-
-  /// Contains Flutter-specific CSS rules, such as default margins and
-  /// paddings.
-  DomHTMLStyleElement? _styleElement;
-
-  /// Configures the screen, such as scaling.
-  DomHTMLMetaElement? _viewportMeta;
+  static const String glassPaneTagName = 'flt-glass-pane';
 
   /// The element that contains the [sceneElement].
   ///
@@ -97,50 +99,6 @@ class FlutterViewEmbedder {
   DomElement? get sceneElement => _sceneElement;
   DomElement? _sceneElement;
 
-  /// This is state persistent across hot restarts that indicates what
-  /// to clear.  Delay removal of old visible state to make the
-  /// transition appear smooth.
-  static const String _staleHotRestartStore = '__flutter_state';
-  List<DomElement?>? _staleHotRestartState;
-
-  /// Creates a container for DOM elements that need to be cleaned up between
-  /// hot restarts.
-  ///
-  /// If a contains already exists, reuses the existing one.
-  void _setupHotRestart() {
-    // This persists across hot restarts to clear stale DOM.
-    _staleHotRestartState = getJsProperty<List<DomElement?>?>(domWindow, _staleHotRestartStore);
-    if (_staleHotRestartState == null) {
-      _staleHotRestartState = <DomElement?>[];
-      setJsProperty(
-          domWindow, _staleHotRestartStore, _staleHotRestartState);
-    }
-  }
-
-  /// Registers DOM elements that need to be cleaned up before hot restarting.
-  ///
-  /// [_setupHotRestart] must have been called prior to calling this method.
-  void _registerHotRestartCleanUp() {
-    registerHotRestartListener(() {
-      _resizeSubscription?.cancel();
-      _localeSubscription?.cancel();
-      _staleHotRestartState!.addAll(<DomElement?>[
-        _glassPaneElement,
-        _styleElement,
-        _viewportMeta,
-      ]);
-    });
-  }
-
-  void _clearOnHotRestart() {
-    if (_staleHotRestartState!.isNotEmpty) {
-      for (final DomElement? element in _staleHotRestartState!) {
-        element?.remove();
-      }
-      _staleHotRestartState!.clear();
-    }
-  }
-
   /// Don't unnecessarily move DOM nodes around. If a DOM node is
   /// already in the right place, skip DOM mutation. This is both faster and
   /// more correct, because moving DOM nodes loses internal state, such as
@@ -151,10 +109,6 @@ class FlutterViewEmbedder {
       _sceneElement = sceneElement;
       _sceneHostElement!.append(sceneElement!);
     }
-    assert(() {
-      _clearOnHotRestart();
-      return true;
-    }());
   }
 
   /// The element that captures input events, such as pointer events.
@@ -170,8 +124,6 @@ class FlutterViewEmbedder {
   HostNode? get glassPaneShadow => _glassPaneShadow;
   HostNode? _glassPaneShadow;
 
-  final DomElement rootElement = domDocument.body!;
-
   static const String defaultFontStyle = 'normal';
   static const String defaultFontWeight = 'normal';
   static const double defaultFontSize = 14;
@@ -180,106 +132,42 @@ class FlutterViewEmbedder {
       '$defaultFontStyle $defaultFontWeight ${defaultFontSize}px $defaultFontFamily';
 
   void reset() {
-    final bool isWebKit = browserEngine == BrowserEngine.webkit;
+    // How was the current renderer selected?
+    const String rendererSelection = FlutterConfiguration.flutterWebAutoDetect
+        ? 'auto-selected'
+        : 'requested explicitly';
 
-    _styleElement?.remove();
-    _styleElement = createDomHTMLStyleElement();
-    _resourcesHost?.remove();
-    _resourcesHost = null;
-    domDocument.head!.append(_styleElement!);
-    final DomCSSStyleSheet sheet = _styleElement!.sheet! as DomCSSStyleSheet;
-    applyGlobalCssRulesToSheet(
-      sheet,
-      browserEngine: browserEngine,
-      hasAutofillOverlay: browserHasAutofillOverlay(),
+    // Initializes the embeddingStrategy so it can host a single-view Flutter app.
+    _embeddingStrategy.initialize(
+      hostElementAttributes: <String, String>{
+        'flt-renderer': '${renderer.rendererTag} ($rendererSelection)',
+        'flt-build-mode': buildMode,
+        // TODO(mdebbar): Disable spellcheck until changes in the framework and
+        // engine are complete.
+        'spellcheck': 'false',
+      },
     );
 
-    final DomHTMLBodyElement bodyElement = domDocument.body!;
-
-    bodyElement.setAttribute(
-      'flt-renderer',
-      '${renderer.rendererTag} (${FlutterConfiguration.flutterWebAutoDetect ? 'auto-selected' : 'requested explicitly'})',
-    );
-    bodyElement.setAttribute('flt-build-mode', buildMode);
-
-    setElementStyle(bodyElement, 'position', 'fixed');
-    setElementStyle(bodyElement, 'top', '0');
-    setElementStyle(bodyElement, 'right', '0');
-    setElementStyle(bodyElement, 'bottom', '0');
-    setElementStyle(bodyElement, 'left', '0');
-    setElementStyle(bodyElement, 'overflow', 'hidden');
-    setElementStyle(bodyElement, 'padding', '0');
-    setElementStyle(bodyElement, 'margin', '0');
-
-    // TODO(yjbanov): fix this when KVM I/O support is added. Currently scroll
-    //                using drag, and text selection interferes.
-    setElementStyle(bodyElement, 'user-select', 'none');
-    setElementStyle(bodyElement, '-webkit-user-select', 'none');
-    setElementStyle(bodyElement, '-ms-user-select', 'none');
-    setElementStyle(bodyElement, '-moz-user-select', 'none');
-
-    // This is required to prevent the browser from doing any native touch
-    // handling. If this is not done, the browser doesn't report 'pointermove'
-    // events properly.
-    setElementStyle(bodyElement, 'touch-action', 'none');
-
-    // These are intentionally outrageous font parameters to make sure that the
-    // apps fully specify their text styles.
-    setElementStyle(bodyElement, 'font', defaultCssFont);
-    setElementStyle(bodyElement, 'color', 'red');
-
-    // TODO(mdebbar): Disable spellcheck until changes in the framework and
-    // engine are complete.
-    bodyElement.spellcheck = false;
-
-    for (final DomElement viewportMeta
-        in domDocument.head!.querySelectorAll('meta[name="viewport"]')) {
-      if (assertionsEnabled) {
-        // Filter out the meta tag that the engine placed on the page. This is
-        // to avoid UI flicker during hot restart. Hot restart will clean up the
-        // old meta tag synchronously with the first post-restart frame.
-        if (!viewportMeta.hasAttribute('flt-viewport')) {
-          print(
-            'WARNING: found an existing <meta name="viewport"> tag. Flutter '
-            'Web uses its own viewport configuration for better compatibility '
-            'with Flutter. This tag will be replaced.',
-          );
-        }
-      }
-      viewportMeta.remove();
-    }
-
-    // This removes a previously created meta tag. Note, however, that this does
-    // not remove the meta tag during hot restart. Hot restart resets all static
-    // variables, so this will be null upon hot restart. Instead, this tag is
-    // removed by _clearOnHotRestart.
-    _viewportMeta?.remove();
-    _viewportMeta = createDomHTMLMetaElement()
-      ..setAttribute('flt-viewport', '')
-      ..name = 'viewport'
-      ..content = 'width=device-width, initial-scale=1.0, '
-          'maximum-scale=1.0, user-scalable=no';
-    domDocument.head!.append(_viewportMeta!);
-
-    // IMPORTANT: the glass pane element must come after the scene element in the DOM node list so
-    //            it can intercept input events.
-    _glassPaneElement?.remove();
-    final DomElement glassPaneElement = domDocument.createElement(_glassPaneTagName);
+    // Create and inject the [_glassPaneElement].
+    final DomElement glassPaneElement =
+        domDocument.createElement(glassPaneTagName);
     _glassPaneElement = glassPaneElement;
-    glassPaneElement.style
-      ..position = 'absolute'
-      ..top = '0'
-      ..right = '0'
-      ..bottom = '0'
-      ..left = '0';
 
-    // This must be appended to the body, so the engine can create a host node
-    // properly.
-    bodyElement.append(glassPaneElement);
+    // This must be attached to the DOM now, so the engine can create a host
+    // node (ShadowDOM or a fallback) next.
+    //
+    // The embeddingStrategy will take care of cleaning up the glassPane on hot
+    // restart.
+    _embeddingStrategy.attachGlassPane(glassPaneElement);
 
     // Create a [HostNode] under the glass pane element, and attach everything
     // there, instead of directly underneath the glass panel.
-    final HostNode glassPaneElementHostNode = _createHostNode(glassPaneElement);
+    //
+    // TODO(dit): clean HostNode, https://github.com/flutter/flutter/issues/116204
+    final HostNode glassPaneElementHostNode = HostNode.create(
+      glassPaneElement,
+      defaultCssFont,
+    );
     _glassPaneShadow = glassPaneElementHostNode;
 
     // Don't allow the scene to receive pointer events.
@@ -324,67 +212,20 @@ class FlutterViewEmbedder {
     }
 
     KeyboardBinding.initInstance();
-    PointerBinding.initInstance(glassPaneElement, KeyboardBinding.instance!.converter);
+    PointerBinding.initInstance(
+      glassPaneElement,
+      KeyboardBinding.instance!.converter,
+    );
 
-    if (domWindow.visualViewport == null && isWebKit) {
-      // Older Safari versions sometimes give us bogus innerWidth/innerHeight
-      // values when the page loads. When it changes the values to correct ones
-      // it does not notify of the change via `onResize`. As a workaround, we
-      // set up a temporary periodic timer that polls innerWidth and triggers
-      // the resizeListener so that the framework can react to the change.
-      //
-      // Safari 13 has implemented visualViewport API so it doesn't need this
-      // timer.
-      //
-      // VisualViewport API is not enabled in Firefox as well. On the other hand
-      // Firefox returns correct values for innerHeight, innerWidth.
-      // Firefox also triggers domWindow.onResize therefore this timer does
-      // not need to be set up for Firefox.
-      final int initialInnerWidth = domWindow.innerWidth!.toInt();
-      // Counts how many times screen size was checked. It is checked up to 5
-      // times.
-      int checkCount = 0;
-      Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
-        checkCount += 1;
-        if (initialInnerWidth != domWindow.innerWidth) {
-          // Window size changed. Notify.
-          t.cancel();
-          _metricsDidChange(null);
-        } else if (checkCount > 5) {
-          // Checked enough times. Stop.
-          t.cancel();
-        }
-      });
-    }
-
-    if (domWindow.visualViewport != null) {
-      _resizeSubscription = DomSubscription(domWindow.visualViewport!, 'resize',
-          allowInterop(_metricsDidChange));
-    } else {
-      _resizeSubscription = DomSubscription(domWindow, 'resize',
-          allowInterop(_metricsDidChange));
-    }
-    _localeSubscription = DomSubscription(domWindow, 'languagechange',
-          allowInterop(_languageDidChange));
-    EnginePlatformDispatcher.instance.updateLocales();
-  }
-
-  // Creates a [HostNode] into a `root` [DomElement].
-  HostNode _createHostNode(DomElement root) {
-    if (getJsProperty<Object?>(root, 'attachShadow') != null) {
-      return ShadowDomHostNode(root);
-    } else {
-      // attachShadow not available, fall back to ElementHostNode.
-      return ElementHostNode(root);
-    }
+    window.onResize.listen(_metricsDidChange);
   }
 
   /// The framework specifies semantics in physical pixels, but CSS uses
   /// logical pixels. To compensate, an inverse scale is injected at the root
   /// level.
   void updateSemanticsScreenProperties() {
-    _semanticsHostElement!.style.setProperty('transform',
-        'scale(${1 / domWindow.devicePixelRatio})');
+    _semanticsHostElement!.style
+        .setProperty('transform', 'scale(${1 / window.devicePixelRatio})');
   }
 
   /// Called immediately after browser window metrics change.
@@ -396,8 +237,9 @@ class FlutterViewEmbedder {
   ///
   /// Note: always check for rotations for a mobile device. Update the physical
   /// size if the change is caused by a rotation.
-  void _metricsDidChange(DomEvent? event) {
+  void _metricsDidChange(ui.Size? newSize) {
     updateSemanticsScreenProperties();
+    // TODO(dit): Do not computePhysicalSize twice, https://github.com/flutter/flutter/issues/117036
     if (isMobile && !window.isRotation() && textEditing.isEditing) {
       window.computeOnScreenKeyboardInsets(true);
       EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
@@ -407,12 +249,6 @@ class FlutterViewEmbedder {
       window.computeOnScreenKeyboardInsets(false);
       EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
     }
-  }
-
-  /// Called immediately after browser window language change.
-  void _languageDidChange(DomEvent event) {
-    EnginePlatformDispatcher.instance.updateLocales();
-    ui.window.onLocaleChanged?.call();
   }
 
   static const String orientationLockTypeAny = 'any';
@@ -487,17 +323,6 @@ class FlutterViewEmbedder {
     }
   }
 
-  /// The element corresponding to the only child of the root surface.
-  DomElement? get _rootApplicationElement {
-    final DomElement lastElement = rootElement.children.last;
-    for (final DomElement child in lastElement.children) {
-      if (child.tagName == 'FLT-SCENE') {
-        return child;
-      }
-    }
-    return null;
-  }
-
   /// Add an element as a global resource to be referenced by CSS.
   ///
   /// This call create a global resource host element on demand and either
@@ -507,15 +332,18 @@ class FlutterViewEmbedder {
   void addResource(DomElement element) {
     final bool isWebKit = browserEngine == BrowserEngine.webkit;
     if (_resourcesHost == null) {
-      _resourcesHost = createDomHTMLDivElement()
+      final DomElement resourcesHost = domDocument
+          .createElement('flt-svg-filters')
         ..style.visibility = 'hidden';
       if (isWebKit) {
-        final DomNode bodyNode = domDocument.body!;
-        bodyNode.insertBefore(_resourcesHost!, bodyNode.firstChild);
+        // The resourcesHost *must* be a sibling of the glassPaneElement.
+        _embeddingStrategy.attachResourcesHost(resourcesHost,
+            nextTo: glassPaneElement);
       } else {
-        _glassPaneShadow!.node.insertBefore(
-            _resourcesHost!, _glassPaneShadow!.node.firstChild);
+        glassPaneShadow!.node
+            .insertBefore(resourcesHost, glassPaneShadow!.node.firstChild);
       }
+      _resourcesHost = resourcesHost;
     }
     _resourcesHost!.append(element);
   }
@@ -528,127 +356,6 @@ class FlutterViewEmbedder {
     assert(element.parentNode == _resourcesHost);
     element.remove();
   }
-
-  String get currentHtml => _rootApplicationElement?.outerHTML ?? '';
-}
-
-// Applies the required global CSS to an incoming [DomCSSStyleSheet] `sheet`.
-void applyGlobalCssRulesToSheet(
-  DomCSSStyleSheet sheet, {
-  required BrowserEngine browserEngine,
-  required bool hasAutofillOverlay,
-  String glassPaneTagName = FlutterViewEmbedder._glassPaneTagName,
-}) {
-  final bool isWebKit = browserEngine == BrowserEngine.webkit;
-  final bool isFirefox = browserEngine == BrowserEngine.firefox;
-  // TODO(web): use more efficient CSS selectors; descendant selectors are slow.
-  // More info: https://csswizardry.com/2011/09/writing-efficient-css-selectors
-
-  if (isFirefox) {
-    // For firefox set line-height, otherwise textx at same font-size will
-    // measure differently in ruler.
-    //
-    // - See: https://github.com/flutter/flutter/issues/44803
-    sheet.insertRule(
-      'flt-paragraph, flt-span {line-height: 100%;}',
-      sheet.cssRules.length.toInt(),
-    );
-  }
-
-  // This undoes browser's default painting and layout attributes of range
-  // input, which is used in semantics.
-  sheet.insertRule(
-    '''
-    flt-semantics input[type=range] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 100%;
-      position: absolute;
-      border: none;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-    }
-    ''',
-    sheet.cssRules.length.toInt(),
-  );
-
-  if (isWebKit) {
-    sheet.insertRule(
-        'flt-semantics input[type=range]::-webkit-slider-thumb {'
-        '  -webkit-appearance: none;'
-        '}',
-        sheet.cssRules.length.toInt());
-  }
-
-  if (isFirefox) {
-    sheet.insertRule(
-        'input::-moz-selection {'
-        '  background-color: transparent;'
-        '}',
-        sheet.cssRules.length.toInt());
-    sheet.insertRule(
-        'textarea::-moz-selection {'
-        '  background-color: transparent;'
-        '}',
-        sheet.cssRules.length.toInt());
-  } else {
-    // On iOS, the invisible semantic text field has a visible cursor and
-    // selection highlight. The following 2 CSS rules force everything to be
-    // transparent.
-    sheet.insertRule(
-        'input::selection {'
-        '  background-color: transparent;'
-        '}',
-        sheet.cssRules.length.toInt());
-    sheet.insertRule(
-        'textarea::selection {'
-        '  background-color: transparent;'
-        '}',
-        sheet.cssRules.length.toInt());
-  }
-  sheet.insertRule('''
-    flt-semantics input,
-    flt-semantics textarea,
-    flt-semantics [contentEditable="true"] {
-    caret-color: transparent;
-  }
-  ''', sheet.cssRules.length.toInt());
-
-  // By default on iOS, Safari would highlight the element that's being tapped
-  // on using gray background. This CSS rule disables that.
-  if (isWebKit) {
-    sheet.insertRule('''
-      $glassPaneTagName * {
-      -webkit-tap-highlight-color: transparent;
-    }
-    ''', sheet.cssRules.length.toInt());
-  }
-
-  // Hide placeholder text
-  sheet.insertRule(
-    '''
-    .flt-text-editing::placeholder {
-      opacity: 0;
-    }
-    ''',
-    sheet.cssRules.length.toInt(),
-  );
-
-  // This css prevents an autofill overlay brought by the browser during
-  // text field autofill by delaying the transition effect.
-  // See: https://github.com/flutter/flutter/issues/61132.
-  if (browserHasAutofillOverlay()) {
-    sheet.insertRule('''
-      .transparentTextEditing:-webkit-autofill,
-      .transparentTextEditing:-webkit-autofill:hover,
-      .transparentTextEditing:-webkit-autofill:focus,
-      .transparentTextEditing:-webkit-autofill:active {
-        -webkit-transition-delay: 99999s;
-      }
-    ''', sheet.cssRules.length.toInt());
-  }
 }
 
 /// The embedder singleton.
@@ -660,15 +367,17 @@ FlutterViewEmbedder get flutterViewEmbedder {
   assert(() {
     if (embedder == null) {
       throw StateError(
-        'FlutterViewEmbedder not initialized. Call `ensureFlutterViewEmbedderInitialized()` '
-        'prior to calling the `flutterViewEmbedder` getter.'
-      );
+          'FlutterViewEmbedder not initialized. Call `ensureFlutterViewEmbedderInitialized()` '
+          'prior to calling the `flutterViewEmbedder` getter.');
     }
     return true;
   }());
   return embedder!;
 }
+
 FlutterViewEmbedder? _flutterViewEmbedder;
 
 /// Initializes the [FlutterViewEmbedder], if it's not already initialized.
-FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() => _flutterViewEmbedder ??= FlutterViewEmbedder();
+FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() =>
+    _flutterViewEmbedder ??=
+        FlutterViewEmbedder(hostElement: configuration.hostElement);

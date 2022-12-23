@@ -6,6 +6,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../vector_math.dart';
+import '../window.dart';
 import 'surface.dart';
 
 class SurfaceScene implements ui.Scene {
@@ -45,12 +46,8 @@ class PersistedScene extends PersistedContainerSurface {
   @override
   void recomputeTransformAndClip() {
     // The scene clip is the size of the entire window.
-    // TODO(yjbanov): in the add2app scenario where we might be hosted inside
-    //                a custom element, this will be different. We will need to
-    //                update this code when we add add2app support.
-    final double screenWidth = domWindow.innerWidth!;
-    final double screenHeight = domWindow.innerHeight!;
-    localClipBounds = ui.Rect.fromLTRB(0, 0, screenWidth, screenHeight);
+    final ui.Size screen = window.physicalSize;
+    localClipBounds = ui.Rect.fromLTRB(0, 0, screen.width, screen.height);
     projectedClip = null;
   }
 

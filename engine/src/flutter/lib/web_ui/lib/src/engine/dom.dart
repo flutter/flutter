@@ -174,6 +174,7 @@ class DomEvent {}
 
 extension DomEventExtension on DomEvent {
   external DomEventTarget? get target;
+  external DomEventTarget? get currentTarget;
   external double? get timeStamp;
   external String get type;
   external void preventDefault();
@@ -461,6 +462,9 @@ class DomHTMLElement extends DomElement {}
 
 extension DomHTMLElementExtension on DomHTMLElement {
   external double get offsetWidth;
+  external double get offsetLeft;
+  external double get offsetTop;
+  external DomHTMLElement? get offsetParent;
 }
 
 @JS()
@@ -1089,6 +1093,8 @@ extension DomMouseEventExtension on DomMouseEvent {
   external double get clientY;
   external double get offsetX;
   external double get offsetY;
+  external double get pageX;
+  external double get pageY;
   DomPoint get client => DomPoint(clientX, clientY);
   DomPoint get offset => DomPoint(offsetX, offsetY);
   external double get button;
@@ -1312,7 +1318,10 @@ class DomStyleSheet {}
 class DomCSSStyleSheet extends DomStyleSheet {}
 
 extension DomCSSStyleSheetExtension on DomCSSStyleSheet {
-  external DomCSSRuleList get cssRules;
+  Iterable<DomCSSRule> get cssRules =>
+      createDomListWrapper<DomCSSRule>(js_util
+          .getProperty<_DomList>(this, 'cssRules'));
+
   double insertRule(String rule, [int? index]) => js_util
       .callMethod<double>(
           this, 'insertRule',
@@ -1322,6 +1331,12 @@ extension DomCSSStyleSheetExtension on DomCSSStyleSheet {
 @JS()
 @staticInterop
 class DomCSSRule {}
+
+@JS()
+@staticInterop
+extension DomCSSRuleExtension on DomCSSRule {
+  external String get cssText;
+}
 
 @JS()
 @staticInterop
@@ -1420,12 +1435,75 @@ extension DomMessageChannelExtension on DomMessageChannel {
   external DomMessagePort get port2;
 }
 
+/// ResizeObserver JS binding.
+///
+/// See: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
 @JS()
 @staticInterop
-class DomCSSRuleList {}
+abstract class DomResizeObserver {}
 
-extension DomCSSRuleListExtension on DomCSSRuleList {
-  external double get length;
+/// Creates a DomResizeObserver with a callback.
+///
+/// Internally converts the `List<dynamic>` of entries into the expected
+/// `List<DomResizeObserverEntry>`
+DomResizeObserver? createDomResizeObserver(DomResizeObserverCallbackFn fn) {
+  return domCallConstructorString('ResizeObserver', <Object?>[
+    allowInterop(
+      (List<dynamic> entries, DomResizeObserver observer) {
+        fn(entries.cast<DomResizeObserverEntry>(), observer);
+      }
+    ),
+  ]) as DomResizeObserver?;
+}
+
+/// ResizeObserver instance methods.
+///
+/// See: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#instance_methods
+extension DomResizeObserverExtension on DomResizeObserver {
+  external void disconnect();
+  external void observe(DomElement target, [DomResizeObserverObserveOptions options]);
+  external void unobserve(DomElement target);
+}
+
+/// Options object passed to the `observe` method of a [DomResizeObserver].
+///
+/// See: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver/observe#parameters
+@JS()
+@staticInterop
+@anonymous
+abstract class DomResizeObserverObserveOptions {
+  external factory DomResizeObserverObserveOptions({
+    String box,
+  });
+}
+
+/// Type of the function used to create a Resize Observer.
+typedef DomResizeObserverCallbackFn = void Function(List<DomResizeObserverEntry> entries, DomResizeObserver observer);
+
+/// The object passed to the [DomResizeObserverCallbackFn], which allows access to the new dimensions of the observed element.
+///
+/// See: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry
+@JS()
+@staticInterop
+abstract class DomResizeObserverEntry {}
+
+/// ResizeObserverEntry instance properties.
+///
+/// See: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry#instance_properties
+extension DomResizeObserverEntryExtension on DomResizeObserverEntry {
+  /// A DOMRectReadOnly object containing the new size of the observed element when the callback is run.
+  ///
+  /// Note that this is better supported than the above two properties, but it
+  /// is left over from an earlier implementation of the Resize Observer API, is
+  /// still included in the spec for web compat reasons, and may be deprecated
+  /// in future versions.
+  external DomRectReadOnly get contentRect;
+  external DomElement get target;
+  // Some more future getters:
+  //
+  // borderBoxSize
+  // contentBoxSize
+  // devicePixelContentBoxSize
 }
 
 /// A factory to create `TrustedTypePolicy` objects.
