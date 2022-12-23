@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Container(
+        child: ColoredBox(
           color: const Color(0xFF00FF00),
           child: Stack(
             children: <Widget>[

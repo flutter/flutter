@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'debug.dart';
-import 'icons.dart';
 import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
@@ -21,7 +20,17 @@ const double _kToolbarButtonIconSize = 16.0;
 
 // Colors extracted from https://developer.apple.com/design/resources/.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarBackgroundColor = Color(0xEB202020);
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
+  // This value was extracted from a screenshot of iOS 16.0.3, as light mode
+  // didn't appear in the Apple design resources assets linked above.
+  color: Color(0xEBF7F7F7),
+  darkColor: Color(0xEB202020),
+);
+
+const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.black,
+  darkColor: CupertinoColors.white,
+);
 
 // Eyeballed value.
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
@@ -36,22 +45,17 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     this.onPressed,
     required Widget this.child,
   }) : assert(child != null),
+       text = null,
        buttonItem = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
   /// a [Text] widget styled like the default iOS text selection toolbar button.
-  CupertinoTextSelectionToolbarButton.text({
+  const CupertinoTextSelectionToolbarButton.text({
     super.key,
     this.onPressed,
-    required String text,
+    required this.text,
   }) : buttonItem = null,
-       child = Text(
-         text,
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
-         ),
-       );
+       child = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] from the given
   /// [ContextMenuButtonItem].
@@ -62,6 +66,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     required ContextMenuButtonItem this.buttonItem,
   }) : assert(buttonItem != null),
        child = null,
+       text = null,
        onPressed = buttonItem.onPressed;
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
@@ -81,6 +86,10 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// [CupertinoTextSelectionToolbarButton.buttonItem].
   /// {@endtemplate}
   final ContextMenuButtonItem? buttonItem;
+
+  /// The text used in the button's label when using
+  /// [CupertinoTextSelectionToolbarButton.text].
+  final String? text;
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
@@ -103,50 +112,23 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       case ContextMenuButtonType.captureText:
         // TODO(luckysmg): Maybe need a localizion label
         return 'Capture Text';
+      case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
         return '';
     }
   }
 
-  static IconData? _getButtonIcon(BuildContext context, ContextMenuButtonItem buttonItem) {
-    switch (buttonItem.type) {
-      case ContextMenuButtonType.cut:
-      case ContextMenuButtonType.copy:
-      case ContextMenuButtonType.paste:
-      case ContextMenuButtonType.selectAll:
-      case ContextMenuButtonType.custom:
-        return null;
-      case ContextMenuButtonType.captureText:
-
-        // TODO(luckysmg): need to get iOS scan text icon, but i didn't find it in CupertinoIcons.
-        return CupertinoIcons.switch_camera;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final Widget child;
-    if (this.child != null) {
-      child = this.child!;
-    } else {
-      // If there is icon for this button, only show icon.
-      final IconData? icon = _getButtonIcon(context, buttonItem!);
-      if (icon == null) {
-        child = Text(
-          getButtonLabel(context, buttonItem!),
-          overflow: TextOverflow.ellipsis,
-          style: _kToolbarButtonFontStyle.copyWith(
-            color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
-          ),
-        );
-      } else {
-        child = Icon(
-          icon,
-          size: _kToolbarButtonIconSize,
-          color: CupertinoColors.white,
-        );
-      }
-    }
+    final Widget child = this.child ?? Text(
+       text ?? getButtonLabel(context, buttonItem!),
+       overflow: TextOverflow.ellipsis,
+       style: _kToolbarButtonFontStyle.copyWith(
+         color: onPressed != null
+             ? _kToolbarTextColor.resolveFrom(context)
+             : CupertinoColors.inactiveGray,
+       ),
+     );
 
     return CupertinoButton(
       borderRadius: null,
