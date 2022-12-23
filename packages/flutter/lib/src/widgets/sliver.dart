@@ -1107,12 +1107,12 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// zero and less than `itemCount`.
   ///
   /// {@macro flutter.widgets.ListView.builder.itemBuilder}
-  /// 
+  ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
-  /// 
+  ///
   ///
   /// The `separatorBuilder` is similar to `itemBuilder`, except it is the widget
-  /// that gets placed between itemBuilder(context, index) and itemBuilder(context, index + 1). 
+  /// that gets placed between itemBuilder(context, index) and itemBuilder(context, index + 1).
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
@@ -1121,8 +1121,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   /// {@tool snippet}
-  /// 
-  //  This example shows how to create a [SliverList] whose [Container] items
+  ///
+  /// This example shows how to create a [SliverList] whose [Container] items
   /// are separated by [Divider]s.
   ///
   /// ```dart
