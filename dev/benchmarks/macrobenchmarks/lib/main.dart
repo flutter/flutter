@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'common.dart';
 
+import 'src/animated_complex_image_filtered.dart';
 import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
@@ -82,6 +83,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         ...gradientPerfRoutes,
         kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
         kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
+        kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
       },
     );
   }
@@ -293,6 +295,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Animated complex opacity perf'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedComplexOpacityPerfRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedComplexImageFilteredPerfRouteName),
+            child: const Text('Animated complex image filtered perf'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedComplexImageFilteredPerfRouteName);
             },
           ),
           ElevatedButton(

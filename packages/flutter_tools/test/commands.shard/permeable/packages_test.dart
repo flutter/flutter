@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -211,7 +212,7 @@ void main() {
       expect(mockStdio.stdout.writes.map(utf8.decode),
         allOf(
           contains(matches(RegExp(r'Resolving dependencies in .+flutter_project\.\.\.'))),
-          contains('+ flutter 0.0.0 from sdk flutter\n'),
+          contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
           contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project!'))),
         ),
       );
@@ -220,7 +221,7 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -242,7 +243,7 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -264,7 +265,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -285,10 +286,11 @@ void main() {
       final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
-      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 1);
+      // A plugin example depends on the plugin itself, and integration_test.
+      expect((await getCommand.usageValues).commandPackagesNumberPlugins, 2);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -310,7 +312,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -332,7 +334,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -363,7 +365,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -385,7 +387,7 @@ void main() {
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -407,7 +409,7 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -429,7 +431,7 @@ void main() {
       expectModulePluginInjected(projectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -459,7 +461,7 @@ void main() {
       expectPluginInjected(exampleProjectPath);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -496,7 +498,7 @@ void main() {
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(false),
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -522,7 +524,7 @@ void main() {
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
       BotDetector: () => const FakeBotDetector(true),
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -553,7 +555,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -584,7 +586,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -613,7 +615,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{}),
       ProcessManager: () => processManager,
       Stdio: () => mockStdio,
-      Pub: () => Pub(
+      Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,

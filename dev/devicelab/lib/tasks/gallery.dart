@@ -18,11 +18,11 @@ final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration
 ///
 /// https://github.com/flutter/flutter/issues/103542
 TaskFunction createGalleryTransitionBuildTest(List<String> args, {bool semanticsEnabled = false}) {
-  return GalleryTransitionBuildTest(args, semanticsEnabled: semanticsEnabled);
+  return GalleryTransitionBuildTest(args, semanticsEnabled: semanticsEnabled).call;
 }
 
 TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
-  return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
+  return GalleryTransitionTest(semanticsEnabled: semanticsEnabled).call;
 }
 
 TaskFunction createGalleryTransitionE2EBuildTest(
@@ -39,7 +39,7 @@ TaskFunction createGalleryTransitionE2EBuildTest(
     timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
     enableImpeller: enableImpeller,
-  );
+  ).call;
 }
 
 TaskFunction createGalleryTransitionE2ETest({
@@ -56,7 +56,7 @@ TaskFunction createGalleryTransitionE2ETest({
     timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
     enableImpeller: enableImpeller,
-  );
+  ).call;
 }
 
 TaskFunction createGalleryTransitionHybridBuildTest(
@@ -67,7 +67,7 @@ TaskFunction createGalleryTransitionHybridBuildTest(
     args,
     semanticsEnabled: semanticsEnabled,
     driverFile: semanticsEnabled ? 'transitions_perf_hybrid_with_semantics_test' : 'transitions_perf_hybrid_test',
-  );
+  ).call;
 }
 
 TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
@@ -76,7 +76,7 @@ TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) 
     driverFile: semanticsEnabled
         ? 'transitions_perf_hybrid_with_semantics_test'
         : 'transitions_perf_hybrid_test',
-  );
+  ).call;
 }
 
 class GalleryTransitionTest {

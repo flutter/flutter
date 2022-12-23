@@ -140,7 +140,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
   /// The string to replace the frames with.
   ///
   /// If the same replacement string is used multiple times in a row, the
-  /// [FlutterError.defaultStackFilter] will simply update a counter after this
+  /// [FlutterError.defaultStackFilter] will insert a repeat count after this
   /// line rather than repeating it.
   final String replacement;
 
@@ -672,9 +672,7 @@ class FlutterErrorDetails with Diagnosticable {
     super.debugFillProperties(properties);
     final DiagnosticsNode verb = ErrorDescription('thrown${ context != null ? ErrorDescription(" $context") : ""}');
     final Diagnosticable? diagnosticable = _exceptionToDiagnosticable();
-    if (exception is NullThrownError) {
-      properties.add(ErrorDescription('The null value was $verb.'));
-    } else if (exception is num) {
+    if (exception is num) {
       properties.add(ErrorDescription('The number $exception was $verb.'));
     } else {
       final DiagnosticsNode errorName;

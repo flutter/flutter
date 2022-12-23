@@ -5,8 +5,9 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
+library;
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 import 'dart:ui';
 
@@ -3885,7 +3886,6 @@ void main() {
           ),
         ),
       );
-
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
       await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
@@ -3912,7 +3912,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 0),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));

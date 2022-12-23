@@ -427,7 +427,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void startTrackingPointer(int pointer, [Matrix4? transform]) {
     GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent, transform);
     _trackedPointers.add(pointer);
-    assert(!_entries.containsValue(pointer));
+    // TODO(goderbauer): Enable assert after recognizers properly clean up their defunct `_entries`, see https://github.com/flutter/flutter/issues/117356.
+    // assert(!_entries.containsKey(pointer));
     _entries[pointer] = _addPointerToArena(pointer);
   }
 

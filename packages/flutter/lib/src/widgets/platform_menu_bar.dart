@@ -954,7 +954,7 @@ enum PlatformProvidedMenuItemType {
   ///
   /// On macOS, this is the `terminate` default menu.
   ///
-  /// This menu item will simply exit the application when activated.
+  /// This menu item will exit the application when activated.
   quit,
 
   /// The system provided "Services" submenu.

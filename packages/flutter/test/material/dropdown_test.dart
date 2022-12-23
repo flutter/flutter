@@ -11,6 +11,7 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
+library;
 
 import 'dart:math' as math;
 
@@ -213,7 +214,7 @@ Widget buildDropdownWithHint({
     selectedItemBuilder: enableSelectedItemBuilder
       ? (BuildContext context) {
           return menuItems.map<Widget>((String item) {
-            return Container(
+            return ColoredBox(
               color: const Color(0xff00ff00),
               child: Text(item),
             );
@@ -1332,6 +1333,9 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+          label: 'Dismiss',
+          textDirection: TextDirection.ltr,
           children: <TestSemantics>[
             TestSemantics(
               flags: <SemanticsFlag>[
