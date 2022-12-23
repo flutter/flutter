@@ -520,6 +520,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         CupertinoIcons.search,
         size: 28.0,
         color: CupertinoColors.white,
+        semanticLabel: 'Enter select widget mode',
       ),
     );
   }

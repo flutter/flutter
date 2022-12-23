@@ -907,7 +907,10 @@ class _MaterialAppState extends State<MaterialApp> {
     return FloatingActionButton(
       onPressed: onPressed,
       mini: true,
-      child: const Icon(Icons.search),
+      child: const Icon(
+        Icons.search,
+        semanticLabel: 'Enter select widget mode',
+      ),
     );
   }
 

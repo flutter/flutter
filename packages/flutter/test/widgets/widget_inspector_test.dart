@@ -642,6 +642,38 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(paragraphText(selection.current! as RenderParagraph), equals('Child 2'));
     });
 
+    testWidgets('MaterialApp inspector select button has a semantics label',
+        (WidgetTester tester) async {
+      WidgetsApp.debugShowWidgetInspectorOverride = true;
+
+      await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+
+      // Select the scaffold widget to show the inspector select button
+      await tester.tap(find.byType(Scaffold), warnIfMissed: false);
+      await tester.pump();
+
+      expect(find.bySemanticsLabel('Enter select widget mode'), findsOneWidget);
+
+      WidgetsApp.debugShowWidgetInspectorOverride = false;
+    });
+
+    testWidgets('CupertinoApp inspector select button has a semantics label',
+        (WidgetTester tester) async {
+      WidgetsApp.debugShowWidgetInspectorOverride = true;
+
+      await tester.pumpWidget(
+        const CupertinoApp(home: CupertinoPageScaffold(child: SizedBox())),
+      );
+
+      // Select the scaffold widget to show the inspector select button
+      await tester.tap(find.byType(CupertinoPageScaffold), warnIfMissed: false);
+      await tester.pump();
+
+      expect(find.bySemanticsLabel('Enter select widget mode'), findsOneWidget);
+
+      WidgetsApp.debugShowWidgetInspectorOverride = false;
+    });
+
     test('WidgetInspectorService null id', () {
       service.disposeAllGroups();
       expect(service.toObject(null), isNull);
