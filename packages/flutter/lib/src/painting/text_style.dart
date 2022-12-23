@@ -38,6 +38,8 @@ const double _kDefaultFontSize = 14.0;
 
 /// An immutable style describing how to format and paint text.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1z6YP7YmvwA}
+///
 /// ### Bold
 ///
 /// {@tool snippet}

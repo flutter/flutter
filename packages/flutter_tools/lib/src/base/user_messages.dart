@@ -42,7 +42,7 @@ class UserMessages {
   String flutterMirrorURL(String url) => 'Flutter download mirror $url';
   String get flutterBinariesDoNotRun =>
       'Downloaded executables cannot execute on host.\n'
-      'See https://github.com/flutter/flutter/issues/6207 for more information';
+      'See https://github.com/flutter/flutter/issues/6207 for more information.';
   String get flutterBinariesLinuxRepairCommands =>
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
@@ -310,10 +310,12 @@ class UserMessages {
       'Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
       "Please ensure that $engineSourcePath is a Flutter engine 'src' directory and that "
       "you have compiled the engine in that directory, which should produce an 'out' directory";
-  String get runnerLocalEngineRequired =>
-      'You must specify --local-engine if you are using a locally built engine.';
+  String get runnerLocalEngineOrWebSdkRequired =>
+      'You must specify --local-engine or --local-web-sdk if you are using a locally built engine or web sdk.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
+  String runnerNoWebSdk(String webSdkPath) =>
+      'No Flutter web sdk found at $webSdkPath.';
   String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
       "Warning: the 'flutter' tool you are currently running is not the one from the current directory:\n"
       '  running Flutter  : $flutterRoot\n'

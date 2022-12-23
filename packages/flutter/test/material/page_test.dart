@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;

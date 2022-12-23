@@ -215,7 +215,7 @@ class CupertinoTextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration = _kDefaultRoundedBorderDecoration,
-    this.padding = const EdgeInsets.all(6.0),
+    this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
     this.placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,
@@ -362,7 +362,7 @@ class CupertinoTextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration,
-    this.padding = const EdgeInsets.all(6.0),
+    this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
     this.placeholderStyle = _kDefaultPlaceholderStyle,
     this.prefix,
@@ -1224,7 +1224,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     }
 
     final bool enabled = widget.enabled ?? true;
-    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.of(context).devicePixelRatio, 0);
+    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.devicePixelRatioOf(context), 0);
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null)

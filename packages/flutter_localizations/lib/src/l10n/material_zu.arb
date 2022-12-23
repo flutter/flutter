@@ -128,5 +128,10 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Imenyu yebha yemenyu"
+  "menuBarMenuLabel": "Imenyu yebha yemenyu",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

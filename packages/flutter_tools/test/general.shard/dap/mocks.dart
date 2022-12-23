@@ -18,6 +18,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     required FileSystem fileSystem,
     required Platform platform,
     bool simulateAppStarted = true,
+    FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart,
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
@@ -30,6 +31,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
       fileSystem: fileSystem,
       platform: platform,
       simulateAppStarted: simulateAppStarted,
+      preAppStart: preAppStart,
     );
   }
 
@@ -39,6 +41,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     required super.fileSystem,
     required super.platform,
     this.simulateAppStarted = true,
+    this.preAppStart,
   }) {
     clientChannel.listen((ProtocolMessage message) {
       _handleDapToClientMessage(message);
@@ -48,16 +51,31 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   int _seq = 1;
   final ByteStreamServerChannel clientChannel;
   final bool simulateAppStarted;
+  final FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart;
 
   late String executable;
   late List<String> processArgs;
   late Map<String, String>? env;
 
-  /// A list of all messages sent to the `flutter run` processes `stdin`.
-  final List<Map<String, Object?>> flutterMessages = <Map<String, Object?>>[];
+  final StreamController<Map<String, Object?>> _dapToClientMessagesController = StreamController<Map<String, Object?>>.broadcast();
 
-  /// The `method`s of all requests send to the `flutter run` processes `stdin`.
-  List<String> get flutterRequests => flutterMessages
+  /// A stream of all messages sent from the adapter back to the client.
+  Stream<Map<String, Object?>> get dapToClientMessages => _dapToClientMessagesController.stream;
+
+  /// A stream of all progress events sent from the adapter back to the client.
+  Stream<Map<String, Object?>> get dapToClientProgressEvents {
+    const List<String> progressEventTypes = <String>['progressStart', 'progressUpdate', 'progressEnd'];
+
+    return dapToClientMessages
+        .where((Map<String, Object?> message) => progressEventTypes.contains(message['event'] as String?));
+  }
+
+  /// A list of all messages sent from the adapter to the `flutter run` processes `stdin`.
+  final List<Map<String, Object?>> dapToFlutterMessages = <Map<String, Object?>>[];
+
+  /// The `method`s of all mesages sent to the `flutter run` processes `stdin`
+  /// by the debug adapter.
+  List<String> get dapToFlutterRequests => dapToFlutterMessages
       .map((Map<String, Object?> message) => message['method'] as String?)
       .whereNotNull()
       .toList();
@@ -74,6 +92,8 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     this.executable = executable;
     this.processArgs = processArgs;
     this.env = env;
+
+    await preAppStart?.call(this);
 
     // Simulate the app starting by triggering handling of events that Flutter
     // would usually write to stdout.
@@ -92,6 +112,8 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   /// Handles messages sent from the debug adapter back to the client.
   void _handleDapToClientMessage(ProtocolMessage message) {
+    _dapToClientMessagesController.add(message.toJson());
+
     // Pretend to be the client, delegating any reverse-requests to the relevant
     // handler that is provided by the test.
     if (message is Event && message.event == 'flutter.forwardedRequest') {
@@ -125,15 +147,25 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   /// Simulates a message emitted by the `flutter run` process by directly
   /// calling the debug adapters [handleStdout] method.
+  ///
+  /// Use [simulateRawStdout] to simulate non-daemon text output.
   void simulateStdoutMessage(Map<String, Object?> message) {
     // Messages are wrapped in a list because Flutter only processes messages
     // wrapped in brackets.
     handleStdout(jsonEncode(<Object?>[message]));
   }
 
+  /// Simulates a string emitted by the `flutter run` process by directly
+  /// calling the debug adapters [handleStdout] method.
+  ///
+  /// Use [simulateStdoutMessage] to simulate a daemon JSON message.
+  void simulateRawStdout(String output) {
+    handleStdout(output);
+  }
+
   @override
   void sendFlutterMessage(Map<String, Object?> message) {
-    flutterMessages.add(message);
+    dapToFlutterMessages.add(message);
     // Don't call super because it will try to write to the process that we
     // didn't actually spawn.
   }

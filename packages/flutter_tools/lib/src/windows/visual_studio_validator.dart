@@ -27,7 +27,7 @@ class VisualStudioValidator extends DoctorValidator {
     String? versionInfo;
 
     if (_visualStudio.isInstalled) {
-      status = ValidationType.installed;
+      status = ValidationType.success;
 
       messages.add(ValidationMessage(
           _userMessages.visualStudioLocation(_visualStudio.installLocation ?? 'unknown')
