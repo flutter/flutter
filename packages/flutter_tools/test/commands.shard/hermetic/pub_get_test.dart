@@ -194,7 +194,7 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    bool printSummaryOnly = true,
   }) async {
     fileSystem.directory(project.directory)
       .childDirectory('.dart_tool')

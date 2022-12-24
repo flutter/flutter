@@ -170,6 +170,8 @@ abstract class Pub {
   /// skipped if the package config file has a "generator" other than "pub".
   /// Defaults to true.
   /// Will also resolve dependencies in the example folder if present.
+  ///
+  /// If [printSummaryOnly] is true, pub output will be limited to summary information.
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
@@ -179,7 +181,7 @@ abstract class Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    bool printSummaryOnly = true,
   });
 
   /// Runs pub in 'batch' mode.
@@ -276,7 +278,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    bool printSummaryOnly = true,
   }) async {
     final String directory = project.directory.path;
     final File packageConfigFile = project.packageConfigFile;
@@ -350,7 +352,7 @@ class _DefaultPub implements Pub {
       directory: directory,
       failureMessage: 'pub $command failed',
       flutterRootOverride: flutterRootOverride,
-      printProgress: printProgress
+      printSummaryOnly: printSummaryOnly
     );
 
     if (!packageConfigFile.existsSync()) {
@@ -378,23 +380,26 @@ class _DefaultPub implements Pub {
   /// Uses [ProcessStartMode.normal] and [Pub._stdio] if [Pub.test] constructor
   /// was used.
   ///
+  /// If [printSummaryOnly] is true, pub output will be limited to summary information.
+  ///
   /// Prints the stdout and stderr of the whole run.
   ///
   /// Sends an analytics event.
   Future<void> _runWithStdioInherited(
     List<String> arguments, {
     required String command,
-    required bool printProgress,
     required PubContext context,
     required String directory,
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
+    bool printSummaryOnly = false,
   }) async {
     int exitCode;
 
     _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+
     try {
       final io.Process process;
       final io.Stdio? stdio = _stdio;
@@ -404,7 +409,10 @@ class _DefaultPub implements Pub {
         process = await _processUtils.start(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
-          environment: pubEnvironment,
+          environment: <String, String> {
+            ...pubEnvironment,
+            if (printSummaryOnly) 'PUB_SUMMARY_ONLY': '1',
+          },
         );
 
         final StreamSubscription<List<int>> stdoutSubscription =

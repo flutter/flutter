@@ -528,7 +528,7 @@ void main() {
         exitCode: 66,
         stderr: 'err1\nerr2\nerr3\n',
         stdout: 'out1\nout2\nout3\n',
-        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests', 'PUB_SUMMARY_ONLY': '1'},
       ),
     ]);
     final FakeStdio mockStdio = FakeStdio();
@@ -604,7 +604,7 @@ exit code: 66
         exitCode: 66,
         stderr: 'err1\nerr2\nerr3\n',
         stdout: 'out1\nout2\nout3\n',
-        environment: const <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+        environment: const <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests', 'PUB_SUMMARY_ONLY': '1'},
       ),
     ]);
 
@@ -657,6 +657,7 @@ exit code: 66
         environment: <String, String>{
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+          'PUB_SUMMARY_ONLY': '1',
         },
         stdout: "FakeCommand's env successfully matched"
       ),
@@ -728,6 +729,7 @@ exit code: 66
           'FLUTTER_ROOT': '',
           'PUB_CACHE': '/global/.pub-cache',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
+          'PUB_SUMMARY_ONLY': '1',
         },
       ),
     ]);
@@ -781,6 +783,7 @@ exit code: 66
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
           'PUB_CACHE': 'custom/pub-cache/path',
+          'PUB_SUMMARY_ONLY': '1',
         },
         stdout: "FakeCommand's env successfully matched"
       ),

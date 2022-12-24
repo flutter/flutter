@@ -537,7 +537,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
-            printProgress: false,
+            printSummaryOnly: false,
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;

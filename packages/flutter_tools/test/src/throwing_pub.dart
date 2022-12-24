@@ -31,7 +31,7 @@ class ThrowingPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    bool printSummaryOnly = true,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
