@@ -392,7 +392,7 @@ class _DefaultPub implements Pub {
     required String directory,
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
-    bool printSummaryOnly = false,
+    bool printSummaryOnly = true,
   }) async {
     int exitCode;
 
