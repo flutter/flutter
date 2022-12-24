@@ -58,6 +58,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.autofocus = false,
+    this.acceptnull=false,
   }) : assert(firstDate != null),
        assert(lastDate != null),
        assert(autofocus != null),
@@ -133,6 +134,9 @@ class InputDatePickerFormField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
+  /// whether allowed to receive null values or not, by default it is false
+  final bool acceptnull;
+
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
 }
@@ -179,7 +183,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       _inputText = localizations.formatCompactDate(_selectedDate!);
-      TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
+      TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
         textEditingValue = textEditingValue.copyWith(selection: TextSelection(
@@ -191,7 +195,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       _controller.value = textEditingValue;
     } else {
       _inputText = '';
-      _controller.value = TextEditingValue(text: _inputText!);
+      _controller.value = _controller.value.copyWith(text: _inputText);
     }
   }
 
@@ -210,7 +214,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   String? _validateDate(String? text) {
     final DateTime? date = _parseDate(text);
-    if (date == null) {
+    if (acceptnull==false && date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
     } else if (!_isValidAcceptableDate(date)) {
       return widget.errorInvalidText ?? MaterialLocalizations.of(context).dateOutOfRangeLabel;
