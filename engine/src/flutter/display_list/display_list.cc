@@ -59,12 +59,15 @@ uint32_t DisplayList::next_unique_id() {
 
 class Culler {
  public:
+  virtual ~Culler() = default;
   virtual bool init(DispatchContext& context) = 0;
   virtual void update(DispatchContext& context) = 0;
 };
-class NopCuller : public Culler {
+class NopCuller final : public Culler {
  public:
   static NopCuller instance;
+
+  ~NopCuller() = default;
 
   bool init(DispatchContext& context) override {
     // Setting next_render_index to 0 means that
@@ -78,10 +81,12 @@ class NopCuller : public Culler {
   void update(DispatchContext& context) override {}
 };
 NopCuller NopCuller::instance = NopCuller();
-class VectorCuller : public Culler {
+class VectorCuller final : public Culler {
  public:
   VectorCuller(const DlRTree* rtree, const std::vector<int>& rect_indices)
       : rtree_(rtree), cur_(rect_indices.begin()), end_(rect_indices.end()) {}
+
+  ~VectorCuller() = default;
 
   bool init(DispatchContext& context) override {
     if (cur_ < end_) {
