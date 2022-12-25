@@ -215,11 +215,9 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             return localizations.pasteButtonLabel;
           case ContextMenuButtonType.selectAll:
             return localizations.selectAllButtonLabel;
-          case ContextMenuButtonType.captureText:
-            // TODO(luckysmg): maybe need a localization text.
-            return 'Capture text';
           case ContextMenuButtonType.delete:
             return localizations.deleteButtonTooltip.toUpperCase();
+          case ContextMenuButtonType.captureText:
           case ContextMenuButtonType.custom:
             return '';
         }

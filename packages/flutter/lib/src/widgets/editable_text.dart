@@ -9,6 +9,7 @@ import 'dart:ui' as ui hide TextStyle;
 import 'package:characters/characters.dart' show CharacterRange, StringCharacters;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -2069,14 +2070,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get captureTextEnabled {
-    switch (defaultTargetPlatform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return false;
-      case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+        return false;
+      case TargetPlatform.iOS:
         return !widget.obscureText && !widget.readOnly && textEditingValue.selection.isCollapsed;
     }
   }
@@ -2477,7 +2478,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
       onCaptureText: captureTextEnabled
-        ? () => captureText(SelectionChangedCause.toolbar)
+          ? () => captureText(SelectionChangedCause.toolbar)
           : null,
     );
   }

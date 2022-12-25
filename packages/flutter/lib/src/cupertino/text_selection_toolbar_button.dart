@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/cupertino/icons.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'icons.dart';
 import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
@@ -111,8 +111,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
       case ContextMenuButtonType.captureText:
-        // TODO(luckysmg): Maybe need a localizion label
-        return 'Capture Text';
       case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
         return '';
