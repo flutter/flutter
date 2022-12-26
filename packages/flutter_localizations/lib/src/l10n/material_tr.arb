@@ -25,6 +25,7 @@
   "continueButtonLabel": "DEVAM",
   "copyButtonLabel": "Kopyala",
   "cutButtonLabel": "Kes",
+  "scanTextButtonLabel": "metni tara",
   "okButtonLabel": "Tamam",
   "pasteButtonLabel": "Yapıştır",
   "selectAllButtonLabel": "Tümünü seç",

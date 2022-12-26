@@ -117,10 +117,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     }
   }
 
-  bool _shouldOnlyShowIcon() {
-    return buttonItem?.type == ContextMenuButtonType.captureText;
-  }
-
   IconData? _getButtonIcon() {
     if (buttonItem == null) {
       return null;
@@ -144,13 +140,9 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     if (this.child != null) {
       child = this.child!;
     } else {
-      if (_shouldOnlyShowIcon()) {
-        child = Icon(
-          _getButtonIcon(),
-          size: _kToolbarButtonIconSize,
-          color: _kToolbarTextColor.resolveFrom(context),
-        );
-      } else {
+      // If this button has an icon, only show icon.
+      final IconData? icon = _getButtonIcon();
+      if (icon == null) {
         child = Text(
           text ?? getButtonLabel(context, buttonItem!),
           overflow: TextOverflow.ellipsis,
@@ -159,6 +151,12 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
                 ? _kToolbarTextColor.resolveFrom(context)
                 : CupertinoColors.inactiveGray,
           ),
+        );
+      } else {
+        child = Icon(
+          _getButtonIcon(),
+          size: _kToolbarButtonIconSize,
+          color: _kToolbarTextColor.resolveFrom(context),
         );
       }
     }

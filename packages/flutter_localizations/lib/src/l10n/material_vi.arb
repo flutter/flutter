@@ -134,5 +134,6 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "scanTextButtonLabel": "quét văn bản",
 }

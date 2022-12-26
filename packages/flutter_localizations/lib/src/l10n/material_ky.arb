@@ -25,6 +25,7 @@
   "continueButtonLabel": "УЛАНТУУ",
   "copyButtonLabel": "Көчүрүү",
   "cutButtonLabel": "Кесүү",
+  "scanTextButtonLabel": "Текстти скандоо",
   "okButtonLabel": "Макул",
   "pasteButtonLabel": "Чаптоо",
   "selectAllButtonLabel": "Баарын тандоо",
@@ -133,5 +134,5 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
 }

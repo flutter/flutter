@@ -25,6 +25,7 @@
   "continueButtonLabel": "ต่อไป",
   "copyButtonLabel": "คัดลอก",
   "cutButtonLabel": "ตัด",
+  "scanTextButtonLabel": "สแกนข้อความ",
   "okButtonLabel": "ตกลง",
   "pasteButtonLabel": "วาง",
   "selectAllButtonLabel": "เลือกทั้งหมด",

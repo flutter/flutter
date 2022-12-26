@@ -28,6 +28,7 @@ void main() {
     expect(localizations.continueButtonLabel, isNotNull);
     expect(localizations.copyButtonLabel, isNotNull);
     expect(localizations.cutButtonLabel, isNotNull);
+    expect(localizations.scanTextButtonLabel, isNotNull);
     expect(localizations.okButtonLabel, isNotNull);
     expect(localizations.pasteButtonLabel, isNotNull);
     expect(localizations.selectAllButtonLabel, isNotNull);

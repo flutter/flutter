@@ -32,6 +32,7 @@
   "continueButtonLabel": "ПРОДОЛЖИТЬ",
   "copyButtonLabel": "Копировать",
   "cutButtonLabel": "Вырезать",
+  "scanTextButtonLabel": "Сканировать текст",
   "okButtonLabel": "ОК",
   "pasteButtonLabel": "Вставить",
   "selectAllButtonLabel": "Выбрать все",
