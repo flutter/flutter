@@ -1583,7 +1583,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     switch (granularity) {
       case TextGranularity.character:
         final String text = range.textInside(fullText);
-        newPosition = _beyondTextBoundary(targetedEdge, forward, CharacterBoundary(text));
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, CharacterBoundary(text));
         result = SelectionResult.end;
         break;
       case TextGranularity.word:
@@ -1592,16 +1592,16 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           return (forward ? offset >= text.length : offset == 0)
               || !TextLayoutMetrics.isWhitespace(text.codeUnitAt(forward ? offset - 1 : offset));
         });
-        newPosition = _beyondTextBoundary(targetedEdge, forward, textBoundary);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
         result = SelectionResult.end;
         break;
       case TextGranularity.line:
-        newPosition = _toTextBoundary(targetedEdge, forward, LineBoundary(this));
+        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(this));
         result = SelectionResult.end;
         break;
       case TextGranularity.document:
         final String text = range.textInside(fullText);
-        newPosition = _beyondTextBoundary(targetedEdge, forward, DocumentBoundary(text));
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, DocumentBoundary(text));
         if (forward && newPosition.offset == range.end) {
           result = SelectionResult.next;
         } else if (!forward && newPosition.offset == range.start) {
@@ -1620,26 +1620,37 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return result;
   }
 
-  TextPosition _beyondTextBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
+  // Move **beyond** the local boundary of the given type (unless range.start or
+  // range.end is reached). Used for most TextGranularity types except for
+  // TextGranularity.line, to ensure the selection movement doesn't get stuck at
+  // a local fixed point.
+  TextPosition _moveBeyondTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
     final int newOffset = forward
-      ? textBoundary.getTrailingTextBoundaryAt(extent.offset) ?? range.end
-      : textBoundary.getLeadingTextBoundaryAt(extent.offset - 1) ?? range.start;
+      ? textBoundary.getTrailingTextBoundaryAt(end.offset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(end.offset - 1) ?? range.start;
     return TextPosition(offset: newOffset);
   }
 
-  TextPosition _toTextBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
-    assert(extent.offset >= 0);
+  // Move **to** the local boundary of the given type. Typically used for line
+  // boundaries, such that performing "move to line start" more than once never
+  // moves the selection to the previous line.
+  TextPosition _moveToTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
+    assert(end.offset >= 0);
     final int caretOffset;
-    switch (extent.affinity) {
+    switch (end.affinity) {
       case TextAffinity.upstream:
-        if (extent.offset < 1 && !forward) {
-          assert (extent.offset == 0);
+        if (end.offset < 1 && !forward) {
+          assert (end.offset == 0);
           return const TextPosition(offset: 0);
         }
-        caretOffset = math.max(0, extent.offset - 1);
+        final CharacterBoundary characterBoundary = CharacterBoundary(fullText);
+        caretOffset = math.max(
+          0,
+          characterBoundary.getLeadingTextBoundaryAt(range.start + end.offset) ?? range.start,
+        ) - 1;
         break;
       case TextAffinity.downstream:
-        caretOffset = extent.offset;
+        caretOffset = end.offset;
         break;
     }
     final int offset = forward

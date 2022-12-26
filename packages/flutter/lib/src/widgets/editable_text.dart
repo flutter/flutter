@@ -69,6 +69,10 @@ typedef EditableTextContextMenuBuilder = Widget Function(
   EditableTextState editableTextState,
 );
 
+// Signature for a function that determines the target location of the given
+// [TextPosition] after applying the given [TextBoundary].
+typedef _ApplyTextBoundary = TextPosition Function(TextPosition, bool, TextBoundary);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -4716,11 +4720,11 @@ class _CodeUnitBoundary extends TextBoundary {
 
 // -------------------------------  Text Actions -------------------------------
 class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextAction<T> {
-  _DeleteTextAction(this.state, this.textBoundary, this._applyTextBoundary);
+  _DeleteTextAction(this.state, this.getTextBoundary, this._applyTextBoundary);
 
   final EditableTextState state;
-  final TextBoundary Function() textBoundary;
-  final TextPosition Function(TextPosition, bool, TextBoundary) _applyTextBoundary;
+  final TextBoundary Function() getTextBoundary;
+  final _ApplyTextBoundary _applyTextBoundary;
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
@@ -4743,7 +4747,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
       );
     }
 
-    final int target = _applyTextBoundary(selection.base, intent.forward, textBoundary()).offset;
+    final int target = _applyTextBoundary(selection.base, intent.forward, getTextBoundary()).offset;
 
     final TextRange rangeToDelete = TextSelection(
       baseOffset: intent.forward
@@ -4764,7 +4768,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
 class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
   _UpdateTextSelectionAction(
     this.state,
-    this.textBoundary,
+    this.getTextBoundary,
     this.applyTextBoundary, {
     required this.ignoreNonCollapsedSelection,
     this.isExpand = false,
@@ -4775,8 +4779,8 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
   final bool ignoreNonCollapsedSelection;
   final bool isExpand;
   final bool extentAtIndex;
-  final TextBoundary Function() textBoundary;
-  final TextPosition Function(TextPosition, bool, TextBoundary) applyTextBoundary;
+  final TextBoundary Function() getTextBoundary;
+  final _ApplyTextBoundary applyTextBoundary;
 
   static const int NEWLINE_CODE_UNIT = 10;
 
@@ -4832,7 +4836,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     }
 
     final bool shouldTargetBase = isExpand && (intent.forward ? selection.baseOffset > selection.extentOffset : selection.baseOffset < selection.extentOffset);
-    final TextPosition newExtent = applyTextBoundary(shouldTargetBase ? selection.base : extent, intent.forward, textBoundary());
+    final TextPosition newExtent = applyTextBoundary(shouldTargetBase ? selection.base : extent, intent.forward, getTextBoundary());
     final TextSelection newSelection = collapseSelection || (!isExpand && newExtent.offset == selection.baseOffset)
       ? TextSelection.fromPosition(newExtent)
       : isExpand ? selection.expandTo(newExtent, extentAtIndex || selection.isCollapsed) : selection.extendTo(newExtent);
