@@ -71,6 +71,22 @@
     "description": "The tooltip for the button that shows a popup menu."
   },
 
+  "scrimLabel": "Scrim",
+  "@scrimLabel": {
+    "description": "The label for the scrim rendered underneath the content of a modal route."
+  },
+
+  "bottomSheetLabel": "Bottom Sheet",
+  "@bottomSheetLabel": {
+    "description": "The label for a BottomSheet."
+  },
+
+  "scrimOnTapHint": "Close $modalRouteContentName",
+  "@scrimOnTapHint": {
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route which users can tap to dismiss the content",
+    "parameters": "modalRouteContentName"
+  },
+
   "aboutListTileTitle": "About $applicationName",
   "@aboutListTileTitle": {
     "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
