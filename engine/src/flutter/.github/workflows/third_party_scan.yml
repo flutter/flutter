@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: setup python
-        uses: actions/setup-python@98f2ad02fd48d057ee3b4d4f66525b231c3e52b6
+        uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912
         with:
           python-version: '3.7.7' # install the python version needed
 
