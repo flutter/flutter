@@ -25,6 +25,7 @@
   "continueButtonLabel": "TIẾP TỤC",
   "copyButtonLabel": "Sao chép",
   "cutButtonLabel": "Cắt",
+  "scanTextButtonLabel": "quét văn bản",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Dán",
   "selectAllButtonLabel": "Chọn tất cả",
@@ -134,6 +135,5 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName",
-  "keyboardKeyShift": "Shift",
-  "scanTextButtonLabel": "quét văn bản",
+  "keyboardKeyShift": "Shift"
 }
