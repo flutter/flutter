@@ -792,7 +792,7 @@ void main() {
   test('Generated service worker correctly inlines file hashes', () {
     final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'}, <String>[], serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst);
 
-    expect(result, contains('{\n  "/foo": "abcd"\n};'));
+    expect(result, contains('{"/foo": "abcd"};'));
   });
 
   test('Generated service worker includes core files', () {
@@ -851,6 +851,15 @@ void main() {
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
       contains('"main.dart.js"'));
   }));
+
+  test('flutter.js sanity checks', () {
+    final String flutterJsContents = flutter_js.generateFlutterJsFile();
+    expect(flutterJsContents, contains('"use strict";'));
+    expect(flutterJsContents, contains('"main.dart.js"'));
+    expect(flutterJsContents, contains('flutter_service_worker.js?v='));
+    expect(flutterJsContents, contains('document.createElement("script")'));
+    expect(flutterJsContents, contains('"application/javascript"'));
+  });
 
   test('flutter.js is not dynamically generated', () => testbed.run(() async {
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/foo')
