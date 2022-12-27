@@ -53,7 +53,7 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Tolerance toleranceFor(ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
+  Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
 void main() {

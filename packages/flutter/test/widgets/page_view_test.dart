@@ -1048,7 +1048,6 @@ void main() {
       viewportDimension: 25.0,
       axisDirection: AxisDirection.right,
       viewportFraction: 1.0,
-      devicePixelRatio: tester.binding.window.devicePixelRatio,
     );
     expect(page.page, 6);
     final PageMetrics page2 = page.copyWith(

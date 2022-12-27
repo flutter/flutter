@@ -371,14 +371,14 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
     return _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
 
-  Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity, ScrollMetrics metrics) {
+  Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: toleranceFor(metrics));
+    return ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: tolerance);
   }
 
-  Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity, ScrollMetrics metrics) {
+  Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: toleranceFor(metrics));
+    return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
   }
 
   @override
@@ -396,10 +396,10 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
         return simulation;
       }
       if (dragVelocity > 0.0) {
-        return _toMidScrollOffsetSimulation(offset, dragVelocity, position);
+        return _toMidScrollOffsetSimulation(offset, dragVelocity);
       }
       if (dragVelocity < 0.0) {
-        return _toZeroScrollOffsetSimulation(offset, dragVelocity, position);
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
       }
     } else {
       // The user ended the drag with little or no velocity. If they
@@ -408,10 +408,10 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       // otherwise snap to zero.
       final double snapThreshold = midScrollOffset / 2.0;
       if (offset >= snapThreshold && offset < midScrollOffset) {
-        return _toMidScrollOffsetSimulation(offset, dragVelocity, position);
+        return _toMidScrollOffsetSimulation(offset, dragVelocity);
       }
       if (offset > 0.0 && offset < snapThreshold) {
-        return _toZeroScrollOffsetSimulation(offset, dragVelocity, position);
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
       }
     }
     return simulation;
