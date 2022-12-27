@@ -1941,14 +1941,26 @@ Future<void> setWidgetForTooltipMode(
   );
 }
 
-void _flutterEventToLeakTracker(ObjectEvent event) => dispatchObjectEvent(event.toMap());
-
-void _directFlutterEventsToLeakTracker() {
+/// The helper lives temporary in this library.
+///
+/// We will need to move it to shared place,
+/// keeping dependency on leak_traker staying in `dev_dependencies`.
+Future<Leaks> _testWidgetsWithLeakTracking(
+  Future<void> Function() callback, {
+  bool throwOnLeaks = true,
+  Duration? timeoutForFinalGarbageCollection,
+  StackTraceCollectionConfig stackTraceCollectionConfig =
+      const StackTraceCollectionConfig(),
+}) async {
+  void _flutterEventToLeakTracker(ObjectEvent event) => dispatchObjectEvent(event.toMap());
   MemoryAllocations.instance.addListener(_flutterEventToLeakTracker);
-}
 
-void _stopDirectingFlutterEventsToLeakTracker() {
-  MemoryAllocations.instance.removeListener(_flutterEventToLeakTracker);
+  try {
+    await callback();
+
+  } finally {
+    MemoryAllocations.instance.removeListener(_flutterEventToLeakTracker);
+  }
 }
 
 Future<void> _testGestureLongPress(WidgetTester tester, Finder tooltip) async {
@@ -1970,3 +1982,5 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
   }
   return _findDebugSemantics(object.parent! as RenderObject);
 }
+
+
