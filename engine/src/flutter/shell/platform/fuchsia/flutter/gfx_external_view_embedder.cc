@@ -327,8 +327,17 @@ void GfxExternalViewEmbedder::SubmitFrame(
         const float view_elevation =
             kScenicZElevationBetweenLayers * scenic_layer_index +
             embedded_views_height;
-        FML_CHECK(view_mutators.total_transform ==
-                  view_params.transformMatrix());
+
+        if (view_mutators.total_transform != view_params.transformMatrix()) {
+          FML_LOG(ERROR) << "Failed assertion: view_mutators.total_transform "
+                            "!= view_params.transformMatrix()";
+          FML_LOG(ERROR) << "view_mutators.total_transform:";
+          view_mutators.total_transform.dump();
+          FML_LOG(ERROR) << "view_params.transformMatrix():";
+          view_params.transformMatrix().dump();
+          FML_LOG(FATAL) << "view_mutators.total_transform "
+                            "!= view_params.transformMatrix()";
+        }
 
         // Set clips for the platform view.
         if (view_mutators.clips != view_holder.mutators.clips) {
