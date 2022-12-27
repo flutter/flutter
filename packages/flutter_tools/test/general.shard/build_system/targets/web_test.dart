@@ -855,10 +855,11 @@ void main() {
   test('flutter.js sanity checks', () {
     final String flutterJsContents = flutter_js.generateFlutterJsFile();
     expect(flutterJsContents, contains('"use strict";'));
-    expect(flutterJsContents, contains('"main.dart.js"'));
+    expect(flutterJsContents, contains('main.dart.js'));
     expect(flutterJsContents, contains('flutter_service_worker.js?v='));
     expect(flutterJsContents, contains('document.createElement("script")'));
     expect(flutterJsContents, contains('"application/javascript"'));
+    expect(flutterJsContents, contains('document.baseURI'));
   });
 
   test('flutter.js is not dynamically generated', () => testbed.run(() async {

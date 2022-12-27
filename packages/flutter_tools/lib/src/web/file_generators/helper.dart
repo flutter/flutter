@@ -12,7 +12,7 @@ import '../../cache.dart';
 String get _flutterRoot => Cache.defaultFlutterRoot(
       platform: const LocalPlatform(),
       fileSystem: const LocalFileSystem(),
-      userMessages: userMessages,
+      userMessages: UserMessages(),
     );
 
 final String fileGeneratorsRoot = path.join(
