@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -514,6 +515,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     setState(() {
       _childHidden = true;
     });
+
+    HapticFeedback.mediumImpact();
 
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
@@ -1373,27 +1376,24 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(_kPadding),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: GestureDetector(
-            onPanEnd: _onPanEnd,
-            onPanStart: _onPanStart,
-            onPanUpdate: _onPanUpdate,
-            child: AnimatedBuilder(
-              animation: _moveController,
-              builder: _buildAnimation,
-              child: widget.orientation == Orientation.portrait
-                ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                )
-                : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                ),
-            ),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: GestureDetector(
+          onPanEnd: _onPanEnd,
+          onPanStart: _onPanStart,
+          onPanUpdate: _onPanUpdate,
+          child: AnimatedBuilder(
+            animation: _moveController,
+            builder: _buildAnimation,
+            child: widget.orientation == Orientation.portrait
+              ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              )
+              : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              ),
           ),
         ),
       ),

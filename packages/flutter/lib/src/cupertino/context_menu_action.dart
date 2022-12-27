@@ -57,12 +57,12 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
   );
-  static const double _kButtonHeight = 56.0;
+  static const double _kButtonHeight = 37.0;
   static const TextStyle _kActionSheetActionStyle = TextStyle(
     fontFamily: '.SF UI Text',
     inherit: false,
-    fontSize: 20.0,
-    fontWeight: FontWeight.w400,
+    fontSize: 14.0,
+    fontWeight: FontWeight.w500,
     color: CupertinoColors.black,
     textBaseline: TextBaseline.alphabetic,
   );
@@ -128,8 +128,8 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
                   : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
               ),
               padding: const EdgeInsets.symmetric(
-                vertical: 16.0,
-                horizontal: 10.0,
+                vertical: 8.0,
+                horizontal: 15.0,
               ),
               child: DefaultTextStyle(
                 style: _textStyle,
@@ -143,6 +143,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
                       Icon(
                         widget.trailingIcon,
                         color: _textStyle.color,
+                        size: 19.0,
                       ),
                   ],
                 ),
