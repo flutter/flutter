@@ -148,7 +148,6 @@ void main() {
       pixels: 0.0,
       viewportDimension: 100.0,
       axisDirection: AxisDirection.down,
-      devicePixelRatio: tester.binding.window.devicePixelRatio,
     );
     scrollPainter!.update(metrics, AxisDirection.down);
 
