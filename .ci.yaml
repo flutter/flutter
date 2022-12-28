@@ -3285,6 +3285,7 @@ targets:
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3293,6 +3294,7 @@ targets:
 
   - name: Mac_ios backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3301,6 +3303,7 @@ targets:
 
   - name: Mac_ios backdrop_filter_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3309,6 +3312,7 @@ targets:
 
   - name: Mac_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3317,6 +3321,7 @@ targets:
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3325,6 +3330,7 @@ targets:
 
   - name: Mac_ios complex_layout_ios__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3333,6 +3339,7 @@ targets:
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3341,6 +3348,7 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3349,6 +3357,7 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_bad_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     bringup: true
     timeout: 60
     properties:
@@ -3358,6 +3367,7 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_bad_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3366,6 +3376,7 @@ targets:
 
   - name: Mac_ios complex_layout_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3374,6 +3385,7 @@ targets:
 
   - name: Mac_ios color_filter_and_fade_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3382,6 +3394,7 @@ targets:
 
   - name: Mac_ios color_filter_and_fade_perf_impeller_ios__e2e_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3390,6 +3403,7 @@ targets:
 
   - name: Mac_ios imagefiltered_transform_animation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3398,6 +3412,7 @@ targets:
 
   - name: Mac_ios imagefiltered_transform_animation_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3407,6 +3422,7 @@ targets:
   - name: Mac_ios external_ui_integration_test_ios
     bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3416,6 +3432,7 @@ targets:
 
   - name: Mac_ios route_test_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3424,6 +3441,7 @@ targets:
 
   - name: Mac_ios flavors_test_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3432,6 +3450,7 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3440,6 +3459,7 @@ targets:
 
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3448,6 +3468,7 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3456,6 +3477,7 @@ targets:
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3464,6 +3486,7 @@ targets:
 
   - name: Mac_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3472,6 +3495,7 @@ targets:
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3491,6 +3515,7 @@ targets:
 
   - name: Mac_arm64_ios hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3501,6 +3526,7 @@ targets:
 
   - name: Mac_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3509,6 +3535,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3517,6 +3544,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3525,6 +3553,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_keyboard_resize
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3533,6 +3562,7 @@ targets:
 
   - name: Mac_ios integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3541,6 +3571,7 @@ targets:
 
   - name: Mac_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3549,6 +3580,7 @@ targets:
 
   - name: Mac_arm64_ios ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3557,6 +3589,7 @@ targets:
 
   - name: Mac_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3565,6 +3598,7 @@ targets:
 
   - name: Mac_arm64_ios ios_content_validation_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3573,6 +3607,7 @@ targets:
 
   - name: Mac_ios ios_defines_test
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3581,6 +3616,7 @@ targets:
 
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3589,6 +3625,7 @@ targets:
 
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3597,6 +3634,7 @@ targets:
 
   - name: Mac_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3605,6 +3643,7 @@ targets:
 
   - name: Mac_arm64_ios macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3613,6 +3652,7 @@ targets:
 
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
     timeout: 60
     properties:
@@ -3623,6 +3663,7 @@ targets:
   - name: Mac_ios microbenchmarks_impeller_ios
     recipe: devicelab/devicelab_drone
     bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3631,6 +3672,7 @@ targets:
 
   - name: Mac_ios native_platform_view_ui_tests_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3639,6 +3681,7 @@ targets:
 
   - name: Mac_ios new_gallery_ios__transition_perf
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3647,6 +3690,7 @@ targets:
 
   - name: Mac_ios new_gallery_impeller_ios__transition_perf
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3655,6 +3699,7 @@ targets:
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3663,6 +3708,7 @@ targets:
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3671,6 +3717,7 @@ targets:
 
   - name: Mac_ios platform_channel_sample_test_swift
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3679,6 +3726,7 @@ targets:
 
   - name: Mac_ios platform_channels_benchmarks_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3687,6 +3735,7 @@ targets:
 
   - name: Mac_ios platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3695,6 +3744,7 @@ targets:
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3703,6 +3753,7 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3711,6 +3762,7 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3719,6 +3771,7 @@ targets:
 
   - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     bringup: true
     timeout: 60
     properties:
@@ -3728,6 +3781,7 @@ targets:
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3736,6 +3790,7 @@ targets:
 
   - name: Mac_ios simple_animation_perf_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3744,6 +3799,7 @@ targets:
 
   - name: Mac_ios simple_animation_perf_impeller_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3752,6 +3808,7 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3760,6 +3817,7 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3768,6 +3826,7 @@ targets:
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3776,6 +3835,7 @@ targets:
 
   - name: Mac_ios fullscreen_textfield_perf_impeller_ios__e2e_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3784,6 +3844,7 @@ targets:
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3792,6 +3853,7 @@ targets:
 
   - name: Mac_ios tiles_scroll_perf_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3800,6 +3862,7 @@ targets:
 
   - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3808,6 +3871,7 @@ targets:
 
   - name: Mac_ios flutter_gallery__transition_perf_e2e_impeller_ios
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3816,6 +3880,7 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3825,6 +3890,7 @@ targets:
   - name: Mac_ios spell_check_test
     bringup: true
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3903,6 +3969,7 @@ targets:
 
   - name: Mac run_release_test_macos
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
@@ -3921,6 +3988,7 @@ targets:
 
   - name: Mac_arm64_ios run_release_test_macos
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
