@@ -874,6 +874,14 @@ void main() {
       expect(result.passed, true);
       handle.dispose();
     });
+
+    testWidgets('Passes if text field does not have label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(const TextField()));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
   });
 
   testWidgets('regression test for material widget',

@@ -546,7 +546,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// should search for annotations, or if the layer has its own annotations to
   /// add.
   ///
-  /// The default implementation simply returns `false`, which means neither
+  /// The default implementation always returns `false`, which means neither
   /// the layer nor its children has annotations, and the annotation search
   /// is not absorbed either (see below for explanation).
   ///
@@ -602,7 +602,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns null if no matching annotations are found.
   ///
-  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// By default this method calls [findAnnotations] with `onlyFirst:
   /// true` and returns the annotation of the first result. Prefer overriding
   /// [findAnnotations] instead of this method, because during an annotation
   /// search, only [findAnnotations] is recursively called, while custom
@@ -628,7 +628,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns a result with empty entries if no matching annotations are found.
   ///
-  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// By default this method calls [findAnnotations] with `onlyFirst:
   /// false` and returns the annotations of its result. Prefer overriding
   /// [findAnnotations] instead of this method, because during an annotation
   /// search, only [findAnnotations] is recursively called, while custom
@@ -650,9 +650,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Override this method to upload this layer to the engine.
-  ///
-  /// Return the engine layer for retained rendering. When there's no
-  /// corresponding engine layer, null is returned.
   @protected
   void addToScene(ui.SceneBuilder builder);
 
@@ -1819,13 +1816,14 @@ class ColorFilterLayer extends ContainerLayer {
 }
 
 /// A composite layer that applies an [ImageFilter] to its children.
-class ImageFilterLayer extends ContainerLayer {
+class ImageFilterLayer extends OffsetLayer {
   /// Creates a layer that applies an [ImageFilter] to its children.
   ///
   /// The [imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.
   ImageFilterLayer({
     ui.ImageFilter? imageFilter,
+    super.offset,
   }) : _imageFilter = imageFilter;
 
   /// The image filter to apply to children.
@@ -1847,6 +1845,7 @@ class ImageFilterLayer extends ContainerLayer {
     assert(imageFilter != null);
     engineLayer = builder.pushImageFilter(
       imageFilter!,
+      offset: offset,
       oldLayer: _engineLayer as ui.ImageFilterEngineLayer?,
     );
     addChildrenToScene(builder);
@@ -2503,6 +2502,8 @@ class LeaderLayer extends ContainerLayer {
         Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder);
     if (offset != Offset.zero) {

@@ -222,7 +222,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive because it requires painting the child into an intermediate
-/// buffer. For the value 0.0, the child is simply not painted at all. For the
+/// buffer. For the value 0.0, the child is not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 ///
 /// The presence of the intermediate buffer which has a transparent background
@@ -539,6 +539,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///  * [ImageFiltered], which applies an [ImageFilter] to its child.
 ///  * [DecoratedBox], which draws a background under (or over) a widget.
 ///  * [Opacity], which changes the opacity of the widget itself.
+///  * https://flutter.dev/go/ios-platformview-backdrop-filter-blur for details and restrictions when an iOS PlatformView needs to be blurred.
 class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
@@ -1273,7 +1274,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 /// top right corner pinned to its original position.
 ///
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.black,
 ///   child: Transform(
 ///     alignment: Alignment.topRight,
@@ -1895,7 +1896,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// ### Why use a [Padding] widget rather than a [Container] with a [Container.padding] property?
 ///
 /// There isn't really any difference between the two. If you supply a
-/// [Container.padding] argument, [Container] simply builds a [Padding] widget
+/// [Container.padding] argument, [Container] builds a [Padding] widget
 /// for you.
 ///
 /// [Container] doesn't implement its properties directly. Instead, [Container]
@@ -1906,7 +1907,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// convenient, feel free to use it. If not, feel free to build these simpler
 /// widgets in whatever combination meets your needs.
 ///
-/// In fact, the majority of widgets in Flutter are simply combinations of other
+/// In fact, the majority of widgets in Flutter are combinations of other
 /// simpler widgets. Composition, rather than inheritance, is the primary
 /// mechanism for building up widgets.
 ///
@@ -4384,6 +4385,10 @@ class PositionedDirectional extends StatelessWidget {
 /// you have some widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [ListView].
 ///
+/// The [Flex] widget does not allow its children to wrap across multiple
+/// horizontal or vertical runs. For a widget that allows its children to wrap,
+/// consider using the [Wrap] widget instead of [Flex].
+///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
 ///
@@ -4394,8 +4399,8 @@ class PositionedDirectional extends StatelessWidget {
 ///
 /// Layout for a [Flex] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor (e.g., those that are not
-///    [Expanded]) with unbounded main axis constraints and the incoming
+/// 1. Layout each child with a null or zero flex factor (e.g., those that are
+///    not [Expanded]) with unbounded main axis constraints and the incoming
 ///    cross axis constraints. If the [crossAxisAlignment] is
 ///    [CrossAxisAlignment.stretch], instead use tight cross axis constraints
 ///    that match the incoming max extent in the cross axis.
@@ -4433,6 +4438,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
+///  * [Wrap], for a widget that allows its children to wrap over multiple _runs_.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
@@ -4770,8 +4776,8 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// Layout for a [Row] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor (e.g., those that are not
-///    [Expanded]) with unbounded horizontal constraints and the incoming
+/// 1. Layout each child with a null or zero flex factor (e.g., those that are
+///    not [Expanded]) with unbounded horizontal constraints and the incoming
 ///    vertical constraints. If the [crossAxisAlignment] is
 ///    [CrossAxisAlignment.stretch], instead use tight vertical constraints that
 ///    match the incoming max height.
@@ -4961,8 +4967,8 @@ class Row extends Flex {
 ///
 /// Layout for a [Column] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor (e.g., those that are not
-///    [Expanded]) with unbounded vertical constraints and the incoming
+/// 1. Layout each child with a null or zero flex factor (e.g., those that are
+///    not [Expanded]) with unbounded vertical constraints and the incoming
 ///    horizontal constraints. If the [crossAxisAlignment] is
 ///    [CrossAxisAlignment.stretch], instead use tight horizontal constraints
 ///    that match the incoming max width.
@@ -5433,7 +5439,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// Rather than positioning the children during layout, the children are
 /// positioned using transformation matrices during the paint phase using the
 /// matrices from the [FlowDelegate.paintChildren] function. The children can be
-/// repositioned efficiently by simply repainting the flow, which happens
+/// repositioned efficiently by only _repainting_ the flow, which happens
 /// without the children being laid out again (contrast this with a [Stack],
 /// which does the sizing and positioning together during layout).
 ///
@@ -6474,7 +6480,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// Because the widget conditionally creates the `MouseRegion`, and leaks the
   /// hover state, it needs to take the restriction into consideration. In this
   /// case, since it has access to the event that triggers the disappearance of
-  /// the `MouseRegion`, it simply trigger the exit callback during that event
+  /// the `MouseRegion`, it triggers the exit callback during that event
   /// as well.
   ///
   /// ** See code in examples/api/lib/widgets/basic/mouse_region.on_exit.1.dart **
@@ -6842,7 +6848,7 @@ class MetaData extends SingleChildRenderObjectWidget {
 /// A widget that annotates the widget tree with a description of the meaning of
 /// the widgets.
 ///
-/// Used by accessibility tools, search engines, and other semantic analysis
+/// Used by assitive technologies, search engines, and other semantic analysis
 /// software to determine the meaning of the application.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=NvtMt_DtFrQ}
@@ -7367,8 +7373,8 @@ class KeyedSubtree extends StatelessWidget {
 /// )
 /// ```
 ///
-/// The difference between either of the previous examples and simply
-/// creating a child directly, without an intervening widget, is the
+/// The difference between either of the previous examples and
+/// creating a child directly without an intervening widget, is the
 /// extra [BuildContext] element that the additional widget adds. This
 /// is particularly noticeable when the tree contains an inherited
 /// widget that is referred to by a method like [Scaffold.of],
@@ -7458,8 +7464,6 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// variables that represents state should be kept outside the [builder] function.
 ///
 /// {@tool snippet}
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=syvT63CosNE}
 ///
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.

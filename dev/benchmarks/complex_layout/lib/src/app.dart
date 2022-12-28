@@ -524,7 +524,7 @@ class ItemGalleryBox extends StatelessWidget {
                         child: Column(
                           children: <Widget>[
                             Expanded(
-                              child: Container(
+                              child: ColoredBox(
                                 color: Theme.of(context).primaryColor,
                                 child: Center(
                                   child: Text(tabName, style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white)),

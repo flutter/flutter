@@ -57,11 +57,52 @@ _flutter.loader = null;
   }
 
   /**
+   * Handles the creation of a TrustedTypes `policy` that validates URLs based
+   * on an (optional) incoming array of RegExes.
+   */
+  class FlutterTrustedTypesPolicy {
+    /**
+     * Constructs the policy.
+     * @param {[RegExp]} validPatterns the patterns to test URLs
+     * @param {String} policyName the policy name (optional)
+     */
+    constructor(validPatterns, policyName = "flutter-js") {
+      const patterns = validPatterns || [
+        /\.dart\.js$/,
+        /^flutter_service_worker.js$/
+      ];
+      if (window.trustedTypes) {
+        this.policy = trustedTypes.createPolicy(policyName, {
+          createScriptURL: function(url) {
+            const parsed = new URL(url, window.location);
+            const file = parsed.pathname.split("/").pop();
+            const matches = patterns.some((pattern) => pattern.test(file));
+            if (matches) {
+              return parsed.toString();
+            }
+            console.error(
+              "URL rejected by TrustedTypes policy",
+              policyName, ":", url, "(download prevented)");
+          }
+        });
+      }
+    }
+  }
+
+  /**
    * Handles loading/reloading Flutter's service worker, if configured.
    *
    * @see: https://developers.google.com/web/fundamentals/primers/service-workers
    */
   class FlutterServiceWorkerLoader {
+    /**
+     * Injects a TrustedTypesPolicy (or undefined if the feature is not supported).
+     * @param {TrustedTypesPolicy | undefined} policy
+     */
+    setTrustedTypesPolicy(policy) {
+      this._ttPolicy = policy;
+    }
+
     /**
      * Returns a Promise that resolves when the latest Flutter service worker,
      * configured by `settings` has been loaded and activated.
@@ -84,8 +125,14 @@ _flutter.loader = null;
         timeoutMillis = 4000,
       } = settings;
 
+      // Apply the TrustedTypes policy, if present.
+      let url = serviceWorkerUrl;
+      if (this._ttPolicy != null) {
+        url = this._ttPolicy.createScriptURL(url);
+      }
+
       const serviceWorkerActivation = navigator.serviceWorker
-        .register(serviceWorkerUrl)
+        .register(url)
         .then(this._getNewServiceWorker)
         .then(this._waitForServiceWorkerActivation);
 
@@ -171,6 +218,14 @@ _flutter.loader = null;
     constructor() {
       // Watchdog to prevent injecting the main entrypoint multiple times.
       this._scriptLoaded = false;
+    }
+
+    /**
+     * Injects a TrustedTypesPolicy (or undefined if the feature is not supported).
+     * @param {TrustedTypesPolicy | undefined} policy
+     */
+    setTrustedTypesPolicy(policy) {
+      this._ttPolicy = policy;
     }
 
     /**
@@ -262,7 +317,12 @@ _flutter.loader = null;
     _createScriptTag(url) {
       const scriptTag = document.createElement("script");
       scriptTag.type = "application/javascript";
-      scriptTag.src = url;
+      // Apply TrustedTypes validation, if available.
+      let trustedUrl = url;
+      if (this._ttPolicy != null) {
+        trustedUrl = this._ttPolicy.createScriptURL(url);
+      }
+      scriptTag.src = trustedUrl;
       return scriptTag;
     }
   }
@@ -285,9 +345,13 @@ _flutter.loader = null;
     async loadEntrypoint(options) {
       const { serviceWorker, ...entrypoint } = options || {};
 
+      // A Trusted Types policy that is going to be used by the loader.
+      const flutterTT = new FlutterTrustedTypesPolicy();
+
       // The FlutterServiceWorkerLoader instance could be injected as a dependency
       // (and dynamically imported from a module if not present).
       const serviceWorkerLoader = new FlutterServiceWorkerLoader();
+      serviceWorkerLoader.setTrustedTypesPolicy(flutterTT.policy);
       await serviceWorkerLoader.loadServiceWorker(serviceWorker).catch(e => {
         // Regardless of what happens with the injection of the SW, the show must go on
         console.warn("Exception while loading service worker:", e);
@@ -296,6 +360,7 @@ _flutter.loader = null;
       // The FlutterEntrypointLoader instance could be injected as a dependency
       // (and dynamically imported from a module if not present).
       const entrypointLoader = new FlutterEntrypointLoader();
+      entrypointLoader.setTrustedTypesPolicy(flutterTT.policy);
       // Install the `didCreateEngineInitializer` listener where Flutter web expects it to be.
       this.didCreateEngineInitializer =
         entrypointLoader.didCreateEngineInitializer.bind(entrypointLoader);

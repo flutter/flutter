@@ -148,12 +148,14 @@ void main() {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
+    const Color modalBarrierColor = Colors.blue;
     const Color persistentBackgroundColor = Colors.red;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       elevation: persistentElevation,
       modalElevation: modalElevation,
       backgroundColor: persistentBackgroundColor,
       modalBackgroundColor: modalBackgroundColor,
+      modalBarrierColor:modalBarrierColor,
     );
 
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
@@ -168,6 +170,9 @@ void main() {
     );
     expect(material.elevation, modalElevation);
     expect(material.color, modalBackgroundColor);
+
+    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+    expect(modalBarrier.color, modalBarrierColor);
   });
 
   testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {

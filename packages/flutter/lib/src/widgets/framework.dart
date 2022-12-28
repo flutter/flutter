@@ -501,7 +501,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Container(color: color, child: child);
+///     return ColoredBox(color: color, child: child);
 ///   }
 /// }
 /// ```
@@ -654,7 +654,7 @@ abstract class StatelessWidget extends Widget {
 ///    this ideal, the more efficient it will be.)
 ///
 ///  * If a subtree does not change, cache the widget that represents that
-///    subtree and re-use it each time it can be used. To do this, simply assign
+///    subtree and re-use it each time it can be used. To do this, assign
 ///    a widget to a `final` state variable and re-use it in the build method. It
 ///    is massively more efficient for a widget to be re-used than for a new (but
 ///    identically-configured) widget to be created. Another caching strategy
@@ -1605,8 +1605,12 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 ///   final Color color;
 ///
+///   static FrogColor? maybeOf(BuildContext context) {
+///     return context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///   }
+///
 ///   static FrogColor of(BuildContext context) {
-///     final FrogColor? result = context.dependOnInheritedWidgetOfExactType<FrogColor>();
+///     final FrogColor? result = maybeOf(context);
 ///     assert(result != null, 'No FrogColor found in context');
 ///     return result!;
 ///   }
@@ -1617,30 +1621,35 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 /// ```
 /// {@end-tool}
 ///
-/// ## Implementing the `of` method
+/// ## Implementing the `of` and `maybeOf` methods
 ///
-/// The convention is to provide a static method `of` on the [InheritedWidget]
-/// which does the call to [BuildContext.dependOnInheritedWidgetOfExactType]. This
-/// allows the class to define its own fallback logic in case there isn't
-/// a widget in scope. In the example above, the value returned will be
-/// null in that case, but it could also have defaulted to a value.
+/// The convention is to provide two static methods, `of` and `maybeOf`, on the
+/// [InheritedWidget] which call
+/// [BuildContext.dependOnInheritedWidgetOfExactType]. This allows the class to
+/// define its own fallback logic in case there isn't a widget in scope.
 ///
-/// Sometimes, the `of` method returns the data rather than the inherited
-/// widget; for example, in this case it could have returned a [Color] instead
-/// of the `FrogColor` widget.
+/// The `of` method typically returns a non-nullable instance and asserts if the
+/// [InheritedWidget] isn't found, and the `maybeOf` method returns a nullable
+/// instance, and returns null if the [InheritedWidget] isn't found. The `of`
+/// method is typically implemented by calling `maybeOf` internally.
+///
+/// Sometimes, the `of` and `maybeOf` methods return some data rather than the
+/// inherited widget itself; for example, in this case it could have returned a
+/// [Color] instead of the `FrogColor` widget.
 ///
 /// Occasionally, the inherited widget is an implementation detail of another
-/// class, and is therefore private. The `of` method in that case is typically
-/// put on the public class instead. For example, [Theme] is implemented as a
-/// [StatelessWidget] that builds a private inherited widget; [Theme.of] looks
-/// for that inherited widget using [BuildContext.dependOnInheritedWidgetOfExactType]
-/// and then returns the [ThemeData].
+/// class, and is therefore private. The `of` and `maybeOf` methods in that case
+/// are typically implemented on the public class instead. For example, [Theme]
+/// is implemented as a [StatelessWidget] that builds a private inherited
+/// widget; [Theme.of] looks for that private inherited widget using
+/// [BuildContext.dependOnInheritedWidgetOfExactType] and then returns the
+/// [ThemeData] inside it.
 ///
-/// ## Calling the `of` method
+/// ## Calling the `of` or `maybeOf` methods
 ///
-/// When using the `of` method, the `context` must be a descendant of the
-/// [InheritedWidget], meaning it must be "below" the [InheritedWidget] in the
-/// tree.
+/// When using the `of` or `maybeOf` methods, the `context` must be a descendant
+/// of the [InheritedWidget], meaning it must be "below" the [InheritedWidget]
+/// in the tree.
 ///
 /// {@tool snippet}
 ///
@@ -1674,8 +1683,9 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///
 /// {@tool snippet}
 ///
-/// In this example, the `context` used is the one from the `MyOtherPage` widget,
-/// which is a parent of the `FrogColor` widget, so this does not work.
+/// In this example, the `context` used is the one from the `MyOtherPage`
+/// widget, which is a parent of the `FrogColor` widget, so this does not work,
+/// and will assert when `FrogColor.of` is called.
 ///
 /// ```dart
 /// // continuing from previous example...
@@ -1697,21 +1707,20 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 ///   }
 /// }
 /// ```
-/// {@end-tool}
-/// {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
+/// {@end-tool} {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
 ///
 /// See also:
 ///
-///  * [StatefulWidget] and [State], for widgets that can build differently
-///    several times over their lifetime.
-///  * [StatelessWidget], for widgets that always build the same way given a
-///    particular configuration and ambient state.
-///  * [Widget], for an overview of widgets in general.
-///  * [InheritedNotifier], an inherited widget whose value can be a
-///    [Listenable], and which will notify dependents whenever the value
-///    sends notifications.
-///  * [InheritedModel], an inherited widget that allows clients to subscribe
-///    to changes for subparts of the value.
+/// * [StatefulWidget] and [State], for widgets that can build differently
+///   several times over their lifetime.
+/// * [StatelessWidget], for widgets that always build the same way given a
+///   particular configuration and ambient state.
+/// * [Widget], for an overview of widgets in general.
+/// * [InheritedNotifier], an inherited widget whose value can be a
+///   [Listenable], and which will notify dependents whenever the value sends
+///   notifications.
+/// * [InheritedModel], an inherited widget that allows clients to subscribe to
+///   changes for subparts of the value.
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -2011,6 +2020,13 @@ class _InactiveElements {
 /// this callback.
 typedef ElementVisitor = void Function(Element element);
 
+/// Signature for the callback to [BuildContext.visitAncestorElements].
+///
+/// The argument is the ancestor being visited.
+///
+/// Return false to stop the walk.
+typedef ConditionalElementVisitor = bool Function(Element element);
+
 /// A handle to the location of a widget in the widget tree.
 ///
 /// This class presents a set of methods that can be used from
@@ -2212,7 +2228,7 @@ abstract class BuildContext {
   ///
   /// All of the qualifications about when [dependOnInheritedWidgetOfExactType] can
   /// be called apply to this method as well.
-  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object aspect });
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect });
 
   /// Obtains the nearest widget of the given type `T`, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
@@ -2220,6 +2236,7 @@ abstract class BuildContext {
   /// type is introduced, or the widget goes away), this build context is
   /// rebuilt so that it can obtain new values from that widget.
   ///
+  /// {@template flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}
   /// This is typically called implicitly from `of()` static methods, e.g.
   /// [Theme.of].
   ///
@@ -2253,6 +2270,7 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
+  /// {@endtemplate}
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({ Object? aspect });
 
   /// Obtains the element corresponding to the nearest widget of the given type `T`,
@@ -2260,6 +2278,7 @@ abstract class BuildContext {
   ///
   /// Returns null if no such element is found.
   ///
+  /// {@template flutter.widgets.BuildContext.getElementForInheritedWidgetOfExactType}
   /// Calling this method is O(1) with a small constant factor.
   ///
   /// This method does not establish a relationship with the target in the way
@@ -2271,11 +2290,13 @@ abstract class BuildContext {
   /// [dependOnInheritedWidgetOfExactType] in [State.didChangeDependencies]. It is
   /// safe to use this method from [State.deactivate], which is called whenever
   /// the widget is removed from the tree.
+  /// {@endtemplate}
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
 
   /// Returns the nearest ancestor widget of the given type `T`, which must be the
   /// type of a concrete [Widget] subclass.
   ///
+  /// {@template flutter.widgets.BuildContext.findAncestorWidgetOfExactType}
   /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since
   /// inherited widgets will trigger consumers to rebuild when they change. This
   /// method is appropriate when used in interaction event handlers (e.g.
@@ -2297,11 +2318,13 @@ abstract class BuildContext {
   ///
   /// Returns null if a widget of the requested type does not appear in the
   /// ancestors of this context.
+  /// {@endtemplate}
   T? findAncestorWidgetOfExactType<T extends Widget>();
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
   /// that is an instance of the given type `T`.
   ///
+  /// {@template flutter.widgets.BuildContext.findAncestorStateOfType}
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
   /// In general, [dependOnInheritedWidgetOfExactType] is more appropriate for such
@@ -2323,6 +2346,7 @@ abstract class BuildContext {
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [findAncestorStateOfType] in [State.didChangeDependencies].
+  /// {@endtemplate}
   ///
   /// {@tool snippet}
   ///
@@ -2335,17 +2359,20 @@ abstract class BuildContext {
   /// Returns the [State] object of the furthest ancestor [StatefulWidget] widget
   /// that is an instance of the given type `T`.
   ///
+  /// {@template flutter.widgets.BuildContext.findRootAncestorStateOfType}
   /// Functions the same way as [findAncestorStateOfType] but keeps visiting subsequent
   /// ancestors until there are none of the type instance of `T` remaining.
   /// Then returns the last one found.
   ///
   /// This operation is O(N) as well though N is the entire widget tree rather than
   /// a subtree.
+  /// {@endtemplate}
   T? findRootAncestorStateOfType<T extends State>();
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget
   /// that is an instance of the given type `T`.
   ///
+  /// {@template flutter.widgets.BuildContext.findAncestorRenderObjectOfType}
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
   /// In general, [dependOnInheritedWidgetOfExactType] is more appropriate for such
@@ -2362,13 +2389,16 @@ abstract class BuildContext {
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [findAncestorRenderObjectOfType] in [State.didChangeDependencies].
+  /// {@endtemplate}
   T? findAncestorRenderObjectOfType<T extends RenderObject>();
 
   /// Walks the ancestor chain, starting with the parent of this build context's
-  /// widget, invoking the argument for each ancestor. The callback is given a
-  /// reference to the ancestor widget's corresponding [Element] object. The
-  /// walk stops when it reaches the root widget or when the callback returns
-  /// false. The callback must not return null.
+  /// widget, invoking the argument for each ancestor.
+  ///
+  /// {@template flutter.widgets.BuildContext.visitAncestorElements}
+  /// The callback is given a reference to the ancestor widget's corresponding
+  /// [Element] object. The walk stops when it reaches the root widget or when
+  /// the callback returns false. The callback must not return null.
   ///
   /// This is useful for inspecting the widget tree.
   ///
@@ -2378,10 +2408,12 @@ abstract class BuildContext {
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [visitAncestorElements] in [State.didChangeDependencies].
-  void visitAncestorElements(bool Function(Element element) visitor);
+  /// {@endtemplate}
+  void visitAncestorElements(ConditionalElementVisitor visitor);
 
   /// Walks the children of this widget.
   ///
+  /// {@template flutter.widgets.BuildContext.visitChildElements}
   /// This is useful for applying changes to children after they are built
   /// without waiting for the next frame, especially if the children are known,
   /// and especially if there is exactly one child (as is always the case for
@@ -2399,6 +2431,7 @@ abstract class BuildContext {
   /// significantly cheaper to use an [InheritedWidget] and have the descendants
   /// pull data down, than it is to use [visitChildElements] recursively to push
   /// data down to them.
+  /// {@endtemplate}
   void visitChildElements(ElementVisitor visitor);
 
   /// Start bubbling this notification at the given build context.
@@ -2733,7 +2766,7 @@ class BuildOwner {
         try {
           element.rebuild();
         } catch (e, stack) {
-          _debugReportException(
+          _reportException(
             ErrorDescription('while rebuilding dirty elements'),
             e,
             stack,
@@ -3101,7 +3134,7 @@ class BuildOwner {
       // Catching the exception directly to avoid activating the ErrorWidget.
       // Since the tree is in a broken state, adding the ErrorWidget would
       // cause more exceptions.
-      _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
+      _reportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       if (!kReleaseMode) {
         Timeline.finishSync();
@@ -3418,19 +3451,22 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// this location in the tree. Otherwise, this getter will walk down the tree
   /// until it finds a [RenderObjectElement].
   RenderObject? get renderObject {
-    RenderObject? result;
-    void visit(Element element) {
-      assert(result == null); // this verifies that there's only one child
-      if (element._lifecycleState == _ElementLifecycle.defunct) {
-        return;
-      } else if (element is RenderObjectElement) {
-        result = element.renderObject;
+    Element? current = this;
+    while (current != null) {
+      if (current._lifecycleState == _ElementLifecycle.defunct) {
+        break;
+      } else if (current is RenderObjectElement) {
+        return current.renderObject;
       } else {
-        element.visitChildren(visit);
+        Element? next;
+        current.visitChildren((Element child) {
+          assert(next == null);  // This verifies that there's only one child.
+          next = child;
+        });
+        current = next;
       }
     }
-    visit(this);
-    return result;
+    return null;
   }
 
   @override
@@ -3805,7 +3841,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Remove [renderObject] from the render tree.
   ///
-  /// The default implementation of this function simply calls
+  /// The default implementation of this function calls
   /// [detachRenderObject] recursively on each child. The
   /// [RenderObjectElement.detachRenderObject] override does the actual work of
   /// removing [renderObject] from the render tree.
@@ -3820,7 +3856,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Add [renderObject] to the render tree at the location specified by `newSlot`.
   ///
-  /// The default implementation of this function simply calls
+  /// The default implementation of this function calls
   /// [attachRenderObject] recursively on each child. The
   /// [RenderObjectElement.attachRenderObject] override does the actual work of
   /// adding [renderObject] to the render tree.
@@ -4440,7 +4476,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  void visitAncestorElements(bool Function(Element element) visitor) {
+  void visitAncestorElements(ConditionalElementVisitor visitor) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     Element? ancestor = _parent;
     while (ancestor != null && visitor(ancestor)) {
@@ -4675,12 +4711,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner!._debugCurrentBuildTarget = this;
       return true;
     }());
-    performRebuild();
-    assert(() {
-      assert(owner!._debugCurrentBuildTarget == this);
-      owner!._debugCurrentBuildTarget = debugPreviousBuildTarget;
-      return true;
-    }());
+    try {
+      performRebuild();
+    } finally {
+      assert(() {
+        assert(owner!._debugCurrentBuildTarget == this);
+        owner!._debugCurrentBuildTarget = debugPreviousBuildTarget;
+        return true;
+      }());
+    }
     assert(!_dirty);
   }
 
@@ -4898,14 +4937,14 @@ typedef NullableIndexedWidgetBuilder = Widget? Function(BuildContext context, in
 ///
 /// The child should typically be part of the returned widget tree.
 ///
-/// Used by [AnimatedBuilder.builder], as well as [WidgetsApp.builder] and
-/// [MaterialApp.builder].
+/// Used by [AnimatedBuilder.builder], [ListenableBuilder.builder],
+/// [WidgetsApp.builder], and [MaterialApp.builder].
 ///
 /// See also:
 ///
-///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-///  * [IndexedWidgetBuilder], which is similar but also takes an index.
-///  * [ValueWidgetBuilder], which is similar but takes a value and a child.
+/// * [WidgetBuilder], which is similar but only takes a [BuildContext].
+/// * [IndexedWidgetBuilder], which is similar but also takes an index.
+/// * [ValueWidgetBuilder], which is similar but takes a value and a child.
 typedef TransitionBuilder = Widget Function(BuildContext context, Widget? child);
 
 /// An [Element] that composes other [Element]s.
@@ -4962,7 +5001,7 @@ abstract class ComponentElement extends Element {
     } catch (e, stack) {
       _debugDoingBuild = false;
       built = ErrorWidget.builder(
-        _debugReportException(
+        _reportException(
           ErrorDescription('building $this'),
           e,
           stack,
@@ -4982,7 +5021,7 @@ abstract class ComponentElement extends Element {
       assert(_child != null);
     } catch (e, stack) {
       built = ErrorWidget.builder(
-        _debugReportException(
+        _reportException(
           ErrorDescription('building $this'),
           e,
           stack,
@@ -5610,7 +5649,7 @@ class InheritedElement extends ProxyElement {
 ///
 /// However, the immediate children of the element may not be the ones that
 /// eventually produce the actual [RenderObject] that they correspond to. For
-/// example a [StatelessElement] (the element of a [StatelessWidget]) simply
+/// example, a [StatelessElement] (the element of a [StatelessWidget])
 /// corresponds to whatever [RenderObject] its child (the element returned by
 /// its [StatelessWidget.build] method) corresponds to.
 ///
@@ -5787,7 +5826,7 @@ abstract class RenderObjectElement extends Element {
             ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
           ]);
         } on FlutterError catch (e) {
-          _debugReportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
+          _reportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
         }
       }
       return true;
@@ -5887,7 +5926,7 @@ abstract class RenderObjectElement extends Element {
   /// list after the [RenderObject] associated with the [Element] provided as
   /// [IndexedSlot.value] in the [slot] object.
   ///
-  /// Simply using the previous sibling as a [slot] is not enough, though, because
+  /// Using the previous sibling as a [slot] is not enough, though, because
   /// child [RenderObject]s are only moved around when the [slot] of their
   /// associated [RenderObjectElement]s is updated. When the order of child
   /// [Element]s is changed, some elements in the list may move to a new index
@@ -6118,7 +6157,7 @@ abstract class RenderObjectElement extends Element {
         // while still allowing debuggers to break on exception. Since the tree
         // is in a broken state, adding the ErrorWidget would likely cause more
         // exceptions, which is not good for the debugging experience.
-        _debugReportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
+        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
       }
       return true;
     }());
@@ -6542,7 +6581,7 @@ class DebugCreator {
   String toString() => element.debugGetCreatorChain(12);
 }
 
-FlutterErrorDetails _debugReportException(
+FlutterErrorDetails _reportException(
   DiagnosticsNode context,
   Object exception,
   StackTrace? stack, {

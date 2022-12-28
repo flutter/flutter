@@ -148,7 +148,7 @@ void main() {
 
     final Rect tallerWidget = checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
 
-    // Check the offsets of CheckBox and title after padding is applied.
+    // Check the offsets of Checkbox and title after padding is applied.
     expect(paddingRect.right, checkboxRect.right + 4);
     expect(paddingRect.left, titleRect.left - 10);
 
@@ -429,6 +429,35 @@ void main() {
     await tester.pump(); // Let the focus take effect.
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
     expect(tileNode.hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('CheckboxListTile onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'CheckboxListTile onFocusChange');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: CheckboxListTile(
+            value: true,
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onChanged: (bool? value) {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
   });
 
     testWidgets('CheckboxListTile can be disabled', (WidgetTester tester) async {

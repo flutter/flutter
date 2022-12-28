@@ -27,7 +27,7 @@ class TestGoldenComparator {
   TestGoldenComparator(this.shellPath, this.compilerFactory, {
     required Logger logger,
     required FileSystem fileSystem,
-    required ProcessManager? processManager,
+    required ProcessManager processManager,
     required this.webRenderer,
   }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
        _logger = logger,
@@ -39,7 +39,7 @@ class TestGoldenComparator {
   final TestCompiler Function() compilerFactory;
   final Logger _logger;
   final FileSystem _fileSystem;
-  final ProcessManager? _processManager;
+  final ProcessManager _processManager;
   final WebRendererMode webRenderer;
 
   TestCompiler? _compiler;
@@ -95,7 +95,7 @@ class TestGoldenComparator {
       'FLUTTER_TEST_BROWSER': 'chrome',
       'FLUTTER_WEB_RENDERER': webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
     };
-    return _processManager!.start(command, environment: environment);
+    return _processManager.start(command, environment: environment);
   }
 
   Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {

@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:async';
 import 'dart:io';
@@ -1997,7 +1998,13 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('image_test.missing.1.png'),
     );
-    expect(tester.takeException().toString(), startsWith('Unable to load asset: '));
+    expect(
+      tester.takeException().toString(),
+      equals(
+        'Unable to load asset: "missing-asset".\n'
+        'The asset does not exist or has empty data.',
+      ),
+    );
     await tester.pump();
     await expectLater(
       find.byKey(key),

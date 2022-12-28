@@ -134,7 +134,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material3Widget = _getMaterialFromDialog(tester);
-    expect(material3Widget.color, const Color(0xff424242));
+    expect(material3Widget.color, material3Theme.colorScheme.surface);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
   });

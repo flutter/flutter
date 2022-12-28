@@ -32,8 +32,8 @@ const Map<String, String> kObsoleteBranches = <String, String>{
 
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
-  // TODO(fujino): update to main https://github.com/flutter/flutter/issues/95041
   master,
+  main,
   beta,
   stable,
 }
@@ -41,6 +41,7 @@ enum Channel {
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
   globals.kDefaultFrameworkChannel,
+  'main',
   'beta',
   'stable',
 };

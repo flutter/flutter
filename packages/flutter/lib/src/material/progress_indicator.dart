@@ -254,6 +254,14 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of a [LinearProgressIndicator] with a changing value.
+/// When toggling the switch, [LinearProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CircularProgressIndicator], which shows progress along a circular arc.
@@ -472,6 +480,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// This example shows a [CircularProgressIndicator] with a changing value.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of a [CircularProgressIndicator] with a changing value.
+/// When toggling the switch, [CircularProgressIndicator] uses a determinate value.
+/// As described in: https://m3.material.io/components/progress-indicators/overview
+///
+/// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -909,7 +925,7 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_143
 
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context);

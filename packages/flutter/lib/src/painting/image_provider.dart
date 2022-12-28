@@ -901,9 +901,10 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 /// The image will be cached regardless of cache headers from the server.
 ///
 /// When a network image is used on the Web platform, the `cacheWidth` and
-/// `cacheHeight` parameters of the [DecoderCallback] are ignored as the Web
-/// engine delegates image decoding of network images to the Web, which does
-/// not support custom decode sizes.
+/// `cacheHeight` parameters of the [DecoderCallback] are only supported when the
+/// application is running with the CanvasKit renderer. When the application is using
+/// the HTML renderer, the web engine delegates image decoding of network images to the Web,
+/// which does not support custom decode sizes.
 ///
 /// See also:
 ///
@@ -991,17 +992,23 @@ class FileImage extends ImageProvider<FileImage> {
   Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
     assert(key == this);
 
-    final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0) {
+    // TODO(jonahwilliams): making this sync caused test failures that seem to
+    // indicate that we can fail to call evict unless at least one await has
+    // occurred in the test.
+    // https://github.com/flutter/flutter/issues/113044
+    final int lengthInBytes = await file.length();
+    if (lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-
     if (decode != null) {
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+      if (file.runtimeType == File) {
+        return decode(await ui.ImmutableBuffer.fromFilePath(file.path));
+      }
+      return decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
     }
-    return decodeDeprecated!(bytes);
+    return decodeDeprecated!(await file.readAsBytes());
   }
 
   @override

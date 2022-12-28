@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -313,6 +314,8 @@ Future<ProcessResult> _runFlutterTest(
     '--no-color',
     '--no-version-check',
     '--no-pub',
+    '--reporter',
+    'compact',
     ...extraArguments,
     testPath,
   ];

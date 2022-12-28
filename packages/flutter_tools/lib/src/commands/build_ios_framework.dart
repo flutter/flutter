@@ -33,6 +33,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required bool verboseHelp,
     Cache? cache,
     Platform? platform,
+    required super.logger,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
        _injectedCache = cache,
@@ -176,6 +177,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 /// managers.
 class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   BuildIOSFrameworkCommand({
+    required super.logger,
     super.flutterVersion,
     required super.buildSystem,
     required bool verboseHelp,
@@ -300,6 +302,10 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           'See https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#create-a-flutterengine for more information.');
     }
 
+    globals.printWarning(
+        'Bitcode support has been deprecated. Turn off the "Enable Bitcode" build setting in your Xcode project or you may encounter compilation errors.\n'
+        'See https://developer.apple.com/documentation/xcode-release-notes/xcode-14-release-notes for details.');
+
     return FlutterCommandResult.success();
   }
 
@@ -312,7 +318,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
       if (!force && (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0)) {
         throwToolExit(
-            '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${flutterVersion.frameworkVersion}');
+            '--cocoapods is only supported on the beta or stable channel. Detected version is ${flutterVersion.frameworkVersion}');
       }
 
       // Podspecs use semantic versioning, which don't support hotfixes.

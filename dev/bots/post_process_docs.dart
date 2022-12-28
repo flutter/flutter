@@ -12,9 +12,6 @@ import 'package:platform/platform.dart' as platform;
 
 import 'package:process/process.dart';
 
-const String kDocsRoot = 'dev/docs';
-const String kPublishRoot = '$kDocsRoot/doc';
-
 class CommandException implements Exception {}
 
 Future<void> main() async {
@@ -65,7 +62,7 @@ Future<void> postProcess() async {
   final File versionFile = File('version');
   final String version = versionFile.readAsStringSync();
   // Recreate footer
-  final String publishPath = path.join(docsPath, 'doc', 'api', 'footer.js');
+  final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
   final File footerFile = File(publishPath)..createSync(recursive: true);
   createFooter(footerFile, version);
 }

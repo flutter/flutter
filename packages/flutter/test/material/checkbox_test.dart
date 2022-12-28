@@ -60,7 +60,7 @@ void main() {
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0));
   });
 
-  testWidgets('CheckBox semantics', (WidgetTester tester) async {
+  testWidgets('Checkbox semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -193,7 +193,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Can wrap CheckBox with Semantics', (WidgetTester tester) async {
+  testWidgets('Can wrap Checkbox with Semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -222,7 +222,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CheckBox tristate: true', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate: true', (WidgetTester tester) async {
     bool? checkBoxValue;
 
     await tester.pumpWidget(
@@ -388,7 +388,7 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgets('CheckBox tristate rendering, programmatic transitions', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate rendering, programmatic transitions', (WidgetTester tester) async {
     Widget buildFrame(bool? checkboxValue) {
       return Theme(
         data: theme,
@@ -439,7 +439,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
   });
 
-  testWidgets('CheckBox color rendering', (WidgetTester tester) async {
+  testWidgets('Checkbox color rendering', (WidgetTester tester) async {
     const Color borderColor = Color(0xff2196f3);
     Color checkColor = const Color(0xffFFFFFF);
     Color activeColor;
@@ -1587,11 +1587,12 @@ void main() {
 
   testWidgets('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool autoFocus = true}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
+        theme: themeData,
         home: Material(
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1617,7 +1618,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: theme.colorScheme.error.withOpacity(0.12))..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+      paints..circle(color: themeData.colorScheme.error.withOpacity(0.12))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Default color
@@ -1627,7 +1628,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..path(color: theme.colorScheme.error)..path(color: theme.colorScheme.onError)
+      paints..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Start hovering
@@ -1639,8 +1640,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: theme.colorScheme.error.withOpacity(0.08))
-        ..path(color: theme.colorScheme.error)
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
+        ..path(color: themeData.colorScheme.error)
     );
 
     // Start pressing
@@ -1649,8 +1650,8 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: theme.colorScheme.error.withOpacity(0.12))
-        ..path(color: theme.colorScheme.error)
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.12))
+        ..path(color: themeData.colorScheme.error)
     );
     await gestureLongPress.up();
     await tester.pump();

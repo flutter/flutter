@@ -19,14 +19,13 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
   final File _infoPlist;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (!_infoPlist.existsSync()) {
       logger.printTrace('Info.plist not found, skipping host app Info.plist migration.');
-      return true;
+      return;
     }
 
     processFileLines(_infoPlist);
-    return true;
   }
 
   @override

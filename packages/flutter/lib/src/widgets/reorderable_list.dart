@@ -609,7 +609,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _scrollable = Scrollable.of(context)!;
+    _scrollable = Scrollable.of(context);
     if (_autoScroller?.scrollable != _scrollable) {
       _autoScroller?.stopAutoScroll();
       _autoScroller = EdgeDraggingAutoScroller(
@@ -1163,7 +1163,7 @@ class ReorderableDragStartListener extends StatelessWidget {
   }
 
   void _startDragging(BuildContext context, PointerDownEvent event) {
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     final SliverReorderableListState? list = SliverReorderableList.maybeOf(context);
     list?.startItemDragReorder(
       index: index,

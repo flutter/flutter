@@ -38,7 +38,12 @@ abstract class RenderAbstractViewport extends RenderObject {
   ///
   /// If the object does not have a [RenderAbstractViewport] as an ancestor,
   /// this function returns null.
-  static RenderAbstractViewport? of(RenderObject? object) {
+  ///
+  /// See also:
+  ///
+  /// * [RenderAbstractViewport.of], which is similar to this method, but
+  ///   asserts if no [RenderAbstractViewport] ancestor is found.
+  static RenderAbstractViewport? maybeOf(RenderObject? object) {
     while (object != null) {
       if (object is RenderAbstractViewport) {
         return object;
@@ -46,6 +51,35 @@ abstract class RenderAbstractViewport extends RenderObject {
       object = object.parent as RenderObject?;
     }
     return null;
+  }
+
+  /// Returns the [RenderAbstractViewport] that most tightly encloses the given
+  /// render object.
+  ///
+  /// If the object does not have a [RenderAbstractViewport] as an ancestor,
+  /// this function will assert in debug mode, and throw an exception in release
+  /// mode.
+  ///
+  /// See also:
+  ///
+  /// * [RenderAbstractViewport.maybeOf], which is similar to this method, but
+  ///   returns null if no [RenderAbstractViewport] ancestor is found.
+  static RenderAbstractViewport of(RenderObject? object) {
+    final RenderAbstractViewport? viewport = maybeOf(object);
+    assert(() {
+      if (viewport == null) {
+        throw FlutterError(
+          'RenderAbstractViewport.of() was called with a render object that was '
+          'not a descendant of a RenderAbstractViewport.\n'
+          'No RenderAbstractViewport render object ancestor could be found starting '
+          'from the object that was passed to RenderAbstractViewport.of().\n'
+          'The render object where the viewport search started was:\n'
+          '  $object',
+        );
+      }
+      return true;
+    }());
+    return viewport!;
   }
 
   /// Returns the offset that would be needed to reveal the `target`

@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -225,7 +226,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(
-    IOSApp app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     bool result;
@@ -242,11 +243,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(IOSApp app) async => false;
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
   Future<bool> installApp(
-    IOSApp app, {
+    covariant IOSApp app, {
     String? userIdentifier,
   }) async {
     final Directory bundle = _fileSystem.directory(app.deviceBundlePath);
@@ -280,7 +281,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> uninstallApp(
-    IOSApp app, {
+    ApplicationPackage app, {
     String? userIdentifier,
   }) async {
     int uninstallationResult;
@@ -348,34 +349,11 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-    final List<String> launchArguments = <String>[
-      '--enable-dart-profiling',
-      '--disable-service-auth-codes',
-      if (debuggingOptions.disablePortPublication) '--disable-observatory-publication',
-      if (debuggingOptions.startPaused) '--start-paused',
-      if (dartVmFlags.isNotEmpty) '--dart-flags="$dartVmFlags"',
-      if (debuggingOptions.useTestFonts) '--use-test-fonts',
-      if (debuggingOptions.debuggingEnabled) ...<String>[
-        '--enable-checked-mode',
-        '--verify-entry-points',
-      ],
-      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
-      if (debuggingOptions.traceSystrace) '--trace-systrace',
-      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
-      if (debuggingOptions.traceSkia) '--trace-skia',
-      if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
-      if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
-      if (debuggingOptions.endlessTraceBuffer) '--endless-trace-buffer',
-      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
-      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
-      if (debuggingOptions.cacheSkSL) '--cache-sksl',
-      if (debuggingOptions.purgePersistentCache) '--purge-persistent-cache',
-      if (route != null) '--route=$route',
-      if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
-      if (debuggingOptions.enableImpeller) '--enable-impeller',
-    ];
-
+    final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
+      EnvironmentType.physical,
+      route,
+      platformArgs,
+    );
     final Status installStatus = _logger.startProgress(
       'Installing and launching...',
     );
@@ -457,7 +435,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    IOSApp app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     // If the debugger is not attached, killing the ios-deploy process won't stop the app.
@@ -476,7 +454,7 @@ class IOSDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    IOSApp? app,
+    covariant IOSApp? app,
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS devices.');

@@ -62,6 +62,11 @@ enum EnginePhase {
   sendSemanticsUpdate,
 }
 
+/// Signature of callbacks used to intercept messages on a given channel.
+///
+/// See [TestDefaultBinaryMessenger.setMockDecodedMessageHandler] for more details.
+typedef _MockMessageHandler = Future<void> Function(Object?);
+
 /// Parts of the system that can generate pointer events that reach the test
 /// binding.
 ///
@@ -104,6 +109,32 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   TestDefaultBinaryMessenger createBinaryMessenger() {
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
+}
+
+/// Accessibility announcement data passed to [SemanticsService.announce] captured in a test.
+///
+/// This class is intended to be used by the testing API to store the announcements
+/// in a structured form so that tests can verify announcement details. The fields
+/// of this class correspond to parameters of the [SemanticsService.announce] method.
+///
+/// See also:
+///
+///  * [WidgetTester.takeAnnouncements], which is the test API that uses this class.
+class CapturedAccessibilityAnnouncement {
+  const CapturedAccessibilityAnnouncement._(
+    this.message,
+    this.textDirection,
+    this.assertiveness,
+  );
+
+  /// The accessibility message announced by the framework.
+  final String message;
+
+  /// The direction in which the text of the [message] flows.
+  final TextDirection textDirection;
+
+  /// Determines the assertiveness level of the accessibility announcement.
+  final Assertiveness assertiveness;
 }
 
 /// Base class for bindings used by widgets library tests.
@@ -611,6 +642,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late StackTraceDemangler _oldStackTraceDemangler;
   FlutterErrorDetails? _pendingExceptionDetails;
 
+  _MockMessageHandler? _announcementHandler;
+  List<CapturedAccessibilityAnnouncement> _announcements =
+      <CapturedAccessibilityAnnouncement>[];
+
+  /// {@template flutter.flutter_test.TakeAccessibilityAnnouncements}
+  /// Returns a list of all the accessibility announcements made by the Flutter
+  /// framework since the last time this function was called.
+  ///
+  /// It's safe to call this when there hasn't been any announcements; it will return
+  /// an empty list in that case.
+  /// {@endtemplate}
+  List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
+    assert(inTest);
+    final List<CapturedAccessibilityAnnouncement> announcements = _announcements;
+    _announcements = <CapturedAccessibilityAnnouncement>[];
+    return announcements;
+  }
+
   static const TextStyle _messageStyle = TextStyle(
     color: Color(0xFF917FFF),
     fontSize: 40.0,
@@ -700,6 +749,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
   }
 
+  Future<void> _handleAnnouncementMessage(Object? mockMessage) async {
+    final Map<Object?, Object?> message = mockMessage! as Map<Object?, Object?>;
+    if (message['type'] == 'announce') {
+      final Map<Object?, Object?> data =
+          message['data']! as Map<Object?, Object?>;
+      final String dataMessage = data['message'].toString();
+      final TextDirection textDirection =
+          TextDirection.values[data['textDirection']! as int];
+      final int assertivenessLevel = (data['assertiveness'] as int?) ?? 0;
+      final Assertiveness assertiveness =
+          Assertiveness.values[assertivenessLevel];
+      final CapturedAccessibilityAnnouncement announcement =
+          CapturedAccessibilityAnnouncement._(
+              dataMessage, textDirection, assertiveness);
+      _announcements.add(announcement);
+    }
+  }
+
   Future<void> _runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester,
@@ -707,6 +774,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ) {
     assert(description != null);
     assert(inTest);
+
+    // Set the handler only if there is currently none.
+    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
+      _announcementHandler = _handleAnnouncementMessage;
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility, _announcementHandler);
+    }
+
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     int exceptionCount = 0; // number of un-taken exceptions
@@ -888,6 +965,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertNoPendingPerformanceModeRequests(
       'A performance mode was requested and not disposed by a test.'
     ));
+    assert(debugAssertNoTimeDilation(
+      'The timeDilation was changed and not reset by the test.'
+    ));
     assert(debugAssertAllFoundationVarsUnset(
       'The value of a foundation debug variable was changed by the test.',
       debugPrintOverride: debugPrintOverride,
@@ -987,6 +1067,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner!.focusManager.dispose();
+
+    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+        .checkMockMessageHandler(
+            SystemChannels.accessibility.name, _announcementHandler)) {
+      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+          .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
+      _announcementHandler = null;
+    }
+    _announcements = <CapturedAccessibilityAnnouncement>[];
 
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
@@ -1275,6 +1364,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_currentFakeAsync != null);
     _currentFakeAsync!.elapse(duration);
     return Future<void>.value();
+  }
+
+  /// Simulates the synchronous passage of time, resulting from blocking or
+  /// expensive calls.
+  void elapseBlocking(Duration duration) {
+    _currentFakeAsync!.elapseBlocking(duration);
   }
 
   @override

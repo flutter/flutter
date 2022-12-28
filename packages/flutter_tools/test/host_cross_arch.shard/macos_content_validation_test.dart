@@ -77,7 +77,7 @@ void main() {
         buildMode,
       ));
 
-      final Directory outputApp = buildPath.childDirectory('flutter_gallery.app');
+      final Directory outputApp = buildPath.childDirectory('Flutter Gallery.app');
       final Directory outputAppFramework =
           fileSystem.directory(fileSystem.path.join(
         outputApp.path,

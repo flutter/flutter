@@ -29,6 +29,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -523,6 +524,34 @@ void main() {
           Stdio: () => FakeStdio(),
           Logger: () => AppRunLogger(parent: BufferLogger.test()),
         });
+
+        testUsingContext('can disable devtools with --no-devtools', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice();
+          testDeviceManager.devices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-devtools',
+              '--machine',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.enableDevTools, isFalse);
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
       });
     });
 
@@ -645,35 +674,35 @@ void main() {
     });
 
     test('auto web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'auto');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
     test('canvaskit web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'canvaskit');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.canvaskit);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
     });
 
     test('html web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'html');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.html);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
     });
 
     test('auto web-renderer with existing dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'auto');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
     test('canvaskit web-renderer with no dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'canvaskit');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.canvaskit);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
     });
 
     test('html web-renderer with no dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=true'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'html');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.html);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
     });
   });
@@ -961,7 +990,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   DevFSWriter? createDevFSWriter(
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     String? userIdentifier,
   ) {
     return null;
@@ -1066,6 +1095,7 @@ class CapturingAppDomain extends AppDomain {
 
   bool? multidexEnabled;
   String? userIdentifier;
+  bool? enableDevTools;
 
   @override
   Future<AppInstance> startApp(
@@ -1085,9 +1115,11 @@ class CapturingAppDomain extends AppDomain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;
+    this.enableDevTools = enableDevTools;
     throwToolExit('');
   }
 }

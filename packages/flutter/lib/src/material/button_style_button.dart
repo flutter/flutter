@@ -287,6 +287,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
     final Size? resolvedMaximumSize = resolve<Size?>((ButtonStyle? style) => style?.maximumSize);
+    final Color? resolvedIconColor = resolve<Color?>((ButtonStyle? style) => style?.iconColor);
     final double? resolvedIconSize = resolve<double?>((ButtonStyle? style) => style?.iconSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>((ButtonStyle? style) => style?.shape);
@@ -400,7 +401,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           customBorder: resolvedShape.copyWith(side: resolvedSide),
           statesController: statesController,
           child: IconTheme.merge(
-            data: IconThemeData(color: resolvedForegroundColor, size: resolvedIconSize),
+            data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
             child: Padding(
               padding: padding,
               child: Align(

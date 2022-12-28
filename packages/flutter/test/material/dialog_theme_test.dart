@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -269,7 +270,7 @@ void main() {
 
     // first is Text('X')
     final RichText text = tester.widget(find.byType(RichText).last);
-    expect(text.text.style!.color, ThemeData().colorScheme.secondary);
+    expect(text.text.style!.color, theme.colorScheme.secondary);
   });
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {

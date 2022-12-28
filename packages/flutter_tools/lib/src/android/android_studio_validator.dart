@@ -73,7 +73,7 @@ class AndroidStudioValidator extends DoctorValidator {
     if (_studio.isValid) {
       type = _hasIssues(messages)
         ? ValidationType.partial
-        : ValidationType.installed;
+        : ValidationType.success;
       messages.addAll(_studio.validationMessages.map<ValidationMessage>(
         (String m) => ValidationMessage(m),
       ));
