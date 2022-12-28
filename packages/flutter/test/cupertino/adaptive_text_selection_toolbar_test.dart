@@ -166,7 +166,7 @@ void main() {
             primaryAnchor: Offset.zero,
           ),
           clipboardStatus: ClipboardStatus.pasteable,
-          liveTextStatus: LiveTextStatus.disabled,
+          liveTextStatus: LiveTextStatus.enabled,
           onCopy: () {},
           onCut: () {},
           onPaste: () {},
@@ -184,14 +184,19 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        break;
       case TargetPlatform.fuchsia:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        break;
       case TargetPlatform.iOS:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
         break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(5));
         break;
     }
   },
