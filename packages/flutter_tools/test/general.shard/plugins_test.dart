@@ -34,7 +34,7 @@ class _PluginPlatformInfo {
     this.pluginClass,
     this.dartPluginClass,
     this.androidPackage,
-    this.sharedDarwinSource,
+    this.sharedDarwinSource = false,
     this.fileName
   }) : assert(pluginClass != null || dartPluginClass != null),
        assert(androidPackage == null || pluginClass != null);
@@ -48,7 +48,7 @@ class _PluginPlatformInfo {
   /// The package entry for an Android plugin implementation using pluginClass.
   final String? androidPackage;
 
-  final bool? sharedDarwinSource;
+  final bool sharedDarwinSource;
 
   /// The fileName entry for a web plugin implementation.
   final String? fileName;
@@ -64,7 +64,7 @@ class _PluginPlatformInfo {
         '${indentation}dartPluginClass: $dartPluginClass',
       if (androidPackage != null)
         '${indentation}package: $androidPackage',
-      if (sharedDarwinSource ?? false)
+      if (sharedDarwinSource)
         '${indentation}sharedDarwinSource: true',
       if (fileName != null)
         '${indentation}fileName: $fileName',
