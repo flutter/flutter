@@ -902,7 +902,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   bool get _isAtSnapSize {
     return extent.snapSizes.any(
       (double snapSize) {
-        return (extent.currentSize - snapSize).abs() <= extent.pixelsToSize(physics.toleranceFor(this).distance);
+        return (extent.currentSize - snapSize).abs() <= extent.pixelsToSize(physics.tolerance.distance);
       },
     );
   }
@@ -937,7 +937,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         initialVelocity: velocity,
         pixelSnapSize: extent.pixelSnapSizes,
         snapAnimationDuration: extent.snapAnimationDuration,
-        tolerance: physics.toleranceFor(this),
+        tolerance: physics.tolerance,
       );
     } else {
       // The iOS bouncing simulation just isn't right here - once we delegate
@@ -946,7 +946,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         // Run the simulation in terms of pixels, not extent.
         position: extent.currentPixels,
         velocity: velocity,
-        tolerance: physics.toleranceFor(this),
+        tolerance: physics.tolerance,
       );
     }
 
@@ -965,7 +965,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         // Make sure we pass along enough velocity to keep scrolling - otherwise
         // we just "bounce" off the top making it look like the list doesn't
         // have more to scroll.
-        velocity = ballisticController.velocity + (physics.toleranceFor(this).velocity * ballisticController.velocity.sign);
+        velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {

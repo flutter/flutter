@@ -107,7 +107,6 @@ void main() {
       pixels: 20.0,
       viewportDimension: 500.0,
       axisDirection: AxisDirection.down,
-      devicePixelRatio: 3.0,
     );
 
     const BouncingScrollPhysics bounce = BouncingScrollPhysics();
@@ -130,12 +129,11 @@ void main() {
 
     test('overscroll is progressively harder', () {
       final ScrollMetrics lessOverscrolledPosition = FixedScrollMetrics(
-        minScrollExtent: 0.0,
-        maxScrollExtent: 1000.0,
-        pixels: -20.0,
-        viewportDimension: 100.0,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
+          minScrollExtent: 0.0,
+          maxScrollExtent: 1000.0,
+          pixels: -20.0,
+          viewportDimension: 100.0,
+          axisDirection: AxisDirection.down,
       );
 
       final ScrollMetrics moreOverscrolledPosition = FixedScrollMetrics(
@@ -144,7 +142,6 @@ void main() {
         pixels: -40.0,
         viewportDimension: 100.0,
         axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
       );
 
       final double lessOverscrollApplied =
@@ -173,7 +170,6 @@ void main() {
         pixels: -20.0,
         viewportDimension: 100.0,
         axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
       );
 
       final double easingApplied =
@@ -190,7 +186,6 @@ void main() {
         pixels: 300.0,
         viewportDimension: 100.0,
         axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
       );
 
       expect(
@@ -210,7 +205,6 @@ void main() {
         pixels: -20.0,
         viewportDimension: 100.0,
         axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
       );
 
       final double easingApplied =
@@ -223,12 +217,11 @@ void main() {
 
     test('overscroll a small list and a big list works the same way', () {
       final ScrollMetrics smallListOverscrolledPosition = FixedScrollMetrics(
-        minScrollExtent: 0.0,
-        maxScrollExtent: 10.0,
-        pixels: -20.0,
-        viewportDimension: 100.0,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
+          minScrollExtent: 0.0,
+          maxScrollExtent: 10.0,
+          pixels: -20.0,
+          viewportDimension: 100.0,
+          axisDirection: AxisDirection.down,
       );
 
       final ScrollMetrics bigListOverscrolledPosition = FixedScrollMetrics(
@@ -237,7 +230,6 @@ void main() {
         pixels: -20.0,
         viewportDimension: 100.0,
         axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
       );
 
       final double smallListOverscrollApplied =
@@ -262,7 +254,6 @@ void main() {
       maxScrollExtent: 1000,
       viewportDimension: 0,
       axisDirection: AxisDirection.down,
-      devicePixelRatio: 3.0,
     );
     expect(position.pixels, pixels);
     late FlutterError error;
