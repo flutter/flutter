@@ -1011,7 +1011,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
         return _colors.onSurfaceVariant.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurfaceVariant.withOpacity(0.08);
+        return _colors.onSurfaceVariant.withOpacity(0.12);
       }
       if (states.contains(MaterialState.pressed)) {
         return _colors.onSurfaceVariant.withOpacity(0.12);
