@@ -785,15 +785,7 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(
-              children: <TestSemantics>[
-                TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'Scrim',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
+            TestSemantics(),
           ],
         ),
       ],
@@ -937,15 +929,7 @@ void main() {
                 ),
               ],
             ),
-            TestSemantics(
-              children: <TestSemantics>[
-                TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
-                  label: 'Scrim',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
+            TestSemantics(),
           ],
         ),
       ],
