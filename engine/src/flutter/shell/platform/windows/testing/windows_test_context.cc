@@ -31,6 +31,10 @@ const std::wstring& WindowsTestContext::GetIcuDataPath() const {
   return icu_data_path_;
 }
 
+const std::wstring& WindowsTestContext::GetAotLibraryPath() const {
+  return aot_library_path_;
+}
+
 void WindowsTestContext::AddNativeFunction(std::string_view name,
                                            Dart_NativeFunction function) {
   native_resolver_->AddNativeCallback(std::string{name}, function);
