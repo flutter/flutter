@@ -20,14 +20,20 @@ namespace scene {
 class Scene {
  public:
   Scene() = delete;
-  explicit Scene(std::shared_ptr<Context> context);
+
+  explicit Scene(std::shared_ptr<SceneContext> scene_context);
+
+  ~Scene();
 
   Node& GetRoot();
+
+  bool Render(const RenderTarget& render_target,
+              const Matrix& camera_transform) const;
 
   bool Render(const RenderTarget& render_target, const Camera& camera) const;
 
  private:
-  std::unique_ptr<SceneContext> scene_context_;
+  std::shared_ptr<SceneContext> scene_context_;
   Node root_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Scene);

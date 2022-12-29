@@ -5,6 +5,7 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <tuple>
 #include <utility>
 
@@ -12,7 +13,9 @@
 #include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/image.h"
+#include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
+#include "impeller/entity/contents/scene_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_unittests.h"
@@ -21,6 +24,8 @@
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/snapshot.h"
+#include "impeller/scene/material.h"
+#include "impeller/scene/node.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
 #include "third_party/skia/include/core/SkData.h"
@@ -1698,6 +1703,54 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
   draw_image_layer(effect_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, SceneColorSource) {
+  // Load up the scene.
+  auto mapping =
+      flutter::testing::OpenFixtureAsMapping("flutter_logo.glb.ipscene");
+  ASSERT_NE(mapping, nullptr);
+
+  std::shared_ptr<scene::Node> gltf_scene = scene::Node::MakeFromFlatbuffer(
+      *mapping, *GetContext()->GetResourceAllocator());
+  ASSERT_NE(gltf_scene, nullptr);
+
+  // Assign a material (temporary stopgap).
+  std::shared_ptr<scene::UnlitMaterial> material = scene::Material::MakeUnlit();
+  auto color_baked = CreateTextureForFixture("flutter_logo_baked.png");
+  ASSERT_NE(color_baked, nullptr);
+  material->SetColorTexture(std::move(color_baked));
+  material->SetVertexColorWeight(0);
+
+  ASSERT_EQ(gltf_scene->GetChildren().size(), 1u);
+  ASSERT_EQ(gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives().size(), 1u);
+  gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives()[0].material =
+      std::move(material);
+
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    Paint paint;
+
+    paint.color_source_type = Paint::ColorSourceType::kScene;
+    paint.color_source = [this, gltf_scene]() {
+      Scalar angle = GetSecondsElapsed();
+      Scalar distance = 2;
+      auto camera_position =
+          Vector3(distance * std::sin(angle), 2, -distance * std::cos(angle));
+      auto contents = std::make_shared<SceneContents>();
+      contents->SetNode(gltf_scene);
+      contents->SetCameraTransform(
+          Matrix::MakePerspective(Degrees(45), GetWindowSize(), 0.1, 1000) *
+          Matrix::MakeLookAt(camera_position, {0, 0, 0}, {0, 1, 0}));
+      return contents;
+    };
+
+    Canvas canvas;
+    canvas.Scale(GetContentScale());
+    canvas.DrawPaint(paint);
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

@@ -8,8 +8,8 @@
 #include <unordered_map>
 
 #include "flutter/fml/hash_combine.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/entity/advanced_blend.vert.h"
 #include "impeller/entity/advanced_blend_color.frag.h"
@@ -65,11 +65,13 @@
 #include "impeller/entity/yuv_to_rgb_filter.vert.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline.h"
+#include "impeller/scene/scene_context.h"
 
 #include "impeller/entity/position.vert.h"
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/entity/position_uv.vert.h"
 
+#include "impeller/scene/scene_context.h"
 #include "impeller/typographer/glyph_atlas.h"
 
 #include "impeller/entity/linear_gradient_ssbo_fill.frag.h"
@@ -215,6 +217,8 @@ class ContentContext {
   ~ContentContext();
 
   bool IsValid() const;
+
+  std::shared_ptr<scene::SceneContext> GetSceneContext() const;
 
   std::shared_ptr<Tessellator> GetTessellator() const;
 
@@ -522,6 +526,7 @@ class ContentContext {
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
   std::shared_ptr<GlyphAtlasContext> glyph_atlas_context_;
+  std::shared_ptr<scene::SceneContext> scene_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContentContext);
 };

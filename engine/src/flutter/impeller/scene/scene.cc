@@ -15,17 +15,23 @@
 namespace impeller {
 namespace scene {
 
-Scene::Scene(std::shared_ptr<Context> context)
-    : scene_context_(std::make_unique<SceneContext>(std::move(context))) {
+Scene::Scene(std::shared_ptr<SceneContext> scene_context)
+    : scene_context_(std::move(scene_context)) {
   root_.is_root_ = true;
 };
+
+Scene::~Scene() {
+  for (auto& child : GetRoot().GetChildren()) {
+    child->parent_ = nullptr;
+  }
+}
 
 Node& Scene::GetRoot() {
   return root_;
 }
 
 bool Scene::Render(const RenderTarget& render_target,
-                   const Camera& camera) const {
+                   const Matrix& camera_transform) const {
   // Collect the render commands from the scene.
   SceneEncoder encoder;
   if (!root_.Render(encoder, Matrix())) {
@@ -36,7 +42,8 @@ bool Scene::Render(const RenderTarget& render_target,
   // Encode the commands.
 
   std::shared_ptr<CommandBuffer> command_buffer =
-      encoder.BuildSceneCommandBuffer(*scene_context_, camera, render_target);
+      encoder.BuildSceneCommandBuffer(*scene_context_, camera_transform,
+                                      render_target);
 
   // TODO(bdero): Do post processing.
 
@@ -46,6 +53,12 @@ bool Scene::Render(const RenderTarget& render_target,
   }
 
   return true;
+}
+
+bool Scene::Render(const RenderTarget& render_target,
+                   const Camera& camera) const {
+  return Render(render_target,
+                camera.GetTransform(render_target.GetRenderTargetSize()));
 }
 
 }  // namespace scene
