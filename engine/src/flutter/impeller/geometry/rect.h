@@ -74,10 +74,10 @@ struct TRect {
   }
 
   constexpr static TRect MakeMaximum() {
-    return TRect::MakeLTRB(-std::numeric_limits<Scalar>::infinity(),
-                           -std::numeric_limits<Scalar>::infinity(),
-                           std::numeric_limits<Scalar>::infinity(),
-                           std::numeric_limits<Scalar>::infinity());
+    return TRect::MakeLTRB(-std::numeric_limits<Type>::infinity(),
+                           -std::numeric_limits<Type>::infinity(),
+                           std::numeric_limits<Type>::infinity(),
+                           std::numeric_limits<Type>::infinity());
   }
 
   template <class U>
@@ -121,6 +121,8 @@ struct TRect {
   constexpr bool IsZero() const { return size.IsZero(); }
 
   constexpr bool IsEmpty() const { return size.IsEmpty(); }
+
+  constexpr bool IsMaximum() const { return *this == MakeMaximum(); }
 
   constexpr auto GetLeft() const {
     return std::min(origin.x, origin.x + size.width);

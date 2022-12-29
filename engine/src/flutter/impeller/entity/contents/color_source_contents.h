@@ -18,7 +18,7 @@ class ColorSourceContents : public Contents {
 
   ~ColorSourceContents() override;
 
-  void SetGeometry(std::unique_ptr<Geometry> geometry);
+  void SetGeometry(std::shared_ptr<Geometry> geometry);
 
   void SetMatrix(Matrix matrix);
 
@@ -32,14 +32,14 @@ class ColorSourceContents : public Contents {
                     const std::optional<Rect>& stencil_coverage) const override;
 
  protected:
-  const std::unique_ptr<Geometry>& GetGeometry() const;
+  const std::shared_ptr<Geometry>& GetGeometry() const;
 
   const Matrix& GetInverseMatrix() const;
 
   Scalar GetAlpha() const;
 
  private:
-  std::unique_ptr<Geometry> geometry_;
+  std::shared_ptr<Geometry> geometry_;
   Matrix inverse_matrix_;
   Scalar alpha_ = 1.0;
 

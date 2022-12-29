@@ -13,11 +13,11 @@ ColorSourceContents::ColorSourceContents() = default;
 
 ColorSourceContents::~ColorSourceContents() = default;
 
-void ColorSourceContents::SetGeometry(std::unique_ptr<Geometry> geometry) {
+void ColorSourceContents::SetGeometry(std::shared_ptr<Geometry> geometry) {
   geometry_ = std::move(geometry);
 }
 
-const std::unique_ptr<Geometry>& ColorSourceContents::GetGeometry() const {
+const std::shared_ptr<Geometry>& ColorSourceContents::GetGeometry() const {
   return geometry_;
 }
 

@@ -5,12 +5,13 @@
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 
 #include "flutter/fml/logging.h"
-#include "flutter/impeller/entity/gles/entity_shaders_gles.h"
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
 #include "flutter/impeller/renderer/backend/gles/proc_table_gles.h"
 #include "flutter/impeller/toolkit/egl/context.h"
 #include "flutter/impeller/toolkit/egl/surface.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
+#include "impeller/entity/gles/entity_shaders_gles.h"
+#include "impeller/scene/shaders/gles/scene_shaders_gles.h"
 
 namespace flutter {
 
@@ -59,6 +60,8 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
           impeller_entity_shaders_gles_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_scene_shaders_gles_data, impeller_scene_shaders_gles_length),
   };
 
   auto context =

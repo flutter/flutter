@@ -27,6 +27,7 @@
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
+#include "impeller/entity/contents/scene_contents.h"
 #include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/entity.h"
@@ -500,6 +501,20 @@ void DisplayListDispatcher::setColorSource(
       };
       return;
     }
+    case Paint::ColorSourceType::kScene: {
+      // const flutter::DlSceneColorSource* scene_color_source =
+      // source->asScene(); std::shared_ptr<scene::Node> scene_node =
+      // scene_color_source->node(); Matrix camera_transform =
+      //   scene_color_node->camera_transform();
+
+      paint_.color_source = [/*scene_node, camera_transform*/]() {
+        auto contents = std::make_shared<SceneContents>();
+        // contents->SetNode(scene_node);
+        // contents->SetCameraTransform(camera_transform);
+        return contents;
+      };
+    }
+      return;
     case Paint::ColorSourceType::kConicalGradient:
       UNIMPLEMENTED;
       break;

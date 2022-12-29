@@ -46,7 +46,7 @@ static void EncodeCommand(const SceneContext& scene_context,
 
 std::shared_ptr<CommandBuffer> SceneEncoder::BuildSceneCommandBuffer(
     const SceneContext& scene_context,
-    const Camera& camera,
+    const Matrix& camera_transform,
     RenderTarget render_target) const {
   {
     TextureDescriptor ds_texture;
@@ -91,9 +91,7 @@ std::shared_ptr<CommandBuffer> SceneEncoder::BuildSceneCommandBuffer(
   }
 
   for (auto& command : commands_) {
-    Matrix view_transform =
-        camera.GetTransform(render_pass->GetRenderTargetSize());
-    EncodeCommand(scene_context, view_transform, *render_pass, command);
+    EncodeCommand(scene_context, camera_transform, *render_pass, command);
   }
 
   if (!render_pass->EncodeCommands()) {

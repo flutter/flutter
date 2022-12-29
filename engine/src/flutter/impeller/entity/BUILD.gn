@@ -134,6 +134,8 @@ impeller_component("entity") {
     "contents/rrect_shadow_contents.h",
     "contents/runtime_effect_contents.cc",
     "contents/runtime_effect_contents.h",
+    "contents/scene_contents.cc",
+    "contents/scene_contents.h",
     "contents/solid_color_contents.cc",
     "contents/solid_color_contents.h",
     "contents/sweep_gradient_contents.cc",
@@ -164,6 +166,7 @@ impeller_component("entity") {
     "../archivist",
     "../image",
     "../renderer",
+    "../scene",
     "../typographer",
   ]
 
