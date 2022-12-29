@@ -8,8 +8,10 @@
 
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
+#include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "rapidjson/document.h"
@@ -95,26 +97,22 @@ std::string SimulatePlatformMessage(TestBinaryMessenger* messenger,
 
 }  // namespace
 
-class PlatformHandlerTest : public ::testing::Test {
+class PlatformHandlerTest : public WindowsTest {
  protected:
   FlutterWindowsEngine* engine() { return engine_.get(); }
 
   void use_headless_engine() {
-    // Set properties required to create the engine.
-    FlutterDesktopEngineProperties properties = {};
-    properties.assets_path = L"C:\\foo\\flutter_assets";
-    properties.icu_data_path = L"C:\\foo\\icudtl.dat";
-    properties.aot_library_path = L"C:\\foo\\aot.so";
-    FlutterProjectBundle project(properties);
+    FlutterWindowsEngineBuilder builder{GetContext()};
 
-    engine_ = std::make_unique<FlutterWindowsEngine>(project);
+    engine_ = builder.Build();
   }
 
   void use_engine_with_view() {
-    use_headless_engine();
+    FlutterWindowsEngineBuilder builder{GetContext()};
 
     auto window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
     view_ = std::make_unique<FlutterWindowsView>(std::move(window));
+    engine_ = builder.Build();
 
     engine_->SetView(view_.get());
   }
