@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:path/path.dart' as path;
 
+import '../../globals.dart' as globals;
 import 'helper.dart';
 
 /// The caching strategy for the generated service worker.
@@ -38,7 +37,8 @@ String generateServiceWorker(
     'js',
     'flutter_service_worker.js',
   );
-  return io.File(flutterServiceWorkerJsPath)
+  return globals.localFileSystem
+      .file(flutterServiceWorkerJsPath)
       .readAsStringSync()
       .replaceAll(
         r'$$RESOURCES_MAP',

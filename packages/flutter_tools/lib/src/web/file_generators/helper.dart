@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/local.dart';
-import 'package:path/path.dart' as path;
-
-import '../../base/platform.dart';
 import '../../base/user_messages.dart';
 import '../../cache.dart';
+import '../../globals.dart' as globals;
 
 String get _flutterRoot => Cache.defaultFlutterRoot(
-      platform: const LocalPlatform(),
-      fileSystem: const LocalFileSystem(),
+      platform: globals.platform,
+      fileSystem: globals.localFileSystem,
       userMessages: UserMessages(),
     );
 
-final String fileGeneratorsRoot = path.join(
+final String fileGeneratorsRoot = globals.localFileSystem.path.join(
   _flutterRoot,
   'packages',
   'flutter_tools',

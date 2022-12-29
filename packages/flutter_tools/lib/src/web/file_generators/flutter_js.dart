@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:path/path.dart' as path;
 
+import '../../globals.dart' as globals;
 import 'helper.dart';
 
 /// Generates the flutter.js file.
@@ -18,5 +17,5 @@ String generateFlutterJsFile() {
     'js',
     'flutter.js',
   );
-  return io.File(flutterJsPath).readAsStringSync();
+  return globals.localFileSystem.file(flutterJsPath).readAsStringSync();
 }
