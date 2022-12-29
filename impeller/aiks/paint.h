@@ -44,6 +44,7 @@ struct Paint {
     kConicalGradient,
     kSweepGradient,
     kRuntimeEffect,
+    kScene,
   };
 
   struct MaskBlurDescriptor {

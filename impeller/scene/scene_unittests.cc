@@ -33,9 +33,11 @@ using SceneTest = PlaygroundTest;
 INSTANTIATE_PLAYGROUND_SUITE(SceneTest);
 
 TEST_P(SceneTest, CuboidUnlit) {
+  auto scene_context = std::make_shared<SceneContext>(GetContext());
+
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
     auto allocator = GetContext()->GetResourceAllocator();
-    auto scene = Scene(GetContext());
+    auto scene = Scene(scene_context);
 
     {
       Mesh mesh;
@@ -87,7 +89,8 @@ TEST_P(SceneTest, FlutterLogo) {
   gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives()[0].material =
       material;
 
-  auto scene = Scene(GetContext());
+  auto scene_context = std::make_shared<SceneContext>(GetContext());
+  auto scene = Scene(scene_context);
   scene.GetRoot().AddChild(std::move(gltf_scene));
   scene.GetRoot().SetLocalTransform(Matrix::MakeScale({3, 3, 3}));
 
@@ -121,7 +124,8 @@ TEST_P(SceneTest, TwoTriangles) {
       Node::MakeFromFlatbuffer(*mapping, *allocator);
   ASSERT_NE(gltf_scene, nullptr);
 
-  auto scene = Scene(GetContext());
+  auto scene_context = std::make_shared<SceneContext>(GetContext());
+  auto scene = Scene(scene_context);
   scene.GetRoot().AddChild(std::move(gltf_scene));
 
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
