@@ -10,6 +10,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_delta.h"
+#include "flutter/fml/time/time_point.h"
 
 #include "vsync_waiter.h"
 
@@ -22,9 +23,10 @@ namespace flutter_runner {
 using on_frame_presented_event =
     std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
 
-// Set to zero for now for maximum simplicity until we have real values.
+// 2ms interval to target vsync is only used until Scenic sends presentation
+// feedback, or when we run out of present credits.
 static constexpr fml::TimeDelta kDefaultFlatlandPresentationInterval =
-    fml::TimeDelta::FromSecondsF(0);
+    fml::TimeDelta::FromMilliseconds(2);
 
 // The component residing on the raster thread that is responsible for
 // maintaining the Flatland instance connection and presenting updates.
@@ -87,6 +89,7 @@ class FlatlandConnection final {
     FireCallbackCallback fire_callback_;
     bool fire_callback_pending_ = false;
     bool first_present_called_ = false;
+    fml::TimePoint next_presentation_time_;
   } threadsafe_state_;
 
   std::vector<zx::event> acquire_fences_;
