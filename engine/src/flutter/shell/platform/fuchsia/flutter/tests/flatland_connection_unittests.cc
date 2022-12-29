@@ -40,6 +40,26 @@ void AwaitVsyncChecked(FlatlandConnection& flatland_connection,
       });
 }
 
+void AwaitVsyncChecked(FlatlandConnection& flatland_connection,
+                       bool& condition_variable,
+                       fml::TimePoint expected_frame_end) {
+  flatland_connection.AwaitVsync(
+      [&condition_variable, expected_frame_end = std::move(expected_frame_end)](
+          fml::TimePoint frame_start, fml::TimePoint frame_end) {
+        EXPECT_EQ(frame_end, expected_frame_end);
+        condition_variable = true;
+      });
+}
+
+std::vector<fuchsia::scenic::scheduling::PresentationInfo>
+CreateFuturePresentationInfos(int presentation_time) {
+  fuchsia::scenic::scheduling::PresentationInfo info_1;
+  info_1.set_presentation_time(presentation_time);
+  std::vector<fuchsia::scenic::scheduling::PresentationInfo> infos;
+  infos.push_back(std::move(info_1));
+  return infos;
+}
+
 }  // namespace
 
 class FlatlandConnectionTest : public ::testing::Test {
@@ -61,10 +81,12 @@ class FlatlandConnectionTest : public ::testing::Test {
   }
 
   // Syntactic sugar for OnNextFrameBegin
-  void OnNextFrameBegin(int num_present_credits) {
+  void OnNextFrameBegin(int num_present_credits, int presentation_time = 345) {
     fuchsia::ui::composition::OnNextFrameBeginValues on_next_frame_begin_values;
     on_next_frame_begin_values.set_additional_present_credits(
         num_present_credits);
+    on_next_frame_begin_values.set_future_presentation_infos(
+        CreateFuturePresentationInfos(presentation_time));
     fake_flatland().FireOnNextFrameBeginEvent(
         std::move(on_next_frame_begin_values));
   }
@@ -171,10 +193,14 @@ TEST_F(FlatlandConnectionTest, BasicPresent) {
   EXPECT_FALSE(await_vsync_fired);
 
   // Fire the `OnNextFrameBegin` event. AwaitVsync should be fired.
+  const int kPresentationTime = 123;
   AwaitVsyncChecked(flatland_connection, await_vsync_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    fml::TimePoint::FromEpochDelta(
+                        fml::TimeDelta::FromNanoseconds(kPresentationTime)));
   fuchsia::ui::composition::OnNextFrameBeginValues on_next_frame_begin_values;
   on_next_frame_begin_values.set_additional_present_credits(3);
+  on_next_frame_begin_values.set_future_presentation_infos(
+      CreateFuturePresentationInfos(kPresentationTime));
   fake_flatland().FireOnNextFrameBeginEvent(
       std::move(on_next_frame_begin_values));
   loop().RunUntilIdle();
@@ -275,24 +301,29 @@ TEST_F(FlatlandConnectionTest, OutOfOrderAwait) {
 
   // Set the callback with AwaitVsync, callback should not be fired
   await_vsync_callback_fired = false;
+  const int kPresentationTime1 = 567;
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    fml::TimePoint::FromEpochDelta(
+                        fml::TimeDelta::FromNanoseconds(kPresentationTime1)));
   EXPECT_FALSE(await_vsync_callback_fired);
 
-  // Fire the `OnNextFrameBegin` event. AwaitVsync callback should be fired.
+  // Fire the `OnNextFrameBegin` event. AwaitVsync callback should be fired with
+  // the given presentation time.
   await_vsync_callback_fired = false;
-  OnNextFrameBegin(1);
+  OnNextFrameBegin(1, kPresentationTime1);
   loop().RunUntilIdle();
   EXPECT_TRUE(await_vsync_callback_fired);
 
   // Second consecutive ONFB should not call the fire callback and should
   // instead set it to be pending to fire on next AwaitVsync
   await_vsync_callback_fired = false;
-  OnNextFrameBegin(1);
+  const int kPresentationTime2 = 678;
+  OnNextFrameBegin(1, kPresentationTime2);
   loop().RunUntilIdle();
   EXPECT_FALSE(await_vsync_callback_fired);
 
-  // Now an AwaitVsync should immediately fire the pending callback
+  // Now an AwaitVsync should immediately fire the pending callback with the
+  // default presentation interval.
   await_vsync_callback_fired = false;
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
                     kDefaultFlatlandPresentationInterval);
@@ -301,13 +332,15 @@ TEST_F(FlatlandConnectionTest, OutOfOrderAwait) {
   // With the pending callback fired, The new callback should be set for the
   // next OnNextFrameBegin to call
   await_vsync_callback_fired = false;
+  const int kPresentationTime3 = 789;
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    fml::TimePoint::FromEpochDelta(
+                        fml::TimeDelta::FromNanoseconds(kPresentationTime3)));
   EXPECT_FALSE(await_vsync_callback_fired);
 
   // Now OnNextFrameBegin should fire the callback
   await_vsync_callback_fired = false;
-  OnNextFrameBegin(1);
+  OnNextFrameBegin(1, kPresentationTime3);
   loop().RunUntilIdle();
   EXPECT_TRUE(await_vsync_callback_fired);
 }

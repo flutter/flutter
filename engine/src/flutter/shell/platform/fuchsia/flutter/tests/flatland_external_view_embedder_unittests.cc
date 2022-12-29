@@ -300,8 +300,12 @@ Matcher<std::shared_ptr<FakeTransform>> IsClipTransformLayer(
 fuchsia::ui::composition::OnNextFrameBeginValues WithPresentCredits(
     uint32_t additional_present_credits) {
   fuchsia::ui::composition::OnNextFrameBeginValues values;
-
   values.set_additional_present_credits(additional_present_credits);
+  fuchsia::scenic::scheduling::PresentationInfo info_1;
+  info_1.set_presentation_time(123);
+  std::vector<fuchsia::scenic::scheduling::PresentationInfo> infos;
+  infos.push_back(std::move(info_1));
+  values.set_future_presentation_infos(std::move(infos));
   return values;
 }
 

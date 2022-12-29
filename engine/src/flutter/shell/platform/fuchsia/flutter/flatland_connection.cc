@@ -10,6 +10,17 @@
 
 namespace flutter_runner {
 
+namespace {
+
+fml::TimePoint GetNextPresentationTime(fml::TimePoint now,
+                                       fml::TimePoint next_presentation_time) {
+  return now > next_presentation_time
+             ? now + flutter_runner::kDefaultFlatlandPresentationInterval
+             : next_presentation_time;
+}
+
+}  // namespace
+
 FlatlandConnection::FlatlandConnection(
     std::string debug_label,
     fuchsia::ui::composition::FlatlandHandle flatland,
@@ -54,7 +65,6 @@ void FlatlandConnection::DoPresent() {
   --present_credits_;
 
   fuchsia::ui::composition::PresentArgs present_args;
-  // TODO(fxbug.dev/114588): compute a better presentation time;
   present_args.set_requested_presentation_time(0);
   present_args.set_acquire_fences(std::move(acquire_fences_));
   present_args.set_release_fences(std::move(previous_present_release_fences_));
@@ -85,10 +95,10 @@ void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
   threadsafe_state_.fire_callback_ = callback;
 
   if (threadsafe_state_.fire_callback_pending_) {
-    fml::TimePoint now = fml::TimePoint::Now();
-    // TODO(fxbug.dev/114588): Calculate correct frame times.
+    const fml::TimePoint now = fml::TimePoint::Now();
     threadsafe_state_.fire_callback_(
-        now, now + kDefaultFlatlandPresentationInterval);
+        now, GetNextPresentationTime(
+                 now, threadsafe_state_.next_presentation_time_));
     threadsafe_state_.fire_callback_ = nullptr;
     threadsafe_state_.fire_callback_pending_ = false;
   }
@@ -97,8 +107,10 @@ void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
 // This method is called from the UI thread.
 void FlatlandConnection::AwaitVsyncForSecondaryCallback(
     FireCallbackCallback callback) {
-  fml::TimePoint now = fml::TimePoint::Now();
-  callback(now, now);
+  const fml::TimePoint now = fml::TimePoint::Now();
+  std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
+  callback(now, GetNextPresentationTime(
+                    now, threadsafe_state_.next_presentation_time_));
 }
 
 void FlatlandConnection::OnError(
@@ -118,15 +130,21 @@ void FlatlandConnection::OnNextFrameBegin(
   }
 
   if (present_credits_ > 0) {
+    FML_CHECK(values.has_future_presentation_infos() &&
+              !values.future_presentation_infos().empty());
+    const auto next_presentation_time =
+        fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromNanoseconds(
+            values.future_presentation_infos().front().presentation_time()));
+
     std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
     if (threadsafe_state_.fire_callback_) {
-      fml::TimePoint now = fml::TimePoint::Now();
-      // TODO(fxbug.dev/114588): Calculate correct frame times.
       threadsafe_state_.fire_callback_(
-          now, now + kDefaultFlatlandPresentationInterval);
+          /*frame_start=*/fml::TimePoint::Now(),
+          /*frame_target=*/next_presentation_time);
       threadsafe_state_.fire_callback_ = nullptr;
     } else {
       threadsafe_state_.fire_callback_pending_ = true;
+      threadsafe_state_.next_presentation_time_ = next_presentation_time;
     }
   }
 }
