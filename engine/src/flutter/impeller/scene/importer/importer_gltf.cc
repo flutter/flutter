@@ -27,10 +27,17 @@ static const std::map<std::string, VerticesBuilder::AttributeType> kAttributes =
      {"NORMAL", VerticesBuilder::AttributeType::kNormal},
      {"TANGENT", VerticesBuilder::AttributeType::kTangent},
      {"TEXCOORD_0", VerticesBuilder::AttributeType::kTextureCoords},
-     {"COLOR_0", VerticesBuilder::AttributeType::kColor}};
+     {"COLOR_0", VerticesBuilder::AttributeType::kColor},
+     {"JOINTS_0", VerticesBuilder::AttributeType::kJoints},
+     {"WEIGHTS_0", VerticesBuilder::AttributeType::kWeights}};
 
 static bool WithinRange(int index, size_t size) {
   return index >= 0 && static_cast<size_t>(index) < size;
+}
+
+static bool MeshPrimitiveIsSkinned(const tinygltf::Primitive& primitive) {
+  return primitive.attributes.find("JOINTS_0") != primitive.attributes.end() &&
+         primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end();
 }
 
 static bool ProcessMeshPrimitive(const tinygltf::Model& gltf,
@@ -41,13 +48,24 @@ static bool ProcessMeshPrimitive(const tinygltf::Model& gltf,
   ///
 
   {
-    VerticesBuilder builder;
+    bool is_skinned = MeshPrimitiveIsSkinned(primitive);
+    std::unique_ptr<VerticesBuilder> builder =
+        is_skinned ? VerticesBuilder::MakeSkinned()
+                   : VerticesBuilder::MakeUnskinned();
 
     for (const auto& attribute : primitive.attributes) {
       auto attribute_type = kAttributes.find(attribute.first);
       if (attribute_type == kAttributes.end()) {
         std::cerr << "Vertex attribute \"" << attribute.first
                   << "\" not supported." << std::endl;
+        continue;
+      }
+      if (!is_skinned &&
+          (attribute_type->second == VerticesBuilder::AttributeType::kJoints ||
+           attribute_type->second ==
+               VerticesBuilder::AttributeType::kWeights)) {
+        // If the primitive doesn't have enough information to be skinned, skip
+        // skinning-related attributes.
         continue;
       }
 
@@ -86,14 +104,15 @@ static bool ProcessMeshPrimitive(const tinygltf::Model& gltf,
           continue;
       }
 
-      builder.SetAttributeFromBuffer(attribute_type->second,  // attribute
-                                     type,                    // component_type
-                                     source_start,            // buffer_start
-                                     accessor.ByteStride(view),  // stride_bytes
-                                     accessor.count);            // count
+      builder->SetAttributeFromBuffer(
+          attribute_type->second,     // attribute
+          type,                       // component_type
+          source_start,               // buffer_start
+          accessor.ByteStride(view),  // stride_bytes
+          accessor.count);            // count
     }
 
-    builder.WriteFBVertices(mesh_primitive);
+    builder->WriteFBVertices(mesh_primitive);
   }
 
   //---------------------------------------------------------------------------
