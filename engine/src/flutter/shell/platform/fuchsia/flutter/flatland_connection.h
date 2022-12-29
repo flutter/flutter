@@ -81,6 +81,9 @@ class FlatlandConnection final {
   uint32_t present_credits_ = 1;
   bool present_pending_ = false;
 
+  // A flow event trace id for following |Flatland::Present| calls into Scenic.
+  uint64_t next_present_trace_id_ = 0;
+
   // This struct contains state that is accessed from both from the UI thread
   // (in AwaitVsync) and the raster thread (in OnNextFrameBegin and Present).
   // You should always lock mutex_ before touching anything in this struct
