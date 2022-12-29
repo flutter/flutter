@@ -7,6 +7,7 @@
 #include <zircon/status.h>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter_runner {
 
@@ -61,6 +62,10 @@ void FlatlandConnection::Present() {
 
 // This method is called from the raster thread.
 void FlatlandConnection::DoPresent() {
+  TRACE_DURATION("flutter", "FlatlandConnection::DoPresent");
+  TRACE_FLOW_BEGIN("gfx", "Flatland::Present", next_present_trace_id_);
+  ++next_present_trace_id_;
+
   FML_CHECK(present_credits_ > 0);
   --present_credits_;
 
