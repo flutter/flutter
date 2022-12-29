@@ -22,7 +22,7 @@ namespace impeller {
 namespace scene {
 
 class CuboidGeometry;
-class VertexBufferGeometry;
+class UnskinnedVertexBufferGeometry;
 
 class Geometry {
  public:
@@ -30,10 +30,10 @@ class Geometry {
 
   static std::shared_ptr<CuboidGeometry> MakeCuboid(Vector3 size);
 
-  static std::shared_ptr<VertexBufferGeometry> MakeVertexBuffer(
-      VertexBuffer vertex_buffer);
+  static std::shared_ptr<Geometry> MakeVertexBuffer(VertexBuffer vertex_buffer,
+                                                    bool is_skinned);
 
-  static std::shared_ptr<VertexBufferGeometry> MakeFromFlatbuffer(
+  static std::shared_ptr<Geometry> MakeFromFlatbuffer(
       const fb::MeshPrimitive& mesh,
       Allocator& allocator);
 
@@ -73,11 +73,11 @@ class CuboidGeometry final : public Geometry {
   FML_DISALLOW_COPY_AND_ASSIGN(CuboidGeometry);
 };
 
-class VertexBufferGeometry final : public Geometry {
+class UnskinnedVertexBufferGeometry final : public Geometry {
  public:
-  VertexBufferGeometry();
+  UnskinnedVertexBufferGeometry();
 
-  ~VertexBufferGeometry() override;
+  ~UnskinnedVertexBufferGeometry() override;
 
   void SetVertexBuffer(VertexBuffer vertex_buffer);
 
@@ -96,7 +96,33 @@ class VertexBufferGeometry final : public Geometry {
  private:
   VertexBuffer vertex_buffer_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(VertexBufferGeometry);
+  FML_DISALLOW_COPY_AND_ASSIGN(UnskinnedVertexBufferGeometry);
+};
+
+class SkinnedVertexBufferGeometry final : public Geometry {
+ public:
+  SkinnedVertexBufferGeometry();
+
+  ~SkinnedVertexBufferGeometry() override;
+
+  void SetVertexBuffer(VertexBuffer vertex_buffer);
+
+  // |Geometry|
+  GeometryType GetGeometryType() const override;
+
+  // |Geometry|
+  VertexBuffer GetVertexBuffer(Allocator& allocator) const override;
+
+  // |Geometry|
+  void BindToCommand(const SceneContext& scene_context,
+                     HostBuffer& buffer,
+                     const Matrix& transform,
+                     Command& command) const override;
+
+ private:
+  VertexBuffer vertex_buffer_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SkinnedVertexBufferGeometry);
 };
 
 }  // namespace scene

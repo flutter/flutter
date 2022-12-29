@@ -11,7 +11,8 @@ namespace scene {
 
 enum class GeometryType {
   kUnskinned = 0,
-  kLastType = kUnskinned,
+  kSkinned = 1,
+  kLastType = kSkinned,
 };
 enum class MaterialType {
   kUnlit = 0,

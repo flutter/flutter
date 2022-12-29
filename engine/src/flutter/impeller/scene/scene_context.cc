@@ -5,6 +5,7 @@
 #include "impeller/scene/scene_context.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/scene/material.h"
+#include "impeller/scene/shaders/skinned.vert.h"
 #include "impeller/scene/shaders/unlit.frag.h"
 #include "impeller/scene/shaders/unskinned.vert.h"
 
@@ -38,6 +39,8 @@ SceneContext::SceneContext(std::shared_ptr<Context> context)
   pipelines_[{PipelineKey{GeometryType::kUnskinned, MaterialType::kUnlit}}] =
       MakePipelineVariants<UnskinnedVertexShader, UnlitFragmentShader>(
           *context_);
+  pipelines_[{PipelineKey{GeometryType::kSkinned, MaterialType::kUnlit}}] =
+      MakePipelineVariants<SkinnedVertexShader, UnlitFragmentShader>(*context_);
 
   {
     impeller::TextureDescriptor texture_descriptor;
