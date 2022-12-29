@@ -16,6 +16,7 @@ import 'text_theme.dart';
 import 'theme.dart';
 
 const double _kCircularIndicatorDiameter = 56;
+const double _kIndicatorHeight = 32;
 
 /// A Material Design widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and
@@ -110,6 +111,7 @@ class NavigationRail extends StatefulWidget {
     this.minExtendedWidth,
     this.useIndicator,
     this.indicatorColor,
+    this.indicatorShape,
   }) :  assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
@@ -306,7 +308,17 @@ class NavigationRail extends StatefulWidget {
 
   /// Overrides the default value of [NavigationRail]'s selection indicator color,
   /// when [useIndicator] is true.
+  ///
+  /// If this is null, [NavigationRailThemeData.indicatorColor] is used. If
+  /// that is null, defaults to [ColorScheme.secondaryContainer].
   final Color? indicatorColor;
+
+  /// Overrides the default value of [NavigationRail]'s selection indicator shape,
+  /// when [useIndicator] is true.
+  ///
+  /// If this is null, [NavigationRailThemeData.indicatorShape] is used. If
+  /// that is null, defaults to [StadiumBorder].
+  final ShapeBorder? indicatorShape;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
@@ -396,7 +408,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? defaults.labelType!;
     final bool useIndicator = widget.useIndicator ?? navigationRailTheme.useIndicator ?? defaults.useIndicator!;
     final Color? indicatorColor = widget.indicatorColor ?? navigationRailTheme.indicatorColor ?? defaults.indicatorColor;
-    final ShapeBorder? indicatorShape = navigationRailTheme.indicatorShape ?? defaults.indicatorShape;
+    final ShapeBorder? indicatorShape = widget.indicatorShape ?? navigationRailTheme.indicatorShape ?? defaults.indicatorShape;
 
     // For backwards compatibility, in M2 the opacity of the unselected icons needs
     // to be set to the default if it isn't in the given theme. This can be removed
@@ -579,7 +591,8 @@ class _RailDestination extends StatelessWidget {
     );
 
     final bool material3 = Theme.of(context).useMaterial3;
-    final double indicatorInkOffsetY;
+    final EdgeInsets destionationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
+    Offset indicatorOffset;
 
     final Widget themedIcon = IconTheme(
       data: iconTheme,
@@ -596,8 +609,10 @@ class _RailDestination extends StatelessWidget {
       case NavigationRailLabelType.none:
         // Split the destination spacing across the top and bottom to keep the icon centered.
         final Widget? spacing = material3 ? const SizedBox(height: _verticalDestinationSpacingM3 / 2) : null;
-        indicatorInkOffsetY = _verticalDestinationPaddingNoLabel - (_verticalIconLabelSpacingM3 / 2);
-
+        indicatorOffset = Offset(
+          minWidth / 2 + destionationPadding.left,
+          _verticalDestinationSpacingM3 / 2 + destionationPadding.top,
+        );
         final Widget iconPart = Column(
           children: <Widget>[
             if (spacing != null) spacing,
@@ -625,9 +640,7 @@ class _RailDestination extends StatelessWidget {
               children: <Widget>[
                 iconPart,
                 // For semantics when label is not showing,
-                SizedBox(
-                  width: 0,
-                  height: 0,
+                SizedBox.shrink(
                   child: Visibility.maintain(
                     visible: false,
                     child: label,
@@ -675,8 +688,12 @@ class _RailDestination extends StatelessWidget {
         final Widget topSpacing = SizedBox(height: material3 ? 0 : verticalPadding);
         final Widget labelSpacing = SizedBox(height: material3 ? lerpDouble(0, _verticalIconLabelSpacingM3, appearingAnimationValue)! : 0);
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : verticalPadding);
-        indicatorInkOffsetY = _verticalDestinationPaddingWithLabel;
-
+        final double indicatorHorizontalPadding = (destionationPadding.left / 2) - (destionationPadding.right / 2);
+        final double indicatorVerticalPadding = destionationPadding.top;
+        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
+          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+        }
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -719,7 +736,12 @@ class _RailDestination extends StatelessWidget {
         final Widget topSpacing = SizedBox(height: material3 ? 0 : _verticalDestinationPaddingWithLabel);
         final Widget labelSpacing = SizedBox(height: material3 ? _verticalIconLabelSpacingM3 : 0);
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : _verticalDestinationPaddingWithLabel);
-        indicatorInkOffsetY = _verticalDestinationPaddingWithLabel;
+        final double indicatorHorizontalPadding = (destionationPadding.left / 2) - (destionationPadding.right / 2);
+        final double indicatorVerticalPadding = destionationPadding.top;
+        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
+          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+        }
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -761,7 +783,7 @@ class _RailDestination extends StatelessWidget {
               splashColor: colors.primary.withOpacity(0.12),
               hoverColor: colors.primary.withOpacity(0.04),
               useMaterial3: material3,
-              indicatorOffsetY: indicatorInkOffsetY,
+              indicatorOffset: indicatorOffset,
               child: content,
             ),
           ),
@@ -783,7 +805,7 @@ class _IndicatorInkWell extends InkResponse {
     super.splashColor,
     super.hoverColor,
     required this.useMaterial3,
-    required this.indicatorOffsetY,
+    required this.indicatorOffset,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
@@ -792,18 +814,17 @@ class _IndicatorInkWell extends InkResponse {
   );
 
   final bool useMaterial3;
-  final double indicatorOffsetY;
+  final Offset indicatorOffset;
 
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
-    final double indicatorOffsetX = referenceBox.size.width / 2;
-
     if (useMaterial3) {
       return () {
-        return Rect.fromCenter(
-          center: Offset(indicatorOffsetX, indicatorOffsetY),
-          width: _kCircularIndicatorDiameter,
-          height: 32,
+        return Rect.fromLTWH(
+          indicatorOffset.dx - (_kCircularIndicatorDiameter / 2),
+          indicatorOffset.dy,
+          _kCircularIndicatorDiameter,
+          _kIndicatorHeight,
         );
       };
     }
@@ -900,6 +921,8 @@ class NavigationRailDestination {
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,
+    this.indicatorColor,
+    this.indicatorShape,
     required this.label,
     this.padding,
   }) : selectedIcon = selectedIcon ?? icon,
@@ -933,6 +956,12 @@ class NavigationRailDestination {
   ///    icons.
   final Widget selectedIcon;
 
+  /// The color of the [indicatorShape] when this destination is selected.
+  final Color? indicatorColor;
+
+  /// The shape of the selection inidicator.
+  final ShapeBorder? indicatorShape;
+
   /// The label for the destination.
   ///
   /// The label must be provided when used with the [NavigationRail]. When the
@@ -965,6 +994,7 @@ const double _verticalDestinationPaddingWithLabel = 16.0;
 const Widget _verticalSpacer = SizedBox(height: 8.0);
 const double _verticalIconLabelSpacingM3 = 4.0;
 const double _verticalDestinationSpacingM3 = 12.0;
+const double _horizontalDestinationSpacingM3 = 12.0;
 
 // Hand coded defaults based on Material Design 2.
 class _NavigationRailDefaultsM2 extends NavigationRailThemeData {

@@ -289,7 +289,7 @@ class CupertinoAlertDialog extends StatelessWidget {
         ),
     ];
 
-    return Container(
+    return ColoredBox(
       color: CupertinoDynamicColor.resolve(_kDialogColor, context),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -555,7 +555,7 @@ class CupertinoActionSheet extends StatelessWidget {
       content.add(Flexible(child: titleSection));
     }
 
-    return Container(
+    return ColoredBox(
       color: CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context),
       child: Column(
         mainAxisSize: MainAxisSize.min,

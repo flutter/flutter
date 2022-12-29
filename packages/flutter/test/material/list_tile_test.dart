@@ -1616,9 +1616,7 @@ void main() {
 
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
-        body: SizedBox(
-          width: 0.0,
-          height: 0.0,
+        body: SizedBox.shrink(
           child: ListTile(
             key: key,
             tileColor: Colors.green,
