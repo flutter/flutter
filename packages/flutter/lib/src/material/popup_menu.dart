@@ -1064,6 +1064,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.constraints,
     this.position,
     this.clipBehavior = Clip.none,
+    this.borderRadius,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
        assert(
@@ -1223,6 +1224,12 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
+  /// The border radius of the containing rectangle. This is effective only if
+  /// [highlightShape] is [BoxShape.rectangle].
+  ///
+  /// If this is null, it is interpreted as [BorderRadius.zero].
+  final BorderRadius? borderRadius;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1314,6 +1321,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
+          borderRadius: widget.borderRadius,
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
           radius: widget.splashRadius,
