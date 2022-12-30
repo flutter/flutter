@@ -443,7 +443,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   /// The top-level Gradle build file.
-  /// 
+  ///
   /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
   File get gradleBuildFile {
     if (hostAppGradleRoot.childFile('build.gradle.kts').existsSync()) {
@@ -454,7 +454,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
 
   /// The app-level Gradle build file.
-  /// 
+  ///
   /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
   File get appGradleBuildFile {
     final Directory appDir = hostAppGradleRoot.childDirectory('app');
