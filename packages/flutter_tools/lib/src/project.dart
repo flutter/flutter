@@ -442,15 +442,26 @@ class AndroidProject extends FlutterProjectPlatform {
     return ephemeralDirectory;
   }
 
-  /// The Gradle build file, which can be Groovy or Kotlin DSL based on the
-  /// extension.
+  /// The top-level Gradle build file.
+  /// 
+  /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
   File get gradleBuildFile {
     if (hostAppGradleRoot.childFile('build.gradle.kts').existsSync()) {
-      return hostAppGradleRoot
-          .childDirectory('app')
-          .childFile('build.gradle.kts');
+      return hostAppGradleRoot.childFile('build.gradle.kts');
     }
-    return hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+    return hostAppGradleRoot.childFile('build.gradle');
+  }
+
+
+  /// The app-level Gradle build file.
+  /// 
+  /// It can be written in Groovy (build.gradle) or Kotlin (build.gradle.kts).
+  File get appGradleBuildFile {
+    final Directory appDir = hostAppGradleRoot.childDirectory('app');
+    if (appDir.childFile('build.gradle.kts').existsSync()) {
+      return appDir.childFile('build.gradle.kts');
+    }
+    return appDir.childFile('build.gradle');
   }
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
@@ -480,11 +491,11 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    if (!gradleBuildFile.existsSync()) {
+    if (!appGradleBuildFile.existsSync()) {
       return false;
     }
 
-    for (final String line in gradleBuildFile.readAsLinesSync()) {
+    for (final String line in appGradleBuildFile.readAsLinesSync()) {
       if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
           line.contains("def flutterPluginVersion = 'managed'")) {
         return true;
@@ -495,7 +506,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    return firstMatchInFile(gradleBuildFile, _kotlinPluginPattern) != null;
+    return firstMatchInFile(appGradleBuildFile, _kotlinPluginPattern) != null;
   }
 
   File get appManifestFile {
@@ -521,7 +532,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   String? get applicationId {
-    return firstMatchInFile(gradleBuildFile, _applicationIdPattern)?.group(1);
+    return firstMatchInFile(appGradleBuildFile, _applicationIdPattern)?.group(1);
   }
 
   String? get group {
