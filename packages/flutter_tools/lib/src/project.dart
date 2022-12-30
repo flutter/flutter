@@ -442,6 +442,17 @@ class AndroidProject extends FlutterProjectPlatform {
     return ephemeralDirectory;
   }
 
+  /// The Gradle build file, which can be Groovy or Kotlin DSL based on the
+  /// extension.
+  File get gradleBuildFile {
+    if (hostAppGradleRoot.childFile('build.gradle.kts').existsSync()) {
+      return hostAppGradleRoot
+          .childDirectory('app')
+          .childFile('build.gradle.kts');
+    }
+    return hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+  }
+
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
@@ -469,12 +480,11 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    final File appGradle = hostAppGradleRoot.childFile(
-        fileSystem.path.join('app', 'build.gradle'));
-    if (!appGradle.existsSync()) {
+    if (!gradleBuildFile.existsSync()) {
       return false;
     }
-    for (final String line in appGradle.readAsLinesSync()) {
+
+    for (final String line in gradleBuildFile.readAsLinesSync()) {
       if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
           line.contains("def flutterPluginVersion = 'managed'")) {
         return true;
@@ -485,12 +495,11 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _kotlinPluginPattern) != null;
+    return firstMatchInFile(gradleBuildFile, _kotlinPluginPattern) != null;
   }
 
   File get appManifestFile {
-    return isUsingGradle
+    return gradleBuildFile.existsSync()
         ? globals.fs.file(globals.fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
         : hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
@@ -508,17 +517,15 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   bool get isUsingGradle {
-    return hostAppGradleRoot.childFile('build.gradle').existsSync();
+    return gradleBuildFile.existsSync();
   }
 
   String? get applicationId {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _applicationIdPattern)?.group(1);
+    return firstMatchInFile(gradleBuildFile, _applicationIdPattern)?.group(1);
   }
 
   String? get group {
-    final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _groupPattern)?.group(1);
+    return firstMatchInFile(gradleBuildFile, _groupPattern)?.group(1);
   }
 
   /// The build directory where the Android artifacts are placed.
