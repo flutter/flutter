@@ -910,15 +910,13 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
-  Widget _materialBuilder(BuildContext context, Widget? child) {
+  ThemeData _themeBuilder(BuildContext context) {
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
     final bool useDarkTheme = mode == ThemeMode.dark
       || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
-    ThemeData? theme;
-
     if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
       theme = widget.highContrastDarkTheme;
     } else if (useDarkTheme && widget.darkTheme != null) {
@@ -927,6 +925,10 @@ class _MaterialAppState extends State<MaterialApp> {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData.light();
+  }
+
+  Widget _materialBuilder(BuildContext context, Widget? child) {
+    final ThemeData theme = _themeBuilder(context);
     final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
     final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
