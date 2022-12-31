@@ -11,6 +11,7 @@
 
 #include "impeller/geometry/matrix.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/renderer/texture.h"
 #include "impeller/scene/camera.h"
 #include "impeller/scene/mesh.h"
 #include "impeller/scene/scene_encoder.h"
@@ -20,8 +21,9 @@ namespace scene {
 
 class Node final {
  public:
-  static std::shared_ptr<Node> MakeFromFlatbuffer(fml::Mapping& mapping,
-                                                  Allocator& allocator);
+  static std::shared_ptr<Node> MakeFromFlatbuffer(
+      const fml::Mapping& ipscene_mapping,
+      Allocator& allocator);
   static std::shared_ptr<Node> MakeFromFlatbuffer(const fb::Scene& scene,
                                                   Allocator& allocator);
 
@@ -52,6 +54,7 @@ class Node final {
   void UnpackFromFlatbuffer(
       const fb::Node& node,
       const std::vector<std::shared_ptr<Node>>& scene_nodes,
+      const std::vector<std::shared_ptr<Texture>>& textures,
       Allocator& allocator);
 
   bool is_root_ = false;
