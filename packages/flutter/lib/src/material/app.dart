@@ -911,6 +911,7 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   ThemeData _themeBuilder(BuildContext context) {
+    ThemeData? theme;
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
@@ -925,6 +926,7 @@ class _MaterialAppState extends State<MaterialApp> {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData.light();
+    return theme;
   }
 
   Widget _materialBuilder(BuildContext context, Widget? child) {
