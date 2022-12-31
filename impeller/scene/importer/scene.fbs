@@ -15,14 +15,28 @@ struct Color {
   a: float;
 }
 
-/// A compressed texture for Flutter to decode. The `bytes` field takes
-/// precedent over the `uri` field.
-table Texture {
-  /// A Flutter asset URI for an image file to import and decode.
-  uri: string;
-  /// Compressed image bytes for Flutter to decode. If this field is not empty,
-  /// it takes precedent over the `uri` field for sourcing the texture.
+enum ComponentType:byte {
+  k8Bit,
+  k16Bit,
+}
+
+table EmbeddedImage {
   bytes: [ubyte];
+  component_count: ubyte = 0;
+  component_type: ComponentType;
+  width: uint;
+  height: uint;
+}
+
+/// The `bytes` field takes precedent over the `uri` field.
+/// If both the `uri` and `bytes` fields are empty, a fully opaque white
+/// placeholder will be used.
+table Texture {
+  /// A Flutter asset URI for a compressed image file to import and decode.
+  uri: string;
+  /// Decompressed image bytes for uploading to the GPU. If this field is not
+  /// empty, it takes precedent over the `uri` field for sourcing the texture.
+  embedded_image: EmbeddedImage;
 }
 
 enum MaterialType:byte {
@@ -34,7 +48,7 @@ enum MaterialType:byte {
 /// by the factor of the component.
 /// Texture fields are indices into the `Scene`->`textures` array. All textures
 /// are optional -- a texture index value of -1 indicates no texture.
-table  Material {
+table Material {
   // When the `MaterialType` is `kUnlit`, only the `base_color` fields are used.
   type: MaterialType;
 

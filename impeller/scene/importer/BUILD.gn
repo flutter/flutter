@@ -17,14 +17,26 @@ flatbuffers("importer_flatbuffers") {
   public_deps = [ "//third_party/flatbuffers" ]
 }
 
+impeller_component("conversions") {
+  sources = [
+    "conversions.cc",
+    "conversions.h",
+  ]
+
+  public_deps = [
+    ":importer_flatbuffers",
+    "../../base",
+    "../../geometry",
+    "//flutter/fml",
+  ]
+}
+
 impeller_component("importer_lib") {
   # Current versions of libcxx have deprecated some of the UTF-16 string
   # conversion APIs.
   defines = [ "_LIBCPP_DISABLE_DEPRECATION_WARNINGS" ]
 
   sources = [
-    "conversions.cc",
-    "conversions.h",
     "importer.h",
     "importer_gltf.cc",
     "switches.cc",
@@ -35,6 +47,7 @@ impeller_component("importer_lib") {
   ]
 
   public_deps = [
+    ":conversions",
     ":importer_flatbuffers",
     "../../base",
     "../../compiler:utilities",

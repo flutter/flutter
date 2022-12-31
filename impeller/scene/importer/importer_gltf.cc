@@ -40,6 +40,25 @@ static bool MeshPrimitiveIsSkinned(const tinygltf::Primitive& primitive) {
          primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end();
 }
 
+static void ProcessMaterial(const tinygltf::Model& gltf,
+                            const tinygltf::Material& in_material,
+                            fb::MaterialT& out_material) {
+  out_material.type = fb::MaterialType::kUnlit;
+  out_material.base_color_factor =
+      ToFBColor(in_material.pbrMetallicRoughness.baseColorFactor);
+  bool base_color_texture_valid =
+      in_material.pbrMetallicRoughness.baseColorTexture.texCoord == 0 &&
+      in_material.pbrMetallicRoughness.baseColorTexture.index >= 0 &&
+      in_material.pbrMetallicRoughness.baseColorTexture.index <
+          static_cast<int32_t>(gltf.textures.size());
+  out_material.base_color_texture =
+      base_color_texture_valid
+          // This is safe because every GLTF input texture is mapped to a
+          // `Scene->texture`.
+          ? in_material.pbrMetallicRoughness.baseColorTexture.index
+          : -1;
+}
+
 static bool ProcessMeshPrimitive(const tinygltf::Model& gltf,
                                  const tinygltf::Primitive& primitive,
                                  fb::MeshPrimitiveT& mesh_primitive) {
@@ -119,35 +138,52 @@ static bool ProcessMeshPrimitive(const tinygltf::Model& gltf,
   /// Indices.
   ///
 
-  if (!WithinRange(primitive.indices, gltf.accessors.size())) {
-    std::cerr << "Mesh primitive has no index buffer. Skipping." << std::endl;
-    return false;
-  }
-
-  auto index_accessor = gltf.accessors[primitive.indices];
-  auto index_view = gltf.bufferViews[index_accessor.bufferView];
-
-  auto indices = std::make_unique<fb::IndicesT>();
-
-  switch (index_accessor.componentType) {
-    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-      indices->type = fb::IndexType::k16Bit;
-      break;
-    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-      indices->type = fb::IndexType::k32Bit;
-      break;
-    default:
-      std::cerr << "Mesh primitive has unsupported index type "
-                << index_accessor.componentType << ". Skipping.";
+  {
+    if (!WithinRange(primitive.indices, gltf.accessors.size())) {
+      std::cerr << "Mesh primitive has no index buffer. Skipping." << std::endl;
       return false;
-  }
-  indices->count = index_accessor.count;
-  indices->data.resize(index_view.byteLength);
-  const auto* index_buffer =
-      &gltf.buffers[index_view.buffer].data[index_view.byteOffset];
-  std::memcpy(indices->data.data(), index_buffer, indices->data.size());
+    }
 
-  mesh_primitive.indices = std::move(indices);
+    auto index_accessor = gltf.accessors[primitive.indices];
+    auto index_view = gltf.bufferViews[index_accessor.bufferView];
+
+    auto indices = std::make_unique<fb::IndicesT>();
+
+    switch (index_accessor.componentType) {
+      case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+        indices->type = fb::IndexType::k16Bit;
+        break;
+      case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+        indices->type = fb::IndexType::k32Bit;
+        break;
+      default:
+        std::cerr << "Mesh primitive has unsupported index type "
+                  << index_accessor.componentType << ". Skipping.";
+        return false;
+    }
+    indices->count = index_accessor.count;
+    indices->data.resize(index_view.byteLength);
+    const auto* index_buffer =
+        &gltf.buffers[index_view.buffer].data[index_view.byteOffset];
+    std::memcpy(indices->data.data(), index_buffer, indices->data.size());
+
+    mesh_primitive.indices = std::move(indices);
+  }
+
+  //---------------------------------------------------------------------------
+  /// Material.
+  ///
+
+  {
+    auto material = std::make_unique<fb::MaterialT>();
+    if (primitive.material >= 0 &&
+        primitive.material < static_cast<int>(gltf.materials.size())) {
+      ProcessMaterial(gltf, gltf.materials[primitive.material], *material);
+    } else {
+      material->type = fb::MaterialType::kUnlit;
+    }
+    mesh_primitive.material = std::move(material);
+  }
 
   return true;
 }
@@ -208,6 +244,45 @@ static void ProcessNode(const tinygltf::Model& gltf,
   }
 }
 
+static void ProcessTexture(const tinygltf::Model& gltf,
+                           const tinygltf::Texture& in_texture,
+                           fb::TextureT& out_texture) {
+  if (in_texture.source < 0 ||
+      in_texture.source >= static_cast<int>(gltf.images.size())) {
+    return;
+  }
+  auto& image = gltf.images[in_texture.source];
+
+  auto embedded = std::make_unique<fb::EmbeddedImageT>();
+  embedded->bytes = image.image;
+  size_t bytes_per_component = 0;
+  switch (image.pixel_type) {
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+      embedded->component_type = fb::ComponentType::k8Bit;
+      bytes_per_component = 1;
+      break;
+    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+      embedded->component_type = fb::ComponentType::k16Bit;
+      bytes_per_component = 2;
+      break;
+    default:
+      std::cerr << "Texture component type " << image.pixel_type
+                << " not supported." << std::endl;
+      return;
+  }
+  if (image.image.size() !=
+      bytes_per_component * image.component * image.width * image.height) {
+    std::cerr << "Decompressed texture had unexpected buffer size. Skipping."
+              << std::endl;
+    return;
+  }
+  embedded->component_count = image.component;
+  embedded->width = image.width;
+  embedded->height = image.height;
+  out_texture.embedded_image = std::move(embedded);
+  out_texture.uri = image.uri;
+}
+
 bool ParseGLTF(const fml::Mapping& source_mapping, fb::SceneT& out_scene) {
   tinygltf::Model gltf;
 
@@ -231,6 +306,12 @@ bool ParseGLTF(const fml::Mapping& source_mapping, fb::SceneT& out_scene) {
 
   const tinygltf::Scene& scene = gltf.scenes[gltf.defaultScene];
   out_scene.children = scene.nodes;
+
+  for (size_t texture_i = 0; texture_i < gltf.textures.size(); texture_i++) {
+    auto texture = std::make_unique<fb::TextureT>();
+    ProcessTexture(gltf, gltf.textures[texture_i], *texture);
+    out_scene.textures.push_back(std::move(texture));
+  }
 
   for (size_t node_i = 0; node_i < gltf.nodes.size(); node_i++) {
     auto node = std::make_unique<fb::NodeT>();

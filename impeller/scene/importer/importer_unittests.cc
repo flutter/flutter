@@ -15,7 +15,8 @@ namespace importer {
 namespace testing {
 
 TEST(ImporterTest, CanParseUnskinnedGLTF) {
-  auto mapping = flutter::testing::OpenFixtureAsMapping("flutter_logo.glb");
+  auto mapping =
+      flutter::testing::OpenFixtureAsMapping("flutter_logo_baked.glb");
 
   fb::SceneT scene;
   ASSERT_TRUE(ParseGLTF(*mapping, scene));
