@@ -4,13 +4,16 @@
 
 #include <cmath>
 #include <memory>
+#include <vector>
 
+#include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/vector.h"
+#include "impeller/image/decompressed_image.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/formats.h"
@@ -72,22 +75,17 @@ TEST_P(SceneTest, FlutterLogo) {
   auto allocator = GetContext()->GetResourceAllocator();
 
   auto mapping =
-      flutter::testing::OpenFixtureAsMapping("flutter_logo.glb.ipscene");
+      flutter::testing::OpenFixtureAsMapping("flutter_logo_baked.glb.ipscene");
   ASSERT_NE(mapping, nullptr);
+
+  flatbuffers::Verifier verifier(mapping->GetMapping(), mapping->GetSize());
+  ASSERT_TRUE(fb::VerifySceneBuffer(verifier));
 
   std::shared_ptr<Node> gltf_scene =
       Node::MakeFromFlatbuffer(*mapping, *allocator);
   ASSERT_NE(gltf_scene, nullptr);
-
-  std::shared_ptr<UnlitMaterial> material = Material::MakeUnlit();
-  auto color_baked = CreateTextureForFixture("flutter_logo_baked.png");
-  material->SetColorTexture(color_baked);
-  material->SetVertexColorWeight(0);
-
   ASSERT_EQ(gltf_scene->GetChildren().size(), 1u);
   ASSERT_EQ(gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives().size(), 1u);
-  gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives()[0].material =
-      material;
 
   auto scene_context = std::make_shared<SceneContext>(GetContext());
   auto scene = Scene(scene_context);

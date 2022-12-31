@@ -75,6 +75,14 @@ fb::Color ToFBColor(const Color c) {
   return fb::Color(c.red, c.green, c.blue, c.alpha);
 }
 
+std::unique_ptr<fb::Color> ToFBColor(const std::vector<double>& c) {
+  auto* color = new fb::Color(c.size() > 0 ? c[0] : 1,  //
+                              c.size() > 1 ? c[1] : 1,  //
+                              c.size() > 2 ? c[2] : 1,  //
+                              c.size() > 3 ? c[3] : 1);
+  return std::unique_ptr<fb::Color>(color);
+}
+
 }  // namespace importer
 }  // namespace scene
 }  // namespace impeller

@@ -329,16 +329,20 @@ bool Playground::OpenPlaygroundHere(SinglePassCallback pass_callback) {
       });
 }
 
-std::optional<DecompressedImage> Playground::LoadFixtureImageRGBA(
-    const char* fixture_name) const {
-  if (!renderer_ || fixture_name == nullptr) {
-    return std::nullopt;
-  }
-
-  auto compressed_image =
-      CompressedImage::Create(OpenAssetAsMapping(fixture_name));
+std::shared_ptr<CompressedImage> Playground::LoadFixtureImageCompressed(
+    std::shared_ptr<fml::Mapping> mapping) const {
+  auto compressed_image = CompressedImage::Create(std::move(mapping));
   if (!compressed_image) {
     VALIDATION_LOG << "Could not create compressed image.";
+    return nullptr;
+  }
+
+  return compressed_image;
+}
+
+std::optional<DecompressedImage> Playground::DecodeImageRGBA(
+    const std::shared_ptr<CompressedImage>& compressed) const {
+  if (compressed == nullptr) {
     return std::nullopt;
   }
   // The decoded image is immediately converted into RGBA as that format is
@@ -346,9 +350,9 @@ std::optional<DecompressedImage> Playground::LoadFixtureImageRGBA(
   // bit pixel strides, this is overkill. Since this is a test fixture we
   // aren't necessarily trying to eke out memory savings here and instead
   // favor simplicity.
-  auto image = compressed_image->Decode().ConvertToRGBA();
+  auto image = compressed->Decode().ConvertToRGBA();
   if (!image.IsValid()) {
-    VALIDATION_LOG << "Could not find fixture named " << fixture_name;
+    VALIDATION_LOG << "Could not decode image.";
     return std::nullopt;
   }
 
@@ -356,42 +360,52 @@ std::optional<DecompressedImage> Playground::LoadFixtureImageRGBA(
 }
 
 std::shared_ptr<Texture> Playground::CreateTextureForFixture(
-    const char* fixture_name,
+    DecompressedImage& decompressed_image,
     bool enable_mipmapping) const {
-  auto image = LoadFixtureImageRGBA(fixture_name);
-  if (!image.has_value()) {
-    return nullptr;
-  }
-
   auto texture_descriptor = TextureDescriptor{};
   texture_descriptor.storage_mode = StorageMode::kHostVisible;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
-  texture_descriptor.size = image->GetSize();
+  texture_descriptor.size = decompressed_image.GetSize();
   texture_descriptor.mip_count =
-      enable_mipmapping ? image->GetSize().MipCount() : 1u;
+      enable_mipmapping ? decompressed_image.GetSize().MipCount() : 1u;
 
   auto texture = renderer_->GetContext()->GetResourceAllocator()->CreateTexture(
       texture_descriptor);
   if (!texture) {
-    VALIDATION_LOG << "Could not allocate texture for fixture " << fixture_name;
+    VALIDATION_LOG << "Could not allocate texture for fixture.";
     return nullptr;
   }
-  texture->SetLabel(fixture_name);
 
-  auto uploaded = texture->SetContents(image->GetAllocation());
+  auto uploaded = texture->SetContents(decompressed_image.GetAllocation());
   if (!uploaded) {
-    VALIDATION_LOG << "Could not upload texture to device memory for fixture "
-                   << fixture_name;
+    VALIDATION_LOG << "Could not upload texture to device memory for fixture.";
     return nullptr;
   }
   return texture;
+}
+
+std::shared_ptr<Texture> Playground::CreateTextureForFixture(
+    std::shared_ptr<fml::Mapping> mapping,
+    bool enable_mipmapping) const {
+  auto image = DecodeImageRGBA(LoadFixtureImageCompressed(std::move(mapping)));
+  if (!image.has_value()) {
+    return nullptr;
+  }
+  return CreateTextureForFixture(image.value());
+}
+
+std::shared_ptr<Texture> Playground::CreateTextureForFixture(
+    const char* fixture_name,
+    bool enable_mipmapping) const {
+  return CreateTextureForFixture(OpenAssetAsMapping(fixture_name));
 }
 
 std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
     std::array<const char*, 6> fixture_names) const {
   std::array<DecompressedImage, 6> images;
   for (size_t i = 0; i < fixture_names.size(); i++) {
-    auto image = LoadFixtureImageRGBA(fixture_names[i]);
+    auto image = DecodeImageRGBA(
+        LoadFixtureImageCompressed(OpenAssetAsMapping(fixture_names[i])));
     if (!image.has_value()) {
       return nullptr;
     }

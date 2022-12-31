@@ -1708,24 +1708,12 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
 TEST_P(AiksTest, SceneColorSource) {
   // Load up the scene.
   auto mapping =
-      flutter::testing::OpenFixtureAsMapping("flutter_logo.glb.ipscene");
+      flutter::testing::OpenFixtureAsMapping("flutter_logo_baked.glb.ipscene");
   ASSERT_NE(mapping, nullptr);
 
   std::shared_ptr<scene::Node> gltf_scene = scene::Node::MakeFromFlatbuffer(
       *mapping, *GetContext()->GetResourceAllocator());
   ASSERT_NE(gltf_scene, nullptr);
-
-  // Assign a material (temporary stopgap).
-  std::shared_ptr<scene::UnlitMaterial> material = scene::Material::MakeUnlit();
-  auto color_baked = CreateTextureForFixture("flutter_logo_baked.png");
-  ASSERT_NE(color_baked, nullptr);
-  material->SetColorTexture(std::move(color_baked));
-  material->SetVertexColorWeight(0);
-
-  ASSERT_EQ(gltf_scene->GetChildren().size(), 1u);
-  ASSERT_EQ(gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives().size(), 1u);
-  gltf_scene->GetChildren()[0]->GetMesh().GetPrimitives()[0].material =
-      std::move(material);
 
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     Paint paint;

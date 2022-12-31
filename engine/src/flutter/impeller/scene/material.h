@@ -10,6 +10,7 @@
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/texture.h"
+#include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/pipeline_key.h"
 
 namespace impeller {
@@ -20,12 +21,10 @@ struct SceneContextOptions;
 class Geometry;
 
 class UnlitMaterial;
-class StandardMaterial;
+class PhysicallyBasedMaterial;
 
 class Material {
  public:
-  virtual ~Material();
-
   struct BlendConfig {
     BlendOperation color_op = BlendOperation::kAdd;
     BlendFactor source_color_factor = BlendFactor::kOne;
@@ -40,9 +39,16 @@ class Material {
     CompareFunction compare = CompareFunction::kAlways;
   };
 
-  static std::unique_ptr<UnlitMaterial> MakeUnlit();
-  static std::unique_ptr<StandardMaterial> MakeStandard();
+  static std::unique_ptr<Material> MakeFromFlatbuffer(
+      const fb::Material& material,
+      const std::vector<std::shared_ptr<Texture>>& textures);
 
+  static std::unique_ptr<UnlitMaterial> MakeUnlit();
+  static std::unique_ptr<PhysicallyBasedMaterial> MakePhysicallyBased();
+
+  virtual ~Material();
+
+  void SetVertexColorWeight(Scalar weight);
   void SetBlendConfig(BlendConfig blend_config);
   void SetStencilConfig(StencilConfig stencil_config);
 
@@ -57,6 +63,7 @@ class Material {
                              Command& command) const = 0;
 
  protected:
+  Scalar vertex_color_weight_ = 1;
   BlendConfig blend_config_;
   StencilConfig stencil_config_;
   bool is_translucent_ = false;
@@ -64,13 +71,15 @@ class Material {
 
 class UnlitMaterial final : public Material {
  public:
+  static std::unique_ptr<UnlitMaterial> MakeFromFlatbuffer(
+      const fb::Material& material,
+      const std::vector<std::shared_ptr<Texture>>& textures);
+
   ~UnlitMaterial();
 
   void SetColor(Color color);
 
   void SetColorTexture(std::shared_ptr<Texture> color_texture);
-
-  void SetVertexColorWeight(Scalar weight);
 
   // |Material|
   MaterialType GetMaterialType() const override;
@@ -83,21 +92,25 @@ class UnlitMaterial final : public Material {
  private:
   Color color_ = Color::White();
   std::shared_ptr<Texture> color_texture_;
-  Scalar vertex_color_weight_ = 1;
 };
 
-class StandardMaterial final : public Material {
+class PhysicallyBasedMaterial final : public Material {
  public:
-  ~StandardMaterial();
+  static std::unique_ptr<PhysicallyBasedMaterial> MakeFromFlatbuffer(
+      const fb::Material& material,
+      const std::vector<std::shared_ptr<Texture>>& textures);
+
+  ~PhysicallyBasedMaterial();
 
   void SetAlbedo(Color albedo);
   void SetRoughness(Scalar roughness);
   void SetMetallic(Scalar metallic);
 
   void SetAlbedoTexture(std::shared_ptr<Texture> albedo_texture);
+  void SetMetallicRoughnessTexture(
+      std::shared_ptr<Texture> metallic_roughness_texture);
   void SetNormalTexture(std::shared_ptr<Texture> normal_texture);
-  void SetOcclusionRoughnessMetallicTexture(
-      std::shared_ptr<Texture> occlusion_roughness_metallic_texture);
+  void SetOcclusionTexture(std::shared_ptr<Texture> occlusion_texture);
 
   void SetEnvironmentMap(std::shared_ptr<Texture> environment_map);
 
@@ -111,12 +124,13 @@ class StandardMaterial final : public Material {
 
  private:
   Color albedo_ = Color::White();
-  Scalar roughness_ = 0.5;
   Scalar metallic_ = 0.5;
+  Scalar roughness_ = 0.5;
 
   std::shared_ptr<Texture> albedo_texture_;
+  std::shared_ptr<Texture> metallic_roughness_texture_;
   std::shared_ptr<Texture> normal_texture_;
-  std::shared_ptr<Texture> occlusion_roughness_metallic_texture_;
+  std::shared_ptr<Texture> occlusion_texture_;
 
   std::shared_ptr<Texture> environment_map_;
 };

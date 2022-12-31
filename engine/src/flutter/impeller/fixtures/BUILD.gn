@@ -35,7 +35,7 @@ impeller_shaders("shader_fixtures") {
 
 scenec("scene_fixtures") {
   geometry = [
-    "flutter_logo.glb",
+    "flutter_logo_baked.glb",
     "two_triangles.glb",
   ]
   type = "gltf"
@@ -61,8 +61,7 @@ test_fixtures("file_fixtures") {
     "blue_noise.png",
     "boston.jpg",
     "embarcadero.jpg",
-    "flutter_logo.glb",
-    "flutter_logo_baked.png",
+    "flutter_logo_baked.glb",
     "kalimba.jpg",
     "multiple_stages.hlsl",
     "resources_limit.vert",
