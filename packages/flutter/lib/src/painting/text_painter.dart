@@ -152,19 +152,20 @@ enum TextWidthBasis {
 /// The default word break rules can be tailored to meet the requirements of
 /// different use cases. For instance, the default rule set keeps horizontal
 /// whitespaces together as a single word, which may not make sense in a
-/// word-counting context -- "hello    world" contains 3 words instead of 2.
-///
-/// For handling keyboard navigation, consider using the [moveByWordBoundary]
-/// variant, which more closely matches the default behavior of most platforms
-/// and editors.
+/// word-counting context -- "hello    world" counts as 3 words instead of 2.
+/// An example is the [moveByWordBoundary] variant, which is a tailored
+/// word-break locator that more closely matches the default behavior of most
+/// platforms and editors when it comes to handling text editing keyboard
+/// shortcuts that move or delete word by word.
 class WordBoundary extends TextBoundary {
   /// Creates a [WordBoundary] with the text and layout information.
-  WordBoundary._(this._textPainter);
+  WordBoundary._(this._text, this._paragraph);
 
-  final TextPainter _textPainter;
+  final InlineSpan _text;
+  final ui.Paragraph _paragraph;
 
   @override
-  TextRange getTextBoundaryAt(int position) => (_textPainter._paragraph ?? _textPainter._createParagraph()).getWordBoundary(TextPosition(offset: max(position, 0)));
+  TextRange getTextBoundaryAt(int position) => _paragraph.getWordBoundary(TextPosition(offset: max(position, 0)));
 
   // Combines two UTF-16 code units (high surrogate + low surrogate) into a
   // single code point that represents a supplementary character.
@@ -181,17 +182,17 @@ class WordBoundary extends TextBoundary {
     return (highSurrogate << 10) + lowSurrogate + base;
   }
 
+  // The Runes class does not provide random access with a code unit offset.
   int? _codePointAt(int index) {
-    final InlineSpan text = _textPainter.text!;
-    final int? codeUnitAtIndex = text.codeUnitAt(index);
+    final int? codeUnitAtIndex = _text.codeUnitAt(index);
     if (codeUnitAtIndex == null) {
       return null;
     }
     switch (codeUnitAtIndex & 0xFC00) {
       case 0xD800:
-        return _codePointFromSurrogates(codeUnitAtIndex, text.codeUnitAt(index + 1)!);
+        return _codePointFromSurrogates(codeUnitAtIndex, _text.codeUnitAt(index + 1)!);
       case 0xDC00:
-        return _codePointFromSurrogates(text.codeUnitAt(index - 1)!, codeUnitAtIndex);
+        return _codePointFromSurrogates(_text.codeUnitAt(index - 1)!, codeUnitAtIndex);
       default:
         return codeUnitAtIndex;
     }
@@ -212,18 +213,18 @@ class WordBoundary extends TextBoundary {
   }
 
   bool _skipSpacesAndPunctuations(int offset, bool forward) {
-    // Some punctuations are supplementary characters, use code point.
-    // "inner" refers to the code unit that's before the break in the search
-    // direction (`forward`).
+    // Use code point since some punctuations are supplementary characters.
+    // "inner" here refers to the code unit that's before the break in the
+    // search direction (`forward`).
     final int? innerCodePoint = _codePointAt(forward ? offset - 1 : offset);
-    final int? outerCodeUnit = _textPainter.text!.codeUnitAt(forward ? offset : offset - 1);
+    final int? outerCodeUnit = _text.codeUnitAt(forward ? offset : offset - 1);
 
-    // Make sure the hard break rules take precedence over the additional ones.
-    // Luckily there're only 4 hard break rules for word breaks, and dictionary
-    // based breaking does not introduce new hard breaks:
+    // Make sure the hard break rules in UAX#29 take precedence over the ones we
+    // add below. Luckily there're only 4 hard break rules for word breaks, and
+    // dictionary based breaking does not introduce new hard breaks:
     // https://unicode-org.github.io/icu/userguide/boundaryanalysis/break-rules.html#word-dictionaries
     //
-    // WB1 & WB2: always break at the start or the end.
+    // WB1 & WB2: always break at the start or the end of the text.
     final bool hardBreakRulesApply = innerCodePoint == null || outerCodeUnit == null
     // WB3a & WB3b: always break before and after newlines.
                                   || _isNewline(innerCodePoint) || _isNewline(outerCodeUnit);
@@ -1280,7 +1281,10 @@ class TextPainter {
   /// This [TextBoundary] uses word boundary rules defined in [Unicode Standard
   /// Annex #29](http://www.unicode.org/reports/tr29/#Word_Boundaries).
   /// {@endtemplate}
-  late final WordBoundary wordBoundaries = WordBoundary._(this);
+  ///
+  /// Currently word boundary analysis can only be performed after [layout]
+  /// has been called.
+  WordBoundary get wordBoundaries => WordBoundary._(text!, _paragraph!);
 
   /// Returns the text range of the line at the given offset.
   ///

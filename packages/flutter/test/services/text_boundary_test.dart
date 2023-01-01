@@ -100,14 +100,16 @@ void main() {
 
   test('wordBoundary.moveByWordBoundary', () {
     const String text = 'ABC   ABC\n'       // [0, 10)
-                        'AÁ   AÁ\n'         // [10, 20)
+                        'AÁ    Á\n'         // [10, 20)
                         '         \n'       // [20, 30)
                         'ABC!!!ABC\n'       // [30, 40)
-                        'A  𑗋𑗋 A\n';     // [40, 50)
+                        '  !ABC !!\n'       // [40, 50)
+                        'A  𑗋𑗋 A\n';     // [50, 60)
 
     final TextPainter textPainter = TextPainter()
       ..textDirection = TextDirection.ltr
-      ..text = const TextSpan(text: text);
+      ..text = const TextSpan(text: text)
+      ..layout();
 
     final TextBoundary boundary = textPainter.wordBoundaries.moveByWordBoundary;
 
@@ -116,22 +118,25 @@ void main() {
     expect(boundary.getLeadingTextBoundaryAt(4), 0);
     expect(boundary.getTrailingTextBoundaryAt(4), 9);
 
+    // Works when words are starting/ending with a combining diacritical mark.
     expect(boundary.getLeadingTextBoundaryAt(14), 10);
     expect(boundary.getTrailingTextBoundaryAt(14), 19);
 
-    // Breaks after newlines.
-    expect(boundary.getLeadingTextBoundaryAt(21), 20);
-    // Breaks before newlines.
-    expect(boundary.getTrailingTextBoundaryAt(21), 29);
+    // Do break before and after newlines.
+    expect(boundary.getLeadingTextBoundaryAt(24), 20);
+    expect(boundary.getTrailingTextBoundaryAt(24), 29);
 
-    // Don't break between punctuations and
+    // Do not break on punctuations.
     expect(boundary.getLeadingTextBoundaryAt(34), 30);
-    // Breaks before newlines.
     expect(boundary.getTrailingTextBoundaryAt(34), 39);
 
+    // Ok to break if next to punctuations or separating spaces.
+    expect(boundary.getLeadingTextBoundaryAt(44), 43);
+    expect(boundary.getTrailingTextBoundaryAt(44), 46);
+
     // 44 points to a low surrogate of a punctuation.
-    expect(boundary.getLeadingTextBoundaryAt(44), 40);
-    expect(boundary.getTrailingTextBoundaryAt(44), 49);
+    expect(boundary.getLeadingTextBoundaryAt(54), 50);
+    expect(boundary.getTrailingTextBoundaryAt(54), 59);
   });
 
   test('line boundary works', () {

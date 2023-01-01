@@ -2343,9 +2343,7 @@ void main() {
       expect(controller.text, 'testing');
       expect(
         controller.selection,
-        const TextSelection.collapsed(
-            offset: 6,
-            affinity: TextAffinity.upstream), // should not expand selection
+        const TextSelection.collapsed(offset: 6), // should not expand selection
         reason: selectRight.toString(),
       );
     }, variant: TargetPlatformVariant.desktop());
