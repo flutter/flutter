@@ -2093,6 +2093,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
+  /// {@macro flutter.painting.TextPainter.wordBoundaries}
+  WordBoundary get wordBoundaries => _textPainter.wordBoundaries;
+
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -97,46 +98,40 @@ void main() {
     expect(boundary.getTrailingTextBoundaryAt(text.length), null);
   });
 
-  test('word boundary works', () {
-    final WordBoundary boundary = WordBoundary(TestTextLayoutMetrics());
-    expect(boundary.getLeadingTextBoundaryAt(3), TestTextLayoutMetrics.wordBoundaryAt3.start);
-    expect(boundary.getTrailingTextBoundaryAt(3), TestTextLayoutMetrics.wordBoundaryAt3.end);
-    expect(boundary.getTextBoundaryAt(3), TestTextLayoutMetrics.wordBoundaryAt3);
-  });
+  test('wordBoundary.moveByWordBoundary', () {
+    const String text = 'ABC   ABC\n'       // [0, 10)
+                        'AÁ   AÁ\n'         // [10, 20)
+                        '         \n'       // [20, 30)
+                        'ABC!!!ABC\n'       // [30, 40)
+                        'A  𑗋𑗋 A\n';     // [40, 50)
 
-  test('wordBoundary.until', () {
-    final List<int> forwardList = <int>[];
-    final List<int> backwardList = <int>[];
+    final TextPainter textPainter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..text = const TextSpan(text: text);
 
-    bool predicate(int offset, bool forward) {
-      final List<int> listToAdd = forward ? forwardList : backwardList;
-      listToAdd.add(offset);
-      return offset <= 0 || offset >= 111;
-    }
+    final TextBoundary boundary = textPainter.wordBoundaries.moveByWordBoundary;
 
-    final TextBoundary boundary = WordBoundary(TestWordBoundary()).until(predicate);
+    // 4 points to the 2nd whitespace in the first line.
+    // Don't break between horizontal spaces and letters/numbers.
+    expect(boundary.getLeadingTextBoundaryAt(4), 0);
+    expect(boundary.getTrailingTextBoundaryAt(4), 9);
 
-    expect(boundary.getLeadingTextBoundaryAt(50), 0);
-    expect(boundary.getTrailingTextBoundaryAt(50), 111);
-    expect(backwardList, <int>[for (int i = 50 ~/ 3; i >= 0; i--) i * 3]);
-    expect(forwardList, <int>[for (int i = 50 ~/ 3 + 1; i <= 111 ~/ 3; i++) i * 3]);
+    expect(boundary.getLeadingTextBoundaryAt(14), 10);
+    expect(boundary.getTrailingTextBoundaryAt(14), 19);
 
-    expect(boundary.getTextBoundaryAt(3), const TextRange(start: 0, end: 111));
-    forwardList.clear();
-    backwardList.clear();
+    // Breaks after newlines.
+    expect(boundary.getLeadingTextBoundaryAt(21), 20);
+    // Breaks before newlines.
+    expect(boundary.getTrailingTextBoundaryAt(21), 29);
 
-    bool predicate2(int offset, bool forward) {
-      final List<int> listToAdd = forward ? forwardList : backwardList;
-      listToAdd.add(offset);
-      return offset >= 111;
-    }
-    final TextBoundary boundary2 = WordBoundary(TestWordBoundary()).until(predicate2);
-    expect(boundary2.getLeadingTextBoundaryAt(50), isNull);
-    expect(boundary2.getTrailingTextBoundaryAt(50), 111);
-    expect(backwardList, <int>[for (int i = 50 ~/ 3; i >= 0; i--) i * 3]);
-    expect(forwardList, <int>[for (int i = 50 ~/ 3 + 1; i <= 111 ~/ 3; i++) i * 3]);
+    // Don't break between punctuations and
+    expect(boundary.getLeadingTextBoundaryAt(34), 30);
+    // Breaks before newlines.
+    expect(boundary.getTrailingTextBoundaryAt(34), 39);
 
-    expect(boundary2.getTextBoundaryAt(3), const TextRange(start: -1, end: 111));
+    // 44 points to a low surrogate of a punctuation.
+    expect(boundary.getLeadingTextBoundaryAt(44), 40);
+    expect(boundary.getTrailingTextBoundaryAt(44), 49);
   });
 
   test('line boundary works', () {
@@ -196,13 +191,5 @@ class TestTextLayoutMetrics extends TextLayoutMetrics {
       return wordBoundaryAt3;
     }
     throw UnimplementedError();
-  }
-}
-
-class TestWordBoundary extends TestTextLayoutMetrics {
-  @override
-  TextRange getWordBoundary(TextPosition position) {
-    final int start = (position.offset ~/ 3) * 3;
-    return TextRange(start: start, end: start + 3);
   }
 }

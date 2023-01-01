@@ -576,12 +576,12 @@ void main() {
             'Now is the time for\n'
             'all good people\n'
             'to come to the aid\n'
-            'of their country',
+            'of their ',
           );
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 71),
+            const TextSelection.collapsed(offset: 64),
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 

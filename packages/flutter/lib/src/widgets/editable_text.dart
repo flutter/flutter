@@ -4007,22 +4007,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // --------------------------- Text Editing Actions ---------------------------
 
   TextBoundary _characterBoundary() => widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
-
-  TextBoundary _nextWordBoundary() {
-    if (widget.obscureText) {
-      return DocumentBoundary(_value.text);
-    } else {
-      return WordBoundary(renderEditable).until((int offset, bool forward) {
-          final int? codeUnit = renderEditable.text?.codeUnitAt(forward ? offset - 1 : offset);
-          // TODO(LongCatIsLooong): Anything that's not a letter or digit should
-          // be skipped, according to the Android "WordIterator" class
-          // implementation.
-          return codeUnit == null || !TextLayoutMetrics.isWhitespace(codeUnit);
-        },
-      );
-    }
-  }
-
+  TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 

@@ -106,40 +106,6 @@ class CharacterBoundary extends TextBoundary {
   }
 }
 
-/// A [TextBoundary] subclass for locating word breaks.
-///
-/// The underlying implementation uses [UAX #29](https://unicode.org/reports/tr29/)
-/// defined default word boundaries.
-///
-/// The default word break rules keep horizontal whitespaces together as a
-/// single word. For instance, "hello world" contains 3 words, which is usually
-/// not what the user expects. Consider using the [until] method to skip
-/// unwanted words.
-class WordBoundary extends TextBoundary {
-  /// Creates a [WordBoundary] with the text and layout information.
-  const WordBoundary(this._textLayout);
-
-  final TextLayoutMetrics _textLayout;
-
-  @override
-  TextRange getTextBoundaryAt(int position) => _textLayout.getWordBoundary(TextPosition(offset: max(position, 0)));
-
-  /// Creates a new [TextBoundary] by repeatedly expanding a [WordBoundary]
-  /// until the given `predicate` returns true.
-  ///
-  /// The predicate will be evaluated every time the current boundary is
-  /// expanded. The `offset` in the predicate is the code unit offset in the
-  /// text that represents the new boundary location, and `forward` indicates
-  /// the direction of the expansion. For example, to skip word boundaries that
-  /// are adjacent to whitespaces:
-  ///
-  /// ```dart
-  /// WordBoundary(textLayout)
-  ///   .until((int offset, bool forward) => !isWhitespace(text.codeUnitAt(forward ? offset - 1 : offset)));
-  /// ```
-  TextBoundary until(UntilPredicate predicate) => _UntilTextBoundary(this, predicate);
-}
-
 /// A [TextBoundary] subclass for locating closest line breaks to a given
 /// `position`.
 ///
@@ -168,30 +134,4 @@ class DocumentBoundary extends TextBoundary {
   int? getLeadingTextBoundaryAt(int position) => position < 0 ? null : 0;
   @override
   int? getTrailingTextBoundaryAt(int position) => position >= _text.length ? null : _text.length;
-}
-
-class _UntilTextBoundary extends TextBoundary {
-  const _UntilTextBoundary(this._textBoundary, this._predicate);
-
-  final UntilPredicate _predicate;
-  final TextBoundary _textBoundary;
-
-  @override
-  int? getLeadingTextBoundaryAt(int position) {
-    if (position < 0) {
-      return null;
-    }
-    final int? offset = _textBoundary.getLeadingTextBoundaryAt(position);
-    return offset == null || _predicate(offset, false)
-      ? offset
-      : getLeadingTextBoundaryAt(offset - 1);
-  }
-
-  @override
-  int? getTrailingTextBoundaryAt(int position) {
-    final int? offset = _textBoundary.getTrailingTextBoundaryAt(max(position, 0));
-    return offset == null || _predicate(offset, true)
-      ? offset
-      : getTrailingTextBoundaryAt(offset);
-  }
 }

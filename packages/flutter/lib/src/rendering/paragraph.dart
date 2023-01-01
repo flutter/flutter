@@ -1563,11 +1563,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         result = SelectionResult.end;
         break;
       case TextGranularity.word:
-        final String text = range.textInside(fullText);
-        final TextBoundary textBoundary = WordBoundary(this).until((int offset, bool forward) {
-          return (forward ? offset >= text.length : offset == 0)
-              || !TextLayoutMetrics.isWhitespace(text.codeUnitAt(forward ? offset - 1 : offset));
-        });
+        final TextBoundary textBoundary = paragraph._textPainter.wordBoundaries.moveByWordBoundary;
         newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
         result = SelectionResult.end;
         break;
