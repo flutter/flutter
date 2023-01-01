@@ -149,10 +149,14 @@ enum TextWidthBasis {
 /// The underlying implementation uses [UAX #29](https://unicode.org/reports/tr29/)
 /// defined default word boundaries.
 ///
-/// The default word break rules keep horizontal whitespaces together as a
-/// single word. For instance, "hello world" contains 3 words, which is usually
-/// not what the user expects. Consider using the [moveByWordBoundary] variant
-/// to retrive a [WordBoundary] suitable for keyboard navigation.
+/// The default word break rules can be tailored to meet the requirements of
+/// different use cases. For instance, the default rule set keeps horizontal
+/// whitespaces together as a single word, which may not make sense in a
+/// word-counting context -- "hello    world" contains 3 words instead of 2.
+///
+/// For handling keyboard navigation, consider using the [moveByWordBoundary]
+/// variant, which more closely matches the default behavior of most platforms
+/// and editors.
 class WordBoundary extends TextBoundary {
   /// Creates a [WordBoundary] with the text and layout information.
   WordBoundary._(this._textPainter);
