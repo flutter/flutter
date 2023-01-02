@@ -35,7 +35,9 @@ Color ToColor(const fb::Color& c);
 /// Impeller -> Flatbuffers
 ///
 
-std::unique_ptr<fb::Matrix> ToFBMatrix(const Matrix& m);
+fb::Matrix ToFBMatrix(const Matrix& m);
+
+std::unique_ptr<fb::Matrix> ToFBMatrixUniquePtr(const Matrix& m);
 
 fb::Vec2 ToFBVec2(const Vector2 v);
 

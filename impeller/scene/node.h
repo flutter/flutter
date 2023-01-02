@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -33,6 +34,11 @@ class Node final {
   Node(Node&& node);
   Node& operator=(Node&& node);
 
+  const std::string& GetName() const;
+  void SetName(const std::string& new_name);
+
+  std::shared_ptr<Node> FindNodeByName(const std::string& name) const;
+
   void SetLocalTransform(Matrix transform);
   Matrix GetLocalTransform() const;
 
@@ -57,6 +63,7 @@ class Node final {
       const std::vector<std::shared_ptr<Texture>>& textures,
       Allocator& allocator);
 
+  std::string name_;
   bool is_root_ = false;
   Node* parent_ = nullptr;
   std::vector<std::shared_ptr<Node>> children_;

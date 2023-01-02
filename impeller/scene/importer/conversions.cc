@@ -51,7 +51,15 @@ Color ToColor(const fb::Color& c) {
 /// Impeller -> Flatbuffers
 ///
 
-std::unique_ptr<fb::Matrix> ToFBMatrix(const Matrix& m) {
+fb::Matrix ToFBMatrix(const Matrix& m) {
+  auto array = std::array<Scalar, 16>{m.m[0],  m.m[1],  m.m[2],  m.m[3],   //
+                                      m.m[4],  m.m[5],  m.m[6],  m.m[7],   //
+                                      m.m[8],  m.m[9],  m.m[10], m.m[11],  //
+                                      m.m[12], m.m[13], m.m[14], m.m[15]};
+  return fb::Matrix(array);
+}
+
+std::unique_ptr<fb::Matrix> ToFBMatrixUniquePtr(const Matrix& m) {
   auto array = std::array<Scalar, 16>{m.m[0],  m.m[1],  m.m[2],  m.m[3],   //
                                       m.m[4],  m.m[5],  m.m[6],  m.m[7],   //
                                       m.m[8],  m.m[9],  m.m[10], m.m[11],  //
