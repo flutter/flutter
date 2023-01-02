@@ -202,8 +202,8 @@ static void ProcessNode(const tinygltf::Model& gltf,
   if (in_node.translation.size() == 3) {
     transform = transform * Matrix::MakeTranslation(
                                 {static_cast<Scalar>(in_node.translation[0]),
-                                 static_cast<Scalar>(in_node.translation[0]),
-                                 static_cast<Scalar>(in_node.translation[0])});
+                                 static_cast<Scalar>(in_node.translation[1]),
+                                 static_cast<Scalar>(in_node.translation[2])});
   }
   if (in_node.rotation.size() == 4) {
     transform = transform * Matrix::MakeRotation(Quaternion(
@@ -226,7 +226,7 @@ static void ProcessNode(const tinygltf::Model& gltf,
     }
     transform = ToMatrix(in_node.matrix);
   }
-  out_node.transform = ToFBMatrix(transform);
+  out_node.transform = ToFBMatrixUniquePtr(transform);
 
   //---------------------------------------------------------------------------
   /// Static meshes.
@@ -242,13 +242,42 @@ static void ProcessNode(const tinygltf::Model& gltf,
       out_node.mesh_primitives.push_back(std::move(mesh_primitive));
     }
   }
+
+  //---------------------------------------------------------------------------
+  /// Skin.
+  ///
+
+  if (WithinRange(in_node.skin, gltf.skins.size())) {
+    auto& skin = gltf.skins[in_node.skin];
+
+    auto ipskin = std::make_unique<fb::SkinT>();
+    ipskin->joints = skin.joints;
+    {
+      std::vector<fb::Matrix> matrices;
+      auto& matrix_accessor = gltf.accessors[skin.inverseBindMatrices];
+      auto& matrix_view = gltf.bufferViews[matrix_accessor.bufferView];
+      auto& matrix_buffer = gltf.buffers[matrix_view.buffer];
+      for (size_t matrix_i = 0; matrix_i < matrix_accessor.count; matrix_i++) {
+        auto* s = reinterpret_cast<const float*>(
+            matrix_buffer.data.data() + matrix_view.byteOffset +
+            matrix_accessor.ByteStride(matrix_view) * matrix_i);
+        Matrix m(s[0], s[1], s[2], s[3],    //
+                 s[4], s[5], s[6], s[7],    //
+                 s[8], s[9], s[10], s[11],  //
+                 s[12], s[13], s[14], s[15]);
+        matrices.push_back(ToFBMatrix(m));
+      }
+      ipskin->inverse_bind_matrices = std::move(matrices);
+    }
+    ipskin->skeleton = skin.skeleton;
+    out_node.skin = std::move(ipskin);
+  }
 }
 
 static void ProcessTexture(const tinygltf::Model& gltf,
                            const tinygltf::Texture& in_texture,
                            fb::TextureT& out_texture) {
-  if (in_texture.source < 0 ||
-      in_texture.source >= static_cast<int>(gltf.images.size())) {
+  if (!WithinRange(in_texture.source, gltf.images.size())) {
     return;
   }
   auto& image = gltf.images[in_texture.source];
@@ -281,6 +310,128 @@ static void ProcessTexture(const tinygltf::Model& gltf,
   embedded->height = image.height;
   out_texture.embedded_image = std::move(embedded);
   out_texture.uri = image.uri;
+}
+
+static void ProcessAnimation(const tinygltf::Model& gltf,
+                             const tinygltf::Animation& in_animation,
+                             fb::AnimationT& out_animation) {
+  out_animation.name = in_animation.name;
+
+  std::vector<std::unique_ptr<impeller::fb::ChannelT>> channels;
+  for (auto& in_channel : in_animation.channels) {
+    auto out_channel = std::make_unique<fb::ChannelT>();
+
+    out_channel->node = in_channel.target_node;
+    auto& sampler = in_animation.samplers[in_channel.sampler];
+
+    /// Keyframe times.
+    auto& times_accessor = gltf.accessors[sampler.input];
+    if (times_accessor.count <= 0) {
+      continue;  // Nothing to record.
+    }
+    {
+      auto& times_bufferview = gltf.bufferViews[times_accessor.bufferView];
+      auto& times_buffer = gltf.buffers[times_bufferview.buffer];
+      if (times_accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        std::cerr << "Unexpected component type \""
+                  << times_accessor.componentType
+                  << "\" for animation channel times accessor. Skipping."
+                  << std::endl;
+        continue;
+      }
+      if (times_accessor.type != TINYGLTF_TYPE_SCALAR) {
+        std::cerr << "Unexpected type \"" << times_accessor.type
+                  << "\" for animation channel times accessor. Skipping."
+                  << std::endl;
+        continue;
+      }
+      for (size_t time_i = 0; time_i < times_accessor.count; time_i++) {
+        const float* time_p = reinterpret_cast<const float*>(
+            times_buffer.data.data() + times_bufferview.byteOffset +
+            times_accessor.ByteStride(times_bufferview) * time_i);
+        out_channel->timeline.push_back(*time_p);
+      }
+    }
+
+    /// Keyframe values.
+    auto& values_accessor = gltf.accessors[sampler.output];
+    if (values_accessor.count != times_accessor.count) {
+      std::cerr << "Mismatch between time and value accessors for animation "
+                   "channel. Skipping."
+                << std::endl;
+      continue;
+    }
+    {
+      auto& values_bufferview = gltf.bufferViews[values_accessor.bufferView];
+      auto& values_buffer = gltf.buffers[values_bufferview.buffer];
+      if (values_accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        std::cerr << "Unexpected component type \""
+                  << values_accessor.componentType
+                  << "\" for animation channel values accessor. Skipping."
+                  << std::endl;
+        continue;
+      }
+      if (in_channel.target_path == "translation") {
+        if (values_accessor.type != TINYGLTF_TYPE_VEC3) {
+          std::cerr << "Unexpected type \"" << values_accessor.type
+                    << "\" for animation channel \"translation\" accessor. "
+                       "Skipping."
+                    << std::endl;
+          continue;
+        }
+        fb::TranslationKeyframesT keyframes;
+        for (size_t value_i = 0; value_i < values_accessor.count; value_i++) {
+          const float* value_p = reinterpret_cast<const float*>(
+              values_buffer.data.data() + values_bufferview.byteOffset +
+              values_accessor.ByteStride(values_bufferview) * value_i);
+          keyframes.values.push_back(
+              fb::Vec3(value_p[0], value_p[1], value_p[2]));
+        }
+        out_channel->keyframes.Set(std::move(keyframes));
+      } else if (in_channel.target_path == "rotation") {
+        if (values_accessor.type != TINYGLTF_TYPE_VEC4) {
+          std::cerr << "Unexpected type \"" << values_accessor.type
+                    << "\" for animation channel \"rotation\" accessor. "
+                       "Skipping."
+                    << std::endl;
+          continue;
+        }
+        fb::RotationKeyframesT keyframes;
+        for (size_t value_i = 0; value_i < values_accessor.count; value_i++) {
+          const float* value_p = reinterpret_cast<const float*>(
+              values_buffer.data.data() + values_bufferview.byteOffset +
+              values_accessor.ByteStride(values_bufferview) * value_i);
+          keyframes.values.push_back(
+              fb::Vec4(value_p[0], value_p[1], value_p[2], value_p[3]));
+        }
+        out_channel->keyframes.Set(std::move(keyframes));
+      } else if (in_channel.target_path == "scale") {
+        if (values_accessor.type != TINYGLTF_TYPE_VEC3) {
+          std::cerr << "Unexpected type \"" << values_accessor.type
+                    << "\" for animation channel \"scale\" accessor. "
+                       "Skipping."
+                    << std::endl;
+          continue;
+        }
+        fb::ScaleKeyframesT keyframes;
+        for (size_t value_i = 0; value_i < values_accessor.count; value_i++) {
+          const float* value_p = reinterpret_cast<const float*>(
+              values_buffer.data.data() + values_bufferview.byteOffset +
+              values_accessor.ByteStride(values_bufferview) * value_i);
+          keyframes.values.push_back(
+              fb::Vec3(value_p[0], value_p[1], value_p[2]));
+        }
+        out_channel->keyframes.Set(std::move(keyframes));
+      } else {
+        std::cerr << "Unsupported animation channel target path \""
+                  << in_channel.target_path << "\". Skipping." << std::endl;
+        continue;
+      }
+    }
+
+    channels.push_back(std::move(out_channel));
+  }
+  out_animation.channels = std::move(channels);
 }
 
 bool ParseGLTF(const fml::Mapping& source_mapping, fb::SceneT& out_scene) {
@@ -317,6 +468,13 @@ bool ParseGLTF(const fml::Mapping& source_mapping, fb::SceneT& out_scene) {
     auto node = std::make_unique<fb::NodeT>();
     ProcessNode(gltf, gltf.nodes[node_i], *node);
     out_scene.nodes.push_back(std::move(node));
+  }
+
+  for (size_t animation_i = 0; animation_i < gltf.animations.size();
+       animation_i++) {
+    auto animation = std::make_unique<fb::AnimationT>();
+    ProcessAnimation(gltf, gltf.animations[animation_i], *animation);
+    out_scene.animations.push_back(std::move(animation));
   }
 
   return true;

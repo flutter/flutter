@@ -91,7 +91,7 @@ TEST(ImporterTest, CanParseSkinnedGLTF) {
   ASSERT_VECTOR3_NEAR(normal, Vector3(0, 0, 1));
 
   Vector4 tangent = ToVector4(vertex.vertex().tangent());
-  ASSERT_VECTOR4_NEAR(tangent, Vector4(0, 0, 0, 1));
+  ASSERT_VECTOR4_NEAR(tangent, Vector4(1, 0, 0, -1));
 
   Vector2 texture_coords = ToVector2(vertex.vertex().texture_coords());
   ASSERT_POINT_NEAR(texture_coords, Vector2(0, 1));
@@ -104,6 +104,19 @@ TEST(ImporterTest, CanParseSkinnedGLTF) {
 
   Vector4 weights = ToVector4(vertex.weights());
   ASSERT_COLOR_NEAR(weights, Vector4(1, 0, 0, 0));
+
+  ASSERT_EQ(scene.animations.size(), 2u);
+  ASSERT_EQ(scene.animations[0]->name, "Idle");
+  ASSERT_EQ(scene.animations[1]->name, "Metronome");
+  ASSERT_EQ(scene.animations[1]->channels.size(), 6u);
+  auto& channel = scene.animations[1]->channels[4];
+  ASSERT_EQ(channel->keyframes.type, fb::Keyframes::RotationKeyframes);
+  auto* keyframes = channel->keyframes.AsRotationKeyframes();
+  ASSERT_EQ(keyframes->values.size(), 40u);
+  ASSERT_VECTOR4_NEAR(ToVector4(keyframes->values[0]),
+                      Vector4(0.653281, 0.270598, -0.270598, 0.653281));
+  ASSERT_VECTOR4_NEAR(ToVector4(keyframes->values[10]),
+                      Vector4(0.425122, 0.565041, -0.565041, 0.425122));
 }
 
 }  // namespace testing

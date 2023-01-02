@@ -164,7 +164,7 @@ table Animation {
 }
 
 table Skin {
-  joints: [int];  // Index into `Scene`->`nodes`.
+  joints: [int];  // Indices into `Scene`->`nodes`.
   inverse_bind_matrices: [Matrix];
   /// The root joint of the skeleton.
   skeleton: int;  // Index into `Scene`->`nodes`.
@@ -180,14 +180,14 @@ struct Matrix {
 
 table Node {
   name: string;
-  children: [int];  // Index into `Scene`->`nodes`.
+  children: [int];  // Indices into `Scene`->`nodes`.
   transform: Matrix;
   mesh_primitives: [MeshPrimitive];
   skin: Skin;
 }
 
 table Scene {
-  children: [int];  // Index into `Scene`->`nodes`.
+  children: [int];  // Indices into `Scene`->`nodes`.
   nodes: [Node];
   textures: [Texture];  // Textures may be reused across different materials.
   animations: [Animation];
