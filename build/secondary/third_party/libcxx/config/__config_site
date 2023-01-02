@@ -27,6 +27,8 @@
 /* #undef _LIBCPP_HAS_NO_RANDOM_DEVICE */
 /* #undef _LIBCPP_HAS_NO_LOCALIZATION */
 
+#define _LIBCPP_REMOVE_TRANSITIVE_INCLUDES
+
 // This is a workaround for BoringSSL, which is compiled in C11 mode
 // and includes stdatomic.h.  Defining this macro will cause stdatomic.h
 // to redirect to the next version of that header in the include path.
