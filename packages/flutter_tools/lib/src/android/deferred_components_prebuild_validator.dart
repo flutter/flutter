@@ -225,9 +225,16 @@ class _DeferredComponentAndroidFiles {
   Directory get componentDir => androidDir.childDirectory(name);
 
   File get androidManifestFile => componentDir.childDirectory('src').childDirectory('main').childFile('AndroidManifest.xml');
-  File get buildGradleFile => componentDir.childFile('build.gradle');
+  File get buildGradleFile {
+    if (componentDir.childFile('build.gradle.kts').existsSync()) {
+      return componentDir.childFile('build.gradle.kts');
+    }
 
-  // True when AndroidManifest.xml and build.gradle exist for the android dynamic feature.
+     return componentDir.childFile('build.gradle');
+  }
+
+  // True when AndroidManifest.xml and build.gradle/build.gradle.kts exist for
+  // the android dynamic feature.
   bool verifyFilesExist() {
     return androidManifestFile.existsSync() && buildGradleFile.existsSync();
   }

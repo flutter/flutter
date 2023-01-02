@@ -1146,7 +1146,7 @@ void addIosProjectFile(Directory directory, {required String Function() projectF
     ..writeAsStringSync(projectFileContent());
 }
 
-void addAndroidGradleFile(Directory directory, { 
+void addAndroidGradleFile(Directory directory, {
   required String Function() gradleFileContent, bool kotlinDsl = false,
 }) {
   directory
