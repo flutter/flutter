@@ -4,9 +4,12 @@
 
 #include "impeller/scene/node.h"
 
+#include <inttypes.h>
+#include <atomic>
 #include <memory>
 
 #include "flutter/fml/logging.h"
+#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/scene/importer/conversions.h"
@@ -17,6 +20,8 @@
 
 namespace impeller {
 namespace scene {
+
+static std::atomic_uint64_t kNextNodeID = 0;
 
 std::shared_ptr<Node> Node::MakeFromFlatbuffer(
     const fml::Mapping& ipscene_mapping,
@@ -155,8 +160,7 @@ void Node::UnpackFromFlatbuffer(
     const std::vector<std::shared_ptr<Node>>& scene_nodes,
     const std::vector<std::shared_ptr<Texture>>& textures,
     Allocator& allocator) {
-  /// Transform.
-
+  name_ = source_node.name()->str();
   SetLocalTransform(importer::ToMatrix(*source_node.transform()));
 
   /// Meshes.
@@ -190,7 +194,7 @@ void Node::UnpackFromFlatbuffer(
   }
 }
 
-Node::Node() = default;
+Node::Node() : name_(SPrintF("__node%" PRIu64, kNextNodeID++)){};
 
 Node::~Node() = default;
 
@@ -201,6 +205,26 @@ Mesh& Mesh::operator=(Mesh&& mesh) = default;
 Node::Node(Node&& node) = default;
 
 Node& Node::operator=(Node&& node) = default;
+
+const std::string& Node::GetName() const {
+  return name_;
+}
+
+void Node::SetName(const std::string& new_name) {
+  name_ = new_name;
+}
+
+std::shared_ptr<Node> Node::FindNodeByName(const std::string& name) const {
+  for (auto& child : children_) {
+    if (child->GetName() == name) {
+      return child;
+    }
+    if (auto found = child->FindNodeByName(name)) {
+      return found;
+    }
+  }
+  return nullptr;
+}
 
 void Node::SetLocalTransform(Matrix transform) {
   local_transform_ = transform;
