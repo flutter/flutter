@@ -129,19 +129,27 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 /// The Android plugin version is specified in the [build.gradle] file within
 /// the project's Android directory.
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
-  final File buildFile = directory.childFile('build.gradle');
+  const String buildFileName = 'build.gradle/build.gradle.kts';
+
+  final File buildFile;
+  if (directory.childFile('build.gradle.kts').existsSync()) {
+    buildFile = directory.childFile('build.gradle.kts');
+  } else {
+    buildFile = directory.childFile('build.gradle');
+  }
+
   if (!buildFile.existsSync()) {
-    logger.printTrace("$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace("$buildFileName doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace("$buildFileName doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
-  logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');
+  logger.printTrace('$buildFileName provides AGP version: $androidPluginVersion');
   return getGradleVersionFor(androidPluginVersion ?? 'unknown');
 }
 
