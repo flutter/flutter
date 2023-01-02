@@ -27,7 +27,8 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
-/** For apps only. Provides the flutter extension used in app/build.gradle.
+/** For apps only. Provides the flutter extension used in the app-level Gradle
+ * build file (app/build.gradle or app/build.gradle.kts).
  * The versions specified here should match the values used in
  * ../lib/src/android/gradle_utils.dart, so when bumping, make sure to update
  * the versions specified there.
@@ -51,7 +52,7 @@ class FlutterExtension {
 
     /**
      * Specifies the relative directory to the Flutter project directory.
-     * In an app project, this is ../.. since the app's build.gradle is under android/app.
+     * In an app project, this is ../.. since the app's Gradle build file is under android/app.
      */
     String source
 
@@ -74,7 +75,7 @@ buildscript {
 
 /**
  * Some apps don't set default compile options.
- * Apps can change these values in android/app/build.gradle.
+ * Apps can change these values in android/app/build.gradle (or build.gradle.kts).
  * This just ensures that default values are set.
  */
 android {
