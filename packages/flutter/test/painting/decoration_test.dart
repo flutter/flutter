@@ -672,7 +672,7 @@ void main() {
   test('paintImage with repeatX and fitHeight', () async {
     final TestCanvas canvas = TestCanvas();
 
-    // paint a square image into an output rect that is twice as wide as it is
+    // Paint a square image into an output rect that is twice as wide as it is
     // tall.  Two copies of the image should be painted, one next to the other.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
@@ -712,7 +712,7 @@ void main() {
   test('paintImage with repeatY and fitWidth', () async {
     final TestCanvas canvas = TestCanvas();
 
-    // paint a square image into an output rect that is twice as tall as it is
+    // Paint a square image into an output rect that is twice as tall as it is
     // wide.  Two copies of the image should be painted, one above the other.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
