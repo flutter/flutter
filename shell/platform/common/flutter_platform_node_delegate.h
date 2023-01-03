@@ -144,6 +144,9 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
   ///             platform thread.
   std::weak_ptr<OwnerBridge> GetOwnerBridge() const;
 
+  // Get the platform node represented by this delegate.
+  virtual ui::AXPlatformNode* GetPlatformNode() const;
+
  private:
   ui::AXNode* ax_node_;
   std::weak_ptr<OwnerBridge> bridge_;
