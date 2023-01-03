@@ -608,7 +608,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     });
 
     Future<void>.delayed(const Duration(milliseconds: 350), () {
-      if (_openController.isAnimating && _openController.value < _midpoint) {
+      if (_openController.isAnimating && _openController.status != AnimationStatus.reverse) {
         HapticFeedback.heavyImpact();
       }
     });
