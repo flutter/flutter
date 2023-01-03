@@ -10,8 +10,10 @@
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_method_codec.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_binary_messenger.h"
+#include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -50,12 +52,46 @@ void SimulateCursorMessage(TestBinaryMessenger* messenger,
 
 }  // namespace
 
-TEST(CursorHandlerTest, ActivateSystemCursor) {
-  TestBinaryMessenger messenger;
-  MockWindowBindingHandler window;
-  CursorHandler cursor_handler(&messenger, &window);
+class CursorHandlerTest : public WindowsTest {
+ protected:
+  FlutterWindowsEngine* engine() { return engine_.get(); }
+  FlutterWindowsView* view() { return view_.get(); }
+  MockWindowBindingHandler* window() { return window_; }
 
-  EXPECT_CALL(window, UpdateFlutterCursor("click")).Times(1);
+  void use_headless_engine() {
+    FlutterWindowsEngineBuilder builder{GetContext()};
+
+    engine_ = builder.Build();
+  }
+
+  void use_engine_with_view() {
+    FlutterWindowsEngineBuilder builder{GetContext()};
+
+    auto window = std::make_unique<MockWindowBindingHandler>();
+
+    window_ = window.get();
+    EXPECT_CALL(*window_, SetView).Times(1);
+    EXPECT_CALL(*window_, GetRenderTarget).WillOnce(Return(nullptr));
+
+    engine_ = builder.Build();
+    view_ = std::make_unique<FlutterWindowsView>(std::move(window));
+
+    engine_->SetView(view_.get());
+  }
+
+ private:
+  std::unique_ptr<FlutterWindowsEngine> engine_;
+  std::unique_ptr<FlutterWindowsView> view_;
+  MockWindowBindingHandler* window_;
+};
+
+TEST_F(CursorHandlerTest, ActivateSystemCursor) {
+  use_engine_with_view();
+
+  TestBinaryMessenger messenger;
+  CursorHandler cursor_handler(&messenger, engine());
+
+  EXPECT_CALL(*window(), UpdateFlutterCursor("click")).Times(1);
 
   bool success = false;
   MethodResultFunctions<> result_handler(
@@ -75,10 +111,38 @@ TEST(CursorHandlerTest, ActivateSystemCursor) {
   EXPECT_TRUE(success);
 }
 
-TEST(CursorHandlerTest, CreateCustomCursor) {
+TEST_F(CursorHandlerTest, ActivateSystemCursorRequiresView) {
+  use_headless_engine();
+
   TestBinaryMessenger messenger;
-  MockWindowBindingHandler window;
-  CursorHandler cursor_handler(&messenger, &window);
+  CursorHandler cursor_handler(&messenger, engine());
+
+  bool error = false;
+  MethodResultFunctions<> result_handler(
+      nullptr,
+      [&error](const std::string& error_code, const std::string& error_message,
+               const EncodableValue* value) {
+        error = true;
+        EXPECT_EQ(error_message,
+                  "Cursor is not available in Windows headless mode");
+      },
+      nullptr);
+
+  SimulateCursorMessage(&messenger, kActivateSystemCursorMethod,
+                        std::make_unique<EncodableValue>(EncodableMap{
+                            {EncodableValue("device"), EncodableValue(0)},
+                            {EncodableValue("kind"), EncodableValue("click")},
+                        }),
+                        &result_handler);
+
+  EXPECT_TRUE(error);
+}
+
+TEST_F(CursorHandlerTest, CreateCustomCursor) {
+  use_engine_with_view();
+
+  TestBinaryMessenger messenger;
+  CursorHandler cursor_handler(&messenger, engine());
 
   // Create a 4x4 raw BGRA test cursor buffer.
   std::vector<uint8_t> buffer(4 * 4 * 4, 0);
@@ -105,10 +169,11 @@ TEST(CursorHandlerTest, CreateCustomCursor) {
   EXPECT_TRUE(success);
 }
 
-TEST(CursorHandlerTest, SetCustomCursor) {
+TEST_F(CursorHandlerTest, SetCustomCursor) {
+  use_engine_with_view();
+
   TestBinaryMessenger messenger;
-  MockWindowBindingHandler window;
-  CursorHandler cursor_handler(&messenger, &window);
+  CursorHandler cursor_handler(&messenger, engine());
 
   // Create a 4x4 raw BGRA test cursor buffer.
   std::vector<uint8_t> buffer(4 * 4 * 4, 0);
@@ -122,7 +187,7 @@ TEST(CursorHandlerTest, SetCustomCursor) {
       },
       nullptr, nullptr);
 
-  EXPECT_CALL(window, SetFlutterCursor(/*cursor=*/NotNull())).Times(1);
+  EXPECT_CALL(*window(), SetFlutterCursor(/*cursor=*/NotNull())).Times(1);
 
   SimulateCursorMessage(&messenger, kCreateCustomCursorMethod,
                         std::make_unique<EncodableValue>(EncodableMap{
@@ -144,10 +209,52 @@ TEST(CursorHandlerTest, SetCustomCursor) {
   EXPECT_TRUE(success);
 }
 
-TEST(CursorHandlerTest, SetNonexistentCustomCursor) {
+TEST_F(CursorHandlerTest, SetCustomCursorRequiresView) {
+  use_headless_engine();
+
   TestBinaryMessenger messenger;
-  MockWindowBindingHandler window;
-  CursorHandler cursor_handler(&messenger, &window);
+  CursorHandler cursor_handler(&messenger, engine());
+
+  // Create a 4x4 raw BGRA test cursor buffer.
+  std::vector<uint8_t> buffer(4 * 4 * 4, 0);
+
+  bool error = false;
+  MethodResultFunctions<> create_result_handler(nullptr, nullptr, nullptr);
+  MethodResultFunctions<> set_result_handler(
+      nullptr,
+      [&error](const std::string& error_code, const std::string& error_message,
+               const EncodableValue* value) {
+        error = true;
+        EXPECT_EQ(error_message,
+                  "Cursor is not available in Windows headless mode");
+      },
+      nullptr);
+
+  SimulateCursorMessage(&messenger, kCreateCustomCursorMethod,
+                        std::make_unique<EncodableValue>(EncodableMap{
+                            {EncodableValue("name"), EncodableValue("hello")},
+                            {EncodableValue("buffer"), EncodableValue(buffer)},
+                            {EncodableValue("width"), EncodableValue(4)},
+                            {EncodableValue("height"), EncodableValue(4)},
+                            {EncodableValue("hotX"), EncodableValue(0.0)},
+                            {EncodableValue("hotY"), EncodableValue(0.0)},
+                        }),
+                        &create_result_handler);
+
+  SimulateCursorMessage(&messenger, kSetCustomCursorMethod,
+                        std::make_unique<EncodableValue>(EncodableMap{
+                            {EncodableValue("name"), EncodableValue("hello")},
+                        }),
+                        &set_result_handler);
+
+  EXPECT_TRUE(error);
+}
+
+TEST_F(CursorHandlerTest, SetNonexistentCustomCursor) {
+  use_engine_with_view();
+
+  TestBinaryMessenger messenger;
+  CursorHandler cursor_handler(&messenger, engine());
 
   bool error = false;
   MethodResultFunctions<> result_handler(
@@ -161,7 +268,7 @@ TEST(CursorHandlerTest, SetNonexistentCustomCursor) {
       },
       nullptr);
 
-  EXPECT_CALL(window, SetFlutterCursor).Times(0);
+  EXPECT_CALL(*window(), SetFlutterCursor).Times(0);
 
   SimulateCursorMessage(&messenger, kSetCustomCursorMethod,
                         std::make_unique<EncodableValue>(EncodableMap{
@@ -172,10 +279,11 @@ TEST(CursorHandlerTest, SetNonexistentCustomCursor) {
   EXPECT_TRUE(error);
 }
 
-TEST(CursorHandlerTest, DeleteCustomCursor) {
+TEST_F(CursorHandlerTest, DeleteCustomCursor) {
+  use_engine_with_view();
+
   TestBinaryMessenger messenger;
-  MockWindowBindingHandler window;
-  CursorHandler cursor_handler(&messenger, &window);
+  CursorHandler cursor_handler(&messenger, engine());
 
   // Create a 4x4 raw BGRA test cursor buffer.
   std::vector<uint8_t> buffer(4 * 4 * 4, 0);
@@ -209,10 +317,11 @@ TEST(CursorHandlerTest, DeleteCustomCursor) {
   EXPECT_TRUE(success);
 }
 
-TEST(CursorHandlerTest, DeleteNonexistentCustomCursor) {
+TEST_F(CursorHandlerTest, DeleteNonexistentCustomCursor) {
+  use_engine_with_view();
+
   TestBinaryMessenger messenger;
-  MockWindowBindingHandler handler;
-  CursorHandler cursor_handler(&messenger, &handler);
+  CursorHandler cursor_handler(&messenger, engine());
 
   bool success = false;
   MethodResultFunctions<> result_handler(
