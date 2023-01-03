@@ -62,16 +62,21 @@ class SemanticsController {
 
   final WidgetsBinding _binding;
 
-  void _traverse(SemanticsNode node, _VisitSemanticsNodeCallback onNode) {
+  bool _traverse(SemanticsNode node, _VisitSemanticsNodeCallback onNode) {
     final bool complete = onNode(node);
     if (complete) {
-      return;
+      return true;
     }
 
     final List<SemanticsNode> children = node.debugListChildrenInOrder(DebugSemanticsDumpOrder.traversalOrder);
     for (final SemanticsNode child in children) {
-      _traverse(child, onNode);
+      final bool childComplete = _traverse(child, onNode);
+      if (childComplete) {
+        return true;
+      }
     }
+
+    return false;
   }
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
