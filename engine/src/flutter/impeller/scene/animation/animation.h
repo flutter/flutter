@@ -10,6 +10,7 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
+#include "impeller/base/timing.h"
 #include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
@@ -60,14 +61,14 @@ class Animation final {
 
   const std::vector<Channel>& GetChannels() const;
 
-  Scalar GetEndTime() const;
+  SecondsF GetEndTime() const;
 
  private:
   Animation();
 
   std::string name_;
   std::vector<Channel> channels_;
-  Scalar end_time_ = 0;
+  SecondsF end_time_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Animation);
 };

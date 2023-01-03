@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/time/time_point.h"
+#include "impeller/base/timing.h"
 #include "impeller/scene/node.h"
 
 namespace impeller {
@@ -36,10 +37,10 @@ AnimationClip& AnimationPlayer::AddAnimation(
 
 void AnimationPlayer::Update() {
   if (!previous_time_.has_value()) {
-    previous_time_ = fml::TimePoint::Now().ToEpochDelta();
+    previous_time_ = Clock::now();
   }
-  auto new_time = fml::TimePoint::Now().ToEpochDelta();
-  Scalar delta_time = (new_time - previous_time_.value()).ToSecondsF();
+  auto new_time = Clock::now();
+  auto delta_time = new_time - previous_time_.value();
   previous_time_ = new_time;
 
   Reset();
