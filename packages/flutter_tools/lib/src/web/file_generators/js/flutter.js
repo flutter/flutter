@@ -10,7 +10,11 @@ _flutter.loader = null;
 (function () {
   "use strict";
 
-  const baseUri = document.baseURI || "/";
+  const baseUri = ensureTrailingSlash(document.baseURI) || "/";
+
+  function ensureTrailingSlash(uri) {
+    return uri.endsWith("/") ? uri : `${uri}/`;
+  }
 
   /**
    * Wraps `promise` in a timeout of the given `duration` in ms.
