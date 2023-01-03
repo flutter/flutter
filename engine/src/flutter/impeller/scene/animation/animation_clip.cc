@@ -43,7 +43,7 @@ void AnimationClip::Pause() {
 
 void AnimationClip::Stop() {
   SetPlaying(false);
-  Seek(0);
+  Seek(SecondsF::zero());
 }
 
 bool AnimationClip::GetLoop() const {
@@ -70,16 +70,16 @@ void AnimationClip::SetWeight(Scalar weight) {
   weight_ = weight;
 }
 
-Scalar AnimationClip::GetPlaybackTime() const {
+SecondsF AnimationClip::GetPlaybackTime() const {
   return playback_time_;
 }
 
-void AnimationClip::Seek(Scalar time) {
-  playback_time_ = std::clamp(time, 0.0f, animation_->GetEndTime());
+void AnimationClip::Seek(SecondsF time) {
+  playback_time_ = std::clamp(time, SecondsF::zero(), animation_->GetEndTime());
 }
 
-void AnimationClip::Advance(Scalar delta_time) {
-  if (!playing_ || delta_time <= 0) {
+void AnimationClip::Advance(SecondsF delta_time) {
+  if (!playing_ || delta_time <= SecondsF::zero()) {
     return;
   }
   delta_time *= playback_time_scale_;
@@ -87,22 +87,26 @@ void AnimationClip::Advance(Scalar delta_time) {
 
   /// Handle looping behavior.
 
-  Scalar end_time = animation_->GetEndTime();
-  if (end_time == 0) {
-    playback_time_ = 0;
+  auto end_time = animation_->GetEndTime();
+  if (end_time == SecondsF::zero()) {
+    playback_time_ = SecondsF::zero();
     return;
   }
-  if (!loop_ && (playback_time_ < 0 || playback_time_ > end_time)) {
+  if (!loop_ &&
+      (playback_time_ < SecondsF::zero() || playback_time_ > end_time)) {
     // If looping is disabled, clamp to the end (or beginning, if playing in
     // reverse) and pause.
     Pause();
-    playback_time_ = std::clamp(playback_time_, 0.0f, end_time);
+    playback_time_ = std::clamp(playback_time_, SecondsF::zero(), end_time);
   } else if (/* loop && */ playback_time_ > end_time) {
     // If looping is enabled and we ran off the end, loop to the beginning.
-    playback_time_ = std::fmod(std::abs(playback_time_), end_time);
-  } else if (/* loop && */ playback_time_ < 0) {
+    playback_time_ =
+        SecondsF(std::fmod(std::abs(playback_time_.count()), end_time.count()));
+  } else if (/* loop && */ playback_time_ < SecondsF::zero()) {
     // If looping is enabled and we ran off the beginning, loop to the end.
-    playback_time_ = end_time - std::fmod(std::abs(playback_time_), end_time);
+    playback_time_ =
+        end_time -
+        SecondsF(std::fmod(std::abs(playback_time_.count()), end_time.count()));
   }
 }
 
