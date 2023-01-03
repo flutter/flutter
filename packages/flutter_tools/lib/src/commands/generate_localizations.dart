@@ -192,6 +192,19 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       'format',
       help: 'When specified, the "dart format" command is run after generating the localization files.'
     );
+    argParser.addFlag(
+      'use-escaping',
+      help: 'Whether or not to use escaping for messages.\n'
+            '\n'
+            'By default, this value is set to false for backwards compatibility. '
+            'Turning this flag on will cause the parser to treat any special characters '
+            'contained within pairs of single quotes as normal strings and treat all '
+            'consecutive pairs of single quotes as a single quote character.',
+    );
+    argParser.addFlag(
+      'suppress-warnings',
+      help: 'When specified, all warnings will be suppressed.\n'
+    );
   }
 
   final FileSystem _fileSystem;
@@ -248,6 +261,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       final String? projectPathString = stringArgDeprecated('project-dir');
       final bool areResourceAttributesRequired = boolArgDeprecated('required-resource-attributes');
       final bool usesNullableGetter = boolArgDeprecated('nullable-getter');
+      final bool useEscaping = boolArgDeprecated('use-escaping');
+      final bool suppressWarnings = boolArgDeprecated('suppress-warnings');
 
       precacheLanguageAndRegionTags();
 
@@ -269,7 +284,9 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           areResourceAttributesRequired: areResourceAttributesRequired,
           untranslatedMessagesFile: untranslatedMessagesFile,
           usesNullableGetter: usesNullableGetter,
+          useEscaping: useEscaping,
           logger: _logger,
+          suppressWarnings: suppressWarnings,
         )
           ..loadResources()
           ..writeOutputFiles())

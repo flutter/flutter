@@ -348,12 +348,53 @@ class Material extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// MaterialInkController? inkController = Material.of(context);
+  /// MaterialInkController? inkController = Material.maybeOf(context);
   /// ```
   ///
   /// This method can be expensive (it walks the element tree).
-  static MaterialInkController? of(BuildContext context) {
+  ///
+  /// See also:
+  ///
+  /// * [Material.of], which is similar to this method, but asserts if
+  ///   no [Material] ancestor is found.
+  static MaterialInkController? maybeOf(BuildContext context) {
     return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
+  }
+
+  /// The ink controller from the closest instance of [Material] that encloses
+  /// the given context.
+  ///
+  /// If no [Material] widget ancestor can be found then this method will assert
+  /// in debug mode, and throw an exception in release mode.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MaterialInkController inkController = Material.of(context);
+  /// ```
+  ///
+  /// This method can be expensive (it walks the element tree).
+  ///
+  /// See also:
+  ///
+  /// * [Material.maybeOf], which is similar to this method, but returns null if
+  ///   no [Material] ancestor is found.
+  static MaterialInkController of(BuildContext context) {
+    final MaterialInkController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        throw FlutterError(
+          'Material.of() was called with a context that does not contain a Material widget.\n'
+          'No Material widget ancestor could be found starting from the context that was passed to '
+          'Material.of(). This can happen because you are using a widget that looks for a Material '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
   }
 
   @override

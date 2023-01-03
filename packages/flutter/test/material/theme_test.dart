@@ -134,7 +134,8 @@ void main() {
 
   testWidgets('ThemeData with null typography uses proper defaults', (WidgetTester tester) async {
     expect(ThemeData().typography, Typography.material2014());
-    expect(ThemeData(useMaterial3: true).typography, Typography.material2021());
+    final ThemeData m3Theme = ThemeData(useMaterial3: true);
+    expect(m3Theme.typography, Typography.material2021(colorScheme: m3Theme.colorScheme));
   });
 
   testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {

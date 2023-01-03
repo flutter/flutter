@@ -60,7 +60,7 @@ void main() {
     );
     expect(
       FlutterErrorDetails(
-        exception: NullThrownError(),
+        exception: NullThrownError(), // ignore: deprecated_member_use
         library: 'LIBRARY',
         context: ErrorDescription('CONTEXTING'),
         informationCollector: () sync* {
@@ -113,6 +113,7 @@ void main() {
       '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
+      // ignore: deprecated_member_use
       FlutterErrorDetails(exception: NullThrownError()).toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The null value was thrown.\n'

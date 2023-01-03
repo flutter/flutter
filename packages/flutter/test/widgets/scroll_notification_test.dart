@@ -218,7 +218,7 @@ void main() {
       ScrollNotificationObserver(
         child: Builder(
           builder: (BuildContext context) {
-            observer = ScrollNotificationObserver.of(context)!;
+            observer = ScrollNotificationObserver.of(context);
             return const SingleChildScrollView(
               child: SizedBox(height: 1200.0),
             );

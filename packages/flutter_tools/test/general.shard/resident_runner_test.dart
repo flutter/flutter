@@ -312,7 +312,7 @@ void main() {
       <FlutterDevice>[
         flutterDevice,
       ],
-      applicationBinary: globals.fs.file('app.apk'),
+      applicationBinary: globals.fs.file('app-debug.apk'),
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',

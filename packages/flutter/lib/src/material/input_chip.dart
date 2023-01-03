@@ -249,7 +249,7 @@ class InputChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_143
 
 class _InputChipDefaultsM3 extends ChipThemeData {
   const _InputChipDefaultsM3(this.context, this.isEnabled)

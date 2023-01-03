@@ -763,7 +763,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--output-dill',
         outputPath,
       ],
-      if (librariesSpec != null) ...<String>[
+      // If we have a platform dill, we don't need to pass the libraries spec,
+      // since the information is embedded in the .dill file.
+      if (librariesSpec != null && platformDill == null) ...<String>[
         '--libraries-spec',
         librariesSpec!,
       ],

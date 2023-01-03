@@ -197,7 +197,7 @@ class _ParentInkResponseProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(_ParentInkResponseProvider oldWidget) => state != oldWidget.state;
 
-  static _ParentInkResponseState? of(BuildContext context) {
+  static _ParentInkResponseState? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ParentInkResponseProvider>()?.state;
   }
 }
@@ -438,13 +438,15 @@ class InkResponse extends StatelessWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final double? radius;
 
-  /// The clipping radius of the containing rect. This is effective only if
-  /// [customBorder] is null.
+  /// The border radius of the containing rectangle. This is effective only if
+  /// [highlightShape] is [BoxShape.rectangle].
   ///
   /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? borderRadius;
 
-  /// The custom clip border which overrides [borderRadius].
+  /// The custom clip border.
+  ///
+  /// If this is null, the ink response will not clip its content.
   final ShapeBorder? customBorder;
 
   /// The color of the ink response when the parent widget is focused. If this
@@ -557,10 +559,12 @@ class InkResponse extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  /// {@template flutter.material.inkwell.onFocusChange}
   /// Handler called when the focus changes.
   ///
   /// Called with true if this widget's node gains focus, and false if it loses
   /// focus.
+  /// {@endtemplate}
   final ValueChanged<bool>? onFocusChange;
 
   /// {@macro flutter.widgets.Focus.autofocus}
@@ -600,7 +604,7 @@ class InkResponse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _ParentInkResponseState? parentState = _ParentInkResponseProvider.of(context);
+    final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
     return _InkResponseStateWidget(
       onTap: onTap,
       onTapDown: onTapDown,
@@ -834,6 +838,21 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       initStatesController();
     }
+    if (widget.customBorder != oldWidget.customBorder ||
+        widget.radius != oldWidget.radius ||
+        widget.borderRadius != oldWidget.borderRadius ||
+        widget.highlightShape != oldWidget.highlightShape) {
+      final InkHighlight? hoverHighLight = _highlights[_HighlightType.hover];
+      if (hoverHighLight != null) {
+        hoverHighLight.dispose();
+        updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
+      }
+      final InkHighlight? focusHighLight = _highlights[_HighlightType.focus];
+      if (focusHighLight != null) {
+        focusHighLight.dispose();
+        // Do not call updateFocusHighlights() here because it is called below
+      }
+    }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
       if (!enabled) {
@@ -916,7 +935,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
-          controller: Material.of(context)!,
+          controller: Material.of(context),
           referenceBox: referenceBox,
           color: resolvedOverlayColor,
           shape: widget.highlightShape,
@@ -952,7 +971,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   InteractiveInkFeature _createInkFeature(Offset globalPosition) {
-    final MaterialInkController inkController = Material.of(context)!;
+    final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
     final Color color =  widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;

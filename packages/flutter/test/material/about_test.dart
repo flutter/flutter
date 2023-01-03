@@ -15,6 +15,46 @@ void main() {
     LicenseRegistry.reset();
   });
 
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          // Display has a vertical hinge down the middle
+          data: const MediaQueryData(
+            size: Size(800, 600),
+            displayFeatures: <DisplayFeature>[
+              DisplayFeature(
+                bounds: Rect.fromLTRB(390, 0, 410, 600),
+                type: DisplayFeatureType.hinge,
+                state: DisplayFeatureState.unknown,
+              ),
+            ],
+          ),
+          child: child!,
+        );
+      },
+      home: Builder(
+        builder: (BuildContext context) => ElevatedButton(
+          onPressed: () {
+            showAboutDialog(
+              context: context,
+              useRootNavigator: false,
+              applicationName: 'A',
+            );
+          },
+          child: const Text('Show About Dialog'),
+        ),
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Close'), findsOneWidget);
+    expect(find.text('View licenses'), findsOneWidget);
+  });
+
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 

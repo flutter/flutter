@@ -806,7 +806,7 @@ class _FocusedDate extends InheritedWidget {
     return !DateUtils.isSameDay(date, oldWidget.date);
   }
 
-  static DateTime? of(BuildContext context) {
+  static DateTime? maybeOf(BuildContext context) {
     final _FocusedDate? focusedDate = context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
     return focusedDate?.date;
   }
@@ -887,7 +887,7 @@ class _DayPickerState extends State<_DayPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
-    final DateTime? focusedDate = _FocusedDate.of(context);
+    final DateTime? focusedDate = _FocusedDate.maybeOf(context);
     if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
@@ -979,16 +979,20 @@ class _DayPickerState extends State<_DayPicker> {
             color: selectedDayBackground,
             shape: BoxShape.circle,
           );
-        } else if (isDisabled) {
-          dayColor = disabledDayColor;
         } else if (isToday) {
-          // The current day gets a different text color and a circle stroke
+          // The current day gets a different text color (if enabled) and a circle stroke
           // border.
-          dayColor = todayColor;
+          if (isDisabled) {
+            dayColor = disabledDayColor;
+          } else {
+            dayColor = todayColor;
+          }
           decoration = BoxDecoration(
-            border: Border.all(color: todayColor),
+            border: Border.all(color: dayColor),
             shape: BoxShape.circle,
           );
+        } else if (isDisabled) {
+          dayColor = disabledDayColor;
         }
 
         Widget dayWidget = Container(

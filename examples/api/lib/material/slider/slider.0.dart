@@ -6,47 +6,44 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const SliderApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class SliderApp extends StatelessWidget {
+  const SliderApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
-      ),
+    return const MaterialApp(
+      home: SliderExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SliderExample extends StatefulWidget {
+  const SliderExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SliderExample> createState() => _SliderExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _SliderExampleState extends State<SliderExample> {
   double _currentSliderValue = 20;
 
   @override
   Widget build(BuildContext context) {
-    return Slider(
-      value: _currentSliderValue,
-      max: 100,
-      divisions: 5,
-      label: _currentSliderValue.round().toString(),
-      onChanged: (double value) {
-        setState(() {
-          _currentSliderValue = value;
-        });
-      },
+    return Scaffold(
+      appBar: AppBar(title: const Text('Slider')),
+      body: Slider(
+        value: _currentSliderValue,
+        max: 100,
+        divisions: 5,
+        label: _currentSliderValue.round().toString(),
+        onChanged: (double value) {
+          setState(() {
+            _currentSliderValue = value;
+          });
+        },
+      ),
     );
   }
 }

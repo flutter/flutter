@@ -284,7 +284,7 @@ class _InkState extends State<Ink> {
       _ink = InkDecoration(
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
-        controller: Material.of(context)!,
+        controller: Material.of(context),
         referenceBox: _boxKey.currentContext!.findRenderObject()! as RenderBox,
         onRemoved: _handleRemoved,
       );

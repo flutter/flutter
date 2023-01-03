@@ -261,20 +261,20 @@ void main() {
       );
       await tester.pump();
 
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(240.0, 0.0, 560.0, 48.0)));
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(228.0, 0.0, 572.0, 48.0)));
 
       // Open and make sure things are the right size.
       await tester.tap(find.text(TestMenu.mainMenu1.label));
       await tester.pump();
 
-      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(240.0, 0.0, 560.0, 48.0)));
+      expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(228.0, 0.0, 572.0, 48.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(366.0, 64.0, 520.0, 78.0)),
+        equals(const Rect.fromLTRB(366.0, 68.0, 520.0, 82.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
-        equals(const Rect.fromLTRB(350.0, 48.0, 602.0, 178.0)),
+        equals(const Rect.fromLTRB(346.0, 48.0, 579.0, 186.0)),
       );
     });
   });

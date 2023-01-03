@@ -79,6 +79,7 @@ void main() {
     const Color displayColor = Color(0x00000001);
     const Color bodyColor = Color(0x00000002);
     const String fontFamily = 'fontFamily';
+    const List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
     const Color decorationColor = Color(0x00000003);
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
     final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
@@ -89,6 +90,7 @@ void main() {
     final Typography typography = Typography.material2018();
     final TextTheme theme = typography.black.apply(
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       displayColor: displayColor,
       bodyColor: bodyColor,
       decoration: decoration,
@@ -130,6 +132,7 @@ void main() {
       theme.labelSmall!,
     ];
     expect(themeStyles.every((TextStyle style) => style.fontFamily == fontFamily), true);
+    expect(themeStyles.every((TextStyle style) => style.fontFamilyFallback == fontFamilyFallback), true);
     expect(themeStyles.every((TextStyle style) => style.decorationColor == decorationColor), true);
     expect(themeStyles.every((TextStyle style) => style.decorationStyle == decorationStyle), true);
     expect(themeStyles.every((TextStyle style) => style.decoration == decoration), true);

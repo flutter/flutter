@@ -49,7 +49,6 @@ class _AppBarExampleState extends State<AppBarExample> {
         shadowColor: shadowColor ? Theme.of(context).colorScheme.shadow : null,
       ),
       body: GridView.builder(
-        shrinkWrap: true,
         itemCount: _items.length,
         padding: const EdgeInsets.all(8.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

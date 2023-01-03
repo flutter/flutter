@@ -160,7 +160,7 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 16;
+    int widgetInspectorExtensionCount = 22;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.

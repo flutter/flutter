@@ -6,16 +6,42 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show kLongPressTimeout, kMinFlingVelocity;
+import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
-const double _kOpenScale = 1.1;
+const double _kOpenScale = 1.15;
+
+// The ratio for the borderRadius of the context menu preview image. This value
+// was eyeballed by overlapping the CupertinoContextMenu with a context menu
+// from iOS 16.0 in the XCode iPhone simulator.
+const double _previewBorderRadiusRatio = 12.0;
+
+// The duration of the transition used when a modal popup is shown. Eyeballed
+// from a physical device running iOS 13.1.2.
+const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
+
+// The duration it takes for the CupertinoContextMenu to open.
+// This value was eyeballed from the XCode simulator running iOS 16.0.
+const Duration _previewLongPressTimeout = Duration(milliseconds: 800);
+
+// The total length of the combined animations until the menu is fully open.
+final int _animationDuration =
+  _previewLongPressTimeout.inMilliseconds + _kModalPopupTransitionDuration.inMilliseconds;
+
+// The final box shadow for the opening child widget.
+// This value was eyeballed from the XCode simulator running iOS 16.0.
+const List<BoxShadow> _endBoxShadow = <BoxShadow>[
+  BoxShadow(
+    color: Color(0x40000000),
+    blurRadius: 10.0,
+    spreadRadius: 0.5,
+  ),
+];
 
 const Color _borderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFA9A9AF),
@@ -37,8 +63,9 @@ typedef ContextMenuPreviewBuilder = Widget Function(
   Widget child,
 );
 
-// A function that proxies to ContextMenuPreviewBuilder without the child.
-typedef _ContextMenuPreviewBuilderChildless = Widget Function(
+/// A function that builds the child and handles the transition between the
+/// default child and the preview when the CupertinoContextMenu is open.
+typedef CupertinoContextMenuBuilder = Widget Function(
   BuildContext context,
   Animation<double> animation,
 );
@@ -84,10 +111,17 @@ enum _ContextMenuLocation {
 /// Photos app on iOS.
 ///
 /// {@tool dartpad}
-/// This sample shows a very simple CupertinoContextMenu for an empty red
-/// 100x100 Container. Simply long press on it to open.
+/// This sample shows a very simple CupertinoContextMenu for the Flutter logo.
+/// Simply long press on it to open.
 ///
 /// ** See code in examples/api/lib/cupertino/context_menu/cupertino_context_menu.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows a similar CupertinoContextMenu, this time using [builder]
+/// to add a border radius to the widget.
+///
+/// ** See code in examples/api/lib/cupertino/context_menu/cupertino_context_menu.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -102,10 +136,239 @@ class CupertinoContextMenu extends StatefulWidget {
   CupertinoContextMenu({
     super.key,
     required this.actions,
-    required this.child,
-    this.previewBuilder,
+    required Widget this.child,
+    @Deprecated(
+      'Use CupertinoContextMenu.builder instead. '
+      'This feature was deprecated after v3.4.0-34.1.pre.',
+    )
+    this.previewBuilder = _defaultPreviewBuilder,
   }) : assert(actions != null && actions.isNotEmpty),
-       assert(child != null);
+       assert(child != null),
+       builder = ((BuildContext context, Animation<double> animation) => child);
+
+  /// Creates a context menu with a custom [builder] controlling the widget.
+  ///
+  /// Use instead of the default constructor when it is needed to have a more
+  /// custom animation.
+  ///
+  /// [actions] is required and cannot be null or empty.
+  ///
+  /// [builder] is required.
+  CupertinoContextMenu.builder({
+    super.key,
+    required this.actions,
+    required this.builder,
+  }) : assert(actions != null && actions.isNotEmpty),
+       child = null,
+       previewBuilder = null;
+
+  /// Exposes the default border radius for matching iOS 16.0 behavior. This
+  /// value was eyeballed from the iOS simulator running iOS 16.0.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Below is example code in order to match the default border radius for an
+  /// iOS 16.0 open preview.
+  ///
+  /// ```dart
+  /// CupertinoContextMenu.builder(
+  ///   actions: <Widget>[
+  ///     CupertinoContextMenuAction(
+  ///       child: const Text('Action one'),
+  ///       onPressed: () {},
+  ///     ),
+  ///   ],
+  ///   builder:(BuildContext context, Animation<double> animation) {
+  ///     final Animation<BorderRadius?> borderRadiusAnimation = BorderRadiusTween(
+  ///       begin: BorderRadius.circular(0.0),
+  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
+  ///     ).animate(
+  ///       CurvedAnimation(
+  ///         parent: animation,
+  ///         curve: Interval(
+  ///           CupertinoContextMenu.animationOpensAt,
+  ///           1.0,
+  ///         ),
+  ///       ),
+  ///     );
+  ///
+  ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
+  ///       begin: const BoxDecoration(
+  ///        color: Color(0xFFFFFFFF),
+  ///        boxShadow: <BoxShadow>[],
+  ///       ),
+  ///       end: const BoxDecoration(
+  ///        color: Color(0xFFFFFFFF),
+  ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
+  ///       ),
+  ///      ).animate(
+  ///        CurvedAnimation(
+  ///         parent: animation,
+  ///         curve: Interval(
+  ///           0.0,
+  ///           CupertinoContextMenu.animationOpensAt,
+  ///         ),
+  ///       )
+  ///     );
+  ///
+  ///     return Container(
+  ///       decoration:
+  ///         animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
+  ///       child: FittedBox(
+  ///         fit: BoxFit.cover,
+  ///         child: ClipRRect(
+  ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.circular(0.0),
+  ///           child: SizedBox(
+  ///             height: 150,
+  ///             width: 150,
+  ///             child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+  ///           ),
+  ///         ),
+  ///       )
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// {@end-tool}
+  static const double kOpenBorderRadius = _previewBorderRadiusRatio;
+
+  /// Exposes the final box shadow of the opening animation of the child widget
+  /// to match the default behavior of the native iOS widget. This value was
+  /// eyeballed from the iOS simulator running iOS 16.0.
+  static const List<BoxShadow> kEndBoxShadow = _endBoxShadow;
+
+  /// The point at which the CupertinoContextMenu begins to animate
+  /// into the open position.
+  ///
+  /// A value between 0.0 and 1.0 corresponding to a point in [builder]'s
+  /// animation. When passing in an animation to [builder] the range before
+  /// [animationOpensAt] will correspond to the animation when the widget is
+  /// pressed and held, and the range after is the animation as the menu is
+  /// fully opening. For an example, see the documentation for [builder].
+  static final double animationOpensAt =
+      _previewLongPressTimeout.inMilliseconds / _animationDuration;
+
+  /// A function that returns a widget to be used alternatively from [child].
+  ///
+  /// The widget returned by the function will be shown at all times: when the
+  /// [CupertinoContextMenu] is closed, when it is in the middle of opening,
+  /// and when it is fully open. This will overwrite the default animation that
+  /// matches the behavior of an iOS 16.0 context menu.
+  ///
+  /// This builder can be used instead of the child when either the intended
+  /// child has a property that would conflict with the default animation, like
+  /// a border radius or a shadow, or if simply a more custom animation is
+  /// needed.
+  ///
+  /// In addition to the current [BuildContext], the function is also called
+  /// with an [Animation]. The complete animation goes from 0 to 1 when
+  /// the CupertinoContextMenu opens, and from 1 to 0 when it closes, and it can
+  /// be used to animate the widget in sync with this opening and closing.
+  ///
+  /// The animation works in two stages. The first happens on press and hold of
+  /// the widget from 0 to [animationOpensAt], and the second stage for when the
+  /// widget fully opens up to the menu, from [animationOpensAt] to 1.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Below is an example of using [builder] to show an image tile setup to be
+  /// opened in the default way to match a native iOS 16.0 app. The behavior
+  /// will match what will happen if the simple child image was passed as just
+  /// the [child] parameter, instead of [builder]. This can be manipulated to
+  /// add more custamizability to the widget's animation.
+  ///
+  /// ```dart
+  /// CupertinoContextMenu.builder(
+  ///   actions: <Widget>[
+  ///     CupertinoContextMenuAction(
+  ///       child: const Text('Action one'),
+  ///       onPressed: () {},
+  ///     ),
+  ///   ],
+  ///   builder:(BuildContext context, Animation<double> animation) {
+  ///     final Animation<BorderRadius?> borderRadiusAnimation = BorderRadiusTween(
+  ///       begin: BorderRadius.circular(0.0),
+  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
+  ///     ).animate(
+  ///       CurvedAnimation(
+  ///         parent: animation,
+  ///         curve: Interval(
+  ///           CupertinoContextMenu.animationOpensAt,
+  ///           1.0,
+  ///         ),
+  ///       ),
+  ///      );
+  ///
+  ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
+  ///       begin: const BoxDecoration(
+  ///        color: Color(0xFFFFFFFF),
+  ///        boxShadow: <BoxShadow>[],
+  ///       ),
+  ///       end: const BoxDecoration(
+  ///        color: Color(0xFFFFFFFF),
+  ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
+  ///       ),
+  ///      ).animate(
+  ///        CurvedAnimation(
+  ///         parent: animation,
+  ///         curve: Interval(
+  ///           0.0,
+  ///           CupertinoContextMenu.animationOpensAt,
+  ///         ),
+  ///       ),
+  ///     );
+  ///
+  ///     return Container(
+  ///       decoration:
+  ///         animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
+  ///       child: FittedBox(
+  ///         fit: BoxFit.cover,
+  ///         child: ClipRRect(
+  ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.circular(0.0),
+  ///           child: SizedBox(
+  ///             height: 150,
+  ///             width: 150,
+  ///             child: Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+  ///           ),
+  ///         ),
+  ///       ),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// Additionally below is an example of a real world use case for [builder].
+  ///
+  /// If a widget is passed to the [child] parameter with properties that
+  /// conflict with the default animation, in this case the border radius,
+  /// unwanted behaviors can arise. Here a boxed shadow will wrap the widget as
+  /// it is expanded. To handle this, a more custom animation and widget can be
+  /// passed to the builder, using values exposed by [CupertinoContextMenu],
+  /// like [CupertinoContextMenu.kEndBoxShadow], to match the native iOS
+  /// animation as close as desired.
+  ///
+  /// ** See code in examples/api/lib/cupertino/context_menu/cupertino_context_menu.1.dart **
+  /// {@end-tool}
+  final CupertinoContextMenuBuilder builder;
+
+  /// The default preview builder if none is provided. It makes a rectangle
+  /// around the child widget with rounded borders, matching the iOS 16 opened
+  /// context menu eyeballed on the XCode iOS simulator.
+  static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
+    return FittedBox(
+      fit: BoxFit.cover,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
+        child: child,
+      ),
+    );
+  }
+
+  // TODO(mitchgoodwin): deprecate [child] with builder refactor https://github.com/flutter/flutter/issues/116306
 
   /// The widget that can be "opened" with the [CupertinoContextMenu].
   ///
@@ -118,9 +381,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// When the [CupertinoContextMenu] is "closed", this widget acts like a
   /// [Container], i.e. it does not constrain its child's size or affect its
   /// position.
-  ///
-  /// This parameter cannot be null.
-  final Widget child;
+  final Widget? child;
 
   /// The actions that are shown in the menu.
   ///
@@ -163,6 +424,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   // The FittedBox in the preview here allows the image to animate its
   ///   // aspect ratio when the CupertinoContextMenu is animating its preview
   ///   // widget open and closed.
+  ///   // ignore: deprecated_member_use
   ///   previewBuilder: (BuildContext context, Animation<double> animation, Widget child) {
   ///     return FittedBox(
   ///       fit: BoxFit.cover,
@@ -190,6 +452,10 @@ class CupertinoContextMenu extends StatefulWidget {
   /// ```
   ///
   /// {@end-tool}
+  @Deprecated(
+    'Use CupertinoContextMenu.builder instead. '
+    'This feature was deprecated after v3.4.0-34.1.pre.',
+  )
   final ContextMenuPreviewBuilder? previewBuilder;
 
   @override
@@ -204,13 +470,15 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   Rect? _decoyChildEndRect;
   OverlayEntry? _lastOverlayEntry;
   _ContextMenuRoute<void>? _route;
+  final double _midpoint = CupertinoContextMenu.animationOpensAt / 2;
 
   @override
   void initState() {
     super.initState();
     _openController = AnimationController(
-      duration: kLongPressTimeout,
+      duration: _previewLongPressTimeout,
       vsync: this,
+      upperBound: CupertinoContextMenu.animationOpensAt,
     );
     _openController.addStatusListener(_onDecoyAnimationStatusChange);
   }
@@ -258,10 +526,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
       builder: (BuildContext context, Animation<double> animation) {
-        if (widget.previewBuilder == null) {
-          return widget.child;
+        if (widget.child == null) {
+          final Animation<double> localAnimation = Tween<double>(begin: CupertinoContextMenu.animationOpensAt, end: 1).animate(animation);
+          return widget.builder(context, localAnimation);
         }
-        return widget.previewBuilder!(context, animation, widget.child);
+        return widget.previewBuilder!(context, animation, widget.child!);
       },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route!);
@@ -316,19 +585,19 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   }
 
   void _onTap() {
-    if (_openController.isAnimating && _openController.value < 0.5) {
+    if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapCancel() {
-    if (_openController.isAnimating && _openController.value < 0.5) {
+    if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
-    if (_openController.isAnimating && _openController.value < 0.5) {
+    if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
@@ -359,6 +628,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           beginRect: childRect,
           controller: _openController,
           endRect: _decoyChildEndRect,
+          builder: widget.builder,
           child: widget.child,
         );
       },
@@ -381,7 +651,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           child: Visibility.maintain(
             key: _childGlobalKey,
             visible: !_childHidden,
-            child: widget.child,
+            child: widget.builder(context, _openController),
           ),
         ),
       ),
@@ -398,105 +668,106 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 // A floating copy of the CupertinoContextMenu's child.
 //
 // When the child is pressed, but before the CupertinoContextMenu opens, it does
-// a "bounce" animation where it shrinks and then grows. This is implemented
-// by hiding the original child and placing _DecoyChild on top of it in an
-// Overlay. The use of an Overlay allows the _DecoyChild to appear on top of
-// siblings of the original child.
+// an animation where it slowly grows. This is implemented by hiding the
+// original child and placing _DecoyChild on top of it in an Overlay. The use of
+// an Overlay allows the _DecoyChild to appear on top of siblings of the
+// original child.
 class _DecoyChild extends StatefulWidget {
   const _DecoyChild({
     this.beginRect,
     required this.controller,
     this.endRect,
     this.child,
+    this.builder,
   });
 
   final Rect? beginRect;
   final AnimationController controller;
   final Rect? endRect;
   final Widget? child;
+  final CupertinoContextMenuBuilder? builder;
 
   @override
   _DecoyChildState createState() => _DecoyChildState();
 }
 
 class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
-  // TODO(justinmc): Dark mode support.
-  // See https://github.com/flutter/flutter/issues/43211.
-  static const Color _lightModeMaskColor = Color(0xFF888888);
-  static const Color _masklessColor = Color(0xFFFFFFFF);
-
-  final GlobalKey _childGlobalKey = GlobalKey();
-  late Animation<Color> _mask;
   late Animation<Rect?> _rect;
+  late Animation<Decoration> _boxDecoration;
 
   @override
   void initState() {
     super.initState();
-    // Change the color of the child during the initial part of the decoy bounce
-    // animation. The interval was eyeballed from a physical iOS 13.1.2 device.
-    _mask = _OnOffAnimation<Color>(
-      controller: widget.controller,
-      onValue: _lightModeMaskColor,
-      offValue: _masklessColor,
-      intervalOn: 0.0,
-      intervalOff: 0.5,
-    );
 
-    final Rect midRect =  widget.beginRect!.deflate(
-      widget.beginRect!.width * (_kOpenScale - 1.0) / 2,
-    );
+    const double beginPause = 1.0;
+    const double openAnimationLength = 5.0;
+    const double totalOpenAnimationLength = beginPause + openAnimationLength;
+    final double endPause =
+      ((totalOpenAnimationLength * _animationDuration) / _previewLongPressTimeout.inMilliseconds) - totalOpenAnimationLength;
+
+    // The timing on the animation was eyeballed from the XCode iOS simulator
+    // running iOS 16.0.
+    // Because the animation no longer goes from 0.0 to 1.0, but to a number
+    // depending on the ratio between the press animation time and the opening
+    // animation time, a pause needs to be added to the end of the tween
+    // sequence that completes that ratio. This is to allow the animation to
+    // fully complete as expected without doing crazy math to the _kOpenScale
+    // value. This change was necessary from the inclusion of the builder and
+    // the complete animation value that it passes along.
     _rect = TweenSequence<Rect?>(<TweenSequenceItem<Rect?>>[
       TweenSequenceItem<Rect?>(
         tween: RectTween(
           begin: widget.beginRect,
-          end: midRect,
-        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
-        weight: 1.0,
+          end: widget.beginRect,
+        ).chain(CurveTween(curve: Curves.linear)),
+        weight: beginPause,
       ),
       TweenSequenceItem<Rect?>(
         tween: RectTween(
-          begin: midRect,
+          begin: widget.beginRect,
           end: widget.endRect,
-        ).chain(CurveTween(curve: Curves.easeOutCubic)),
-        weight: 1.0,
+        ).chain(CurveTween(curve: Curves.easeOutSine)),
+        weight: openAnimationLength,
+      ),
+      TweenSequenceItem<Rect?>(
+        tween: RectTween(
+          begin: widget.endRect,
+          end: widget.endRect,
+        ).chain(CurveTween(curve: Curves.linear)),
+        weight: endPause,
       ),
     ]).animate(widget.controller);
-    _rect.addListener(_rectListener);
-  }
 
-  // Listen to the _rect animation and vibrate when it reaches the halfway point
-  // and switches from animating down to up.
-  void _rectListener() {
-    if (widget.controller.value < 0.5) {
-      return;
-    }
-    HapticFeedback.selectionClick();
-    _rect.removeListener(_rectListener);
-  }
-
-  @override
-  void dispose() {
-    _rect.removeListener(_rectListener);
-    super.dispose();
+    _boxDecoration = DecorationTween(
+      begin: const BoxDecoration(
+        color: Color(0xFFFFFFFF),
+        boxShadow: <BoxShadow>[],
+      ),
+      end: const BoxDecoration(
+        color: Color(0xFFFFFFFF),
+        boxShadow: _endBoxShadow,
+      ),
+    ).animate(CurvedAnimation(
+        parent: widget.controller,
+        curve: Interval(0.0, CupertinoContextMenu.animationOpensAt),
+      ),
+    );
   }
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
-    final Color color = widget.controller.status == AnimationStatus.reverse
-      ? _masklessColor
-      : _mask.value;
     return Positioned.fromRect(
       rect: _rect.value!,
-      child: ShaderMask(
-        key: _childGlobalKey,
-        shaderCallback: (Rect bounds) {
-          return LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[color, color],
-          ).createShader(bounds);
-        },
+      child: Container(
+        decoration: _boxDecoration.value,
         child: widget.child,
       ),
+    );
+  }
+
+  Widget _buildBuilder(BuildContext context, Widget? child) {
+    return Positioned.fromRect(
+      rect: _rect.value!,
+      child: widget.builder!(context, widget.controller),
     );
   }
 
@@ -505,7 +776,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     return Stack(
       children: <Widget>[
         AnimatedBuilder(
-          builder: _buildAnimation,
+          builder: widget.child != null ? _buildAnimation : _buildBuilder,
           animation: widget.controller,
         ),
       ],
@@ -520,7 +791,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     required List<Widget> actions,
     required _ContextMenuLocation contextMenuLocation,
     this.barrierLabel,
-    _ContextMenuPreviewBuilderChildless? builder,
+    CupertinoContextMenuBuilder? builder,
     super.filter,
     required Rect previousChildRect,
     super.settings,
@@ -533,13 +804,9 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
-  // The duration of the transition used when a modal popup is shown. Eyeballed
-  // from a physical device running iOS 13.1.2.
-  static const Duration _kModalPopupTransitionDuration =
-    Duration(milliseconds: 335);
 
   final List<Widget> _actions;
-  final _ContextMenuPreviewBuilderChildless? _builder;
+  final CupertinoContextMenuBuilder? _builder;
   final GlobalKey _childGlobalKey = GlobalKey();
   final _ContextMenuLocation _contextMenuLocation;
   bool _externalOffstage = false;
@@ -1217,41 +1484,4 @@ class _ContextMenuSheet extends StatelessWidget {
       children: getChildren(context),
     );
   }
-}
-
-// An animation that switches between two colors.
-//
-// The transition is immediate, so there are no intermediate values or
-// interpolation. The color switches from offColor to onColor and back to
-// offColor at the times given by intervalOn and intervalOff.
-class _OnOffAnimation<T> extends CompoundAnimation<T> {
-  _OnOffAnimation({
-    required AnimationController controller,
-    required T onValue,
-    required T offValue,
-    required double intervalOn,
-    required double intervalOff,
-  }) : _offValue = offValue,
-       assert(intervalOn >= 0.0 && intervalOn <= 1.0),
-       assert(intervalOff >= 0.0 && intervalOff <= 1.0),
-       assert(intervalOn <= intervalOff),
-       super(
-        first: Tween<T>(begin: offValue, end: onValue).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(intervalOn, intervalOn),
-          ),
-        ),
-        next: Tween<T>(begin: onValue, end: offValue).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(intervalOff, intervalOff),
-          ),
-        ),
-       );
-
-  final T _offValue;
-
-  @override
-  T get value => next.value == _offValue ? next.value : first.value;
 }

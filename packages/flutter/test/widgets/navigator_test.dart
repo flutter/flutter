@@ -180,6 +180,59 @@ void main() {
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
+  testWidgets('Navigator can push Route created through page class as Pageless route', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        home: const Scaffold(
+          body: Text('home'),
+        )
+      )
+    );
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    nav.currentState!.push<void>(page.createRoute(nav.currentContext!));
+    await tester.pumpAndSettle();
+    expect(find.text('page'), findsOneWidget);
+
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    // Default to hard edge.
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            clipBehavior: Clip.none,
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
+  });
+
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
     final List<Page<void>> pages = <Page<void>>[
       const ZeroTransitionPage(name: 'Page 1'),
@@ -318,36 +371,56 @@ void main() {
     expect(log, equals(<String>['left']));
   });
 
-   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
-     final List<String> log = <String>[];
-     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) {
-         return Row(
-           children: <Widget>[
-             GestureDetector(
-               onTap: () {
-                 log.add('left');
-                 Navigator.pushNamed(context, '/second');
-               },
-               child: const Text('left'),
-             ),
-             GestureDetector(
-               onTap: () { log.add('right'); },
-               child: const Text('right'),
-             ),
-           ],
-         );
-       },
-       '/second': (BuildContext context) => Container(),
-     };
-     await tester.pumpWidget(MaterialApp(routes: routes));
-     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
-     expect(log, isEmpty);
-     await tester.tap(find.text('left'), pointer: 1);
-     expect(log, equals(<String>['left']));
-     await gesture.up();
-     expect(log, equals(<String>['left']));
-   });
+  testWidgets('pushnamed can handle Object as type', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+    await tester.pumpWidget(MaterialApp(navigatorKey: nav, routes: routes));
+    expect(find.text('/'), findsOneWidget);
+    Error? error;
+    try {
+      nav.currentState!.pushNamed<Object>('/second');
+    } on Error catch(e) {
+      error = e;
+    }
+    expect(error, isNull);
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+  });
+
+  testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) {
+        return Row(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                log.add('left');
+                Navigator.pushNamed(context, '/second');
+              },
+              child: const Text('left'),
+            ),
+            GestureDetector(
+              onTap: () { log.add('right'); },
+              child: const Text('right'),
+            ),
+          ],
+        );
+      },
+      '/second': (BuildContext context) => Container(),
+    };
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
+    expect(log, isEmpty);
+    await tester.tap(find.text('left'), pointer: 1);
+    expect(log, equals(<String>['left']));
+    await gesture.up();
+    expect(log, equals(<String>['left']));
+  });
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -2738,62 +2811,6 @@ void main() {
       );
     });
 
-    Widget buildFrame(String action) {
-      const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/' : (BuildContext context) => OnTapPage(
-          id: action,
-          onTap: () {
-            if (action == 'push') {
-              Navigator.of(context).push(myPage.createRoute(context));
-            } else if (action == 'pushReplacement') {
-              Navigator.of(context).pushReplacement(myPage.createRoute(context));
-            } else if (action == 'pushAndRemoveUntil') {
-              Navigator.of(context).pushAndRemoveUntil(myPage.createRoute(context), (_) => true);
-            }
-          },
-        ),
-      };
-
-      return MaterialApp(routes: routes);
-    }
-
-    void checkException(WidgetTester tester) {
-      final dynamic exception = tester.takeException();
-      expect(exception, isFlutterError);
-      final FlutterError error = exception as FlutterError;
-      expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   A page-based route should not be added using the imperative api.\n'
-          '   Provide a new list with the corresponding Page to Navigator.pages\n'
-          '   instead.\n',
-        ),
-      );
-    }
-
-    testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('push'));
-      await tester.tap(find.text('push'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
-    testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('pushReplacement'));
-      await tester.tap(find.text('pushReplacement'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
-    testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('pushAndRemoveUntil'));
-      await tester.tap(find.text('pushAndRemoveUntil'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
     testWidgets('throw if page list is empty', (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[];
       final FlutterExceptionHandler? originalOnError = FlutterError.onError;
@@ -3914,6 +3931,16 @@ void main() {
       ),
     );
     expect(policy, isA<ReadingOrderTraversalPolicy>());
+  });
+
+  group('RouteSettings.toString', () {
+    test('when name is not null, should have double quote', () {
+      expect(const RouteSettings(name: '/home').toString(), 'RouteSettings("/home", null)');
+    });
+
+    test('when name is null, should not have double quote', () {
+      expect(const RouteSettings().toString(), 'RouteSettings(none, null)');
+    });
   });
 }
 

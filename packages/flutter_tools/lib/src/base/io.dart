@@ -267,7 +267,6 @@ class Stdio {
   }
   io.Stdout? _stdout;
 
-  @visibleForTesting
   io.IOSink get stderr {
     if (_stderr != null) {
       return _stderr!;

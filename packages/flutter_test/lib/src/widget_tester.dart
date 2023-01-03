@@ -946,6 +946,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return binding.takeException();
   }
 
+  /// {@macro flutter.flutter_test.TakeAccessibilityAnnouncements}
+  ///
+  /// See [TestWidgetsFlutterBinding.takeAnnouncements] for details.
+  List<CapturedAccessibilityAnnouncement> takeAnnouncements() {
+    return binding.takeAnnouncements();
+  }
+
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of

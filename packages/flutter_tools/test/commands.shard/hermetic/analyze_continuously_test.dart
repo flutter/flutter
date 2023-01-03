@@ -77,7 +77,7 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       createSampleProject(tempDir);
 
-      final Pub pub = Pub(
+      final Pub pub = Pub.test(
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -117,7 +117,7 @@ void main() {
   testUsingContext('AnalysisServer errors', () async {
     createSampleProject(tempDir, brokenCode: true);
 
-    final Pub pub = Pub(
+    final Pub pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,

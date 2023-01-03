@@ -26,7 +26,7 @@ import 'android_sdk.dart';
 //
 // For more information about the latest version, check:
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-// https://kotlinlang.org/docs/gradle.html#plugin-and-versions
+// https://kotlinlang.org/docs/releases.html#release-details
 const String templateDefaultGradleVersion = '7.5';
 const String templateAndroidGradlePluginVersion = '7.2.0';
 const String templateDefaultGradleVersionForModule = '7.2.0';

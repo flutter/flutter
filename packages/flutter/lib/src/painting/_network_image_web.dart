@@ -8,117 +8,17 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
-import 'package:js/js_util.dart' as js_util;
 
+import '../services/dom.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
-
-/// [DomXMLHttpRequest] interop class.
-@JS()
-@staticInterop
-class DomXMLHttpRequest {}
-
-/// [DomXMLHttpRequest] extension.
-extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
-  /// Gets the response.
-  external dynamic get response;
-
-  /// Gets the response text.
-  external String? get responseText;
-
-  /// Gets the response type.
-  external String get responseType;
-
-  /// Gets the status.
-  external int? get status;
-
-  /// Set the response type.
-  external set responseType(String value);
-
-  /// Set the request header.
-  external void setRequestHeader(String header, String value);
-
-  /// Open the request.
-  void open(String method, String url, bool isAsync) => js_util.callMethod(
-      this, 'open', <Object>[method, url, isAsync]);
-
-  /// Send the request.
-  void send() => js_util.callMethod(this, 'send', <Object>[]);
-
-  /// Add event listener.
-  void addEventListener(String type, DomEventListener? listener,
-      [bool? useCapture]) {
-    if (listener != null) {
-      js_util.callMethod(this, 'addEventListener',
-          <Object>[type, listener, if (useCapture != null) useCapture]);
-    }
-  }
-}
-
-/// Factory function for creating [DomXMLHttpRequest].
-DomXMLHttpRequest createDomXMLHttpRequest() =>
-    domCallConstructorString('XMLHttpRequest', <Object?>[])!
-        as DomXMLHttpRequest;
-
-/// Type for event listener.
-typedef DomEventListener = void Function(DomEvent event);
-
-/// [DomEvent] interop object.
-@JS()
-@staticInterop
-class DomEvent {}
-
-/// [DomEvent] reqiured extension.
-extension DomEventExtension on DomEvent {
-  /// Get the event type.
-  external String get type;
-
-  /// Initialize an event.
-  void initEvent(String type, [bool? bubbles, bool? cancelable]) =>
-      js_util.callMethod(this, 'initEvent', <Object>[
-        type,
-        if (bubbles != null) bubbles,
-        if (cancelable != null) cancelable
-      ]);
-}
-
-/// [DomProgressEvent] interop object.
-@JS()
-@staticInterop
-class DomProgressEvent extends DomEvent {}
-
-/// [DomProgressEvent] reqiured extension.
-extension DomProgressEventExtension on DomProgressEvent {
-  /// Amount of work done.
-  external int? get loaded;
-
-  /// Total amount of work.
-  external int? get total;
-}
-
-/// Gets a constructor from a [String].
-Object? domGetConstructor(String constructorName) =>
-    js_util.getProperty(domWindow, constructorName);
-
-/// Calls a constructor as a [String].
-Object? domCallConstructorString(String constructorName, List<Object?> args) {
-  final Object? constructor = domGetConstructor(constructorName);
-  if (constructor == null) {
-    return null;
-  }
-  return js_util.callConstructor(constructor, args);
-}
-
-/// The underyling window object.
-@JS('window')
-external Object get domWindow;
 
 /// Creates a type for an overridable factory function for testing purposes.
 typedef HttpRequestFactory = DomXMLHttpRequest Function();
 
 /// Default HTTP client.
 DomXMLHttpRequest _httpClient() {
-  return DomXMLHttpRequest();
+  return createDomXMLHttpRequest();
 }
 
 /// Creates an overridable factory function.

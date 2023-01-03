@@ -192,7 +192,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
     markNeedsPaint();
   }
 
-  // Sets the offset of the underlaying platform view on the platform side.
+  // Sets the offset of the underlying platform view on the platform side.
   //
   // This allows the Android native view to draw the a11y highlights in the same
   // location on the screen as the platform view widget in the Flutter framework.

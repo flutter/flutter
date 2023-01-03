@@ -106,8 +106,10 @@ Future<Offset?> startPicker(
     ValueChanged<TimeOfDay?> onChanged, {
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
       String? restorationId,
+      bool useMaterial3 = false,
     }) async {
   await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
     restorationScopeId: 'app',
     locale: const Locale('en', 'US'),
     home: _TimePickerLauncher(
@@ -138,6 +140,14 @@ void main() {
 }
 
 void _tests() {
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay? time) {
+      expect(find.text('Select time'), findsOneWidget);
+      expect(find.text('Enter time'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+    }, useMaterial3: true);
+  });
+
   testWidgets('tap-select an hour', (WidgetTester tester) async {
     TimeOfDay? result;
 

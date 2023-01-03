@@ -44,7 +44,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             child: Form(
               autovalidateMode: AutovalidateMode.always,
               onChanged: () {
-                Form.of(primaryFocus!.context!)!.save();
+                Form.of(primaryFocus!.context!).save();
               },
               child: Wrap(
                 children: List<Widget>.generate(5, (int index) {

@@ -225,7 +225,7 @@ class SystemChannels {
   /// A [MethodChannel] for handling spell check for text input.
   ///
   /// This channel exposes the spell check framework for supported platforms.
-  /// Currently supported on Android only.
+  /// Currently supported on Android and iOS only.
   ///
   /// Spell check requests are initiated by `SpellCheck.initiateSpellCheck`.
   /// These requests may either be completed or canceled. If the request is

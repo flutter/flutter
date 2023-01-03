@@ -1006,7 +1006,7 @@ void main() {
         child: SizedBox(key: sizedBoxKey, width: 20, height: 20),
       ),
     ));
-    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!)!;
+    final MaterialInkController controller = Material.of(sizedBoxKey.currentContext!);
 
     final TrackPaintInkFeature tracker = TrackPaintInkFeature(
       controller: controller,
@@ -1015,7 +1015,7 @@ void main() {
     controller.addInkFeature(tracker);
     expect(tracker.paintCount, 0);
 
-    // Force a repaint. Since it's offstage, the ink feture should not get painted.
+    // Force a repaint. Since it's offstage, the ink feature should not get painted.
     materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
     expect(tracker.paintCount, 0);
 

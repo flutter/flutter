@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'magnifier.dart';
@@ -41,6 +42,7 @@ class SelectionArea extends StatefulWidget {
     super.key,
     this.focusNode,
     this.selectionControls,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
     required this.child,
@@ -65,6 +67,23 @@ class SelectionArea extends StatefulWidget {
   /// If it is null, the platform specific selection control is used.
   final TextSelectionControls? selectionControls;
 
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the ambient
+  /// [ThemeData.platform].
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to build a custom context menu for any selected
+  /// content in a SelectionArea.
+  ///
+  /// ** See code in examples/api/lib/material/context_menu/selectable_region_toolbar_builder.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  final SelectableRegionContextMenuBuilder? contextMenuBuilder;
+
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
@@ -72,6 +91,12 @@ class SelectionArea extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, SelectableRegionState selectableRegionState) {
+    return AdaptiveTextSelectionToolbar.selectableRegion(
+      selectableRegionState: selectableRegionState,
+    );
+  }
 
   @override
   State<StatefulWidget> createState() => _SelectionAreaState();
@@ -100,22 +125,24 @@ class _SelectionAreaState extends State<SelectionArea> {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        controls ??= materialTextSelectionControls;
+        controls ??= materialTextSelectionHandleControls;
         break;
       case TargetPlatform.iOS:
-        controls ??= cupertinoTextSelectionControls;
+        controls ??= cupertinoTextSelectionHandleControls;
         break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        controls ??= desktopTextSelectionControls;
+        controls ??= desktopTextSelectionHandleControls;
         break;
       case TargetPlatform.macOS:
-        controls ??= cupertinoDesktopTextSelectionControls;
+        controls ??= cupertinoDesktopTextSelectionHandleControls;
         break;
     }
+
     return SelectableRegion(
-      focusNode: _effectiveFocusNode,
       selectionControls: controls,
+      focusNode: _effectiveFocusNode,
+      contextMenuBuilder: widget.contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
       child: widget.child,

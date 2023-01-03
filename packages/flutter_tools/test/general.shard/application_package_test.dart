@@ -57,7 +57,7 @@ void main() {
 
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
       const String aaptPath = 'aaptPath';
-      final File apkFile = globals.fs.file('app.apk');
+      final File apkFile = globals.fs.file('app-debug.apk');
       final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
       sdkVersion.aaptPath = aaptPath;
       sdk.latestVersion = sdkVersion;
@@ -81,7 +81,7 @@ void main() {
         TargetPlatform.android_arm,
         applicationBinary: apkFile,
       ))!;
-      expect(applicationPackage.name, 'app.apk');
+      expect(applicationPackage.name, 'app-debug.apk');
       expect(applicationPackage, isA<PrebuiltApplicationPackage>());
       expect((applicationPackage as PrebuiltApplicationPackage).applicationPackage.path, apkFile.path);
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -103,7 +103,7 @@ void main() {
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
-        applicationBinary: globals.fs.file('app.apk'),
+        applicationBinary: globals.fs.file('app-debug.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
@@ -386,9 +386,95 @@ void main() {
       final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
-          FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
 
       expect(iosApp, null);
+    }, overrides: overrides);
+
+    testUsingContext('returns project app icon dirname', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String iconDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
+      );
+      expect(iosApp.projectAppIconDirName, globals.fs.path.join('ios', iconDirSuffix));
+    }, overrides: overrides);
+
+    testUsingContext('returns template app icon dirname for Contents.json', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String iconDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
+      );
+      expect(
+        iosApp.templateAppIconDirNameForContentsJson,
+        globals.fs.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          iconDirSuffix,
+        ),
+      );
+    }, overrides: overrides);
+
+    testUsingContext('returns template app icon dirname for images', () async {
+      final String toolsDir = globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+      );
+      final String packageConfigPath = globals.fs.path.join(
+        toolsDir,
+        '.dart_tool',
+        'package_config.json'
+      );
+      globals.fs.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner');
+      final String iconDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'AppIcon.appiconset',
+      );
+      expect(
+        await iosApp.templateAppIconDirNameForImages,
+        globals.fs.path.absolute(
+          'flutter_template_images',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          iconDirSuffix,
+        ),
+      );
     }, overrides: overrides);
   });
 

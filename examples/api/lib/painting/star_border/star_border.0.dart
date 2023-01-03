@@ -144,7 +144,6 @@ class ExampleBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: UniqueKey(),
       alignment: Alignment.center,
       padding: const EdgeInsets.all(20),
       width: 150,

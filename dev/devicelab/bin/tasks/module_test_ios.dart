@@ -548,8 +548,7 @@ end
       );
 
       if (!xcodebuildOutput.contains('flutter --verbose --local-engine-src-path=bogus assemble') || // Verbose output
-          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus') ||
-          !xcodebuildOutput.contains('Command PhaseScriptExecution failed with a nonzero exit code')) {
+          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus')) {
         return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');
       }
 

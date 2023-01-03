@@ -58,11 +58,11 @@ class IntegrationTestsProject extends Project implements TestsProject {
   String get testFilePath => fileSystem.path.join(dir.path, 'integration_test', 'app_test.dart');
 
   @override
-  Uri get breakpointUri => throw UnimplementedError();
+  Uri get breakpointUri => Uri.file(testFilePath);
 
   @override
   Uri get breakpointAppUri => throw UnimplementedError();
 
   @override
-  int get breakpointLine => throw UnimplementedError();
+  int get breakpointLine => lineContaining(testContent, '// BREAKPOINT');
 }

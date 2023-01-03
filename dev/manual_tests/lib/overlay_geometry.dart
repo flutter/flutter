@@ -172,8 +172,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       markers[MarkerType.topLeft] = box!.localToGlobal(Offset.zero);
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));
-      final ScrollableState? scrollable = Scrollable.of(target.currentContext!);
-      markersScrollOffset = scrollable!.position.pixels;
+      final ScrollableState scrollable = Scrollable.of(target.currentContext!);
+      markersScrollOffset = scrollable.position.pixels;
     });
   }
 

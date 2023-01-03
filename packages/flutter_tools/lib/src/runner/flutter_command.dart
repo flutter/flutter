@@ -392,6 +392,19 @@ abstract class FlutterCommand extends Command<void> {
     _usesPortOption = true;
   }
 
+  /// Add option values for output directory of artifacts
+  void usesOutputDir() {
+    // TODO(eliasyishak): this feature has been added to [BuildWebCommand] and
+    //  [BuildAarCommand]
+    argParser.addOption('output',
+        abbr: 'o',
+        aliases: <String>['output-dir'],
+        help:
+            'The absolute path to the directory where the repository is generated. '
+            'By default, this is <current-directory>/build/<target-platform>.\n'
+            'Currently supported for subcommands: aar, web.');
+  }
+
   void addDevToolsOptions({required bool verboseHelp}) {
     argParser.addFlag(
       kEnableDevTools,
@@ -1256,14 +1269,17 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  @visibleForOverriding
+  String get deprecationWarning {
+    return '${globals.logger.terminal.warningMark} The "$name" command is '
+           'deprecated and will be removed in a future version of Flutter. '
+           'See https://flutter.dev/docs/development/tools/sdk/releases '
+           'for previous releases of Flutter.\n';
+  }
+
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printWarning(
-        '${globals.logger.terminal.warningMark} The "$name" command is deprecated and '
-        'will be removed in a future version of Flutter. '
-        'See https://flutter.dev/docs/development/tools/sdk/releases '
-        'for previous releases of Flutter.\n',
-      );
+      globals.printWarning(deprecationWarning);
     }
   }
 

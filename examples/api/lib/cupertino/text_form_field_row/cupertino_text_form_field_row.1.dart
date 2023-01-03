@@ -34,7 +34,7 @@ class FromSectionExample extends StatelessWidget {
         child: Form(
           autovalidateMode: AutovalidateMode.always,
           onChanged: () {
-            Form.of(primaryFocus!.context!)?.save();
+            Form.maybeOf(primaryFocus!.context!)?.save();
           },
           child: CupertinoFormSection.insetGrouped(
             header: const Text('SECTION 1'),

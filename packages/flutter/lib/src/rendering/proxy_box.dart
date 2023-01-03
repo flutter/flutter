@@ -173,7 +173,12 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
     RenderBox? child,
   }) : super(child);
 
-  /// How to behave during hit testing.
+  /// How to behave during hit testing when deciding how the hit test propagates
+  /// to children and whether to consider targets behind this one.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   HitTestBehavior behavior;
 
   @override

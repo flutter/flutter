@@ -326,7 +326,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   ApplicationPackage? stopAppPackage;
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     stopAppPackage = app;

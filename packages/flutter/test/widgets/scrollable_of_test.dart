@@ -22,7 +22,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _position?.removeListener(listener);
-    _position = Scrollable.of(context)?.position;
+    _position = Scrollable.maybeOf(context)?.position;
     _position?.addListener(listener);
     widget.log('didChangeDependencies ${_position?.pixels.toStringAsFixed(1)}');
   }

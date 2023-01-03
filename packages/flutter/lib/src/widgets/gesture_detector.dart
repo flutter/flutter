@@ -970,10 +970,14 @@ class GestureDetector extends StatelessWidget {
   /// detecting screens.
   final GestureForcePressEndCallback? onForcePressEnd;
 
-  /// How this gesture detector should behave during hit testing.
+  /// How this gesture detector should behave during hit testing when deciding
+  /// how the hit test propagates to children and whether to consider targets
+  /// behind this one.
   ///
   /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
   /// [HitTestBehavior.translucent] if child is null.
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   final HitTestBehavior? behavior;
 
   /// Whether to exclude these gestures from the semantics tree. For

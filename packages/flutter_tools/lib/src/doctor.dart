@@ -512,7 +512,10 @@ class FlutterValidator extends DoctorValidator {
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
 
-      messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel));
+      final String flutterRoot = _flutterRoot();
+      messages.add(_getFlutterVersionMessage(frameworkVersion, versionChannel, flutterRoot));
+
+      _validateRequiredBinaries(flutterRoot).forEach(messages.add);
       messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
         messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
@@ -546,6 +549,9 @@ class FlutterValidator extends DoctorValidator {
       buffer.writeln(_userMessages.flutterBinariesDoNotRun);
       if (_platform.isLinux) {
         buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
+      } else if (_platform.isMacOS && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
+        buffer.writeln('Flutter requires the Rosetta translation environment on ARM Macs. Try running:');
+        buffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
       }
       messages.add(ValidationMessage.error(buffer.toString()));
     }
@@ -575,8 +581,8 @@ class FlutterValidator extends DoctorValidator {
     );
   }
 
-  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel) {
-    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, _flutterRoot());
+  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel, String flutterRoot) {
+    String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, flutterRoot);
 
     // The tool sets the channel as "unknown", if the current branch is on a
     // "detached HEAD" state or doesn't have an upstream, and sets the
@@ -592,6 +598,45 @@ class FlutterValidator extends DoctorValidator {
       flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownVersion}';
     }
     return ValidationMessage.hint(flutterVersionMessage);
+  }
+
+  List<ValidationMessage> _validateRequiredBinaries(String flutterRoot) {
+    final ValidationMessage? flutterWarning = _validateSdkBinary('flutter', flutterRoot);
+    final ValidationMessage? dartWarning = _validateSdkBinary('dart', flutterRoot);
+    return <ValidationMessage>[
+      if (flutterWarning != null) flutterWarning,
+      if (dartWarning != null) dartWarning,
+    ];
+  }
+
+  /// Return a warning if the provided [binary] on the user's path does not
+  /// resolve within the Flutter SDK.
+  ValidationMessage? _validateSdkBinary(String binary, String flutterRoot) {
+    final String flutterBinDir = _fileSystem.path.join(flutterRoot, 'bin');
+
+    final File? flutterBin = _operatingSystemUtils.which(binary);
+    if (flutterBin == null) {
+      return ValidationMessage.hint(
+        'The $binary binary is not on your path. Consider adding '
+        '$flutterBinDir to your path.',
+      );
+    }
+    final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
+    if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
+      final String hint = 'Warning: `$binary` on your path resolves to '
+          '$resolvedFlutterPath, which is not inside your current Flutter '
+          'SDK checkout at $flutterRoot. Consider adding $flutterBinDir to '
+          'the front of your path.';
+      return ValidationMessage.hint(hint);
+    }
+    return null;
+  }
+
+  bool _filePathContainsDirPath(String directory, String file) {
+    // calling .canonicalize() will normalize for alphabetic case and path
+    // separators
+    return (_fileSystem.path.canonicalize(file))
+        .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
   ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {

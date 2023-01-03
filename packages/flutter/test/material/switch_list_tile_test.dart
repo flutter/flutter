@@ -148,10 +148,10 @@ void main() {
       find.byType(Switch),
       paints
         ..rrect(color: Colors.blue[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.yellow[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.yellow[500]),
     );
 
     await tester.tap(find.byType(Switch));
@@ -161,10 +161,10 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(color: Colors.green[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.red[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.red[500]),
     );
   });
 
@@ -478,6 +478,64 @@ void main() {
     await tester.pump(); // Let the focus take effect.
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
     expect(tileNode.hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('SwitchListTile onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile onFocusChange');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SwitchListTile(
+            value: true,
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onChanged: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SwitchListTile.adaptive(
+            value: true,
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onChanged: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
   });
 
   group('feedback', () {
