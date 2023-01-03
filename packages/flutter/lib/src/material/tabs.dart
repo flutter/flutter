@@ -1912,7 +1912,7 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_150
 
 class _TabsDefaultsM3 extends TabBarTheme {
   _TabsDefaultsM3(this.context)
