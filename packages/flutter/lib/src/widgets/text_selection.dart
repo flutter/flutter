@@ -469,6 +469,20 @@ class TextSelectionOverlay {
     return;
   }
 
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  void showSpellCheckSuggestionsToolbar(
+    WidgetBuilder spellCheckSuggestionsToolbarBuilder
+  ) {
+    _updateSelectionOverlay();
+    assert(context.mounted);
+    _selectionOverlay
+      .showSpellCheckSuggestionsToolbar(
+        context: context,
+        builder: spellCheckSuggestionsToolbarBuilder,
+    );
+  }
+
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
   void showMagnifier(Offset positionToShow) {
     final TextPosition position = renderObject.getPositionForPoint(positionToShow);
@@ -1347,6 +1361,29 @@ class SelectionOverlay {
     );
   }
 
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  void showSpellCheckSuggestionsToolbar({
+    BuildContext? context,
+    required WidgetBuilder builder,
+  }) {
+    if (context == null) {
+      return;
+    }
+
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return _SelectionToolbarWrapper(
+          layerLink: toolbarLayerLink,
+          offset: -renderBox.localToGlobal(Offset.zero),
+          child: builder(context),
+        );
+      },
+    );
+  }
+
   bool _buildScheduled = false;
 
   /// Rebuilds the selection toolbar or handles if they are present.
@@ -2124,6 +2161,15 @@ class TextSelectionGestureDetectorBuilder {
           }
           break;
         case TargetPlatform.android:
+          editableText.hideToolbar();
+          editableText.showSpellCheckSuggestionsToolbar();
+          if (isShiftPressedValid) {
+            _isShiftTapping = true;
+            _extendSelection(details.globalPosition, SelectionChangedCause.tap);
+            return;
+          }
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
         case TargetPlatform.fuchsia:
           editableText.hideToolbar();
           if (isShiftPressedValid) {
@@ -2512,7 +2558,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionEnd].
   ///
-  /// By default, it simply cleans up the state used for handling certain
+  /// By default, it cleans up the state used for handling certain
   /// built-in behaviors.
   ///
   /// See also:

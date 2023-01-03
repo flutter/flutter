@@ -332,6 +332,7 @@ class _IndicatorPainter extends CustomPainter {
     required this.tabKeys,
     required _IndicatorPainter? old,
     required this.indicatorPadding,
+    required this.labelPaddings,
     this.dividerColor,
   }) : assert(controller != null),
        assert(indicator != null),
@@ -347,6 +348,7 @@ class _IndicatorPainter extends CustomPainter {
   final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
   final Color? dividerColor;
+  final List<EdgeInsetsGeometry> labelPaddings;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
   // layout is completed. These values can be null when TabBar contains no
@@ -402,9 +404,11 @@ class _IndicatorPainter extends CustomPainter {
 
     if (indicatorSize == TabBarIndicatorSize.label) {
       final double tabWidth = tabKeys[tabIndex].currentContext!.size!.width;
-      final double delta = ((tabRight - tabLeft) - tabWidth) / 2.0;
-      tabLeft += delta;
-      tabRight -= delta;
+      final EdgeInsetsGeometry labelPadding = labelPaddings[tabIndex];
+      final EdgeInsets insets = labelPadding.resolve(_currentTextDirection);
+      final double delta = ((tabRight - tabLeft) - (tabWidth + insets.horizontal)) / 2.0;
+      tabLeft += delta + insets.left;
+      tabRight = tabLeft + tabWidth;
     }
 
     final EdgeInsets insets = indicatorPadding.resolve(_currentTextDirection);
@@ -952,6 +956,7 @@ class _TabBarState extends State<TabBar> {
   int? _currentIndex;
   late double _tabStripWidth;
   late List<GlobalKey> _tabKeys;
+  late List<EdgeInsetsGeometry> _labelPaddings;
   bool _debugHasScheduledValidTabsCountCheck = false;
 
   @override
@@ -960,6 +965,7 @@ class _TabBarState extends State<TabBar> {
     // If indicatorSize is TabIndicatorSize.label, _tabKeys[i] is used to find
     // the width of tab widget i. See _IndicatorPainter.indicatorRect().
     _tabKeys = widget.tabs.map((Widget tab) => GlobalKey()).toList();
+    _labelPaddings = List<EdgeInsetsGeometry>.filled(widget.tabs.length, EdgeInsets.zero, growable: true);
   }
 
   Decoration _getIndicator() {
@@ -1063,6 +1069,7 @@ class _TabBarState extends State<TabBar> {
       tabKeys: _tabKeys,
       old: _indicatorPainter,
       dividerColor: theme.useMaterial3 ? widget.dividerColor ?? defaults.dividerColor : null,
+      labelPaddings: _labelPaddings,
     );
   }
 
@@ -1098,8 +1105,10 @@ class _TabBarState extends State<TabBar> {
     if (widget.tabs.length > _tabKeys.length) {
       final int delta = widget.tabs.length - _tabKeys.length;
       _tabKeys.addAll(List<GlobalKey>.generate(delta, (int n) => GlobalKey()));
+      _labelPaddings.addAll(List<EdgeInsetsGeometry>.filled(delta, EdgeInsets.zero));
     } else if (widget.tabs.length < _tabKeys.length) {
       _tabKeys.removeRange(widget.tabs.length, _tabKeys.length);
+      _labelPaddings.removeRange(widget.tabs.length, _tabKeys.length);
     }
   }
 
@@ -1274,10 +1283,12 @@ class _TabBarState extends State<TabBar> {
         }
       }
 
+      _labelPaddings[index] = adjustedPadding ?? widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+
       return Center(
         heightFactor: 1.0,
         child: Padding(
-          padding: adjustedPadding ?? widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding,
+          padding: _labelPaddings[index],
           child: KeyedSubtree(
             key: _tabKeys[index],
             child: widget.tabs[index],

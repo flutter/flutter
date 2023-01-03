@@ -541,7 +541,13 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(T intent) => onInvoke(intent);
 }
 
-/// An action dispatcher that simply invokes the actions given to it.
+/// An action dispatcher that invokes the actions given to it.
+///
+/// The [invokeAction] method on this class directly calls the [Action.invoke]
+/// method on the [Action] object.
+///
+/// For [ContextAction] actions, if no `context` is provided, the
+/// [BuildContext] of the [primaryFocus] is used instead.
 ///
 /// See also:
 ///
@@ -1230,7 +1236,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+      final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
       switch (mode) {
         case NavigationMode.traditional:
           return target.enabled;
@@ -1271,7 +1277,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return widget.enabled;

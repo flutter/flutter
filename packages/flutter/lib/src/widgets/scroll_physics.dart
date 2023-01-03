@@ -13,6 +13,7 @@ import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
+import 'view.dart';
 
 export 'package:flutter/physics.dart' show ScrollSpringSimulation, Simulation, Tolerance;
 
@@ -236,8 +237,8 @@ class ScrollPhysics {
   /// the overall scale between the global screen and local scrollable
   /// coordinate systems.
   ///
-  /// The default implementation is stateless, and simply provides a point-in-
-  /// time decision about how fast the scrollable is scrolling. It would always
+  /// The default implementation is stateless, and provides a point-in-time
+  /// decision about how fast the scrollable is scrolling. It would always
   /// return true for a scrollable that is animating back and forth at high
   /// velocity in a loop. It is assumed that callers will handle such
   /// a case, or that a custom stateful implementation would be written that
@@ -251,7 +252,7 @@ class ScrollPhysics {
     assert(metrics != null);
     assert(context != null);
     if (parent == null) {
-      final double maxPhysicalPixels = WidgetsBinding.instance.window.physicalSize.longestSide;
+      final double maxPhysicalPixels = View.of(context).physicalSize.longestSide;
       return velocity.abs() > maxPhysicalPixels;
     }
     return parent!.recommendDeferredLoading(velocity, metrics, context);

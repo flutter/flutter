@@ -50,6 +50,8 @@ Future<void> integrationDriver(
   // error if it's used as a message for requestData.
   String jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
 
+  final Map<String, bool> onScreenshotResults = <String, bool>{};
+
   Response response = Response.fromJson(jsonResponse);
 
   // Until `integration_test` returns a [WebDriverCommandType.noop], keep
@@ -63,8 +65,10 @@ Future<void> integrationDriver(
       // Use `driver.screenshot()` method to get a screenshot of the web page.
       final List<int> screenshotImage = await driver.screenshot();
       final String screenshotName = response.data!['screenshot_name']! as String;
+      final Map<String, Object?>? args = (response.data!['args'] as Map<String, Object?>?)?.cast<String, Object?>();
 
-      final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage);
+      final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage, args);
+      onScreenshotResults[screenshotName] = screenshotSuccess;
       if (screenshotSuccess) {
         jsonResponse = await driver.requestData(DriverTestMessage.complete().toString());
       } else {
@@ -104,7 +108,8 @@ Future<void> integrationDriver(
 
       bool ok = false;
       try {
-        ok = await onScreenshot(screenshotName, screenshotBytes.cast<int>());
+        ok = onScreenshotResults[screenshotName] ??
+            await onScreenshot(screenshotName, screenshotBytes.cast<int>());
       } catch (exception) {
         throw StateError(
           'Screenshot failure:\n'

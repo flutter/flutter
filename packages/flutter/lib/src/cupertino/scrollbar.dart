@@ -29,7 +29,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 
 /// An iOS style scrollbar.
 ///
-/// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
+/// To add a scrollbar to a [ScrollView], wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
@@ -171,7 +171,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..mainAxisMargin = _kScrollbarMainAxisMargin
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
-      ..padding = MediaQuery.of(context).padding
+      ..padding = MediaQuery.paddingOf(context)
       ..minLength = _kScrollbarMinLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
       ..scrollbarOrientation = widget.scrollbarOrientation;

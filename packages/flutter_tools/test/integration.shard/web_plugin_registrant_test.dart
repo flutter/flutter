@@ -80,19 +80,17 @@ void main() {
     ),
   });
 
-  testUsingContext('generated plugin registrant passes analysis without null safety', () async {
+  testUsingContext('generated plugin registrant passes analysis with null safety', () async {
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
     await _editPubspecFile(projectDir,
       _composeEditors(<PubspecEditor>[
         _addDependencyEditor('shared_preferences', version: '^2.0.0'),
 
-        // This turns null safety off
-        _setDartSDKVersionEditor('>=2.11.0 <3.0.0'),
+        _setDartSDKVersionEditor('>=2.12.0 <4.0.0'),
       ]));
 
-    // The generated main.dart file has a bunch of stuff that is invalid without null safety, so
-    // replace it with a no-op dummy main file. We aren't testing it in this scenario anyway.
+    // Replace main file with a no-op dummy. We aren't testing it in this scenario anyway.
     await _replaceMainFile(projectDir, 'void main() {}');
 
     // The plugin registrant is created on build...
