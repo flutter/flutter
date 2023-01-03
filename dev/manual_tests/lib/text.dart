@@ -508,7 +508,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -577,7 +577,7 @@ class _UnderlinesState extends State<Underlines> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -680,7 +680,7 @@ class _FallbackState extends State<Fallback> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -754,7 +754,7 @@ class Bidi extends StatefulWidget {
 class _BidiState extends State<Bidi> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
@@ -862,7 +862,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -988,7 +988,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

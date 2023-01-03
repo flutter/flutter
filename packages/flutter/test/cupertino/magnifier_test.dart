@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ void main() {
         final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
-          Container(
+          ColoredBox(
             key: outerKey,
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(

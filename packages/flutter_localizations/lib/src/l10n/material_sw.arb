@@ -132,5 +132,8 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Menyu ya upau wa menyu",
   "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
   "keyboardKeyShift": "Shift"
 }

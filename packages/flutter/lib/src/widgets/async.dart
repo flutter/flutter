@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Widgets that handle interaction with asynchronous computations.
-///
-/// Asynchronous computations are represented by [Future]s and [Stream]s.
-
 import 'dart:async' show StreamSubscription;
 
 import 'package:flutter/foundation.dart';
