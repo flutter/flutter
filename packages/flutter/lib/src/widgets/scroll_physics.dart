@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart' show AxisDirection;
 import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
@@ -383,16 +384,29 @@ class ScrollPhysics {
   /// The spring to use for ballistic simulations.
   SpringDescription get spring => parent?.spring ?? _kDefaultSpring;
 
-  /// The default accuracy to which scrolling is computed.
-  static final Tolerance _kDefaultTolerance = Tolerance(
-    // TODO(ianh): Handle the case of the device pixel ratio changing.
-    // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
-    velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
-  );
+  /// Deprecated. Call [toleranceFor] instead.
+  @Deprecated(
+    'Call toleranceFor instead. '
+    'This feature was deprecated after v3.7.0-13.0.pre.',
+  )
+  Tolerance get tolerance {
+    return toleranceFor(FixedScrollMetrics(
+      minScrollExtent: null,
+      maxScrollExtent: null,
+      pixels: null,
+      viewportDimension: null,
+      axisDirection: AxisDirection.down,
+      devicePixelRatio: WidgetsBinding.instance.window.devicePixelRatio,
+    ));
+  }
 
   /// The tolerance to use for ballistic simulations.
-  Tolerance get tolerance => parent?.tolerance ?? _kDefaultTolerance;
+  Tolerance toleranceFor(ScrollMetrics metrics) {
+    return parent?.toleranceFor(metrics) ?? Tolerance(
+      velocity: 1.0 / (0.050 * metrics.devicePixelRatio), // logical pixels per second
+      distance: 1.0 / metrics.devicePixelRatio, // logical pixels
+    );
+  }
 
   /// The minimum distance an input pointer drag must have moved to
   /// to be considered a scroll fling gesture.
@@ -696,7 +710,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
-    final Tolerance tolerance = this.tolerance;
+    final Tolerance tolerance = toleranceFor(position);
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       double constantDeceleration;
       switch (decelerationRate) {
@@ -840,7 +854,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
 
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
-    final Tolerance tolerance = this.tolerance;
+    final Tolerance tolerance = toleranceFor(position);
     if (position.outOfRange) {
       double? end;
       if (position.pixels > position.maxScrollExtent) {
