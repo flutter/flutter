@@ -12,6 +12,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/scene/animation/animation_player.h"
 #include "impeller/scene/importer/conversions.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/mesh.h"
@@ -144,12 +145,21 @@ std::shared_ptr<Node> Node::MakeFromFlatbuffer(const fb::Scene& scene,
     }
     result->AddChild(scene_nodes[child]);
   }
-  // TODO(bdero): Unpack animations.
 
   // Unpack each node.
   for (size_t node_i = 0; node_i < scene.nodes()->size(); node_i++) {
     scene_nodes[node_i]->UnpackFromFlatbuffer(*scene.nodes()->Get(node_i),
                                               scene_nodes, textures, allocator);
+  }
+
+  // Unpack animations.
+  if (scene.animations()) {
+    for (const auto animation : *scene.animations()) {
+      if (auto out_animation =
+              Animation::MakeFromFlatbuffer(*animation, scene_nodes)) {
+        result->animations_.push_back(out_animation);
+      }
+    }
   }
 
   return result;
@@ -202,10 +212,6 @@ Mesh::Mesh(Mesh&& mesh) = default;
 
 Mesh& Mesh::operator=(Mesh&& mesh) = default;
 
-Node::Node(Node&& node) = default;
-
-Node& Node::operator=(Node&& node) = default;
-
 const std::string& Node::GetName() const {
   return name_;
 }
@@ -214,16 +220,38 @@ void Node::SetName(const std::string& new_name) {
   name_ = new_name;
 }
 
-std::shared_ptr<Node> Node::FindNodeByName(const std::string& name) const {
+std::shared_ptr<Node> Node::FindChildByName(
+    const std::string& name,
+    bool exclude_animation_players) const {
   for (auto& child : children_) {
+    if (exclude_animation_players && child->animation_player_.has_value()) {
+      continue;
+    }
     if (child->GetName() == name) {
       return child;
     }
-    if (auto found = child->FindNodeByName(name)) {
+    if (auto found = child->FindChildByName(name)) {
       return found;
     }
   }
   return nullptr;
+}
+
+std::shared_ptr<Animation> Node::FindAnimationByName(
+    const std::string& name) const {
+  for (const auto& animation : animations_) {
+    if (animation->GetName() == name) {
+      return animation;
+    }
+  }
+  return nullptr;
+}
+
+AnimationClip& Node::AddAnimation(const std::shared_ptr<Animation>& animation) {
+  if (!animation_player_.has_value()) {
+    animation_player_ = AnimationPlayer();
+  }
+  return animation_player_->AddAnimation(animation, this);
 }
 
 void Node::SetLocalTransform(Matrix transform) {
@@ -274,8 +302,11 @@ Mesh& Node::GetMesh() {
 }
 
 bool Node::Render(SceneEncoder& encoder, const Matrix& parent_transform) const {
-  Matrix transform = parent_transform * local_transform_;
+  if (animation_player_.has_value()) {
+    animation_player_->Update();
+  }
 
+  Matrix transform = parent_transform * local_transform_;
   mesh_.Render(encoder, transform);
 
   for (auto& child : children_) {

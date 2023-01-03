@@ -9,10 +9,12 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-
 #include "impeller/geometry/matrix.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/texture.h"
+#include "impeller/scene/animation/animation.h"
+#include "impeller/scene/animation/animation_clip.h"
+#include "impeller/scene/animation/animation_player.h"
 #include "impeller/scene/camera.h"
 #include "impeller/scene/mesh.h"
 #include "impeller/scene/scene_encoder.h"
@@ -31,13 +33,15 @@ class Node final {
   Node();
   ~Node();
 
-  Node(Node&& node);
-  Node& operator=(Node&& node);
-
   const std::string& GetName() const;
   void SetName(const std::string& new_name);
 
-  std::shared_ptr<Node> FindNodeByName(const std::string& name) const;
+  std::shared_ptr<Node> FindChildByName(
+      const std::string& name,
+      bool exclude_animation_players = false) const;
+
+  std::shared_ptr<Animation> FindAnimationByName(const std::string& name) const;
+  AnimationClip& AddAnimation(const std::shared_ptr<Animation>& animation);
 
   void SetLocalTransform(Matrix transform);
   Matrix GetLocalTransform() const;
@@ -53,9 +57,6 @@ class Node final {
 
   bool Render(SceneEncoder& encoder, const Matrix& parent_transform) const;
 
- protected:
-  Matrix local_transform_;
-
  private:
   void UnpackFromFlatbuffer(
       const fb::Node& node,
@@ -63,11 +64,17 @@ class Node final {
       const std::vector<std::shared_ptr<Texture>>& textures,
       Allocator& allocator);
 
+  Matrix local_transform_;
+
   std::string name_;
   bool is_root_ = false;
   Node* parent_ = nullptr;
   std::vector<std::shared_ptr<Node>> children_;
   Mesh mesh_;
+
+  // For convenience purposes, deserialized nodes hang onto an animation library
+  std::vector<std::shared_ptr<Animation>> animations_;
+  mutable std::optional<AnimationPlayer> animation_player_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Node);
 
