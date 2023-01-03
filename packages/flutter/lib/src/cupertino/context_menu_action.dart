@@ -50,7 +50,7 @@ class CupertinoContextMenuAction extends StatefulWidget {
 
 class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {
   static const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
-    color: Color(0xFFEEEEEE),
+    color: Color(0xFFF1F1F1),
     darkColor: Color(0xFF212122),
   );
   static const Color _kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
