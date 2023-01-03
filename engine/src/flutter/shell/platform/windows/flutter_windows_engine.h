@@ -21,6 +21,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
+#include "flutter/shell/platform/windows/cursor_handler.h"
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
@@ -307,6 +308,9 @@ class FlutterWindowsEngine {
   // surfaces. Surface creation functionality requires a valid render_target.
   // May be nullptr if ANGLE failed to initialize.
   std::unique_ptr<AngleSurfaceManager> surface_manager_;
+
+  // Handler for cursor events.
+  std::unique_ptr<CursorHandler> cursor_handler_;
 
   // Handler for the flutter/platform channel.
   std::unique_ptr<PlatformHandler> platform_handler_;
