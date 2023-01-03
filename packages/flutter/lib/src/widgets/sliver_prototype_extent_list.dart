@@ -70,7 +70,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// list, shows an infinite number of items in varying shades of blue:
   ///
   /// ```dart
-  /// SliverFixedExtentList.builder(
+  /// SliverPrototypeExtentList.builder(
   ///   prototypeItem: Container(
   ///     alignment: Alignment.center,
   ///     child: const Text('list item prototype'),
@@ -79,7 +79,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   ///     return Container(
   ///       alignment: Alignment.center,
   ///       color: Colors.lightBlue[100 * (index % 9)],
-  ///       child: const Text('list item $index'),
+  ///       child: Text('list item $index'),
   ///     );
   ///   },
   /// )
@@ -120,10 +120,11 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// list, shows an infinite number of items in varying shades of blue:
   ///
   /// ```dart
-  /// SliverList.list(
+  /// SliverPrototypeExtentList.list(
+  ///   prototypeItem: const Text('Hello'),
   ///   children: const <Widget>[
-  ///     const Text('Hello'),
-  ///     const Text('World!'),
+  ///     Text('Hello'),
+  ///     Text('World!'),
   ///   ],
   /// );
   /// ```

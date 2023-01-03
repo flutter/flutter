@@ -1195,8 +1195,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// ```dart
   /// SliverList.list(
   ///   children: const <Widget>[
-  ///     const Text('Hello'),
-  ///     const Text('World!'),
+  ///     Text('Hello'),
+  ///     Text('World!'),
   ///   ],
   /// );
   /// ```
@@ -1367,8 +1367,8 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// SliverFixedExtentList.list(
   ///   itemExtent: 50.0,
   ///   children: const <Widget>[
-  ///     const Text('Hello'),
-  ///     const Text('World!'),
+  ///     Text('Hello'),
+  ///     Text('World!'),
   ///   ],
   /// );
   /// ```
