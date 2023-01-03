@@ -114,4 +114,8 @@ FlutterPlatformNodeDelegate::GetOwnerBridge() const {
   return bridge_;
 }
 
+ui::AXPlatformNode* FlutterPlatformNodeDelegate::GetPlatformNode() const {
+  return nullptr;
+}
+
 }  // namespace flutter

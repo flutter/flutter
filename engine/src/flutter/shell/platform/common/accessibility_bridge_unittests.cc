@@ -7,6 +7,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "flutter/third_party/accessibility/ax/ax_tree_manager_map.h"
 #include "test_accessibility_bridge.h"
 
 namespace flutter {
@@ -481,6 +482,16 @@ TEST(AccessibilityBridgeTest, CanReparentNodeWithChild) {
       Contains(ui::AXEventGenerator::Event::OTHER_ATTRIBUTE_CHANGED).Times(1));
   EXPECT_THAT(bridge->accessibility_events,
               Contains(ui::AXEventGenerator::Event::ROLE_CHANGED).Times(1));
+}
+
+TEST(AccessibilityBridgeTest, AXTreeManagerTest) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  ui::AXTreeID tree_id = bridge->GetTreeID();
+  ui::AXTreeManager* manager =
+      ui::AXTreeManagerMap::GetInstance().GetManager(tree_id);
+  ASSERT_EQ(manager, static_cast<ui::AXTreeManager*>(bridge.get()));
 }
 
 }  // namespace testing
