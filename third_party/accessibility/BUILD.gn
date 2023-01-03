@@ -91,6 +91,8 @@ if (enable_unittests) {
       if (is_win) {
         sources += [
           "ax/platform/ax_fragment_root_win_unittest.cc",
+          "ax/platform/ax_platform_node_textprovider_win_unittest.cc",
+          "ax/platform/ax_platform_node_textrangeprovider_win_unittest.cc",
           "ax/platform/ax_platform_node_win_unittest.cc",
           "base/win/dispatch_stub.cc",
           "base/win/dispatch_stub.h",

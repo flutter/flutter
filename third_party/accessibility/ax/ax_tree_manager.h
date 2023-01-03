@@ -7,6 +7,7 @@
 
 #include "ax_export.h"
 #include "ax_node.h"
+#include "ax_tree.h"
 #include "ax_tree_id.h"
 
 namespace ui {
@@ -16,6 +17,8 @@ namespace ui {
 // trees).
 class AX_EXPORT AXTreeManager {
  public:
+  virtual ~AXTreeManager() = default;
+
   // Returns the AXNode with the given |node_id| from the tree that has the
   // given |tree_id|. This allows for callers to access nodes outside of their
   // own tree. Returns nullptr if |tree_id| or |node_id| is not found.
@@ -40,6 +43,8 @@ class AX_EXPORT AXTreeManager {
   // hosts the current tree. Returns nullptr if this tree doesn't have a parent
   // tree.
   virtual AXNode* GetParentNodeFromParentTreeAsAXNode() const = 0;
+
+  virtual AXTree* GetTree() const = 0;
 };
 
 }  // namespace ui

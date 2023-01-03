@@ -51,6 +51,14 @@ class AX_EXPORT AXPlatformNodeDelegateBase : public AXPlatformNodeDelegate {
   // be a native accessible object implemented by another class.
   gfx::NativeViewAccessible GetParent() override;
 
+  // If this object is exposed to the platform's accessibility layer, returns
+  // this object. Otherwise, returns the platform leaf or lowest unignored
+  // ancestor under which this object is found.
+  //
+  // (An ignored node means that the node should not be exposed to platform
+  // APIs: See `IsIgnored`.)
+  gfx::NativeViewAccessible GetLowestPlatformAncestor() const override;
+
   // Get the index in parent. Typically this is the AXNode's index_in_parent_.
   int GetIndexInParent() override;
 
