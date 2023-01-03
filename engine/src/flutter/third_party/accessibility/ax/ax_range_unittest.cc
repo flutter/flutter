@@ -68,6 +68,7 @@ class TestAXRangeScreenRectDelegate : public AXRangeRectDelegate {
       AXNode::AXID node_id,
       int start_offset,
       int end_offset,
+      ui::AXClippingBehavior clipping_behavior,
       AXOffscreenResult* offscreen_result) override {
     if (tree_manager_->GetTreeID() != tree_id)
       return gfx::Rect();
@@ -80,7 +81,7 @@ class TestAXRangeScreenRectDelegate : public AXRangeRectDelegate {
         TestAXNodeHelper::GetOrCreate(tree_manager_->GetTree(), node);
     return wrapper->GetInnerTextRangeBoundsRect(
         start_offset, end_offset, AXCoordinateSystem::kScreenDIPs,
-        AXClippingBehavior::kClipped, offscreen_result);
+        clipping_behavior, offscreen_result);
   }
 
   gfx::Rect GetBoundsRect(AXTreeID tree_id,

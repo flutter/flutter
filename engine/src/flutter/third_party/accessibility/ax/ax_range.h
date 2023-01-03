@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "ax_clipping_behavior.h"
 #include "ax_enums.h"
 #include "ax_offscreen_result.h"
 #include "ax_role_properties.h"
@@ -35,6 +36,7 @@ class AXRangeRectDelegate {
       AXNode::AXID node_id,
       int start_offset,
       int end_offset,
+      ui::AXClippingBehavior clipping_behavior,
       AXOffscreenResult* offscreen_result) = 0;
   virtual gfx::Rect GetBoundsRect(AXTreeID tree_id,
                                   AXNode::AXID node_id,
@@ -392,7 +394,8 @@ class AXRange {
                     current_line_start->tree_id(),
                     current_line_start->anchor_id(),
                     current_line_start->text_offset(),
-                    current_line_end->text_offset(), &offscreen_result)
+                    current_line_end->text_offset(),
+                    ui::AXClippingBehavior::kUnclipped, &offscreen_result)
               : delegate->GetBoundsRect(current_line_start->tree_id(),
                                         current_line_start->anchor_id(),
                                         &offscreen_result);

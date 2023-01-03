@@ -105,6 +105,16 @@ enum class AXEmbeddedObjectBehavior {
 // overridden for testing.
 AX_EXPORT extern AXEmbeddedObjectBehavior g_ax_embedded_object_behavior;
 
+class AX_EXPORT ScopedAXEmbeddedObjectBehaviorSetter {
+ public:
+  explicit ScopedAXEmbeddedObjectBehaviorSetter(
+      AXEmbeddedObjectBehavior behavior);
+  ~ScopedAXEmbeddedObjectBehaviorSetter();
+
+ private:
+  AXEmbeddedObjectBehavior prev_behavior_;
+};
+
 // Forward declarations.
 template <class AXPositionType, class AXNodeType>
 class AXPosition;
@@ -324,8 +334,9 @@ class AXPosition {
     BASE_DCHECK(GetAnchor());
     // If this position is anchored to an ignored node, then consider this
     // position to be ignored.
-    if (GetAnchor()->IsIgnored())
+    if (GetAnchor()->IsIgnored()) {
       return true;
+    }
 
     switch (kind_) {
       case AXPositionKind::NULL_POSITION:
@@ -372,8 +383,9 @@ class AXPosition {
         // If the corresponding leaf position is ignored, the current text
         // offset will point to ignored text. Therefore, consider this position
         // to be ignored.
-        if (!IsLeaf())
+        if (!IsLeaf()) {
           return AsLeafTreePosition()->IsIgnored();
+        }
         return false;
     }
   }
@@ -417,8 +429,9 @@ class AXPosition {
                 (child_index_ >= 0 && child_index_ <= AnchorChildCount())) &&
                !IsInDescendantOfEmptyObject();
       case AXPositionKind::TEXT_POSITION:
-        if (!GetAnchor() || IsInDescendantOfEmptyObject())
+        if (!GetAnchor() || IsInDescendantOfEmptyObject()) {
           return false;
+        }
 
         // For performance reasons we skip any validation of the text offset
         // that involves retrieving the anchor's text, if the offset is set to
@@ -1029,8 +1042,9 @@ class AXPosition {
       const AXNodeType* ancestor_anchor,
       ax::mojom::MoveDirection move_direction =
           ax::mojom::MoveDirection::kForward) const {
-    if (!ancestor_anchor)
+    if (!ancestor_anchor) {
       return CreateNullPosition();
+    }
 
     AXPositionInstance ancestor_position = Clone();
     while (!ancestor_position->IsNullPosition() &&
@@ -1285,8 +1299,9 @@ class AXPosition {
   }
 
   AXPositionInstance AsLeafTextPosition() const {
-    if (IsNullPosition() || IsLeaf())
+    if (IsNullPosition() || IsLeaf()) {
       return AsTextPosition();
+    }
 
     // Adjust the text offset.
     // No need to check for "before text" positions here because they are only
@@ -1316,7 +1331,7 @@ class AXPosition {
           child_position->affinity_ = ax::mojom::TextAffinity::kUpstream;
           break;
         }
-        child_position = text_position->CreateChildPositionAt(i);
+        child_position = std::move(text_position->CreateChildPositionAt(i));
         adjusted_offset -= max_text_offset_in_parent;
       }
 
@@ -1902,7 +1917,7 @@ class AXPosition {
         // the same as the one that would have been computed if the original
         // position were at the start of the inline text box for "Line two".
         const int max_text_offset = MaxTextOffset();
-        const int max_text_offset_in_parent =
+        int max_text_offset_in_parent =
             IsEmbeddedObjectInParent() ? 1 : max_text_offset;
         int parent_offset = AnchorTextOffsetInParent();
         ax::mojom::TextAffinity parent_affinity = affinity_;
@@ -1935,6 +1950,14 @@ class AXPosition {
           parent_affinity = ax::mojom::TextAffinity::kDownstream;
         }
 
+        // This dummy position serves to retrieve the max text offset of the
+        // anchor-node in which we want to create the parent position.
+        AXPositionInstance dummy_position =
+            CreateTextPosition(tree_id, parent_id, 0, parent_affinity);
+        max_text_offset_in_parent = dummy_position->MaxTextOffset();
+        if (parent_offset > max_text_offset_in_parent) {
+          parent_offset = max_text_offset_in_parent;
+        }
         AXPositionInstance parent_position = CreateTextPosition(
             tree_id, parent_id, parent_offset, parent_affinity);
 
@@ -2061,6 +2084,7 @@ class AXPosition {
       BASE_DCHECK(text_position->text_offset_ >= 0);
       return text_position;
     }
+
     text_position = text_position->CreateNextLeafTextPosition();
     while (!text_position->IsNullPosition() &&
            (text_position->IsIgnored() || !text_position->MaxTextOffset())) {
