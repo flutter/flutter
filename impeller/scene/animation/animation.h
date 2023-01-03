@@ -1,0 +1,76 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#pragma once
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "flutter/fml/hash_combine.h"
+#include "flutter/fml/macros.h"
+#include "impeller/geometry/quaternion.h"
+#include "impeller/geometry/scalar.h"
+#include "impeller/geometry/vector.h"
+#include "impeller/scene/animation/property_resolver.h"
+#include "impeller/scene/importer/scene_flatbuffers.h"
+
+namespace impeller {
+namespace scene {
+
+class Node;
+
+class Animation final {
+ public:
+  static std::shared_ptr<Animation> MakeFromFlatbuffer(
+      const fb::Animation& animation,
+      const std::vector<std::shared_ptr<Node>>& scene_nodes);
+
+  enum class Property {
+    kTranslation,
+    kRotation,
+    kScale,
+  };
+
+  struct BindKey {
+    std::string node_name;
+    Property property = Property::kTranslation;
+
+    struct Hash {
+      std::size_t operator()(const BindKey& o) const {
+        return fml::HashCombine(o.node_name, o.property);
+      }
+    };
+
+    struct Equal {
+      bool operator()(const BindKey& lhs, const BindKey& rhs) const {
+        return lhs.node_name == rhs.node_name && lhs.property == rhs.property;
+      }
+    };
+  };
+
+  struct Channel {
+    BindKey bind_target;
+    std::unique_ptr<PropertyResolver> resolver;
+  };
+  ~Animation();
+
+  const std::string& GetName() const;
+
+  const std::vector<Channel>& GetChannels() const;
+
+  Scalar GetEndTime() const;
+
+ private:
+  Animation();
+
+  std::string name_;
+  std::vector<Channel> channels_;
+  Scalar end_time_ = 0;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(Animation);
+};
+
+}  // namespace scene
+}  // namespace impeller

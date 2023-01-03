@@ -17,6 +17,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/formats.h"
+#include "impeller/scene/animation/animation_clip.h"
 #include "impeller/scene/camera.h"
 #include "impeller/scene/geometry.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
@@ -121,6 +122,13 @@ TEST_P(SceneTest, TwoTriangles) {
   std::shared_ptr<Node> gltf_scene =
       Node::MakeFromFlatbuffer(*mapping, *allocator);
   ASSERT_NE(gltf_scene, nullptr);
+
+  auto animation = gltf_scene->FindAnimationByName("Metronome");
+  ASSERT_NE(animation, nullptr);
+
+  AnimationClip& metronome_clip = gltf_scene->AddAnimation(animation);
+  metronome_clip.SetLoop(true);
+  metronome_clip.Play();
 
   auto scene_context = std::make_shared<SceneContext>(GetContext());
   auto scene = Scene(scene_context);
