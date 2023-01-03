@@ -940,7 +940,13 @@ void main() {
       testWidgets('performAction with unsupported action throws StateError', (WidgetTester tester) async {
         await tester.pumpWidget(Semantics());
 
-        expect(() => tester.semantics.performAction(tester.semantics.find(find.byType(Semantics)), SemanticsAction.tap), throwsStateError);
+        expect(
+          () => tester.semantics.performAction(
+            tester.semantics.find(find.byType(Semantics)),
+            SemanticsAction.tap,
+          ),
+          throwsStateError,
+        );
       });
 
       testWidgets('tap causes semantic tap', (WidgetTester tester) async {
@@ -991,7 +997,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
-          reason: 'When not yet scrolled, a scrollview should only be able to support left scrolls.');
+          reason: 'When not yet scrolled, a scrollview should only be able to support left scrolls.',
+        );
 
         tester.semantics.scrollLeft(find.byType(ListView));
         await tester.pump();
@@ -999,7 +1006,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
-          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.');
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
 
         // This will scroll the listview until it's completely scrolled to the right.
         final double extent = tester.semantics.findScrollable(find.byType(ListView)).scrollExtentMax!;
@@ -1013,7 +1021,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
-          reason: 'When fully scrolled, a scrollview should only support right scrolls.');
+          reason: 'When fully scrolled, a scrollview should only support right scrolls.',
+        );
 
         tester.semantics.scrollRight(find.byType(ListView));
         await tester.pump();
@@ -1021,7 +1030,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
-          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.');
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
       });
 
       testWidgets('scrollUp and scrollDown scrolls up and down respectively', (WidgetTester tester) async {
@@ -1039,7 +1049,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
-          reason: 'When not yet scrolled, a scrollview should only be able to support left scrolls.');
+          reason: 'When not yet scrolled, a scrollview should only be able to support left scrolls.',
+        );
 
         tester.semantics.scrollUp(find.byType(ListView));
         await tester.pump();
@@ -1047,7 +1058,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
-          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.');
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
 
         // This will scroll the listview until it's completely scrolled to the right.
         final double extent = tester.semantics.findScrollable(find.byType(ListView)).scrollExtentMax!;
@@ -1061,7 +1073,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
-          reason: 'When fully scrolled, a scrollview should only support right scrolls.');
+          reason: 'When fully scrolled, a scrollview should only support right scrolls.',
+        );
 
         tester.semantics.scrollDown(find.byType(ListView));
         await tester.pump();
@@ -1069,7 +1082,8 @@ void main() {
         expect(
           tester.semantics.findScrollable(find.byType(ListView)),
           containsSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
-          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.');
+          reason: 'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
+        );
       });
 
       testWidgets('increase causes semantic increase', (WidgetTester tester) async {
@@ -1090,7 +1104,8 @@ void main() {
         expect(invoked, isTrue);
         expect(
           tester.semantics.find(find.byType(Slider)).value,
-          equals(expected));
+          equals(expected),
+        );
       });
 
       testWidgets('decrease causes semantic decrease', (WidgetTester tester) async {
@@ -1111,7 +1126,8 @@ void main() {
         expect(invoked, isTrue);
         expect(
           tester.semantics.find(find.byType(Slider)).value,
-          equals(expected));
+          equals(expected),
+        );
       });
 
       testWidgets('showOnScreen sends showOnScreen action', (WidgetTester tester) async {
@@ -1142,7 +1158,8 @@ void main() {
 
         expect(
           tester.semantics.find(find.text('Test')),
-          containsSemantics(isHidden: false));
+          containsSemantics(isHidden: false),
+        );
       });
 
       testWidgets('actions for moving the cursor without modifying selection can move the cursor forward and back by character and word', (WidgetTester tester) async {
