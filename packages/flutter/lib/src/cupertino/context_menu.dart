@@ -516,8 +516,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       _childHidden = true;
     });
 
-    HapticFeedback.mediumImpact();
-
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
       barrierLabel: 'Dismiss',
@@ -607,6 +605,12 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   void _onTapDown(TapDownDetails details) {
     setState(() {
       _childHidden = true;
+    });
+
+    Future<void>.delayed(const Duration(milliseconds: 350), () {
+      if (_openController.isAnimating && _openController.value < _midpoint) {
+        HapticFeedback.mediumImpact();
+      }
     });
 
     final Rect childRect = _getRect(_childGlobalKey);
