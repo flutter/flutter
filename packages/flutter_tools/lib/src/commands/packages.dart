@@ -20,7 +20,7 @@ import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
-    addSubcommand(PackagesGetCommand('get', "Get the current package's dependencies", PubContext.pubGet));
+    addSubcommand(PackagesGetCommand('get', "Get the current package's dependencies.", PubContext.pubGet));
     addSubcommand(PackagesGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions.", PubContext.pubUpgrade));
     addSubcommand(PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd));
     addSubcommand(PackagesGetCommand('remove', 'Removes a dependency from the current package.', PubContext.pubRemove));
