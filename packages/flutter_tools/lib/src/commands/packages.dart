@@ -145,7 +145,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   String get invocation {
     return '${runner!.executableName} packages pub [<arguments...>]';
   }
-  
+
   static final PubContext _context = PubContext.pubPassThrough;
 
   @override
