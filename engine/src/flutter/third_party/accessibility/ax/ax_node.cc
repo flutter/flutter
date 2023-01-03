@@ -11,6 +11,8 @@
 #include "ax_role_properties.h"
 #include "ax_table_info.h"
 #include "ax_tree.h"
+#include "ax_tree_manager.h"
+#include "ax_tree_manager_map.h"
 #include "base/color_utils.h"
 #include "base/string_utils.h"
 
@@ -1197,6 +1199,30 @@ bool AXNode::IsEmbeddedGroup() const {
   return ui::IsSetLike(parent()->data().role);
 }
 
+AXNode* AXNode::GetLowestPlatformAncestor() const {
+  AXNode* current_node = const_cast<AXNode*>(this);
+  AXNode* lowest_unignored_node = current_node;
+  for (; lowest_unignored_node && lowest_unignored_node->IsIgnored();
+       lowest_unignored_node = lowest_unignored_node->parent()) {
+  }
+
+  // `highest_leaf_node` could be nullptr.
+  AXNode* highest_leaf_node = lowest_unignored_node;
+  // For the purposes of this method, a leaf node does not include leaves in the
+  // internal accessibility tree, only in the platform exposed tree.
+  for (AXNode* ancestor_node = lowest_unignored_node; ancestor_node;
+       ancestor_node = ancestor_node->GetUnignoredParent()) {
+    if (ancestor_node->IsLeaf())
+      highest_leaf_node = ancestor_node;
+  }
+  if (highest_leaf_node)
+    return highest_leaf_node;
+
+  if (lowest_unignored_node)
+    return lowest_unignored_node;
+  return current_node;
+}
+
 AXNode* AXNode::GetTextFieldAncestor() const {
   AXNode* parent = GetUnignoredParent();
 
@@ -1208,6 +1234,71 @@ AXNode* AXNode::GetTextFieldAncestor() const {
   }
 
   return nullptr;
+}
+
+bool AXNode::IsDescendantOfCrossingTreeBoundary(const AXNode* ancestor) const {
+  if (!ancestor)
+    return false;
+  if (this == ancestor)
+    return true;
+  if (const AXNode* parent = GetParentCrossingTreeBoundary())
+    return parent->IsDescendantOfCrossingTreeBoundary(ancestor);
+  return false;
+}
+
+AXNode* AXNode::GetParentCrossingTreeBoundary() const {
+  BASE_DCHECK(!tree_->GetTreeUpdateInProgressState());
+  if (parent_)
+    return parent_;
+  const AXTreeManager* manager =
+      AXTreeManagerMap::GetInstance().GetManager(tree_->GetAXTreeID());
+  if (manager)
+    return manager->GetParentNodeFromParentTreeAsAXNode();
+  return nullptr;
+}
+
+AXTree::Selection AXNode::GetUnignoredSelection() const {
+  BASE_DCHECK(tree())
+      << "Cannot retrieve the current selection if the node is not "
+         "attached to an accessibility tree.\n"
+      << *this;
+  AXTree::Selection selection = tree()->GetUnignoredSelection();
+
+  // "selection.anchor_offset" and "selection.focus_ofset" might need to be
+  // adjusted if the anchor or the focus nodes include ignored children.
+  //
+  // TODO(nektar): Move this logic into its own "AXSelection" class and cache
+  // the result for faster reuse.
+  const AXNode* anchor = tree()->GetFromId(selection.anchor_object_id);
+  if (anchor && !anchor->IsLeaf()) {
+    BASE_DCHECK(selection.anchor_offset >= 0);
+    if (static_cast<size_t>(selection.anchor_offset) <
+        anchor->children().size()) {
+      const AXNode* anchor_child = anchor->children()[selection.anchor_offset];
+      BASE_DCHECK(anchor_child);
+      selection.anchor_offset =
+          static_cast<int>(anchor_child->GetUnignoredIndexInParent());
+    } else {
+      selection.anchor_offset =
+          static_cast<int>(anchor->GetUnignoredChildCount());
+    }
+  }
+
+  const AXNode* focus = tree()->GetFromId(selection.focus_object_id);
+  if (focus && !focus->IsLeaf()) {
+    BASE_DCHECK(selection.focus_offset >= 0);
+    if (static_cast<size_t>(selection.focus_offset) <
+        focus->children().size()) {
+      const AXNode* focus_child = focus->children()[selection.focus_offset];
+      BASE_DCHECK(focus_child);
+      selection.focus_offset =
+          static_cast<int>(focus_child->GetUnignoredIndexInParent());
+    } else {
+      selection.focus_offset =
+          static_cast<int>(focus->GetUnignoredChildCount());
+    }
+  }
+  return selection;
 }
 
 }  // namespace ui

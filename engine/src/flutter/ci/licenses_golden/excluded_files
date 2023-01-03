@@ -358,6 +358,8 @@
 ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_base_unittest.cc
 ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac_unittest.h
 ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_mac_unittest.mm
+../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textprovider_win_unittest.cc
+../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_textrangeprovider_win_unittest.cc
 ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_unittest.cc
 ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_unittest.h
 ../../../flutter/third_party/accessibility/ax/platform/ax_platform_node_win_unittest.cc
