@@ -27,7 +27,7 @@ const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 /// [SemanticsController._traverse] method. The return value determines whether
 /// the traversal is finished or not, so returning `true` will short circuit the
 /// traversal at the current `node`.
-typedef _VisitSemanticsNodeCallback = bool Function(SemanticsNode node); 
+typedef _VisitSemanticsNodeCallback = bool Function(SemanticsNode node);
 
 /// Class that programmatically interacts with the [Semantics] tree.
 ///
