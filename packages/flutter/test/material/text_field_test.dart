@@ -11,6 +11,7 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
+library;
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, WindowPadding;
@@ -7431,7 +7432,6 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     expect(exception.toString(), startsWith('No Material widget found.'));
-    expect(exception.toString(), endsWith(':\n  $textField\nThe ancestors of this widget were:\n  [root]'));
   });
 
   testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
@@ -11640,7 +11640,7 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: Container(
+          body: ColoredBox(
             color: Colors.grey,
             child: Center(
               child: Container(

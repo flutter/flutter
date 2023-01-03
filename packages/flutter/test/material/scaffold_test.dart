@@ -11,6 +11,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
+// From bottom_sheet.dart.
+const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
+
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/103741
   testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
@@ -2458,6 +2461,7 @@ void main() {
       '     Scaffold\n'
       '     MediaQuery\n'
       '     Directionality\n'
+      '     View-[GlobalObjectKey TestWindow#e6136]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n',
@@ -2620,6 +2624,86 @@ void main() {
       // ignore: avoid_redundant_argument_values
       matchesSemantics(label: 'BottomSheet', hasDismissAction: false),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/117004
+  testWidgets('can rebuild and remove bottomSheet at the same time', (WidgetTester tester) async {
+    bool themeIsLight = true;
+    bool? defaultBottomSheet = true;
+    final GlobalKey bottomSheetKey1 = GlobalKey();
+    final GlobalKey bottomSheetKey2 = GlobalKey();
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return MaterialApp(
+            theme: themeIsLight ? ThemeData.light() : ThemeData.dark(),
+            home: Scaffold(
+              bottomSheet: defaultBottomSheet == null
+                  ? null
+                  : defaultBottomSheet!
+                    ? Container(
+                        key: bottomSheetKey1,
+                        width: double.infinity,
+                        height: 100,
+                        color: Colors.blue,
+                        child: const Text('BottomSheet'),
+                      )
+                    : Container(
+                        key: bottomSheetKey2,
+                        width: double.infinity,
+                        height: 100,
+                        color: Colors.red,
+                        child: const Text('BottomSheet'),
+                      ),
+              body: const Placeholder(),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.byKey(bottomSheetKey1), findsOneWidget);
+    expect(find.byKey(bottomSheetKey2), findsNothing);
+
+    // Change to the other bottomSheet.
+    setState(() {
+      defaultBottomSheet = false;
+    });
+    expect(find.byKey(bottomSheetKey1), findsOneWidget);
+    expect(find.byKey(bottomSheetKey2), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.byKey(bottomSheetKey1), findsNothing);
+    expect(find.byKey(bottomSheetKey2), findsOneWidget);
+
+    // Set bottomSheet to null, which starts its exit animation.
+    setState(() {
+      defaultBottomSheet = null;
+    });
+    expect(find.byKey(bottomSheetKey1), findsNothing);
+    expect(find.byKey(bottomSheetKey2), findsOneWidget);
+
+    // While the bottomSheet is on the way out, change the theme to cause it to
+    // rebuild.
+    setState(() {
+      themeIsLight = false;
+    });
+    expect(find.byKey(bottomSheetKey1), findsNothing);
+    expect(find.byKey(bottomSheetKey2), findsOneWidget);
+
+    // The most recent bottomSheet remains on screen during the exit animation.
+    await tester.pump(_bottomSheetExitDuration);
+    expect(find.byKey(bottomSheetKey1), findsNothing);
+    expect(find.byKey(bottomSheetKey2), findsOneWidget);
+
+    // After animating out, the bottomSheet is gone.
+    await tester.pumpAndSettle();
+    expect(find.byKey(bottomSheetKey1), findsNothing);
+    expect(find.byKey(bottomSheetKey2), findsNothing);
+
+    expect(tester.takeException(), isNull);
   });
 }
 

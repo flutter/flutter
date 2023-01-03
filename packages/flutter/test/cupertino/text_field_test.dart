@@ -11,6 +11,7 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
+library;
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
@@ -1499,7 +1500,7 @@ void main() {
     expect(controller.text, 'abcdef');
   });
 
-  testWidgets('toolbar has the same visual regardless of theming', (WidgetTester tester) async {
+  testWidgets('toolbar colors change with theme brightness, but nothing else', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: "j'aime la poutine",
     );
@@ -1523,7 +1524,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     Text text = tester.widget<Text>(find.text('Paste'));
-    expect(text.style!.color, CupertinoColors.white);
+    expect(text.style!.color!.value, CupertinoColors.black.value);
     expect(text.style!.fontSize, 14);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
@@ -1555,7 +1556,7 @@ void main() {
 
     text = tester.widget<Text>(find.text('Paste'));
     // The toolbar buttons' text are still the same style.
-    expect(text.style!.color, CupertinoColors.white);
+    expect(text.style!.color!.value, CupertinoColors.white.value);
     expect(text.style!.fontSize, 14);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);

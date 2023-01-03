@@ -148,6 +148,8 @@ export 'src/widgets/transitions.dart';
 export 'src/widgets/tween_animation_builder.dart';
 export 'src/widgets/unique_widget.dart';
 export 'src/widgets/value_listenable_builder.dart';
+// TODO(goderbauer): Enable once clean-up in google3 is done.
+// export 'src/widgets/view.dart';
 export 'src/widgets/viewport.dart';
 export 'src/widgets/visibility.dart';
 export 'src/widgets/widget_inspector.dart';

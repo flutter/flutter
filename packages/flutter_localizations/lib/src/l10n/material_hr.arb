@@ -134,5 +134,8 @@
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "Izbornik trake izbornika",
   "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
   "keyboardKeyShift": "Shift"
 }
