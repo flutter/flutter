@@ -117,7 +117,7 @@ const std::vector<Animation::Channel>& Animation::GetChannels() const {
   return channels_;
 }
 
-Scalar Animation::GetEndTime() const {
+SecondsF Animation::GetEndTime() const {
   return end_time_;
 }
 
