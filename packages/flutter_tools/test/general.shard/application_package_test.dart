@@ -292,7 +292,7 @@ void main() {
       globals.fs.directory('bundle.app').createSync();
       globals.fs.file('bundle.app/Info.plist').createSync();
       testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
-      final PrebuiltIOSApp iosApp = (IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp?)!;
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app'))! as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
@@ -343,7 +343,7 @@ void main() {
             .file(globals.fs.path.join(bundleAppDir.path, 'Info.plist'))
             .createSync();
       };
-      final PrebuiltIOSApp iosApp = (IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp?)!;
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa'))! as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
@@ -594,7 +594,7 @@ void main() {
 
     testUsingContext('Success with far file', () {
       globals.fs.file('bundle.far').createSync();
-      final PrebuiltFuchsiaApp fuchsiaApp = (FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far')) as PrebuiltFuchsiaApp?)!;
+      final PrebuiltFuchsiaApp fuchsiaApp = FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far'))! as PrebuiltFuchsiaApp;
       expect(testLogger.errorText, isEmpty);
       expect(fuchsiaApp.id, 'bundle.far');
       expect(fuchsiaApp.applicationPackage.path, globals.fs.file('bundle.far').path);
