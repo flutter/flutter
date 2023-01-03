@@ -1423,11 +1423,13 @@ class _ContextMenuSheet extends StatelessWidget {
   final _ContextMenuLocation _contextMenuLocation;
   final Orientation _orientation;
 
+  static const double _kMenuWidth = 250.0;
+
   // Get the children, whose order depends on orientation and
   // contextMenuLocation.
   List<Widget> getChildren(BuildContext context) {
     final Widget menu = SizedBox(
-      width: 250,
+      width: _kMenuWidth,
       child: IntrinsicHeight(
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
