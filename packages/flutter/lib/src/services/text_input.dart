@@ -2191,7 +2191,9 @@ mixin TextInputControl {
 
   /// Requests that the text input control starts Live Text input.
   ///
-  /// This method is called when the input control will start capturing text input.
+  /// This method is called when the input control will start Live Text input.
+  /// See also:
+  ///  * [LiveText], where we can get the the availability of Live Text input.
   void startLiveTextInput() {}
 
   /// Requests that the text input control is hidden.
