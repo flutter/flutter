@@ -192,7 +192,7 @@ void main() {
               onCut: () {},
               onPaste: () {},
               onSelectAll: () {},
-              onCaptureText: () {},
+              onLiveTextInput: () {},
             ),
           ),
         ),

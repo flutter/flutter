@@ -2247,7 +2247,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void captureText(SelectionChangedCause cause) {
+  void startLiveTextInput(SelectionChangedCause cause) {
     if (widget.readOnly || widget.obscureText) {
       return;
     }
@@ -2480,7 +2480,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
       onLiveTextInput: liveTextInputEnabled
-          ? () => captureText(SelectionChangedCause.toolbar)
+          ? () => startLiveTextInput(SelectionChangedCause.toolbar)
           : null,
     );
   }

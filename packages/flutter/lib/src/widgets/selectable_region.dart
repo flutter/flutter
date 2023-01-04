@@ -1115,7 +1115,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   @override
-  void captureText(SelectionChangedCause cause) {
+  void startLiveTextInput(SelectionChangedCause cause) {
     assert(false);
   }
 

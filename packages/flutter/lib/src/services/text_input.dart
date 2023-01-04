@@ -1090,11 +1090,11 @@ mixin TextSelectionDelegate {
   /// [bringIntoView] to selection will be called and hide toolbar.
   void copySelection(SelectionChangedCause cause);
 
-  /// Start capturing text from camera to input.
+  /// Start Live Text input.
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
-  /// will be hidden and will start capture text from camera.
-  void captureText(SelectionChangedCause cause);
+  /// will be hidden and will start Live Text input.
+  void startLiveTextInput(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].
