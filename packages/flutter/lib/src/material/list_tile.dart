@@ -800,9 +800,9 @@ class ListTile extends StatelessWidget {
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('subtitleTextStyle', subtitleTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('leadingAndTrailingTextStyle', leadingAndTrailingTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('subtitleTextStyle', subtitleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('leadingAndTrailingTextStyle', leadingAndTrailingTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: null));
     properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'true', ifFalse: 'false', showName: true, defaultValue: true));
     properties.add(DiagnosticsProperty<Function>('onTap', onTap, defaultValue: null));
