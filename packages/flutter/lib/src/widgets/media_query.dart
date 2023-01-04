@@ -167,24 +167,54 @@ class MediaQueryData {
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or
   /// [dart:ui.PlatformDispatcher.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.FlutterView window)
-    : size = window.physicalSize / window.devicePixelRatio,
-      devicePixelRatio = window.devicePixelRatio,
-      textScaleFactor = window.platformDispatcher.textScaleFactor,
-      platformBrightness = window.platformDispatcher.platformBrightness,
-      padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
-      viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
-      viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
-      systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      accessibleNavigation = window.platformDispatcher.accessibilityFeatures.accessibleNavigation,
-      invertColors = window.platformDispatcher.accessibilityFeatures.invertColors,
-      disableAnimations = window.platformDispatcher.accessibilityFeatures.disableAnimations,
-      boldText = window.platformDispatcher.accessibilityFeatures.boldText,
-      highContrast = window.platformDispatcher.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
+  factory MediaQueryData.fromWindow(ui.FlutterView window) => MediaQueryData.fromView(window);
+
+  /// Creates data for a [MediaQuery] based on the given `view`.
+  ///
+  /// If provided, the `platformData` is used to fill in the platform-specific
+  /// aspects of the newly created [MediaQueryData]. If `platformData` is null,
+  /// the `view`'s [PlatformDispatcher] is consulted to construct the
+  /// platform-specific data.
+  ///
+  /// Data, that is exposed directly on the [FlutterView] is considered
+  /// view-specific. Data, that is only exposed via the
+  /// [FlutterView.platformDispatcher] property is considered platform-specific.
+  ///
+  /// Callers of this method should ensure that they also register for
+  /// notifications so that the [MediaQueryData] can be updated when any data
+  /// used to construct it changes. Notifications to consider are:
+  ///
+  ///  * [WidgetsBindingObserver.didChangeMetrics] or
+  ///    [dart:ui.PlatformDispatcher.onMetricsChanged],
+  ///  * [WidgetsBindingObserver.didChangeAccessibilityFeatures] or
+  ///    [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged],
+  ///  * [WidgetsBindingObserver.didChangeTextScaleFactor] or
+  ///    [dart:ui.PlatformDispatcher.onTextScaleFactorChanged],
+  ///  * [WidgetsBindingObserver.didChangePlatformBrightness] or
+  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
+  ///
+  /// The last three notifications are only relevant if no `platformData` is
+  /// provided. If `platformData` is provided, callers should ensure to call
+  /// this method again when it changes to keep the constructed [MediaQueryData]
+  /// updated.
+  MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
+    : size = view.physicalSize / view.devicePixelRatio,
+      devicePixelRatio = view.devicePixelRatio,
+      textScaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor,
+      platformBrightness = platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
+      padding = EdgeInsets.fromWindowPadding(view.padding, view.devicePixelRatio),
+      viewPadding = EdgeInsets.fromWindowPadding(view.viewPadding, view.devicePixelRatio),
+      viewInsets = EdgeInsets.fromWindowPadding(view.viewInsets, view.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromWindowPadding(view.systemGestureInsets, view.devicePixelRatio),
+      accessibleNavigation = platformData?.accessibleNavigation ?? view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors = platformData?.invertColors ?? view.platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations = platformData?.disableAnimations ?? view.platformDispatcher.accessibilityFeatures.disableAnimations,
+      boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
+      highContrast = platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
+      alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
       navigationMode = NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromWindow(window),
-      displayFeatures = window.displayFeatures;
+      gestureSettings = DeviceGestureSettings.fromWindow(view),
+      displayFeatures = view.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -889,10 +919,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// and its dependents are updated when `window` changes, instead of
   /// rebuilding the whole widget tree.
   ///
-  /// This should be inserted into the widget tree when the [MediaQuery] view
-  /// padding is consumed by a widget in such a way that the view padding is no
-  /// longer exposed to the widget's descendants or siblings.
-  ///
   /// The [child] argument is required and must not be null.
   static Widget fromWindow({
     Key? key,
@@ -900,6 +926,34 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   }) {
     return _MediaQueryFromWindow(
       key: key,
+      child: child,
+    );
+  }
+
+  /// Wraps the [child] in a [MediaQuery] which is built using data from the
+  /// provided [view].
+  ///
+  /// The [MediaQuery] is constructed using the platform-specific data of the
+  /// surrounding [MediaQuery] and the view-specific data of the provided
+  /// [view]. If no surrounding [MediaQuery] exists, the platform-specific data
+  /// is generated from the [PlatformDispatcher] associated with the provided
+  /// [view]. Any information that's exposed via the [PlatformDispatcher] is
+  /// considered platform-specific. Data exposed directly on the [FlutterView]
+  /// (excluding its [FlutterView.platformDispatcher] property) is considered
+  /// view-specific.
+  ///
+  /// The injected [MediaQuery] automatically updates when any of the data used
+  /// to construct it changes.
+  ///
+  /// The [view] and [child] argument is required and must not be null.
+  static Widget fromView({
+    Key? key,
+    required FlutterView view,
+    required Widget child,
+  }) {
+    return _MediaQueryFromView(
+      key: key,
+      view: view,
       child: child,
     );
   }
@@ -1493,5 +1547,122 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+}
+
+class _MediaQueryFromView extends StatefulWidget {
+  const _MediaQueryFromView({
+    super.key,
+    required this.view,
+    this.ignoreParentData = false,
+    required this.child,
+  });
+
+  final FlutterView view;
+  final bool ignoreParentData;
+  final Widget child;
+
+  @override
+  State<_MediaQueryFromView> createState() => _MediaQueryFromViewState();
+}
+
+class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBindingObserver {
+  MediaQueryData? _parentData;
+  MediaQueryData? _data;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateParentData();
+    _updateData();
+    assert(_data != null);
+  }
+
+  @override
+  void didUpdateWidget(_MediaQueryFromView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.ignoreParentData != oldWidget.ignoreParentData) {
+      _updateParentData();
+    }
+    if (_data == null || oldWidget.view != widget.view) {
+      _updateData();
+    }
+    assert(_data != null);
+  }
+
+  void _updateParentData() {
+    _parentData = widget.ignoreParentData ? null : MediaQuery.maybeOf(context);
+    _data = null; // _updateData must be called again after changing parent data.
+  }
+
+  void _updateData() {
+    final MediaQueryData newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
+    if (newData != _data) {
+      setState(() {
+        _data = newData;
+      });
+    }
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    // If we have a parent, it dictates our accessibility features. If we don't
+    // have a parent, we get our accessibility features straight from the
+    // PlatformDispatcher and need to update our data in response to the
+    // PlatformDispatcher changing its accessibility features setting.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
+  void didChangeMetrics() {
+    _updateData();
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    // If we have a parent, it dictates our text scale factor. If we don't have
+    // a parent, we get our text scale factor from the PlatformDispatcher and
+    // need to update our data in response to the PlatformDispatcher changing
+    // its text scale factor setting.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    // If we have a parent, it dictates our platform brightness. If we don't
+    // have a parent, we get our platform brightness from the PlatformDispatcher
+    // and need to update our data in response to the PlatformDispatcher
+    // changing its platform brightness setting.
+    if (_parentData == null) {
+      _updateData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    MediaQueryData effectiveData = _data!;
+    if (!kReleaseMode) {
+      effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
+    }
+    return MediaQuery(
+      data: effectiveData,
+      child: widget.child,
+    );
   }
 }

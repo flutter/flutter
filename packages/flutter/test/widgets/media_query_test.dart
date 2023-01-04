@@ -45,8 +45,11 @@ class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
 void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
     bool tested = false;
-    await tester.pumpWidget(
-      Builder(
+    // Cannot use tester.pumpWidget here because it wraps the widget in a View,
+    // which introduces a MediaQuery ancestor.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: Builder(
         builder: (BuildContext context) {
           tested = true;
           MediaQuery.of(context); // should throw
@@ -108,8 +111,11 @@ void main() {
 
   testWidgets('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
     bool tested = false;
-    await tester.pumpWidget(
-      Builder(
+    // Cannot use tester.pumpWidget here because it wraps the widget in a View,
+    // which introduces a MediaQuery ancestor.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: Builder(
         builder: (BuildContext context) {
           final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
@@ -753,19 +759,17 @@ void main() {
   });
 
   testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
-    bool hasMediaQueryAsParentOutside = false;
-    bool hasMediaQueryAsParentInside = false;
+    MediaQuery? mediaQueryOutside;
+    MediaQuery? mediaQueryInside;
 
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          hasMediaQueryAsParentOutside =
-              context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+          mediaQueryOutside = context.findAncestorWidgetOfExactType<MediaQuery>();
           return MediaQuery.fromWindow(
             child: Builder(
               builder: (BuildContext context) {
-                hasMediaQueryAsParentInside =
-                    context.findAncestorWidgetOfExactType<MediaQuery>() != null;
+                mediaQueryInside = context.findAncestorWidgetOfExactType<MediaQuery>();
                 return const SizedBox();
               },
             ),
@@ -774,8 +778,8 @@ void main() {
       ),
     );
 
-    expect(hasMediaQueryAsParentOutside, false);
-    expect(hasMediaQueryAsParentInside, true);
+    expect(mediaQueryInside, isNotNull);
+    expect(mediaQueryOutside, isNot(mediaQueryInside));
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
@@ -1149,4 +1153,10 @@ void main() {
       const _MediaQueryAspectCase(MediaQuery.maybeDisplayFeaturesOf, MediaQueryData(displayFeatures: <DisplayFeature>[DisplayFeature(bounds: Rect.zero, type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)])),
     ]
   ));
+}
+
+Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
+  tester.binding.attachRootWidget(widget);
+  tester.binding.scheduleFrame();
+  return tester.binding.pump();
 }
