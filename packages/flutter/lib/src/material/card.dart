@@ -214,7 +214,7 @@ class _CardDefaultsM2 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_150
 
 class _CardDefaultsM3 extends CardTheme {
   const _CardDefaultsM3(this.context)
