@@ -103,7 +103,7 @@ abstract class MaterialLocalizations {
   /// Label for "cut" edit buttons and menu items.
   String get cutButtonLabel;
 
-  /// Label for "scan text" edit buttons and menu items.
+  /// Label for "scan text" OCR edit buttons and menu items.
   String get scanTextButtonLabel;
 
   /// Label for OK buttons and menu items.

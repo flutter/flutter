@@ -117,10 +117,11 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     }
   }
 
-  IconData? _getButtonIcon() {
+  Icon? _getButtonIcon(BuildContext context) {
     if (buttonItem == null) {
       return null;
     }
+    final IconData? iconData;
     switch (buttonItem!.type) {
       case ContextMenuButtonType.cut:
       case ContextMenuButtonType.copy:
@@ -130,8 +131,19 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       case ContextMenuButtonType.custom:
         return null;
       case ContextMenuButtonType.captureText:
-        return CupertinoIcons.doc_text_viewfinder;
+        iconData = CupertinoIcons.doc_text_viewfinder;
+        break;
     }
+
+    if (iconData == null) {
+      return null;
+    }
+
+    return Icon(
+      iconData,
+      size: _kToolbarButtonIconSize,
+      color: _kToolbarTextColor.resolveFrom(context),
+    );
   }
 
   @override
@@ -141,7 +153,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       child = this.child!;
     } else {
       // If this button has an icon, only show icon.
-      final IconData? icon = _getButtonIcon();
+      final Icon? icon = _getButtonIcon(context);
       if (icon == null) {
         child = Text(
           text ?? getButtonLabel(context, buttonItem!),
@@ -153,11 +165,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
           ),
         );
       } else {
-        child = Icon(
-          _getButtonIcon(),
-          size: _kToolbarButtonIconSize,
-          color: _kToolbarTextColor.resolveFrom(context),
-        );
+        child = icon;
       }
     }
 
