@@ -109,6 +109,8 @@ enum HostArtifact {
   impellerc,
   // Impeller's tessellation library.
   libtessellator,
+
+  // flutterMigrateDill
 }
 
 // TODO(knopp): Remove once darwin artifacts are universal and moved out of darwin-x64
@@ -254,6 +256,9 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'impellerc$exe';
     case HostArtifact.libtessellator:
       return 'libtessellator$dll';
+
+    // case HostArtifact.flutterMigrateDill:
+    //   return 'flutter_migrate.dill';
   }
 }
 

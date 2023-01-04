@@ -213,7 +213,13 @@ List<FlutterCommand> generateCommands({
   ),
   LogsCommand(),
   MakeHostAppEditableCommand(),
-  MigrateCommand(verbose: verbose),
+  MigrateCommand(
+    verbose: verbose,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    stdio: globals.stdio,
+    processManager: globals.processManager,  
+  ),
   PackagesCommand(),
   PrecacheCommand(
     verboseHelp: verboseHelp,
