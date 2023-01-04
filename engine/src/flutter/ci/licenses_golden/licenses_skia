@@ -1,4 +1,4 @@
-Signature: bfb6bf0a5ad2b5218f7ecece4a305148
+Signature: 83a3161dc427b108aedd5013fc2530c8
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7359,7 +7359,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/ops/AtlasRenderTask.cpp + ../..
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/ops/AtlasRenderTask.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Buffer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Buffer.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/graphite/DrawBufferManager.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/BufferManager.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/BufferManager.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/DrawBufferManager.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBlitCommandEncoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBuffer.h + ../../../third_party/skia/LICENSE
@@ -7445,7 +7446,8 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AtlasRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AtlasRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Buffer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Buffer.h
-FILE: ../../../third_party/skia/src/gpu/graphite/DrawBufferManager.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/BufferManager.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/BufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/DrawBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBlitCommandEncoder.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlBuffer.h
@@ -8272,6 +8274,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/bug12866.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/crbug_1313579.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/base/SkAPI.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/base/SkAlign.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/base/SkAssert.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/base/SkAttributes.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/base/SkDebug.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/base/SkFeatures.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/base/SkLoadUserConfig.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkAlphaType.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkCapabilities.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkColorType.h + ../../../third_party/skia/LICENSE
@@ -8285,6 +8294,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlUtils.h + ../../..
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkAlignedStorage.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/private/SkPathEnums.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkTypeTraits.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/sksl/SkSLVersion.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode.cpp + ../../../third_party/skia/LICENSE
@@ -8484,6 +8494,13 @@ ORIGIN: ../../../third_party/skia/src/utils/SkTestCanvas.h + ../../../third_part
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/bug12866.cpp
 FILE: ../../../third_party/skia/gm/crbug_1313579.cpp
+FILE: ../../../third_party/skia/include/base/SkAPI.h
+FILE: ../../../third_party/skia/include/base/SkAlign.h
+FILE: ../../../third_party/skia/include/base/SkAssert.h
+FILE: ../../../third_party/skia/include/base/SkAttributes.h
+FILE: ../../../third_party/skia/include/base/SkDebug.h
+FILE: ../../../third_party/skia/include/base/SkFeatures.h
+FILE: ../../../third_party/skia/include/base/SkLoadUserConfig.h
 FILE: ../../../third_party/skia/include/core/SkAlphaType.h
 FILE: ../../../third_party/skia/include/core/SkCapabilities.h
 FILE: ../../../third_party/skia/include/core/SkColorType.h
@@ -8497,6 +8514,7 @@ FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlUtils.h
 FILE: ../../../third_party/skia/include/gpu/graphite/vk/VulkanGraphiteUtils.h
 FILE: ../../../third_party/skia/include/gpu/vk/VulkanBackendContext.h
 FILE: ../../../third_party/skia/include/private/SkAlignedStorage.h
+FILE: ../../../third_party/skia/include/private/SkPathEnums.h
 FILE: ../../../third_party/skia/include/private/SkTypeTraits.h
 FILE: ../../../third_party/skia/include/sksl/SkSLVersion.h
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode.cpp
