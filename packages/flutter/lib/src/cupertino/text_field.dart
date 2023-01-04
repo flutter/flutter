@@ -102,7 +102,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   final _CupertinoTextFieldState _state;
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapDragUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -120,7 +120,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   }
 
   @override
-  void onDragSelectionEnd(DragEndDetails details) {
+  void onDragSelectionEnd(TapDragEndDetails details) {
     _state._requestKeyboard();
   }
 }
