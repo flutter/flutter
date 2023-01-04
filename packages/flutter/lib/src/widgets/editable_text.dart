@@ -2083,9 +2083,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
   }
 
-  void _onChangedLiveTextStatus() {
+  void _onChangedLiveTextInputStatus() {
     setState(() {
-      // Inform the widget that the value of liveTextStatus has changed.
+      // Inform the widget that the value of liveTextInputStatus has changed.
     });
   }
 
@@ -2482,7 +2482,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void initState() {
     super.initState();
     clipboardStatus?.addListener(_onChangedClipboardStatus);
-    liveTextInputStatus?.addListener(_onChangedLiveTextStatus);
+    liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_onEditableScroll);
@@ -2630,7 +2630,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     WidgetsBinding.instance.removeObserver(this);
     clipboardStatus?.removeListener(_onChangedClipboardStatus);
     clipboardStatus?.dispose();
-    liveTextInputStatus?.removeListener(_onChangedLiveTextStatus);
+    liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
     liveTextInputStatus?.dispose();
     _cursorVisibilityNotifier.dispose();
     super.dispose();

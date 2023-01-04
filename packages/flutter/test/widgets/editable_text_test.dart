@@ -132,6 +132,71 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
+  testWidgets(
+    'Tap Live Text button can work correctly',
+    (WidgetTester tester) async {
+
+      bool invokeLiveTextInputSuccessfully = false;
+      final GlobalKey key = GlobalKey();
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: EditableText(
+              maxLines: 10,
+              controller: controller,
+              showSelectionHandles: true,
+              autofocus: true,
+              focusNode: FocusNode(),
+              style: Typography.material2018().black.subtitle1!,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              keyboardType: TextInputType.text,
+              textAlign: TextAlign.right,
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                EditableTextState editableTextState,
+              ) {
+                return CupertinoAdaptiveTextSelectionToolbar.editable(
+                    key: key,
+                    clipboardStatus: ClipboardStatus.pasteable,
+                    onCopy: null,
+                    onCut: null,
+                    onPaste: null,
+                    onSelectAll: null,
+                    onLiveTextInput: () {
+                      invokeLiveTextInputSuccessfully = true;
+                    },
+                    anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero));
+              },
+            ),
+          ),
+        ),
+      ));
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(find.byKey(key), findsNothing);
+
+      mockClipboard.mockLiveTextInputEnabled = true;
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(key), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
+      await tester.tap(find.byIcon(CupertinoIcons.doc_text_viewfinder));
+      await tester.pump();
+      expect(invokeLiveTextInputSuccessfully, isTrue);
+    },
+    skip: kIsWeb,
+  );
+
   // Related issue: https://github.com/flutter/flutter/issues/98115
   testWidgets('ScheduleShowCaretOnScreen with no animation when the window changes metrics', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
