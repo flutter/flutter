@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import '../../globals.dart' as globals;
 import 'helper.dart';
 
@@ -32,7 +30,7 @@ String generateServiceWorker(
     return '';
   }
 
-  final String flutterServiceWorkerJsPath = path.join(
+  final String flutterServiceWorkerJsPath = globals.localFileSystem.path.join(
     fileGeneratorsRoot,
     'js',
     'flutter_service_worker.js',
