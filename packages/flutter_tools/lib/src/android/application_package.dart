@@ -116,7 +116,11 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     }
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
-      apkFile = getApkDirectory(androidProject.parent).childFile(filename);
+      Directory apkDirectory = getApkDirectory(androidProject.parent);
+      if (androidProject.parent.isModule && buildInfo?.mode == BuildMode.debug) {
+        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.name);
+      }
+      apkFile = apkDirectory.childFile(filename);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
