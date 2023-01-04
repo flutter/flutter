@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
+import '../general.shard/project_test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
@@ -54,6 +55,73 @@ void main() {
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
       ).path).createSync(recursive: true);
     });
+
+    testUsingContext('correct debug filename in module projects', () async {
+      const String aaptPath = 'aaptPath';
+      final File apkFile = globals.fs.file('app-debug.apk');
+      final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
+      sdkVersion.aaptPath = aaptPath;
+      sdk.latestVersion = sdkVersion;
+      sdk.platformToolsAvailable = true;
+      sdk.licensesAvailable = false;
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            aaptPath,
+            'dump',
+            'xmltree',
+             apkFile.path,
+            'AndroidManifest.xml',
+          ],
+          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
+        )
+      );
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            aaptPath,
+            'dump',
+            'xmltree',
+             fs.path.join('module_project', 'build', 'host', 'outputs', 'apk', 'debug', 'app-debug.apk'),
+            'AndroidManifest.xml',
+          ],
+          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
+        )
+      );
+
+      final ApplicationPackage applicationPackage = (await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        TargetPlatform.android_arm,
+        applicationBinary: apkFile,
+      ))!;
+      final BufferLogger logger = BufferLogger.test();
+      final FlutterProject project = await aModuleProject();
+      project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+      final File appGradle = project.android.hostAppGradleRoot.childFile(
+        fs.path.join('app', 'build.gradle'));
+      appGradle.createSync(recursive: true);
+      appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+      final File apkDebugFile = project.directory
+        .childDirectory('build')
+        .childDirectory('host')
+        .childDirectory('outputs')
+        .childDirectory('apk')
+        .childDirectory('debug')
+        .childFile('app-debug.apk');
+      apkDebugFile.createSync(recursive: true);
+      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+        project.android,
+        androidSdk: sdk,
+        processManager: fakeProcessManager,
+        userMessages:  UserMessages(),
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        logger: logger,
+        fileSystem: fs,
+        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+      );
+      expect(androidApk, isNotNull);
+    }, overrides: overrides);
 
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
       const String aaptPath = 'aaptPath';
