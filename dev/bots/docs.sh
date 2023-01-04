@@ -148,3 +148,7 @@ if [[ -n "$LUCI_CI" && -z "$LUCI_PR" ]]; then
   (cd "$FLUTTER_ROOT/dev/docs"; move_offline_into_place)
   deploy_docs
 fi
+
+# Zip docs
+cd "$FLUTTER_ROOT/dev/docs"
+zip api_docs.zip doc

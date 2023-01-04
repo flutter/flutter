@@ -869,10 +869,10 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       return const SizedBox.expand();
     }
     if (!_platformViewCreated) {
-      // Depending on the implementation, the initial size can be used to size
-      // the platform view.
+      // Depending on the implementation, the first non-empty size can be used
+      // to size the platform view.
       return _PlatformViewPlaceHolder(onLayout: (Size size) {
-        if (controller.awaitingCreation) {
+        if (controller.awaitingCreation && !size.isEmpty) {
           controller.create(size: size);
         }
       });
