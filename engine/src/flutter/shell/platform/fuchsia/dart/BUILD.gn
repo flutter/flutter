@@ -286,7 +286,7 @@ dart_library("quiver") {
   package_name = "quiver"
 
   # The current version of this library is not null safe
-  language_version = "2.0"
+  language_version = "2.17"
 
   deps = [
     ":matcher",
@@ -299,16 +299,13 @@ dart_library("quiver") {
     "check.dart",
     "collection.dart",
     "core.dart",
-    "io.dart",
     "iterables.dart",
-    "mirrors.dart",
     "pattern.dart",
     "src/async/collect.dart",
     "src/async/concat.dart",
     "src/async/countdown_timer.dart",
     "src/async/enumerate.dart",
     "src/async/future_stream.dart",
-    "src/async/iteration.dart",
     "src/async/metronome.dart",
     "src/async/stream_buffer.dart",
     "src/async/stream_router.dart",
@@ -324,8 +321,10 @@ dart_library("quiver") {
     "src/collection/lru_map.dart",
     "src/collection/multimap.dart",
     "src/collection/treeset.dart",
+    "src/collection/utils.dart",
     "src/core/hash.dart",
     "src/core/optional.dart",
+    "src/core/utils.dart",
     "src/iterables/concat.dart",
     "src/iterables/count.dart",
     "src/iterables/cycle.dart",
@@ -343,10 +342,8 @@ dart_library("quiver") {
     "strings.dart",
     "testing/async.dart",
     "testing/equality.dart",
-    "testing/runtime.dart",
     "testing/src/async/fake_async.dart",
     "testing/src/equality/equality.dart",
-    "testing/src/runtime/checked_mode.dart",
     "testing/src/time/time.dart",
     "testing/time.dart",
     "time.dart",
