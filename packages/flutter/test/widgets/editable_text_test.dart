@@ -181,7 +181,6 @@ void main() {
 
       expect(find.byKey(key), findsNothing);
 
-      mockClipboard.mockLiveTextInputEnabled = true;
       // Long-press to bring up the context menu.
       final Finder textFinder = find.byType(EditableText);
       await tester.longPress(textFinder);
