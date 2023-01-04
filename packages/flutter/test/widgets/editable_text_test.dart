@@ -194,7 +194,7 @@ void main() {
       await tester.pump();
       expect(invokeLiveTextInputSuccessfully, isTrue);
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
   );
 
   // Related issue: https://github.com/flutter/flutter/issues/98115
