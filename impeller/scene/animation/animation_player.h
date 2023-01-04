@@ -6,7 +6,7 @@
 
 #include <memory>
 #include <optional>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "flutter/fml/hash_combine.h"
