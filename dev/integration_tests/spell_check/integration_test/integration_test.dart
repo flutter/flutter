@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Timeout(Duration(seconds: 60))
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
