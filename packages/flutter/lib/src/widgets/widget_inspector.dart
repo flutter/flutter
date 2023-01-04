@@ -1500,13 +1500,14 @@ mixin WidgetInspectorService {
           return false;
         }
         selection.currentElement = object;
-        developer.inspect(selection.currentElement);
+        print('DAKE: Sending CURRENTELEMENT');
+        _sendInspectEvent(selection.currentElement);
       } else {
         if (object == selection.current) {
           return false;
         }
         selection.current = object! as RenderObject;
-        developer.inspect(selection.current);
+        _sendInspectEvent(selection.current);
       }
       if (selectionChangedCallback != null) {
         if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
@@ -1524,7 +1525,24 @@ mixin WidgetInspectorService {
     }
     return false;
   }
+  void _sendInspectEvent(Object? object){
+    developer.inspect(object);
 
+    // final _Location? location = _getCreationLocation(element);
+
+    final location = WidgetInspectorService.instance._getSelectedSummaryLocation(null, 'my-group');
+    if (location != null){
+      developer.postEvent(
+        'navigate',
+        {
+          'file': location.file,
+          'line': location.line,
+          'column': location.column,
+        },
+        stream: 'toolEvent',
+      );
+    }
+  }
   /// Returns a DevTools uri linking to a specific element on the inspector page.
   String? _devToolsInspectorUriForElement(Element element) {
     if (activeDevToolsServerAddress != null && connectedVmServiceUri != null) {
@@ -2770,28 +2788,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
       });
     }
   }
-  void _inspect(RenderObject? renderObject, Element? element){
-    developer.inspect(renderObject);
-
-    // final _Location? location = _getCreationLocation(element);
-
-    // final selectedWidget = WidgetInspectorService.instance._getSelectedSummaryWidget(null, 'my-group');
-    final location = WidgetInspectorService.instance._getSelectedSummaryLocation(null, 'my-group');
-    //TODO: Find a way to grab Diagnostics node before serializing
-    print('LOCATION: $location');
-    if (location != null){
-      print('POSTING');
-      developer.postEvent(
-        'navigate',
-        {
-          'file': location.file,
-          'line': location.line,
-          'column': location.column,
-        },
-        stream: 'toolEvent',
-      );
-    }
-  }
 
   void _handleTap() {
     if (!isSelectMode) {
@@ -2799,7 +2795,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     }
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
-      _inspect(selection.current, selection.currentElement);
+      WidgetInspectorService.instance._sendInspectEvent(selection.current);
     }
     setState(() {
       // Only exit select mode if there is a button to return to select mode.
