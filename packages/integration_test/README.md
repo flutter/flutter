@@ -310,7 +310,12 @@ dev_target="14.3"
 flutter build ios integration_test/foo_test.dart --release
 
 pushd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner -xcconfig Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
+xcodebuild build-for-testing \
+  -workspace Runner.xcworkspace \
+  -scheme Runner \
+  -xcconfig Flutter/Release.xcconfig \
+  -derivedDataPath \
+  $output -sdk iphoneos
 popd
 
 pushd $product
@@ -321,11 +326,15 @@ popd
 You can verify locally that your tests are successful by running the following command:
 
 ```sh
-xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" -destination id=<YOUR_DEVICE_ID>
+xcodebuild test-without-building \
+  -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" \
+  -destination id=<YOUR_DEVICE_ID>
 ```
 
 Once everything is ok, you can upload the resulting zip to Firebase Test Lab (change the model with your values):
 
 ```sh
-gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip" --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
+gcloud firebase test ios run \
+  --test "build/ios_integ/Build/Products/ios_tests.zip" \
+  --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
 ```
