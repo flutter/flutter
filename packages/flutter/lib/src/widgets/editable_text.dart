@@ -1686,7 +1686,6 @@ class EditableText extends StatefulWidget {
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   static List<ContextMenuButtonItem> getEditableButtonItems({
     required final ClipboardStatus? clipboardStatus,
-    required final LiveTextInputStatus? liveTextInputStatus,
     required final VoidCallback? onCopy,
     required final VoidCallback? onCut,
     required final VoidCallback? onPaste,
@@ -1726,7 +1725,7 @@ class EditableText extends StatefulWidget {
     }
 
     // Config button items with Live Text.
-    if (onLiveTextInput != null && liveTextInputStatus == LiveTextInputStatus.enabled) {
+    if (onLiveTextInput != null) {
       resultButtonItem.add(ContextMenuButtonItem(
         onPressed: onLiveTextInput,
         type: ContextMenuButtonType.liveTextInput,
@@ -2072,6 +2071,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get liveTextInputEnabled {
+    if (liveTextInputStatus?.value != LiveTextInputStatus.enabled) {
+      return false;
+    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
@@ -2248,7 +2250,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void startLiveTextInput(SelectionChangedCause cause) {
-    if (widget.readOnly || widget.obscureText) {
+    if (!liveTextInputEnabled || widget.readOnly || widget.obscureText) {
       return;
     }
     if (_hasInputConnection) {
@@ -2466,7 +2468,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   List<ContextMenuButtonItem> get contextMenuButtonItems {
     return buttonItemsForToolbarOptions() ?? EditableText.getEditableButtonItems(
       clipboardStatus: clipboardStatus?.value,
-      liveTextInputStatus: liveTextInputStatus?.value,
       onCopy: copyEnabled
           ? () => copySelection(SelectionChangedCause.toolbar)
           : null,

@@ -99,7 +99,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   AdaptiveTextSelectionToolbar.editable({
     super.key,
     required ClipboardStatus clipboardStatus,
-    required LiveTextInputStatus liveTextStatus,
     required VoidCallback? onCopy,
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
@@ -109,7 +108,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
          clipboardStatus: clipboardStatus,
-         liveTextInputStatus: liveTextStatus,
          onCopy: onCopy,
          onCut: onCut,
          onPaste: onPaste,

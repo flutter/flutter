@@ -187,7 +187,6 @@ void main() {
                 primaryAnchor: Offset.zero,
               ),
               clipboardStatus: ClipboardStatus.pasteable,
-              liveTextStatus: LiveTextInputStatus.enabled,
               onCopy: () {},
               onCut: () {},
               onPaste: () {},
