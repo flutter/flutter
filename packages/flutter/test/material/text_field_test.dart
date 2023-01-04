@@ -13982,6 +13982,74 @@ void main() {
       }, variant: TargetPlatformVariant.all());
     }
   });
+
+  group('Spell check configuration', () {
+    testWidgets('Spell check configuration properly enabled by default', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        overlay(
+          child: TextField(),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+
+      expect(editableTextState.spellCheckEnabled, isTrue);
+      expect(
+        editableTextState.spellCheckConfiguration.spellCheckService.runtimeType,
+        equals(DefaultSpellCheckService),
+      );
+      expect(
+        editableTextState.spellCheckConfiguration.misspelledTextStyle,
+        equals(TextField.materialMisspelledTextStyle),
+      );
+      expect(
+        editableTextState.spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder,
+        equals(TextField.defaultSpellCheckSuggestionsToolbarBuilder),
+      );
+    });
+
+    testWidgets('Spell check configuration disabled when disabled manually', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
+          ),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+
+      expect(editableTextState.spellCheckEnabled, isFalse);
+    });
+
+    testWidgets('Spell check configuration fields properly inferred when not fully specified', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue = true;
+
+      await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            spellCheckConfiguration: const SpellCheckConfiguration(),
+          ),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+
+      expect(editableTextState.spellCheckEnabled, isTrue);
+      expect(
+        editableTextState.spellCheckConfiguration.spellCheckService.runtimeType,
+        equals(DefaultSpellCheckService),
+      );
+      expect(
+        editableTextState.spellCheckConfiguration.misspelledTextStyle,
+        equals(TextField.materialMisspelledTextStyle),
+      );
+      expect(
+        editableTextState.spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder,
+        equals(TextField.defaultSpellCheckSuggestionsToolbarBuilder),
+      );
+    });
+  });
 }
 
 /// A Simple widget for testing the obscure text.

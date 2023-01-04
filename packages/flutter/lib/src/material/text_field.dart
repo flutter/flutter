@@ -1211,20 +1211,25 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         ),
     ];
 
-    // Set configuration as disabled if not otherwise specified. If specified,
-    // ensure that configuration uses Material text style for misspelled words
-    // unless a custom style is specified.
-    final SpellCheckConfiguration spellCheckConfiguration =
-      widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
-        ? widget.spellCheckConfiguration!.copyWith(
-            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? TextField.materialMisspelledTextStyle,
-            spellCheckSuggestionsToolbarBuilder:
-              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
-          )
-        : const SpellCheckConfiguration.disabled();
+    // Set the spell check configuration if not otherwise disabled. If a
+    // configuration was specified in the widget, (i) ensure that configuration
+    // uses the Material text style for misspeleld words unless a custom style
+    // is specified and (ii) ensure that configuration uses the Material spell
+    // check suggestions toolbar builder unless a custom builder is specified.
+    final SpellCheckConfiguration spellCheckConfiguration = 
+      widget.spellCheckConfiguration == null
+        ? SpellCheckConfiguration(
+            spellCheckService: DefaultSpellCheckService(),
+            misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+        )
+        : widget.spellCheckConfiguration!.copyWith(
+              misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
+                ?? TextField.materialMisspelledTextStyle,
+              spellCheckSuggestionsToolbarBuilder:
+                widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+                  ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
+        );
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
