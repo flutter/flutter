@@ -912,10 +912,20 @@ void main() {
       expect(fakeTextChannel.outgoingCalls.length, 6);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setEditableSizeAndTransform');
 
-      connection.setSelectionRects(const <SelectionRect>[SelectionRect(position: 0, bounds: Rect.zero)]);
+      connection.setSelectionRects(const <SelectionRect>[SelectionRect(position: 1, bounds: Rect.fromLTWH(2, 3, 4, 5), direction: TextDirection.rtl)]);
       expectedMethodCalls.add('setSelectionRects');
       expect(control.methodCalls, expectedMethodCalls);
       expect(fakeTextChannel.outgoingCalls.length, 7);
+      expect(fakeTextChannel.outgoingCalls.last.arguments, const TypeMatcher<List<List<num>>>());
+      final List<List<num>> sentList = fakeTextChannel.outgoingCalls.last.arguments as List<List<num>>;
+      expect(sentList.length, 1);
+      expect(sentList[0].length, 6);
+      expect(sentList[0][0], 2); // left
+      expect(sentList[0][1], 3); // top
+      expect(sentList[0][2], 4); // width
+      expect(sentList[0][3], 5); // height
+      expect(sentList[0][4], 1); // position
+      expect(sentList[0][5], TextDirection.rtl.index); // direction
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setSelectionRects');
 
       connection.setStyle(
