@@ -205,7 +205,7 @@ class UpgradeCommandRunner {
     // Make sure the welcome message re-display is delayed until the end.
     final PersistentToolState persistentToolState = globals.persistentToolState!;
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
-    await precacheArtifacts();
+    await precacheArtifacts(workingDirectory);
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
@@ -318,27 +318,6 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Update the engine repository and precache all artifacts.
-  ///
-  /// Check for and download any engine and pkg/ updates. We run the 'flutter'
-  /// shell script reentrantly here so that it will download the updated
-  /// Dart and so forth if necessary.
-  Future<void> precacheArtifacts() async {
-    globals.printStatus('');
-    globals.printStatus('Upgrading engine...');
-    final int code = await globals.processUtils.stream(
-      <String>[
-        globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
-      ],
-      workingDirectory: workingDirectory,
-      allowReentrantFlutter: true,
-      environment: Map<String, String>.of(globals.platform.environment),
-    );
-    if (code != 0) {
-      throwToolExit(null, exitCode: code);
-    }
-  }
-
   /// Update the user's packages.
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
     globals.printStatus('');
@@ -365,5 +344,25 @@ class UpgradeCommandRunner {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
     );
+  }
+}
+
+/// Update the engine repository and precache all artifacts.
+///
+/// Check for and download any engine and pkg/ updates. We run the 'flutter'
+/// shell script reentrantly here so that it will download the updated
+/// Dart and so forth if necessary.
+Future<void> precacheArtifacts() async {
+  globals.printStatus('');
+  globals.printStatus('Upgrading engine...');
+  final int code = await globals.processUtils.stream(
+    <String>[
+      globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
+    ],
+    allowReentrantFlutter: true,
+    environment: Map<String, String>.of(globals.platform.environment),
+  );
+  if (code != 0) {
+    throwToolExit(null, exitCode: code);
   }
 }
