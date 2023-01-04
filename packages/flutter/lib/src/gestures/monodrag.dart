@@ -84,6 +84,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   }) : assert(dragStartBehavior != null);
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
@@ -570,6 +571,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -616,6 +618,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -654,6 +657,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   PanGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override

@@ -128,6 +128,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   // Implementation notes:
@@ -492,6 +493,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   /// A pointer that might cause a tap has contacted the screen at a particular
@@ -813,6 +815,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
   SerialTapGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
+    super.allowedButtonsFilter
   });
 
   /// A pointer has contacted the screen at a particular location, which might

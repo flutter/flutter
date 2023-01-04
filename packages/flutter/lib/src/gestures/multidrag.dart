@@ -26,11 +26,6 @@ export 'gesture_settings.dart' show DeviceGestureSettings;
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
 typedef GestureMultiDragStartCallback = Drag? Function(Offset position);
 
-/// Signature for `allowedButtonsFilter` in [MultiDragGestureRecognizer].
-/// Used to filter the input buttons of the pointer event.
-/// The parameter `buttons` comes from [PointerEvent.buttons].
-typedef AllowedButtonsFilter = bool Function(int buttons);
-
 /// Per-pointer state for a [MultiDragGestureRecognizer].
 ///
 /// A [MultiDragGestureRecognizer] tracks each pointer separately. The state for
@@ -228,37 +223,14 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    AllowedButtonsFilter? allowedButtonsFilter,
-  }): _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
+    super.allowedButtonsFilter,
+  });
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
   /// The remaining notifications for this drag gesture are delivered to the
   /// [Drag] object returned by this callback.
   GestureMultiDragStartCallback? onStart;
-
-  /// {@template flutter.gestures.multidrag._allowedButtonsFilter}
-  /// Called when interaction starts. This limits the dragging behavior
-  /// for custom clicks (such as scroll click). Its parameter comes
-  /// from [PointerEvent.buttons].
-  ///
-  /// Due to how [kPrimaryButton], [kSecondaryButton], etc., use integers,
-  /// bitwise operations can help filter how buttons are pressed.
-  /// For example, if someone simultaneously presses the primary and secondary
-  /// buttons, the default behavior will return false. The following code
-  /// accepts any button press with primary:
-  /// `(int buttons) => buttons & kPrimaryButton != 0`.
-  ///
-  /// When value is `(int buttons) => false`, allow no interactions.
-  /// When value is `(int buttons) => true`, allow all interactions.
-  ///
-  /// Defaults to primary button only.
-  /// {@endtemplate}
-  final AllowedButtonsFilter _allowedButtonsFilter;
-
-  // The default value for [allowedButtonsFilter].
-  // Accept the input if, and only if, [kPrimaryButton] is pressed.
-  static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
 
   Map<int, MultiDragPointerState>? _pointers = <int, MultiDragPointerState>{};
 
@@ -361,8 +333,8 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   @override
   @protected
   bool isPointerAllowed(PointerDownEvent event) {
-    // Check for mouse button, then device kind.
-    return _allowedButtonsFilter(event.buttons) && super.isPointerAllowed(event);
+    // Check for mouse button, then device kind and button type.
+    return super.isPointerAllowed(event);
   }
 
   @override
