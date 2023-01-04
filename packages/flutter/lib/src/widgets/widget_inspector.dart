@@ -2218,6 +2218,17 @@ mixin WidgetInspectorService {
     final Element? current = selection.currentElement;
     return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
+  _Location? _getSelectedLocation(String? previousSelectionId, String groupName) {
+    final Object? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+    final Element? current = selection.currentElement;
+
+    // TODO is previousSelection as an Object ok?
+    if(current == previousSelection){
+      return _getCreationLocation(previousSelection);
+     } else {
+      return _getCreationLocation(current);
+     }
+  }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element]
   /// if the selected [Element] should be shown in the summary tree otherwise
@@ -2229,6 +2240,29 @@ mixin WidgetInspectorService {
   /// reused.
   String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
+  }
+  
+  _Location? _getSelectedSummaryLocation(String? previousSelectionId, String groupName) {
+    if (!isWidgetCreationTracked()) {
+      return _getSelectedLocation(previousSelectionId, groupName);
+    }
+    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+    Element? current = selection.currentElement;
+    if (current != null && !_isValueCreatedByLocalProject(current)) {
+      Element? firstLocal;
+      for (final Element candidate in current.debugGetDiagnosticChain()) {
+        if (_isValueCreatedByLocalProject(candidate)) {
+          firstLocal = candidate;
+          break;
+        }
+      }
+      current = firstLocal;
+    }
+    if(current == previousSelection?.value){
+      return _getCreationLocation(previousSelection);
+     } else {
+      return _getCreationLocation(current);
+     }
   }
 
   Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
@@ -2736,13 +2770,17 @@ class _WidgetInspectorState extends State<WidgetInspector>
       });
     }
   }
-  void _inspect(Object? object){
-    developer.inspect(object);
+  void _inspect(RenderObject? renderObject, Element? element){
+    developer.inspect(renderObject);
 
-    final _Location? location = _getCreationLocation(object);
+    // final _Location? location = _getCreationLocation(element);
+
+    // final selectedWidget = WidgetInspectorService.instance._getSelectedSummaryWidget(null, 'my-group');
+    final location = WidgetInspectorService.instance._getSelectedSummaryLocation(null, 'my-group');
+    //TODO: Find a way to grab Diagnostics node before serializing
     print('LOCATION: $location');
-    if(location != null) {
-
+    if (location != null){
+      print('POSTING');
       developer.postEvent(
         'navigate',
         {
@@ -2754,13 +2792,14 @@ class _WidgetInspectorState extends State<WidgetInspector>
       );
     }
   }
+
   void _handleTap() {
     if (!isSelectMode) {
       return;
     }
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation!);
-      _inspect(selection.current);
+      _inspect(selection.current, selection.currentElement);
     }
     setState(() {
       // Only exit select mode if there is a button to return to select mode.
