@@ -311,8 +311,6 @@ void main() {
         message: 'The plugin `$_kTestPluginName` is missing the required field `fileName` in pubspec.yaml',
       ),
     );
-
-    //final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
   });
 
   testWithoutContext('Windows assumes win32 when no variants are given', () {
