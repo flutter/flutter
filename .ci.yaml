@@ -4699,6 +4699,7 @@ targets:
       task_name: flutter_gallery_win__compile
 
   - name: Windows_android hot_mode_dev_cycle_win__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/117978
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
