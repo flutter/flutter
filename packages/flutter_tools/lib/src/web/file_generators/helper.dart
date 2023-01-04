@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../base/platform.dart';
 import '../../base/user_messages.dart';
 import '../../cache.dart';
 import '../../globals.dart' as globals;
 
 String get _flutterRoot => Cache.defaultFlutterRoot(
-      platform: globals.platform,
       fileSystem: globals.localFileSystem,
+      platform: const LocalPlatform(),
       userMessages: UserMessages(),
     );
 
