@@ -110,13 +110,15 @@ class DisplayListFlags {
 
 class DisplayListFlagsBase : protected DisplayListFlags {
  protected:
-  explicit DisplayListFlagsBase(int flags) : flags_(flags) {}
+  explicit constexpr DisplayListFlagsBase(int flags) : flags_(flags) {}
 
   const int flags_;
 
-  bool has_any(int qFlags) const { return (flags_ & qFlags) != 0; }
-  bool has_all(int qFlags) const { return (flags_ & qFlags) == qFlags; }
-  bool has_none(int qFlags) const { return (flags_ & qFlags) == 0; }
+  constexpr bool has_any(int qFlags) const { return (flags_ & qFlags) != 0; }
+  constexpr bool has_all(int qFlags) const {
+    return (flags_ & qFlags) == qFlags;
+  }
+  constexpr bool has_none(int qFlags) const { return (flags_ & qFlags) == 0; }
 };
 
 /// An attribute class for advertising specific properties of
@@ -125,27 +127,33 @@ class DisplayListFlagsBase : protected DisplayListFlags {
 class DisplayListSpecialGeometryFlags : DisplayListFlagsBase {
  public:
   /// The geometry may have segments that end without closing the path.
-  bool may_have_end_caps() const { return has_any(kMayHaveCaps_); }
+  constexpr bool may_have_end_caps() const { return has_any(kMayHaveCaps_); }
 
   /// The geometry may have segments connect non-continuously.
-  bool may_have_joins() const { return has_any(kMayHaveJoins_); }
+  constexpr bool may_have_joins() const { return has_any(kMayHaveJoins_); }
 
   /// Mainly for drawPoints(PointMode) where Butt caps are rendered as squares.
-  bool butt_cap_becomes_square() const { return has_any(kButtCapIsSquare_); }
+  constexpr bool butt_cap_becomes_square() const {
+    return has_any(kButtCapIsSquare_);
+  }
 
   /// The geometry may have segments that end on a diagonal
   /// such that their end caps extend further than the default
   /// |strokeWidth * 0.5| margin around the geometry.
-  bool may_have_diagonal_caps() const { return has_any(kMayHaveDiagonalCaps_); }
+  constexpr bool may_have_diagonal_caps() const {
+    return has_any(kMayHaveDiagonalCaps_);
+  }
 
   /// The geometry may have segments that meet at vertices at
   /// an acute angle such that the miter joins will extend
   /// further than the default |strokeWidth * 0.5| margin around
   /// the geometry.
-  bool may_have_acute_joins() const { return has_any(kMayHaveAcuteJoins_); }
+  constexpr bool may_have_acute_joins() const {
+    return has_any(kMayHaveAcuteJoins_);
+  }
 
  private:
-  explicit DisplayListSpecialGeometryFlags(int flags)
+  explicit constexpr DisplayListSpecialGeometryFlags(int flags)
       : DisplayListFlagsBase(flags) {
     FML_DCHECK((flags & kAnySpecialGeometryMask_) == flags);
   }
@@ -162,19 +170,19 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
   const DisplayListSpecialGeometryFlags WithPathEffect(
       const DlPathEffect* effect) const;
 
-  bool ignores_paint() const { return has_any(kIgnoresPaint_); }
+  constexpr bool ignores_paint() const { return has_any(kIgnoresPaint_); }
 
-  bool applies_anti_alias() const { return has_any(kUsesAntiAlias_); }
-  bool applies_dither() const { return has_any(kUsesDither_); }
-  bool applies_color() const { return has_any(kUsesColor_); }
-  bool applies_alpha() const { return has_any(kUsesAlpha_); }
-  bool applies_alpha_or_color() const {
+  constexpr bool applies_anti_alias() const { return has_any(kUsesAntiAlias_); }
+  constexpr bool applies_dither() const { return has_any(kUsesDither_); }
+  constexpr bool applies_color() const { return has_any(kUsesColor_); }
+  constexpr bool applies_alpha() const { return has_any(kUsesAlpha_); }
+  constexpr bool applies_alpha_or_color() const {
     return has_any(kUsesAlpha_ | kUsesColor_);
   }
 
   /// The primitive dynamically determines whether it is a stroke or fill
   /// operation (or both) based on the setting of the |Style| attribute.
-  bool applies_style() const { return has_any(kIsDrawnGeometry_); }
+  constexpr bool applies_style() const { return has_any(kIsDrawnGeometry_); }
   /// The primitive can use any of the stroke attributes, such as
   /// StrokeWidth, StrokeMiter, StrokeCap, or StrokeJoin. This
   /// method will return if the primitive is defined as one that
@@ -185,29 +193,37 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
   /// the style.
   // bool applies_stroke_attributes() const { return is_stroked(); }
 
-  bool applies_shader() const { return has_any(kUsesShader_); }
+  constexpr bool applies_shader() const { return has_any(kUsesShader_); }
   /// The primitive honors the current SkColorFilter, including
   /// the related attribute InvertColors
-  bool applies_color_filter() const { return has_any(kUsesColorFilter_); }
+  constexpr bool applies_color_filter() const {
+    return has_any(kUsesColorFilter_);
+  }
   /// The primitive honors the SkBlendMode or SkBlender
-  bool applies_blend() const { return has_any(kUsesBlend_); }
-  bool applies_path_effect() const { return has_any(kUsesPathEffect_); }
+  constexpr bool applies_blend() const { return has_any(kUsesBlend_); }
+  constexpr bool applies_path_effect() const {
+    return has_any(kUsesPathEffect_);
+  }
   /// The primitive honors the SkMaskFilter whether set using the
   /// filter object or using the convenience method |setMaskBlurFilter|
-  bool applies_mask_filter() const { return has_any(kUsesMaskFilter_); }
-  bool applies_image_filter() const { return has_any(kUsesImageFilter_); }
+  constexpr bool applies_mask_filter() const {
+    return has_any(kUsesMaskFilter_);
+  }
+  constexpr bool applies_image_filter() const {
+    return has_any(kUsesImageFilter_);
+  }
 
-  bool is_geometric() const { return has_any(kIsAnyGeometryMask_); }
-  bool always_stroked() const { return has_any(kIsStrokedGeometry_); }
-  bool is_stroked(DlDrawStyle style = DlDrawStyle::kStroke) const {
+  constexpr bool is_geometric() const { return has_any(kIsAnyGeometryMask_); }
+  constexpr bool always_stroked() const { return has_any(kIsStrokedGeometry_); }
+  constexpr bool is_stroked(DlDrawStyle style = DlDrawStyle::kStroke) const {
     return (has_any(kIsStrokedGeometry_) ||
             (style != DlDrawStyle::kFill && has_any(kIsDrawnGeometry_)));
   }
 
-  bool is_flood() const { return has_any(kFloodsSurface_); }
+  constexpr bool is_flood() const { return has_any(kFloodsSurface_); }
 
  private:
-  explicit DisplayListAttributeFlags(int flags)
+  explicit constexpr DisplayListAttributeFlags(int flags)
       : DisplayListFlagsBase(flags),
         special_flags_(flags & kAnySpecialGeometryMask_) {
     FML_DCHECK((flags & kIsAnyGeometryMask_) == kIsNonGeometric_ ||
@@ -220,11 +236,11 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
                (flags & kAnySpecialGeometryMask_) == 0);
   }
 
-  const DisplayListAttributeFlags with(int extra) const {
+  constexpr DisplayListAttributeFlags operator+(int extra) const {
     return extra == 0 ? *this : DisplayListAttributeFlags(flags_ | extra);
   }
 
-  const DisplayListAttributeFlags without(int remove) const {
+  constexpr DisplayListAttributeFlags operator-(int remove) const {
     FML_DCHECK(has_all(remove));
     return DisplayListAttributeFlags(flags_ & ~remove);
   }
@@ -235,41 +251,186 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
 };
 
 class DisplayListOpFlags : DisplayListFlags {
+ private:
+  // Flags common to all primitives that apply colors
+  static constexpr int kBASE_PaintFlags_ = (kUsesDither_ |       //
+                                            kUsesColor_ |        //
+                                            kUsesAlpha_ |        //
+                                            kUsesBlend_ |        //
+                                            kUsesShader_ |       //
+                                            kUsesColorFilter_ |  //
+                                            kUsesImageFilter_);
+
+  // Flags common to all primitives that stroke or fill
+  static constexpr int kBASE_StrokeOrFillFlags_ = (kIsDrawnGeometry_ |  //
+                                                   kUsesAntiAlias_ |    //
+                                                   kUsesMaskFilter_ |   //
+                                                   kUsesPathEffect_);
+
+  // Flags common to primitives that stroke geometry
+  static constexpr int kBASE_StrokeFlags_ = (kIsStrokedGeometry_ |  //
+                                             kUsesAntiAlias_ |      //
+                                             kUsesMaskFilter_ |     //
+                                             kUsesPathEffect_);
+
+  // Flags common to primitives that render an image with paint attributes
+  static constexpr int kBASE_ImageFlags_ = (kIsNonGeometric_ |   //
+                                            kUsesAlpha_ |        //
+                                            kUsesDither_ |       //
+                                            kUsesBlend_ |        //
+                                            kUsesColorFilter_ |  //
+                                            kUsesImageFilter_);
+
  public:
-  static const DisplayListAttributeFlags kSaveLayerFlags;
-  static const DisplayListAttributeFlags kSaveLayerWithPaintFlags;
-  static const DisplayListAttributeFlags kDrawColorFlags;
-  static const DisplayListAttributeFlags kDrawPaintFlags;
-  static const DisplayListAttributeFlags kDrawLineFlags;
+  static constexpr DisplayListAttributeFlags kSaveLayerFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kSaveLayerWithPaintFlags{
+      kIsNonGeometric_ |   //
+      kUsesAlpha_ |        //
+      kUsesBlend_ |        //
+      kUsesColorFilter_ |  //
+      kUsesImageFilter_    //
+  };
+  static constexpr DisplayListAttributeFlags kDrawColorFlags{
+      kFloodsSurface_ |  //
+      kIgnoresPaint_     //
+  };
+  static constexpr DisplayListAttributeFlags kDrawPaintFlags{
+      kBASE_PaintFlags_ |  //
+      kFloodsSurface_      //
+  };
   // Special case flags for horizonal and vertical lines
-  static const DisplayListAttributeFlags kDrawHVLineFlags;
-  static const DisplayListAttributeFlags kDrawRectFlags;
-  static const DisplayListAttributeFlags kDrawOvalFlags;
-  static const DisplayListAttributeFlags kDrawCircleFlags;
-  static const DisplayListAttributeFlags kDrawRRectFlags;
-  static const DisplayListAttributeFlags kDrawDRRectFlags;
-  static const DisplayListAttributeFlags kDrawPathFlags;
-  static const DisplayListAttributeFlags kDrawArcNoCenterFlags;
-  static const DisplayListAttributeFlags kDrawArcWithCenterFlags;
-  static const DisplayListAttributeFlags kDrawPointsAsPointsFlags;
-  static const DisplayListAttributeFlags kDrawPointsAsLinesFlags;
-  static const DisplayListAttributeFlags kDrawPointsAsPolygonFlags;
-  static const DisplayListAttributeFlags kDrawVerticesFlags;
-  static const DisplayListAttributeFlags kDrawImageFlags;
-  static const DisplayListAttributeFlags kDrawImageWithPaintFlags;
-  static const DisplayListAttributeFlags kDrawImageRectFlags;
-  static const DisplayListAttributeFlags kDrawImageRectWithPaintFlags;
-  static const DisplayListAttributeFlags kDrawImageNineFlags;
-  static const DisplayListAttributeFlags kDrawImageNineWithPaintFlags;
-  static const DisplayListAttributeFlags kDrawImageLatticeFlags;
-  static const DisplayListAttributeFlags kDrawImageLatticeWithPaintFlags;
-  static const DisplayListAttributeFlags kDrawAtlasFlags;
-  static const DisplayListAttributeFlags kDrawAtlasWithPaintFlags;
-  static const DisplayListAttributeFlags kDrawPictureFlags;
-  static const DisplayListAttributeFlags kDrawPictureWithPaintFlags;
-  static const DisplayListAttributeFlags kDrawDisplayListFlags;
-  static const DisplayListAttributeFlags kDrawTextBlobFlags;
-  static const DisplayListAttributeFlags kDrawShadowFlags;
+  static constexpr DisplayListAttributeFlags kDrawHVLineFlags{
+      kBASE_PaintFlags_ |   //
+      kBASE_StrokeFlags_ |  //
+      kMayHaveCaps_         //
+  };
+  static constexpr DisplayListAttributeFlags kDrawLineFlags{
+      kDrawHVLineFlags         //
+      + kMayHaveDiagonalCaps_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawRectFlags{
+      kBASE_PaintFlags_ |         //
+      kBASE_StrokeOrFillFlags_ |  //
+      kMayHaveJoins_              //
+  };
+  static constexpr DisplayListAttributeFlags kDrawOvalFlags{
+      kBASE_PaintFlags_ |       //
+      kBASE_StrokeOrFillFlags_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawCircleFlags{
+      kBASE_PaintFlags_ |       //
+      kBASE_StrokeOrFillFlags_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawRRectFlags{
+      kBASE_PaintFlags_ |       //
+      kBASE_StrokeOrFillFlags_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawDRRectFlags{
+      kBASE_PaintFlags_ |       //
+      kBASE_StrokeOrFillFlags_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawPathFlags{
+      kBASE_PaintFlags_ |         //
+      kBASE_StrokeOrFillFlags_ |  //
+      kMayHaveCaps_ |             //
+      kMayHaveDiagonalCaps_ |     //
+      kMayHaveJoins_ |            //
+      kMayHaveAcuteJoins_         //
+  };
+  static constexpr DisplayListAttributeFlags kDrawArcNoCenterFlags{
+      kBASE_PaintFlags_ |         //
+      kBASE_StrokeOrFillFlags_ |  //
+      kMayHaveCaps_ |             //
+      kMayHaveDiagonalCaps_       //
+  };
+  static constexpr DisplayListAttributeFlags kDrawArcWithCenterFlags{
+      kBASE_PaintFlags_ |         //
+      kBASE_StrokeOrFillFlags_ |  //
+      kMayHaveJoins_ |            //
+      kMayHaveAcuteJoins_         //
+  };
+  static constexpr DisplayListAttributeFlags kDrawPointsAsPointsFlags{
+      kBASE_PaintFlags_ |   //
+      kBASE_StrokeFlags_ |  //
+      kMayHaveCaps_ |       //
+      kButtCapIsSquare_     //
+  };
+  static constexpr DisplayListAttributeFlags kDrawPointsAsLinesFlags{
+      kBASE_PaintFlags_ |    //
+      kBASE_StrokeFlags_ |   //
+      kMayHaveCaps_ |        //
+      kMayHaveDiagonalCaps_  //
+  };
+  // Polygon mode just draws (count-1) separate lines, no joins
+  static constexpr DisplayListAttributeFlags kDrawPointsAsPolygonFlags{
+      kBASE_PaintFlags_ |    //
+      kBASE_StrokeFlags_ |   //
+      kMayHaveCaps_ |        //
+      kMayHaveDiagonalCaps_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawVerticesFlags{
+      kIsNonGeometric_ |   //
+      kUsesDither_ |       //
+      kUsesAlpha_ |        //
+      kUsesShader_ |       //
+      kUsesBlend_ |        //
+      kUsesColorFilter_ |  //
+      kUsesImageFilter_    //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageWithPaintFlags{
+      kBASE_ImageFlags_ |  //
+      kUsesAntiAlias_ |    //
+      kUsesMaskFilter_     //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageRectFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageRectWithPaintFlags{
+      kBASE_ImageFlags_ |  //
+      kUsesAntiAlias_ |    //
+      kUsesMaskFilter_     //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageNineFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageNineWithPaintFlags{
+      kBASE_ImageFlags_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageLatticeFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawImageLatticeWithPaintFlags{
+      kBASE_ImageFlags_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawAtlasFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawAtlasWithPaintFlags{
+      kBASE_ImageFlags_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawPictureFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawPictureWithPaintFlags{
+      kSaveLayerWithPaintFlags  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawDisplayListFlags{
+      kIgnoresPaint_  //
+  };
+  static constexpr DisplayListAttributeFlags kDrawTextBlobFlags{
+      DisplayListAttributeFlags(kBASE_PaintFlags_ |         //
+                                kBASE_StrokeOrFillFlags_ |  //
+                                kMayHaveJoins_)             //
+      - kUsesAntiAlias_                                     //
+  };
+  static constexpr DisplayListAttributeFlags kDrawShadowFlags{
+      kIgnoresPaint_  //
+  };
 };
 
 }  // namespace flutter
