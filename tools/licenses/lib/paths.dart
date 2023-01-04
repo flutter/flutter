@@ -141,6 +141,7 @@ final Set<String> skippedPaths = <String>{
   r'third_party/pkg/platform',
   r'third_party/pkg/process',
   r'third_party/pkg/process_runner',
+  r'third_party/pkg/quiver',
   r'third_party/pkg/vector_math',
   r'third_party/pyyaml', // build-time dependency only
   r'third_party/rapidjson/contrib', // contains nothing that ends up in the binary executable
