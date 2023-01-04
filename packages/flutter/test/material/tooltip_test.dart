@@ -652,39 +652,46 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
-  _testWidgetsWithLeakTracking('Custom tooltip message textAlign', (WidgetTester tester) async {
-    Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
-      final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Tooltip(
-            key: tooltipKey,
-            textAlign: textAlign,
-            message: tooltipText,
-            child: Container(
-              width: 100.0,
-              height: 100.0,
-              color: Colors.green[500],
+
+
+  testWidgets('Custom tooltip message textAlign', (WidgetTester tester) async {
+    _withFlutterLeakTracking(
+      () async {
+        Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
+          final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Tooltip(
+                key: tooltipKey,
+                textAlign: textAlign,
+                message: tooltipText,
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                  color: Colors.green[500],
+                ),
+              ),
             ),
-          ),
-        ),
-      );
-      tooltipKey.currentState?.ensureTooltipVisible();
-      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
-    }
+          );
+          tooltipKey.currentState?.ensureTooltipVisible();
+          await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+        }
 
-    // Default value should be TextAlign.start
-    await pumpTooltipWithTextAlign();
-    TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.start);
+        // Default value should be TextAlign.start
+        await pumpTooltipWithTextAlign();
+        TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.start);
 
-    await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.center);
+        await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
+        textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.center);
 
-    await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.end);
+        await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
+        textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.end);
+      },
+      tester: tester,
+    );
   });
 
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
@@ -1931,36 +1938,6 @@ Future<void> setWidgetForTooltipMode(
   );
 }
 
-/// The helper lives temporary in this library.
-///
-/// We will need to move it to shared place,
-/// keeping dependency on leak_traker staying in `dev_dependencies`.
-Future<void> _testWidgetsWithLeakTracking(
-    String description,
-  Future<void> Function(WidgetTester) callback,{
-  StackTraceCollectionConfig stackTraceCollectionConfig =
-      const StackTraceCollectionConfig(),
-}) async {
-  void flutterEventToLeakTracker(ObjectEvent event) => dispatchObjectEvent(event.toMap());
-  MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
-
-  try {
-    testWidgets(
-      description,
-      (WidgetTester tester) async {
-        final Leaks leaks = await withLeakTracking(
-          () async => callback(tester),
-          asyncCodeRunner: (DartAsyncCallback action) async => tester.runAsync(action),
-          stackTraceCollectionConfig: stackTraceCollectionConfig,
-        );
-        expect(leaks, isLeakFree);
-      },
-    );
-  } finally {
-    MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
-  }
-}
-
 Future<void> _testGestureLongPress(WidgetTester tester, Finder tooltip) async {
   final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip));
   await tester.pump();
@@ -1981,4 +1958,39 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
   return _findDebugSemantics(object.parent! as RenderObject);
 }
 
-
+/// Wrapper for [withLeakTracking] with Flutter specific functionality.
+///
+/// 1. Listens to [MemoryAllocations] events.
+/// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
+///
+/// Copied from `psckage:leak_tracker/test/test_infra/flutter_helpers.dart`.
+Future<void> _withFlutterLeakTracking(
+  DartAsyncCallback callback, {
+  required WidgetTester? tester,
+  StackTraceCollectionConfig stackTraceCollectionConfig =
+      const StackTraceCollectionConfig(),
+  Duration? timeoutForFinalGarbageCollection,
+  void Function(Leaks foundLeaks)? leaksObtainer,
+}) async {
+  void flutterEventToLeakTracker(ObjectEvent event) =>
+      dispatchObjectEvent(event.toMap());
+  MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
+  final AsyncCodeRunner asyncCodeRunner = tester == null
+      ? (DartAsyncCallback action) async => action()
+      : (DartAsyncCallback action) async => tester.runAsync(action);
+  try {
+    final Leaks leaks = await withLeakTracking(
+      () async => callback(),
+      asyncCodeRunner: asyncCodeRunner,
+      stackTraceCollectionConfig: stackTraceCollectionConfig,
+      shouldThrowOnLeaks: false,
+      timeoutForFinalGarbageCollection: timeoutForFinalGarbageCollection,
+    );
+    if (leaksObtainer != null) {
+      leaksObtainer(leaks);
+    }
+    expect(leaks, isLeakFree);
+  } finally {
+    MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
+  }
+}
