@@ -270,7 +270,7 @@ void main() {
     const String pluginYamlRaw =
       'platforms:\n'
       ' windows:\n'
-      '  pluginClass: WinSamplePlugin\n'
+      '  pluginClass: WebSamplePlugin\n'
       '  supportedVariants:\n'
       '    - win32\n';
 
@@ -288,6 +288,31 @@ void main() {
     expect(windowsPlugin.supportedVariants, <PluginPlatformVariant>[
       PluginPlatformVariant.win32,
     ]);
+  });
+
+  testWithoutContext('Web plugin tool exits if fileName field missing', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    const String pluginYamlRaw =
+      'platforms:\n'
+      ' web:\n'
+      '  pluginClass: WebSamplePlugin\n';
+
+    final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message: 'The plugin `$_kTestPluginName` is missing the required field `fileName` in pubspec.yaml',
+      ),
+    );
+
+    //final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey]! as WebPlugin;
   });
 
   testWithoutContext('Windows assumes win32 when no variants are given', () {
