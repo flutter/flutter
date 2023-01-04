@@ -18,6 +18,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.bottomStart,
     );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
     ${shape('md.comp.menu.container', '')};
 
@@ -60,6 +61,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       enableFeedback: true,
       alignment: AlignmentDirectional.centerStart,
     );
+
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -190,7 +192,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       const EdgeInsets.symmetric(horizontal: 12),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
 }
@@ -202,6 +204,7 @@ class _MenuDefaultsM3 extends MenuStyle {
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.topEnd,
     );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
     ${shape('md.comp.menu.container', '')};
 

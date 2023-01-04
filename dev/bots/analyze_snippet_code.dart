@@ -457,6 +457,7 @@ class _SnippetChecker {
     '// ignore_for_file: directives_ordering',
     '// ignore_for_file: prefer_final_locals',
     '// ignore_for_file: unnecessary_import',
+    '// ignore_for_file: unreachable_from_main',
     '// ignore_for_file: unused_element',
     '// ignore_for_file: unused_local_variable',
   ];

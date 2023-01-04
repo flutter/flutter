@@ -159,8 +159,8 @@ class FlowParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// Rather than positioning the children during layout, the children are
 /// positioned using transformation matrices during the paint phase using the
-/// matrices from the [FlowDelegate.paintChildren] function. The children can be
-/// repositioned efficiently by simply repainting the flow.
+/// matrices from the [FlowDelegate.paintChildren] function. The children are thus
+/// repositioned efficiently by repainting the flow, skipping layout.
 ///
 /// The most efficient way to trigger a repaint of the flow is to supply a
 /// repaint argument to the constructor of the [FlowDelegate]. The flow will

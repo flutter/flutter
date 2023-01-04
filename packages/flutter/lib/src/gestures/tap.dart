@@ -45,11 +45,13 @@ class TapDownDetails {
   final Offset localPosition;
 }
 
+/// {@template flutter.gestures.tap.GestureTapDownCallback}
 /// Signature for when a pointer that might cause a tap has contacted the
 /// screen.
 ///
 /// The position at which the pointer contacted the screen is available in the
 /// `details`.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -82,11 +84,13 @@ class TapUpDetails {
   final PointerDeviceKind kind;
 }
 
+/// {@template flutter.gestures.tap.GestureTapUpCallback}
 /// Signature for when a pointer that will trigger a tap has stopped contacting
 /// the screen.
 ///
 /// The position at which the pointer stopped contacting the screen is available
 /// in the `details`.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -216,7 +220,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     if (_down != null) {
       // This happens when this tap gesture has been rejected while the pointer
       // is down (i.e. due to movement), when another allowed pointer is added,
-      // in which case all pointers are simply ignored. The `_down` being null
+      // in which case all pointers are ignored. The `_down` being null
       // means that _reset() has been called, since it is always set at the
       // first allowed down event and will not be cleared except for reset(),
       super.addAllowedPointer(event);
@@ -360,8 +364,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   TapGestureRecognizer({ super.debugOwner, super.supportedDevices });
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   /// A pointer has contacted the screen at a particular location with a primary
   /// button, which might be the start of a tap.
+  /// {@endtemplate}
   ///
   /// This triggers after the down event, once a short timeout ([deadline]) has
   /// elapsed, or once the gestures has won the arena, whichever comes first.
@@ -378,8 +384,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTapDown], which exposes this callback.
   GestureTapDownCallback? onTapDown;
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onTapUp}
   /// A pointer has stopped contacting the screen at a particular location,
   /// which is recognized as a tap of a primary button.
+  /// {@endtemplate}
   ///
   /// This triggers on the up event, if the recognizer wins the arena with it
   /// or has previously won, immediately followed by [onTap].
@@ -411,8 +419,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTap], which exposes this callback.
   GestureTapCallback? onTap;
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onTapCancel}
   /// A pointer that previously triggered [onTapDown] will not end up causing
   /// a tap.
+  /// {@endtemplate}
   ///
   /// This triggers once the gesture loses the arena if [onTapDown] has
   /// previously been triggered.
@@ -428,8 +438,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback? onTapCancel;
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onSecondaryTap}
   /// A pointer has stopped contacting the screen, which is recognized as a tap
   /// of a secondary button.
+  /// {@endtemplate}
   ///
   /// This triggers on the up event, if the recognizer wins the arena with it or
   /// has previously won, immediately following [onSecondaryTapUp].
@@ -444,8 +456,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onSecondaryTap], which exposes this callback.
   GestureTapCallback? onSecondaryTap;
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapDown}
   /// A pointer has contacted the screen at a particular location with a
   /// secondary button, which might be the start of a secondary tap.
+  /// {@endtemplate}
   ///
   /// This triggers after the down event, once a short timeout ([deadline]) has
   /// elapsed, or once the gestures has won the arena, whichever comes first.
@@ -462,8 +476,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onSecondaryTapDown], which exposes this callback.
   GestureTapDownCallback? onSecondaryTapDown;
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapUp}
   /// A pointer has stopped contacting the screen at a particular location,
   /// which is recognized as a tap of a secondary button.
+  /// {@endtemplate}
   ///
   /// This triggers on the up event if the recognizer wins the arena with it
   /// or has previously won.
@@ -482,8 +498,10 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onSecondaryTapUp], which exposes this callback.
   GestureTapUpCallback? onSecondaryTapUp;
 
+  /// {@template flutter.gestures.tap.TapGestureRecognizer.onSecondaryTapCancel}
   /// A pointer that previously triggered [onSecondaryTapDown] will not end up
   /// causing a tap.
+  /// {@endtemplate}
   ///
   /// This triggers once the gesture loses the arena if [onSecondaryTapDown]
   /// has previously been triggered.

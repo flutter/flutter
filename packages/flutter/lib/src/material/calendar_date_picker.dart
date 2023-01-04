@@ -188,8 +188,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     _textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
       _announcedInitialDate = true;
+      final bool isToday = DateUtils.isSameDay(widget.currentDate, _selectedDate);
+      final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
       SemanticsService.announce(
-        _localizations.formatFullDate(_selectedDate),
+        '${_localizations.formatFullDate(_selectedDate)}$semanticLabelSuffix',
         _textDirection,
       );
     }
@@ -968,6 +970,7 @@ class _DayPickerState extends State<_DayPicker> {
             (widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(dayToBuild));
         final bool isSelectedDay = DateUtils.isSameDay(widget.selectedDate, dayToBuild);
         final bool isToday = DateUtils.isSameDay(widget.currentDate, dayToBuild);
+        final String semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
 
         BoxDecoration? decoration;
         Color dayColor = enabledDayColor;
@@ -1019,7 +1022,7 @@ class _DayPickerState extends State<_DayPicker> {
               // day of month before the rest of the date, as they are looking
               // for the day of month. To do that we prepend day of month to the
               // formatted full date.
-              label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
+              label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix',
               selected: isSelectedDay,
               excludeSemantics: true,
               child: dayWidget,

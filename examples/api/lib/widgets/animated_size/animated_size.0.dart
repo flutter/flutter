@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [AnimatedSize].
+// Flutter code sample for [AnimatedSize].
 
 import 'package:flutter/material.dart';
 
@@ -49,7 +49,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _updateSize(),
-      child: Container(
+      child: ColoredBox(
         color: Colors.amberAccent,
         child: AnimatedSize(
           curve: Curves.easeIn,

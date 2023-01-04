@@ -29,7 +29,7 @@
 // is referenced more than once, link back to the instance the example file is
 // named for.
 
-/// Flutter code sample for [Placeholder].
+// Flutter code sample for [Placeholder].
 
 import 'package:flutter/widgets.dart';
 
