@@ -310,7 +310,7 @@ dev_target="14.3"
 flutter build ios integration_test/foo_test.dart --release
 
 pushd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner -config Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
+xcodebuild -workspace Runner.xcworkspace -scheme Runner -xcconfig Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
 popd
 
 pushd $product
