@@ -247,7 +247,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
       case TargetPlatform.iOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
             return CupertinoTextSelectionToolbarButton.buttonItem(
-              buttonItem: buttonItem.copyWith(label: getButtonLabel(context, buttonItem)),
+              buttonItem: buttonItem,
             );
           });
       case TargetPlatform.fuchsia:
