@@ -23,6 +23,7 @@ import 'dart:ui' as ui
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:meta/meta_meta.dart';
 
 import 'app.dart';
 import 'basic.dart';
@@ -3685,6 +3686,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 }
 
+@Target(<TargetKind>{TargetKind.method})
 class _WidgetFactory {
   const _WidgetFactory();
 }
