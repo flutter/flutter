@@ -2279,7 +2279,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-
   /// Finds specified [SuggestionSpan] that matches the provided index using
   /// binary search.
   ///
