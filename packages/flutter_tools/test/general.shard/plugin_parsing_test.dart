@@ -270,7 +270,7 @@ void main() {
     const String pluginYamlRaw =
       'platforms:\n'
       ' windows:\n'
-      '  pluginClass: WebSamplePlugin\n'
+      '  pluginClass: WinSamplePlugin\n'
       '  supportedVariants:\n'
       '    - win32\n';
 
