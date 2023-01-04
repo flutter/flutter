@@ -2071,19 +2071,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get liveTextInputEnabled {
-    if (liveTextInputStatus?.value != LiveTextInputStatus.enabled) {
-      return false;
-    }
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return false;
-      case TargetPlatform.iOS:
-        return !widget.obscureText && !widget.readOnly && textEditingValue.selection.isCollapsed;
-    }
+    return liveTextInputStatus?.value == LiveTextInputStatus.enabled &&
+        !widget.obscureText &&
+        !widget.readOnly &&
+        textEditingValue.selection.isCollapsed;
   }
 
   void _onChangedClipboardStatus() {

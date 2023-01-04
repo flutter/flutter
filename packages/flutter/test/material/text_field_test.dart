@@ -210,6 +210,42 @@ void main() {
     );
   }
 
+  testWidgets(
+    'Live Text button shows and hide correctly when LiveTextStatus changes.',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: '');
+      const Key key = ValueKey<String>('TextField');
+      final FocusNode focusNode = FocusNode();
+      final Widget app = MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: Center(
+            child: TextField(
+              key: key,
+              controller: controller,
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      );
+
+      mockClipboard.mockLiveTextInputEnabled = true;
+      await tester.pumpWidget(app);
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
+
+      mockClipboard.mockLiveTextInputEnabled = false;
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsNothing);
+    },
+  );
+
   testWidgets('text field selection toolbar should hide when the user starts typing', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
