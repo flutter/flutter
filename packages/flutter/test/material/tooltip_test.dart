@@ -655,7 +655,7 @@ void main() {
 
 
   testWidgets('Custom tooltip message textAlign', (WidgetTester tester) async {
-    _withFlutterLeakTracking(
+    await _withFlutterLeakTracking(
       () async {
         Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
           final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
