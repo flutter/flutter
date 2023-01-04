@@ -110,7 +110,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         return localizations.pasteButtonLabel;
       case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
-      case ContextMenuButtonType.captureText:
+      case ContextMenuButtonType.liveTextInput:
       case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
         return '';
@@ -130,7 +130,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
         return null;
-      case ContextMenuButtonType.captureText:
+      case ContextMenuButtonType.liveTextInput:
         iconData = CupertinoIcons.doc_text_viewfinder;
         break;
     }

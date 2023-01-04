@@ -1058,8 +1058,11 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
-  /// Whether capture text input is enabled, must not be null.
-  bool get captureTextEnabled => false;
+  /// Whether Live Text input is enabled, must not be null.
+  ///
+  /// See also:
+  ///  * [LiveText], where we can get the the availability of Live Text input.
+  bool get liveTextInputEnabled => false;
 
   /// Cut current selection to [Clipboard].
   ///
@@ -1351,7 +1354,11 @@ class TextInputConnection {
     TextInput._instance._show();
   }
 
-  /// Start live text capture input.
+  /// Start Live Text input.
+  ///
+  /// This method should only be called when Live Text input is available.
+  /// See also:
+  ///  * [LiveText], where we can get the the availability of Live Text input.
   void startLiveTextInput() {
     assert(attached);
     TextInput._instance._startLiveTextInput();
@@ -2182,7 +2189,7 @@ mixin TextInputControl {
   /// This method is called when the input control should become visible.
   void show() {}
 
-  /// Requests that the text input control start live text input (OCR).
+  /// Requests that the text input control starts Live Text input.
   ///
   /// This method is called when the input control will start capturing text input.
   void startLiveTextInput() {}

@@ -99,7 +99,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   AdaptiveTextSelectionToolbar.editable({
     super.key,
     required ClipboardStatus clipboardStatus,
-    required LiveTextStatus liveTextStatus,
+    required LiveTextInputStatus liveTextStatus,
     required VoidCallback? onCopy,
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
@@ -109,12 +109,12 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
          clipboardStatus: clipboardStatus,
-         liveTextStatus: liveTextStatus,
+         liveTextInputStatus: liveTextStatus,
          onCopy: onCopy,
          onCut: onCut,
          onPaste: onPaste,
          onSelectAll: onSelectAll,
-         onCaptureText: onCaptureText
+         onLiveTextInput: onCaptureText
        );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
@@ -217,7 +217,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             return localizations.selectAllButtonLabel;
           case ContextMenuButtonType.delete:
             return localizations.deleteButtonTooltip.toUpperCase();
-          case ContextMenuButtonType.captureText:
+          case ContextMenuButtonType.liveTextInput:
             return localizations.scanTextButtonLabel;
           case ContextMenuButtonType.custom:
             return '';
