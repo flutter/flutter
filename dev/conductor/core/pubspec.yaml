@@ -10,7 +10,7 @@ dependencies:
   archive: 3.3.2
   args: 2.3.1
   http: 0.13.5
-  intl: 0.17.0
+  intl: 0.18.0
   meta: 1.8.0
   path: 1.8.3
   process: 4.2.4
