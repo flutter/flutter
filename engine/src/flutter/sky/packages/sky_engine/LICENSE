@@ -245,7 +245,6 @@ fuchsia-vulkan
 fuchsia_sdk
 glslang
 khronos
-pkg
 shaderc
 spirv-cross
 txt
