@@ -125,6 +125,13 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
       const ui::AXClippingBehavior clipping_behavior,
       ui::AXOffscreenResult* offscreen_result) const override;
 
+  // |ui::AXPlatformNodeDelegateBase|
+  gfx::NativeViewAccessible GetLowestPlatformAncestor() const override;
+
+  // |ui::AXPlatformNodeDelegateBase|
+  ui::AXNodePosition::AXPositionInstance CreateTextPositionAt(
+      int offset) const override;
+
   //------------------------------------------------------------------------------
   /// @brief      Called only once, immediately after construction. The
   ///             constructor doesn't take any arguments because in the Windows
@@ -146,6 +153,17 @@ class FlutterPlatformNodeDelegate : public ui::AXPlatformNodeDelegateBase {
 
   // Get the platform node represented by this delegate.
   virtual ui::AXPlatformNode* GetPlatformNode() const;
+
+  // |ui::AXPlatformNodeDelegateBase|
+  virtual ui::AXPlatformNode* GetFromNodeID(int32_t id) override;
+
+  // |ui::AXPlatformNodeDelegateBase|
+  virtual ui::AXPlatformNode* GetFromTreeIDAndNodeID(
+      const ui::AXTreeID& tree_id,
+      int32_t node_id) override;
+
+  // |ui::AXPlatformNodeDelegateBase|
+  virtual const ui::AXTree::Selection GetUnignoredSelection() const override;
 
  private:
   ui::AXNode* ax_node_;

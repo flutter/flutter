@@ -6,7 +6,9 @@
 
 #include <utility>
 
+#include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/third_party/accessibility/ax/ax_action_data.h"
+#include "flutter/third_party/accessibility/ax/ax_tree_manager_map.h"
 #include "flutter/third_party/accessibility/gfx/geometry/rect_conversions.h"
 
 namespace flutter {
@@ -116,6 +118,48 @@ FlutterPlatformNodeDelegate::GetOwnerBridge() const {
 
 ui::AXPlatformNode* FlutterPlatformNodeDelegate::GetPlatformNode() const {
   return nullptr;
+}
+
+gfx::NativeViewAccessible
+FlutterPlatformNodeDelegate::GetLowestPlatformAncestor() const {
+  auto bridge_ptr = bridge_.lock();
+  BASE_DCHECK(bridge_ptr);
+  auto lowest_platform_ancestor = ax_node_->GetLowestPlatformAncestor();
+  if (lowest_platform_ancestor) {
+    return bridge_ptr->GetNativeAccessibleFromId(
+        ax_node_->GetLowestPlatformAncestor()->id());
+  }
+  return nullptr;
+}
+
+ui::AXNodePosition::AXPositionInstance
+FlutterPlatformNodeDelegate::CreateTextPositionAt(int offset) const {
+  return ui::AXNodePosition::CreatePosition(*ax_node_, offset);
+}
+
+ui::AXPlatformNode* FlutterPlatformNodeDelegate::GetFromNodeID(
+    int32_t node_id) {
+  ui::AXTreeManager* tree_manager =
+      ui::AXTreeManagerMap::GetInstance().GetManager(
+          ax_node_->tree()->GetAXTreeID());
+  AccessibilityBridge* platform_manager =
+      static_cast<AccessibilityBridge*>(tree_manager);
+  return platform_manager->GetPlatformNodeFromTree(node_id);
+}
+
+ui::AXPlatformNode* FlutterPlatformNodeDelegate::GetFromTreeIDAndNodeID(
+    const ui::AXTreeID& tree_id,
+    int32_t node_id) {
+  ui::AXTreeManager* tree_manager =
+      ui::AXTreeManagerMap::GetInstance().GetManager(tree_id);
+  AccessibilityBridge* platform_manager =
+      static_cast<AccessibilityBridge*>(tree_manager);
+  return platform_manager->GetPlatformNodeFromTree(node_id);
+}
+
+const ui::AXTree::Selection FlutterPlatformNodeDelegate::GetUnignoredSelection()
+    const {
+  return ax_node_->GetUnignoredSelection();
 }
 
 }  // namespace flutter
