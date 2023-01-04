@@ -314,6 +314,7 @@ xcodebuild build-for-testing \
   -workspace Runner.xcworkspace \
   -scheme Runner \
   -xcconfig Flutter/Release.xcconfig \
+  -configuration Release \
   -derivedDataPath \
   $output -sdk iphoneos
 popd
