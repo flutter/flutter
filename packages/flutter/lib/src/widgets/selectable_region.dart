@@ -1116,7 +1116,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   @override
   void startLiveTextInput(SelectionChangedCause cause) {
-    assert(false);
+    assert(false, 'Live Text input is not supported because SelectableRegion is not editable.');
   }
 
   // [SelectionRegistrar] override.

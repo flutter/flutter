@@ -3094,7 +3094,7 @@ enum ClipboardStatus {
 /// A [ValueNotifier] whose [value] indicates whether the current device supports the live text
 /// (OCR) function.
 ///
-/// Call [update] to asynchronously update value if needed.
+/// Call [update] to asynchronously update [value] if needed.
 class LiveTextInputStatusNotifier extends ValueNotifier<LiveTextInputStatus> with WidgetsBindingObserver {
   /// Create a new LiveTextStatusNotifier.
   LiveTextInputStatusNotifier({
@@ -3117,7 +3117,7 @@ class LiveTextInputStatusNotifier extends ValueNotifier<LiveTextInputStatus> wit
         exception: exception,
         stack: stack,
         library: 'widget library',
-        context: ErrorDescription('while checking the availability of Live Text'),
+        context: ErrorDescription('while checking the availability of Live Text input'),
       ));
       // In the case of an error from the Live Text API, set the value to
       // unknown so that it will try to update again later.
