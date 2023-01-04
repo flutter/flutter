@@ -8,6 +8,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "third_party/dart/runtime/include/dart_api.h"
