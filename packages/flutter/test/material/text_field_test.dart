@@ -14012,7 +14012,7 @@ void main() {
       await tester.pumpWidget(
         overlay(
           child: const TextField(
-            spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
+            spellCheckConfiguration: SpellCheckConfiguration.disabled(),
           ),
         ),
       );
@@ -14028,7 +14028,7 @@ void main() {
       await tester.pumpWidget(
         overlay(
           child: const TextField(
-            spellCheckConfiguration: const SpellCheckConfiguration(),
+            spellCheckConfiguration: SpellCheckConfiguration(),
           ),
         ),
       );
