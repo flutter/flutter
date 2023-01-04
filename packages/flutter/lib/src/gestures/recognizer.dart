@@ -125,8 +125,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   final AllowedButtonsFilter _allowedButtonsFilter;
 
   // The default value for [allowedButtonsFilter].
-  // Accept the input if, and only if, [kPrimaryButton] is pressed.
-  static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
+  // Accept any input.
+  static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
@@ -544,7 +544,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     )
     super.kind,
     super.supportedDevices,
-    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+    super.allowedButtonsFilter,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -553,9 +553,6 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
        );
-
-  /// PrimaryPointerGestureRecognizer gestures are accepted regardless of the button state.
-  static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.

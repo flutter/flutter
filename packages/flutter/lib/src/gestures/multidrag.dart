@@ -223,8 +223,11 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    super.allowedButtonsFilter,
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
+
+  // Accept the input if, and only if, [kPrimaryButton] is pressed.
+  static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
@@ -327,14 +330,6 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(_pointers!.containsKey(pointer));
     GestureBinding.instance.pointerRouter.removeRoute(pointer, _handleEvent);
     _pointers!.remove(pointer)!.dispose();
-  }
-
-  /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
-  @override
-  @protected
-  bool isPointerAllowed(PointerDownEvent event) {
-    // Check for mouse button, then device kind and button type.
-    return super.isPointerAllowed(event);
   }
 
   @override
