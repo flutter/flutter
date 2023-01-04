@@ -84,7 +84,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
-    required AllowedButtonsFilter? allowedButtonsFilter,
+    AllowedButtonsFilter? allowedButtonsFilter,
   }) : assert(kind == null || supportedDevices == null),
        _supportedDevices = kind == null ? supportedDevices : <PointerDeviceKind>{ kind },
        _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
@@ -217,8 +217,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   bool isPointerAllowed(PointerDownEvent event) {
     // Currently, it only checks for device kind. But in the future we could check
     // for other things e.g. mouse button.
-    return _supportedDevices == null ||
-        _supportedDevices!.contains(event.kind) ||
+    return (_supportedDevices == null ||
+            _supportedDevices!.contains(event.kind)) &&
         _allowedButtonsFilter(event.buttons);
   }
 
