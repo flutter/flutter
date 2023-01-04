@@ -205,7 +205,7 @@ class UpgradeCommandRunner {
     // Make sure the welcome message re-display is delayed until the end.
     final PersistentToolState persistentToolState = globals.persistentToolState!;
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
-    await precacheArtifacts(workingDirectory);
+    await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
