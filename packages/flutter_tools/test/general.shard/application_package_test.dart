@@ -91,10 +91,10 @@ void main() {
         )
       );
 
-      final ApplicationPackage applicationPackage = (await ApplicationPackageFactory.instance!.getPackageForPlatform(
+      await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
         applicationBinary: apkFile,
-      ))!;
+      );
       final BufferLogger logger = BufferLogger.test();
       final FlutterProject project = await aModuleProject();
       project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
