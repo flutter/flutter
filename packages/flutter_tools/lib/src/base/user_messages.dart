@@ -176,10 +176,10 @@ class UserMessages {
       'Launch Xcode and install additional required components when prompted or run:\n'
       '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
-      'Xcode not installed; this is necessary for iOS development.\n'
+      'Xcode not installed; this is necessary for iOS and macOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
   String get xcodeIncomplete =>
-      'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
+      'Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.\n'
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
