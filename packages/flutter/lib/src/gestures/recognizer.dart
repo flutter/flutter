@@ -544,7 +544,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     )
     super.kind,
     super.supportedDevices,
-    super.allowedButtonsFilter,
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',
@@ -553,6 +553,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
          postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be positive or null',
        );
+
+  /// PrimaryPointerGestureRecognizer gestures are accepted regardless of the button state.
+  static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.

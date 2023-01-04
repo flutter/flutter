@@ -149,7 +149,11 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// Creates a tap gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  BaseTapGestureRecognizer({ super.debugOwner, super.supportedDevices })
+  BaseTapGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+    super.allowedButtonsFilter,
+  })
     : super(deadline: kPressTimeout);
 
   bool _sentTapDown = false;

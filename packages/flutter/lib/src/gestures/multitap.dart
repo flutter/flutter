@@ -815,8 +815,11 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
   SerialTapGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
-    super.allowedButtonsFilter
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior
   });
+
+  /// SerialTap gestures are accepted regardless of the button state.
+  static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   /// A pointer has contacted the screen at a particular location, which might
   /// be the start of a serial tap.

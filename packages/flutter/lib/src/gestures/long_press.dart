@@ -257,8 +257,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
-    super.allowedButtonsFilter,
     super.debugOwner,
+    super.allowedButtonsFilter,
   }) : super(
          deadline: duration ?? kLongPressTimeout,
        );

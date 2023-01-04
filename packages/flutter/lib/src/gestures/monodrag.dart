@@ -645,8 +645,10 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   PanGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
-    super.allowedButtonsFilter,
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
+
+  static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
