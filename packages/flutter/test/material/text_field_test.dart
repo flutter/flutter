@@ -13987,7 +13987,7 @@ void main() {
     testWidgets('Spell check configuration properly enabled by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         overlay(
-          child: TextField(),
+          child: const TextField(),
         ),
       );
 
@@ -14011,7 +14011,7 @@ void main() {
     testWidgets('Spell check configuration disabled when disabled manually', (WidgetTester tester) async {
       await tester.pumpWidget(
         overlay(
-          child: TextField(
+          child: const TextField(
             spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
           ),
         ),
@@ -14027,7 +14027,7 @@ void main() {
 
       await tester.pumpWidget(
         overlay(
-          child: TextField(
+          child: const TextField(
             spellCheckConfiguration: const SpellCheckConfiguration(),
           ),
         ),
