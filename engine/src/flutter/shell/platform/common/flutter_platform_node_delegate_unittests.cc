@@ -246,5 +246,63 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   EXPECT_EQ(result, false);
 }
 
+TEST(FlutterPlatformNodeDelegateTest, selfIsLowestPlatformAncestor) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "";
+  root.child_count = 0;
+  root.children_in_traversal_order = nullptr;
+  root.custom_accessibility_actions_count = 0;
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  bridge->CommitUpdates();
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto lowest_platform_ancestor = root_node->GetLowestPlatformAncestor();
+  EXPECT_EQ(root_node->GetNativeViewAccessible(), lowest_platform_ancestor);
+}
+
+TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode root;
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "";
+  root.child_count = 1;
+  int32_t children[] = {1};
+  root.children_in_traversal_order = children;
+  root.custom_accessibility_actions_count = 0;
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+
+  FlutterSemanticsNode child1;
+  child1.id = 1;
+  child1.label = "child 1";
+  child1.hint = "";
+  child1.value = "";
+  child1.increased_value = "";
+  child1.decreased_value = "";
+  child1.tooltip = "";
+  child1.child_count = 0;
+  child1.custom_accessibility_actions_count = 0;
+  bridge->AddFlutterSemanticsNodeUpdate(&child1);
+
+  bridge->CommitUpdates();
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  auto node_by_id = root_node->GetFromNodeID(1);
+  EXPECT_EQ(child1_node->GetPlatformNode(), node_by_id);
+}
+
 }  // namespace testing
 }  // namespace flutter
