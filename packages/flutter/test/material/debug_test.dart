@@ -193,7 +193,7 @@ void main() {
       '     Semantics\n'
       '     Localizations\n'
       '     MediaQuery\n'
-      '     _MediaQueryFromWindow\n'
+      '     _MediaQueryFromView\n'
       '     Semantics\n'
       '     _FocusInheritedScope\n'
       '     Focus\n'

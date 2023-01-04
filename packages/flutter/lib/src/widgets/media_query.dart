@@ -924,8 +924,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     Key? key,
     required Widget child,
   }) {
-    return _MediaQueryFromWindow(
+    return _MediaQueryFromView(
       key: key,
+      view: WidgetsBinding.instance.window,
+      ignoreParentData: true,
       child: child,
     );
   }
@@ -1451,103 +1453,6 @@ enum NavigationMode {
   /// controls will retain focus when disabled, and will be able to receive
   /// focus (although they remain disabled) when traversed.
   directional,
-}
-
-/// Provides a [MediaQuery] which is built and updated using the latest
-/// [WidgetsBinding.window] values.
-///
-/// Receives `window` updates by listening to [WidgetsBinding].
-///
-/// The standalone widget ensures that it rebuilds **only** [MediaQuery] and
-/// its dependents when `window` changes, instead of rebuilding the entire
-/// widget tree.
-///
-/// It is used by [WidgetsApp] if no other [MediaQuery] is available above it.
-///
-/// See also:
-///
-///  * [MediaQuery], which establishes a subtree in which media queries resolve
-///    to a [MediaQueryData].
-class _MediaQueryFromWindow extends StatefulWidget {
-  /// Creates a [_MediaQueryFromWindow] that provides a [MediaQuery] to its
-  /// descendants using the `window` to keep [MediaQueryData] up to date.
-  ///
-  /// The [child] must not be null.
-  const _MediaQueryFromWindow({
-    super.key,
-    required this.child,
-  });
-
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  @override
-  State<_MediaQueryFromWindow> createState() => _MediaQueryFromWindowState();
-}
-
-class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  // ACCESSIBILITY
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  // METRICS
-
-  @override
-  void didChangeMetrics() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  // RENDERING
-  @override
-  void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
-    if (!kReleaseMode) {
-      data = data.copyWith(platformBrightness: debugBrightnessOverride);
-    }
-    return MediaQuery(
-      data: data,
-      child: widget.child,
-    );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
 }
 
 class _MediaQueryFromView extends StatefulWidget {
