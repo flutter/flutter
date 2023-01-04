@@ -57,7 +57,9 @@ typedef TaskCallback<T> = FutureOr<T> Function();
 /// priority needs to be run.
 ///
 /// Return true if a task with the given priority should be executed at this
-/// time, false otherwise.
+/// time, false otherwise. Outstanding tasks after returning false are
+/// re-evaluated after the next (or current) frame, or after a new task is
+/// scheduled.
 ///
 /// See also:
 ///
