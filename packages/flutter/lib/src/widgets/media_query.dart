@@ -138,8 +138,8 @@ enum _MediaQueryAspect {
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
-  /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [dart:ui.PlatformDispatcher].
+  /// Consider using [MediaQueryData.fromView] to create data based on a
+  /// [dart:ui.FlutterView].
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
@@ -197,6 +197,12 @@ class MediaQueryData {
   /// provided. If `platformData` is provided, callers should ensure to call
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
+  ///    [FlutterView], makes it available to descendant widgets, and sets up
+  ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
     : size = view.physicalSize / view.devicePixelRatio,
       devicePixelRatio = view.devicePixelRatio,
