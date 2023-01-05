@@ -53,10 +53,13 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
+  auto tolerance =
+      kDefaultCurveTolerance / entity.GetTransformation().GetMaxBasisLength();
+
   VertexBuffer vertex_buffer;
   auto& host_buffer = pass.GetTransientsBuffer();
   auto tesselation_result = renderer.GetTessellator()->Tessellate(
-      path_.GetFillType(), path_.CreatePolyline(),
+      path_.GetFillType(), path_.CreatePolyline(tolerance),
       [&vertex_buffer, &host_buffer](
           const float* vertices, size_t vertices_count, const uint16_t* indices,
           size_t indices_count) {
