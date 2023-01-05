@@ -49,7 +49,7 @@ enum DragStartBehavior {
 }
 
 /// Signature for `allowedButtonsFilter` in [GestureRecognizer].
-/// Used to filter the input buttons of the pointer event.
+/// Used to filter the input buttons of incoming pointer events.
 /// The parameter `buttons` comes from [PointerEvent.buttons].
 typedef AllowedButtonsFilter = bool Function(int buttons);
 
@@ -105,7 +105,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// tracked and recognized.
   final Set<PointerDeviceKind>? _supportedDevices;
 
-    /// {@template flutter.gestures.multidrag._allowedButtonsFilter}
+  /// {@template flutter.gestures.multidrag._allowedButtonsFilter}
   /// Called when interaction starts. This limits the dragging behavior
   /// for custom clicks (such as scroll click). Its parameter comes
   /// from [PointerEvent.buttons].
@@ -120,7 +120,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// When value is `(int buttons) => false`, allow no interactions.
   /// When value is `(int buttons) => true`, allow all interactions.
   ///
-  /// Defaults to primary button only.
+  /// Defaults to all buttons.
   /// {@endtemplate}
   final AllowedButtonsFilter _allowedButtonsFilter;
 
@@ -215,8 +215,6 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
   @protected
   bool isPointerAllowed(PointerDownEvent event) {
-    // Currently, it only checks for device kind. But in the future we could check
-    // for other things e.g. mouse button.
     return (_supportedDevices == null ||
             _supportedDevices!.contains(event.kind)) &&
         _allowedButtonsFilter(event.buttons);
