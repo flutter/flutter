@@ -1568,7 +1568,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         result = SelectionResult.end;
         break;
       case TextGranularity.line:
-        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(this));
+        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, paragraph._textPainter.textLayoutWithOffset!.textLayout.lineBoundaries);
         result = SelectionResult.end;
         break;
       case TextGranularity.document:
