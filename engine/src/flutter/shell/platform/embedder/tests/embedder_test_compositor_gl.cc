@@ -29,7 +29,7 @@ bool EmbedderTestCompositorGL::UpdateOffscrenComposition(
 
   auto surface =
       SkSurface::MakeRenderTarget(context_.get(),            // context
-                                  SkBudgeted::kNo,           // budgeted
+                                  skgpu::Budgeted::kNo,      // budgeted
                                   image_info,                // image info
                                   1,                         // sample count
                                   kTopLeft_GrSurfaceOrigin,  // surface origin

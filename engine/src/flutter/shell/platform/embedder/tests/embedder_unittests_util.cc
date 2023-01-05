@@ -19,7 +19,7 @@ sk_sp<SkSurface> CreateRenderSurface(const FlutterLayer& layer,
       SkImageInfo::MakeN32Premul(layer.size.width, layer.size.height);
   auto surface = context ? SkSurface::MakeRenderTarget(
                                context,                   // context
-                               SkBudgeted::kNo,           // budgeted
+                               skgpu::Budgeted::kNo,      // budgeted
                                image_info,                // image info
                                1,                         // sample count
                                kTopLeft_GrSurfaceOrigin,  // surface origin

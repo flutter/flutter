@@ -75,7 +75,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   MTLTextureDescriptor* textureDescriptor = [[MTLTextureDescriptor alloc] init];
@@ -133,7 +133,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   TestExternalTexture* testExternalTexture =
@@ -185,7 +185,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   TestExternalTexture* testExternalTexture =
@@ -239,7 +239,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) 
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, SkBudgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   TestExternalTexture* testExternalTexture =
