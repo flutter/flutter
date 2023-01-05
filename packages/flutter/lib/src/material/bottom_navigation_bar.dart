@@ -1121,7 +1121,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
         break;
       case BottomNavigationBarType.shifting:
-        backgroundColor = _backgroundColor;
+        backgroundColor = _backgroundColor ?? bottomTheme.backgroundColor;
         break;
     }
 

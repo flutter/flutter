@@ -912,6 +912,44 @@ void main() {
     expect(_getMaterial(tester).color, equals(itemColor));
   });
 
+  testWidgets('Shifting BottomNavigationBar background color is overridden by theme color to prevent null', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.black;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark().copyWith(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            backgroundColor: backgroundColor,
+          ),
+        ),
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.camera),
+                label: 'Camera',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.back_hand),
+                label: 'Hand',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(_getMaterial(tester).color, equals(backgroundColor));
+  });
+
   testWidgets('Specifying both selectedItemColor and fixedColor asserts', (WidgetTester tester) async {
     expect(
       () {
