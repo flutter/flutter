@@ -1129,11 +1129,9 @@ class TextPainter {
     // Unfortunately we can't deal with infinity so layout a second time.
     if (needsLayout && adjustedMaxWidth == double.infinity) {
       newLayout._paragraph.layout(ui.ParagraphConstraints(width: contentWidth));
-      //print('!!! second layout:  intrinsic $intrinsicWidth, clamp $contentWidth => ${newLayout._paragraph.width}');
     }
 
     final Offset newPaintOffset = _computePaintOffsetWithConstraints(newLayout, contentWidth);
-    print('> layout ${needsLayout ? "done" : "skipped"} $hashCode: content width: $minWidth - ($contentWidth) - $maxWidth (adjusted: $knownMaxIntrinsicWidth >= $adjustedMaxWidth), offset: $newPaintOffset width: ${newLayout.width}');
     if (needsLayout) {
       _rebuildParagraphForPaint = false;
       _layoutCache?.layout._paragraph.dispose();

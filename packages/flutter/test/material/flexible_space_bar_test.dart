@@ -474,7 +474,7 @@ void main() {
       Rect.fromLTRB(
         0,
         height - titleFontSize - 10,
-        (width / 1.5).floorToDouble() * 1.5,
+        width,
         height,
       ),
     );
@@ -546,7 +546,7 @@ void main() {
       Rect.fromLTRB(
         0,
         height - titleFontSize - bottomMargin,
-        (collapsedWidth / 3).floorToDouble() * 3,
+        collapsedWidth,
         height,
       ),
     );
