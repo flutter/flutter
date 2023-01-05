@@ -21,6 +21,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
+import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -190,15 +191,6 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsHotReload => interfaceType == IOSDeviceConnectionInterface.usb;
-
-  @override
-  bool get supportsHotRestart => interfaceType == IOSDeviceConnectionInterface.usb;
-
-  @override
-  bool get supportsFlutterExit => interfaceType == IOSDeviceConnectionInterface.usb;
-
-  @override
   final String name;
 
   @override
@@ -318,7 +310,12 @@ class IOSDevice extends Device {
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
     String? packageId;
-
+    if (interfaceType == IOSDeviceConnectionInterface.network &&
+        debuggingOptions.debuggingEnabled &&
+        debuggingOptions.disablePortPublication) {
+      _logger.printError('Port publication (publish-port) must be enabled for wireless debugging.');
+      return LaunchResult.failed();
+    }
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 
@@ -353,6 +350,8 @@ class IOSDevice extends Device {
       EnvironmentType.physical,
       route,
       platformArgs,
+      ipv6: ipv6,
+      interfaceType: interfaceType,
     );
     final Status installStatus = _logger.startProgress(
       'Installing and launching...',
@@ -379,9 +378,10 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
+        // Don't port foward if debugging with a network device.
         observatoryDiscovery = ProtocolDiscovery.observatory(
           deviceLogReader,
-          portForwarder: portForwarder,
+          portForwarder: interfaceType == IOSDeviceConnectionInterface.network ? null : portForwarder,
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
@@ -413,11 +413,32 @@ class IOSDevice extends Device {
       }
 
       _logger.printTrace('Application launched on the device. Waiting for observatory url.');
-      final Timer timer = Timer(discoveryTimeout ?? const Duration(seconds: 30), () {
-        _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
+      final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 60 : 30;
+      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
+        _logger.printError('iOS Observatory not discovered after ${discoveryTimeout ?? defaultTimeout} seconds. This is taking much longer than expected...');
         iosDeployDebugger?.pauseDumpBacktraceResume();
       });
-      final Uri? localUri = await observatoryDiscovery?.uri;
+
+      Uri? localUri;
+      if (interfaceType == IOSDeviceConnectionInterface.network) {
+        try {
+          // Wait for iOS Observatory to start up.
+          await observatoryDiscovery?.uri;
+
+          // Get Observatory URL with the device IP.
+          localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
+            package.id,
+            this,
+            usesIpv6: ipv6,
+            deviceVmservicePort: debuggingOptions.deviceVmServicePort,
+            isNetworkDevice: true,
+          );
+        } on StateError {
+          _logger.printError('iOS Observatory not discovered before stream was closed.');
+        }
+      } else {
+        localUri = await observatoryDiscovery?.uri;
+      }
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();

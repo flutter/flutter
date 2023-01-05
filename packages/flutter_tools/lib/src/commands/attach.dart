@@ -24,6 +24,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
@@ -303,12 +304,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           rethrow;
         }
       } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
+        final bool isNetworkDevice = (device is IOSDevice) && device.interfaceType == IOSDeviceConnectionInterface.network;
         final Uri? uriFromMdns =
           await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
             appId,
             device,
             usesIpv6: usesIpv6,
             deviceVmservicePort: deviceVmservicePort,
+            isNetworkDevice: isNetworkDevice,
           );
         observatoryUri = uriFromMdns == null
           ? null

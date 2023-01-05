@@ -237,18 +237,85 @@ void main() {
       final Uri? uri = await portDiscovery.getObservatoryUri('bar', device, hostVmservicePort: 0);
       expect(uri.toString(), 'http://127.0.0.1:123/');
     });
+
+    testWithoutContext('Get network device IP (iPv4)', () async {
+      final MDnsClient client = FakeMDnsClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+          ],
+        },
+        ipResponse: <String, List<IPAddressResourceRecord>>{
+          'appId': <IPAddressResourceRecord>[
+            IPAddressResourceRecord('Device IP', 0, address: InternetAddress.tryParse('111.111.111.111')!),
+          ],
+        },
+        txtResponse: <String, List<TxtResourceRecord>>{
+          'bar': <TxtResourceRecord>[
+            TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+          ],
+        },
+      );
+
+      final FakeIOSDevice device = FakeIOSDevice();
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: TestUsage(),
+      );
+      final Uri? uri = await portDiscovery.getObservatoryUri('bar', device, isNetworkDevice: true);
+      expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
+    });
+
+    testWithoutContext('Get network device IP (iPv6)', () async {
+      final MDnsClient client = FakeMDnsClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+          ],
+        },
+        ipResponse: <String, List<IPAddressResourceRecord>>{
+          'appId': <IPAddressResourceRecord>[
+            IPAddressResourceRecord('Device IP', 0, address: InternetAddress.tryParse('1111:1111:1111:1111:1111:1111:1111:1111')!),
+          ],
+        },
+        txtResponse: <String, List<TxtResourceRecord>>{
+          'bar': <TxtResourceRecord>[
+            TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+          ],
+        },
+      );
+
+      final FakeIOSDevice device = FakeIOSDevice();
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+        logger: BufferLogger.test(),
+        flutterUsage: TestUsage(),
+      );
+      final Uri? uri = await portDiscovery.getObservatoryUri('bar', device, isNetworkDevice: true);
+      expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
+    });
+
   });
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {
   FakeMDnsClient(this.ptrRecords, this.srvResponse, {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
+    this.ipResponse = const <String, List<IPAddressResourceRecord>>{},
     this.osErrorOnStart = false,
   });
 
   final List<PtrResourceRecord> ptrRecords;
   final Map<String, List<SrvResourceRecord>> srvResponse;
   final Map<String, List<TxtResourceRecord>> txtResponse;
+  final Map<String, List<IPAddressResourceRecord>> ipResponse;
   final bool osErrorOnStart;
 
   @override
@@ -278,6 +345,10 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     if (T == TxtResourceRecord) {
       final String key = query.fullyQualifiedName;
       return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[]) as Stream<T>;
+    }
+    if (T == IPAddressResourceRecord) {
+      final String key = query.fullyQualifiedName;
+      return Stream<IPAddressResourceRecord>.fromIterable(ipResponse[key] ?? <IPAddressResourceRecord>[]) as Stream<T>;
     }
     throw UnsupportedError('Unsupported query type $T');
   }

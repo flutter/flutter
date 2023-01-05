@@ -57,7 +57,12 @@ class MDnsObservatoryDiscovery {
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
   @visibleForTesting
-  Future<MDnsObservatoryDiscoveryResult?> query({String? applicationId, int? deviceVmservicePort}) async {
+  Future<MDnsObservatoryDiscoveryResult?> query({
+    String? applicationId,
+    int? deviceVmservicePort,
+    bool ipv6 = false,
+    bool isNetworkDevice = false
+  }) async {
     _logger.printTrace('Checking for advertised Dart observatories...');
     try {
       await _client.start();
@@ -113,6 +118,31 @@ class MDnsObservatoryDiscovery {
         _logger.printWarning('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
+
+      // Get the IP address of the service if using a network device.
+      InternetAddress? ipAddress;
+      if (isNetworkDevice) {
+        List<IPAddressResourceRecord> ipAddresses = await _client
+          .lookup<IPAddressResourceRecord>(
+            ipv6 ? ResourceRecordQuery.addressIPv6(srv.first.target) : ResourceRecordQuery.addressIPv4(srv.first.target),
+          )
+          .toList();
+        if (ipAddresses.isEmpty) {
+          throwToolExit('Did not find IP for service ${srv.first.target}.');
+        }
+
+        // Filter out link-local addresses.
+        if (ipAddresses.length > 1) {
+          ipAddresses = ipAddresses.where((IPAddressResourceRecord element) => element.address.isLinkLocal == false).toList();
+        }
+
+        if (ipAddresses.length > 1) {
+          _logger.printWarning('Unexpectedly found more than one IP for observatory for service ${srv.first.target} '
+                    '- using first one (${ipAddresses.first.address}).');
+        }
+        ipAddress = ipAddresses.first.address;
+      }
+
       _logger.printTrace('Checking for authentication code for $domainName');
       final List<TxtResourceRecord> txt = await _client
         .lookup<TxtResourceRecord>(
@@ -139,7 +169,7 @@ class MDnsObservatoryDiscovery {
       if (!authCode.endsWith('/')) {
         authCode += '/';
       }
-      return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
+      return MDnsObservatoryDiscoveryResult(srv.first.port, authCode, ipAddress: ipAddress);
     } finally {
       _client.stop();
     }
@@ -149,25 +179,33 @@ class MDnsObservatoryDiscovery {
     bool usesIpv6 = false,
     int? hostVmservicePort,
     int? deviceVmservicePort,
+    bool isNetworkDevice = false,
   }) async {
     final MDnsObservatoryDiscoveryResult? result = await query(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
+      ipv6: usesIpv6,
+      isNetworkDevice: isNetworkDevice,
     );
     if (result == null) {
       await _checkForIPv4LinkLocal(device);
       return null;
     }
-
-    final String host = usesIpv6
+    final String host;
+    if (isNetworkDevice && result.ipAddress != null) {
+      host = result.ipAddress!.address;
+    } else {
+      host = usesIpv6
       ? InternetAddress.loopbackIPv6.address
       : InternetAddress.loopbackIPv4.address;
+    }
     return buildObservatoryUri(
       device,
       host,
       result.port,
       hostVmservicePort,
       result.authCode,
+      isNetworkDevice,
     );
   }
 
@@ -237,9 +275,10 @@ class MDnsObservatoryDiscovery {
 }
 
 class MDnsObservatoryDiscoveryResult {
-  MDnsObservatoryDiscoveryResult(this.port, this.authCode);
+  MDnsObservatoryDiscoveryResult(this.port, this.authCode, {this.ipAddress});
   final int port;
   final String authCode;
+  final InternetAddress? ipAddress;
 }
 
 Future<Uri> buildObservatoryUri(
@@ -248,6 +287,7 @@ Future<Uri> buildObservatoryUri(
   int devicePort, [
   int? hostVmservicePort,
   String? authCode,
+  bool isNetworkDevice = false,
 ]) async {
   String path = '/';
   if (authCode != null) {
@@ -259,8 +299,14 @@ Future<Uri> buildObservatoryUri(
     path += '/';
   }
   hostVmservicePort ??= 0;
-  final int? actualHostPort = hostVmservicePort == 0 ?
+
+  final int? actualHostPort;
+  if (isNetworkDevice) {
+    actualHostPort = devicePort;
+  } else {
+    actualHostPort = hostVmservicePort == 0 ?
     await device.portForwarder?.forward(devicePort) :
     hostVmservicePort;
+  }
   return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }
