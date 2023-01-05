@@ -1562,7 +1562,9 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   Widget build(BuildContext context) {
     MediaQueryData effectiveData = _data!;
-    if (!kReleaseMode) {
+    // If we get our platformBrightness from the PlatformDispatcher (i.e. we have no parentData) replace it
+    // with the debugBrightnessOverride in non-release mode.
+    if (!kReleaseMode && _parentData == null && effectiveData.platformBrightness != debugBrightnessOverride) {
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }
     return MediaQuery(

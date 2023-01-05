@@ -1551,7 +1551,7 @@ class TestView implements FlutterView {
 class TestWindowPadding implements WindowPadding {
   const TestWindowPadding(this.value);
   final double value;
-  
+
   @override
   double get bottom => value;
   @override
