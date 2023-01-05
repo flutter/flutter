@@ -27,6 +27,9 @@ typedef _HandleMessageCallBack = Future<bool> Function();
 /// When set to true, all platform messages will be printed to the console.
 const bool debugPrintPlatformMessages = false;
 
+/// The view ID for a singleton flutter window.
+const int kSingletonViewId = 0;
+
 /// Whether [_customUrlStrategy] has been set or not.
 ///
 /// It is valid to set [_customUrlStrategy] to null, so we can't use a null
@@ -43,11 +46,11 @@ set customUrlStrategy(UrlStrategy? strategy) {
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
 class EngineFlutterWindow extends ui.SingletonFlutterWindow {
-  EngineFlutterWindow(this._windowId, this.platformDispatcher) {
+  EngineFlutterWindow(this.viewId, this.platformDispatcher) {
     final EnginePlatformDispatcher engineDispatcher =
         platformDispatcher as EnginePlatformDispatcher;
-    engineDispatcher.windows[_windowId] = this;
-    engineDispatcher.windowConfigurations[_windowId] = const ui.ViewConfiguration();
+    engineDispatcher.viewData[viewId] = this;
+    engineDispatcher.windowConfigurations[viewId] = const ui.ViewConfiguration();
     if (_isUrlStrategySet) {
       _browserHistory = createHistoryForExistingState(_customUrlStrategy);
     }
@@ -58,7 +61,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     });
   }
 
-  final Object _windowId;
+  @override
+  final Object viewId;
 
   @override
   final ui.PlatformDispatcher platformDispatcher;
@@ -202,8 +206,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   ui.ViewConfiguration get viewConfiguration {
     final EnginePlatformDispatcher engineDispatcher =
         platformDispatcher as EnginePlatformDispatcher;
-    assert(engineDispatcher.windowConfigurations.containsKey(_windowId));
-    return engineDispatcher.windowConfigurations[_windowId] ??
+    assert(engineDispatcher.windowConfigurations.containsKey(viewId));
+    return engineDispatcher.windowConfigurations[viewId] ??
         const ui.ViewConfiguration();
   }
 
@@ -339,32 +343,13 @@ class EngineSingletonFlutterWindow extends EngineFlutterWindow {
   double? _debugDevicePixelRatio;
 }
 
-/// A type of [FlutterView] that can be hosted inside of a [FlutterWindow].
-class EngineFlutterWindowView extends ui.FlutterWindow {
-  EngineFlutterWindowView._(this._viewId, this.platformDispatcher);
-
-  final Object _viewId;
-
-  @override
-  final ui.PlatformDispatcher platformDispatcher;
-
-  @override
-  ui.ViewConfiguration get viewConfiguration {
-    final EnginePlatformDispatcher engineDispatcher =
-        platformDispatcher as EnginePlatformDispatcher;
-    assert(engineDispatcher.windowConfigurations.containsKey(_viewId));
-    return engineDispatcher.windowConfigurations[_viewId] ??
-        const ui.ViewConfiguration();
-  }
-}
-
 /// The window singleton.
 ///
 /// `dart:ui` window delegates to this value. However, this value has a wider
 /// API surface, providing Web-specific functionality that the standard
 /// `dart:ui` version does not.
 final EngineSingletonFlutterWindow window =
-    EngineSingletonFlutterWindow(0, EnginePlatformDispatcher.instance);
+    EngineSingletonFlutterWindow(kSingletonViewId, EnginePlatformDispatcher.instance);
 
 /// The Web implementation of [ui.WindowPadding].
 class WindowPadding implements ui.WindowPadding {

@@ -190,7 +190,13 @@ class PlatformConfiguration {
 
 class ViewConfiguration {
   const ViewConfiguration({
-    this.window,
+    FlutterView? view,
+    @Deprecated('''
+      Use the `view` property instead.
+      This change is related to adding multi-view support in Flutter.
+      This feature was deprecated after 3.7.0-1.2.pre.
+    ''')
+    FlutterView? window,
     this.devicePixelRatio = 1.0,
     this.geometry = Rect.zero,
     this.visible = false,
@@ -200,10 +206,17 @@ class ViewConfiguration {
     this.padding = WindowPadding.zero,
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
-  });
+  }) : assert(window == null || view == null),
+  _view = view ?? window;
 
   ViewConfiguration copyWith({
-    FlutterWindow? window,
+    FlutterView? view,
+    @Deprecated('''
+      Use the `view` property instead.
+      This change is related to adding multi-view support in Flutter.
+      This feature was deprecated after 3.7.0-1.2.pre.
+    ''')
+    FlutterView? window,
     double? devicePixelRatio,
     Rect? geometry,
     bool? visible,
@@ -214,8 +227,9 @@ class ViewConfiguration {
     GestureSettings? gestureSettings,
     List<DisplayFeature>? displayFeatures,
   }) {
+    assert(view == null || window == null);
     return ViewConfiguration(
-      window: window ?? this.window,
+      view: view ?? window ?? _view,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       geometry: geometry ?? this.geometry,
       visible: visible ?? this.visible,
@@ -228,7 +242,14 @@ class ViewConfiguration {
     );
   }
 
-  final FlutterWindow? window;
+  @Deprecated('''
+    Use the `view` property instead.
+    This change is related to adding multi-view support in Flutter.
+    This feature was deprecated after 3.7.0-1.2.pre.
+  ''')
+  FlutterView? get window => _view;
+  FlutterView? get view => _view;
+  final FlutterView? _view;
   final double devicePixelRatio;
   final Rect geometry;
   final bool visible;
@@ -241,7 +262,7 @@ class ViewConfiguration {
 
   @override
   String toString() {
-    return '$runtimeType[window: $window, geometry: $geometry]';
+    return '$runtimeType[view: $view, geometry: $geometry]';
   }
 }
 

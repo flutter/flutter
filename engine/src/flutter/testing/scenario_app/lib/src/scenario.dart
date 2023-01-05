@@ -7,7 +7,7 @@ import 'dart:ui';
 
 /// A scenario to run for testing.
 abstract class Scenario {
-  /// Creates a new scenario using a specific FlutterWindow instance.
+  /// Creates a new scenario using a specific FlutterView instance.
   Scenario(this.dispatcher);
 
   /// The window used by this scenario. May be mocked.

@@ -222,10 +222,10 @@ class PlatformDispatcher {
     final ViewConfiguration previousConfiguration =
         _viewConfigurations[id] ?? const ViewConfiguration();
     if (!_views.containsKey(id)) {
-      _views[id] = FlutterWindow._(id, this);
+      _views[id] = FlutterView._(id, this);
     }
     _viewConfigurations[id] = previousConfiguration.copyWith(
-      window: _views[id],
+      view: _views[id],
       devicePixelRatio: devicePixelRatio,
       geometry: Rect.fromLTWH(0.0, 0.0, width, height),
       viewPadding: WindowPadding._(
@@ -1289,8 +1289,18 @@ class PlatformConfiguration {
 /// An immutable view configuration.
 class ViewConfiguration {
   /// A const constructor for an immutable [ViewConfiguration].
+  ///
+  /// When constructing a view configuration, supply either the [view] or the
+  /// [window] property, but not both since the [view] and [window] property
+  /// are backed by the same instance variable.
   const ViewConfiguration({
-    this.window,
+    FlutterView? view,
+    @Deprecated('''
+      Use the `view` property instead.
+      This change is related to adding multi-view support in Flutter.
+      This feature was deprecated after 3.7.0-1.2.pre.
+    ''')
+    FlutterView? window,
     this.devicePixelRatio = 1.0,
     this.geometry = Rect.zero,
     this.visible = false,
@@ -1300,10 +1310,17 @@ class ViewConfiguration {
     this.padding = WindowPadding.zero,
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
-  });
+  }) : assert(window == null || view == null),
+    _view = view ?? window;
 
   /// Copy this configuration with some fields replaced.
   ViewConfiguration copyWith({
+    FlutterView? view,
+    @Deprecated('''
+      Use the `view` property instead.
+      This change is related to adding multi-view support in Flutter.
+      This feature was deprecated after 3.7.0-1.2.pre.
+    ''')
     FlutterView? window,
     double? devicePixelRatio,
     Rect? geometry,
@@ -1315,8 +1332,9 @@ class ViewConfiguration {
     GestureSettings? gestureSettings,
     List<DisplayFeature>? displayFeatures,
   }) {
+    assert(view == null || window == null);
     return ViewConfiguration(
-      window: window ?? this.window,
+      view: view ?? window ?? _view,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       geometry: geometry ?? this.geometry,
       visible: visible ?? this.visible,
@@ -1329,11 +1347,22 @@ class ViewConfiguration {
     );
   }
 
-  /// The top level view into which the view is placed and its geometry is
-  /// relative to.
+  /// The top level view for which this [ViewConfiguration]'s properties apply to.
   ///
-  /// If null, then this configuration represents a top level view itself.
-  final FlutterView? window;
+  /// If this property is null, this [ViewConfiguration] is a top level view.
+  @Deprecated('''
+    Use the `view` property instead.
+    This change is related to adding multi-view support in Flutter.
+    This feature was deprecated after 3.7.0-1.2.pre.
+  ''')
+  FlutterView? get window => _view;
+
+  /// The top level view for which this [ViewConfiguration]'s properties apply to.
+  ///
+  /// If this property is null, this [ViewConfiguration] is a top level view.
+  FlutterView? get view => _view;
+
+  final FlutterView?  _view;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
@@ -1427,7 +1456,7 @@ class ViewConfiguration {
 
   @override
   String toString() {
-    return '$runtimeType[window: $window, geometry: $geometry]';
+    return '$runtimeType[view: $view, geometry: $geometry]';
   }
 }
 
@@ -1666,7 +1695,7 @@ enum AppLifecycleState {
   /// On Android, this corresponds to an app or the Flutter host view running
   /// in the foreground inactive state.  Apps transition to this state when
   /// another activity is focused, such as a split-screen app, a phone call,
-  /// a picture-in-picture app, a system dialog, or another window.
+  /// a picture-in-picture app, a system dialog, or another view.
   ///
   /// Apps in this state should assume that they may be [paused] at any time.
   inactive,
