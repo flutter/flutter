@@ -4502,7 +4502,7 @@ class PositionedDirectional extends StatelessWidget {
 /// [Flex] to be any larger than the total size of all its children.
 ///
 /// [MainAxisAlignment] : How to align, center, or apply spacing
-/// between  the children in the direction of the main axis.
+/// between the children in the direction in the main axis.
 ///
 /// [CrossAxisAlignment] : How to align, or stretch, the children in
 /// the direction of the cross axis.
@@ -4607,45 +4607,45 @@ class PositionedDirectional extends StatelessWidget {
 ///
 ///    Children with a fit that is [FlexFit.loose] are given loose constraints.
 ///    The min size is not as big as the max, and the child is allowed to be
-///    the size it wants to be (in the main axis). The only children this
+///     the size it wants to be (in the main axis). The only children this
 ///    should apply to are [Flexible]s.
 ///
-/// An edge case was mentioned above, regarding using a [Flexible]
-/// and an [Expanded] in the same [Flex]. What happens is that the
-/// [Expanded] will use all of the space reserved for it in Step 2, but
-/// the [Flexible] might not use all of the space reserved for it. Oftentimes,
-/// a person will use an [Expanded] thinking it will use _all_ of the
-/// leftover space in a [Flex], but this situation will not do that. I.E.:
+///   An edge case was mentioned above, regarding using a [Flexible]
+///     and an [Expanded] in the same [Flex]. What happens is the
+///     [Expanded] will use all of the space reserved for it in Step 2, but
+///     the [Flexible] might not use all of the space reserved for it. Oftentimes,
+///     a person will use an [Expanded] thinking it will use _all_ of the
+///     leftover space in a [Flex], but this situation will not do that. I.E.:
 ///
-/// - A [Column] is in a parent that is 300 high, with tight constraints.
-/// - One child is a box with a set height of 100.
-/// - Leftover space in the [Column] is 200.
-/// - There is one [Expanded] with a [flex] of 1.
-/// - There is one [Flexible] with a [flex] of 1.
-/// - The flexes are equal, so half of the space (100) is reserved for each.
-/// - Each has a child that is 50 high.
-/// - The [Expanded] will ignore the child's height and stretch to 100 high.
-/// - The [Flexible] will not stretch its child, and will be 50 high.
+///     - A [Column] is in a parent that is 300 high, with tight constraints.
+///     - One child is a box with a set height of 100.
+///     - Leftover space in the [Column] is 200.
+///     - There is one [Expanded] with a [flex] of 1.
+///     - There is one [Flexible] with a [flex] of 1.
+///     - The flexes are equal, so half of the space (100) is reserved for each.
+///     - Each has a child that is 50 high.
+///     - The [Expanded] will ignore the child's height and stretch to 100 high.
+///     - The [Flexible] will not stretch its child, and will be 50 high.
 ///
-/// When you look at the result that is rendered, it seems the [Column]
-/// is short by 50, because all the children you can see add up to only
-/// 250. However, the [Column] is not short, it is the full 300 high. What
-/// is happening is the [Column] is 300 high but all of its children only
-/// add up to 250 high. The [Expanded] _did_ use all of the space it
-/// was offered, but it was only offered 100.
+///     When you look at the result that is rendered, it seems the [Column]
+///     is short by 50, because all the children you can see add up to only
+///     250. However, the [Column] is not short, it is the full 300 high. What
+///     is happening is the [Column] is 300 high but all of its children only
+///     add up to 250 high. The [Expanded] _did_ use all of the space it
+///     was offered, but it was only offered 100.
 ///
-/// The reason the [Column] looks short is that it has a transparent
-/// background, and you're looking _through_ the [Column] in the
-/// section that wasn't used. This makes it appear the [Column]
-/// is only 250 high, but it's actually 300, with 50 of that being
-/// transparent.
+///     The reason the [Column] looks short is that it has a transparent
+///     background, and you're looking _through_ the [Column] in the
+///     section that wasn't used. This makes it appear the [Column]
+///     is only 250 high, but it's actually 300, with 50 of that being
+///     transparent.
 ///
-/// That is the edge case that can be confusing, if you're expecting
-/// an [Expanded] to use up _all_ of the leftover space in your [Flex].
+///     That is the edge case that can be confusing, if you're expecting
+///     an [Expanded] to use up _all_ of the leftover space in your [Flex].
 ///
 ///    Remember, the other children that are not [Flexible] or
-///    [Expanded] do not have a flex parameter, and so do not
-///    go through layout steps 2 or 3.
+///     [Expanded] do not have a flex parameter, and so do not
+///     go through layout steps 2 or 3.
 ///
 /// 4. The final size of the [Flex] in its cross axis will end up being
 ///     the same as its largest child in the cross axis, but only as long
