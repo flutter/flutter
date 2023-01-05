@@ -215,9 +215,7 @@ List<FlutterCommand> generateCommands({
   MakeHostAppEditableCommand(),
   MigrateCommand(
     verbose: verbose,
-    logger: globals.logger,
     fileSystem: globals.fs,
-    stdio: globals.stdio,
     processManager: globals.processManager,  
   ),
   PackagesCommand(),
