@@ -4372,7 +4372,7 @@ class PositionedDirectional extends StatelessWidget {
 /// A widget that displays its children in a single line, either vertically or
 /// horizontally.
 ///
-/// This documentation for the [Flex} and its layout algorithm have been
+/// This documentation for the [Flex] and its layout algorithm have been
 /// written to be beginner friendly. They are most often read by people who
 /// are new to Flutter, and who are trying to understand the basic behavior
 /// of [Row] and [Column]. They have often received an error along the lines
