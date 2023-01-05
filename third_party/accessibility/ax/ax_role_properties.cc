@@ -687,6 +687,9 @@ bool IsText(ax::mojom::Role role) {
     case ax::mojom::Role::kInlineTextBox:
     case ax::mojom::Role::kLineBreak:
     case ax::mojom::Role::kStaticText:
+    case ax::mojom::Role::kTextField:
+    case ax::mojom::Role::kTextFieldWithComboBox:
+    case ax::mojom::Role::kLabelText:
       return true;
     default:
       return false;

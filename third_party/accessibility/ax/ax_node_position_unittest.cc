@@ -297,6 +297,7 @@ void AXPositionTest::SetUp() {
                                true);
   text_field_.AddState(ax::mojom::State::kEditable);
   text_field_.SetValue(TEXT_VALUE);
+  text_field_.SetName(TEXT_VALUE);
   text_field_.AddIntListAttribute(
       ax::mojom::IntListAttribute::kCachedLineStarts,
       std::vector<int32_t>{0, 7});
@@ -1078,7 +1079,7 @@ TEST_F(AXPositionTest, GetMaxTextOffsetAndGetTextWithGeneratedContent) {
   root_1.role = ax::mojom::Role::kRootWebArea;
   root_1.child_ids = {text_field_2.id};
 
-  text_field_2.role = ax::mojom::Role::kTextField;
+  text_field_2.role = ax::mojom::Role::kGroup;
   text_field_2.SetValue("3.14");
   text_field_2.child_ids = {static_text_3.id, static_text_5.id};
 
@@ -1573,7 +1574,7 @@ TEST_F(AXPositionTest, AtStartAndEndOfLineInsideTextField) {
 
   AXNodeData text_field_data_1;
   text_field_data_1.id = 2;
-  text_field_data_1.role = ax::mojom::Role::kTextField;
+  text_field_data_1.role = ax::mojom::Role::kGroup;
   // "kIsLineBreakingObject" and the "kEditable" state are not strictly
   // necessary but are added for completeness.
   text_field_data_1.AddBoolAttribute(
@@ -1613,7 +1614,7 @@ TEST_F(AXPositionTest, AtStartAndEndOfLineInsideTextField) {
 
   AXNodeData text_field_data_2;
   text_field_data_2.id = 7;
-  text_field_data_2.role = ax::mojom::Role::kTextField;
+  text_field_data_2.role = ax::mojom::Role::kGroup;
   // "kIsLineBreakingObject" and the "kEditable" state are not strictly
   // necessary but are added for completeness.
   text_field_data_2.AddBoolAttribute(
@@ -7567,7 +7568,7 @@ TEST_F(AXPositionTest, EmptyObjectReplacedByCharacterTextNavigation) {
   inline_box_3.AddIntListAttribute(ax::mojom::IntListAttribute::kWordEnds,
                                    std::vector<int32_t>{6});
 
-  text_field_4.role = ax::mojom::Role::kTextField;
+  text_field_4.role = ax::mojom::Role::kGroup;
   text_field_4.child_ids = {generic_container_5.id};
 
   generic_container_5.role = ax::mojom::Role::kGenericContainer;
