@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -155,18 +156,22 @@ void main() {
     await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(192.0);
+    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+    //                A bug in the HTML renderer and/or Chrome 96+ causes a
+    //                discrepancy in the paragraph height.
+    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+    testVerticalGeometry(hasIssue99933 ? 193 : 192.0);
 
     // Make sure that the height of a large subtitle is taken into account.
     await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 0.5, subtitleScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(108.0);
+    testVerticalGeometry(hasIssue99933 ? 109 : 108.0);
 
     await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(192.0);
+    testVerticalGeometry(hasIssue99933 ? 193 : 192.0);
   });
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
@@ -499,13 +504,20 @@ void main() {
         ),
       ),
     );
+    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+    //                A bug in the HTML renderer and/or Chrome 96+ causes a
+    //                discrepancy in the paragraph height.
+    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+    const double height = hasIssue99933 ? 301.0 : 300;
+    const double avatarTop = hasIssue99933 ? 130.5 : 130.0;
+    const double placeholderTop = hasIssue99933 ? 138.5 : 138.0;
     //                                                                          LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 300.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,        130.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,        138.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 300.0       , 800.0,  72.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 300.0 + 16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, 300.0 + 24.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,            0.0, 800.0, height));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,      avatarTop,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0,  height       , 800.0,  72.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0,  height + 16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,  height + 24.0,  24.0,  24.0));
 
     // THREE-LINE
     await tester.pumpWidget(
@@ -534,12 +546,12 @@ void main() {
       ),
     );
     //                                                                          LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,         0.0, 800.0, 300.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,         8.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 300.0      , 800.0,  88.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 300.0 + 8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, 300.0 + 8.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, height));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,          8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,          8.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, height      , 800.0,  88.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, height + 8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0,  24.0,  24.0));
 
     // "ONE-LINE" with Small Leading Widget
     await tester.pumpWidget(
