@@ -88,7 +88,6 @@ class UpgradeCommand extends FlutterCommand {
 
 @visibleForTesting
 class UpgradeCommandRunner {
-
   String? workingDirectory; // set in runCommand() above
 
   Future<FlutterCommandResult> runCommand({
@@ -205,7 +204,7 @@ class UpgradeCommandRunner {
     // Make sure the welcome message re-display is delayed until the end.
     final PersistentToolState persistentToolState = globals.persistentToolState!;
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
-    await precacheArtifacts();
+    await precacheArtifacts(workingDirectory!);
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
@@ -352,7 +351,7 @@ class UpgradeCommandRunner {
 /// Check for and download any engine and pkg/ updates. We run the 'flutter'
 /// shell script reentrantly here so that it will download the updated
 /// Dart and so forth if necessary.
-Future<void> precacheArtifacts() async {
+Future<void> precacheArtifacts(String workingDirectory) async {
   globals.printStatus('');
   globals.printStatus('Upgrading engine...');
   final int code = await globals.processUtils.stream(
@@ -361,6 +360,7 @@ Future<void> precacheArtifacts() async {
     ],
     allowReentrantFlutter: true,
     environment: Map<String, String>.of(globals.platform.environment),
+    workingDirectory: workingDirectory,
   );
   if (code != 0) {
     throwToolExit(null, exitCode: code);

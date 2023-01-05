@@ -143,7 +143,7 @@ class ChannelCommand extends FlutterCommand {
     }
     await _checkout(branchName);
     if (boolArg('cache-artifacts')!) {
-      await precacheArtifacts();
+      await precacheArtifacts(Cache.flutterRoot!);
     }
     globals.printStatus("Successfully switched to flutter channel '$branchName'.");
     globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
