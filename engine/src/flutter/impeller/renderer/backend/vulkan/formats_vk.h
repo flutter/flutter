@@ -148,6 +148,10 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
       return vk::Format::eB8G8R8A8Unorm;
     case PixelFormat::kB8G8R8A8UNormIntSRGB:
       return vk::Format::eB8G8R8A8Srgb;
+    case PixelFormat::kR32G32B32A32Float:
+      return vk::Format::eR32G32B32A32Sfloat;
+    case PixelFormat::kR16G16B16A16Float:
+      return vk::Format::eR16G16B16A16Sfloat;
     case PixelFormat::kS8UInt:
       return vk::Format::eS8Uint;
     case PixelFormat::kD32FloatS8UInt:
@@ -177,6 +181,12 @@ constexpr PixelFormat ToPixelFormat(vk::Format format) {
 
     case vk::Format::eB8G8R8A8Srgb:
       return PixelFormat::kB8G8R8A8UNormIntSRGB;
+
+    case vk::Format::eR32G32B32A32Sfloat:
+      return PixelFormat::kR32G32B32A32Float;
+
+    case vk::Format::eR16G16B16A16Sfloat:
+      return PixelFormat::kR16G16B16A16Float;
 
     case vk::Format::eS8Uint:
       return PixelFormat::kS8UInt;

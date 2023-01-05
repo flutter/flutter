@@ -54,7 +54,7 @@ void AnimationPlayer::Update() {
 
 void AnimationPlayer::Reset() {
   for (auto& [node, transform] : default_target_transforms_) {
-    node->SetLocalTransform(transform);
+    node->SetLocalTransform(Matrix());
   }
 }
 

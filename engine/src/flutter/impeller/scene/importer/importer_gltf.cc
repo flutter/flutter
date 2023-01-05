@@ -8,6 +8,7 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -199,22 +200,22 @@ static void ProcessNode(const tinygltf::Model& gltf,
   ///
 
   Matrix transform;
-  if (in_node.translation.size() == 3) {
-    transform = transform * Matrix::MakeTranslation(
-                                {static_cast<Scalar>(in_node.translation[0]),
-                                 static_cast<Scalar>(in_node.translation[1]),
-                                 static_cast<Scalar>(in_node.translation[2])});
+  if (in_node.scale.size() == 3) {
+    transform =
+        transform * Matrix::MakeScale({static_cast<Scalar>(in_node.scale[0]),
+                                       static_cast<Scalar>(in_node.scale[1]),
+                                       static_cast<Scalar>(in_node.scale[2])});
   }
   if (in_node.rotation.size() == 4) {
     transform = transform * Matrix::MakeRotation(Quaternion(
                                 in_node.rotation[0], in_node.rotation[1],
                                 in_node.rotation[2], in_node.rotation[3]));
   }
-  if (in_node.scale.size() == 3) {
-    transform =
-        transform * Matrix::MakeScale({static_cast<Scalar>(in_node.scale[0]),
-                                       static_cast<Scalar>(in_node.scale[1]),
-                                       static_cast<Scalar>(in_node.scale[2])});
+  if (in_node.translation.size() == 3) {
+    transform = transform * Matrix::MakeTranslation(
+                                {static_cast<Scalar>(in_node.translation[0]),
+                                 static_cast<Scalar>(in_node.translation[1]),
+                                 static_cast<Scalar>(in_node.translation[2])});
   }
   if (in_node.matrix.size() == 16) {
     if (!transform.IsIdentity()) {
@@ -317,11 +318,14 @@ static void ProcessAnimation(const tinygltf::Model& gltf,
                              fb::AnimationT& out_animation) {
   out_animation.name = in_animation.name;
 
-  std::vector<std::unique_ptr<impeller::fb::ChannelT>> channels;
+  // std::vector<impeller::fb::ChannelT> channels;
+  std::vector<impeller::fb::ChannelT> translation_channels;
+  std::vector<impeller::fb::ChannelT> rotation_channels;
+  std::vector<impeller::fb::ChannelT> scale_channels;
   for (auto& in_channel : in_animation.channels) {
-    auto out_channel = std::make_unique<fb::ChannelT>();
+    auto out_channel = fb::ChannelT();
 
-    out_channel->node = in_channel.target_node;
+    out_channel.node = in_channel.target_node;
     auto& sampler = in_animation.samplers[in_channel.sampler];
 
     /// Keyframe times.
@@ -349,7 +353,7 @@ static void ProcessAnimation(const tinygltf::Model& gltf,
         const float* time_p = reinterpret_cast<const float*>(
             times_buffer.data.data() + times_bufferview.byteOffset +
             times_accessor.ByteStride(times_bufferview) * time_i);
-        out_channel->timeline.push_back(*time_p);
+        out_channel.timeline.push_back(*time_p);
       }
     }
 
@@ -387,7 +391,8 @@ static void ProcessAnimation(const tinygltf::Model& gltf,
           keyframes.values.push_back(
               fb::Vec3(value_p[0], value_p[1], value_p[2]));
         }
-        out_channel->keyframes.Set(std::move(keyframes));
+        out_channel.keyframes.Set(std::move(keyframes));
+        translation_channels.push_back(std::move(out_channel));
       } else if (in_channel.target_path == "rotation") {
         if (values_accessor.type != TINYGLTF_TYPE_VEC4) {
           std::cerr << "Unexpected type \"" << values_accessor.type
@@ -404,7 +409,8 @@ static void ProcessAnimation(const tinygltf::Model& gltf,
           keyframes.values.push_back(
               fb::Vec4(value_p[0], value_p[1], value_p[2], value_p[3]));
         }
-        out_channel->keyframes.Set(std::move(keyframes));
+        out_channel.keyframes.Set(std::move(keyframes));
+        rotation_channels.push_back(std::move(out_channel));
       } else if (in_channel.target_path == "scale") {
         if (values_accessor.type != TINYGLTF_TYPE_VEC3) {
           std::cerr << "Unexpected type \"" << values_accessor.type
@@ -421,15 +427,22 @@ static void ProcessAnimation(const tinygltf::Model& gltf,
           keyframes.values.push_back(
               fb::Vec3(value_p[0], value_p[1], value_p[2]));
         }
-        out_channel->keyframes.Set(std::move(keyframes));
+        out_channel.keyframes.Set(std::move(keyframes));
+        scale_channels.push_back(std::move(out_channel));
       } else {
         std::cerr << "Unsupported animation channel target path \""
                   << in_channel.target_path << "\". Skipping." << std::endl;
         continue;
       }
     }
+  }
 
-    channels.push_back(std::move(out_channel));
+  std::vector<std::unique_ptr<impeller::fb::ChannelT>> channels;
+  for (const auto& channel_list :
+       {translation_channels, rotation_channels, scale_channels}) {
+    for (const auto& channel : channel_list) {
+      channels.push_back(std::make_unique<fb::ChannelT>(channel));
+    }
   }
   out_animation.channels = std::move(channels);
 }
@@ -457,6 +470,9 @@ bool ParseGLTF(const fml::Mapping& source_mapping, fb::SceneT& out_scene) {
 
   const tinygltf::Scene& scene = gltf.scenes[gltf.defaultScene];
   out_scene.children = scene.nodes;
+
+  out_scene.transform =
+      ToFBMatrixUniquePtr(Matrix::MakeScale(Vector3(1, 1, -1)));
 
   for (size_t texture_i = 0; texture_i < gltf.textures.size(); texture_i++) {
     auto texture = std::make_unique<fb::TextureT>();

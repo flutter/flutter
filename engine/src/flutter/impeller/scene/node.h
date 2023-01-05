@@ -18,6 +18,7 @@
 #include "impeller/scene/camera.h"
 #include "impeller/scene/mesh.h"
 #include "impeller/scene/scene_encoder.h"
+#include "impeller/scene/skin.h"
 
 namespace impeller {
 namespace scene {
@@ -35,6 +36,8 @@ class Node final {
 
   const std::string& GetName() const;
   void SetName(const std::string& new_name);
+
+  Node* GetParent() const;
 
   std::shared_ptr<Node> FindChildByName(
       const std::string& name,
@@ -55,7 +58,12 @@ class Node final {
   void SetMesh(Mesh mesh);
   Mesh& GetMesh();
 
-  bool Render(SceneEncoder& encoder, const Matrix& parent_transform) const;
+  void SetIsJoint(bool is_joint);
+  bool IsJoint() const;
+
+  bool Render(SceneEncoder& encoder,
+              Allocator& allocator,
+              const Matrix& parent_transform) const;
 
  private:
   void UnpackFromFlatbuffer(
@@ -68,6 +76,7 @@ class Node final {
 
   std::string name_;
   bool is_root_ = false;
+  bool is_joint_ = false;
   Node* parent_ = nullptr;
   std::vector<std::shared_ptr<Node>> children_;
   Mesh mesh_;
@@ -75,6 +84,8 @@ class Node final {
   // For convenience purposes, deserialized nodes hang onto an animation library
   std::vector<std::shared_ptr<Animation>> animations_;
   mutable std::optional<AnimationPlayer> animation_player_;
+
+  std::unique_ptr<Skin> skin_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Node);
 

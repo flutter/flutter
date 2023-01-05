@@ -89,8 +89,8 @@ void TranslationTimelineResolver::Apply(Node& target,
   if (key.lerp < 1) {
     value = values_[key.index - 1].Lerp(value, key.lerp);
   }
-  target.SetLocalTransform(Matrix::MakeTranslation(value * weight) *
-                           target.GetLocalTransform());
+  target.SetLocalTransform(target.GetLocalTransform() *
+                           Matrix::MakeTranslation(value * weight));
 }
 
 RotationTimelineResolver::RotationTimelineResolver() = default;
@@ -108,8 +108,8 @@ void RotationTimelineResolver::Apply(Node& target,
   if (key.lerp < 1) {
     value = values_[key.index - 1].Slerp(value, key.lerp);
   }
-  target.SetLocalTransform(Matrix::MakeRotation(value * weight) *
-                           target.GetLocalTransform());
+  target.SetLocalTransform(target.GetLocalTransform() *
+                           Matrix::MakeRotation(value * weight));
 }
 
 ScaleTimelineResolver::ScaleTimelineResolver() = default;
@@ -125,8 +125,8 @@ void ScaleTimelineResolver::Apply(Node& target, SecondsF time, Scalar weight) {
   if (key.lerp < 1) {
     value = values_[key.index - 1].Lerp(value, key.lerp);
   }
-  target.SetLocalTransform(Matrix::MakeScale(value * weight) *
-                           target.GetLocalTransform());
+  target.SetLocalTransform(target.GetLocalTransform() *
+                           Matrix::MakeScale(value * weight));
 }
 
 }  // namespace scene

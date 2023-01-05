@@ -107,6 +107,16 @@ struct TexImage2DData {
         external_format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         break;
+      case PixelFormat::kR32G32B32A32Float:
+        internal_format = GL_RGBA;
+        external_format = GL_RGBA;
+        type = GL_FLOAT;
+        break;
+      case PixelFormat::kR16G16B16A16Float:
+        internal_format = GL_RGBA;
+        external_format = GL_RGBA;
+        type = GL_HALF_FLOAT;
+        break;
       case PixelFormat::kUnknown:
       case PixelFormat::kS8UInt:
       case PixelFormat::kD32FloatS8UInt:
@@ -133,6 +143,20 @@ struct TexImage2DData {
         internal_format = GL_RGBA;
         external_format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
+        data = std::move(mapping);
+        break;
+      }
+      case PixelFormat::kR32G32B32A32Float: {
+        internal_format = GL_RGBA;
+        external_format = GL_RGBA;
+        type = GL_FLOAT;
+        data = std::move(mapping);
+        break;
+      }
+      case PixelFormat::kR16G16B16A16Float: {
+        internal_format = GL_RGBA;
+        external_format = GL_RGBA;
+        type = GL_HALF_FLOAT;
         data = std::move(mapping);
         break;
       }
@@ -274,6 +298,10 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kB8G8R8A8UNormInt:
     case PixelFormat::kR8G8B8A8UNormInt:
       return GL_RGBA4;
+    case PixelFormat::kR32G32B32A32Float:
+      return GL_RGBA32F;
+    case PixelFormat::kR16G16B16A16Float:
+      return GL_RGBA16F;
     case PixelFormat::kS8UInt:
       return GL_STENCIL_INDEX8;
     case PixelFormat::kD32FloatS8UInt:

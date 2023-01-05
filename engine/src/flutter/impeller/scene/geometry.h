@@ -45,6 +45,8 @@ class Geometry {
                              HostBuffer& buffer,
                              const Matrix& transform,
                              Command& command) const = 0;
+
+  virtual void SetJointsTexture(const std::shared_ptr<Texture>& texture);
 };
 
 class CuboidGeometry final : public Geometry {
@@ -119,8 +121,12 @@ class SkinnedVertexBufferGeometry final : public Geometry {
                      const Matrix& transform,
                      Command& command) const override;
 
+  // |Geometry|
+  void SetJointsTexture(const std::shared_ptr<Texture>& texture) override;
+
  private:
   VertexBuffer vertex_buffer_;
+  std::shared_ptr<Texture> joints_texture_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SkinnedVertexBufferGeometry);
 };
