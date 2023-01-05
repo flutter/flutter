@@ -1500,7 +1500,6 @@ mixin WidgetInspectorService {
           return false;
         }
         selection.currentElement = object;
-        print('DAKE: Sending CURRENTELEMENT');
         _sendInspectEvent(selection.currentElement);
       } else {
         if (object == selection.current) {
@@ -1530,9 +1529,9 @@ mixin WidgetInspectorService {
 
     // final _Location? location = _getCreationLocation(element);
 
-    final location = WidgetInspectorService.instance._getSelectedSummaryLocation(null, 'my-group');
+    final _Location? location = WidgetInspectorService.instance._getSelectedSummaryLocation(null, 'my-group');
     if (location != null){
-      developer.postEvent(
+      postEvent(
         'navigate',
         {
           'file': location.file,
@@ -2337,8 +2336,17 @@ mixin WidgetInspectorService {
   /// [WidgetInspectorService] can track which events were dispatched by
   /// overriding this method.
   @protected
-  void postEvent(String eventKind, Map<Object, Object?> eventData) {
-    developer.postEvent(eventKind, eventData);
+  void postEvent(String eventKind, Map<Object, Object?> eventData, {String stream = 'Extension'}) {
+    developer.postEvent(eventKind, eventData, stream: stream);
+  }
+  
+  /// All events dispatched by a [WidgetInspectorService] use this method
+  /// instead of calling [developer.inspect] directly so that tests for
+  /// [WidgetInspectorService] can track which events were dispatched by
+  /// overriding this method.
+  @protected
+  void inspect(Object? object) {
+    developer.inspect(object);
   }
 
   final _ElementLocationStatsTracker _rebuildStats = _ElementLocationStatsTracker();
