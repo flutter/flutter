@@ -4369,66 +4369,295 @@ class PositionedDirectional extends StatelessWidget {
   }
 }
 
-/// A widget that displays its children in a one-dimensional array.
+/// A widget that displays its children in a single line, either vertically or
+/// horizontally.
 ///
-/// The [Flex] widget allows you to control the axis along which the children are
-/// placed (horizontal or vertical). This is referred to as the _main axis_. If
-/// you know the main axis in advance, then consider using a [Row] (if it's
-/// horizontal) or [Column] (if it's vertical) instead, because that will be less
-/// verbose.
+/// The documentation for the [Flex} and its layout algorithm have been
+/// written to be beginner friendly. They are most often read by people who
+/// are new to Flutter, and who are trying to understand the basic behavior
+/// of [Row] and [Column]. They have often received a [RenderFlex] error,
+/// have no idea what it means, and have turned to this part of the docs
+/// for help.  If you are a more advanced user of the Flutter SDK, then
+/// we thank you for your patience.
 ///
-/// To cause a child to expand to fill the available space in the [direction]
-/// of this widget's main axis, wrap the child in an [Expanded] widget.
+/// The [Flex] widget allows you to control the axis along which its children
+/// are placed (horizontal or vertical). This is referred to as the
+/// _main axis_. If  you know which direction you need to use, meaning it's
+/// not being decided programmatically at runtime, then consider using a
+/// [Row] or [Column] instead because that will make your code easier to read.
+///
+/// A [Column] is actually nothing more than a [Flex] with its direction set
+/// to vertical, and a [Row] is nothing more than a [Flex] with its direction
+/// set to horizontal.
 ///
 /// The [Flex] widget does not scroll (and in general it is considered an error
-/// to have more children in a [Flex] than will fit in the available room). If
-/// you have some widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [ListView].
+/// to have more children in a [Flex] than will fit in the available space). If
+/// you need to display more items than will fit in the visible area, there
+/// are two common ways of approaching this. One is a [ListView], which
+/// can create its children via a method and can load them lazily as the
+/// user scrolls and each child scrolls into view.
 ///
-/// The [Flex] widget does not allow its children to wrap across multiple
-/// horizontal or vertical runs. For a widget that allows its children to wrap,
-/// consider using the [Wrap] widget instead of [Flex].
+/// Another way of dealing with the situation would be to place the
+/// [Row] or [Column] inside of a [SingleChildScrollView], but
+/// this can quickly become a performance issue if there are many children
+/// as they will all be rendered ahead of time, whether they are displayed
+/// on-screen or are far off-screen, out of view.
+///
+/// Though each approach has merits, the [SingleChildScrollView] is not
+/// _typically_ used unless the number of children won't exceed two or
+/// three times the length of the visible area. If you use this approach,
+/// you may wish to use Flutter's dev tools to check your app's performance.
+/// Remember to check performance with a release build, as a Just In Time
+/// (JiT) compiled debug build will always perform worse than the final,
+/// Ahead of Time (AoT) compiled release build.
+///
+/// The [Flex] widget does not allow its children to wrap the way text does
+/// when there is too much text to fit on one line. If you need a widget that
+/// will let you have many children and automatically wrap them into multiple
+/// lines as each line runs out of room, consider using the [Wrap] widget.
+///
+/// If you need a [Flex] to be as large as its parent will allow in the
+/// cross axis, while also causing all of the children of the [Flex]
+/// to stretch to be that same size in the cross axis, consider setting
+/// the [Flex.crossAxisAlignment] to [CrossAxisAlignment.stretch].
 ///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
 ///
 /// ## Layout algorithm
 ///
-/// _This section describes how a [Flex] is rendered by the framework._
-/// _See [BoxConstraints] for an introduction to box layout models._
+/// _(If you are looking for more advanced reading on the subject of
+/// layout models, see [BoxConstraints] for an introduction to them.)_
 ///
-/// Layout for a [Flex] proceeds in six steps:
+/// There are several terms a person needs to understand before
+/// going into the explanation of the layout algorithm:
 ///
-/// 1. Layout each child with a null or zero flex factor (e.g., those that are
-///    not [Expanded]) with unbounded main axis constraints and the incoming
-///    cross axis constraints. If the [crossAxisAlignment] is
-///    [CrossAxisAlignment.stretch], instead use tight cross axis constraints
-///    that match the incoming max extent in the cross axis.
-/// 2. Divide the remaining main axis space among the children with non-zero
-///    flex factors (e.g., those that are [Expanded]) according to their flex
-///    factor. For example, a child with a flex factor of 2.0 will receive twice
-///    the amount of main axis space as a child with a flex factor of 1.0.
-/// 3. Layout each of the remaining children with the same cross axis
-///    constraints as in step 1, but instead of using unbounded main axis
-///    constraints, use max axis constraints based on the amount of space
-///    allocated in step 2. Children with [Flexible.fit] properties that are
-///    [FlexFit.tight] are given tight constraints (i.e., forced to fill the
-///    allocated space), and children with [Flexible.fit] properties that are
-///    [FlexFit.loose] are given loose constraints (i.e., not forced to fill the
-///    allocated space).
-/// 4. The cross axis extent of the [Flex] is the maximum cross axis extent of
-///    the children (which will always satisfy the incoming constraints).
-/// 5. The main axis extent of the [Flex] is determined by the [mainAxisSize]
-///    property. If the [mainAxisSize] property is [MainAxisSize.max], then the
-///    main axis extent of the [Flex] is the max extent of the incoming main
-///    axis constraints. If the [mainAxisSize] property is [MainAxisSize.min],
-///    then the main axis extent of the [Flex] is the sum of the main axis
-///    extents of the children (subject to the incoming constraints).
+/// [Flex] : The superclass of [Row] and [Column]. All [Row]s and [Column]s
+/// are [Flex]es, and for most of the rest of this explanation they will be
+/// referred to as a [Flex].
+///
+/// Main axis: The main direction of the [Flex]. This is vertical
+/// for a [Column] and horizontal for a [Row].
+///
+/// Cross axis: The other direction. The cross axis of a [Column]
+/// is horizontal, and the cross axis of a [Row] is vertical.
+///
+/// [Flexible] : A widget that _could_ cause its child to stretch in the
+/// direction of the main axis, _though it does necessarily have to._
+///
+/// [Expanded] : A type of [Flexible] that _must_ stretch its child
+/// to use all of the space _reserved for it_ during layout.
+///
+/// It is important to understand an [Expanded] will always use all of the
+/// space it is offered, _but it may not be offered all of the leftover
+/// space there is._ There is an edge case in which a [Flexible] and an
+/// [Expanded] are used within the same [Flex], and the results can only
+/// be understood once a person understands what is happening within this
+/// layout algorithm. More on that later.
+///
+/// [Flexible.fit] : The fit is the parameter of the [Flexible] that
+/// determines if it must stretch its children.
+///
+/// [FlexFit] : An enum that is used by the [Flexible.fit]. There are
+/// two values, tight and loose:
+///
+/// [FlexFit.tight] will force the child to stretch and use all of
+/// the space offered to it _in the main axis_. An [Expanded] is
+/// nothing more than a [Flexible] with its fit parameter hard
+/// coded to [FlexFit.tight]. It is important to remember that
+/// any size specified in the child of a [Flexible] will be ignored,
+/// as the child will be forced to use all of the space offered to it
+/// in the main axis.
+///
+/// Any time a widget is given "tight constraints" by its parent,
+/// that widget will be forced to use all of the space offered to it.
+///
+/// [FlexFit.loose] is the default fit for the [Flexible]. It will not cause
+/// its child to stretch in the main axis, and will allow the child to be the
+/// size the child's parameters state it should be.
+///
+/// [MainAxisSize] : An enum that that determines if the [Flex] will
+/// be forced to be as large as its parent will allow.
+///
+/// [MainAxisSize.max] will force the [Flex] to be as large as the parent
+/// will allow in the main axis. _This does not force the children to be
+/// larger._
+///
+/// [MainAxisSize.min] : Allow the [Flex] to be whatever size it needs
+/// to be in order to accommodate its children, without forcing the
+/// [Flex] to be any larger than the total size of all its children.
+///
+/// [MainAxisAlignment] : How to align, center, or apply spacing
+/// between  the children in the direction of the main axis.
+///
+/// [CrossAxisAlignment] : How to align, or stretch, the children in
+/// the direction of the cross axis.
+///
+/// Constraints: These are the minimum and maximum sizes between
+/// which a widget must be. There are constraints both vertically and
+/// horizontally. If constraints are _tight_, this means the min and max
+/// limits are the same, forcing the widget to be that specific size. If
+/// constraints are loose, the widget can be any size within the specified
+/// min and max, for both width and height.
+///
+/// There is another case in which there are no constraints given,
+/// and this can be the case with the children of a [Flex].
+/// This is also the source of many errors seen while using [Row]s
+/// and [Column]s. Error messages referring to this will often use
+/// the term _unbounded_ to describe the situation in which no
+/// constraints (min or max size limits) have been passed down from
+/// the parent.
+///
+/// Now that all of those terms have been explained, the multi-child
+/// layout algorithm for a [Flex] proceeds in six steps:
+///
+/// 1. Layout each child that is not a [Flexible] or an [Expanded],
+///    but do so without setting any minimum or maximum size in the
+///    main axis. This is called laying the child out "without applying
+///    any constraints in the main axis".
+///
+///    Apply any constraints in the _cross axis_ direction that may have
+///    been passed down by the parent of the [Flex], without forcing the
+///    child to be any larger than it's stated size in that direction. This is
+///    called using _"loose constraints"_ (in this case, in the cross axis).
+///
+///    However, if the [CrossAxisAlignment] of the [Flex] has been
+///    set to [CrossAxisAlignment.stretch] then force all the children of the
+///    [Flex] to be as large as possible in the cross axis direction. This is
+///    called using _"tight constraints"_.
+///
+/// 2. In the main axis, take whatever space is left over after
+///   laying out everything that is not a [Flexible] and divide that
+///   space among the [Flexible]s. (Remember, [Expanded] is just
+///   a kind of [Flexible]).
+///
+///   The [Flexible.flex] parameter determines how much of the
+///   leftover space each [Flexible] will end up having reserved
+///   for it. Notice that _"reserved for it"_ does not mean how big
+///   it's going to be. It means the space (or size) reserved for it
+///   is the maximum size the [Flexible] _could be,_ in the main axis.
+///
+///   Add up all the [flex] values of each [Flexible]'s fit parameter,
+///   and each [Flexible] will have a percentage of the leftover space
+///   reserved for it. This percentage will be equal to the percentage
+///   of total [flex] each [Flexible]'s [flex] value represents. IE:
+///
+///   [Flexible] 1 has [flex] of 50.
+///   [Expanded] 1 has [flex] of 30.
+///   [Expanded] 2 has [flex] of 20.
+///
+///   In the above case, the total of all flex parameters is 100. The
+///   [Flexible] will get 50/100 (50%) of the remaining space reserved
+///   for it. The first [Expanded] will get 30/100 (30%) reserved for it,
+///   and the second one will get 20% of the remaining space
+///   reserved for it.
+///
+///   The numbers you use for your [Flexible.fit] parameters
+///   don't have to add to 100. This example does so only because
+///   it makes understanding the process easier.
+///
+/// 3. Layout the [Flexible] and [Expanded] children, and use
+///     the same cross axis size limits (constraints) that were used
+///     in Step 1. Remember, if using [CrossAxisAlignment.stretch] then
+///     force all of the children to be max possible size in the cross axis,
+///     else let them be the size they want.
+///
+///     Unlike in Step 1, this time set _maximum_ main axis constraints
+///     (max size limits) for each [Flexible] and [Expanded] to be the
+///     sizes that were reserved for them in Step 2. In other words, the
+///     max possible main axis sizes were calculated in Step 2, and now
+///     those sizes get used when actually laying out each [Flexible]
+///     and [Expanded] in Step 3.
+///
+///     This next part is where the fit comes in.
+///
+///    Children with a fit property that is set to [FlexFit.tight] are given
+///    "tight constraints". As mentioned previously, this means the min
+///    size limit is set to be the same as the max size limit, and this
+///    gives the child only one size to be, since min == max.
+///
+///     _This will force the child of the [Expanded] to be the size specified
+///     by the tight constraints, no matter what size the child of the flexible
+///     might have been set to._ Any size you specify for the main axis
+///     of a widget that you then put in a [Flexible] with it's fit set to
+///     [FlexFit.tight] will be ignored, no matter if that size is larger or
+///     smaller than the leftover space. The child will always be as large
+///     as the space that was reserved for its parent [Expanded].
+///
+///    The only  children who should have a tight fit are the [Expanded]s.
+///    It is considered bad to use a [Flexible] and set its fit to tight
+///    because doing so creates unnecessary confusion, and this could be
+///    a reason for having one's coffee privileges revoked. If you need a
+///    tight fit, use an [Expanded] and other developers will understand
+///    what is happening at a glance.
+///
+///    Children with a fit that is [FlexFit.loose] are given loose constraints.
+///    The min size is not as big as the max, and the child is allowed to be
+///    the size it wants to be (in the main axis). The only children this
+///    should apply to are [Flexible]s.
+///
+///    Remember, all the other children that are not [Flexible] or
+///    [Expanded] do not have a flex parameter, and so do not
+///    go through steps 2 and 3.
+///
+/// 4. The final size of the [Flex] in its cross axis will end up being
+///     the same as its largest child in the cross axis, but only as long
+///     as it fits within the max constraint (max size limit) that was set
+///     by the parent of the [Flex]. If the largest child in the main axis
+///     has a final size that is larger than the max allowable size, an
+///     "overflow" error will occur and you will see black and yellow bars
+///     where the overflow occurred.
+///
+///     But what if the largest child in the cross axis doesn't have a set
+///     size, and instead just wants to be as large as it's allowed to be?
+///     If the parent of the [Flex] has set a max constraint in the cross
+///     axis, then it will be that size. However, if the parent of the [Flex]
+///     has not set any max limit, and a child tries to be as large as
+///     possible in the cross axis, an error will occur. This error will
+///     usually be along the lines of _"BoxConstraints force infinite
+///     height"_ (or width).
+///
+/// 5. The final size of the [Flex] in the main axis is determined in part
+///     by its [mainAxisSize] property. If the [mainAxisSize] property is
+///     [MainAxisSize.max], then the size of the [Flex] in the main axis will
+///     be as large as its parent will allow it to be. If the [mainAxisSize]
+///     property is [MainAxisSize.min], then the size of the [Flex] in the
+///     main axis will be the total of the sizes of all of its children, in the
+///     main axis, _as long as it fits within the max size its parent will
+///     allow_. If it doesn't fit, you will most likely have an overflow with
+///     yellow and black bars.
+///
 /// 6. Determine the position for each child according to the
 ///    [mainAxisAlignment] and the [crossAxisAlignment]. For example, if the
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any main axis
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+///    If the [crossAxisAlignment] is set to [CrossAxisAlignment.stretch],
+///    _all_ of the children will be forced to be as large as the parent of the
+///    [Flex] will allow, in the cross axis.
+///
+/// Advanced tip:
+/// What if you need to force the cross axis size of all
+/// children to match the size of the largest _child_ in the cross axis,
+/// but you do not want your [Flex] to be larger than that largest
+/// child, _even if the parent would allow it?_
+///
+///  You can use [CrossAxisAlignment.stretch] but then wrap
+///  a [Column] in an [IntrinsicWidth], or a [Row] in an
+///  [IntrinsicHeight]. The intrinsic tells the [Flex] that it does
+///  not have to be larger than its largest child (in the cross axis),
+///  but using [CrossAxisAlignment.stretch] tells the children
+///  to all be as big as the [Flex] will allow.
+///
+/// IE:
+///
+///       IntrinsicHeight(
+///         child: Row(
+///           crossAxisAlignment: CrossAxisAlignment.stretch,
+///           children: [...],
+///         ),
+///       ),
 ///
 /// See also:
 ///
