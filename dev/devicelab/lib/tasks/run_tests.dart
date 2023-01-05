@@ -12,11 +12,11 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createAndroidRunDebugTest() {
-  return AndroidRunOutputTest(release: false);
+  return AndroidRunOutputTest(release: false).call;
 }
 
 TaskFunction createAndroidRunReleaseTest() {
-  return AndroidRunOutputTest(release: true);
+  return AndroidRunOutputTest(release: true).call;
 }
 
 TaskFunction createMacOSRunDebugTest() {
@@ -27,7 +27,7 @@ TaskFunction createMacOSRunDebugTest() {
     'lib/main.dart',
     release: false,
     allowStderr: true,
-  );
+  ).call;
 }
 
 TaskFunction createMacOSRunReleaseTest() {
@@ -38,7 +38,7 @@ TaskFunction createMacOSRunReleaseTest() {
     'lib/main.dart',
     release: true,
     allowStderr: true,
-  );
+  ).call;
 }
 
 TaskFunction createWindowsRunDebugTest() {
@@ -46,7 +46,7 @@ TaskFunction createWindowsRunDebugTest() {
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: false,
-  );
+  ).call;
 }
 
 TaskFunction createWindowsRunReleaseTest() {
@@ -54,7 +54,7 @@ TaskFunction createWindowsRunReleaseTest() {
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: true,
-  );
+  ).call;
 }
 
 class AndroidRunOutputTest extends RunOutputTask {
@@ -244,14 +244,14 @@ abstract class RunOutputTask {
             ready.complete();
           }
         });
-      run.stderr
+      final Stream<String> runStderr = run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
+        .asBroadcastStream();
+      runStderr.listen((String line) => print('run:stderr: $line'));
+      runStderr
         .skipWhile(isExpectedStderr)
-        .listen((String line) {
-          print('run:stderr: $line');
-          stderr.add(line);
-        });
+        .listen((String line) => stderr.add(line));
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null) {

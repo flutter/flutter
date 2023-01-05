@@ -103,7 +103,7 @@ bool getBoolFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null) {
-    return (env[envName]?.toUpperCase()) == 'TRUE';
+    return env[envName]?.toUpperCase() == 'TRUE';
   }
   return argResults[name] as bool;
 }

@@ -366,6 +366,15 @@ targets:
         ["firebaselab"]
       task_name: release_smoke_test
 
+  - name: Linux flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
     enabled_branches:
@@ -716,6 +725,7 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
+      - bin/internal/engine.version
       - .ci.yaml
 
   - name: Linux tool_integration_tests_1_4
@@ -2586,6 +2596,27 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__start_up
 
+  - name: Mac flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+
+  - name: Mac_arm64 flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "arm64"
+
   - name: Mac flutter_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
@@ -3864,7 +3895,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: spell_check_test
+      task_name: spell_check_test_ios
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -4685,6 +4716,15 @@ targets:
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
 
+  - name: Windows flutter_packaging_test
+    recipe: packaging_v2/packaging_v2
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4750,6 +4790,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "x86"
 
 
   - name: Mac_arm64 flutter_packaging
