@@ -4479,7 +4479,7 @@ class PositionedDirectional extends StatelessWidget {
 /// the space offered to it _in the main axis_. An [Expanded] is
 /// nothing more than a [Flexible] with its fit parameter hard
 /// coded to [FlexFit.tight]. It is important to remember that
-/// any size specified in the child of a [Flexible] will be ignored,
+/// any size specified in the child of an [Expanded] will be ignored,
 /// as the child will be forced to use all of the space offered to it
 /// in the main axis.
 ///
