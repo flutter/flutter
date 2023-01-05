@@ -1038,112 +1038,20 @@ class RenderParagraph extends RenderBox
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
     bool needsAssembleSemanticsNode = false;
-    bool needsCustomMerger = false;
+    bool needsChildConfigrationsDelegate = false;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
       if (info.recognizer != null) {
         needsAssembleSemanticsNode = true;
         break;
       }
-      needsCustomMerger = needsCustomMerger || info.isPlaceholder;
+      needsChildConfigrationsDelegate = needsChildConfigrationsDelegate || info.isPlaceholder;
     }
 
     if (needsAssembleSemanticsNode) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
-    } else if(needsCustomMerger) {
-      config.childConfigurationsDelegate = (List<SemanticsConfiguration> childConfigs) {
-        final List<AttributedString> cachedStrings = _cachedAttributedLabels ??=  <AttributedString>[];
-        final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
-        int placeholderIndex = 0;
-        int childConfigsIndex = 0;
-        if (cachedStrings.isNotEmpty) {
-          int textSpanLabelIndex = 0;
-          bool seenTextSpan = false;
-          for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-            if (info.isPlaceholder) {
-              if (seenTextSpan) {
-                final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-                textSpanConfig.textDirection = textDirection;
-                textSpanConfig.attributedLabel = cachedStrings[textSpanLabelIndex];
-                builder.markAsMergeUp(textSpanConfig);
-                textSpanLabelIndex += 1;
-                seenTextSpan = false;
-              }
-              while (childConfigsIndex < childConfigs.length &&
-                     childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
-                builder.markAsMergeUp(childConfigs[childConfigsIndex]);
-                childConfigsIndex += 1;
-              }
-              placeholderIndex += 1;
-              continue;
-            }
-            seenTextSpan = true;
-          }
-          assert(
-            () {
-              if (seenTextSpan) {
-                return textSpanLabelIndex == cachedStrings.length - 1;
-              } else {
-                return textSpanLabelIndex == cachedStrings.length;
-              }
-            }(),
-            'all cached strings must be used',
-          );
-
-          if (seenTextSpan) {
-            final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-            textSpanConfig.attributedLabel = cachedStrings.last;
-            builder.markAsMergeUp(textSpanConfig);
-          }
-        } else {
-          int offset = 0;
-          StringBuffer? buffer;
-          List<StringAttribute>? attributes;
-          for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
-            if (info.isPlaceholder) {
-              // The label can be null if there is no text span in between
-              // placeholder spans.
-              if (buffer != null) {
-                final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-                textSpanConfig.textDirection = textDirection;
-                textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
-                builder.markAsMergeUp(textSpanConfig);
-                cachedStrings.add(textSpanConfig.attributedLabel);
-                buffer = null;
-                offset = 0;
-                attributes = null;
-              }
-              while (childConfigsIndex < childConfigs.length &&
-                  childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
-                builder.markAsMergeUp(childConfigs[childConfigsIndex]);
-                childConfigsIndex += 1;
-              }
-              placeholderIndex += 1;
-              continue;
-            }
-            buffer ??= StringBuffer();
-            attributes ??= <StringAttribute>[];
-            final String label = info.semanticsLabel ?? info.text;
-            for (final StringAttribute infoAttribute in info.stringAttributes) {
-              final TextRange originalRange = infoAttribute.range;
-              attributes.add(
-                infoAttribute.copy(
-                  range: TextRange(start: offset + originalRange.start, end: offset + originalRange.end),
-                ),
-              );
-            }
-            buffer.write(label);
-            offset += label.length;
-          }
-          if (buffer != null) {
-            final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
-            textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
-            builder.markAsMergeUp(textSpanConfig);
-            cachedStrings.add(textSpanConfig.attributedLabel);
-          }
-        }
-        return builder.build();
-      };
+    } else if (needsChildConfigrationsDelegate) {
+      config.childConfigurationsDelegate = _childSemanticsConfigurationsDelegate;
     } else {
       if (_cachedAttributedLabels == null) {
         final StringBuffer buffer = StringBuffer();
@@ -1165,10 +1073,84 @@ class RenderParagraph extends RenderBox
         }
         _cachedAttributedLabels = <AttributedString>[AttributedString(buffer.toString(), attributes: attributes)];
       }
-    config.attributedLabel = _cachedAttributedLabels![0];
-    config.textDirection = textDirection;
+      config.attributedLabel = _cachedAttributedLabels![0];
+      config.textDirection = textDirection;
     }
   }
+
+  ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(List<SemanticsConfiguration> childConfigs) {
+    final List<AttributedString> cachedStrings = _cachedAttributedLabels ??= <AttributedString>[];
+    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
+    final bool hasCache = cachedStrings.isNotEmpty;
+    int placeholderIndex = 0;
+    int childConfigsIndex = 0;
+    int textSpanLabelIndex = 0;
+    bool seenTextSpan = false;
+    int offset = 0;
+    StringBuffer? buffer;
+    List<StringAttribute>? attributes;
+    for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
+      if (info.isPlaceholder) {
+        if (seenTextSpan) {
+          final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+          textSpanConfig.textDirection = textDirection;
+          if (hasCache) {
+            textSpanConfig.attributedLabel = cachedStrings[textSpanLabelIndex];
+          } else {
+            assert(buffer != null && attributes != null);
+            textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
+            assert(textSpanLabelIndex == cachedStrings.length);
+            cachedStrings.add(textSpanConfig.attributedLabel);
+            buffer = null;
+            offset = 0;
+            attributes = null;
+          }
+          textSpanLabelIndex += 1;
+          builder.markAsMergeUp(textSpanConfig);
+          seenTextSpan = false;
+        }
+        while (childConfigsIndex < childConfigs.length &&
+            childConfigs[childConfigsIndex].tagsChildrenWith(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
+          builder.markAsMergeUp(childConfigs[childConfigsIndex]);
+          childConfigsIndex += 1;
+        }
+        placeholderIndex += 1;
+        continue;
+      }
+      seenTextSpan = true;
+      if (!hasCache) {
+        buffer ??= StringBuffer();
+        attributes ??= <StringAttribute>[];
+        final String label = info.semanticsLabel ?? info.text;
+        for (final StringAttribute infoAttribute in info.stringAttributes) {
+          final TextRange originalRange = infoAttribute.range;
+          attributes.add(
+            infoAttribute.copy(
+              range: TextRange(start: offset + originalRange.start,
+                  end: offset + originalRange.end),
+            ),
+          );
+        }
+        buffer.write(label);
+        offset += label.length;
+      }
+    }
+    if (seenTextSpan) {
+      final SemanticsConfiguration textSpanConfig = SemanticsConfiguration();
+      textSpanConfig.textDirection = textDirection;
+      if (hasCache) {
+        textSpanConfig.attributedLabel = cachedStrings[textSpanLabelIndex];
+      } else {
+        assert(buffer != null && attributes != null);
+        textSpanConfig.attributedLabel = AttributedString(buffer.toString(), attributes: attributes!);
+        cachedStrings.add(textSpanConfig.attributedLabel);
+      }
+      builder.markAsMergeUp(textSpanConfig);
+    }
+    return builder.build();
+  }
+
+
 
   // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
