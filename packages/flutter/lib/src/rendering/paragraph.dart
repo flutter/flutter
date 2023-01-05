@@ -1559,21 +1559,21 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     switch (granularity) {
       case TextGranularity.character:
         final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(CharacterBoundary(text), targetedEdge, forward);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, CharacterBoundary(text));
         result = SelectionResult.end;
         break;
       case TextGranularity.word:
-        final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(WhitespaceBoundary(text) + WordBoundary(this), targetedEdge, forward);
+        final TextBoundary textBoundary = paragraph._textPainter.wordBoundaries.moveByWordBoundary;
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
         result = SelectionResult.end;
         break;
       case TextGranularity.line:
-        newPosition = _getNextPosition(LineBreak(this), targetedEdge, forward);
+        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(this));
         result = SelectionResult.end;
         break;
       case TextGranularity.document:
         final String text = range.textInside(fullText);
-        newPosition = _getNextPosition(DocumentBoundary(text), targetedEdge, forward);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, DocumentBoundary(text));
         if (forward && newPosition.offset == range.end) {
           result = SelectionResult.next;
         } else if (!forward && newPosition.offset == range.start) {
@@ -1592,15 +1592,43 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return result;
   }
 
-  TextPosition _getNextPosition(TextBoundary boundary, TextPosition position, bool forward) {
-    if (forward) {
-      return _clampTextPosition(
-        (PushTextPosition.forward + boundary).getTrailingTextBoundaryAt(position)
-      );
+  // Move **beyond** the local boundary of the given type (unless range.start or
+  // range.end is reached). Used for most TextGranularity types except for
+  // TextGranularity.line, to ensure the selection movement doesn't get stuck at
+  // a local fixed point.
+  TextPosition _moveBeyondTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
+    final int newOffset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(end.offset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(end.offset - 1) ?? range.start;
+    return TextPosition(offset: newOffset);
+  }
+
+  // Move **to** the local boundary of the given type. Typically used for line
+  // boundaries, such that performing "move to line start" more than once never
+  // moves the selection to the previous line.
+  TextPosition _moveToTextBoundaryAtDirection(TextPosition end, bool forward, TextBoundary textBoundary) {
+    assert(end.offset >= 0);
+    final int caretOffset;
+    switch (end.affinity) {
+      case TextAffinity.upstream:
+        if (end.offset < 1 && !forward) {
+          assert (end.offset == 0);
+          return const TextPosition(offset: 0);
+        }
+        final CharacterBoundary characterBoundary = CharacterBoundary(fullText);
+        caretOffset = math.max(
+          0,
+          characterBoundary.getLeadingTextBoundaryAt(range.start + end.offset) ?? range.start,
+        ) - 1;
+        break;
+      case TextAffinity.downstream:
+        caretOffset = end.offset;
+        break;
     }
-    return _clampTextPosition(
-      (PushTextPosition.backward + boundary).getLeadingTextBoundaryAt(position),
-    );
+    final int offset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
+      : textBoundary.getLeadingTextBoundaryAt(caretOffset) ?? range.start;
+    return TextPosition(offset: offset);
   }
 
   MapEntry<TextPosition, SelectionResult> _handleVerticalMovement(TextPosition position, {required double horizontalBaselineInParagraphCoordinates, required bool below}) {

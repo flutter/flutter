@@ -1296,12 +1296,12 @@ void main() {
 
       await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: alt, control: control));
       await tester.pump();
-      // Ho[w are you]?
+      // Ho[w are ]you?
       // Good, and you?
       // Fine, thank you.
       expect(paragraph1.selections.length, 1);
       expect(paragraph1.selections[0].start, 2);
-      expect(paragraph1.selections[0].end, 11);
+      expect(paragraph1.selections[0].end, 8);
       expect(paragraph2.selections.length, 0);
     }, variant: TargetPlatformVariant.all());
 
