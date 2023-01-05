@@ -807,28 +807,37 @@ TEST_P(EntityTest, BlendingModeOptions) {
 }
 
 TEST_P(EntityTest, BezierCircleScaled) {
-  Entity entity;
-  entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
-  auto path = PathBuilder{}
-                  .MoveTo({97.325, 34.818})
-                  .CubicCurveTo({98.50862885295136, 34.81812293973836},
-                                {99.46822048142015, 33.85863261475589},
-                                {99.46822048142015, 32.67499810206613})
-                  .CubicCurveTo({99.46822048142015, 31.491363589376355},
-                                {98.50862885295136, 30.53187326439389},
-                                {97.32499434685802, 30.531998226542708})
-                  .CubicCurveTo({96.14153655073771, 30.532123170035373},
-                                {95.18222070648729, 31.491540299350355},
-                                {95.18222070648729, 32.67499810206613})
-                  .CubicCurveTo({95.18222070648729, 33.85845590478189},
-                                {96.14153655073771, 34.81787303409686},
-                                {97.32499434685802, 34.81799797758954})
-                  .Close()
-                  .TakePath();
-  entity.SetTransformation(
-      Matrix::MakeScale({20.0, 20.0, 1.0}).Translate({-80, -15, 0}));
-  entity.SetContents(SolidColorContents::Make(path, Color::Red()));
-  ASSERT_TRUE(OpenPlaygroundHere(entity));
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    static float scale = 20;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Scale", &scale, 1, 100);
+    ImGui::End();
+
+    Entity entity;
+    entity.SetTransformation(Matrix::MakeScale(GetContentScale()));
+    auto path = PathBuilder{}
+                    .MoveTo({97.325, 34.818})
+                    .CubicCurveTo({98.50862885295136, 34.81812293973836},
+                                  {99.46822048142015, 33.85863261475589},
+                                  {99.46822048142015, 32.67499810206613})
+                    .CubicCurveTo({99.46822048142015, 31.491363589376355},
+                                  {98.50862885295136, 30.53187326439389},
+                                  {97.32499434685802, 30.531998226542708})
+                    .CubicCurveTo({96.14153655073771, 30.532123170035373},
+                                  {95.18222070648729, 31.491540299350355},
+                                  {95.18222070648729, 32.67499810206613})
+                    .CubicCurveTo({95.18222070648729, 33.85845590478189},
+                                  {96.14153655073771, 34.81787303409686},
+                                  {97.32499434685802, 34.81799797758954})
+                    .Close()
+                    .TakePath();
+    entity.SetTransformation(
+        Matrix::MakeScale({scale, scale, 1.0}).Translate({-90, -20, 0}));
+    entity.SetContents(SolidColorContents::Make(path, Color::Red()));
+    return entity.Render(context, pass);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(EntityTest, Filters) {
