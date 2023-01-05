@@ -12,7 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
-  final Map<String, List<Map<Object, Object?>>> eventsDispatched = <String, List<Map<Object, Object?>>>{};
+  final Map<String, Map<String,List<Map<Object, Object?>>>> eventsDispatched = <String, Map<String, List<Map<Object, Object?>>>>{};
+  final  List<Object?> objectsInspected = <Object?>[];
 
   @override
   void registerServiceExtension({
@@ -24,12 +25,22 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   }
 
   @override
-  void postEvent(String eventKind, Map<Object, Object?> eventData) {
-    getEventsDispatched(eventKind).add(eventData);
+  void postEvent(String eventKind, Map<Object, Object?> eventData, { String stream = 'Extension' }) {
+    getEventsDispatched(eventKind, stream: stream).add(eventData);
   }
 
-  List<Map<Object, Object?>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object?>>[]);
+  @override
+  void inspect(Object? object) {
+    objectsInspected.add(object);
+  }
+
+  List<Map<Object, Object?>> getEventsDispatched(String eventKind, { String stream = 'Extension' }) {
+    final Map<String, List<Map<Object, Object?>>> eventKindEntry = eventsDispatched.putIfAbsent(eventKind, () => <String, List<Map<Object, Object?>>>{});
+    return eventKindEntry.putIfAbsent(stream, () => <Map<Object, Object?>>[]);
+  }
+
+  List<Object?> getObjectsInspected(){
+    return objectsInspected;
   }
 
   Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(String extensionName) {

@@ -1525,7 +1525,7 @@ mixin WidgetInspectorService {
     return false;
   }
   void _sendInspectEvent(Object? object){
-    developer.inspect(object);
+    inspect(object);
 
     // final _Location? location = _getCreationLocation(element);
 

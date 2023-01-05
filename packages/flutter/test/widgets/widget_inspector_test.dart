@@ -826,7 +826,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(service.selection.currentElement, equals(null));
       expect(service.selection.current, equals(null));
     });
-
+    // TODO: Test onTap sends the inspect event
+    // TODO: test setSelection Sends the post event
     testWidgets('WidgetInspectorService getParentChain', (WidgetTester tester) async {
       const String group = 'test-group';
 
@@ -972,6 +973,46 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+    testWidgets('WidgetInspectorService setSelection notifiers', (WidgetTester tester) async {
+      final String pubRootTest = generateTestPubRootDirectory(service);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      service.disposeAllGroups();
+
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
+
+      service.setSelection(elementA, 'my-group');
+
+      final objectsInspected = service.getObjectsInspected();
+      expect(objectsInspected, equals([elementA]));
+
+      final List<Map<Object, Object?>> navigateEventsPosted = service.getEventsDispatched('navigate', stream: 'toolEvent',);
+      expect(navigateEventsPosted.length, equals(1));
+      final Map<Object,Object?> event = navigateEventsPosted[0];
+      final String file = event['file']! as String;
+      final int line = event['line']! as int;
+      final int column = event['column']! as int;
+      expect(file, endsWith('widget_inspector_test.dart'));
+      // We don't hardcode the actual lines the widgets are created on as that
+      // would make this test fragile.
+      expect(line, isNotNull);
+      // Column numbers are more stable than line numbers.
+      expect(column, equals(15));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
