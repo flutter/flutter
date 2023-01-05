@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
-import '../general.shard/project_test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
@@ -963,3 +962,20 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   @override
   late String aaptPath;
 }
+
+Future<FlutterProject> aModuleProject() async {
+  final Directory directory = globals.fs.directory('module_project');
+  directory
+    .childDirectory('.dart_tool')
+    .childFile('package_config.json')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+  directory.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_module
+flutter:
+  module:
+    androidPackage: com.example
+''');
+  return FlutterProject.fromDirectory(directory);
+}
+
