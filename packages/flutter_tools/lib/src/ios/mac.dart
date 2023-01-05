@@ -740,13 +740,6 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   }
 
-  if (!issueDetected && _needUpdateSigningIdentifier(xcodeBuildExecution)) {
-    issueDetected = true;
-    logger.printError('');
-    logger.printError('It appears that your application still contains the default signing identifier.');
-    logger.printError("Try replacing 'com.example' with your signing id in Xcode:");
-    logger.printError('  open ios/Runner.xcworkspace');
-  }
   return issueDetected;
 }
 
@@ -758,13 +751,6 @@ bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
   return xcodeBuildExecution != null && xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
         xcodeBuildExecution.buildSettings.containsKey);
-}
-
-// Return `true` if the signing identifier needs to be updated.
-bool _needUpdateSigningIdentifier(XcodeBuildExecution? xcodeBuildExecution) {
-  return xcodeBuildExecution != null
-      && xcodeBuildExecution.environmentType == EnvironmentType.physical
-      && (xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') ?? false);
 }
 
 // Detects and handles errors from stdout.

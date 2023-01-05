@@ -336,6 +336,8 @@ abstract class Gradient {
 
 /// A 2D linear gradient.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=gYNTcgZVcWw}
+///
 /// This class is used by [BoxDecoration] to represent linear gradients. This
 /// abstracts out the arguments to the [ui.Gradient.linear] constructor from
 /// the `dart:ui` library.

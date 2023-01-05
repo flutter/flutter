@@ -350,7 +350,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
 
     // Hide the text selection toolbar on mobile when orientation changes.
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     if (_lastOrientation == null) {
       _lastOrientation = orientation;
       return;

@@ -1476,6 +1476,34 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
+  testWidgets('ListTile onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'ListTile Focus');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListTile(
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
@@ -1587,9 +1615,7 @@ void main() {
 
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
-        body: SizedBox(
-          width: 0.0,
-          height: 0.0,
+        body: SizedBox.shrink(
           child: ListTile(
             key: key,
             tileColor: Colors.green,
@@ -2202,7 +2228,7 @@ void main() {
       );
     }
 
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     // ListTile - ListTileStyle.list (default).
     await tester.pumpWidget(buildFrame());

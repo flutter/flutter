@@ -1943,7 +1943,7 @@ flutter:
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelDill');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1974,7 +1974,7 @@ flutter:
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformSoundKernelDill');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -2649,7 +2649,7 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     appStopped = true;
     return true;
   }
@@ -2664,7 +2664,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => NoOpDeviceLogReader(name);
 

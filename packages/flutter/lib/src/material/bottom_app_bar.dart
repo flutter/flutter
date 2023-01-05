@@ -196,6 +196,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
           key: materialKey,
           type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
           elevation: elevation,
+          color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
           child: child == null
             ? null
@@ -275,9 +276,8 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_150
 
-// Generated version v0_141
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   const _BottomAppBarDefaultsM3(this.context)
     : super(

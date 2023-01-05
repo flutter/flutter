@@ -45,7 +45,7 @@ void main() {
     writeFile(fileSystem.path.join(projectRoot.path, 'pubspec.yaml'), '''
 name: hello
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.12.0 <4.0.0'
 ''');
     writeFile(fileSystem.path.join(projectRoot.path, 'lib', 'main.dart'), '''
 import 'unsafe.dart';

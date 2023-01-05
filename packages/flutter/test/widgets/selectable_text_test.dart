@@ -5,8 +5,9 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
+library;
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 import 'dart:ui';
 
@@ -195,7 +196,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(textFieldStart, kind: PointerDeviceKind.mouse);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
 
     final FlutterError error = tester.takeException() as FlutterError;
     expect(
@@ -3885,7 +3886,6 @@ void main() {
           ),
         ),
       );
-
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
       await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
@@ -3907,12 +3907,13 @@ void main() {
       expect(find.byType(CupertinoButton), findsNWidgets(1));
 
       // Double tap selecting the same word somewhere else is fine.
+      await tester.pumpAndSettle(kDoubleTapTimeout);
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 0),
+        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3928,6 +3929,7 @@ void main() {
       editableTextState.hideToolbar();
       await tester.pumpAndSettle();
 
+      await tester.pumpAndSettle(kDoubleTapTimeout);
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of material_animated_icons;
+// TODO(goderbauer): Clean up the part-of hack currently used for testing the private implementation.
+part of material_animated_icons; // ignore: use_string_in_part_of_directives
 
 // The code for drawing animated icons is kept in a private API, as we are not
 // yet ready for exposing a public API for (partial) vector graphics support.
