@@ -332,35 +332,6 @@ void main() {
       expect(recognized, const <String>['down', 'start']);
     });
 
-    testGesture('Should recognize long press with multiple buttons', (GestureTester tester) {
-      const PointerDownEvent multipleButtonsDown = PointerDownEvent(
-        pointer: 5,
-        position: Offset(10, 10),
-        buttons: kPrimaryButton | kSecondaryButton,
-      );
-
-      final LongPressGestureRecognizer customGesture =
-          LongPressGestureRecognizer(allowedButtonsFilter: (int buttons) => true)
-            ..onLongPressDown = (LongPressDownDetails details) {
-              recognized.add('down');
-            }
-            ..onLongPress = () {
-              recognized.add('start');
-            }
-            ..addPointer(multipleButtonsDown);
-
-      tester.closeArena(5);
-      expect(recognized, const <String>[]);
-      tester.route(multipleButtonsDown);
-      expect(recognized, const <String>['down']);
-      tester.async.elapse(const Duration(milliseconds: 300));
-      expect(recognized, const <String>['down']);
-      tester.async.elapse(const Duration(milliseconds: 700));
-      expect(recognized, const <String>['down', 'start']);
-      customGesture.dispose();
-      expect(recognized, const <String>['down', 'start']);
-    });
-
     testGesture('Short up cancels long press', (GestureTester tester) {
       gesture.addPointer(down);
       tester.closeArena(5);
