@@ -978,4 +978,3 @@ flutter:
 ''');
   return FlutterProject.fromDirectory(directory);
 }
-
