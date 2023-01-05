@@ -3283,7 +3283,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (selection.isCollapsed) {
         rectToReveal = targetOffset.rect;
       } else {
-        final List<Rect> selectionBoxes = renderEditable.getBoxesForSelection(selection);
+        final List<TextBox> selectionBoxes = renderEditable.getBoxesForSelection(selection);
         // selectionBoxes may be empty if, for example, the selection does not
         // encompass a full character, like if it only contained part of an
         // extended grapheme cluster.
@@ -3291,7 +3291,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           rectToReveal = targetOffset.rect;
         } else {
           rectToReveal = selection.baseOffset < selection.extentOffset ?
-            selectionBoxes.last : selectionBoxes.first;
+            selectionBoxes.last.toRect() : selectionBoxes.first.toRect();
         }
       }
 
@@ -3594,11 +3594,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final CharacterRange characterRange = CharacterRange(plainText);
     while (characterRange.moveNext()) {
       final int graphemeEnd = graphemeStart + characterRange.current.length;
-      final List<Rect> boxes = renderEditable.getBoxesForSelection(
+      final List<TextBox> boxes = renderEditable.getBoxesForSelection(
         TextSelection(baseOffset: graphemeStart, extentOffset: graphemeEnd),
       );
 
-      final Rect? box = boxes.isEmpty ? null : boxes.first;
+      final TextBox? box = boxes.isEmpty ? null : boxes.first;
       if (box != null) {
         final Rect paintBounds = renderEditable.paintBounds;
         // Stop early when characters are already below the bottom edge of the
@@ -3606,8 +3606,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (paintBounds.bottom <= box.top) {
           break;
         }
-        if (paintBounds.contains(box.topLeft) || paintBounds.contains(box.bottomRight)) {
-          rects.add(SelectionRect(position: graphemeStart, bounds: box));
+        if (paintBounds.contains(Offset(box.left, box.top)) || paintBounds.contains(Offset(box.right, box.bottom))) {
+          rects.add(SelectionRect(position: graphemeStart, bounds: box.toRect(), direction: box.direction));
         }
       }
       graphemeStart = graphemeEnd;
