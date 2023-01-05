@@ -32,9 +32,6 @@ const String _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
 /// The console environment key used by the pub tool to find the cache directory.
 const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
 
-/// The console environment key used by the pub tool to limit HTTP retries.
-const String _kPubMaxHttpRetriesEnvironmentKey = 'PUB_MAX_HTTP_RETRIES';
-
 typedef MessageFilter = String? Function(String message);
 
 /// globalCachePath is the directory in which the content of the localCachePath will be moved in
@@ -352,7 +349,6 @@ class _DefaultPub implements Pub {
       context: context,
       directory: directory,
       failureMessage: 'pub $command failed',
-      retry: !offline,
       flutterRootOverride: flutterRootOverride,
       printProgress: printProgress
     );
@@ -391,7 +387,6 @@ class _DefaultPub implements Pub {
     required String command,
     required bool printProgress,
     required PubContext context,
-    required bool retry,
     required String directory,
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
@@ -403,9 +398,6 @@ class _DefaultPub implements Pub {
 
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
-    if (!retry) {
-      pubEnvironment[_kPubMaxHttpRetriesEnvironmentKey] = '1';
-    }
 
     try {
       if (printProgress) {
