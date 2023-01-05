@@ -541,19 +541,17 @@ class WebPlugin extends PluginPlatform {
   });
 
   factory WebPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    if (yaml['pluginClass'] is! String) {
+      throwToolExit('The plugin `$name` is missing the required field `pluginClass` in pubspec.yaml');
+    }
+    if (yaml['fileName'] is! String) {
+      throwToolExit('The plugin `$name` is missing the required field `fileName` in pubspec.yaml');
+    }
     return WebPlugin(
       name: name,
       pluginClass: yaml['pluginClass'] as String,
       fileName: yaml['fileName'] as String,
     );
-  }
-
-  static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
-    return yaml['pluginClass'] is String && yaml['fileName'] is String;
   }
 
   static const String kConfigKey = 'web';
