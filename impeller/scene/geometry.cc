@@ -12,6 +12,8 @@
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/device_buffer_descriptor.h"
 #include "impeller/renderer/formats.h"
+#include "impeller/renderer/sampler_descriptor.h"
+#include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
@@ -116,6 +118,8 @@ std::shared_ptr<Geometry> Geometry::MakeFromFlatbuffer(
   };
   return MakeVertexBuffer(std::move(vertex_buffer), is_skinned);
 }
+
+void Geometry::SetJointsTexture(const std::shared_ptr<Texture>& texture) {}
 
 //------------------------------------------------------------------------------
 /// CuboidGeometry
@@ -239,10 +243,31 @@ void SkinnedVertexBufferGeometry::BindToCommand(
   command.BindVertices(
       GetVertexBuffer(*scene_context.GetContext()->GetResourceAllocator()));
 
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kNearest;
+  sampler_desc.mag_filter = MinMagFilter::kNearest;
+  sampler_desc.mip_filter = MipFilter::kNone;
+  sampler_desc.width_address_mode = SamplerAddressMode::kRepeat;
+  sampler_desc.label = "NN Repeat";
+
+  SkinnedVertexShader::BindJointsTexture(
+      command,
+      joints_texture_ ? joints_texture_ : scene_context.GetPlaceholderTexture(),
+      scene_context.GetContext()->GetSamplerLibrary()->GetSampler(
+          sampler_desc));
+
   SkinnedVertexShader::VertInfo info;
   info.mvp = transform;
+  info.enable_skinning = joints_texture_ ? 1 : 0;
+  info.joint_texture_size =
+      joints_texture_ ? joints_texture_->GetSize().width : 1;
   SkinnedVertexShader::BindVertInfo(command, buffer.EmplaceUniform(info));
 }
 
+// |Geometry|
+void SkinnedVertexBufferGeometry::SetJointsTexture(
+    const std::shared_ptr<Texture>& texture) {
+  joints_texture_ = texture;
+}
 }  // namespace scene
 }  // namespace impeller

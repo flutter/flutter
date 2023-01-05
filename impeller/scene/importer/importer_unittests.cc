@@ -74,6 +74,8 @@ TEST(ImporterTest, CanParseSkinnedGLTF) {
   // The skinned node contains both a skeleton and skinned mesh primitives that
   // reference bones in the skeleton.
   auto& skinned_node = scene.nodes[node->children[0]];
+  ASSERT_NE(skinned_node->skin, nullptr);
+
   ASSERT_EQ(skinned_node->mesh_primitives.size(), 2u);
   auto& bottom_triangle = *skinned_node->mesh_primitives[0];
   ASSERT_EQ(bottom_triangle.indices->count, 3u);

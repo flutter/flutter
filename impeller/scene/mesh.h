@@ -15,6 +15,8 @@
 namespace impeller {
 namespace scene {
 
+class Skin;
+
 class Mesh final {
  public:
   struct Primitive {
@@ -31,7 +33,9 @@ class Mesh final {
   void AddPrimitive(Primitive mesh_);
   std::vector<Primitive>& GetPrimitives();
 
-  bool Render(SceneEncoder& encoder, const Matrix& transform) const;
+  bool Render(SceneEncoder& encoder,
+              const Matrix& transform,
+              const std::shared_ptr<Texture>& joints) const;
 
  private:
   std::vector<Primitive> primitives_;
