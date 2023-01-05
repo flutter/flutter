@@ -21,8 +21,8 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrDirectContext* surface_context,
     // There is a rendering surface that may contain textures that are going to
     // be referenced in the layer tree about to be drawn.
     return SkSurface::MakeRenderTarget(
-        reinterpret_cast<GrRecordingContext*>(surface_context), SkBudgeted::kNo,
-        image_info);
+        reinterpret_cast<GrRecordingContext*>(surface_context),
+        skgpu::Budgeted::kNo, image_info);
   }
 
   // There is no rendering surface, assume no GPU textures are present and

@@ -28,7 +28,7 @@ sk_sp<SkImage> ConvertToRasterUsingResourceContext(
           .SetIfFalse([&surface, &surface_info, resource_context] {
             if (resource_context) {
               surface = SkSurface::MakeRenderTarget(
-                  resource_context.get(), SkBudgeted::kNo, surface_info);
+                  resource_context.get(), skgpu::Budgeted::kNo, surface_info);
             } else {
               surface = SkSurface::MakeRaster(surface_info);
             }
