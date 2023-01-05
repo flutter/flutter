@@ -65,19 +65,6 @@ static void PassthroughAttributeWriter(
   }
 }
 
-/// @brief  A ComponentWriter which converts a Vector3 position from
-///         right-handed GLTF space to left-handed Impeller space.
-static void PositionAttributeWriter(
-    Scalar* destination,
-    const void* source,
-    const VerticesBuilder::ComponentProperties& component,
-    const VerticesBuilder::AttributeProperties& attribute) {
-  FML_DCHECK(attribute.component_count == 3);
-  *(destination + 0) = component.convert_proc(source, 0, true);
-  *(destination + 1) = component.convert_proc(source, 1, true);
-  *(destination + 2) = -component.convert_proc(source, 2, true);
-}
-
 /// @brief  A ComponentWriter which converts four vertex indices to scalars.
 static void JointsAttributeWriter(
     Scalar* destination,
@@ -96,7 +83,7 @@ std::map<VerticesBuilder::AttributeType, VerticesBuilder::AttributeProperties>
          {.offset_bytes = offsetof(UnskinnedVerticesBuilder::Vertex, position),
           .size_bytes = sizeof(UnskinnedVerticesBuilder::Vertex::position),
           .component_count = 3,
-          .write_proc = PositionAttributeWriter}},
+          .write_proc = PassthroughAttributeWriter}},
         {VerticesBuilder::AttributeType::kNormal,
          {.offset_bytes = offsetof(UnskinnedVerticesBuilder::Vertex, normal),
           .size_bytes = sizeof(UnskinnedVerticesBuilder::Vertex::normal),

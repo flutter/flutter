@@ -34,7 +34,9 @@ bool Scene::Render(const RenderTarget& render_target,
                    const Matrix& camera_transform) const {
   // Collect the render commands from the scene.
   SceneEncoder encoder;
-  if (!root_.Render(encoder, Matrix())) {
+  if (!root_.Render(encoder,
+                    *scene_context_->GetContext()->GetResourceAllocator(),
+                    Matrix())) {
     FML_LOG(ERROR) << "Failed to render frame.";
     return false;
   }

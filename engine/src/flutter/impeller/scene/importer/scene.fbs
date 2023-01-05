@@ -188,6 +188,7 @@ table Node {
 
 table Scene {
   children: [int];  // Indices into `Scene`->`nodes`.
+  transform: Matrix;
   nodes: [Node];
   textures: [Texture];  // Textures may be reused across different materials.
   animations: [Animation];

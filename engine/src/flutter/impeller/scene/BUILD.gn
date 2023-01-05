@@ -31,6 +31,8 @@ impeller_component("scene") {
     "scene_context.h",
     "scene_encoder.cc",
     "scene_encoder.h",
+    "skin.cc",
+    "skin.h",
   ]
 
   public_deps = [

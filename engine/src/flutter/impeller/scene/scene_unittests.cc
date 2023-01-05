@@ -135,6 +135,31 @@ TEST_P(SceneTest, TwoTriangles) {
   scene.GetRoot().AddChild(std::move(gltf_scene));
 
   Renderer::RenderCallback callback = [&](RenderTarget& render_target) {
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      static Scalar playback_time_scale = 1;
+      static Scalar weight = 1;
+      static bool loop = true;
+
+      ImGui::SliderFloat("Playback time scale", &playback_time_scale, -5, 5);
+      ImGui::SliderFloat("Weight", &weight, -2, 2);
+      ImGui::Checkbox("Loop", &loop);
+      if (ImGui::Button("Play")) {
+        metronome_clip.Play();
+      }
+      if (ImGui::Button("Pause")) {
+        metronome_clip.Pause();
+      }
+      if (ImGui::Button("Stop")) {
+        metronome_clip.Stop();
+      }
+
+      metronome_clip.SetPlaybackTimeScale(playback_time_scale);
+      metronome_clip.SetWeight(weight);
+      metronome_clip.SetLoop(loop);
+    }
+
+    ImGui::End();
     Node& node = *scene.GetRoot().GetChildren()[0];
     node.SetLocalTransform(node.GetLocalTransform() *
                            Matrix::MakeRotation(0.02, {0, 1, 0, 0}));

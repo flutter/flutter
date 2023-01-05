@@ -126,6 +126,8 @@ std::shared_ptr<Node> Node::MakeFromFlatbuffer(const fb::Scene& scene,
   }
 
   auto result = std::make_shared<Node>();
+  result->SetLocalTransform(importer::ToMatrix(*scene.transform()));
+
   if (!scene.nodes() || !scene.children()) {
     return result;  // The scene is empty.
   }
@@ -190,17 +192,21 @@ void Node::UnpackFromFlatbuffer(
 
   /// Child nodes.
 
-  if (!source_node.children()) {
-    return;
+  if (source_node.children()) {
+    // Wire up graph connections.
+    for (int child : *source_node.children()) {
+      if (child < 0 || static_cast<size_t>(child) >= scene_nodes.size()) {
+        VALIDATION_LOG << "Node child index out of range.";
+        continue;
+      }
+      AddChild(scene_nodes[child]);
+    }
   }
 
-  // Wire up graph connections.
-  for (int child : *source_node.children()) {
-    if (child < 0 || static_cast<size_t>(child) >= scene_nodes.size()) {
-      VALIDATION_LOG << "Node child index out of range.";
-      continue;
-    }
-    AddChild(scene_nodes[child]);
+  /// Skin.
+
+  if (source_node.skin()) {
+    skin_ = Skin::MakeFromFlatbuffer(*source_node.skin(), scene_nodes);
   }
 }
 
@@ -218,6 +224,10 @@ const std::string& Node::GetName() const {
 
 void Node::SetName(const std::string& new_name) {
   name_ = new_name;
+}
+
+Node* Node::GetParent() const {
+  return parent_;
 }
 
 std::shared_ptr<Node> Node::FindChildByName(
@@ -301,16 +311,27 @@ Mesh& Node::GetMesh() {
   return mesh_;
 }
 
-bool Node::Render(SceneEncoder& encoder, const Matrix& parent_transform) const {
+void Node::SetIsJoint(bool is_joint) {
+  is_joint_ = is_joint;
+}
+
+bool Node::IsJoint() const {
+  return is_joint_;
+}
+
+bool Node::Render(SceneEncoder& encoder,
+                  Allocator& allocator,
+                  const Matrix& parent_transform) const {
   if (animation_player_.has_value()) {
     animation_player_->Update();
   }
 
   Matrix transform = parent_transform * local_transform_;
-  mesh_.Render(encoder, transform);
+  mesh_.Render(encoder, transform,
+               skin_ ? skin_->GetJointsTexture(allocator) : nullptr);
 
   for (auto& child : children_) {
-    if (!child->Render(encoder, transform)) {
+    if (!child->Render(encoder, allocator, transform)) {
       return false;
     }
   }
