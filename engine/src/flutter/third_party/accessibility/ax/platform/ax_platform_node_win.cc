@@ -31,6 +31,7 @@
 #include "ax_fragment_root_win.h"
 #include "ax_platform_node_delegate.h"
 #include "ax_platform_node_delegate_utils_win.h"
+#include "ax_platform_node_textprovider_win.h"
 #include "shellscalingapi.h"
 #include "uia_registrar_win.h"
 
@@ -5599,10 +5600,13 @@ AXPlatformNodeWin::GetPatternProviderFactoryMethod(PATTERNID pattern_id) {
       }
       break;
 
-      // TODO(schectman): add implementations for ITextProvider and
-      // ITextRangeProvider interfaces.
-      // https://github.com/flutter/flutter/issues/114547 and
-      // https://github.com/flutter/flutter/issues/109804
+    case UIA_TextEditPatternId:
+    case UIA_TextPatternId:
+      if (IsText() || IsTextField() ||
+          data.role == ax::mojom::Role::kRootWebArea) {
+        return &AXPlatformNodeTextProviderWin::CreateIUnknown;
+      }
+      break;
 
     case UIA_TogglePatternId:
       if (SupportsToggle(data.role)) {
