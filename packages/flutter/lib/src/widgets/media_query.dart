@@ -212,7 +212,7 @@ class MediaQueryData {
       boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
       highContrast = platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
-      navigationMode = NavigationMode.traditional,
+      navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
       gestureSettings = DeviceGestureSettings.fromWindow(view),
       displayFeatures = view.displayFeatures;
 
