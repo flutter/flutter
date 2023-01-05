@@ -290,6 +290,7 @@ class PackagesGetCommand extends FlutterCommand {
         );
       }
     }
+    final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
 
     final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
     final Stopwatch timer = Stopwatch()..start();
@@ -300,7 +301,7 @@ class PackagesGetCommand extends FlutterCommand {
           ...subArgs,
           // `dart pub get` and friends defaults to `--no-example`.
           if(!exampleWasParsed && target != null) '--example',
-          if(directoryOption == null && target != null) ...<String>['--directory', target],
+          if(directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
         ],
         project: rootProject,
         context: _context,
