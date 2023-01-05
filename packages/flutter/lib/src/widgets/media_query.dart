@@ -176,8 +176,8 @@ class MediaQueryData {
   /// the `view`'s [PlatformDispatcher] is consulted to construct the
   /// platform-specific data.
   ///
-  /// Data, that is exposed directly on the [FlutterView] is considered
-  /// view-specific. Data, that is only exposed via the
+  /// Data which is exposed directly on the [FlutterView] is considered
+  /// view-specific. Data which is only exposed via the
   /// [FlutterView.platformDispatcher] property is considered platform-specific.
   ///
   /// Callers of this method should ensure that they also register for
