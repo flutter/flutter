@@ -78,6 +78,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   void resetAllState() {
     super.resetAllState();
     eventsDispatched.clear();
+    objectsInspected.clear();
     rebuildCount = 0;
   }
 }

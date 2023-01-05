@@ -975,7 +975,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(columnA, equals(columnB));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
-    testWidgets('WidgetInspectorService setSelection notifiers', (WidgetTester tester) async {
+    testWidgets('WidgetInspectorService setSelection notifiers for an Element',
+    (WidgetTester tester) async {
       final String pubRootTest = generateTestPubRootDirectory(service);
       await tester.pumpWidget(
         Directionality(
@@ -996,11 +997,58 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       service.resetPubRootDirectories();
       service.addPubRootDirectories(<String>[pubRootTest]);
 
+      // Select the widget
       service.setSelection(elementA, 'my-group');
 
-      final objectsInspected = service.getObjectsInspected();
-      expect(objectsInspected, equals([elementA]));
+      // ensure that developer.inspect was called on the widget
+      final List<Object?> objectsInspected = service.getObjectsInspected();
+      expect(objectsInspected, equals(<Element>[elementA]));
 
+      // ensure that a navigate event was sent for the element
+      final List<Map<Object, Object?>> navigateEventsPosted = service.getEventsDispatched('navigate', stream: 'toolEvent',);
+      expect(navigateEventsPosted.length, equals(1));
+      final Map<Object,Object?> event = navigateEventsPosted[0];
+      final String file = event['file']! as String;
+      final int line = event['line']! as int;
+      final int column = event['column']! as int;
+      expect(file, endsWith('widget_inspector_test.dart'));
+      // We don't hardcode the actual lines the widgets are created on as that
+      // would make this test fragile.
+      expect(line, isNotNull);
+      // Column numbers are more stable than line numbers.
+      expect(column, equals(15));
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+    
+    testWidgets('WidgetInspectorService setSelection notifiers for a RenderObject',
+    (WidgetTester tester) async {
+      final String pubRootTest = generateTestPubRootDirectory(service);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      service.disposeAllGroups();
+
+      service.resetPubRootDirectories();
+      service.addPubRootDirectories(<String>[pubRootTest]);
+
+      // Select the render object for the widget.
+      service.setSelection(elementA.renderObject, 'my-group');
+
+      // ensure that developer.inspect was called on the widget
+      final List<Object?> objectsInspected = service.getObjectsInspected();
+      expect(objectsInspected, equals(<RenderObject?>[elementA.renderObject]));
+
+      // ensure that a navigate event was sent for the renderObject
       final List<Map<Object, Object?>> navigateEventsPosted = service.getEventsDispatched('navigate', stream: 'toolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
