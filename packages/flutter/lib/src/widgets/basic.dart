@@ -4372,13 +4372,27 @@ class PositionedDirectional extends StatelessWidget {
 /// A widget that displays its children in a single line, either vertically or
 /// horizontally.
 ///
-/// The documentation for the [Flex} and its layout algorithm have been
+/// This documentation for the [Flex} and its layout algorithm have been
 /// written to be beginner friendly. They are most often read by people who
 /// are new to Flutter, and who are trying to understand the basic behavior
-/// of [Row] and [Column]. They have often received a [RenderFlex] error,
-/// have no idea what it means, and have turned to this part of the docs
-/// for help.  If you are a more advanced user of the Flutter SDK, then
-/// we thank you for your patience.
+/// of [Row] and [Column]. They have often received an error along the lines
+/// of _"RenderFlex children have non-zero flex but incoming height
+/// constraints are unbounded."_ They have no idea what the error means,
+/// and have turned to this part of the docs for help.  If you are a more
+/// advanced user of the Flutter SDK, then we thank you for your patience.
+///
+/// A quick explanation of RenderFlex errors:
+/// Any [RenderFlex] error will almost always trace back to an issue with
+/// a [Row] or [Column] having a child that wants to be as large as it can,
+/// and there is nothing limiting its size. That combination makes it
+/// impossible for the engine to lay the [Row] or [Column] out, since the
+/// size is trying to be infinity. A [Row] or [Column] is a kind of [Flex],
+/// which is used in the widget layer. However, this error occurs in the
+/// render layer, and that layer uses a different class called a [RenderFlex].
+/// This is why you see an error about a [RenderFlex] instead of a [Row]
+/// or [Column]. Understanding the rest of this documentation of the [Flex]
+/// will help you understand what is happening, and how you can approach
+/// fixing it.
 ///
 /// The [Flex] widget allows you to control the axis along which its children
 /// are placed (horizontal or vertical). This is referred to as the
