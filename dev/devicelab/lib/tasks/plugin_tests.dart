@@ -230,7 +230,11 @@ public class $pluginClass: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    result("called " + call.method)
+#if os(macOS)
+    result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
+#elseif os(iOS)
+    result("iOS " + UIDevice.current.systemVersion)
+#endif
   }
 }
 ''';
