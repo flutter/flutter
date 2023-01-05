@@ -1,4 +1,4 @@
-Signature: b08ae6bff7e9a0bdf97f774b0b76601a
+Signature: d57208bd57f930c3f9c1aea31f6e2117
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8306,6 +8306,7 @@ ORIGIN: ../../../third_party/skia/src/core/SkSLTypeShared.h + ../../../third_par
 ORIGIN: ../../../third_party/skia/src/gpu/AtlasTypes.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/AtlasTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/RefCntedCallback.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/SkBackingFit.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrBufferTransferRenderTask.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrBufferTransferRenderTask.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrBufferUpdateRenderTask.cpp + ../../../third_party/skia/LICENSE
@@ -8526,6 +8527,7 @@ FILE: ../../../third_party/skia/src/core/SkSLTypeShared.h
 FILE: ../../../third_party/skia/src/gpu/AtlasTypes.cpp
 FILE: ../../../third_party/skia/src/gpu/AtlasTypes.h
 FILE: ../../../third_party/skia/src/gpu/RefCntedCallback.h
+FILE: ../../../third_party/skia/src/gpu/SkBackingFit.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferTransferRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferTransferRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBufferUpdateRenderTask.cpp
