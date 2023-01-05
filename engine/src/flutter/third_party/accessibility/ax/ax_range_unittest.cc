@@ -205,7 +205,7 @@ void AXRangeTest::SetUp() {
   check_box2_.AddIntAttribute(ax::mojom::IntAttribute::kPreviousOnLineId,
                               check_box1_.id);
 
-  text_field_.role = ax::mojom::Role::kTextField;
+  text_field_.role = ax::mojom::Role::kGroup;
   text_field_.AddState(ax::mojom::State::kEditable);
   text_field_.SetValue(TEXT_FIELD);
   text_field_.AddIntListAttribute(
