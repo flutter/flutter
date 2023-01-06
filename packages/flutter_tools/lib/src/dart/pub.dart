@@ -704,7 +704,6 @@ class _DefaultPub implements Pub {
     );
     final File currentVersion = _fileSystem.file(
       _fileSystem.path.join(Cache.flutterRoot!, 'version'));
-      lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
     lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
 
     await _updatePackageConfig(project);
