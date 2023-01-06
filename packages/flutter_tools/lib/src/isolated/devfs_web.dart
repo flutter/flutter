@@ -930,7 +930,6 @@ class WebDevFS implements DevFS {
     globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
     'lib',
     'dev_compiler',
-    'kernel',
     'amd',
     'require.js',
   ));
