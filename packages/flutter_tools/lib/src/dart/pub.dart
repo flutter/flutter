@@ -368,7 +368,8 @@ class _DefaultPub implements Pub {
   /// Uses [ProcessStartMode.normal] and [Pub._stdio] if [Pub.test] constructor
   /// was used.
   ///
-  /// Prints the stdout and stderr of the whole run.
+  /// Prints the stdout and stderr of the whole run, unless silenced using
+  /// [printProgress].
   ///
   /// Sends an analytics event.
   Future<void> _runWithStdioInherited(
@@ -381,43 +382,66 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
   }) async {
     int exitCode;
+
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+
     try {
-      final io.Process process;
-      final io.Stdio? stdio = _stdio;
+      if (printProgress) {
+        final io.Stdio? stdio = _stdio;
+        if (stdio == null) {
+          // Let pub inherit stdio and output directly to the tool's stdout and
+          // stderr handles.
+          final io.Process process = await _processUtils.start(
+            pubCommand,
+            workingDirectory: _fileSystem.path.current,
+            environment: pubEnvironment,
+            mode: ProcessStartMode.inheritStdio,
+          );
 
-      if (stdio != null) {
-        // Omit mode parameter and direct pub output to [Pub._stdio] for tests.
-        process = await _processUtils.start(
-          pubCommand,
-          workingDirectory: _fileSystem.path.current,
-          environment: pubEnvironment,
-        );
+          exitCode = await process.exitCode;
+        } else {
+          // Omit [mode] parameter to send output to [process.stdout] and
+          // [process.stderr].
+          final io.Process process = await _processUtils.start(
+            pubCommand,
+            workingDirectory: _fileSystem.path.current,
+            environment: pubEnvironment,
+          );
 
-        final StreamSubscription<List<int>> stdoutSubscription =
-          process.stdout.listen(stdio.stdout.add);
-        final StreamSubscription<List<int>> stderrSubscription =
-          process.stderr.listen(stdio.stderr.add);
+          // Direct pub output to [Pub._stdio] for tests.
+          final StreamSubscription<List<int>> stdoutSubscription =
+              process.stdout.listen(stdio.stdout.add);
+          final StreamSubscription<List<int>> stderrSubscription =
+              process.stderr.listen(stdio.stderr.add);
 
-        await Future.wait<void>(<Future<void>>[
-          stdoutSubscription.asFuture<void>(),
-          stderrSubscription.asFuture<void>(),
-        ]);
+          await Future.wait<void>(<Future<void>>[
+            stdoutSubscription.asFuture<void>(),
+            stderrSubscription.asFuture<void>(),
+          ]);
 
-        unawaited(stdoutSubscription.cancel());
-        unawaited(stderrSubscription.cancel());
+          unawaited(stdoutSubscription.cancel());
+          unawaited(stderrSubscription.cancel());
+
+          exitCode = await process.exitCode;
+        }
       } else {
-        // Let pub inherit stdio for normal operation.
-        process = await _processUtils.start(
+        // Do not try to use [ProcessUtils.start] here, because it requires you
+        // to read all data out of the stdout and stderr streams. If you don't
+        // read the streams, it may appear to work fine on your platform but
+        // will block the tool's process on Windows.
+        // See https://api.dart.dev/stable/dart-io/Process/start.html
+        //
+        // [ProcessUtils.run] will send the output to [result.stdout] and
+        // [result.stderr], which we will ignore.
+        final RunResult result = await _processUtils.run(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
           environment: pubEnvironment,
-          mode: ProcessStartMode.inheritStdio,
         );
-      }
 
-      exitCode = await process.exitCode;
+        exitCode = result.exitCode;
+      }
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
       if (exception is io.ProcessException) {
