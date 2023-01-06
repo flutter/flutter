@@ -712,15 +712,16 @@ class _DefaultPub implements Pub {
     }
   }
 
-  /// Update the package configuration file.
+  /// Update the package configuration file in [project].
   ///
-  /// Creates a corresponding `package_config_subset` file that is used by the build
-  /// system to avoid rebuilds caused by an updated pub timestamp.
+  /// Creates a corresponding `package_config_subset` file that is used by the
+  /// build system to avoid rebuilds caused by an updated pub timestamp.
   ///
-  /// if [generateSyntheticPackage] is true then insert flutter_gen synthetic
-  /// package into the package configuration. This is used by the l10n localization
-  /// tooling to insert a new reference into the package_config file, allowing the import
-  /// of a package URI that is not specified in the pubspec.yaml
+  /// if `project.generateSyntheticPackage` is `true` then insert flutter_gen
+  /// synthetic package into the package configuration. This is used by the l10n
+  /// localization tooling to insert a new reference into the package_config
+  /// file, allowing the import of a package URI that is not specified in the
+  /// pubspec.yaml
   ///
   /// For more information, see:
   ///   * [generateLocalizations], `in lib/src/localizations/gen_l10n.dart`
