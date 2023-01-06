@@ -312,7 +312,19 @@ class NestedScrollView extends StatefulWidget {
     return <Widget>[
       ...headerSliverBuilder(context, bodyIsScrolled),
       SliverFillRemaining(
+        // The inner (body) scroll view must use this scroll controller so that
+        // the independent scroll positions can be kept in sync.
         child: PrimaryScrollController(
+          // The inner scroll view should always inherit this
+          // PrimaryScrollController, on every platform.
+          automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
+          // `PrimaryScrollController.scrollDirection` is not set, and so it is
+          // restricted to the default Axis.vertical.
+          // Ideally the inner and outer views would have the same
+          // scroll direction, and so we could assume
+          // `NestedScrollView.scrollDirection` for the PrimaryScrollController,
+          // but use cases already exist where the axes are mismatched.
+          // https://github.com/flutter/flutter/issues/102001
           controller: innerController,
           child: body,
         ),
@@ -514,6 +526,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     required super.pixels,
     required super.viewportDimension,
     required super.axisDirection,
+    required super.devicePixelRatio,
     required this.minRange,
     required this.maxRange,
     required this.correctionOffset,
@@ -526,6 +539,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     double? pixels,
     double? viewportDimension,
     AxisDirection? axisDirection,
+    double? devicePixelRatio,
     double? minRange,
     double? maxRange,
     double? correctionOffset,
@@ -536,6 +550,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       minRange: minRange ?? this.minRange,
       maxRange: maxRange ?? this.maxRange,
       correctionOffset: correctionOffset ?? this.correctionOffset,
@@ -803,6 +818,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       minRange: minRange,
       maxRange: maxRange,
       correctionOffset: correctionOffset,
+      devicePixelRatio: _outerPosition!.devicePixelRatio,
     );
   }
 
@@ -891,7 +907,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     goIdle();
     updateUserScrollDirection(
@@ -1076,7 +1095,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   void updateParent() {
     _outerPosition?.setParent(
-      _parent ?? PrimaryScrollController.of(_state.context),
+      _parent ?? PrimaryScrollController.maybeOf(_state.context),
     );
   }
 
@@ -1332,6 +1351,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
+    coordinator.updateUserScrollDirection(ScrollDirection.idle);
   }
 
   // This is called by activities when they finish their work and want to go
@@ -1369,6 +1389,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           metrics,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.inner:
         return _NestedInnerBallisticScrollActivity(
@@ -1376,9 +1397,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           this,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.independent:
-        return BallisticScrollActivity(this, simulation, context.vsync);
+        return BallisticScrollActivity(this, simulation, context.vsync, activity?.shouldIgnorePointer ?? true);
     }
   }
 
@@ -1450,7 +1472,8 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
     _NestedScrollPosition position,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(position, simulation, vsync);
+    bool shouldIgnorePointer,
+  ) : super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
 
@@ -1486,9 +1509,10 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
     this.metrics,
     Simulation simulation,
     TickerProvider vsync,
+    bool shouldIgnorePointer,
   ) : assert(metrics.minRange != metrics.maxRange),
       assert(metrics.maxRange > metrics.minRange),
-      super(position, simulation, vsync);
+      super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;

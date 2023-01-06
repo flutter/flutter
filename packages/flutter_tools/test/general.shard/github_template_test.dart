@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -16,8 +14,9 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  BufferLogger logger;
-  FileSystem fs;
+  late BufferLogger logger;
+  late FileSystem fs;
+
   setUp(() {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
@@ -144,8 +143,8 @@ void main() {
     });
 
     group('new issue template URL', () {
-      StackTrace stackTrace;
-      Error error;
+      late StackTrace stackTrace;
+      late Error error;
       const String command = 'flutter test';
       const String doctorText = ' [✓] Flutter (Channel report';
 
@@ -220,7 +219,7 @@ project_type: app
         ''');
 
         final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText);
-        final String actualBody = Uri.parse(actualURL).queryParameters['body'];
+        final String? actualBody = Uri.parse(actualURL).queryParameters['body'];
         const String expectedBody = '''
 ## Command
 ```

@@ -13,7 +13,7 @@ class DeferredComponentsProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <3.0.0"
+    sdk: ">=2.12.0-0 <4.0.0"
 
   dependencies:
     flutter:
@@ -45,7 +45,7 @@ class DeferredComponentsProject extends Project {
         libFuture = DeferredLibrary.loadLibrary();
         libFuture?.whenComplete(() => deferredText = 'complete ${DeferredLibrary.add(10, 42)}');
       }
-      runApp(new MyApp());
+      runApp(MyApp());
       await Future.delayed(const Duration(milliseconds: 50));
     }
   }
@@ -54,9 +54,9 @@ class DeferredComponentsProject extends Project {
     @override
     Widget build(BuildContext context) {
       topLevelFunction();
-      return new MaterialApp( // BUILD BREAKPOINT
+      return MaterialApp( // BUILD BREAKPOINT
         title: 'Flutter Demo',
-        home: new Container(),
+        home: Container(),
       );
     }
   }

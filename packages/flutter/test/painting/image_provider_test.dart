@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:file/memory.dart';
@@ -88,14 +87,14 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.load(provider, (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+    expect(provider.loadBuffer(provider, (ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
       return Future<Codec>.value(FakeCodec());
     }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
@@ -104,7 +103,7 @@ void main() {
     final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
@@ -113,7 +112,7 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer = provider.load(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
@@ -122,7 +121,7 @@ void main() {
     const String asset = 'images/blue.png';
     final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
     final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
-    final MultiFrameImageStreamCompleter completer = provider.load(key, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(key, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, asset);
   });
@@ -130,13 +129,36 @@ void main() {
   test('Resize image sets tag', () async {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
-    final MultiFrameImageStreamCompleter completer = provider.load(
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(
       await provider.obtainKey(ImageConfiguration.empty),
       decoder,
     ) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
+
+  test('File image throws error when given a real but non-image file', () async {
+    final Completer<Exception> error = Completer<Exception>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error.complete(details.exception as Exception);
+    };
+    final FileImage provider = FileImage(File('pubspec.yaml'));
+
+    expect(imageCache.statusForKey(provider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
+
+    provider.resolve(ImageConfiguration.empty);
+
+    expect(imageCache.statusForKey(provider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
+
+    expect(await error.future, isException
+      .having((Exception exception) => exception.toString(), 'toString', contains('Invalid image data')));
+
+    // Invalid images are marked as pending so that we do not attempt to reload them.
+    expect(imageCache.statusForKey(provider).untracked, false);
+    expect(imageCache.pendingImageCount, 1);
+  }, skip: kIsWeb); // [intended] The web cannot load files.
 }
 
 class FakeCodec implements Codec {

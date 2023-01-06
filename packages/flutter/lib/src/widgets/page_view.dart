@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show precisionErrorTolerance, clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
@@ -68,7 +68,7 @@ import 'viewport.dart';
 ///         body: PageView(
 ///           controller: _pageController,
 ///           children: <Widget>[
-///             Container(
+///             ColoredBox(
 ///               color: Colors.red,
 ///               child: Center(
 ///                 child: ElevatedButton(
@@ -85,7 +85,7 @@ import 'viewport.dart';
 ///                 ),
 ///               ),
 ///             ),
-///             Container(
+///             ColoredBox(
 ///               color: Colors.blue,
 ///               child: Center(
 ///                 child: ElevatedButton(
@@ -273,6 +273,7 @@ class PageMetrics extends FixedScrollMetrics {
     required super.viewportDimension,
     required super.axisDirection,
     required this.viewportFraction,
+    required super.devicePixelRatio,
   });
 
   @override
@@ -283,6 +284,7 @@ class PageMetrics extends FixedScrollMetrics {
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? viewportFraction,
+    double? devicePixelRatio,
   }) {
     return PageMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -291,6 +293,7 @@ class PageMetrics extends FixedScrollMetrics {
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       viewportFraction: viewportFraction ?? this.viewportFraction,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
 
@@ -403,13 +406,13 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
+    PageStorage.maybeOf(context.storageContext)?.writeState(context.storageContext, _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
   }
 
   @override
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final double? value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as double?;
+      final double? value = PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
       if (value != null) {
         _pageToUseOnStartup = value;
       }
@@ -463,6 +466,20 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_cachedPage == null);
+
+    if (other is! _PagePosition) {
+      return;
+    }
+
+    if (other._cachedPage != null) {
+      _cachedPage = other._cachedPage;
+    }
+  }
+
+  @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
     return super.applyContentDimensions(
@@ -479,6 +496,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     double? viewportDimension,
     AxisDirection? axisDirection,
     double? viewportFraction,
+    double? devicePixelRatio,
   }) {
     return PageMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -487,6 +505,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       viewportFraction: viewportFraction ?? this.viewportFraction,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
 }
@@ -559,7 +578,7 @@ class PageScrollPhysics extends ScrollPhysics {
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);
     }
-    final Tolerance tolerance = this.tolerance;
+    final Tolerance tolerance = toleranceFor(position);
     final double target = _getTargetPixels(position, tolerance, velocity);
     if (target != position.pixels) {
       return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
@@ -661,6 +680,8 @@ class PageView extends StatefulWidget {
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
   ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
   /// {@template flutter.widgets.PageView.findChildIndexCallback}
   /// The [findChildIndexCallback] corresponds to the
   /// [SliverChildBuilderDelegate.findChildIndexCallback] property. If null,
@@ -679,7 +700,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    required IndexedWidgetBuilder itemBuilder,
+    required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,

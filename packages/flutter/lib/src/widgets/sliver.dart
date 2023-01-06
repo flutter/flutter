@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show SplayTreeMap, HashMap;
+import 'dart:collection' show HashMap, SplayTreeMap;
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -19,6 +20,8 @@ export 'package:flutter/rendering.dart' show
 
 // Examples can assume:
 // late SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
+// abstract class SomeWidget extends StatefulWidget { const SomeWidget({super.key}); }
+// typedef ChildWidget = Placeholder;
 
 /// A callback which produces a semantic index given a widget and the local index.
 ///
@@ -295,7 +298,7 @@ typedef ChildIndexGetter = int? Function(Key key);
 /// {@end-tool}
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
+/// with a semantic index. For example, in [ListView.separated()] the
 /// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
@@ -375,6 +378,11 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Should return null if asked to build a widget with a greater index than
   /// exists.
   ///
+  /// May result in an infinite loop or run out of memory if [childCount] is null
+  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
+  /// return null from [builder], or set a [childCount].
+  ///
   /// The delegate wraps the children returned by this builder in
   /// [RepaintBoundary] widgets.
   final NullableIndexedWidgetBuilder builder;
@@ -383,6 +391,11 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// If null, the number of children is determined by the least index for which
   /// [builder] returns null.
+  ///
+  /// May result in an infinite loop or run out of memory if [childCount] is null
+  /// and the [builder] always provides a zero-size widget (such as `Container()`
+  /// or `SizedBox.shrink()`). If possible, provide children with non-zero size,
+  /// return null from [builder], or set a [childCount].
   final int? childCount;
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
@@ -405,7 +418,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// boundaries so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short
   /// snippet of text), it might be more efficient to not add a repaint boundary
-  /// and simply repaint the children during scrolling.
+  /// and instead always repaint the children during scrolling.
   ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
@@ -541,7 +554,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// second delegate should offset its children by 10.
 ///
 /// In certain cases, only a subset of child widgets should be annotated
-/// with a semantic index. For example, in [new ListView.separated()] the
+/// with a semantic index. For example, in [ListView.separated()] the
 /// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
@@ -561,7 +574,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
   /// null.
   ///
-  /// If the order of children` never changes, consider using the constant
+  /// If the order of children never changes, consider using the constant
   /// [SliverChildListDelegate.fixed] constructor.
   SliverChildListDelegate(
     this.children, {
@@ -620,7 +633,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// boundaries so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short
   /// snippet of text), it might be more efficient to not add a repaint boundary
-  /// and simply repaint the children during scrolling.
+  /// and instead always repaint the children during scrolling.
   ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
@@ -667,11 +680,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///
   /// ```dart
   /// class SomeWidgetState extends State<SomeWidget> {
-  ///   List<Widget> _children;
-  ///
-  ///   void initState() {
-  ///     _children = [];
-  ///   }
+  ///   final List<Widget> _children = <Widget>[];
   ///
   ///   void someHandler() {
   ///     setState(() {
@@ -681,6 +690,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   ///     });
   ///   }
   ///
+  ///   @override
   ///   Widget build(BuildContext context) {
   ///     // Always create a new list of children as a Widget is immutable.
   ///     return PageView(children: List<Widget>.of(_children));
@@ -1014,13 +1024,195 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
 ///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
-///  * [SliverGrid], which places its children in arbitrary positions.
+///  * [SliverAnimatedList], which animates items added to or removed from a
+///    list.
+///  * [SliverGrid], which places multiple children in a two dimensional grid.
+///  * [SliverAnimatedGrid], a sliver which animates items when they are
+///    inserted into or removed from a grid.
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
   const SliverList({
     super.key,
     required super.delegate,
   });
+
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// This constructor is appropriate for sliver lists with a large (or
+  /// infinite) number of children because the builder is called only for those
+  /// children that are actually visible.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverList.builder(
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Container(
+  ///       alignment: Alignment.center,
+  ///       color: Colors.lightBlue[100 * (index % 9)],
+  ///       child: Text('list item $index'),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  /// {@end-tool}
+  SliverList.builder({
+    super.key,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
+    int? itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(delegate: SliverChildBuilderDelegate(
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       ));
+
+  /// A sliver that places multiple box children, separated by box widgets, in a linear array along the main
+  /// axis.
+  ///
+  /// This constructor is appropriate for sliver lists with a large (or
+  /// infinite) number of children because the builder is called only for those
+  /// children that are actually visible.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
+  ///
+  /// The `separatorBuilder` is similar to `itemBuilder`, except it is the widget
+  /// that gets placed between itemBuilder(context, index) and itemBuilder(context, index + 1).
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  /// {@tool snippet}
+  ///
+  /// This example shows how to create a [SliverList] whose [Container] items
+  /// are separated by [Divider]s.
+  ///
+  /// ```dart
+  /// SliverList.separated(
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Container(
+  ///       alignment: Alignment.center,
+  ///       color: Colors.lightBlue[100 * (index % 9)],
+  ///       child: Text('list item $index'),
+  ///     );
+  ///   },
+  ///   separatorBuilder: (BuildContext context, int index) => const Divider(),
+  /// )
+  /// ```
+  /// {@end-tool}
+  SliverList.separated({
+    super.key,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
+    required NullableIndexedWidgetBuilder separatorBuilder,
+    int? itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : assert(itemBuilder != null),
+       assert(separatorBuilder != null),
+       super(delegate: SliverChildBuilderDelegate(
+         (BuildContext context, int index) {
+           final int itemIndex = index ~/ 2;
+           final Widget? widget;
+           if (index.isEven) {
+             widget = itemBuilder(context, itemIndex);
+           } else {
+             widget = separatorBuilder(context, itemIndex);
+             assert(() {
+               if (widget == null) {
+                 throw FlutterError('separatorBuilder cannot return null.');
+               }
+               return true;
+             }());
+           }
+           return widget;
+         },
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount == null ? null : math.max(0, itemCount * 2 - 1),
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+         semanticIndexCallback: (Widget _, int index) {
+           return index.isEven ? index ~/ 2 : null;
+         },
+       ));
+
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// This constructor uses a list of [Widget]s to build the sliver.
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverList.list(
+  ///   children: const <Widget>[
+  ///     Text('Hello'),
+  ///     Text('World!'),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
+  SliverList.list({
+    super.key,
+    required List<Widget> children,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(delegate: SliverChildListDelegate(
+         children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       ));
 
   @override
   SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this, replaceMovedChildren: true);
@@ -1084,6 +1276,116 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.itemExtent,
   });
+
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// [SliverFixedExtentList] places its children in a linear array along the main
+  /// axis starting at offset zero and without gaps. Each child is forced to have
+  /// the [itemExtent] in the main axis and the
+  /// [SliverConstraints.crossAxisExtent] in the cross axis.
+  ///
+  /// This constructor is appropriate for sliver lists with a large (or
+  /// infinite) number of children whose extent is already determined.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// The `itemExtent` argument is the extent of each item.
+  ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  /// {@tool snippet}
+  ///
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverFixedExtentList.builder(
+  ///   itemExtent: 50.0,
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return Container(
+  ///       alignment: Alignment.center,
+  ///       color: Colors.lightBlue[100 * (index % 9)],
+  ///       child: Text('list item $index'),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  /// {@end-tool}
+  SliverFixedExtentList.builder({
+    super.key,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    required this.itemExtent,
+    ChildIndexGetter? findChildIndexCallback,
+    int? itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(delegate: SliverChildBuilderDelegate(
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       ));
+
+  /// A sliver that places multiple box children in a linear array along the main
+  /// axis.
+  ///
+  /// [SliverFixedExtentList] places its children in a linear array along the main
+  /// axis starting at offset zero and without gaps. Each child is forced to have
+  /// the [itemExtent] in the main axis and the
+  /// [SliverConstraints.crossAxisExtent] in the cross axis.
+  ///
+  /// This constructor uses a list of [Widget]s to build the sliver.
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows an infinite number of items in varying shades of blue:
+  ///
+  /// ```dart
+  /// SliverFixedExtentList.list(
+  ///   itemExtent: 50.0,
+  ///   children: const <Widget>[
+  ///     Text('Hello'),
+  ///     Text('World!'),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
+  SliverFixedExtentList.list({
+    super.key,
+    required List<Widget> children,
+    required this.itemExtent,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : super(delegate: SliverChildListDelegate(
+         children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       ));
 
   /// The extent the children are forced to have in the main axis.
   final double itemExtent;
@@ -1156,6 +1458,49 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.gridDelegate,
   });
+
+  /// A sliver that creates a 2D array of widgets that are created on demand.
+  ///
+  /// This constructor is appropriate for sliver grids with a large (or
+  /// infinite) number of children because the builder is called only for those
+  /// children that are actually visible.
+  ///
+  /// Providing a non-null `itemCount` improves the ability of the [SliverGrid]
+  /// to estimate the maximum scroll extent.
+  ///
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
+  ///
+  /// {@macro flutter.widgets.ListView.builder.itemBuilder}
+  ///
+  /// {@macro flutter.widgets.PageView.findChildIndexCallback}
+  ///
+  /// The [gridDelegate] argument is required.
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
+  SliverGrid.builder({
+    super.key,
+    required this.gridDelegate,
+    required NullableIndexedWidgetBuilder itemBuilder,
+    ChildIndexGetter? findChildIndexCallback,
+    int? itemCount,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+  }) : assert(gridDelegate != null),
+       super(delegate: SliverChildBuilderDelegate(
+         itemBuilder,
+         findChildIndexCallback: findChildIndexCallback,
+         childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
+         addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
+       ));
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with a fixed number of tiles in the cross axis.
@@ -1625,33 +1970,21 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive because it requires painting the sliver child into an intermediate
-/// buffer. For the value 0.0, the sliver child is simply not painted at all.
+/// buffer. For the value 0.0, the sliver child is not painted at all.
 /// For the value 1.0, the sliver child is painted immediately without an
 /// intermediate buffer.
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 ///
 /// This example shows a [SliverList] when the `_visible` member field is true,
-/// and hides it when it is false:
+/// and hides it when it is false.
 ///
-/// ```dart
-/// bool _visible = true;
-/// List<Widget> listItems = const <Widget>[
-///   Text('Now you see me,'),
-///   Text("Now you don't!"),
-/// ];
+/// This is more efficient than adding and removing the sliver child widget from
+/// the tree on demand, but it does not affect how much the list scrolls (the
+/// [SliverList] is still present, merely invisible).
 ///
-/// SliverOpacity(
-///   opacity: _visible ? 1.0 : 0.0,
-///   sliver: SliverList(
-///     delegate: SliverChildListDelegate(listItems),
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/widgets/sliver/sliver_opacity.1.dart **
 /// {@end-tool}
-///
-/// This is more efficient than adding and removing the sliver child widget
-/// from the tree on demand.
 ///
 /// See also:
 ///
@@ -1659,6 +1992,11 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///    RenderBox layout protocol.
 ///  * [AnimatedOpacity], which uses an animation internally to efficiently
 ///    animate [Opacity].
+///  * [SliverVisibility], which can hide a child more efficiently (albeit less
+///    subtly, because it is either visible or hidden, rather than allowing
+///    fractional opacity values). Specifically, the [SliverVisibility.maintain]
+///    constructor is equivalent to using a sliver opacity widget with values of
+///    `0.0` or `1.0`.
 class SliverOpacity extends SingleChildRenderObjectWidget {
   /// Creates a sliver that makes its sliver child partially transparent.
   ///

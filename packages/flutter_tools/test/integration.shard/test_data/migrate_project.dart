@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Timeout(Duration(seconds: 600))
+library;
 
 import 'dart:io';
 import 'package:file/file.dart';
@@ -176,7 +177,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ">=2.6.0 <4.0.0"
 
 dependencies:
   flutter:

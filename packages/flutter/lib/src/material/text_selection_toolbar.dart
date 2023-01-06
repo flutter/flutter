@@ -14,10 +14,8 @@ import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// viewport.
-const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
+const double _kToolbarContentDistance = 8.0;
 
 /// A fully-functional Material-style text selection toolbar.
 ///
@@ -29,8 +27,8 @@ const double _kToolbarHeight = 44.0;
 ///
 /// See also:
 ///
-///  * [TextSelectionControls.buildToolbar], where this is used by default to
-///    build an Android-style toolbar.
+///  * [AdaptiveTextSelectionToolbar], which builds the toolbar for the current
+///    platform.
 ///  * [CupertinoTextSelectionToolbar], which is similar, but builds an iOS-
 ///    style toolbar.
 class TextSelectionToolbar extends StatelessWidget {
@@ -78,6 +76,26 @@ class TextSelectionToolbar extends StatelessWidget {
   /// {@endtemplate}
   final ToolbarBuilder toolbarBuilder;
 
+  /// Minimal padding from all edges of the selection toolbar to all edges of the
+  /// viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which uses this same value for its
+  ///    padding from the edges of the viewport.
+  static const double kToolbarScreenPadding = 8.0;
+
+  /// The size of the text selection handles.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which references this value to calculate
+  ///    the padding between the toolbar and anchor.
+  static const double kHandleSize = 22.0;
+
+  /// Padding between the toolbar and the anchor.
+  static const double kToolbarContentDistanceBelow = kHandleSize - 2.0;
+
   // Build the default Android Material text selection menu toolbar.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
     return _TextSelectionToolbarContainer(
@@ -87,34 +105,37 @@ class TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double paddingAbove = MediaQuery.of(context).padding.top
-        + _kToolbarScreenPadding;
-    final double availableHeight = anchorAbove.dy - paddingAbove;
+    // Incorporate the padding distance between the content and toolbar.
+    final Offset anchorAbovePadded =
+        anchorAbove - const Offset(0.0, _kToolbarContentDistance);
+    final Offset anchorBelowPadded =
+        anchorBelow + const Offset(0.0, kToolbarContentDistanceBelow);
+
+    final double paddingAbove = MediaQuery.paddingOf(context).top
+        + kToolbarScreenPadding;
+    final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
-    final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
+    // Makes up for the Padding above the Stack.
+    final Offset localAdjustment = Offset(kToolbarScreenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
         paddingAbove,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
+        kToolbarScreenPadding,
       ),
-      child: Stack(
-        children: <Widget>[
-          CustomSingleChildLayout(
-            delegate: TextSelectionToolbarLayoutDelegate(
-              anchorAbove: anchorAbove - localAdjustment,
-              anchorBelow: anchorBelow - localAdjustment,
-              fitsAbove: fitsAbove,
-            ),
-            child: _TextSelectionToolbarOverflowable(
-              isAbove: fitsAbove,
-              toolbarBuilder: toolbarBuilder,
-              children: children,
-            ),
-          ),
-        ],
+      child: CustomSingleChildLayout(
+        delegate: TextSelectionToolbarLayoutDelegate(
+          anchorAbove: anchorAbovePadded - localAdjustment,
+          anchorBelow: anchorBelowPadded - localAdjustment,
+          fitsAbove: fitsAbove,
+        ),
+        child: _TextSelectionToolbarOverflowable(
+          isAbove: fitsAbove,
+          toolbarBuilder: toolbarBuilder,
+          children: children,
+        ),
       ),
     );
   }
@@ -156,8 +177,8 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   // changed and saved values are no longer relevant. This should be called in
   // setState or another context where a rebuild is happening.
   void _reset() {
-    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes in
-    // order to cause it to rebuild. This lets it recalculate its
+    // Change _TextSelectionToolbarTrailingEdgeAlign's key when the menu changes
+    // in order to cause it to rebuild. This lets it recalculate its
     // saved width for the new set of children, and it prevents AnimatedSize
     // from animating the size change.
     _containerKey = UniqueKey();

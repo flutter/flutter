@@ -4,9 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 String? _unicodeChar(String key) {
   if (key.length == 1) {
@@ -65,7 +69,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   /// The modifiers that were present when the key event occurred.
   ///
   /// See `lib/src/engine/keyboard.dart` in the web engine for the numerical
-  /// values of the `metaState`. These constants are also replicated as static
+  /// values of the [metaState]. These constants are also replicated as static
   /// constants in this class.
   ///
   /// See also:
@@ -102,8 +106,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return maybeLocationKey;
     }
 
-    // Look to see if the [code] is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
+    // Look to see if the [key] is one we know about and have a mapping for.
+    final LogicalKeyboardKey? newKey = kWebToLogicalKey[key];
     if (newKey != null) {
       return newKey;
     }

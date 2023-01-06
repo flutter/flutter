@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
+import 'implicit_animations.dart';
+import 'media_query.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'pages.dart';
@@ -135,9 +136,15 @@ enum HeroFlightDirection {
 /// To make the animations look good, it's critical that the widget tree for the
 /// hero in both locations be essentially identical. The widget of the *target*
 /// is, by default, used to do the transition: when going from route A to route
-/// B, route B's hero's widget is placed over route A's hero's widget. If a
-/// [flightShuttleBuilder] is supplied, its output widget is shown during the
-/// flight transition instead.
+/// B, route B's hero's widget is placed over route A's hero's widget. Additionally,
+/// if the [Hero] subtree changes appearance based on an [InheritedWidget] (such
+/// as [MediaQuery] or [Theme]), then the hero animation may have discontinuity
+/// at the start or the end of the animation because route A and route B provides
+/// different such [InheritedWidget]s. Consider providing a custom [flightShuttleBuilder]
+/// to ensure smooth transitions. The default [flightShuttleBuilder] interpolates
+/// [MediaQuery]'s paddings. If your [Hero] widget uses custom [InheritedWidget]s
+/// and displays a discontinuity in the animation, try to provide custom in-flight
+/// transition using [flightShuttleBuilder].
 ///
 /// By default, both route A and route B's heroes are hidden while the
 /// transitioning widget is animating in-flight above the 2 routes.
@@ -910,8 +917,8 @@ class HeroController extends NavigatorObserver {
     final NavigatorState? navigator = this.navigator;
     final OverlayState? overlay = navigator?.overlay;
     // If the navigator or the overlay was removed before this end-of-frame
-    // callback was called, then don't actually start a transition, and we don'
-    // t have to worry about any Hero widget we might have hidden in a previous
+    // callback was called, then don't actually start a transition, and we don't
+    // have to worry about any Hero widget we might have hidden in a previous
     // flight, or ongoing flights.
     if (navigator == null || overlay == null) {
       return;
@@ -998,7 +1005,35 @@ class HeroController extends NavigatorObserver {
     BuildContext toHeroContext,
   ) {
     final Hero toHero = toHeroContext.widget as Hero;
-    return toHero.child;
+
+    final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(toHeroContext);
+    final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(fromHeroContext);
+
+    if (toMediaQueryData == null || fromMediaQueryData == null) {
+      return toHero.child;
+    }
+
+    final EdgeInsets fromHeroPadding = fromMediaQueryData.padding;
+    final EdgeInsets toHeroPadding = toMediaQueryData.padding;
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: toMediaQueryData.copyWith(
+            padding: (flightDirection == HeroFlightDirection.push)
+              ? EdgeInsetsTween(
+                  begin: fromHeroPadding,
+                  end: toHeroPadding,
+                ).evaluate(animation)
+              : EdgeInsetsTween(
+                  begin: toHeroPadding,
+                  end: fromHeroPadding,
+                ).evaluate(animation),
+          ),
+          child: toHero.child);
+      },
+    );
   }
 }
 

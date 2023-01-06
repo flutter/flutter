@@ -129,5 +129,10 @@
   "keyboardKeySpace": "Tühik",
   "keyboardKeyMetaMacOs": "Käsk",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Menüüriba menüü",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

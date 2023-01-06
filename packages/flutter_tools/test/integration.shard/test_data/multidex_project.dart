@@ -56,7 +56,7 @@ class MultidexProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <3.0.0"
+    sdk: ">=2.12.0-0 <4.0.0"
 
   dependencies:
     flutter:
@@ -77,9 +77,9 @@ class MultidexProject extends Project {
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
-      return new MaterialApp(
+      return MaterialApp(
         title: 'Flutter Demo',
-        home: new Container(),
+        home: Container(),
       );
     }
   }

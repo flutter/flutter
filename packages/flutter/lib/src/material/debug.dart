@@ -8,7 +8,11 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 
-/// Asserts that the given context has a [Material] ancestor.
+// Examples can assume:
+// late BuildContext context;
+
+/// Asserts that the given context has a [Material] ancestor within the closest
+/// [LookupBoundary].
 ///
 /// Used by many Material Design widgets to make sure that they are
 /// only used in contexts where they can print ink onto some material.
@@ -20,17 +24,26 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// assert(debugCheckHasMaterial(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
-    if (context.widget is! Material && context.findAncestorWidgetOfExactType<Material>() == null) {
+    if (LookupBoundary.findAncestorWidgetOfExactType<Material>(context) == null) {
+      final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Material>(context);
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No Material widget found.'),
+        ErrorSummary('No Material widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+        if (hiddenByBoundary)
+          ErrorDescription(
+            'There is an ancestor Material widget, but it is hidden by a LookupBoundary.'
+          ),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require a Material '
-          'widget ancestor.\n'
+          'widget ancestor within the closest LookupBoundary.\n'
           'In Material Design, most widgets are conceptually "printed" on '
           "a sheet of material. In Flutter's material library, that "
           'material is represented by the Material widget. It is the '
@@ -63,6 +76,10 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasMaterialLocalizations(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This function has the side-effect of establishing an inheritance
 /// relationship with the nearest [Localizations] widget (see
@@ -109,6 +126,10 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// assert(debugCheckHasScaffold(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
@@ -141,6 +162,10 @@ bool debugCheckHasScaffold(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasScaffoldMessenger(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This method can be expensive (it walks the element tree).
 ///

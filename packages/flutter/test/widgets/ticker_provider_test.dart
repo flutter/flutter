@@ -67,7 +67,7 @@ void main() {
 
   group('TickerProviderStateMixin assertion control test', () {
     testWidgets('SingleTickerProviderStateMixin create multiple tickers', (WidgetTester tester) async {
-      final Widget widget = _SingleTickerCreateMultipleTicker();
+      const Widget widget = _SingleTickerCreateMultipleTicker();
       await tester.pumpWidget(widget);
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
@@ -304,6 +304,8 @@ class _MultipleTickerTestState extends State<_MultipleTickerTest> with TickerPro
 }
 
 class _SingleTickerCreateMultipleTicker extends StatefulWidget {
+  const _SingleTickerCreateMultipleTicker();
+
   @override
   _SingleTickerCreateMultipleTickerState createState() => _SingleTickerCreateMultipleTickerState();
 }

@@ -5,9 +5,10 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -294,6 +295,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeEnd: onChangeEnd,
       vsync: vsync,
       textDirection: Directionality.of(context),
+      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
     );
   }
 
@@ -322,7 +324,7 @@ const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
 
 const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 
-class _RenderCupertinoSlider extends RenderConstrainedBox {
+class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTrackerAnnotation {
   _RenderCupertinoSlider({
     required double value,
     int? divisions,
@@ -334,8 +336,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     this.onChangeEnd,
     required TickerProvider vsync,
     required TextDirection textDirection,
+    MouseCursor cursor = MouseCursor.defer,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(textDirection != null),
+       assert(cursor != null),
+       _cursor = cursor,
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
@@ -584,4 +589,27 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
     }
   }
+
+  @override
+  MouseCursor get cursor => _cursor;
+  MouseCursor _cursor;
+  set cursor(MouseCursor value) {
+    if (_cursor != value) {
+      _cursor = value;
+      // A repaint is needed in order to trigger a device update of
+      // [MouseTracker] so that this new value can be found.
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  PointerEnterEventListener? onEnter;
+
+  PointerHoverEventListener? onHover;
+
+  @override
+  PointerExitEventListener? onExit;
+
+  @override
+  bool get validForMouseTracker => false;
 }

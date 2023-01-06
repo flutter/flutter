@@ -6,6 +6,8 @@ import 'dart:collection';
 
 import 'events.dart';
 
+export 'events.dart' show PointerEvent;
+
 /// A callback used by [PointerEventResampler.sample] and
 /// [PointerEventResampler.stop] to process a resampled `event`.
 typedef HandleEventCallback = void Function(PointerEvent event);

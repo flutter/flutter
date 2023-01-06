@@ -14,8 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
-
 import 'object.dart';
 
 export 'package:flutter/services.dart' show
@@ -299,13 +297,13 @@ class MouseTracker extends ChangeNotifier {
   /// result.
   ///
   /// The [updateWithEvent] indicates that an event has been observed, and is
-  /// called during the handler of the event.  It is typically called by
+  /// called during the handler of the event. It is typically called by
   /// [RendererBinding], and should be called with all events received, and let
   /// [MouseTracker] filter which to react to.
   ///
   /// The `getResult` is a function to return the hit test result at the
-  /// position of the event. It should not simply return cached hit test
-  /// result, because the cache does not change throughout a tap sequence.
+  /// position of the event. It should not return a cached hit test
+  /// result, because the cache would not change during a tap sequence.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
     if (event.kind != PointerDeviceKind.mouse) {
       return;
@@ -408,10 +406,11 @@ class MouseTracker extends ChangeNotifier {
     // hit-test order.
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
-      if (!nextAnnotations.containsKey(annotation))
+      if (!nextAnnotations.containsKey(annotation)) {
         if (annotation.validForMouseTracker && annotation.onExit != null) {
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
         }
+      }
     });
 
     // Send enter events to annotations that are not in last but in next, in

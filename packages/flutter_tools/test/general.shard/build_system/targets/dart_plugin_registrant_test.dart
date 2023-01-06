@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210722"
-@Tags(<String>['no-shuffle'])
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -94,14 +86,18 @@ flutter:
         pluginClass: none
 
 environment:
-  sdk: ">=2.12.0-259.9.beta <3.0.0"
+  sdk: ">=2.12.0-259.9.beta <4.0.0"
   flutter: ">=1.20.0"
 ''';
 
 void main() {
 
   group('Dart plugin registrant' , () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+    late FileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry',
         () async {
@@ -125,6 +121,7 @@ void main() {
 
       expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
+
     testWithoutContext('skipped based on platform', () async {
       const Map<String, bool> canSkip = <String, bool>{
         'darwin-x64': false,
@@ -336,7 +333,8 @@ void main() {
       projectDir
           .childDirectory('.dart_tool')
           .childFile('package_config.json')
-          .writeAsStringSync(_kSamplePackageJson);
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
       projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
 
@@ -347,7 +345,8 @@ void main() {
       environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
           .childFile('pubspec.yaml')
-          .writeAsStringSync(_kSamplePluginPubspec);
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePluginPubspec);
 
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);

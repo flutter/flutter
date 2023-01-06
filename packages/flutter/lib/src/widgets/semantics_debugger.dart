@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -13,6 +12,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'view.dart';
 
 /// A widget that visualizes the semantics for the child.
 ///
@@ -97,7 +97,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   Offset? _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * View.of(context).devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -160,7 +160,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _pipelineOwner,
         _client.generation,
         _lastPointerDownLocation, // in physical pixels
-        WidgetsBinding.instance.window.devicePixelRatio,
+        View.of(context).devicePixelRatio,
         widget.labelStyle,
       ),
       child: GestureDetector(
@@ -289,10 +289,14 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
     assert(data.attributedLabel != null);
     final String message;
+    // Android will avoid pronouncing duplicating tooltip and label.
+    // Therefore, having two identical strings is the same as having a single
+    // string.
+    final bool shouldIgnoreDuplicatedLabel = defaultTargetPlatform == TargetPlatform.android && data.attributedLabel.string == data.tooltip;
     final String tooltipAndLabel = <String>[
       if (data.tooltip.isNotEmpty)
         data.tooltip,
-      if (data.attributedLabel.string.isNotEmpty)
+      if (data.attributedLabel.string.isNotEmpty && !shouldIgnoreDuplicatedLabel)
         data.attributedLabel.string,
     ].join('\n');
     if (tooltipAndLabel.isEmpty) {
@@ -340,6 +344,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       ..layout(maxWidth: rect.width);
 
     textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
+    textPainter.dispose();
     canvas.restore();
   }
 

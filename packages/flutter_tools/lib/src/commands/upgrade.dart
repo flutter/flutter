@@ -12,6 +12,7 @@ import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -303,7 +304,7 @@ class UpgradeCommandRunner {
   /// Update the engine repository and precache all artifacts.
   ///
   /// Check for and download any engine and pkg/ updates. We run the 'flutter'
-  /// shell script re-entrantly here so that it will download the updated
+  /// shell script reentrantly here so that it will download the updated
   /// Dart and so forth if necessary.
   Future<void> precacheArtifacts() async {
     globals.printStatus('');
@@ -330,7 +331,7 @@ class UpgradeCommandRunner {
       globals.printStatus('');
       await pub.get(
         context: PubContext.pubUpgrade,
-        directory: projectRoot,
+        project: FlutterProject.fromDirectory(globals.fs.directory(projectRoot)),
         upgrade: true,
       );
     }

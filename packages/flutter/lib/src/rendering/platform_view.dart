@@ -109,6 +109,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   /// Sets a new Android view controller.
   @override
   set controller(AndroidViewController controller) {
+    assert(!_isDisposed);
     assert(_viewController != null);
     assert(controller != null);
     if (_viewController == controller) {
@@ -140,6 +141,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   }
 
   void _onPlatformViewCreated(int id) {
+    assert(!_isDisposed);
     markNeedsSemanticsUpdate();
   }
 
@@ -177,11 +179,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     Size targetSize;
     do {
       targetSize = size;
-      if (_viewController.isCreated) {
-        _currentTextureSize = await _viewController.setSize(targetSize);
-      } else {
-        await _viewController.create(size: targetSize);
-        _currentTextureSize = targetSize;
+      _currentTextureSize = await _viewController.setSize(targetSize);
+      if (_isDisposed) {
+        return;
       }
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
@@ -192,7 +192,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
     markNeedsPaint();
   }
 
-  // Sets the offset of the underlaying platform view on the platform side.
+  // Sets the offset of the underlying platform view on the platform side.
   //
   // This allows the Android native view to draw the a11y highlights in the same
   // location on the screen as the platform view widget in the Flutter framework.
@@ -248,6 +248,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void dispose() {
     _isDisposed = true;
     _clipRectLayer.layer = null;
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     super.dispose();
   }
 
@@ -319,10 +320,13 @@ class RenderUiKitView extends RenderBox {
   /// must have been created by calling [PlatformViewsService.initUiKitView].
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
-  set viewController(UiKitViewController viewController) {
-    assert(viewController != null);
-    final bool needsSemanticsUpdate = _viewController.id != viewController.id;
-    _viewController = viewController;
+  set viewController(UiKitViewController value) {
+    assert(value != null);
+    if (_viewController == value) {
+      return;
+    }
+    final bool needsSemanticsUpdate = _viewController.id != value.id;
+    _viewController = value;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
       markNeedsSemanticsUpdate();
@@ -731,7 +735,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
 
   _HandlePointerEvent? _handlePointerEvent;
 
-  /// {@macro  flutter.rendering.RenderAndroidView.updateGestureRecognizers}
+  /// {@macro flutter.rendering.RenderAndroidView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.

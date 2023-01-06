@@ -12,6 +12,8 @@ import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
+///
 /// {@tool dartpad}
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.

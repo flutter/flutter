@@ -7,6 +7,9 @@ import 'package:flutter/gestures.dart';
 
 import 'system_channels.dart';
 
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder;
+export 'package:flutter/gestures.dart' show PointerEvent;
+
 /// Maintains the state of mouse cursors and manages how cursors are searched
 /// for.
 ///

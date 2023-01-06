@@ -62,6 +62,7 @@ class IconsDemoState extends State<IconsDemo> {
           bottom: false,
           child: Scrollbar(
             child: ListView(
+              primary: true,
               padding: const EdgeInsets.all(24.0),
               children: <Widget>[
                 _IconsDemoCard(handleIconButtonPress, Icons.face), // direction-agnostic icon
@@ -111,7 +112,7 @@ class _IconsDemoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.textTheme.subtitle1!.copyWith(color: theme.textTheme.caption!.color);
+    final TextStyle textStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
     return Card(
       child: DefaultTextStyle(
         style: textStyle,

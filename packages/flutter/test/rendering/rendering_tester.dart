@@ -9,10 +9,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart' show TestDefaultBinaryMessengerBinding, EnginePhase, fail;
+import 'package:flutter_test/flutter_test.dart' show EnginePhase, TestDefaultBinaryMessengerBinding, fail;
 
 export 'package:flutter/foundation.dart' show FlutterError, FlutterErrorDetails;
-export 'package:flutter_test/flutter_test.dart' show TestDefaultBinaryMessengerBinding, EnginePhase;
+export 'package:flutter_test/flutter_test.dart' show EnginePhase, TestDefaultBinaryMessengerBinding;
 
 class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, GestureBinding, PaintingBinding, SemanticsBinding, RendererBinding, TestDefaultBinaryMessengerBinding {
   /// Creates a binding for testing rendering library functionality.
@@ -365,12 +365,38 @@ class TestClipPaintingContext extends PaintingContext {
   Clip clipBehavior = Clip.none;
 }
 
-void expectOverflowedErrors() {
-  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
-  final bool overflowed = errorDetails.toString().contains('overflowed');
-  if (!overflowed) {
-    FlutterError.reportError(errorDetails);
+class TestPushLayerPaintingContext extends PaintingContext {
+  TestPushLayerPaintingContext() : super(ContainerLayer(), Rect.zero);
+
+  final List<ContainerLayer> pushedLayers = <ContainerLayer>[];
+
+  @override
+  void pushLayer(
+    ContainerLayer childLayer,
+    PaintingContextCallback painter,
+    Offset offset, {
+    Rect? childPaintBounds
+  }) {
+    pushedLayers.add(childLayer);
+    super.pushLayer(childLayer, painter, offset, childPaintBounds: childPaintBounds);
   }
+}
+
+// Absorbs errors that don't have "overflowed" in their error details.
+void absorbOverflowedErrors() {
+  final Iterable<FlutterErrorDetails> errorDetails = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails();
+  final Iterable<FlutterErrorDetails> filtered = errorDetails.where((FlutterErrorDetails details) {
+    return !details.toString().contains('overflowed');
+  });
+  if (filtered.isNotEmpty) {
+    filtered.forEach(FlutterError.reportError);
+  }
+}
+
+// Reports any FlutterErrors.
+void expectNoFlutterErrors() {
+  final Iterable<FlutterErrorDetails> errorDetails = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails();
+  errorDetails.forEach(FlutterError.reportError);
 }
 
 RenderConstrainedBox get box200x200 =>

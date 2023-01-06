@@ -133,10 +133,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -191,10 +188,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -251,10 +245,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -320,10 +311,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -391,10 +379,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -448,10 +433,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -500,10 +482,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   ),
                 );
               },
@@ -556,10 +535,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   ),
                 );
               },
@@ -715,10 +691,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   );
                 },
               ),
@@ -734,9 +707,7 @@ void main() {
 
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(tip, paints..path(
-      color: const Color(0x80800000),
-    ));
+    expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
   testWidgets('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
@@ -757,10 +728,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: const SizedBox(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                    child: const SizedBox.shrink(),
                   );
                 },
               ),
@@ -776,9 +744,7 @@ void main() {
 
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
-    expect(tip, paints..path(
-      color: const Color(0x80800000),
-    ));
+    expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
   testWidgets('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {

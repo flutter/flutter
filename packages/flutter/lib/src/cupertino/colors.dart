@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Brightness;
+import 'dart:ui' show Brightness, Color;
 
 import '../../foundation.dart';
 import '../widgets/basic.dart';
@@ -990,11 +990,11 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   CupertinoDynamicColor resolveFrom(BuildContext context) {
     Brightness brightness = Brightness.light;
     if (_isPlatformBrightnessDependent) {
-      brightness =  CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light;
+      brightness = CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light;
     }
     bool isHighContrastEnabled = false;
     if (_isHighContrastDependent) {
-      isHighContrastEnabled = MediaQuery.maybeOf(context)?.highContrast ?? false;
+      isHighContrastEnabled = MediaQuery.maybeHighContrastOf(context) ?? false;
     }
 
     final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent

@@ -277,22 +277,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (!buildInfo.androidGradleDaemon) {
       command.add('--no-daemon');
     }
-    if (_artifacts is LocalEngineArtifacts) {
-      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
+    final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
+    if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineArtifacts.engineOutPath,
+        engineOutPath: localEngineInfo.engineOutPath,
         androidBuildInfo: androidBuildInfo,
         fileSystem: _fileSystem,
       );
       _logger.printTrace(
-          'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
+          'Using local engine: ${localEngineInfo.engineOutPath}\n'
               'Local Maven repo: ${localEngineRepo.path}'
       );
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-      command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+      command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-          localEngineArtifacts.engineOutPath)}');
+          localEngineInfo.engineOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo
           .targetArchs
@@ -465,41 +465,39 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
       return;
     }
-    // Gradle produced an APK.
+    // Gradle produced APKs.
     final Iterable<String> apkFilesPaths = project.isModule
         ? findApkFilesModule(project, androidBuildInfo, _logger, _usage)
         : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
-    final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
-    if (!apkFile.existsSync()) {
-      _exitWithExpectedFileNotFound(
-        project: project,
-        fileExtension: '.apk',
-        logger: _logger,
-        usage: _usage,
+
+    // Generate sha1 for every generated APKs.
+    for (final File apkFile in apkFilesPaths.map(apkDirectory.childFile)) {
+      if (!apkFile.existsSync()) {
+        _exitWithExpectedFileNotFound(
+          project: project,
+          fileExtension: '.apk',
+          logger: _logger,
+          usage: _usage,
+        );
+      }
+
+      final String filename = apkFile.basename;
+      _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
+      final File apkShaFile = apkDirectory.childFile('$filename.sha1');
+      apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+
+      final String appSize = (buildInfo.mode == BuildMode.debug)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsMB(apkFile.lengthSync())})';
+      _logger.printStatus(
+        '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
+        color: TerminalColor.green,
       );
-    }
 
-    // Copy the first APK to app.apk, so `flutter run` can find it.
-    // TODO(egarciad): Handle multiple APKs.
-    apkFile.copySync(apkDirectory
-        .childFile('app.apk')
-        .path);
-    _logger.printTrace('calculateSha: $apkDirectory/app.apk');
-
-    final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
-    apkShaFile.writeAsStringSync(_calculateSha(apkFile));
-
-    final String appSize = (buildInfo.mode == BuildMode.debug)
-        ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(apkFile.lengthSync())})';
-    _logger.printStatus(
-      '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
-      color: TerminalColor.green,
-    );
-
-    if (buildInfo.codeSizeDirectory != null) {
-      await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
+      if (buildInfo.codeSizeDirectory != null) {
+        await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
+      }
     }
   }
 
@@ -613,20 +611,20 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
 
-    if (_artifacts is LocalEngineArtifacts) {
-      final LocalEngineArtifacts localEngineArtifacts = _artifacts as LocalEngineArtifacts;
+    final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
+    if (localEngineInfo != null) {
       final Directory localEngineRepo = _getLocalEngineRepo(
-        engineOutPath: localEngineArtifacts.engineOutPath,
+        engineOutPath: localEngineInfo.engineOutPath,
         androidBuildInfo: androidBuildInfo,
         fileSystem: _fileSystem,
       );
       _logger.printTrace(
-        'Using local engine: ${localEngineArtifacts.engineOutPath}\n'
+        'Using local engine: ${localEngineInfo.engineOutPath}\n'
         'Local Maven repo: ${localEngineRepo.path}'
       );
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
-      command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+      command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
 
       // Copy the local engine repo in the output directory.
       try {
@@ -641,7 +639,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         );
       }
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
-          localEngineArtifacts.engineOutPath)}');
+          localEngineInfo.engineOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
           .map(getPlatformNameForAndroidArch).join(',');
@@ -726,7 +724,7 @@ void printHowToConsumeAar({
 
   for (final String buildMode in buildModes) {
     logger.printStatus("""
-      ${buildMode}Implementation '$androidPackage:flutter:$buildNumber:$buildMode'""");
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber'""");
   }
 
   logger.printStatus('''
@@ -958,7 +956,7 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
   XmlDocument document;
   try {
     document = XmlDocument.parse(pomFile.readAsStringSync());
-  } on XmlParserException {
+  } on XmlException {
     throwToolExit(
       'Error parsing $pomPath. Please ensure that this is a valid XML document.'
     );

@@ -92,10 +92,11 @@ class PaletteTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final TextStyle whiteTextStyle = textTheme.bodyText2!.copyWith(color: Colors.white);
-    final TextStyle blackTextStyle = textTheme.bodyText2!.copyWith(color: Colors.black);
+    final TextStyle whiteTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.white);
+    final TextStyle blackTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.black);
     return Scrollbar(
       child: ListView(
+        primary: true,
         itemExtent: kColorItemHeight,
         children: <Widget>[
           ...primaryKeys.map<Widget>((int index) {

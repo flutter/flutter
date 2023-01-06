@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines the color and border properties of [ToggleButtons] widgets.
 ///
 /// Used by [ToggleButtonsTheme] to control the color and border properties
@@ -263,7 +266,7 @@ class ToggleButtonsTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ToggleButtonsTheme theme = ToggleButtonsTheme.of(context);
+  /// ToggleButtonsThemeData theme = ToggleButtonsTheme.of(context);
   /// ```
   static ToggleButtonsThemeData of(BuildContext context) {
     final ToggleButtonsTheme? toggleButtonsTheme = context.dependOnInheritedWidgetOfExactType<ToggleButtonsTheme>();

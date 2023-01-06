@@ -7,6 +7,7 @@ enum StatusProjectValidator {
   warning,
   success,
   crash,
+  info,
 }
 
 class ProjectValidatorResult {

@@ -4,8 +4,8 @@
 
 | File name | Explanation |
 | ---- | ---- |
-| [`physical_key_data.json`](physical_key_data.json) | Contains the merged physical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
-| [`logical_key_data.json`](logical_key_data.json) | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
+| [`physical_key_data.g.json`](physical_key_data.g.json) | Contains the merged physical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
+| [`logical_key_data.g.json`](logical_key_data.g.json) | Contains the merged logical key data from all the other sources. This file is regenerated if "--collect" is specified for the gen_keycodes script, or used as a source otherwise. |
 | [`supplemental_hid_codes.inc`](supplemental_hid_codes.inc) | A supplementary HID list on top of Chromium's list of HID codes for extra physical keys. Certain entries may also overwrite Chromium's corresponding entries. |
 | [`supplemental_key_data.inc`](supplemental_key_data.inc) | A supplementary key list on top of Chromium's list of keys for extra logical keys.|
 | [`chromium_modifiers.json`](chromium_modifiers.json) | Maps the web's `key` for modifier keys to the names of the logical keys for these keys' left and right variations.This is used when generating logical keys to provide independent values for sided logical keys. Web uses the same `key` for modifier keys of different sides, but Flutter's logical key model treats them as different keys.|
@@ -17,8 +17,8 @@
 
 | File name | Explanation |
 | ---- | ---- |
-| [`keyboard_key.tmpl`](keyboard_key.tmpl) | The template for `keyboard_key.dart`. |
-| [`keyboard_maps.tmpl`](keyboard_maps.tmpl) | The template for `keyboard_maps.dart`. |
+| [`keyboard_key.tmpl`](keyboard_key.tmpl) | The template for `keyboard_key.g.dart`. |
+| [`keyboard_maps.tmpl`](keyboard_maps.tmpl) | The template for `keyboard_maps.g.dart`. |
 
 
 ### Android

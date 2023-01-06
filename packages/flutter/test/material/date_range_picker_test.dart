@@ -56,9 +56,11 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTimeRange?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
+    bool useMaterial3 = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -113,6 +115,13 @@ void main() {
       expect(find.text(helpText!), findsOneWidget);
       expect(find.text(saveText!), findsOneWidget);
     });
+  });
+
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Select range'), findsOneWidget);
+    }, useMaterial3: true);
   });
 
   testWidgets('Initial date is the default', (WidgetTester tester) async {
@@ -1074,6 +1083,24 @@ void main() {
       // By default it should place the dialog on the left screen
       expect(tester.getTopLeft(find.byType(DateRangePickerDialog)), Offset.zero);
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(390.0, 600.0));
+    });
+  });
+
+group('Semantics', () {
+  testWidgets('calendar mode', (WidgetTester tester) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    currentDate = DateTime(2016, DateTime.january, 30);
+    addTearDown(semantics.dispose);
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(
+        tester.getSemantics(find.text('30')),
+        matchesSemantics(
+          label: '30, Saturday, January 30, 2016, Today',
+          hasTapAction: true,
+          isFocusable: true,
+        ),
+      );
+    });
     });
   });
 }

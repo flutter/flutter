@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// bool _giveVerse = false;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'theme.dart';
 import 'thumb_painter.dart';
 
 // Examples can assume:
@@ -69,6 +73,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.activeColor,
     this.trackColor,
     this.thumbColor,
+    this.applyTheme,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(dragStartBehavior != null);
@@ -102,13 +107,15 @@ class CupertinoSwitch extends StatefulWidget {
   /// ```
   final ValueChanged<bool>? onChanged;
 
-  /// The color to use when this switch is on.
+  /// The color to use for the track when the switch is on.
   ///
-  /// Defaults to [CupertinoColors.systemGreen] when null and ignores
-  /// the [CupertinoTheme] in accordance to native iOS behavior.
+  /// If null and [applyTheme] is false, defaults to [CupertinoColors.systemGreen]
+  /// in accordance to native iOS behavior. Otherwise, defaults to
+  /// [CupertinoThemeData.primaryColor].
   final Color? activeColor;
 
-  /// The color to use for the background when the switch is off.
+
+  /// The color to use for the track when the switch is off.
   ///
   /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color? trackColor;
@@ -117,6 +124,16 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to [CupertinoColors.white] when null.
   final Color? thumbColor;
+
+  /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
+  /// Whether to apply the ambient [CupertinoThemeData].
+  ///
+  /// If true, the track uses [CupertinoThemeData.primaryColor] for the track
+  /// when the switch is on.
+  ///
+  /// Defaults to [CupertinoThemeData.applyThemeToAll].
+  /// {@endtemplate}
+  final bool? applyTheme;
 
   /// {@template flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -307,6 +324,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData theme = CupertinoTheme.of(context);
     if (needsPositionAnimation) {
       _resumePositionAnimation();
     }
@@ -317,7 +335,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         child: _CupertinoSwitchRenderObjectWidget(
           value: widget.value,
           activeColor: CupertinoDynamicColor.resolve(
-            widget.activeColor ?? CupertinoColors.systemGreen,
+            widget.activeColor
+            ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
+            ?? CupertinoColors.systemGreen,
             context,
           ),
           trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
@@ -375,6 +395,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoSwitch renderObject) {
+    assert(renderObject._state == state);
     renderObject
       ..value = value
       ..activeColor = activeColor

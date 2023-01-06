@@ -107,8 +107,24 @@ void main() {
       expect(
         tester.getTopLeft(find.text('initial')) -
             tester.getTopLeft(find.byType(CupertinoSearchTextField)),
-        const Offset(29.8, 8.0),
+        const Offset(31.5, 8.0),
       );
+    },
+  );
+
+  testWidgets('can change keyboard type', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoSearchTextField(
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(CupertinoSearchTextField));
+      await tester.showKeyboard(find.byType(CupertinoSearchTextField));
+      expect((tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'], equals('TextInputType.number'));
     },
   );
 
@@ -215,7 +231,7 @@ void main() {
       );
 
       expect(
-        tester.getTopRight(find.byIcon(CupertinoIcons.search)).dx + 3.8,
+        tester.getTopRight(find.byIcon(CupertinoIcons.search)).dx + 5.5,
         tester.getTopLeft(find.byType(EditableText)).dx,
       );
 
@@ -223,7 +239,7 @@ void main() {
         tester.getTopLeft(find.byType(EditableText)).dx,
         tester.getTopLeft(find.byType(CupertinoSearchTextField)).dx +
             tester.getSize(find.byIcon(CupertinoIcons.search)).width +
-            9.8,
+            11.5,
       );
     },
   );
@@ -242,7 +258,7 @@ void main() {
       );
 
       expect(
-        tester.getTopRight(find.byType(EditableText)).dx + 5.0,
+        tester.getTopRight(find.byType(EditableText)).dx + 5.5,
         tester.getTopLeft(find.byIcon(CupertinoIcons.xmark_circle_fill)).dx,
       );
 
@@ -252,7 +268,7 @@ void main() {
             tester
                 .getSize(find.byIcon(CupertinoIcons.xmark_circle_fill))
                 .width -
-            10.0,
+            10.5,
       );
     },
   );
@@ -577,5 +593,35 @@ void main() {
     );
 
     expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('smartQuotesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            smartQuotesType: SmartQuotesType.disabled,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.smartQuotesType, SmartQuotesType.disabled);
+  });
+
+  testWidgets('smartDashesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            smartDashesType: SmartDashesType.disabled,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.smartDashesType, SmartDashesType.disabled);
   });
 }

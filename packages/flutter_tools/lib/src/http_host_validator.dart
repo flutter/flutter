@@ -72,6 +72,8 @@ class HttpHostValidator extends DoctorValidator {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on HttpException catch (e) {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
+    } on HandshakeException catch (e) {
+      return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on OSError catch (e) {
       return _HostValidationResult.fail(host, 'An error occurred while checking the HTTP host: ${e.message}');
     } on FormatException catch (e) {
@@ -108,7 +110,7 @@ class HttpHostValidator extends DoctorValidator {
 
     if (availabilityResults.every((_HostValidationResult result) => result.available)) {
       return ValidationResult(
-          ValidationType.installed,
+          ValidationType.success,
           messages..add(const ValidationMessage('All required HTTP hosts are available')),
       );
     }

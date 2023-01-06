@@ -28,7 +28,7 @@ abstract class DirectionalTextEditingIntent extends Intent {
   /// operation from the current caret location towards the end of the document.
   ///
   /// Unless otherwise specified by the recipient of this intent, this parameter
-  /// uses the logical order of characters in the string to determind the
+  /// uses the logical order of characters in the string to determine the
   /// direction, and is not affected by the writing direction of the text.
   final bool forward;
 }
@@ -99,7 +99,7 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
   ///
   /// If true, when an [Intent] to go to the beginning/end of a wordwrapped line
   /// is received and the selection is already at the beginning/end of the line,
-  /// then the selection will be moved to the next/previous line.  If false, the
+  /// then the selection will be moved to the next/previous line. If false, the
   /// selection will remain at the wordwrap.
   final bool continuesAtWrap;
 }
@@ -137,11 +137,11 @@ class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIn
 /// reverse.
 ///
 /// This is typically only used on MacOS.
-class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends DirectionalTextEditingIntent {
+class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent].
   const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent({
     required bool forward,
-  }) : super(forward);
+  }) : super(forward, false, true);
 }
 
 /// Expands the current selection to the document boundary in the direction
@@ -154,11 +154,11 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
 ///
 ///   [ExtendSelectionToDocumentBoundaryIntent], which is similar but always
 ///   moves the extent.
-class ExpandSelectionToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
+class ExpandSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExpandSelectionToDocumentBoundaryIntent].
   const ExpandSelectionToDocumentBoundaryIntent({
     required bool forward,
-  }) : super(forward);
+  }) : super(forward, false);
 }
 
 /// Expands the current selection to the closest line break in the direction
@@ -173,11 +173,11 @@ class ExpandSelectionToDocumentBoundaryIntent extends DirectionalTextEditingInte
 ///
 ///   [ExtendSelectionToLineBreakIntent], which is similar but always moves the
 ///   extent.
-class ExpandSelectionToLineBreakIntent extends DirectionalTextEditingIntent {
+class ExpandSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExpandSelectionToLineBreakIntent].
   const ExpandSelectionToLineBreakIntent({
     required bool forward,
-  }) : super(forward);
+  }) : super(forward, false);
 }
 
 /// Extends, or moves the current selection from the current
@@ -210,6 +210,17 @@ class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMove
   }) : super(forward, collapseSelection);
 }
 
+/// Expands, or moves the current selection from the current
+/// [TextSelection.extent] position to the closest position on the adjacent
+/// page.
+class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionVerticallyToAdjacentPageIntent].
+  const ExtendSelectionVerticallyToAdjacentPageIntent({
+    required bool forward,
+    required bool collapseSelection,
+  }) : super(forward, collapseSelection);
+}
+
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the start or the end of the document.
 ///
@@ -230,6 +241,15 @@ class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIn
 class ScrollToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
   /// Creates a [ScrollToDocumentBoundaryIntent].
   const ScrollToDocumentBoundaryIntent({
+    required bool forward,
+  }) : super(forward);
+}
+
+/// Scrolls up or down by page depending on the [forward] parameter.
+/// Extends the selection up or down by page based on the [forward] parameter.
+class ExtendSelectionByPageIntent extends DirectionalTextEditingIntent {
+  /// Creates a [ExtendSelectionByPageIntent].
+  const ExtendSelectionByPageIntent({
     required bool forward,
   }) : super(forward);
 }
@@ -328,4 +348,11 @@ class UpdateSelectionIntent extends Intent {
 
   /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
+}
+
+/// An [Intent] that represents a user interaction that attempts to swap the
+/// characters immediately around the cursor.
+class TransposeCharactersIntent extends Intent {
+  /// Creates a [TransposeCharactersIntent].
+  const TransposeCharactersIntent();
 }

@@ -783,20 +783,86 @@ void main() {
     await tester.pumpWidget(
       Stack(),
     );
+    final String exception = tester.takeException().toString();
+
     expect(
-      tester.takeException().toString(),
+      exception, startsWith(
       'No Directionality widget found.\n'
       "Stack widgets require a Directionality widget ancestor to resolve the 'alignment' argument.\n"
       "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction.\n"
       'The specific widget that could not find a Directionality ancestor was:\n'
       '  Stack\n'
-      'The ownership chain for the affected widget is: "Stack ← [root]"\n'
+      'The ownership chain for the affected widget is: "Stack ← ', // Omitted full ownership chain because it is not relevant for the test.
+    ));
+    expect(
+      exception, endsWith(
+      '← [root]"\n' // End of ownership chain.
       'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
       'top of your application widget tree. It determines the ambient reading direction and is used, for '
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
       'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
       'Instead of providing a Directionality widget, another solution would be passing a non-directional '
       "'alignment', or an explicit 'textDirection', to the Stack.",
-    );
+    ));
+  });
+
+  testWidgets('Can update clipBehavior of IndexedStack',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(IndexedStack(textDirection: TextDirection.ltr));
+    final RenderIndexedStack renderObject =
+      tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // Update clipBehavior to Clip.antiAlias
+
+    await tester.pumpWidget(IndexedStack(
+      textDirection: TextDirection.ltr,
+      clipBehavior: Clip.antiAlias,
+    ));
+    final RenderIndexedStack renderIndexedObject =
+      tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
+    expect(renderIndexedObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('IndexedStack sizing: explicit', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    Widget buildIndexedStack(StackFit sizing) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 2.0,
+              maxWidth: 3.0,
+              minHeight: 5.0,
+              maxHeight: 7.0,
+            ),
+            child: IndexedStack(
+              sizing: sizing,
+              children: <Widget>[
+                LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    logs.add(constraints.toString());
+                    return const Placeholder();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildIndexedStack(StackFit.loose));
+    logs.add('=1=');
+    await tester.pumpWidget(buildIndexedStack(StackFit.expand));
+    logs.add('=2=');
+    await tester.pumpWidget(buildIndexedStack(StackFit.passthrough));
+    expect(logs, <String>[
+      'BoxConstraints(0.0<=w<=3.0, 0.0<=h<=7.0)',
+      '=1=',
+      'BoxConstraints(w=3.0, h=7.0)',
+      '=2=',
+      'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
+    ]);
   });
 }

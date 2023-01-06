@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for MaterialStateOutlinedBorder
+// Flutter code sample for [MaterialStateOutlinedBorder].
 
 import 'package:flutter/material.dart';
 
@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
 
 class SelectedBorder extends RoundedRectangleBorder
     implements MaterialStateOutlinedBorder {
+  const SelectedBorder();
+
   @override
   OutlinedBorder? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
@@ -54,7 +56,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             isSelected = value;
           });
         },
-        shape: SelectedBorder(),
+        shape: const SelectedBorder(),
       ),
     );
   }

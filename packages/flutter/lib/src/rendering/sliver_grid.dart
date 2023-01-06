@@ -461,7 +461,10 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     assert(_debugAssertIsValid(constraints.crossAxisExtent));
-    final int crossAxisCount = (constraints.crossAxisExtent / (maxCrossAxisExtent + crossAxisSpacing)).ceil();
+    int crossAxisCount = (constraints.crossAxisExtent / (maxCrossAxisExtent + crossAxisSpacing)).ceil();
+    // Ensure a minimum count of 1, can be zero and result in an infinite extent
+    // below when the window size is 0.
+    crossAxisCount = math.max(1, crossAxisCount);
     final double usableCrossAxisExtent = math.max(
       0.0,
       constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1),
@@ -584,8 +587,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     }
 
     final SliverGridGeometry firstChildGridGeometry = layout.getGeometryForChildIndex(firstIndex);
-    final double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
-    double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
 
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: firstChildGridGeometry.scrollOffset)) {
@@ -600,6 +601,8 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       }
     }
 
+    final double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
+    double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
     RenderBox? trailingChildWithLayout;
 
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
@@ -658,7 +661,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       leadingScrollOffset: leadingScrollOffset,
       trailingScrollOffset: trailingScrollOffset,
     );
-
     final double paintExtent = calculatePaintOffset(
       constraints,
       from: math.min(constraints.scrollOffset, leadingScrollOffset),
@@ -675,8 +677,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       paintExtent: paintExtent,
       maxPaintExtent: estimatedTotalExtent,
       cacheExtent: cacheExtent,
-      // Conservative to avoid complexity.
-      hasVisualOverflow: true,
+      hasVisualOverflow: estimatedTotalExtent > paintExtent || constraints.scrollOffset > 0.0 || constraints.overlap != 0.0,
     );
 
     // We may have started the layout while scrolled to the end, which

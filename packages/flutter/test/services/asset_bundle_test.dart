@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -28,6 +27,8 @@ class TestAssetBundle extends CachingAssetBundle {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('Caching asset bundle test', () async {
     final TestAssetBundle bundle = TestAssetBundle();
 
@@ -73,8 +74,8 @@ void main() {
     expect(
       error.toStringDeep(),
       'FlutterError\n'
-      '   Unable to load asset: key\n'
-      '   HTTP status code: 404\n',
+      '   Unable to load asset: "key".\n'
+      '   HTTP status code: 400\n',
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
@@ -84,4 +85,20 @@ void main() {
 
     expect(bundle.toString(), 'NetworkAssetBundle#${shortHash(bundle)}($uri)');
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  test('Throws expected exceptions when loading not exists asset', () async {
+    late final FlutterError error;
+    try {
+      await rootBundle.load('not-exists');
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(
+      error.message,
+      equals(
+        'Unable to load asset: "not-exists".\n'
+        'The asset does not exist or has empty data.',
+      ),
+    );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
 }

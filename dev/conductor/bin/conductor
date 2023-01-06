@@ -40,4 +40,4 @@ DART_BIN="$REPO_DIR/bin/dart"
 # Ensure pub get has been run in the repo before running the conductor
 (cd "$REPO_DIR/dev/conductor/core"; "$DART_BIN" pub get 1>&2)
 
-"$DART_BIN" --enable-asserts "$REPO_DIR/dev/conductor/core/bin/cli.dart" "$@"
+exec "$DART_BIN" --enable-asserts "$REPO_DIR/dev/conductor/core/bin/cli.dart" "$@"

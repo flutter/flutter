@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
+import 'dart:ui' as ui show Color, Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -10,23 +10,21 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'package:vector_math/vector_math_64.dart';
-
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart' show
-  PointerEvent,
+  PointerCancelEvent,
   PointerDownEvent,
+  PointerEvent,
   PointerMoveEvent,
-  PointerUpEvent,
-  PointerCancelEvent;
+  PointerUpEvent;
 
 /// A base class for render boxes that resemble their children.
 ///
-/// A proxy box has a single child and simply mimics all the properties of that
+/// A proxy box has a single child and mimics all the properties of that
 /// child by calling through to the child for each function in the render box
 /// protocol. For example, a proxy box determines its size by asking its child
 /// to layout with the same constraints and then matching the size.
@@ -43,7 +41,7 @@ export 'package:flutter/gestures.dart' show
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   /// Creates a proxy render box.
   ///
-  /// Proxy render boxes are rarely created directly because they simply proxy
+  /// Proxy render boxes are rarely created directly because they proxy
   /// the render box protocol to [child]. Instead, consider using one of the
   /// subclasses.
   RenderProxyBox([RenderBox? child]) {
@@ -175,7 +173,12 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
     RenderBox? child,
   }) : super(child);
 
-  /// How to behave during hit testing.
+  /// How to behave during hit testing when deciding how the hit test propagates
+  /// to children and whether to consider targets behind this one.
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   HitTestBehavior behavior;
 
   @override
@@ -866,7 +869,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive because it requires painting the child into an intermediate
-/// buffer. For the value 0.0, the child is simply not painted at all. For the
+/// buffer. For the value 0.0, the child is not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
   /// Creates a partially transparent render object.
@@ -885,14 +888,10 @@ class RenderOpacity extends RenderProxyBox {
        super(child);
 
   @override
-  bool get alwaysNeedsCompositing => child != null && (_alpha > 0);
+  bool get alwaysNeedsCompositing => child != null && _alpha > 0;
 
   @override
-  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
-    final OpacityLayer updatedLayer = oldLayer ?? OpacityLayer();
-    updatedLayer.alpha = _alpha;
-    return updatedLayer;
-  }
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   int _alpha;
 
@@ -921,7 +920,7 @@ class RenderOpacity extends RenderProxyBox {
     if (didNeedCompositing != alwaysNeedsCompositing) {
       markNeedsCompositingBitsUpdate();
     }
-    markNeedsPaint();
+    markNeedsCompositedLayerUpdate();
     if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics) {
       markNeedsSemanticsUpdate();
     }
@@ -949,20 +948,18 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer layer = oldLayer ?? OpacityLayer();
+    layer.alpha = _alpha;
+    return layer;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
-      assert(() {
-        layer!.debugCreator = debugCreator;
-        return true;
-      }());
+    if (child == null || _alpha == 0) {
+      return;
     }
+    super.paint(context, offset);
   }
 
   @override
@@ -1517,6 +1514,13 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       return true;
     }());
   }
+
+  @override
+  void dispose() {
+    _debugText?.dispose();
+    _debugText = null;
+    super.dispose();
+  }
 }
 
 /// Clips its child using a rectangle.
@@ -1580,8 +1584,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.width / 8.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1687,8 +1693,10 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawRRect(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset(_clip!.tlRadiusX, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1773,8 +1781,10 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
+        }
       }
       return true;
     }());
@@ -1851,8 +1861,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
     assert(() {
       if (child != null) {
         super.debugPaintSize(context, offset);
-        context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
-        _debugText!.paint(context.canvas, offset);
+        if (clipBehavior != Clip.none) {
+          context.canvas.drawPath(_clip!.shift(offset), _debugPaint!);
+          _debugText!.paint(context.canvas, offset);
+        }
       }
       return true;
     }());
@@ -2008,11 +2020,11 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RRect get _defaultClip {
     assert(hasSize);
     assert(_shape != null);
+    final Rect rect = Offset.zero & size;
     switch (_shape) {
       case BoxShape.rectangle:
-        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
+        return (borderRadius ?? BorderRadius.zero).toRRect(rect);
       case BoxShape.circle:
-        final Rect rect = Offset.zero & size;
         return RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
   }
@@ -2598,6 +2610,13 @@ class RenderTransform extends RenderProxyBox {
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
+          // if the matrix is singular the children would be compressed to a line or
+          // single point, instead short-circuit and paint nothing.
+          final double det = transform.determinant();
+          if (det == 0 || !det.isFinite) {
+            layer = null;
+            return;
+          }
           layer = context.pushTransform(
             needsCompositing,
             offset,
@@ -3447,6 +3466,72 @@ class RenderRepaintBoundary extends RenderProxyBox {
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
+  /// Capture an image of the current state of this render object and its
+  /// children synchronously.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes in the dimensions
+  /// of the render object, multiplied by the [pixelRatio].
+  ///
+  /// To use [toImageSync], the render object must have gone through the paint phase
+  /// (i.e. [debugNeedsPaint] must be false).
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
+  ///
+  /// This API functions like [toImage], except that rasterization begins eagerly
+  /// on the raster thread and the image is returned before this is completed.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The following is an example of how to go from a `GlobalKey` on a
+  /// `RepaintBoundary` to an image handle:
+  ///
+  /// ```dart
+  /// class ImageCaptureHome extends StatefulWidget {
+  ///   const ImageCaptureHome({super.key});
+  ///
+  ///   @override
+  ///   State<ImageCaptureHome> createState() => _ImageCaptureHomeState();
+  /// }
+  ///
+  /// class _ImageCaptureHomeState extends State<ImageCaptureHome> {
+  ///   GlobalKey globalKey = GlobalKey();
+  ///
+  ///   void _captureImage() {
+  ///     final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  ///     final ui.Image image = boundary.toImageSync();
+  ///     print('Image dimensions: ${image.width}x${image.height}');
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return RepaintBoundary(
+  ///       key: globalKey,
+  ///       child: Center(
+  ///         child: TextButton(
+  ///           onPressed: _captureImage,
+  ///           child: const Text('Hello World', textDirection: TextDirection.ltr),
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [OffsetLayer.toImageSync] for a similar API at the layer level.
+  ///  * [dart:ui.Scene.toImageSync] for more information about the image returned.
+  ui.Image toImageSync({ double pixelRatio = 1.0 }) {
+    assert(!debugNeedsPaint);
+    final OffsetLayer offsetLayer = layer! as OffsetLayer;
+    return offsetLayer.toImageSync(Offset.zero & size, pixelRatio: pixelRatio);
+  }
+
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child
   /// paint at different times. When both paint at the same time, the repaint
@@ -4274,6 +4359,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.checked != null) {
       config.isChecked = _properties.checked;
     }
+    if (_properties.mixed != null) {
+      config.isCheckStateMixed = _properties.mixed;
+    }
     if (_properties.toggled != null) {
       config.isToggled = _properties.toggled;
     }
@@ -4912,7 +5000,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final Size? leaderSize = link.leaderSize;
     assert(
-      link.leaderSize != null || (link.leader == null || leaderAnchor == Alignment.topLeft),
+      link.leaderSize != null || link.leader == null || leaderAnchor == Alignment.topLeft,
       '$link: layer is linked to ${link.leader} but a valid leaderSize is not set. '
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',

@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library stocks;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show
-  debugPaintSizeEnabled,
   debugPaintBaselinesEnabled,
   debugPaintLayerBordersEnabled,
   debugPaintPointersEnabled,
+  debugPaintSizeEnabled,
   debugRepaintRainbowEnabled;
 
 import 'i18n/stock_strings.dart';

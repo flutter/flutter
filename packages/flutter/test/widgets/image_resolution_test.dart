@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
-import 'dart:typed_data';
+library;
+
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
@@ -84,7 +85,7 @@ class TestAssetImage extends AssetImage {
   final Map<double, ui.Image> images;
 
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
     late ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
       final ui.Image image = images[scaleOf(data)]!;

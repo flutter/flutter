@@ -196,6 +196,12 @@ const Feature flutterCustomDevicesFeature = Feature(
   master: FeatureChannelSetting(
     available: true,
   ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+  ),
 );
 
 /// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.

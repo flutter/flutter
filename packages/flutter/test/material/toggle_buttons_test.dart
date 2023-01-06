@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -223,15 +224,15 @@ void main() {
         of: find.widgetWithText(TextButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyMedium!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyMedium!.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
         of: find.widgetWithText(TextButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.bodyText2!.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.bodyText2!.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyMedium!.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyMedium!.decoration);
   });
 
   testWidgets('Custom text style except color is applied', (WidgetTester tester) async {
@@ -2006,6 +2007,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
@@ -2018,6 +2020,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
@@ -2030,12 +2033,72 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('Toggle buttons have correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Icon(Icons.check),
+              Icon(Icons.access_alarm),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isChecked,
+                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.isFocusable,
+              ],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
             ),
           ],
         ),

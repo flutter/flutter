@@ -7,6 +7,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+export 'dart:io' show HttpClientResponse;
+export 'dart:typed_data' show Uint8List;
+
 /// Signature for getting notified when chunks of bytes are received while
 /// consolidating the bytes of an [HttpClientResponse] into a [Uint8List].
 ///

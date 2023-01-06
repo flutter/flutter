@@ -5,6 +5,9 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+export 'dart:typed_data' show ByteData;
+export 'dart:ui' show PlatformMessageResponseCallback;
+
 /// A function which takes a platform message and asynchronously returns an encoded response.
 typedef MessageHandler = Future<ByteData?>? Function(ByteData? message);
 

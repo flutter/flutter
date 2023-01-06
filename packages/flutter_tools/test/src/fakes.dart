@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -222,9 +224,9 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
 
 /// A Stdio that collects stdout and supports simulated stdin.
 class FakeStdio extends Stdio {
-  final MemoryStdout _stdout = MemoryStdout();
+  final MemoryStdout _stdout = MemoryStdout()..terminalColumns = 80;
   final MemoryIOSink _stderr = MemoryIOSink();
-  final StreamController<List<int>> _stdin = StreamController<List<int>>();
+  final FakeStdin _stdin = FakeStdin();
 
   @override
   MemoryStdout get stdout => _stdout;
@@ -233,14 +235,47 @@ class FakeStdio extends Stdio {
   MemoryIOSink get stderr => _stderr;
 
   @override
-  Stream<List<int>> get stdin => _stdin.stream;
+  Stream<List<int>> get stdin => _stdin;
 
   void simulateStdin(String line) {
-    _stdin.add(utf8.encode('$line\n'));
+    _stdin.controller.add(utf8.encode('$line\n'));
   }
+
+  @override
+  bool hasTerminal = true;
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
+}
+
+class FakeStdin extends Fake implements Stdin {
+  final StreamController<List<int>> controller = StreamController<List<int>>();
+
+  @override
+  bool echoMode = true;
+
+  @override
+  bool lineMode = true;
+
+  @override
+  Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
+    return controller.stream.transform(transformer);
+  }
+
+  @override
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    return controller.stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+  }
 }
 
 class FakePlistParser implements PlistParser {
@@ -527,4 +562,25 @@ class FakeStopwatchFactory implements StopwatchFactory {
   Stopwatch createStopwatch([String name = '']) {
     return stopwatches[name] ?? FakeStopwatch();
   }
+}
+
+class FakeFlutterProjectFactory implements FlutterProjectFactory {
+  @override
+  FlutterProject fromDirectory(Directory directory) {
+    return FlutterProject.fromDirectoryTest(directory);
+  }
+
+  @override
+  Map<String, FlutterProject> get projects => throw UnimplementedError();
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  late bool platformToolsAvailable;
+
+  @override
+  late bool licensesAvailable;
+
+  @override
+  AndroidSdkVersion? latestVersion;
 }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
@@ -45,6 +44,9 @@ void main() {
     final BinaryMessenger delegate = TestDelegate();
     final Future<ByteData?>? future = delegate.send('', null);
     expect(future, isNotNull);
+    // TODO(srawlins): Fix this static issue,
+    // https://github.com/flutter/flutter/issues/105750.
+    // ignore: body_might_complete_normally_catch_error
     await future!.catchError((Object error) { });
     try {
       await TestDefaultBinaryMessenger(delegate).send('', null);

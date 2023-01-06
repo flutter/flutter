@@ -2,11 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
+
+class TestMaterialLocalizations extends DefaultMaterialLocalizations {
+  @override
+  String formatCompactDate(DateTime date) {
+    return '${date.month}/${date.day}/${date.year}';
+  }
+}
+
+class TestMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) {
+    return SynchronousFuture<MaterialLocalizations>(TestMaterialLocalizations());
+  }
+
+  @override
+  bool shouldReload(TestMaterialLocalizationsDelegate old) => false;
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +48,11 @@ void main() {
     bool autofocus = false,
     Key? formKey,
     ThemeData? theme,
+    Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
   }) {
     return MaterialApp(
       theme: theme ?? ThemeData.from(colorScheme: const ColorScheme.light()),
+      localizationsDelegates: localizationsDelegates,
       home: Material(
         child: Form(
           key: formKey,
@@ -251,7 +274,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
-        label: 'Enter Date\nmm/dd/yyyy',
+        label: 'Enter Date',
         isTextField: true,
         isFocused: true,
         value: '01/15/2016',
@@ -300,5 +323,27 @@ void main() {
       expect(containerColor, equals(Colors.transparent));
     });
 
+    testWidgets('Date text localization', (WidgetTester tester) async {
+      final Iterable<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
+        TestMaterialLocalizationsDelegate(),
+        DefaultWidgetsLocalizations.delegate,
+      ];
+      await tester.pumpWidget(
+        inputDatePickerField(
+          localizationsDelegates: delegates,
+        )
+      );
+      await tester.enterText(find.byType(TextField), '01/01/2022');
+      await tester.pumpAndSettle();
+
+      // Verify that the widget can be updated to a new value after the
+      // entered text was transformed by the localization formatter.
+      await tester.pumpWidget(
+        inputDatePickerField(
+          initialDate: DateTime(2017),
+          localizationsDelegates: delegates,
+        )
+      );
+    });
   });
 }

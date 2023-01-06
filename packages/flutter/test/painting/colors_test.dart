@@ -102,7 +102,7 @@ void main() {
           within<HSVColor>(distance: _doubleColorPrecision, from: hsvColor),
         );
       }
-      // output.add(new HSVColor.fromAHSV(1.0, 0.0, 1.0, value).toColor());
+      // output.add(HSVColor.fromAHSV(1.0, 0.0, 1.0, value).toColor());
     }
     final List<Color> expectedColors = <Color>[
       const Color(0xff000000),

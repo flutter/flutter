@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'layer.dart';
@@ -39,7 +38,12 @@ abstract class RenderAbstractViewport extends RenderObject {
   ///
   /// If the object does not have a [RenderAbstractViewport] as an ancestor,
   /// this function returns null.
-  static RenderAbstractViewport? of(RenderObject? object) {
+  ///
+  /// See also:
+  ///
+  /// * [RenderAbstractViewport.of], which is similar to this method, but
+  ///   asserts if no [RenderAbstractViewport] ancestor is found.
+  static RenderAbstractViewport? maybeOf(RenderObject? object) {
     while (object != null) {
       if (object is RenderAbstractViewport) {
         return object;
@@ -47,6 +51,35 @@ abstract class RenderAbstractViewport extends RenderObject {
       object = object.parent as RenderObject?;
     }
     return null;
+  }
+
+  /// Returns the [RenderAbstractViewport] that most tightly encloses the given
+  /// render object.
+  ///
+  /// If the object does not have a [RenderAbstractViewport] as an ancestor,
+  /// this function will assert in debug mode, and throw an exception in release
+  /// mode.
+  ///
+  /// See also:
+  ///
+  /// * [RenderAbstractViewport.maybeOf], which is similar to this method, but
+  ///   returns null if no [RenderAbstractViewport] ancestor is found.
+  static RenderAbstractViewport of(RenderObject? object) {
+    final RenderAbstractViewport? viewport = maybeOf(object);
+    assert(() {
+      if (viewport == null) {
+        throw FlutterError(
+          'RenderAbstractViewport.of() was called with a render object that was '
+          'not a descendant of a RenderAbstractViewport.\n'
+          'No RenderAbstractViewport render object ancestor could be found starting '
+          'from the object that was passed to RenderAbstractViewport.of().\n'
+          'The render object where the viewport search started was:\n'
+          '  $object',
+        );
+      }
+      return true;
+    }());
+    return viewport!;
   }
 
   /// Returns the offset that would be needed to reveal the `target`
@@ -752,8 +785,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // Steps to convert `rect` (from a RenderBox coordinate system) to its
     // scroll offset within this viewport (not in the exact order):
     //
-    // 1. Pick the outmost RenderBox (between which, and the viewport, there is
-    // nothing but RenderSlivers) as an intermediate reference frame
+    // 1. Pick the outermost RenderBox (between which, and the viewport, there
+    // is nothing but RenderSlivers) as an intermediate reference frame
     // (the `pivot`), convert `rect` to that coordinate space.
     //
     // 2. Convert `rect` from the `pivot` coordinate space to its sliver

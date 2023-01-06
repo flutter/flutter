@@ -4,7 +4,6 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'box.dart';
 import 'layer.dart';

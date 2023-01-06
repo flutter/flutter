@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
-       TextDirection, StringAttribute;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
@@ -16,8 +15,13 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
-export 'dart:ui' show SemanticsAction, StringAttribute, SpellOutStringAttribute, LocaleStringAttribute;
-export 'semantics_event.dart';
+export 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection, VoidCallback;
+
+export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, DiagnosticsTreeStyle, Key, TextTreeConfiguration;
+export 'package:flutter/services.dart' show TextSelection;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'semantics_event.dart' show SemanticsEvent;
 
 /// Signature for a function that is called for each [SemanticsNode].
 ///
@@ -44,6 +48,25 @@ typedef SetTextHandler = void Function(String text);
 ///
 /// Returned by [SemanticsConfiguration.getActionHandler].
 typedef SemanticsActionHandler = void Function(Object? args);
+
+/// Signature for a function that receives a semantics update and returns no result.
+///
+/// Used by [SemanticsOwner.onSemanticsUpdate].
+typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
+
+/// Signature for the [SemanticsConfiguration.childConfigurationsDelegate].
+///
+/// The input list contains all [SemanticsConfiguration]s that rendering
+/// children want to merge upward. One can tag a render child with a
+/// [SemanticsTag] and look up its [SemanticsConfiguration]s through
+/// [SemanticsConfiguration.tagsChildrenWith].
+///
+/// The return value is the arrangement of these configs, including which
+/// configs continue to merge upward and which configs form sibling merge group.
+///
+/// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
+/// value.
+typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// A tag for a [SemanticsNode].
 ///
@@ -75,6 +98,89 @@ class SemanticsTag {
 
   @override
   String toString() => '${objectRuntimeType(this, 'SemanticsTag')}($name)';
+}
+
+/// The result that contains the arrangement for the child
+/// [SemanticsConfiguration]s.
+///
+/// When the [PipelineOwner] builds the semantics tree, it uses the returned
+/// [ChildSemanticsConfigurationsResult] from
+/// [SemanticsConfiguration.childConfigurationsDelegate] to decide how semantics nodes
+/// should form.
+///
+/// Use [ChildSemanticsConfigurationsResultBuilder] to build the result.
+class ChildSemanticsConfigurationsResult {
+  ChildSemanticsConfigurationsResult._(this.mergeUp, this.siblingMergeGroups);
+
+  /// Returns the [SemanticsConfiguration]s that are supposed to be merged into
+  /// the parent semantics node.
+  ///
+  /// [SemanticsConfiguration]s that are either semantics boundaries or are
+  /// conflicting with other [SemanticsConfiguration]s will form explicit
+  /// semantics nodes. All others will be merged into the parent.
+  final List<SemanticsConfiguration> mergeUp;
+
+  /// The groups of child semantics configurations that want to merge together
+  /// and form a sibling [SemanticsNode].
+  ///
+  /// All the [SemanticsConfiguration]s in a given group that are either
+  /// semantics boundaries or are conflicting with other
+  /// [SemanticsConfiguration]s of the same group will be excluded from the
+  /// sibling merge group and form independent semantics nodes as usual.
+  ///
+  /// The result [SemanticsNode]s from the merges are attached as the sibling
+  /// nodes of the immediate parent semantics node. For example, a `RenderObjectA`
+  /// has a rendering child, `RenderObjectB`. If both of them form their own
+  /// semantics nodes, `SemanticsNodeA` and `SemanticsNodeB`, any semantics node
+  /// created from sibling merge groups of `RenderObjectB` will be attach to
+  /// `SemanticsNodeA` as a sibling of `SemanticsNodeB`.
+  final List<List<SemanticsConfiguration>> siblingMergeGroups;
+}
+
+/// The builder to build a [ChildSemanticsConfigurationsResult] based on its
+/// annotations.
+///
+/// To use this builder, one can use [markAsMergeUp] and
+/// [markAsSiblingMergeGroup] to annotate the arrangement of
+/// [SemanticsConfiguration]s. Once all the configs are annotated, use [build]
+/// to generate the [ChildSemanticsConfigurationsResult].
+class ChildSemanticsConfigurationsResultBuilder {
+  /// Creates a [ChildSemanticsConfigurationsResultBuilder].
+  ChildSemanticsConfigurationsResultBuilder();
+
+  final List<SemanticsConfiguration> _mergeUp = <SemanticsConfiguration>[];
+  final List<List<SemanticsConfiguration>> _siblingMergeGroups = <List<SemanticsConfiguration>>[];
+
+  /// Marks the [SemanticsConfiguration] to be merged into the parent semantics
+  /// node.
+  ///
+  /// The [SemanticsConfiguration] will be added to the
+  /// [ChildSemanticsConfigurationsResult.mergeUp] that this builder builds.
+  void markAsMergeUp(SemanticsConfiguration config) => _mergeUp.add(config);
+
+  /// Marks a group of [SemanticsConfiguration]s to merge together
+  /// and form a sibling [SemanticsNode].
+  ///
+  /// The group of [SemanticsConfiguration]s will be added to the
+  /// [ChildSemanticsConfigurationsResult.siblingMergeGroups] that this builder builds.
+  void markAsSiblingMergeGroup(List<SemanticsConfiguration> configs) => _siblingMergeGroups.add(configs);
+
+  /// Builds a [ChildSemanticsConfigurationsResult] contains the arrangement.
+  ChildSemanticsConfigurationsResult build() {
+    assert((){
+      final Set<SemanticsConfiguration> seenConfigs = <SemanticsConfiguration>{};
+      for (final SemanticsConfiguration config in <SemanticsConfiguration>[..._mergeUp, ..._siblingMergeGroups.flattened]) {
+        assert(
+          seenConfigs.add(config),
+          'Duplicated SemanticsConfigurations. This can happen if the same '
+          'SemanticsConfiguration was marked twice in markAsMergeUp and/or '
+          'markAsSiblingMergeGroup'
+        );
+      }
+      return true;
+    }());
+    return ChildSemanticsConfigurationsResult._(_mergeUp, _siblingMergeGroups);
+  }
 }
 
 /// An identifier of a custom semantics action.
@@ -773,6 +879,7 @@ class SemanticsProperties extends DiagnosticableTree {
   const SemanticsProperties({
     this.enabled,
     this.checked,
+    this.mixed,
     this.selected,
     this.toggled,
     this.button,
@@ -848,14 +955,30 @@ class SemanticsProperties extends DiagnosticableTree {
   /// or similar widget with a "checked" state, and what its current
   /// state is.
   ///
-  /// This is mutually exclusive with [toggled].
+  /// When the [Checkbox.value] of a tristate Checkbox is null,
+  /// indicating a mixed-state, this value shall be false, in which
+  /// case, [mixed] will be true.
+  ///
+  /// This is mutually exclusive with [toggled] and [mixed].
   final bool? checked;
+
+  /// If non-null, indicates that this subtree represents a checkbox
+  /// or similar widget with a "half-checked" state or similar, and
+  /// whether it is currently in this half-checked state.
+  ///
+  /// This must be null when [Checkbox.tristate] is false, or
+  /// when the widget is not a checkbox. When a tristate
+  /// checkbox is fully unchecked/checked, this value shall
+  /// be false.
+  ///
+  /// This is mutually exclusive with [checked] and [toggled].
+  final bool? mixed;
 
   /// If non-null, indicates that this subtree represents a toggle switch
   /// or similar widget with an "on" state, and what its current
   /// state is.
   ///
-  /// This is mutually exclusive with [checked].
+  /// This is mutually exclusive with [checked] and [mixed].
   final bool? toggled;
 
   /// If non-null indicates that this subtree represents something that can be
@@ -1487,6 +1610,7 @@ class SemanticsProperties extends DiagnosticableTree {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
@@ -2312,7 +2436,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     );
     assert(
       !_canPerformAction(SemanticsAction.decrease) || (value == '') == (decreasedValue == ''),
-      'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
+      'A SemanticsNode with action "decrease" needs to be annotated with either both "value" and "decreasedValue" or neither',
     );
   }
 
@@ -3031,6 +3155,19 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
 class SemanticsOwner extends ChangeNotifier {
+  /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
+  SemanticsOwner({
+    required this.onSemanticsUpdate,
+  });
+
+  /// The [onSemanticsUpdate] callback is expected to dispatch [SemanticsUpdate]s
+  /// to the [FlutterView] that is associated with this [PipelineOwner] and/or
+  /// [SemanticsOwner].
+  ///
+  /// A [SemanticsOwner] calls [onSemanticsUpdate] during [sendSemanticsUpdate]
+  /// after the [SemanticsUpdate] has been build, but before the [SemanticsOwner]'s
+  /// listeners have been notified.
+  final SemanticsUpdateCallback onSemanticsUpdate;
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
@@ -3048,7 +3185,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [dart:ui.PlatformDispatcher.updateSemantics].
+  /// Update the semantics using [onSemanticsUpdate].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty) {
       return;
@@ -3097,7 +3234,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    SemanticsBinding.instance.platformDispatcher.updateSemantics(builder.build());
+    onSemanticsUpdate(builder.build());
     notifyListeners();
   }
 
@@ -3535,8 +3672,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3553,8 +3690,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
@@ -3571,8 +3708,8 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorForwardByCharacter = value;
   }
@@ -3589,8 +3726,8 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler? value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (Object? args) {
-      final bool extentSelection = args! as bool;
-      value!(extentSelection);
+      final bool extendSelection = args! as bool;
+      value!(extendSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
   }
@@ -3683,6 +3820,25 @@ class SemanticsConfiguration {
   set onDidLoseAccessibilityFocus(VoidCallback? value) {
     _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value!);
     _onDidLoseAccessibilityFocus = value;
+  }
+
+  /// A delegate that decides how to handle [SemanticsConfiguration]s produced
+  /// in the widget subtree.
+  ///
+  /// The [SemanticsConfiguration]s are produced by rendering objects in the
+  /// subtree and want to merge up to their parent. This delegate can decide
+  /// which of these should be merged together to form sibling SemanticsNodes and
+  /// which of them should be merged upwards into the parent SemanticsNode.
+  ///
+  /// The input list of [SemanticsConfiguration]s can be empty if the rendering
+  /// object of this semantics configuration is a leaf node.
+  ChildSemanticsConfigurationsDelegate? get childConfigurationsDelegate => _childConfigurationsDelegate;
+  ChildSemanticsConfigurationsDelegate? _childConfigurationsDelegate;
+  set childConfigurationsDelegate(ChildSemanticsConfigurationsDelegate? value) {
+    assert(value != null);
+    _childConfigurationsDelegate = value;
+    // Setting the childConfigsDelegate does not annotate any meaningful
+    // semantics information of the config.
   }
 
   /// Returns the action handler registered for [action] or null if none was
@@ -4186,8 +4342,24 @@ class SemanticsConfiguration {
   /// checked/unchecked state.
   bool? get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
   set isChecked(bool? value) {
+    assert(value != true || isCheckStateMixed != true);
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value!);
+  }
+
+  /// If this node has tristate that can be controlled by the user, whether
+  /// that state is in its mixed state.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have checked/unchecked state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// mixed checked state.
+  bool? get isCheckStateMixed => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isCheckStateMixed) : null;
+  set isCheckStateMixed(bool? value) {
+    assert(value != true || isChecked != true);
+    _setFlag(SemanticsFlag.hasCheckedState, true);
+    _setFlag(SemanticsFlag.isCheckStateMixed, value!);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
@@ -4393,6 +4565,11 @@ class SemanticsConfiguration {
   ///  * [addTagForChildren] to add a tag and for more information about their
   ///    usage.
   Iterable<SemanticsTag>? get tagsForChildren => _tagsForChildren;
+
+  /// Whether this configuration will tag the child semantics nodes with a
+  /// given [SemanticsTag].
+  bool tagsChildrenWith(SemanticsTag tag) => _tagsForChildren?.contains(tag) ?? false;
+
   Set<SemanticsTag>? _tagsForChildren;
 
   /// Specifies a [SemanticsTag] that this configuration wants to apply to all
@@ -4678,7 +4855,7 @@ abstract class SemanticsSortKey with Diagnosticable implements Comparable<Semant
   }
 }
 
-/// A [SemanticsSortKey] that sorts simply based on the `double` value it is
+/// A [SemanticsSortKey] that sorts based on the `double` value it is
 /// given.
 ///
 /// The [OrdinalSortKey] compares itself with other [OrdinalSortKey]s
@@ -4704,7 +4881,6 @@ class OrdinalSortKey extends SemanticsSortKey {
     this.order, {
     super.name,
   }) : assert(order != null),
-       assert(order != double.nan),
        assert(order > double.negativeInfinity),
        assert(order < double.infinity);
 

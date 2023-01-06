@@ -148,7 +148,7 @@ const int _kMergeSortLimit = 32;
 /// This merge sort is stable: Equal elements end up in the same order as they
 /// started in.
 ///
-/// For small lists (less than 32 elements), `mergeSort` automatically uses an
+/// For small lists (less than 32 elements), [mergeSort] automatically uses an
 /// insertion sort instead, as that is more efficient for small lists. The
 /// insertion sort is also stable.
 void mergeSort<T>(

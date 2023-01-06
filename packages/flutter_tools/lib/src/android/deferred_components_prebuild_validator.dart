@@ -136,7 +136,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
       XmlDocument document;
       try {
         document = XmlDocument.parse(stringRes.readAsStringSync());
-      } on XmlParserException {
+      } on XmlException {
         invalidFiles[stringRes.path] = 'Error parsing $stringRes '
         'Please ensure that the strings.xml is a valid XML document and '
         'try again.';

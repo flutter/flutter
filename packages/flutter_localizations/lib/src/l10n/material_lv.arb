@@ -130,5 +130,10 @@
   "keyboardKeySpace": "Atstarpes taustiņš",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Windows",
-  "menuBarMenuLabel": "Menu bar menu"
+  "menuBarMenuLabel": "Izvēļņu joslas izvēlne",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }

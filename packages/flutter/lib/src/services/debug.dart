@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 
 import 'hardware_keyboard.dart';
 
+export 'hardware_keyboard.dart' show KeyDataTransitMode;
+
 /// Override the transit mode with which key events are simulated.
 ///
 /// Setting [debugKeyEventSimulatorTransitModeOverride] is a good way to make

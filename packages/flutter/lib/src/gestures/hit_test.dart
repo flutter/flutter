@@ -8,6 +8,12 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
 
+export 'dart:ui' show Offset;
+
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
+export 'events.dart' show PointerEvent;
+
 /// An object that can hit-test pointers.
 abstract class HitTestable {
   // This class is intended to be used as an interface, and should not be

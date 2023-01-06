@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_activity.dart';
@@ -19,6 +20,7 @@ import 'scroll_context.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'view.dart';
 
 export 'scroll_activity.dart' show ScrollHoldController;
 
@@ -242,6 +244,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     isScrollingNotifier.value = activity!.isScrolling;
   }
 
+  @override
+  double get devicePixelRatio => MediaQuery.maybeDevicePixelRatioOf(context.storageContext) ?? View.of(context.storageContext).devicePixelRatio;
+
   /// Update the scroll position ([pixels]) to a given pixel value.
   ///
   /// This should only be called by the current [ScrollActivity], either during
@@ -402,7 +407,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   // TODO(goderbauer): Deprecate this when state restoration supports all features of PageStorage.
   @protected
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext, pixels);
+    PageStorage.maybeOf(context.storageContext)?.writeState(context.storageContext, pixels);
   }
 
   /// Called whenever the [ScrollPosition] is created, to restore the scroll
@@ -424,7 +429,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final double? value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as double?;
+      final double? value = PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
       if (value != null) {
         correctPixels(value);
       }
@@ -703,7 +708,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }) {
     assert(alignmentPolicy != null);
     assert(object.attached);
-    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
     assert(viewport != null);
 
     Rect? targetRect;
@@ -810,8 +815,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// This method is very similar to [jumpTo], but [pointerScroll] will
   /// update the [ScrollDirection].
-  ///
-  // TODO(YeungKC): Support trackpad scroll, https://github.com/flutter/flutter/issues/23604.
   void pointerScroll(double delta);
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -976,6 +979,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void dispose() {
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
+    isScrollingNotifier.dispose();
     super.dispose();
   }
 

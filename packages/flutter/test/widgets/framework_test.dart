@@ -514,7 +514,7 @@ void main() {
       exception.toString(),
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'If multiple keyed widgets exist as children of another widget, they must have unique keys.\n'
         'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
       ),
     );
@@ -541,7 +541,7 @@ void main() {
       exception.toString(),
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'If multiple keyed widgets exist as children of another widget, they must have unique keys.\n'
         'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].'
       ),
     );
@@ -717,7 +717,7 @@ void main() {
       exception.toString(),
       equalsIgnoringHashCodes(
         'Duplicate keys found.\n'
-        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'If multiple keyed widgets exist as children of another widget, they must have unique keys.\n'
         'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose) has multiple children with key [GlobalKey#00000 problematic].',
       ),
     );
@@ -901,7 +901,7 @@ void main() {
       children: <Widget>[
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
-        Container(color: Colors.green, child: SizedBox(key: key)),
+        ColoredBox(color: Colors.green, child: SizedBox(key: key)),
       ],
     );
     await tester.pumpWidget(stack);
@@ -1183,13 +1183,13 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      equalsIgnoringHashCodes(
+      startsWith(
         'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]',
+        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });
@@ -1216,13 +1216,13 @@ void main() {
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
-      equalsIgnoringHashCodes(
+      startsWith(
         'The children of `MultiChildRenderObjectElement` must each has an associated render object.\n'
         'This typically means that the `_EmptyWidget` or its children\n'
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← [root]',
+        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });
@@ -1234,7 +1234,7 @@ void main() {
       children: <Widget>[
         Container(),
         Container(key: GlobalKey()),
-        Container(color: Colors.green, child: Container()),
+        ColoredBox(color: Colors.green, child: Container()),
         Container(key: GlobalKey()),
         Container(),
       ],
@@ -1252,11 +1252,10 @@ void main() {
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├Container(bg: MaterialColor(primary value: Color(0xff4caf50)))\n'
-        '│└ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
-        '│ └Container\n'
-        '│  └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
-        '│   └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
+        '├ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        '│└Container\n'
+        '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
+        '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
@@ -1268,7 +1267,7 @@ void main() {
   });
 
   testWidgets('scheduleBuild while debugBuildingDirtyElements is true', (WidgetTester tester) async {
-    /// ignore here is required for testing purpose because changing the flag properly is hard
+    // ignore here is required for testing purpose because changing the flag properly is hard
     // ignore: invalid_use_of_protected_member
     tester.binding.debugBuildingDirtyElements = true;
     late FlutterError error;
@@ -1558,6 +1557,50 @@ void main() {
     expect(builder.properties.any((DiagnosticsNode property) => property.name == 'renderObject' && property.value == null), isTrue);
   });
 
+  testWidgets('debugFillProperties sorts dependencies in alphabetical order', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final TestRenderObjectElement element = TestRenderObjectElement();
+
+    final _TestInheritedElement focusTraversalOrder =
+    _TestInheritedElement(const FocusTraversalOrder(
+      order: LexicalFocusOrder(''),
+      child: Placeholder(),
+    ));
+    final _TestInheritedElement directionality =
+        _TestInheritedElement(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Placeholder(),
+    ));
+    final _TestInheritedElement buttonBarTheme =
+        _TestInheritedElement(const ButtonBarTheme(
+        data: ButtonBarThemeData(
+          alignment: MainAxisAlignment.center,
+        ),
+      child: Placeholder(),
+    ));
+
+    // Dependencies are added out of alphabetical order.
+    element
+      ..dependOnInheritedElement(focusTraversalOrder)
+      ..dependOnInheritedElement(directionality)
+      ..dependOnInheritedElement(buttonBarTheme);
+
+    // Dependencies will be sorted by [debugFillProperties].
+    element.debugFillProperties(builder);
+
+    expect(
+      builder.properties.any((DiagnosticsNode property) => property.name == 'dependencies' && property.value != null),
+      isTrue,
+    );
+    final DiagnosticsProperty<List<DiagnosticsNode>> dependenciesProperty =
+        builder.properties.firstWhere((DiagnosticsNode property) => property.name == 'dependencies') as DiagnosticsProperty<List<DiagnosticsNode>>;
+    expect(dependenciesProperty, isNotNull);
+
+    final List<DiagnosticsNode> dependencies = dependenciesProperty.value!;
+    expect(dependencies.length, equals(3));
+    expect(dependencies.toString(), '[ButtonBarTheme, Directionality, FocusTraversalOrder]');
+  });
+
   testWidgets('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
     final int initialCount = tester.binding.buildOwner!.globalKeyCount;
     final GlobalKey key1 = GlobalKey();
@@ -1818,9 +1861,6 @@ class DirtyElementWithCustomBuildOwner extends Element {
   final BuildOwner _owner;
 
   @override
-  void performRebuild() {}
-
-  @override
   BuildOwner get owner => _owner;
 
   @override
@@ -1924,9 +1964,9 @@ class StatefulElementSpy extends StatefulElement {
   _Stateful get _statefulWidget => widget as _Stateful;
 
   @override
-  void rebuild() {
+  void rebuild({bool force = false}) {
     _statefulWidget.onElementRebuild?.call(this);
-    super.rebuild();
+    super.rebuild(force: force);
   }
 }
 
@@ -2071,9 +2111,6 @@ class _EmptyElement extends Element {
 
   @override
   bool get debugDoingBuild => false;
-
-  @override
-  void performRebuild() {}
 }
 
 class _TestLeaderLayerWidget extends SingleChildRenderObjectWidget {

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
@@ -250,12 +249,7 @@ Future<void> main() async {
           350.0, 200.0, 450.0, 300.0,
           topRight: const Radius.circular(10.0),
         ),
-        inner: RRect.fromLTRBAndCorners(
-          360.0, 210.0, 440.0, 290.0,
-          topLeft: const Radius.circular(-10.0),
-          bottomRight: const Radius.circular(-10.0),
-          bottomLeft: const Radius.circular(-10.0),
-        ),
+        inner: RRect.fromLTRBAndCorners(360.0, 210.0, 440.0, 290.0),
       )
       ..circle(x: 400.0, y: 350.0, radius: 45.0),
     );

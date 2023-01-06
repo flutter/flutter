@@ -756,7 +756,7 @@ void main() {
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(Colors.white)));
   });
 
@@ -784,7 +784,7 @@ void main() {
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
   });
 
@@ -883,6 +883,42 @@ void main() {
     expect(rootObserver.pushCount, 1);
     expect(localObserver.pushCount, 1);
   });
+
+  testWidgets('Query text field shows toolbar initially', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/95588
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // Open search.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.controller!.text.length, 0);
+
+    mockClipboard.handleMethodCall(const MethodCall(
+      'Clipboard.setData',
+      <String, dynamic>{
+        'text': 'pasteablestring',
+      },
+    ));
+
+    // Long press shows toolbar.
+    await tester.longPress(textFieldFinder);
+    await tester.pump();
+    expect(find.text('Paste'), findsOneWidget);
+
+    await tester.tap(find.text('Paste'));
+    await tester.pump();
+    expect(textField.controller!.text.length, 15);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
 
 class TestHomePage extends StatelessWidget {

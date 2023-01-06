@@ -3,14 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
 
-import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show PointerDeviceKind;
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'drag.dart' show DragEndDetails, DragUpdateDetails;
+export 'drag_details.dart' show DragDownDetails, DragStartDetails, DragUpdateDetails, GestureDragDownCallback, GestureDragStartCallback, GestureDragUpdateCallback;
+export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEvent;
+export 'recognizer.dart' show DragStartBehavior;
+export 'velocity_tracker.dart' show VelocityEstimate, VelocityTracker;
 
 enum _DragState {
   ready,
@@ -18,11 +26,13 @@ enum _DragState {
   accepted,
 }
 
+/// {@template flutter.gestures.monodrag.GestureDragEndCallback}
 /// Signature for when a pointer that was previously in contact with the screen
 /// and moving is no longer in contact with the screen.
 ///
 /// The velocity at which the pointer was moving when it stopped contacting
 /// the screen is available in the `details`.
+/// {@endtemplate}
 ///
 /// Used by [DragGestureRecognizer.onEnd].
 typedef GestureDragEndCallback = void Function(DragEndDetails details);
@@ -116,8 +126,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [DragDownDetails], which is passed as an argument to this callback.
   GestureDragDownCallback? onDown;
 
+  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onStart}
   /// A pointer has contacted the screen with a primary button and has begun to
   /// move.
+  /// {@endtemplate}
   ///
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [DragStartDetails] object. The [dragStartBehavior]
@@ -129,8 +141,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [DragStartDetails], which is passed as an argument to this callback.
   GestureDragStartCallback? onStart;
 
+  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onUpdate}
   /// A pointer that is in contact with the screen with a primary button and
   /// moving has moved again.
+  /// {@endtemplate}
   ///
   /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [DragUpdateDetails] object.
@@ -141,9 +155,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
   GestureDragUpdateCallback? onUpdate;
 
+  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.onEnd}
   /// A pointer that was previously in contact with the screen with a primary
   /// button and moving is no longer in contact with the screen and was moving
   /// at a specific velocity when it stopped contacting the screen.
+  /// {@endtemplate}
   ///
   /// The velocity is provided in the callback's `details` argument, which is a
   /// [DragEndDetails] object.

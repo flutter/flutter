@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show TextDirection;
-
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
@@ -22,11 +20,10 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
     await SemanticsService.announce('announcement 1', TextDirection.ltr);
-    await SemanticsService.announce('announcement 2', TextDirection.rtl);
-
+    await SemanticsService.announce('announcement 2', TextDirection.rtl, assertiveness: Assertiveness.assertive);
     expect(log, equals(<Map<String, dynamic>>[
       <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1}},
-      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0, 'assertiveness': 1}},
     ]));
   });
 }

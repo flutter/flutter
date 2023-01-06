@@ -168,7 +168,7 @@ class AndroidSemanticsAction {
       case _kSetText:
         return 'AndroidSemanticsAction.setText';
       default:
-        return null;
+        throw UnimplementedError();
     }
   }
 
@@ -201,8 +201,9 @@ class AndroidSemanticsAction {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is AndroidSemanticsAction
         && other.id == id;
   }
@@ -210,7 +211,7 @@ class AndroidSemanticsAction {
   /// Creates a new [AndroidSemanticsAction] from an integer `value`.
   ///
   /// Returns `null` if the id is not a known Android accessibility action.
-  static AndroidSemanticsAction deserialize(int value) {
+  static AndroidSemanticsAction? deserialize(int value) {
     return _kActionById[value];
   }
 }

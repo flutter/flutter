@@ -12,7 +12,7 @@
 /// Example:
 ///
 ///     enum Vote { yea, nay }
-///     final index = new EnumIndex(Vote.values);
+///     final index = EnumIndex(Vote.values);
 ///     index.lookupBySimpleName('yea'); // returns Vote.yea
 ///     index.toSimpleName(Vote.nay); // returns 'nay'
 class EnumIndex<E> {

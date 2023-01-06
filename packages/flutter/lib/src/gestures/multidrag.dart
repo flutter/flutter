@@ -13,9 +13,15 @@ import 'constants.dart';
 import 'drag.dart';
 import 'drag_details.dart';
 import 'events.dart';
-import 'gesture_settings.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'arena.dart' show GestureDisposition;
+export 'drag.dart' show Drag;
+export 'events.dart' show PointerDownEvent;
+export 'gesture_settings.dart' show DeviceGestureSettings;
 
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
 typedef GestureMultiDragStartCallback = Drag? Function(Offset position);
@@ -502,9 +508,8 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(Offset initialPosition, Duration delay, PointerDeviceKind kind, DeviceGestureSettings? deviceGestureSettings)
-      : assert(delay != null),
-        super(initialPosition, kind, deviceGestureSettings) {
+  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.deviceGestureSettings)
+      : assert(delay != null) {
     _timer = Timer(delay, _delayPassed);
   }
 

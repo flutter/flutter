@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -228,6 +227,7 @@ class _FlutterLogoPainter extends BoxPainter {
   final FlutterLogoDecoration _config;
 
   // these are configured assuming a font size of 100.0.
+  // TODO(dnfield): Figure out how to dispose this https://github.com/flutter/flutter/issues/110601
   late TextPainter _textPainter;
   late Rect _textBoundingRect;
 

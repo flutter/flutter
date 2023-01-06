@@ -4,13 +4,17 @@
 
 import 'dart:math' as math;
 
-import 'package:vector_math/vector_math_64.dart';
-
-import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'events.dart' show PointerDownEvent, PointerEvent, PointerPanZoomStartEvent;
+export 'recognizer.dart' show DragStartBehavior;
+export 'velocity_tracker.dart' show Velocity;
+
 
 /// The possible states of a [ScaleGestureRecognizer].
 enum _ScaleState {
@@ -264,9 +268,10 @@ class _LineBetweenPointers {
 ///
 /// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
 /// calculates their focal point, indicated scale, and rotation. When a focal
-/// pointer is established, the recognizer calls [onStart]. As the focal point,
-/// scale, rotation change, the recognizer calls [onUpdate]. When the pointers
-/// are no longer in contact with the screen, the recognizer calls [onEnd].
+/// point is established, the recognizer calls [onStart]. As the focal point,
+/// scale, and rotation change, the recognizer calls [onUpdate]. When the
+/// pointers are no longer in contact with the screen, the recognizer calls
+/// [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
   ///

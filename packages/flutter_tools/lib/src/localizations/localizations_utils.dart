@@ -292,7 +292,33 @@ String generateString(String value) {
     // Reintroduce escaped backslashes into generated Dart string.
     .replaceAll(backslash, r'\\');
 
-  return "'$value'";
+  return value;
+}
+
+/// Given a list of strings, placeholders, or helper function calls, concatenate
+/// them into one expression to be returned.
+///
+/// If `isSingleStringVar` is passed, then we want to convert "'$expr'" to "expr".
+String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
+  if (expressions.isEmpty) {
+    return "''";
+  } else if (isSingleStringVar) {
+    // If our expression is "$varName" where varName is a String, this is equivalent to just varName.
+    return expressions[0].substring(1);
+  } else {
+    final String string = expressions.reversed.fold<String>('', (String string, String expression) {
+      if (expression[0] != r'$') {
+        return generateString(expression) + string;
+      }
+      final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+      if (alphanumeric.hasMatch(expression.substring(1)) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
+        return '$expression$string';
+      } else {
+        return '\${${expression.substring(1)}}$string';
+      }
+    });
+    return "'$string'";
+  }
 }
 
 /// Typed configuration from the localizations config file.
@@ -311,6 +337,9 @@ class LocalizationOptions {
     this.useSyntheticPackage = true,
     this.areResourceAttributesRequired = false,
     this.usesNullableGetter = true,
+    this.format = false,
+    this.useEscaping = false,
+    this.suppressWarnings = false,
   }) : assert(useSyntheticPackage != null);
 
   /// The `--arb-dir` argument.
@@ -377,6 +406,21 @@ class LocalizationOptions {
   ///
   /// Whether or not the localizations class getter is nullable.
   final bool usesNullableGetter;
+
+  /// The `format` argument.
+  ///
+  /// Whether or not to format the generated files.
+  final bool format;
+
+  /// The `use-escaping` argument.
+  ///
+  /// Whether or not the ICU escaping syntax is used.
+  final bool useEscaping;
+
+  /// The `suppress-warnings` argument.
+  ///
+  /// Whether or not to suppress warnings.
+  final bool suppressWarnings;
 }
 
 /// Parse the localizations configuration options from [file].
@@ -411,6 +455,9 @@ LocalizationOptions parseLocalizationsOptions({
     useSyntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? true,
     areResourceAttributesRequired: _tryReadBool(yamlNode, 'required-resource-attributes', logger) ?? false,
     usesNullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger) ?? true,
+    format: _tryReadBool(yamlNode, 'format', logger) ?? false,
+    useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger) ?? false,
+    suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger) ?? false,
   );
 }
 

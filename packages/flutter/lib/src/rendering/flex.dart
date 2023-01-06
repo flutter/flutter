@@ -235,8 +235,8 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///
 /// Layout for a [RenderFlex] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor with unbounded main axis
-///    constraints and the incoming cross axis constraints. If the
+/// 1. Layout each child with a null or zero flex factor with unbounded main
+///    axis constraints and the incoming cross axis constraints. If the
 ///    [crossAxisAlignment] is [CrossAxisAlignment.stretch], instead use tight
 ///    cross axis constraints that match the incoming max extent in the cross
 ///    axis.
@@ -991,10 +991,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final double remainingSpace = math.max(0.0, actualSizeDelta);
     late final double leadingSpace;
     late final double betweenSpace;
-    // flipMainAxis is used to decide whether to lay out left-to-right/top-to-bottom (false), or
-    // right-to-left/bottom-to-top (true). The _startIsTopLeft will return null if there's only
-    // one child and the relevant direction is null, in which case we arbitrarily decide not to
-    // flip, but that doesn't have any detectable effect.
+    // flipMainAxis is used to decide whether to lay out
+    // left-to-right/top-to-bottom (false), or right-to-left/bottom-to-top
+    // (true). The _startIsTopLeft will return null if there's only one child
+    // and the relevant direction is null, in which case we arbitrarily decide
+    // to flip, but that doesn't have any detectable effect.
     final bool flipMainAxis = !(_startIsTopLeft(direction, textDirection, verticalDirection) ?? true);
     switch (_mainAxisAlignment) {
       case MainAxisAlignment.start:
@@ -1104,8 +1105,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     );
 
     assert(() {
-      // Only set this if it's null to save work. It gets reset to null if the
-      // _direction changes.
       final List<DiagnosticsNode> debugOverflowHints = <DiagnosticsNode>[
         ErrorDescription(
           'The overflowing $runtimeType has an orientation of $_direction.',

@@ -9,7 +9,7 @@ import 'dart:ffi' as ffi;
 
 /// Bindings for `src/{{projectName}}.h`.
 ///
-/// Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+/// Regenerate bindings with `flutter pub run ffigen --config ffigen.yaml`.
 ///
 class {{pluginDartClass}}Bindings {
   /// Holds the symbol lookup function.
@@ -48,9 +48,9 @@ class {{pluginDartClass}}Bindings {
 
   /// A longer lived native function, which occupies the thread calling it.
   ///
-  /// Calling these kind of native functions in the main isolate will
-  /// block Dart execution and cause dropped frames in Flutter applications.
-  /// Consider calling such native functions from a separate isolate.
+  /// Do not call these kind of native functions in the main isolate. They will
+  /// block Dart execution. This will cause dropped frames in Flutter applications.
+  /// Instead, call these native functions on a separate isolate.
   int sum_long_running(
     int a,
     int b,

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -46,11 +45,24 @@ class FakePlatformViewController extends PlatformViewController {
 }
 
 class FakeAndroidViewController implements AndroidViewController {
-  FakeAndroidViewController(this.viewId);
+  FakeAndroidViewController(
+    this.viewId, {
+    this.requiresSize = false,
+    this.requiresViewComposition = false,
+  });
 
   bool disposed = false;
   bool focusCleared = false;
   bool created = false;
+  // If true, [create] won't be considered to have been called successfully
+  // unless it includes a size.
+  bool requiresSize;
+
+  bool _createCalledSuccessfully = false;
+
+  Offset? createPosition;
+
+  final List<PlatformViewCreatedCallback> _createdCallbacks = <PlatformViewCreatedCallback>[];
 
   /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
@@ -94,16 +106,20 @@ class FakeAndroidViewController implements AndroidViewController {
   int get textureId => 0;
 
   @override
+  bool get awaitingCreation => !_createCalledSuccessfully;
+
+  @override
   bool get isCreated => created;
 
   @override
   void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
     created = true;
+    createdCallbacks.add(listener);
   }
 
   @override
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    throw UnimplementedError();
+    createdCallbacks.remove(listener);
   }
 
   @override
@@ -117,10 +133,20 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<void> create({Size? size}) async {}
+  Future<void> create({Size? size, Offset? position}) async {
+    assert(!_createCalledSuccessfully);
+    if (requiresSize && size != null) {
+      assert(!size.isEmpty);
+    }
+    _createCalledSuccessfully = size != null && position != null || !requiresSize;
+    createPosition = position;
+  }
 
   @override
-  List<PlatformViewCreatedCallback> get createdCallbacks => <PlatformViewCreatedCallback>[];
+  List<PlatformViewCreatedCallback> get createdCallbacks => _createdCallbacks;
+
+  @override
+  bool requiresViewComposition;
 }
 
 class FakeAndroidPlatformViewsController {
@@ -144,6 +170,11 @@ class FakeAndroidPlatformViewsController {
   int? lastClearedFocusViewId;
 
   Map<int, Offset> offsets = <int, Offset>{};
+
+  /// True if Texture Layer Hybrid Composition mode should be enabled.
+  ///
+  /// When false, `create` will simulate the engine's fallback mode.
+  bool allowTextureLayerMode = true;
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -184,7 +215,10 @@ class FakeAndroidPlatformViewsController {
     final double? height = args['height'] as double?;
     final int layoutDirection = args['direction'] as int;
     final bool? hybrid = args['hybrid'] as bool?;
+    final bool? hybridFallback = args['hybridFallback'] as bool?;
     final Uint8List? creationParams = args['params'] as Uint8List?;
+    final double? top = args['top'] as double?;
+    final double? left = args['left'] as double?;
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -207,11 +241,22 @@ class FakeAndroidPlatformViewsController {
     _views[id] = FakeAndroidPlatformView(id, viewType,
         width != null && height != null ? Size(width, height) : null,
         layoutDirection,
-        hybrid,
-        creationParams,
+        hybrid: hybrid,
+        hybridFallback: hybridFallback,
+        creationParams: creationParams,
+        position: left != null && top != null ? Offset(left, top) : null,
     );
+    // Return a hybrid result (null rather than a texture ID) if:
+    final bool hybridResult =
+      // hybrid was explicitly requested, or
+      (hybrid ?? false) ||
+      // hybrid fallback was requested and simulated.
+      (!allowTextureLayerMode && (hybridFallback ?? false));
+    if (hybridResult) {
+      return Future<void>.value();
+    }
     final int textureId = _textureCounter++;
-    return Future<int>.sync(() => textureId);
+    return Future<int>.value(textureId);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
@@ -498,7 +543,8 @@ class FakeHtmlPlatformViewsController {
 
 @immutable
 class FakeAndroidPlatformView {
-  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection, this.hybrid, [this.creationParams]);
+  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection,
+    {this.hybrid, this.hybridFallback, this.creationParams, this.position});
 
   final int id;
   final String type;
@@ -506,14 +552,18 @@ class FakeAndroidPlatformView {
   final Size? size;
   final int layoutDirection;
   final bool? hybrid;
+  final bool? hybridFallback;
+  final Offset? position;
 
   FakeAndroidPlatformView copyWith({Size? size, int? layoutDirection}) => FakeAndroidPlatformView(
     id,
     type,
     size ?? this.size,
     layoutDirection ?? this.layoutDirection,
-    hybrid,
-    creationParams,
+    hybrid: hybrid,
+    hybridFallback: hybridFallback,
+    creationParams: creationParams,
+    position: position,
   );
 
   @override
@@ -527,7 +577,9 @@ class FakeAndroidPlatformView {
         && listEquals<int>(other.creationParams, creationParams)
         && other.size == size
         && other.hybrid == hybrid
-        && other.layoutDirection == layoutDirection;
+        && other.hybridFallback == hybridFallback
+        && other.layoutDirection == layoutDirection
+        && other.position == position;
   }
 
   @override
@@ -538,11 +590,15 @@ class FakeAndroidPlatformView {
     size,
     layoutDirection,
     hybrid,
+    hybridFallback,
+    position,
   );
 
   @override
   String toString() {
-    return 'FakeAndroidPlatformView(id: $id, type: $type, size: $size, layoutDirection: $layoutDirection, hybrid: $hybrid, creationParams: $creationParams)';
+    return 'FakeAndroidPlatformView(id: $id, type: $type, size: $size, '
+      'layoutDirection: $layoutDirection, hybrid: $hybrid, '
+      'hybridFallback: $hybridFallback, creationParams: $creationParams, position: $position)';
   }
 }
 

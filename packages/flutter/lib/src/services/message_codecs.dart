@@ -9,6 +9,12 @@ import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 
 import 'message_codec.dart';
 
+export 'dart:typed_data' show ByteData;
+
+export 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
+
+export 'message_codec.dart' show MethodCall;
+
 const int _writeBufferStartCapacity = 64;
 
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].

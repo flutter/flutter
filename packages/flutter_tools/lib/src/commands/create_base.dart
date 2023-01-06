@@ -17,7 +17,6 @@ import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
-import '../dart/pub.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -132,9 +131,27 @@ abstract class CreateBase extends FlutterCommand {
     );
   }
 
+  /// Pattern for a Windows file system drive (e.g. "D:").
+  ///
+  /// `dart:io` does not recognize strings matching this pattern as absolute
+  /// paths, as they have no top level back-slash; however, users often specify
+  /// this
+  @visibleForTesting
+  static final RegExp kWindowsDrivePattern = RegExp(r'^[a-zA-Z]:$');
+
   /// The output directory of the command.
   @protected
+  @visibleForTesting
   Directory get projectDir {
+    final String argProjectDir = argResults!.rest.first;
+    if (globals.platform.isWindows && kWindowsDrivePattern.hasMatch(argProjectDir)) {
+      throwToolExit(
+        'You attempted to create a flutter project at the path "$argProjectDir", which is the name of a drive. This '
+        'is usually a mistake--you probably want to specify a containing directory, like "$argProjectDir\\app_name". '
+        'If you really want it at the drive root, re-run the command with the root directory after the drive, like '
+        '"$argProjectDir\\".',
+      );
+    }
     return globals.fs.directory(argResults!.rest.first);
   }
 
@@ -337,6 +354,7 @@ abstract class CreateBase extends FlutterCommand {
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
     bool withFfiPluginHook = false,
+    bool withEmptyMain = false,
     bool ios = false,
     bool android = false,
     bool web = false,
@@ -392,6 +410,7 @@ abstract class CreateBase extends FlutterCommand {
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
       'withPluginHook': withFfiPluginHook || withPlatformChannelPluginHook,
+      'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
@@ -520,6 +539,7 @@ abstract class CreateBase extends FlutterCommand {
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );
@@ -529,24 +549,6 @@ abstract class CreateBase extends FlutterCommand {
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
-      );
-
-      await pub.get(
-        context: PubContext.create,
-        directory: directory.path,
-        offline: boolArgDeprecated('offline'),
-        // For templates that use the l10n localization tooling, make sure
-        // importing the generated package works right after `flutter create`.
-        generateSyntheticPackage: true,
-      );
-
-      await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: androidPlatform,
-        iosPlatform: iosPlatform,
-        linuxPlatform: linuxPlatform,
-        macOSPlatform: macOSPlatform,
-        windowsPlatform: windowsPlatform,
-        webPlatform: webPlatform,
       );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
@@ -668,11 +670,11 @@ abstract class CreateBase extends FlutterCommand {
       'templates',
       'template_manifest.json',
     );
-    final Map<String, Object> manifest = json.decode(
+    final Map<String, Object?> manifest = json.decode(
       globals.fs.file(manifestPath).readAsStringSync(),
-    ) as Map<String, Object>;
+    ) as Map<String, Object?>;
     return Set<Uri>.from(
-      (manifest['files']! as List<Object>).cast<String>().map<Uri>(
+      (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
           (String path) =>
               Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
     );

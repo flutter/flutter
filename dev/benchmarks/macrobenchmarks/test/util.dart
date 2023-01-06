@@ -25,9 +25,16 @@ void macroPerfTestE2E(
   ControlCallback? body,
   ControlCallback? setup,
 }) {
-  macroPerfTestMultiPageE2E(testName, <ScrollableButtonRoute>[
-    ScrollableButtonRoute(kScrollableName, routeName),
-  ]);
+  macroPerfTestMultiPageE2E(
+    testName,
+    <ScrollableButtonRoute>[
+      ScrollableButtonRoute(kScrollableName, routeName),
+    ],
+    pageDelay: pageDelay,
+    duration: duration,
+    body: body,
+    setup: setup,
+  );
 }
 
 void macroPerfTestMultiPageE2E(

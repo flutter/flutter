@@ -70,6 +70,10 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 The debug adapter may emit several custom events that are useful to clients. Below are the Flutter-specific custom events, and the standard Dart DAP custom events are [documented here](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#custom-events).
 
+### `flutter.appStarted`
+
+This event is emitted when the application has started up. Unlike `dart.debuggerUris`, this event occurs even for `noDebug` launches or those that do not include a VM Service.
+
 ### `flutter.serviceExtensionStateChanged`
 
 When the value of a Flutter service extension changes, this event is emitted and includes the new value. Values are always encoded as strings, even if numeric/boolean.

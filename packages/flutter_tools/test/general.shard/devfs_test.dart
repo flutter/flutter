@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show ProcessSignal, Process;
+import 'dart:io' as io show Process, ProcessSignal;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -18,8 +16,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -31,6 +29,7 @@ import '../src/context.dart';
 import '../src/fake_http_client.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+import '../src/logging_logger.dart';
 
 final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
   method: '_createDevFS',
@@ -101,7 +100,6 @@ void main() {
     final DateTime fiveSecondsAgo = file.statSync().modified.subtract(const Duration(seconds: 5));
     expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
     expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
-    expect(content.isModifiedAfter(null), isTrue);
 
     file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
 
@@ -186,7 +184,7 @@ void main() {
       requests: <VmServiceExpectation>[createDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
     );
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.dill')
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
@@ -226,6 +224,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.syncedBytes, 5);
@@ -250,10 +249,10 @@ void main() {
     );
 
     await devFS.create();
-    final DateTime previousCompile = devFS.lastCompiled;
+    final DateTime? previousCompile = devFS.lastCompiled;
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       return const CompilerOutput('lib/foo.dill', 2, <Uri>[]);
     };
 
@@ -265,6 +264,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, false);
@@ -289,10 +289,10 @@ void main() {
     );
 
     await devFS.create();
-    final DateTime previousCompile = devFS.lastCompiled;
+    final DateTime? previousCompile = devFS.lastCompiled;
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -305,6 +305,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -330,10 +331,10 @@ void main() {
     );
 
     await devFS.create();
-    final DateTime previousCompile = devFS.lastCompiled;
+    final DateTime? previousCompile = devFS.lastCompiled;
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -347,6 +348,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       devFSWriter: localDevFSWriter,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -380,7 +382,7 @@ void main() {
     await devFS.create();
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('example').createSync();
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -396,6 +398,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       devFSWriter: writer,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -456,7 +459,7 @@ void main() {
     await devFS.create();
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -469,6 +472,7 @@ void main() {
       trackWidgetCreation: false,
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
+      shaderCompiler: const FakeShaderCompiler(),
     );
 
     expect(report.success, true);
@@ -506,7 +510,7 @@ void main() {
           await Future<dynamic>.delayed(const Duration(milliseconds: 5));
         }
 
-        String boundaryKey;
+        String? boundaryKey;
         while(processed < frontendServerStdIn.writes.length) {
           final List<int> data = frontendServerStdIn.writes[processed];
           final String stringData = utf8.decode(data);
@@ -554,6 +558,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       bundle: FakeBundle(),
+      shaderCompiler: const FakeShaderCompiler(),
     );
     expect(report1.success, true);
     logger.messages.clear();
@@ -567,6 +572,7 @@ void main() {
       invalidatedFiles: <Uri>[],
       packageConfig: PackageConfig.empty,
       bundle: FakeBundle(),
+      shaderCompiler: const FakeShaderCompiler(),
     );
     expect(report2.success, true);
 
@@ -578,13 +584,124 @@ void main() {
     expect(compileLibMainIndex, greaterThanOrEqualTo(0));
     expect(bundleProcessingDoneIndex, greaterThan(compileLibMainIndex));
   });
+
+  group('Shader compilation', () {
+    late FileSystem fileSystem;
+    late ProcessManager processManager;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      processManager = FakeProcessManager.any();
+    });
+
+    testUsingContext('DevFS recompiles shaders', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[createDevFSRequest],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await devFS.create();
+
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+      final FakeBundle bundle = FakeBundle()
+        ..entries['foo.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
+        ..entries['not.frag'] = DevFSByteContent(<int>[1, 2, 3, 4])
+        ..entryKinds['foo.frag'] = AssetKind.shader;
+
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/main.dart'),
+        generator: residentCompiler,
+        dillOutputPath: 'lib/foo.dill',
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: bundle,
+      );
+
+      expect(report.success, true);
+      expect(devFS.shaderPathsToEvict, <String>{'foo.frag'});
+      expect(devFS.assetPathsToEvict, <String>{'not.frag'});
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('DevFS tracks when FontManifest is updated', () async {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[createDevFSRequest],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final DevFS devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      await devFS.create();
+
+      expect(devFS.didUpdateFontManifest, false);
+
+      final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
+        ..onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
+          fileSystem.file('lib/foo.dill')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
+          return const CompilerOutput('lib/foo.dill', 0, <Uri>[]);
+        };
+      final FakeBundle bundle = FakeBundle()
+        ..entries['FontManifest.json'] = DevFSByteContent(<int>[1, 2, 3, 4]);
+
+      final UpdateFSReport report = await devFS.update(
+        mainUri: Uri.parse('lib/main.dart'),
+        generator: residentCompiler,
+        dillOutputPath: 'lib/foo.dill',
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: bundle,
+      );
+
+      expect(report.success, true);
+      expect(devFS.shaderPathsToEvict, <String>{});
+      expect(devFS.assetPathsToEvict, <String>{'FontManifest.json'});
+      expect(devFS.didUpdateFontManifest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+  });
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
-  Future<CompilerOutput> Function(Uri mainUri, List<Uri> invalidatedFiles) onRecompile;
+  Future<CompilerOutput> Function(Uri mainUri, List<Uri>? invalidatedFiles)? onRecompile;
 
   @override
-  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {String outputPath, PackageConfig packageConfig, String projectRootPath, FileSystem fs, bool suppressErrors = false, bool checkDartPluginRegistry = false}) {
+  Future<CompilerOutput> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {String? outputPath, PackageConfig? packageConfig, String? projectRootPath, FileSystem? fs, bool suppressErrors = false, bool checkDartPluginRegistry = false, File? dartPluginRegistrant}) {
     return onRecompile?.call(mainUri, invalidatedFiles)
       ?? Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
   }
@@ -599,33 +716,12 @@ class FakeDevFSWriter implements DevFSWriter {
   }
 }
 
-class LoggingLogger extends BufferLogger {
-  LoggingLogger() : super.test();
-
-  List<String> messages = <String>[];
-
-  @override
-  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
-    messages.add(message);
-  }
-
-  @override
-  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
-    messages.add(message);
-  }
-
-  @override
-  void printTrace(String message) {
-    messages.add(message);
-  }
-}
-
 class FakeBundle extends AssetBundle {
   @override
   List<File> get additionalDependencies => <File>[];
 
   @override
-  Future<int> build({String manifestPath = defaultManifestPath, String assetDirPath, String packagesPath, bool deferredComponentsEnabled = false, TargetPlatform targetPlatform}) async {
+  Future<int> build({String manifestPath = defaultManifestPath, String? assetDirPath, String? packagesPath, bool deferredComponentsEnabled = false, TargetPlatform? targetPlatform}) async {
     return 0;
   }
 
@@ -633,7 +729,10 @@ class FakeBundle extends AssetBundle {
   Map<String, Map<String, DevFSContent>> get deferredComponentsEntries => <String, Map<String, DevFSContent>>{};
 
   @override
-  Map<String, DevFSContent> get entries => <String, DevFSContent>{};
+  final Map<String, DevFSContent> entries = <String, DevFSContent>{};
+
+  @override
+  final Map<String, AssetKind> entryKinds = <String, AssetKind>{};
 
   @override
   List<File> get inputFiles => <File>[];
@@ -657,7 +756,7 @@ class AnsweringFakeProcessManager implements ProcessManager {
   final IOSink stdin;
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
+  bool canRun(dynamic executable, {String? workingDirectory}) {
     return true;
   }
 
@@ -667,17 +766,17 @@ class AnsweringFakeProcessManager implements ProcessManager {
   }
 
   @override
-  Future<ProcessResult> run(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) async {
+  Future<ProcessResult> run(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding? stdoutEncoding = systemEncoding, Encoding? stderrEncoding = systemEncoding}) async {
     throw UnimplementedError();
   }
 
   @override
-  ProcessResult runSync(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) {
+  ProcessResult runSync(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding? stdoutEncoding = systemEncoding, Encoding? stderrEncoding = systemEncoding}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<Process> start(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
+  Future<Process> start(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
     return AnsweringFakeProcess(stdout, stderr, stdin);
   }
 }
@@ -702,4 +801,16 @@ class AnsweringFakeProcess implements io.Process {
 
   @override
   int get pid => 42;
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) async {
+    return DevFSByteContent(await inputShader.contentsAsBytes());
+  }
 }
