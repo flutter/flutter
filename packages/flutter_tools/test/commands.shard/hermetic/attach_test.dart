@@ -981,7 +981,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     DeviceLogReader? logReader,
     this.onGetLogReader,
     this.interfaceType = IOSDeviceConnectionInterface.none,
-    // IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none,
   }) : _portForwarder = portForwarder, _logReader = logReader;
 
   final DevicePortForwarder? _portForwarder;

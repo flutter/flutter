@@ -426,7 +426,7 @@ class IOSDevice extends Device {
 
         // Get Observatory URL with the device IP.
         localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
-          null,
+          package.id,
           this,
           usesIpv6: ipv6,
           deviceVmservicePort: debuggingOptions.deviceVmServicePort,
