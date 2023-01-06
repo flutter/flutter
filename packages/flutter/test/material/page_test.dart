@@ -355,7 +355,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(isSnapshotted(page2Finder), isFalse);
 
-    // Transioning back from page 2 to page 1.
+    // Transitioning back from page 2 to page 1.
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
