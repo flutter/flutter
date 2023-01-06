@@ -795,7 +795,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.constraints,
     required this.clipBehavior,
   }) : itemSizes = List<Size?>.filled(items.length, null),
-       // Menus always cycle focus through its items irrespective of the
+       // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
        super(traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop);
 

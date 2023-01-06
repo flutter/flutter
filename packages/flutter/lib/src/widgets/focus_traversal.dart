@@ -84,10 +84,8 @@ enum TraversalDirection {
   left,
 }
 
-/// {@template flutter.focus.TraversalEdgeBehavior}
 /// Controls the transfer of focus beyond the first and the last items of a
 /// [FocusScopeNode].
-/// {@endtemplate}
 ///
 /// This enumeration only controls the traversal behavior performed by
 /// [FocusTraversalPolicy]. Other methods of focus transfer, such as direct

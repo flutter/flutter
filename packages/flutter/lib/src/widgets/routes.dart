@@ -1004,7 +1004,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// [BackdropFilter]. This allows blur effects, for example.
   final ui.ImageFilter? filter;
 
-  /// {@macro flutter.focus.TraversalEdgeBehavior}
+  /// Controls the transfer of focus beyond the first and the last items of a
+  /// [FocusScopeNode].
   ///
   /// If set to null, [Navigator.routeTraversalEdgeBehavior] is used.
   final TraversalEdgeBehavior? traversalEdgeBehavior;

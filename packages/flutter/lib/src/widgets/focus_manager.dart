@@ -1223,7 +1223,8 @@ class FocusScopeNode extends FocusNode {
   @override
   FocusScopeNode get nearestScope => this;
 
-  /// {@macro flutter.focus.TraversalEdgeBehavior}
+  /// Controls the transfer of focus beyond the first and the last items of a
+  /// [FocusScopeNode].
   ///
   /// Changing this field value has no immediate effect on the UI. Instead, next time
   /// focus traversal takes place [FocusTraversalPolicy] will read this value
