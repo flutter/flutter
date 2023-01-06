@@ -977,7 +977,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService setSelection notifiers for an Element',
     (WidgetTester tester) async {
-      final String pubRootTest = generateTestPubRootDirectory(service);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -994,8 +993,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       service.disposeAllGroups();
 
-      service.resetPubRootDirectories();
-      service.addPubRootDirectories(<String>[pubRootTest]);
+      setupDefaultPubRootDirectory(service);
 
       // Select the widget
       service.setSelection(elementA, 'my-group');
@@ -1021,7 +1019,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     
     testWidgets('WidgetInspectorService setSelection notifiers for a RenderObject',
     (WidgetTester tester) async {
-      final String pubRootTest = generateTestPubRootDirectory(service);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1038,8 +1035,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       service.disposeAllGroups();
 
-      service.resetPubRootDirectories();
-      service.addPubRootDirectories(<String>[pubRootTest]);
+      setupDefaultPubRootDirectory(service);
 
       // Select the render object for the widget.
       service.setSelection(elementA.renderObject, 'my-group');
@@ -1063,6 +1059,55 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(column, equals(15));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
+    testWidgets('WidgetInspector selectButton inspection for tap', (WidgetTester tester) async {
+      final Key childKey = UniqueKey();
+      final GlobalKey selectButtonKey = GlobalKey();
+      final GlobalKey inspectorKey = GlobalKey();
+      setupDefaultPubRootDirectory(service);
+
+      Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+      }
+      // State type is private, hence using dynamic.
+      dynamic getInspectorState() => inspectorKey.currentState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetInspector(
+            key: inspectorKey,
+            selectButtonBuilder: selectButtonBuilder,
+            child: const Text('Child 1'),
+          ),
+        ),
+      );
+      final Finder child = find.text('Child 1');
+      final Element childElement = child.evaluate().first;
+
+      await tester.tap(child, warnIfMissed: false);
+      
+      await tester.pump();
+
+      // ensure that developer.inspect was called on the widget
+      final List<Object?> objectsInspected = service.getObjectsInspected();
+      expect(objectsInspected, equals(<RenderObject?>[childElement.renderObject]));
+
+      // ensure that a navigate event was sent for the renderObject
+      final List<Map<Object, Object?>> navigateEventsPosted = service.getEventsDispatched('navigate', stream: 'toolEvent',);
+      expect(navigateEventsPosted.length, equals(1));
+      final Map<Object,Object?> event = navigateEventsPosted[0];
+      final String file = event['file']! as String;
+      final int line = event['line']! as int;
+      final int column = event['column']! as int;
+      expect(file, endsWith('widget_inspector_test.dart'));
+      // We don't hardcode the actual lines the widgets are created on as that
+      // would make this test fragile.
+      expect(line, isNotNull);
+      // Column numbers are more stable than line numbers.
+      expect(column, equals(26));
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+    
+   
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(
