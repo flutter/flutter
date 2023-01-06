@@ -41,10 +41,23 @@ void AccessibilityBridgeWindows::OnAccessibilityEvent(
       DispatchWinAccessibilityEvent(win_delegate,
                                     ax::mojom::Event::kChildrenChanged);
       break;
-    case ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED:
+    case ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED: {
+      // An event indicating a change in document selection should be fired
+      // only for the focused node whose selection has changed. If a valid
+      // caret and selection exist in the app tree, they must both be within
+      // the focus node.
+      ui::AXNode::AXID focus_id = GetAXTreeData().sel_focus_object_id;
+      auto focus_delegate =
+          GetFlutterPlatformNodeDelegateFromID(focus_id).lock();
+      if (!focus_delegate) {
+        win_delegate =
+            std::static_pointer_cast<FlutterPlatformNodeDelegateWindows>(
+                focus_delegate);
+      }
       DispatchWinAccessibilityEvent(
           win_delegate, ax::mojom::Event::kDocumentSelectionChanged);
       break;
+    }
     case ui::AXEventGenerator::Event::FOCUS_CHANGED:
       DispatchWinAccessibilityEvent(win_delegate, ax::mojom::Event::kFocus);
       SetFocus(win_delegate);

@@ -338,5 +338,11 @@ TEST(AccessibilityBridgeWindows, OnAccessibilityStateChanged) {
       ax::mojom::Event::kStateChanged);
 }
 
+TEST(AccessibilityBridgeWindows, OnDocumentSelectionChanged) {
+  ExpectWinEventFromAXEvent(
+      1, ui::AXEventGenerator::Event::DOCUMENT_SELECTION_CHANGED,
+      ax::mojom::Event::kDocumentSelectionChanged);
+}
+
 }  // namespace testing
 }  // namespace flutter
