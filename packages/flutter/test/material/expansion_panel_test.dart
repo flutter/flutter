@@ -1302,7 +1302,7 @@ void main() {
     expect(box.size.width, equals(744.0));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/5848
+  // Regression test for https://github.com/flutter/flutter/issues/5848.
   testWidgets('The AnimatedContainer and IconButton have the same height of 48px', (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
@@ -1317,11 +1317,11 @@ void main() {
       ),
     );
 
-    // The panel is closed
+    // The panel is closed.
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
 
-    // No padding applied to closed header
+    // No padding applied to closed header.
     final RenderBox boxOfContainer = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     final RenderBox boxOfIconButton = tester.renderObject(find.byType(IconButton).first);
     expect(boxOfContainer.size.height, equals(boxOfIconButton.size.height));
