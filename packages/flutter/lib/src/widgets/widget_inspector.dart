@@ -1524,16 +1524,16 @@ mixin WidgetInspectorService {
     }
     return false;
   }
+
+  /// Notify debuggers to open an inspector on the object.
   void _sendInspectEvent(Object? object){
     inspect(object);
 
-    // final _Location? location = _getCreationLocation(element);
-
-    final _Location? location = WidgetInspectorService.instance._getSelectedSummaryLocation(null, 'my-group');
+    final _Location? location = WidgetInspectorService.instance._getSelectedSummaryWidgetLocation(null, 'my-group');
     if (location != null){
       postEvent(
         'navigate',
-        {
+        <String, Object>{
           'file': location.file,
           'line': location.line,
           'column': location.column,
@@ -1542,6 +1542,7 @@ mixin WidgetInspectorService {
       );
     }
   }
+
   /// Returns a DevTools uri linking to a specific element on the inspector page.
   String? _devToolsInspectorUriForElement(Element element) {
     if (activeDevToolsServerAddress != null && connectedVmServiceUri != null) {
@@ -2235,12 +2236,19 @@ mixin WidgetInspectorService {
     final Element? current = selection.currentElement;
     return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
-  _Location? _getSelectedLocation(String? previousSelectionId, String groupName) {
-    final Object? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
+
+  /// Mimics the behaviour of [_getSelectedWidget], but returns a [_Location]
+  /// instead.
+  _Location? _getSelectedWidgetLocation(
+    String? previousSelectionId,
+    String groupName,
+  ) {
+    final DiagnosticsNode? previousSelection = toObject(
+      previousSelectionId,
+    ) as DiagnosticsNode?;
     final Element? current = selection.currentElement;
 
-    // TODO is previousSelection as an Object ok?
-    if(current == previousSelection){
+    if(current == previousSelection?.value){
       return _getCreationLocation(previousSelection);
      } else {
       return _getCreationLocation(current);
@@ -2258,10 +2266,12 @@ mixin WidgetInspectorService {
   String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
-  
-  _Location? _getSelectedSummaryLocation(String? previousSelectionId, String groupName) {
+
+  /// Mimics the behaviour of [_getSelectedSummaryWidget], but returns a
+  /// [_Location] instead.
+  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId, String groupName) {
     if (!isWidgetCreationTracked()) {
-      return _getSelectedLocation(previousSelectionId, groupName);
+      return _getSelectedWidgetLocation(previousSelectionId, groupName);
     }
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     Element? current = selection.currentElement;
@@ -2275,6 +2285,7 @@ mixin WidgetInspectorService {
       }
       current = firstLocal;
     }
+
     if(current == previousSelection?.value){
       return _getCreationLocation(previousSelection);
      } else {
