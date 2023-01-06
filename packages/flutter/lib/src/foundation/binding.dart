@@ -187,9 +187,10 @@ abstract class BindingBase {
   /// such as a [TestWindow].
   ///
   /// The [window] is a singleton meant for use by applications that only have a
-  /// single main window. In addition to the properties of [ui.FlutterWindow],
-  /// [window] provides access to platform-specific properties and callbacks
-  /// available on the [platformDispatcher].
+  /// single main window. In addition to the properties of
+  /// [ui.SingletonFlutterWindow], [window] provides access to
+  /// platform-specific properties and callbacks available on the
+  /// [platformDispatcher].
   ///
   /// For applications designed for more than one main window, prefer using the
   /// [platformDispatcher] to access available views via
