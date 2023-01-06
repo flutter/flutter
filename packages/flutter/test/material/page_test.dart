@@ -368,7 +368,7 @@ void main() {
     // Page 1 on top.
     await tester.pumpAndSettle();
     expect(isSnapshotted(page1Finder), isFalse);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
