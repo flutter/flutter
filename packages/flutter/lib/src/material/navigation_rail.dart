@@ -393,7 +393,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   @override
   void didChangeDependencies(){
     super.didChangeDependencies();
-    final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
+    late final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
     _extendedController = AnimationController(
       duration: widget.extendedAnimationDuration ?? navigationRailTheme.extendedAnimationDuration ?? kThemeAnimationDuration,
       vsync: this,
