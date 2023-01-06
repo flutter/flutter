@@ -364,6 +364,7 @@ class _NavigationRailState extends State<NavigationRail>
   @override
   void dispose() {
     _disposeControllers();
+    _extensionController.dispose();
     super.dispose();
   }
 
@@ -371,7 +372,11 @@ class _NavigationRailState extends State<NavigationRail>
   void didUpdateWidget(NavigationRail oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.extended != oldWidget.extended) {
+    if (widget.extensionAnimationCurve != oldWidget.extensionAnimationCurve ||
+        widget.extensionAnimationDuration !=
+            oldWidget.extensionAnimationDuration) {
+      _resetExtensionControllerState();
+    } else if (widget.extended != oldWidget.extended) {
       if (widget.extended) {
         _extensionController.forward();
       } else {
@@ -525,7 +530,6 @@ class _NavigationRailState extends State<NavigationRail>
     for (final AnimationController controller in _destinationControllers) {
       controller.dispose();
     }
-    _extensionController.dispose();
   }
 
   void _initExtensionController() {
@@ -566,6 +570,10 @@ class _NavigationRailState extends State<NavigationRail>
   void _resetState() {
     _disposeControllers();
     _initControllers();
+  }
+
+  void _resetExtensionControllerState() {
+    _extensionController.dispose();
     _initExtensionController();
   }
 
