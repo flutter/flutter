@@ -421,21 +421,17 @@ class IOSDevice extends Device {
 
       Uri? localUri;
       if (interfaceType == IOSDeviceConnectionInterface.network) {
-        try {
-          // Wait for iOS Observatory to start up.
-          await observatoryDiscovery?.uri;
+        // Wait for iOS Observatory to start up.
+        await observatoryDiscovery?.uri;
 
-          // Get Observatory URL with the device IP.
-          localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
-            package.id,
-            this,
-            usesIpv6: ipv6,
-            deviceVmservicePort: debuggingOptions.deviceVmServicePort,
-            isNetworkDevice: true,
-          );
-        } on StateError {
-          _logger.printError('iOS Observatory not discovered before stream was closed.');
-        }
+        // Get Observatory URL with the device IP.
+        localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
+          null,
+          this,
+          usesIpv6: ipv6,
+          deviceVmservicePort: debuggingOptions.deviceVmServicePort,
+          isNetworkDevice: true,
+        );
       } else {
         localUri = await observatoryDiscovery?.uri;
       }
