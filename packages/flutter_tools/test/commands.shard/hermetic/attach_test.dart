@@ -986,7 +986,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   final DevicePortForwarder? _portForwarder;
 
-
+  @override
   final IOSDeviceConnectionInterface interfaceType;
 
   @override

@@ -326,7 +326,7 @@ class XCDevice {
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
-          interfaceType: _interfaceType(device),
+          interfaceType: interface,
           sdkVersion: sdkVersion,
           iProxy: _iProxy,
           fileSystem: globals.fs,
