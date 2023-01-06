@@ -415,7 +415,7 @@ class IOSDevice extends Device {
       _logger.printTrace('Application launched on the device. Waiting for observatory url.');
       final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 60 : 30;
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
-        _logger.printError('iOS Observatory not discovered after ${discoveryTimeout ?? defaultTimeout} seconds. This is taking much longer than expected...');
+        _logger.printError('iOS Observatory not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
         iosDeployDebugger?.pauseDumpBacktraceResume();
       });
 

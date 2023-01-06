@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -979,9 +980,14 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     DevicePortForwarder? portForwarder,
     DeviceLogReader? logReader,
     this.onGetLogReader,
+    this.interfaceType = IOSDeviceConnectionInterface.none,
+    // IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none,
   }) : _portForwarder = portForwarder, _logReader = logReader;
 
   final DevicePortForwarder? _portForwarder;
+
+
+  final IOSDeviceConnectionInterface interfaceType;
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder!;
