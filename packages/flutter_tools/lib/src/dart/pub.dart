@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -30,10 +31,6 @@ const String _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
 
 /// The console environment key used by the pub tool to find the cache directory.
 const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
-
-/// The UNAVAILABLE exit code returned by the pub tool.
-/// (see https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart)
-const int _kPubExitCodeUnavailable = 69;
 
 typedef MessageFilter = String? Function(String message);
 
@@ -150,8 +147,19 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
-    required Stdio stdio,
   }) = _DefaultPub;
+
+  /// Create a [Pub] instance with a mocked [stdio].
+  @visibleForTesting
+  factory Pub.test({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Platform platform,
+    required BotDetector botDetector,
+    required Usage usage,
+    required Stdio stdio,
+  }) = _DefaultPub.test;
 
   /// Runs `pub get` or `pub upgrade` for [project].
   ///
@@ -214,6 +222,26 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Usage usage,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _platform = platform,
+       _botDetector = botDetector,
+       _usage = usage,
+       _processUtils = ProcessUtils(
+         logger: logger,
+         processManager: processManager,
+       ),
+       _processManager = processManager,
+       _stdio = null;
+
+  @visibleForTesting
+  _DefaultPub.test({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Platform platform,
+    required BotDetector botDetector,
+    required Usage usage,
     required Stdio stdio,
   }) : _fileSystem = fileSystem,
        _logger = logger,
@@ -234,7 +262,7 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final Usage _usage;
   final ProcessManager _processManager;
-  final Stdio _stdio;
+  final Stdio? _stdio;
 
   @override
   Future<void> get({
@@ -315,13 +343,12 @@ class _DefaultPub implements Pub {
         '--offline',
       '--example',
     ];
-    await _runWithRetries(
+    await _runWithStdioInherited(
       args,
       command: command,
       context: context,
       directory: directory,
       failureMessage: 'pub $command failed',
-      retry: !offline,
       flutterRootOverride: flutterRootOverride,
       printProgress: printProgress
     );
@@ -346,76 +373,90 @@ class _DefaultPub implements Pub {
     }
   }
 
-  /// Runs pub with [arguments].
+  /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
-  /// Retries the command as long as the exit code is
-  /// `_kPubExitCodeUnavailable`.
+  /// Uses [ProcessStartMode.normal] and [Pub._stdio] if [Pub.test] constructor
+  /// was used.
   ///
-  /// Prints the stderr and stdout of the last run.
+  /// Prints the stdout and stderr of the whole run, unless silenced using
+  /// [printProgress].
   ///
-  /// Sends an analytics event
-  Future<void> _runWithRetries(
+  /// Sends an analytics event.
+  Future<void> _runWithStdioInherited(
     List<String> arguments, {
     required String command,
     required bool printProgress,
     required PubContext context,
-    required bool retry,
     required String directory,
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
   }) async {
     int exitCode;
-    int attempts = 0;
-    int duration = 1;
-
-    List<_OutputLine>? output;
-    StreamSubscription<String> recordLines(Stream<List<int>> stream, _OutputStream streamName) {
-      return stream
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) => output!.add(_OutputLine(line, streamName)));
+    if (printProgress) {
+      _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
     }
 
-    final Status? status = printProgress
-      ? _logger.startProgress('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',)
-      : null;
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+
     try {
-      do {
-        output = <_OutputLine>[];
-        attempts += 1;
-        final io.Process process = await _processUtils.start(
+      if (printProgress) {
+        final io.Stdio? stdio = _stdio;
+        if (stdio == null) {
+          // Let pub inherit stdio and output directly to the tool's stdout and
+          // stderr handles.
+          final io.Process process = await _processUtils.start(
+            pubCommand,
+            workingDirectory: _fileSystem.path.current,
+            environment: pubEnvironment,
+            mode: ProcessStartMode.inheritStdio,
+          );
+
+          exitCode = await process.exitCode;
+        } else {
+          // Omit [mode] parameter to send output to [process.stdout] and
+          // [process.stderr].
+          final io.Process process = await _processUtils.start(
+            pubCommand,
+            workingDirectory: _fileSystem.path.current,
+            environment: pubEnvironment,
+          );
+
+          // Direct pub output to [Pub._stdio] for tests.
+          final StreamSubscription<List<int>> stdoutSubscription =
+              process.stdout.listen(stdio.stdout.add);
+          final StreamSubscription<List<int>> stderrSubscription =
+              process.stderr.listen(stdio.stderr.add);
+
+          await Future.wait<void>(<Future<void>>[
+            stdoutSubscription.asFuture<void>(),
+            stderrSubscription.asFuture<void>(),
+          ]);
+
+          unawaited(stdoutSubscription.cancel());
+          unawaited(stderrSubscription.cancel());
+
+          exitCode = await process.exitCode;
+        }
+      } else {
+        // Do not try to use [ProcessUtils.start] here, because it requires you
+        // to read all data out of the stdout and stderr streams. If you don't
+        // read the streams, it may appear to work fine on your platform but
+        // will block the tool's process on Windows.
+        // See https://api.dart.dev/stable/dart-io/Process/start.html
+        //
+        // [ProcessUtils.run] will send the output to [result.stdout] and
+        // [result.stderr], which we will ignore.
+        final RunResult result = await _processUtils.run(
           pubCommand,
           workingDirectory: _fileSystem.path.current,
           environment: pubEnvironment,
         );
-        final StreamSubscription<String> stdoutSubscription =
-          recordLines(process.stdout, _OutputStream.stdout);
-        final StreamSubscription<String> stderrSubscription =
-          recordLines(process.stderr, _OutputStream.stderr);
 
-        exitCode = await process.exitCode;
-        unawaited(stdoutSubscription.cancel());
-        unawaited(stderrSubscription.cancel());
-
-        if (retry && exitCode == _kPubExitCodeUnavailable) {
-          _logger.printStatus(
-            '$failureMessage (server unavailable) -- attempting retry $attempts in $duration '
-            'second${ duration == 1 ? "" : "s"}...',
-          );
-          await Future<void>.delayed(Duration(seconds: duration));
-          if (duration < 64) {
-            duration *= 2;
-          }
-          // This will cause a retry.
-          output = null;
-        }
-      } while (output == null);
-      status?.stop();
+        exitCode = result.exitCode;
+      }
     // The exception is rethrown, so don't catch only Exceptions.
     } catch (exception) { // ignore: avoid_catches_without_on_clauses
-      status?.cancel();
       if (exception is io.ProcessException) {
         final StringBuffer buffer = StringBuffer('${exception.message}\n');
         final String directoryExistsMessage = _fileSystem.directory(directory).existsSync()
@@ -434,40 +475,19 @@ class _DefaultPub implements Pub {
       rethrow;
     }
 
-    if (printProgress) {
-      // Show the output of the last run.
-      for (final _OutputLine line in output) {
-        switch (line.stream) {
-          case _OutputStream.stdout:
-            _stdio.stdoutWrite('${line.line}\n');
-            break;
-          case _OutputStream.stderr:
-            _stdio.stderrWrite('${line.line}\n');
-            break;
-        }
-      }
-    }
-
     final int code = exitCode;
-    String result = 'success';
-    if (output.any((_OutputLine line) => line.line.contains('version solving failed'))) {
-      result = 'version-solving-failed';
-    } else if (code != 0) {
-      result = 'failure';
-    }
+    final String result = code == 0 ? 'success' : 'failure';
     PubResultEvent(
       context: context.toAnalyticsString(),
       result: result,
       usage: _usage,
     ).send();
-    final String lastPubMessage = output.isEmpty ? 'no message' : output.last.line;
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
       buffer.writeln('command: "${pubCommand.join(' ')}"');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
-      buffer.writeln('last line of pub output: "${lastPubMessage.trim()}"');
       throwToolExit(
         buffer.toString(),
         exitCode: code,
@@ -812,15 +832,4 @@ class _DefaultPub implements Pub {
     buffer.writeln(packageConfig.version);
     return buffer.toString();
   }
-}
-
-class _OutputLine {
-  _OutputLine(this.line, this.stream);
-  final String line;
-  final _OutputStream stream;
-}
-
-enum _OutputStream {
-  stdout,
-  stderr,
 }

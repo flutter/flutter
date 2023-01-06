@@ -168,6 +168,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
+    this.expandIconColor,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -195,6 +196,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
+    this.expandIconColor,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true;
@@ -207,14 +209,14 @@ class ExpansionPanelList extends StatefulWidget {
   /// is pressed. The arguments passed to the callback are the index of the
   /// pressed panel and whether the panel is currently expanded or not.
   ///
-  /// If ExpansionPanelList.radio is used, the callback may be called a
+  /// If [ExpansionPanelList.radio] is used, the callback may be called a
   /// second time if a different panel was previously open. The arguments
   /// passed to the second callback are the index of the panel that will close
   /// and false, marking that it will be closed.
   ///
-  /// For ExpansionPanelList, the callback needs to setState when it's notified
+  /// For [ExpansionPanelList], the callback needs to setState when it's notified
   /// about the closing/opening panel. On the other hand, the callback for
-  /// ExpansionPanelList.radio is simply meant to inform the parent widget of
+  /// [ExpansionPanelList.radio] is intended to inform the parent widget of
   /// changes, as the radio panels' open/close states are managed internally.
   ///
   /// This callback is useful in order to keep track of the expanded/collapsed
@@ -248,6 +250,9 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// By default, the value of elevation is 2.
   final double elevation;
+
+  /// {@macro flutter.material.ExpandIcon.color}
+  final Color? expandIconColor;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -356,6 +361,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       Widget expandIconContainer = Container(
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
+          color: widget.expandIconColor,
           isExpanded: _isChildExpanded(index),
           padding: const EdgeInsets.all(16.0),
           onPressed: !child.canTapOnHeader

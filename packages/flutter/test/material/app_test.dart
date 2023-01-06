@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -475,7 +476,7 @@ void main() {
     double? textScaleFactor;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
-        textScaleFactor = MediaQuery.of(context).textScaleFactor;
+        textScaleFactor = MediaQuery.textScaleFactorOf(context);
         return Container();
       }),
     ));

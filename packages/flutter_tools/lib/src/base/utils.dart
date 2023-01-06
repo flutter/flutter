@@ -288,7 +288,7 @@ class _AnsiRun {
 /// widths is fine, for instance).
 ///
 /// If [outputPreferences.wrapText] is false, then the text will be returned
-/// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
+/// split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
 List<String> _wrapTextAsLines(String text, {
   int start = 0,
