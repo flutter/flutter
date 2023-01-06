@@ -826,8 +826,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(service.selection.currentElement, equals(null));
       expect(service.selection.current, equals(null));
     });
-    // TODO: Test onTap sends the inspect event
-    // TODO: test setSelection Sends the post event
+
     testWidgets('WidgetInspectorService getParentChain', (WidgetTester tester) async {
       const String group = 'test-group';
 
