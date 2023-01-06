@@ -401,12 +401,15 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
   }) async {
     int exitCode;
+    if (printProgress) {
+      _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
+    }
 
     final List<String> pubCommand = _pubCommand(arguments);
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride, summaryOnly: outputMode == PubOutputMode.summaryOnly);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
 
     try {
-      if (outputMode != PubOutputMode.none) {
+      if (printProgress) {
         final io.Stdio? stdio = _stdio;
         if (stdio == null) {
           // Let pub inherit stdio and output directly to the tool's stdout and
