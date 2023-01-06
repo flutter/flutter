@@ -16,6 +16,16 @@ import 'paragraph.dart';
 import 'ruler.dart';
 import 'text_direction.dart';
 
+/// A single canvas2d context to use for all text measurements.
+@visibleForTesting
+final DomCanvasRenderingContext2D textContext =
+    // We don't use this canvas to draw anything, so let's make it as small as
+    // possible to save memory.
+    createDomCanvasElement(width: 0, height: 0).context2D;
+
+/// The last font used in the [textContext].
+String? _lastContextFont;
+
 /// Performs layout on a [CanvasParagraph].
 ///
 /// It uses a [DomCanvasElement] to measure text.
@@ -23,9 +33,6 @@ class TextLayoutService {
   TextLayoutService(this.paragraph);
 
   final CanvasParagraph paragraph;
-
-  final DomCanvasRenderingContext2D context =
-      createDomCanvasElement().context2D;
 
   // *** Results of layout *** //
 
@@ -53,7 +60,7 @@ class TextLayoutService {
   ui.Rect get paintBounds => _paintBounds;
   ui.Rect _paintBounds = ui.Rect.zero;
 
-  late final Spanometer spanometer = Spanometer(paragraph, context);
+  late final Spanometer spanometer = Spanometer(paragraph);
 
   late final LayoutFragmenter layoutFragmenter =
       LayoutFragmenter(paragraph.plainText, paragraph.spans);
@@ -882,10 +889,9 @@ class LineBuilder {
 /// it's set, the [Spanometer] updates the underlying [context] so that
 /// subsequent measurements use the correct styles.
 class Spanometer {
-  Spanometer(this.paragraph, this.context);
+  Spanometer(this.paragraph);
 
   final CanvasParagraph paragraph;
-  final DomCanvasRenderingContext2D context;
 
   static final RulerHost _rulerHost = RulerHost();
 
@@ -904,8 +910,6 @@ class Spanometer {
     _rulers.clear();
   }
 
-  String _cssFontString = '';
-
   double? get letterSpacing => currentSpan.style.letterSpacing;
 
   TextHeightRuler? _currentRuler;
@@ -913,12 +917,24 @@ class Spanometer {
 
   ParagraphSpan get currentSpan => _currentSpan!;
   set currentSpan(ParagraphSpan? span) {
+    // Update the font string if it's different from the last applied font
+    // string.
+    //
+    // Also, we need to update the font string even if the span isn't changing.
+    // That's because `textContext` is shared across all spanometers.
+    if (span != null) {
+      final String newCssFontString = span.style.cssFontString;
+      if (_lastContextFont != newCssFontString) {
+        _lastContextFont = newCssFontString;
+        textContext.font = newCssFontString;
+      }
+    }
+
     if (span == _currentSpan) {
       return;
     }
     _currentSpan = span;
 
-    // No need to update css font string when `span` is null.
     if (span == null) {
       _currentRuler = null;
       return;
@@ -933,13 +949,6 @@ class Spanometer {
       _rulers[heightStyle] = ruler;
     }
     _currentRuler = ruler;
-
-    // Update the font string if it's different from the previous span.
-    final String cssFontString = span.style.cssFontString;
-    if (_cssFontString != cssFontString) {
-      _cssFontString = cssFontString;
-      context.font = cssFontString;
-    }
   }
 
   /// Whether the spanometer is ready to take measurements.
@@ -955,7 +964,7 @@ class Spanometer {
   double get height => _currentRuler!.height;
 
   double measureText(String text) {
-    return measureSubstring(context, text, 0, text.length);
+    return measureSubstring(textContext, text, 0, text.length);
   }
 
   double measureRange(int start, int end) {
@@ -1047,7 +1056,7 @@ class Spanometer {
     assert(end >= currentSpan.start && end <= currentSpan.end);
 
     return measureSubstring(
-      context,
+      textContext,
       paragraph.plainText,
       start,
       end,
