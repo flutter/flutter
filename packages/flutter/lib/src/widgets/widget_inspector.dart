@@ -2234,25 +2234,16 @@ mixin WidgetInspectorService {
   Map<String, Object?>? _getSelectedWidget(String? previousSelectionId, String groupName) {
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     final Element? current = selection.currentElement;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(
+      _getSelectedWidgetDiagnosticsNode(previousSelectionId, groupName),
+      InspectorSerializationDelegate(groupName: groupName, service: this),
+    );
   }
 
-  /// Mimics the behaviour of [_getSelectedWidget], but returns a [_Location]
-  /// instead.
-  _Location? _getSelectedWidgetLocation(
-    String? previousSelectionId,
-    String groupName,
-  ) {
-    final DiagnosticsNode? previousSelection = toObject(
-      previousSelectionId,
-    ) as DiagnosticsNode?;
+  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId, String groupName) {
+    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     final Element? current = selection.currentElement;
-
-    if(current == previousSelection?.value){
-      return _getCreationLocation(previousSelection);
-     } else {
-      return _getCreationLocation(current);
-     }
+    return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element]
@@ -2267,11 +2258,13 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
 
-  /// Mimics the behaviour of [_getSelectedSummaryWidget], but returns a
-  /// [_Location] instead.
   _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId, String groupName) {
+     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId, groupName)?.value);
+  }
+
+  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId, String groupName) {
     if (!isWidgetCreationTracked()) {
-      return _getSelectedWidgetLocation(previousSelectionId, groupName);
+      return _getSelectedWidgetDiagnosticsNode(previousSelectionId, groupName);
     }
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     Element? current = selection.currentElement;
@@ -2285,31 +2278,11 @@ mixin WidgetInspectorService {
       }
       current = firstLocal;
     }
-
-    if(current == previousSelection?.value){
-      return _getCreationLocation(previousSelection);
-     } else {
-      return _getCreationLocation(current);
-     }
+    return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
   }
 
   Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
-    if (!isWidgetCreationTracked()) {
-      return _getSelectedWidget(previousSelectionId, groupName);
-    }
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
-    Element? current = selection.currentElement;
-    if (current != null && !_isValueCreatedByLocalProject(current)) {
-      Element? firstLocal;
-      for (final Element candidate in current.debugGetDiagnosticChain()) {
-        if (_isValueCreatedByLocalProject(candidate)) {
-          firstLocal = candidate;
-          break;
-        }
-      }
-      current = firstLocal;
-    }
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionId, groupName), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns whether [Widget] creation locations are available.
