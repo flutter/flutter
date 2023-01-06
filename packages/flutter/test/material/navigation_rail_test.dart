@@ -1545,7 +1545,7 @@ void main() {
                     selectedIndex: 0,
                     destinations: _destinations(),
                     extended: extended,
-                    extendedAnimationDuration: const Duration(milliseconds: 200),
+                    extensionAnimationDuration: const Duration(milliseconds: 200),
                   ),
                   const Expanded(
                     child: Text('body'),
@@ -2014,7 +2014,7 @@ void main() {
                       ),
                     ],
                     extended: extended,
-                    extendedAnimationDuration: const Duration(milliseconds: 10),
+                    extensionAnimationDuration: const Duration(milliseconds: 10),
                   ),
                   const Expanded(
                     child: Text('body'),
@@ -2075,7 +2075,7 @@ void main() {
                       ),
                     ],
                     extended: extended,
-                    extendedAnimationCurve: const Threshold(1),
+                    extensionAnimationCurve: const Threshold(1),
                   ),
                   const Expanded(
                     child: Text('body'),
@@ -4477,7 +4477,7 @@ void main() {
                         ),
                       ],
                       extended: extended,
-                      extendedAnimationDuration: const Duration(milliseconds: 10),
+                      extensionAnimationDuration: const Duration(milliseconds: 10),
                     ),
                     const Expanded(
                       child: Text('body'),
@@ -4538,7 +4538,7 @@ void main() {
                         ),
                       ],
                       extended: extended,
-                      extendedAnimationCurve: const Threshold(1),
+                      extensionAnimationCurve: const Threshold(1),
                     ),
                     const Expanded(
                       child: Text('body'),

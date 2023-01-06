@@ -79,8 +79,8 @@ class NavigationRail extends StatefulWidget {
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
-  /// [unselectedIconTheme], [selectedIconTheme], [extendedAnimationCurve] or
-  /// [extendedAnimationDuration] are null, then their
+  /// [unselectedIconTheme], [selectedIconTheme], [extensionAnimationCurve] or
+  /// [extensionAnimationDuration] are null, then their
   /// [NavigationRailThemeData] values will be used. If the corresponding
   /// [NavigationRailThemeData] property is null, then the navigation rail
   /// defaults are used. See the individual properties for more information.
@@ -106,8 +106,8 @@ class NavigationRail extends StatefulWidget {
     this.minExtendedWidth,
     this.useIndicator,
     this.indicatorColor,
-    this.extendedAnimationCurve,
-    this.extendedAnimationDuration,
+    this.extensionAnimationCurve,
+    this.extensionAnimationDuration,
   })  : assert(destinations != null && destinations.length >= 2),
         assert(selectedIndex == null ||
             (0 <= selectedIndex && selectedIndex < destinations.length)),
@@ -314,14 +314,14 @@ class NavigationRail extends StatefulWidget {
   ///
   /// If `null`, defaults to [NavigationRailThemeData.extendedAnimationCurve].
   /// If that is `null`, defaults to [Curves.fastOutSlowIn].
-  final Curve? extendedAnimationCurve;
+  final Curve? extensionAnimationCurve;
 
   /// The animation duration that is used when extending and shrinking the
   /// [NavigationRail].
   ///
   /// If `null`, defaults to [NavigationRailThemeData.extendedAnimationDuration].
   /// If that is `null`, defaults to [kThemeAnimationDuration].
-  final Duration? extendedAnimationDuration;
+  final Duration? extensionAnimationDuration;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
@@ -352,7 +352,7 @@ class _NavigationRailState extends State<NavigationRail>
     with TickerProviderStateMixin {
   late List<AnimationController> _destinationControllers;
   late List<Animation<double>> _destinationAnimations;
-  late AnimationController _extendedController;
+  late AnimationController _extensionController;
   late Animation<double> _extendedAnimation;
 
   @override
@@ -373,9 +373,9 @@ class _NavigationRailState extends State<NavigationRail>
 
     if (widget.extended != oldWidget.extended) {
       if (widget.extended) {
-        _extendedController.forward();
+        _extensionController.forward();
       } else {
-        _extendedController.reverse();
+        _extensionController.reverse();
       }
     }
 
@@ -525,26 +525,26 @@ class _NavigationRailState extends State<NavigationRail>
     for (final AnimationController controller in _destinationControllers) {
       controller.dispose();
     }
-    _extendedController.dispose();
+    _extensionController.dispose();
   }
 
   void _initExtensionController() {
     late final NavigationRailThemeData navigationRailTheme =
         NavigationRailTheme.of(context);
-    _extendedController = AnimationController(
-      duration: widget.extendedAnimationDuration ??
+    _extensionController = AnimationController(
+      duration: widget.extensionAnimationDuration ??
           navigationRailTheme.extendedAnimationDuration ??
           kThemeAnimationDuration,
       vsync: this,
       value: widget.extended ? 1.0 : 0.0,
     );
     _extendedAnimation = CurvedAnimation(
-      parent: _extendedController,
-      curve: widget.extendedAnimationCurve ??
+      parent: _extensionController,
+      curve: widget.extensionAnimationCurve ??
           navigationRailTheme.extendedAnimationCurve ??
           Curves.fastOutSlowIn,
     );
-    _extendedController.addListener(_rebuild);
+    _extensionController.addListener(_rebuild);
   }
 
   void _initControllers() {
