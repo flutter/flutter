@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
+import 'package:meta/meta.dart';
 
 /// This file contains static interop classes for interacting with the DOM and
 /// some helpers. All of the classes in this file are named after their
@@ -584,7 +585,16 @@ class DomPerformanceMeasure extends DomPerformanceEntry {}
 @staticInterop
 class DomCanvasElement extends DomHTMLElement {}
 
+@visibleForTesting
+int debugCanvasCount = 0;
+
+@visibleForTesting
+void debugResetCanvasCount() {
+  debugCanvasCount = 0;
+}
+
 DomCanvasElement createDomCanvasElement({int? width, int? height}) {
+  debugCanvasCount++;
   final DomCanvasElement canvas =
       domWindow.document.createElement('canvas') as DomCanvasElement;
   if (width != null) {
@@ -625,6 +635,7 @@ abstract class DomCanvasImageSource {}
 class DomCanvasRenderingContext2D {}
 
 extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
+  external DomCanvasElement? get canvas;
   external Object? get fillStyle;
   external set fillStyle(Object? style);
   external String get font;

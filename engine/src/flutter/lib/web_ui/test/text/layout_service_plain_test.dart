@@ -691,4 +691,64 @@ Future<void> testMain() async {
       l('i', 9, 10, hardBreak: true, width: 10.0, left: 40.0),
     ]);
   });
+
+  test('uses a single minimal canvas', () {
+    debugResetCanvasCount();
+
+    plain(ahemStyle, 'Lorem').layout(constrain(double.infinity));
+    plain(ahemStyle, 'ipsum dolor').layout(constrain(150.0));
+    // Try different styles too.
+    plain(EngineParagraphStyle(fontWeight: ui.FontWeight.bold), 'sit amet').layout(constrain(300.0));
+
+    expect(textContext.canvas!.width, isZero);
+    expect(textContext.canvas!.height, isZero);
+    // This number is 0 instead of 1 because the canvas is created at the top
+    // level as a global variable. So by the time this test runs, the canvas
+    // would have been created already.
+    //
+    // So we just make sure that no new canvas is created after the above layout
+    // calls.
+    expect(debugCanvasCount, 0);
+  });
+
+  test('does not leak styles across spanometers', () {
+    // This prevents the Ahem font from being forced in all paragraphs.
+    ui.debugEmulateFlutterTesterEnvironment = false;
+
+    final CanvasParagraph p1 = plain(
+      EngineParagraphStyle(
+        fontSize: 20.0,
+        fontFamily: 'FontFamily1',
+      ),
+      'Lorem',
+    )..layout(constrain(double.infinity));
+    // After the layout, the canvas should have the above style applied.
+    expect(textContext.font, contains('20px'));
+    expect(textContext.font, contains('FontFamily1'));
+
+    final CanvasParagraph p2 = plain(
+      EngineParagraphStyle(
+        fontSize: 40.0,
+        fontFamily: 'FontFamily2',
+      ),
+      'ipsum dolor',
+    )..layout(constrain(double.infinity));
+    // After the layout, the canvas should have the above style applied.
+    expect(textContext.font, contains('40px'));
+    expect(textContext.font, contains('FontFamily2'));
+
+    p1.getBoxesForRange(0, 2);
+    // getBoxesForRange performs some text measurements. Let's make sure that it
+    // applied the correct style.
+    expect(textContext.font, contains('20px'));
+    expect(textContext.font, contains('FontFamily1'));
+
+    p2.getBoxesForRange(0, 4);
+    // getBoxesForRange performs some text measurements. Let's make sure that it
+    // applied the correct style.
+    expect(textContext.font, contains('40px'));
+    expect(textContext.font, contains('FontFamily2'));
+
+    ui.debugEmulateFlutterTesterEnvironment = true;
+  });
 }
