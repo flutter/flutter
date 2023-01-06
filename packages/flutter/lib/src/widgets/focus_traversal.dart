@@ -47,7 +47,7 @@ void _focusAndEnsureVisible(
 // sorting their contents.
 class _FocusTraversalGroupInfo {
   _FocusTraversalGroupInfo(
-    _FocusTraversalGroupMarker? marker, {
+    _FocusTraversalGroupScope? marker, {
     FocusTraversalPolicy? defaultPolicy,
     List<FocusNode>? members,
   })  : groupNode = marker?.focusNode,
@@ -284,20 +284,20 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   @protected
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode);
 
-  _FocusTraversalGroupMarker? _getMarker(BuildContext? context) {
-    return context?.getElementForInheritedWidgetOfExactType<_FocusTraversalGroupMarker>()?.widget as _FocusTraversalGroupMarker?;
+  _FocusTraversalGroupScope? _getMarker(BuildContext? context) {
+    return context?.getElementForInheritedWidgetOfExactType<_FocusTraversalGroupScope>()?.widget as _FocusTraversalGroupScope?;
   }
 
   // Sort all descendants, taking into account the FocusTraversalGroup
   // that they are each in, and filtering out non-traversable/focusable nodes.
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope, FocusNode currentNode) {
     assert(scope != null);
-    final _FocusTraversalGroupMarker? scopeGroupMarker = _getMarker(scope.context);
+    final _FocusTraversalGroupScope? scopeGroupMarker = _getMarker(scope.context);
     final FocusTraversalPolicy defaultPolicy = scopeGroupMarker?.policy ?? ReadingOrderTraversalPolicy();
     // Build the sorting data structure, separating descendants into groups.
     final Map<FocusNode?, _FocusTraversalGroupInfo> groups = <FocusNode?, _FocusTraversalGroupInfo>{};
     for (final FocusNode node in scope.descendants) {
-      final _FocusTraversalGroupMarker? groupMarker = _getMarker(node.context);
+      final _FocusTraversalGroupScope? groupMarker = _getMarker(node.context);
       final FocusNode? groupNode = groupMarker?.focusNode;
       // Group nodes need to be added to their parent's node, or to the "null"
       // node if no parent is found. This creates the hierarchy of group nodes
@@ -309,7 +309,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         // looking with that node's parent, since _getMarker will return the
         // context it was called on if it matches the type.
         final BuildContext? parentContext = _getAncestor(groupNode!.context!, count: 2);
-        final _FocusTraversalGroupMarker? parentMarker = _getMarker(parentContext);
+        final _FocusTraversalGroupScope? parentMarker = _getMarker(parentContext);
         final FocusNode? parentNode = parentMarker?.focusNode;
         groups[parentNode] ??= _FocusTraversalGroupInfo(parentMarker, members: <FocusNode>[], defaultPolicy: defaultPolicy);
         assert(!groups[parentNode]!.members.contains(node));
@@ -1539,7 +1539,7 @@ class FocusTraversalGroup extends StatefulWidget {
   ///    [FocusTraversalGroup] ancestor is found.
   static FocusTraversalPolicy of(BuildContext context) {
     assert(context != null);
-    final _FocusTraversalGroupMarker? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupMarker>();
+    final _FocusTraversalGroupScope? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupScope>();
     assert(() {
       if (inherited == null) {
         throw FlutterError(
@@ -1574,7 +1574,7 @@ class FocusTraversalGroup extends StatefulWidget {
   ///    ancestor is found.
   static FocusTraversalPolicy? maybeOf(BuildContext context) {
     assert(context != null);
-    final _FocusTraversalGroupMarker? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupMarker>();
+    final _FocusTraversalGroupScope? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupScope>();
     return inherited?.policy;
   }
 
@@ -1612,7 +1612,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return _FocusTraversalGroupMarker(
+    return _FocusTraversalGroupScope(
       policy: widget.policy,
       focusNode: focusNode!,
       child: Focus(
@@ -1629,8 +1629,8 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 }
 
 // A "marker" inherited widget to make the group faster to find.
-class _FocusTraversalGroupMarker extends InheritedWidget {
-  const _FocusTraversalGroupMarker({
+class _FocusTraversalGroupScope extends InheritedWidget {
+  const _FocusTraversalGroupScope({
     required this.policy,
     required this.focusNode,
     required super.child,
