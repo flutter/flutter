@@ -258,7 +258,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     super.kind,
     super.supportedDevices,
     super.debugOwner,
-    super.allowedButtonsFilter,
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   }) : super(
          deadline: duration ?? kLongPressTimeout,
        );
@@ -268,6 +268,12 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
+
+  // Accept the input if, and only if, a single button is pressed.
+  static bool _defaultButtonAcceptBehavior(int buttons) =>
+      buttons == kPrimaryButton ||
+      buttons == kSecondaryButton ||
+      buttons == kTertiaryButton;
 
   /// Called when a pointer has contacted the screen at a particular location
   /// with a primary button, which might be the start of a long-press.
