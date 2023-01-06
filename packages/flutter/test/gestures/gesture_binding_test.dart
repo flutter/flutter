@@ -213,7 +213,7 @@ void main() {
     expect(events.length, 1);
     expect(events[0], isA<PointerScrollEvent>());
 
-    // Make sure PointerEventConverter return none when device pixel ratio is invalid.
+    // Make sure PointerEventConverter returns none when device pixel ratio is invalid.
     events = PointerEventConverter.expand(packet.data, 0).toList();
     expect(events.length, 0);
   });
