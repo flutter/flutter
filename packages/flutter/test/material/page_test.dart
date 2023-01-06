@@ -291,20 +291,22 @@ void main() {
   testWidgets(
       'test page transition (_ZoomPageTransition) with rasterization disables snapshotting for enter route',
       (WidgetTester tester) async {
+    Iterable<Layer> findLayers(Finder of) {
+      return tester.layerListOf(
+        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
+      );
+    }
+
     bool isTransitioningWithoutSnapshotting(Finder of) {
       // When snapshotting is off, the OpacityLayer and TransformLayer will be
       // applied directly.
-      final Iterable<Layer> layers = tester.layerListOf(
-        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
-      );
+      final Iterable<Layer> layers = findLayers(of);
       return layers.whereType<OpacityLayer>().length == 1 &&
           layers.whereType<TransformLayer>().length == 1;
     }
 
     bool isSnapshotted(Finder of) {
-      final Iterable<Layer> layers = tester.layerListOf(
-        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
-      );
+      final Iterable<Layer> layers = findLayers(of);
       // The scrim and the snapshot image are the only two layers.
       return layers.length == 2 &&
           layers.whereType<OffsetLayer>().length == 1 &&
