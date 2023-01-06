@@ -858,7 +858,8 @@ class TextPainter {
     if (layout == null) {
       return null;
     }
-    final List<TextBox> rawBoxes = layout._inlinePlaceholderBoxes ??= layout.layout._paragraph.getBoxesForPlaceholders();
+    final List<TextBox> rawBoxes = layout._inlinePlaceholderBoxes
+                               ??= layout.layout._paragraph.getBoxesForPlaceholders();
     final Offset offset = layout.offset;
     if (offset == Offset.zero) {
       return rawBoxes;
@@ -1093,6 +1094,10 @@ class TextPainter {
     }
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     final _TextPainterLayoutCache? cachedLayout = _layoutCache;
+    // This is done to match the SkParagraph behavior (which in turn is there
+    // to match the libtxt behavior).
+    minWidth = minWidth.floorToDouble();
+    maxWidth = maxWidth.floorToDouble();
 
     // If the given maxWidth is still greater than or equal to the max intrinsic
     // width, there's no need to call layout on the paragraph again: there will
@@ -1120,18 +1125,27 @@ class TextPainter {
         intrinsicWidth = newLayout.maxIntrinsicWidth;
         break;
     }
+
     // The content width the text painter should report after applying this
     // paintOffset;
-    final double contentWidth = minWidth == double.infinity
-      ? intrinsicWidth // but why?
-      : clampDouble(intrinsicWidth, minWidth, maxWidth);
-
+    final double contentWidth = minWidth.isFinite
+      ? clampDouble(intrinsicWidth, minWidth, maxWidth).floorToDouble()
+      : intrinsicWidth.floorToDouble();  // but why?
+    final Offset testPaintOffset = _computePaintOffsetWithConstraints(newLayout, contentWidth);
+    final Offset newPaintOffset;
+    assert(testPaintOffset.dy == 0);
     // Unfortunately we can't deal with infinity so layout a second time.
-    if (needsLayout && adjustedMaxWidth == double.infinity) {
+    if (!testPaintOffset.dx.isFinite) {
+    //if (newLayout._paragraph.width.ceilToDouble() != contentWidth) {
+      assert(maxWidth.isInfinite);
       newLayout._paragraph.layout(ui.ParagraphConstraints(width: contentWidth));
+      newPaintOffset = _computePaintOffsetWithConstraints(newLayout, contentWidth);
+    } else {
+      newPaintOffset = testPaintOffset;
     }
+    assert(newPaintOffset.dx.isFinite);
+    assert(newPaintOffset.dy == 0);
 
-    final Offset newPaintOffset = _computePaintOffsetWithConstraints(newLayout, contentWidth);
     if (needsLayout) {
       _rebuildParagraphForPaint = false;
       _layoutCache?.layout._paragraph.dispose();
@@ -1139,8 +1153,17 @@ class TextPainter {
     } else {
       assert(cachedLayout.layout == newLayout);
       cachedLayout.contentWidth = contentWidth;
-      cachedLayout.offset = newPaintOffset;
+      cachedLayout.offset = testPaintOffset;
     }
+    if (newPaintOffset != Offset.zero) {
+      final des = text is TextSpan ? text.text : text.toStringShort();
+      print('$des: ${newLayout._paragraph.width} ${newLayout._paragraph.height}, $newPaintOffset, $contentWidth');
+    //} else {
+    //  final des = text is TextSpan ? text.text : text.toStringShort();
+    //  print('regular $des: ${newLayout._paragraph.width} ${newLayout._paragraph.height}, , $contentWidth');
+    }
+    print('($minWidth, $maxWidth) => $inlinePlaceholderBoxes, $inlinePlaceholderScales, $size, $maxIntrinsicWidth, ${computeLineMetrics()}');
+
     return TextLayoutWithOffset._(newLayout, newPaintOffset);
   }
 

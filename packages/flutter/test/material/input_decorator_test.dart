@@ -5572,7 +5572,7 @@ void main() {
         }
         final Rect clipRect = arguments[0] as Rect;
         // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
-        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 100 / 0.75, 16.0)));
+        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 133.0, 16.0)));
         return true;
       }),
     );

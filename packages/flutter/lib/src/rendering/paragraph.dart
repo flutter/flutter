@@ -735,10 +735,8 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
       final TextParentData textParentData = child.parentData! as TextParentData;
-      textParentData.offset = Offset(
-        _textPainter.inlinePlaceholderBoxes![childIndex].left,
-        _textPainter.inlinePlaceholderBoxes![childIndex].top,
-      );
+      final TextBox textBox = _textPainter.inlinePlaceholderBoxes![childIndex];
+      textParentData.offset = Offset(textBox.left, textBox.top);
       textParentData.scale = _textPainter.inlinePlaceholderScales![childIndex];
       child = childAfter(child);
       childIndex += 1;
