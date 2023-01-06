@@ -403,9 +403,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       parent: _extendedController,
       curve: widget.extendedAnimationCurve ?? navigationRailTheme.extendedAnimationCurve ?? Curves.fastOutSlowIn,
     );
-    _extendedController.addListener(() {
-      _rebuild();
-    });
+    _extendedController.addListener(_rebuild);
   }
 
   @override
