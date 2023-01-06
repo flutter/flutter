@@ -16,6 +16,7 @@ const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
     vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );
+const EdgeInsets _kExpandIconPadding = EdgeInsets.all(12.0);
 
 class _SaltedKey<S, V> extends LocalKey {
   const _SaltedKey(this.salt, this.value);
@@ -363,7 +364,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         child: ExpandIcon(
           color: widget.expandIconColor,
           isExpanded: _isChildExpanded(index),
-          padding: const EdgeInsets.all(16.0),
+          padding: _kExpandIconPadding,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
