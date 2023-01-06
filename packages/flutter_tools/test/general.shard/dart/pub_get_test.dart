@@ -641,6 +641,59 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/116627
+  testWithoutContext('pub get suppresses progress output', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          '__deprecated_pub',
+          '--directory',
+          '.',
+          'get',
+          '--example',
+        ],
+        stderr: 'err1\nerr2\nerr3\n',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{'FLUTTER_ROOT': '', 'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests'},
+      ),
+    ]);
+
+    final FakeStdio mockStdio = FakeStdio();
+    final Pub pub = Pub.test(
+      platform: FakePlatform(),
+      usage: TestUsage(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      botDetector: const BotDetectorAlwaysNo(),
+      stdio: mockStdio,
+    );
+
+    try {
+      await pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+        printProgress: false
+      );
+    } on ToolExit {
+      // Ignore.
+    }
+
+    expect(
+      mockStdio.stdout.writes.map(utf8.decode),
+      isNot(
+        <String>[
+          'out1\nout2\nout3\n',
+        ]
+      )
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('pub cache in flutter root is ignored', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
