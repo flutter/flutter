@@ -106,6 +106,23 @@ class CharacterBoundary extends TextBoundary {
   }
 }
 
+/// A [TextBoundary] subclass for locating closest line breaks to a given
+/// `position`.
+///
+/// When the given `position` points to a hard line break, the returned range
+/// is the line's content range before the hard line break, and does not contain
+/// the given `position`. For instance, the line breaks at `position = 1` for
+/// "a\nb" is `[0, 1)`, which does not contain the position `1`.
+class LineBoundary extends TextBoundary {
+  /// Creates a [LineBoundary] with the text and layout information.
+  const LineBoundary(this._textLayout);
+
+  final TextLayoutMetrics _textLayout;
+
+  @override
+  TextRange getTextBoundaryAt(int position) => _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
+}
+
 /// A text boundary that uses the entire document as logical boundary.
 class DocumentBoundary extends TextBoundary {
   /// Creates a [DocumentBoundary] with the text
