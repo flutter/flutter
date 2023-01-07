@@ -6,8 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-abstract class TestTextInputFormatter extends TextInputFormatter {
+class TestTextInputFormatter extends TextInputFormatter {
   const TestTextInputFormatter();
+
+  noSuchMethod(Invocation invocation) {
+    super.noSuchMethod(invocation);
+  }
 }
 
 void main() {
