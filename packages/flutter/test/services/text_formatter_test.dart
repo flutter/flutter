@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 class TestTextInputFormatter extends TextInputFormatter {
   const TestTextInputFormatter();
 
-  noSuchMethod(Invocation invocation) {
+  @override
+  void noSuchMethod(Invocation invocation) {
     super.noSuchMethod(invocation);
   }
 }
