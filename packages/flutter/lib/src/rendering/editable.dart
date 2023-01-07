@@ -2101,8 +2101,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@macro flutter.painting.TextPainter.wordBoundaries}
   WordBoundary get wordBoundaries => _textPainter.wordBoundaries;
 
-  TextLayout? get textLayoutWithOffset => _textPainter.textLayoutWithOffset?.textLayout;
-
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}

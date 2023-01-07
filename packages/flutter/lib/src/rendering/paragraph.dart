@@ -735,8 +735,10 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
       final TextParentData textParentData = child.parentData! as TextParentData;
-      final TextBox textBox = _textPainter.inlinePlaceholderBoxes![childIndex];
-      textParentData.offset = Offset(textBox.left, textBox.top);
+      textParentData.offset = Offset(
+        _textPainter.inlinePlaceholderBoxes![childIndex].left,
+        _textPainter.inlinePlaceholderBoxes![childIndex].top,
+      );
       textParentData.scale = _textPainter.inlinePlaceholderScales![childIndex];
       child = childAfter(child);
       childIndex += 1;
@@ -1566,7 +1568,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         result = SelectionResult.end;
         break;
       case TextGranularity.line:
-        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, paragraph._textPainter.textLayoutWithOffset!.textLayout.lineBoundaries);
+        newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(this));
         result = SelectionResult.end;
         break;
       case TextGranularity.document:

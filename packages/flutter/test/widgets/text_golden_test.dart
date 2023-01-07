@@ -803,73 +803,73 @@ void main() {
                   constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
-                      //text: 'C ',
+                      text: 'C ',
                       style: TextStyle(
                         fontSize: 16,
                       ),
                       children: <InlineSpan>[
-                        //WidgetSpan(
-                        //  alignment: PlaceholderAlignment.baseline,
-                        //  baseline: TextBaseline.alphabetic,
-                        //  child: Checkbox(value: true, onChanged: null),
-                        //),
-                        //WidgetSpan(
-                        //  child: Checkbox(value: false, onChanged: null),
-                        //),
-                        //TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
-                        //WidgetSpan(
-                        //  alignment: PlaceholderAlignment.baseline,
-                        //  baseline: TextBaseline.alphabetic,
-                        //  child: SizedBox(
-                        //    width: 50.0,
-                        //    height: 55.0,
-                        //    child: DecoratedBox(
-                        //      decoration: BoxDecoration(
-                        //        color: Color(0xffffff00),
-                        //      ),
-                        //      child: Center(
-                        //        child:SizedBox(
-                        //          width: 10.0,
-                        //          height: 15.0,
-                        //          child: DecoratedBox(
-                        //            decoration: BoxDecoration(
-                        //              color: Color(0xffff0000),
-                        //            ),
-                        //          ),
-                        //        ),
-                        //      ),
-                        //    ),
-                        //  ),
-                        //),
-                        //TextSpan(text: 'hello world! seize the day!'),
-                        //WidgetSpan(
-                        //  alignment: PlaceholderAlignment.baseline,
-                        //  baseline: TextBaseline.alphabetic,
-                        //  child: Checkbox(value: false, onChanged: null),
-                        //),
-                        //WidgetSpan(
-                        //  alignment: PlaceholderAlignment.baseline,
-                        //  baseline: TextBaseline.alphabetic,
-                        //  child: SizedBox(
-                        //    width: 20,
-                        //    height: 20,
-                        //    child: Checkbox(value: true, onChanged: null),
-                        //  ),
-                        //),
-                        //WidgetSpan(
-                        //  alignment: PlaceholderAlignment.baseline,
-                        //  baseline: TextBaseline.alphabetic,
-                        //  child: Checkbox(value: false, onChanged: null),
-                        //),
-                        //WidgetSpan(
-                        //  alignment: PlaceholderAlignment.baseline,
-                        //  baseline: TextBaseline.alphabetic,
-                        //  child: SizedBox(
-                        //    width: 20,
-                        //    height: 20,
-                        //    child: Checkbox(value: true, onChanged: null),
-                        //  ),
-                        //),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: Checkbox(value: true, onChanged: null),
+                        ),
+                        WidgetSpan(
+                          child: Checkbox(value: false, onChanged: null),
+                        ),
+                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Color(0xffffff00),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Color(0xffff0000),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        TextSpan(text: 'hello world! seize the day!'),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: Checkbox(value: false, onChanged: null),
+                        ),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: null),
+                          ),
+                        ),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: Checkbox(value: false, onChanged: null),
+                        ),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: null),
+                          ),
+                        ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,

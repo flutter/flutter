@@ -4008,7 +4008,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextBoundary _characterBoundary() => widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
-  TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : renderEditable.textLayoutWithOffset!.lineBoundaries;
+  TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {

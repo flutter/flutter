@@ -139,6 +139,13 @@ void main() {
     expect(boundary.getTrailingTextBoundaryAt(54), 59);
   });
 
+  test('line boundary works', () {
+    final LineBoundary boundary = LineBoundary(TestTextLayoutMetrics());
+    expect(boundary.getLeadingTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3.start);
+    expect(boundary.getTrailingTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3.end);
+    expect(boundary.getTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3);
+  });
+
   test('document boundary works', () {
     const String text = 'abcd efg hi\njklmno\npqrstuv';
     const DocumentBoundary boundary = DocumentBoundary(text);
@@ -159,4 +166,35 @@ void main() {
     expect(boundary.getLeadingTextBoundaryAt(text.length + 1), 0);
     expect(boundary.getTrailingTextBoundaryAt(text.length + 1), null);
   });
+}
+
+class TestTextLayoutMetrics extends TextLayoutMetrics {
+  static const TextSelection lineAt3 = TextSelection(baseOffset: 0, extentOffset: 10);
+  static const TextRange wordBoundaryAt3 = TextRange(start: 4, end: 7);
+
+  @override
+  TextSelection getLineAtOffset(TextPosition position) {
+    if (position.offset == 3) {
+      return lineAt3;
+    }
+    throw UnimplementedError();
+  }
+
+  @override
+  TextPosition getTextPositionAbove(TextPosition position) {
+    throw UnimplementedError();
+  }
+
+  @override
+  TextPosition getTextPositionBelow(TextPosition position) {
+    throw UnimplementedError();
+  }
+
+  @override
+  TextRange getWordBoundary(TextPosition position) {
+    if (position.offset == 3) {
+      return wordBoundaryAt3;
+    }
+    throw UnimplementedError();
+  }
 }
