@@ -939,8 +939,8 @@ class WebDevFS implements DevFS {
       'require.js',
     ));
 
-    return oldFile.existsSync() 
-      ? oldFile 
+    return oldFile.existsSync()
+      ? oldFile
       : globals.fs.file(globals.fs.path.join(
           globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
           'lib',
