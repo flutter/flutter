@@ -371,27 +371,28 @@ class FlutterManifest {
   }
 
 
-  late final List<Uri> shaders = _extractShaders();
+  late final List<Uri> shaders = _extractAssetUris('shaders', 'Shader');
+  late final List<Uri> models = _extractAssetUris('models', 'Model');
 
-  List<Uri> _extractShaders() {
-    if (!_flutterDescriptor.containsKey('shaders')) {
+  List<Uri> _extractAssetUris(String key, String singularName) {
+    if (!_flutterDescriptor.containsKey(key)) {
       return <Uri>[];
     }
 
-    final List<Object?>? shaders = _flutterDescriptor['shaders'] as List<Object?>?;
-    if (shaders == null) {
+    final List<Object?>? items = _flutterDescriptor[key] as List<Object?>?;
+    if (items == null) {
       return const <Uri>[];
     }
     final List<Uri> results = <Uri>[];
-    for (final Object? shader in shaders) {
-      if (shader is! String || shader == null || shader == '') {
-        _logger.printError('Shader manifest contains a null or empty uri.');
+    for (final Object? item in items) {
+      if (item is! String || item == null || item == '') {
+        _logger.printError('$singularName manifest contains a null or empty uri.');
         continue;
       }
       try {
-        results.add(Uri(pathSegments: shader.split('/')));
+        results.add(Uri(pathSegments: item.split('/')));
       } on FormatException {
-        _logger.printError('Shader manifest contains invalid uri: $shader.');
+        _logger.printError('$singularName manifest contains invalid uri: $item.');
       }
     }
     return results;
@@ -535,6 +536,17 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         }
         break;
       case 'shaders':
+        if (yamlValue is! YamlList) {
+          errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
+        } else if (yamlValue.isEmpty) {
+          break;
+        } else if (yamlValue[0] is! String) {
+          errors.add(
+            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
+          );
+        }
+        break;
+      case 'models':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
         } else if (yamlValue.isEmpty) {

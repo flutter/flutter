@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
+import 'build_system/targets/scene_importer.dart';
 import 'build_system/targets/shader_compiler.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
@@ -582,6 +583,7 @@ class DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -600,8 +602,8 @@ class DevFS {
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-    final List<Future<void>> pendingShaderCompiles = <Future<void>>[];
-    bool shaderCompilationFailed = false;
+    final List<Future<void>> pendingAssetBuilds = <Future<void>>[];
+    bool assetBuildFailed = false;
     int syncedBytes = 0;
     if (fullRestart) {
       generator.reset();
@@ -656,26 +658,48 @@ class DevFS {
           didUpdateFontManifest = true;
         }
 
-        if (bundle.entryKinds[archivePath] == AssetKind.shader) {
-          final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
-          pendingShaderCompiles.add(pending);
-          pending.then((DevFSContent? content) {
-            if (content == null) {
-              shaderCompilationFailed = true;
-              return;
+        switch (bundle.entryKinds[archivePath]) {
+          case AssetKind.shader:
+            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (archivePath != null && !bundleFirstUpload) {
+                shaderPathsToEvict.add(archivePath);
+              }
+            });
+            break;
+          case AssetKind.model:
+            if (sceneImporter == null) {
+              break;
             }
+            final Future<DevFSContent?> pending = sceneImporter.reimportScene(content);
+            pendingAssetBuilds.add(pending);
+            pending.then((DevFSContent? content) {
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (archivePath != null && !bundleFirstUpload) {
+                shaderPathsToEvict.add(archivePath);
+              }
+            });
+            break;
+          case AssetKind.regular:
+          case AssetKind.font:
+          case null:
             dirtyEntries[deviceUri] = content;
             syncedBytes += content.size;
             if (archivePath != null && !bundleFirstUpload) {
-              shaderPathsToEvict.add(archivePath);
+              assetPathsToEvict.add(archivePath);
             }
-          });
-        } else {
-          dirtyEntries[deviceUri] = content;
-          syncedBytes += content.size;
-          if (archivePath != null && !bundleFirstUpload) {
-            assetPathsToEvict.add(archivePath);
-          }
         }
       });
 
@@ -707,8 +731,8 @@ class DevFS {
     _logger.printTrace('Updating files.');
     final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
 
-    await Future.wait(pendingShaderCompiles);
-    if (shaderCompilationFailed) {
+    await Future.wait(pendingAssetBuilds);
+    if (assetBuildFailed) {
       return UpdateFSReport();
     }
 

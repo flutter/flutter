@@ -27,6 +27,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/targets/scene_importer.dart';
 import '../build_system/targets/shader_compiler.dart';
 import '../build_system/targets/web.dart';
 import '../bundle_builder.dart';
@@ -816,6 +817,7 @@ class WebDevFS implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
