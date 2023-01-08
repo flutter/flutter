@@ -551,12 +551,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
-    // Since colors can't be resolved in this context, we use the theme's
-    // primary color if it's available. Otherwise, we use the default
-    // Cupertino activeBlue.
-    //
-    // This is similiar to the logic in [MaterialApp].
-    final Color color = widget.color ?? widget.theme?.primaryColor ?? CupertinoColors.activeBlue;
+    // CupertinoTheme won't resolve colors in this context if brightness
+    // is null, so this doesn't really work.
+    final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
+    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
 
     if (_usesRouter) {
       return WidgetsApp.router(
@@ -626,10 +624,13 @@ class _CupertinoAppState extends State<CupertinoApp> {
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
-        child: HeroControllerScope(
-          controller: _heroController,
-          child: Builder(
-            builder: _buildWidgetApp,
+        child: CupertinoTheme(
+          data: widget.theme ?? const CupertinoThemeData(),
+          child: HeroControllerScope(
+            controller: _heroController,
+            child: Builder(
+              builder: _buildWidgetApp,
+            ),
           ),
         ),
       ),
