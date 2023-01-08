@@ -525,10 +525,39 @@ class _CupertinoAppState extends State<CupertinoApp> {
     );
   }
 
-  WidgetsApp _buildWidgetApp(BuildContext context) {
+  Widget _cupertinoBuilder(BuildContext context, Widget? child) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
 
+    return CupertinoTheme(
+      data: effectiveThemeData,
+      // DefaultTextStyle has to be declared here because
+      // passing a textStyle directly to the WidgetsApp 
+      // will make it non-resolvable.
+      child: DefaultTextStyle(
+        style: effectiveThemeData.textTheme.textStyle,
+        child: DefaultSelectionStyle(
+          selectionColor: effectiveThemeData.primaryColor.withOpacity(0.2),
+          cursorColor: effectiveThemeData.primaryColor,
+          child: widget.builder != null
+              ? Builder(
+                  builder: (BuildContext context) {
+                    return widget.builder!(context, child);
+                  },
+                )
+              : child ?? const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+
+  WidgetsApp _buildWidgetApp(BuildContext context) {
+    // Since colors can't be resolved in this context, we use the theme's
+    // primary color if it's available. Otherwise, we use the default
+    // Cupertino activeBlue.
+    //
+    // This is similiar to the logic in [MaterialApp].
+    final Color color = widget.color ?? widget.theme?.primaryColor ?? CupertinoColors.activeBlue;
+    
     if (_usesRouter) {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
@@ -537,10 +566,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
         routerDelegate: widget.routerDelegate,
         routerConfig: widget.routerConfig,
         backButtonDispatcher: widget.backButtonDispatcher,
-        builder: widget.builder,
+        builder: _cupertinoBuilder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
-        textStyle: effectiveThemeData.textTheme.textStyle,
         color: color,
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
@@ -571,10 +599,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
       onGenerateRoute: widget.onGenerateRoute,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onUnknownRoute: widget.onUnknownRoute,
-      builder: widget.builder,
+      builder: _cupertinoBuilder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,
-      textStyle: effectiveThemeData.textTheme.textStyle,
       color: color,
       locale: widget.locale,
       localizationsDelegates: _localizationsDelegates,
@@ -595,29 +622,14 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
-
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
-        child: CupertinoTheme(
-          data: effectiveThemeData,
-          child: DefaultSelectionStyle(
-            selectionColor: effectiveThemeData.primaryColor.withOpacity(0.2),
-            cursorColor: effectiveThemeData.primaryColor,
-            child: HeroControllerScope(
-              controller: _heroController,
-              child: !widget.useInheritedMediaQuery
-                  ? MediaQuery.fromWindow(
-                      child: Builder(
-                        builder: _buildWidgetApp,
-                      ),
-                    )
-                  : Builder(
-                      builder: _buildWidgetApp,
-                    ),
-            ),
+        child: HeroControllerScope(
+          controller: _heroController,
+          child: Builder(
+            builder: _buildWidgetApp,
           ),
         ),
       ),
