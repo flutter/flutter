@@ -531,7 +531,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     return CupertinoTheme(
       data: effectiveThemeData,
       // DefaultTextStyle has to be declared here because
-      // passing a textStyle directly to the WidgetsApp 
+      // passing a textStyle directly to the WidgetsApp
       // will make it non-resolvable.
       child: DefaultTextStyle(
         style: effectiveThemeData.textTheme.textStyle,
@@ -557,7 +557,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     //
     // This is similiar to the logic in [MaterialApp].
     final Color color = widget.color ?? widget.theme?.primaryColor ?? CupertinoColors.activeBlue;
-    
+
     if (_usesRouter) {
       return WidgetsApp.router(
         key: GlobalObjectKey(this),
