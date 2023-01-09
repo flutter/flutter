@@ -484,6 +484,7 @@ class DevFS {
   final Directory? rootDirectory;
   final Set<String> assetPathsToEvict = <String>{};
   final Set<String> shaderPathsToEvict = <String>{};
+  final Set<String> scenePathsToEvict = <String>{};
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   bool hasSetAssetDirectory = false;
@@ -688,7 +689,7 @@ class DevFS {
               dirtyEntries[deviceUri] = content;
               syncedBytes += content.size;
               if (archivePath != null && !bundleFirstUpload) {
-                shaderPathsToEvict.add(archivePath);
+                scenePathsToEvict.add(archivePath);
               }
             });
             break;
