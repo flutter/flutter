@@ -1,4 +1,4 @@
-Signature: 6adfea3e1aa8a36d5af29da55c370084
+Signature: fdca516e6e3f00c9c96304eaf4bf26ec
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8195,6 +8195,9 @@ ORIGIN: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h 
 ORIGIN: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkAvifCodec.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkAvifCodec.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkJpegRCodec.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkJpegRCodec.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkStubJpegRDecoderAPI.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputeCommandEncoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineBuilder.cpp + ../../../third_party/skia/LICENSE
@@ -8224,6 +8227,9 @@ FILE: ../../../third_party/skia/modules/svg/include/SkSVGOpenTypeSVGDecoder.h
 FILE: ../../../third_party/skia/modules/svg/src/SkSVGOpenTypeSVGDecoder.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkAvifCodec.h
+FILE: ../../../third_party/skia/src/codec/SkJpegRCodec.cpp
+FILE: ../../../third_party/skia/src/codec/SkJpegRCodec.h
+FILE: ../../../third_party/skia/src/codec/SkStubJpegRDecoderAPI.h
 FILE: ../../../third_party/skia/src/gpu/graphite/mtl/MtlComputeCommandEncoder.h
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_hmtx.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineBuilder.cpp
