@@ -87,27 +87,27 @@ const String htmlSample3 = '''
 
 void main() {
   test('can parse baseHref', () {
-    expect(IndexHtml('<base href="/foo/111/">').baseHref, 'foo/111');
-    expect(IndexHtml(htmlSample1).baseHref, 'foo/222');
-    expect(IndexHtml(htmlSample2).baseHref, ''); // Placeholder base href.
+    expect(IndexHtml('<base href="/foo/111/">').getBaseHref(), 'foo/111');
+    expect(IndexHtml(htmlSample1).getBaseHref(), 'foo/222');
+    expect(IndexHtml(htmlSample2).getBaseHref(), ''); // Placeholder base href.
   });
 
   test('handles missing baseHref', () {
-    expect(IndexHtml('').baseHref, '');
-    expect(IndexHtml('<base>').baseHref, '');
-    expect(IndexHtml(htmlSample3).baseHref, '');
+    expect(IndexHtml('').getBaseHref(), '');
+    expect(IndexHtml('<base>').getBaseHref(), '');
+    expect(IndexHtml(htmlSample3).getBaseHref(), '');
   });
 
   test('throws on invalid baseHref', () {
-    expect(() => IndexHtml('<base href>').baseHref, throwsToolExit());
-    expect(() => IndexHtml('<base href="">').baseHref, throwsToolExit());
-    expect(() => IndexHtml('<base href="foo/111">').baseHref, throwsToolExit());
+    expect(() => IndexHtml('<base href>').getBaseHref(), throwsToolExit());
+    expect(() => IndexHtml('<base href="">').getBaseHref(), throwsToolExit());
+    expect(() => IndexHtml('<base href="foo/111">').getBaseHref(), throwsToolExit());
     expect(
-      () => IndexHtml('<base href="foo/111/">').baseHref,
+      () => IndexHtml('<base href="foo/111/">').getBaseHref(),
       throwsToolExit(),
     );
     expect(
-      () => IndexHtml('<base href="/foo/111">').baseHref,
+      () => IndexHtml('<base href="/foo/111">').getBaseHref(),
       throwsToolExit(),
     );
   });
@@ -129,13 +129,13 @@ void main() {
 
   test('re-parses after substitutions', () {
     final IndexHtml indexHtml = IndexHtml(htmlSample2);
-    expect(indexHtml.baseHref, ''); // Placeholder base href.
+    expect(indexHtml.getBaseHref(), ''); // Placeholder base href.
 
     indexHtml.applySubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
     );
     // The parsed base href should be updated after substitutions.
-    expect(indexHtml.baseHref, 'foo/333');
+    expect(indexHtml.getBaseHref(), 'foo/333');
   });
 }

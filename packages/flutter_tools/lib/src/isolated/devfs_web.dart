@@ -133,7 +133,7 @@ class WebAssetServer implements AssetReader {
     this._modules,
     this._digests,
     this._nullSafetyMode,
-  ) : basePath = _getIndexHtml().baseHref;
+  ) : basePath = _getIndexHtml().getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.

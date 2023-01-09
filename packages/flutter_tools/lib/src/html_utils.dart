@@ -10,6 +10,17 @@ import 'base/common.dart';
 /// Placeholder for base href
 const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
+/// Utility class for parsing and performing operations on the contents of the
+/// index.html file.
+///
+/// For example, to parse the base href from the index.html file:
+///
+/// ```dart
+/// String parseBaseHref(File indexHtmlFile) {
+///   final IndexHtml indexHtml = IndexHtml(indexHtmlFile.readAsStringSync());
+///   return indexHtml.getBaseHref();
+/// }
+/// ```
 class IndexHtml {
   IndexHtml(this._content);
 
@@ -19,7 +30,7 @@ class IndexHtml {
   Document _getDocument() => parse(_content);
 
   /// Parses the base href from the index.html file.
-  String get baseHref {
+  String getBaseHref() {
     final Element? baseElement = _getDocument().querySelector('base');
     final String? baseHref = baseElement?.attributes == null
         ? null
@@ -33,14 +44,14 @@ class IndexHtml {
       throw ToolExit(
         'Error: The base href in "web/index.html" must be absolute (i.e. start '
         'with a "/"), but found: `${baseElement!.outerHtml}`.\n'
-        '$_basePathExample',
+        '$_kBasePathExample',
       );
     }
 
     if (!baseHref.endsWith('/')) {
       throw ToolExit(
         'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement!.outerHtml}`.\n'
-        '$_basePathExample',
+        '$_kBasePathExample',
       );
     }
 
@@ -88,7 +99,7 @@ String stripTrailingSlash(String path) {
   return path;
 }
 
-const String _basePathExample = '''
+const String _kBasePathExample = '''
 For example, to serve from the root use:
 
     <base href="/">
