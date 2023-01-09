@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -21,6 +22,8 @@ import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -180,6 +183,7 @@ class DriveCommand extends RunCommandBase {
   final FileSystemUtils _fsUtils;
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
+  bool isNetworkDevice = false;
 
   @override
   final String name = 'drive';
@@ -202,6 +206,19 @@ class DriveCommand extends RunCommandBase {
 
   @override
   bool get cachePubGet => false;
+
+  // Network devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a network device,
+  // change it to be enabled.
+  @override
+  bool get disablePortPublication {
+    final ArgResults? localArgResults = argResults;
+    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+      return false;
+    }
+    return !boolArgDeprecated('publish-port');
+  }
 
   @override
   Future<void> validateCommand() async {
@@ -231,6 +248,8 @@ class DriveCommand extends RunCommandBase {
     if (screenshot != null && !device.supportsScreenshot) {
       _logger.printError('Screenshot not supported for ${device.name}.');
     }
+    // Debugging options will vary if it's a network device.
+    _checkIfNetworkDevice(device);
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
     _flutterDriverFactory ??= FlutterDriverFactory(
@@ -355,6 +374,12 @@ class DriveCommand extends RunCommandBase {
       );
     }
     return timeoutSeconds;
+  }
+
+  void _checkIfNetworkDevice(Device? device) {
+    if (device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network) {
+      isNetworkDevice = true;
+    }
   }
 
   void _registerScreenshotCallbacks(Device device) {

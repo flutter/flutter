@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -313,8 +314,7 @@ class IOSDevice extends Device {
     if (interfaceType == IOSDeviceConnectionInterface.network &&
         debuggingOptions.debuggingEnabled &&
         debuggingOptions.disablePortPublication) {
-      _logger.printError('Port publication (publish-port) must be enabled for wireless debugging.');
-      return LaunchResult.failed();
+      throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
     }
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
@@ -413,9 +413,22 @@ class IOSDevice extends Device {
       }
 
       _logger.printTrace('Application launched on the device. Waiting for observatory url.');
-      final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 60 : 30;
+
+      final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 45 : 30;
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
         _logger.printError('iOS Observatory not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
+
+        // If debugging with a wireless device and the timeout is reached, remind the
+        // user to allow local network permissions.
+        if (interfaceType == IOSDeviceConnectionInterface.network) {
+          _logger.printError(
+            'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
+            'This is required for wireless debugging. If you selected "Don\'t Allow", '
+            'you can turn it on in Settings > Your App Name > Local Network. '
+            "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again."
+          );
+        }
+
         iosDeployDebugger?.pauseDumpBacktraceResume();
       });
 
@@ -423,6 +436,19 @@ class IOSDevice extends Device {
       if (interfaceType == IOSDeviceConnectionInterface.network) {
         // Wait for iOS Observatory to start up.
         await observatoryDiscovery?.uri;
+
+        // If observatory url is not found within 2.2 seconds, change the status
+        // message to prompt users to click Allow. Wait 2.2 seconds because it
+        // should only show this message if they have not already approved the permissions.
+        // MDnsObservatoryDiscovery takes at least 2 seconds to check and get
+        // observatory url and we give it 200 milliseconds wiggle room.
+        Status? networkPermissionsStatus;
+        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 2, milliseconds: 200), () {
+          installStatus.stop();
+          networkPermissionsStatus = _logger.startProgress(
+            'Waiting for approval of local network permissions...',
+          );
+        });
 
         // Get Observatory URL with the device IP.
         localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
@@ -432,6 +458,9 @@ class IOSDevice extends Device {
           deviceVmservicePort: debuggingOptions.deviceVmServicePort,
           isNetworkDevice: true,
         );
+
+        mDNSLookupTimer.cancel();
+        networkPermissionsStatus?.stop();
       } else {
         localUri = await observatoryDiscovery?.uri;
       }

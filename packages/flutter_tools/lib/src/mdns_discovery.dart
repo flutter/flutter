@@ -66,11 +66,18 @@ class MDnsObservatoryDiscovery {
     _logger.printTrace('Checking for advertised Dart observatories...');
     try {
       await _client.start();
-      final List<PtrResourceRecord> pointerRecords = await _client
-        .lookup<PtrResourceRecord>(
-          ResourceRecordQuery.serverPointer(dartObservatoryName),
-        )
-        .toList();
+
+      List<PtrResourceRecord> pointerRecords = <PtrResourceRecord>[];
+      if (isNetworkDevice) {
+        // Keep checking for records every 2 seconds.
+        // Wireless debugging devices rely on the mDNS server,
+        // but must wait for user to accept local network permissions.
+        while(pointerRecords.isEmpty) {
+          pointerRecords = await _getServerPointerRecords(timeout: const Duration(seconds: 2));
+        }
+      } else {
+        pointerRecords = await _getServerPointerRecords();
+      }
       if (pointerRecords.isEmpty) {
         _logger.printTrace('No pointer records found.');
         return null;
@@ -133,7 +140,7 @@ class MDnsObservatoryDiscovery {
 
         // Filter out link-local addresses.
         if (ipAddresses.length > 1) {
-          ipAddresses = ipAddresses.where((IPAddressResourceRecord element) => element.address.isLinkLocal == false).toList();
+          ipAddresses = ipAddresses.where((IPAddressResourceRecord element) => !element.address.isLinkLocal).toList();
         }
 
         if (ipAddresses.length > 1) {
@@ -175,6 +182,18 @@ class MDnsObservatoryDiscovery {
     }
   }
 
+  Future<List<PtrResourceRecord>> _getServerPointerRecords({
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    final List<PtrResourceRecord> pointerRecords = await _client
+      .lookup<PtrResourceRecord>(
+        ResourceRecordQuery.serverPointer(dartObservatoryName),
+        timeout: timeout,
+      )
+      .toList();
+    return pointerRecords;
+  }
+
   Future<Uri?> getObservatoryUri(String? applicationId, Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
@@ -192,8 +211,10 @@ class MDnsObservatoryDiscovery {
       return null;
     }
     final String host;
-    if (isNetworkDevice && result.ipAddress != null) {
-      host = result.ipAddress!.address;
+
+    final InternetAddress? ipAddress = result.ipAddress;
+    if (isNetworkDevice && ipAddress != null) {
+      host = ipAddress.address;
     } else {
       host = usesIpv6
       ? InternetAddress.loopbackIPv6.address
@@ -302,6 +323,8 @@ Future<Uri> buildObservatoryUri(
 
   final int? actualHostPort;
   if (isNetworkDevice) {
+    // When debugging with a network device, port forwarding is not required
+    // so just use the device's port.
     actualHostPort = devicePort;
   } else {
     actualHostPort = hostVmservicePort == 0 ?
