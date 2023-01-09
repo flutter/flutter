@@ -494,6 +494,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
   late HeroController _heroController;
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
 
+  late Color color;
+
   @override
   void initState() {
     super.initState();
@@ -528,6 +530,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _cupertinoBuilder(BuildContext context, Widget? child) {
     final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
 
+    if (color is CupertinoDynamicColor) {
+      color = (color as CupertinoDynamicColor).resolveFrom(context);
+    }
+
     return CupertinoTheme(
       data: effectiveThemeData,
       // DefaultTextStyle has to be declared here because
@@ -551,10 +557,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
-    // CupertinoTheme won't resolve colors in this context if brightness
-    // is null, so this doesn't really work.
-    final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
+    // If this color is a CupertinoDynamicColor, it
+    // is going to be resolved in the _cupertinoBuilder.
+    color = widget.color ?? widget.theme?.primaryColor ?? CupertinoColors.systemBlue;
 
     if (_usesRouter) {
       return WidgetsApp.router(
@@ -624,13 +629,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
       child: CupertinoUserInterfaceLevel(
         data: CupertinoUserInterfaceLevelData.base,
-        child: CupertinoTheme(
-          data: widget.theme ?? const CupertinoThemeData(),
-          child: HeroControllerScope(
-            controller: _heroController,
-            child: Builder(
-              builder: _buildWidgetApp,
-            ),
+        child: HeroControllerScope(
+          controller: _heroController,
+          child: Builder(
+            builder: _buildWidgetApp,
           ),
         ),
       ),
