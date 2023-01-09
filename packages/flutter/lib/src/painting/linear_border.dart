@@ -26,6 +26,7 @@ import 'edge_insets.dart';
 /// "start" side, and 1 means align on the "end" side. The meaning of
 /// start and end depend on the current [TextDirection], see
 /// [Directionality].
+@immutable
 class LinearBorderEdge {
   /// Defines one side of a [LinearBorder].
   ///
@@ -71,6 +72,22 @@ class LinearBorderEdge {
       alignment: lerpDouble(a.alignment, b.alignment, t)!,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is LinearBorderEdge
+      && other.size == size
+      && other.alignment == alignment;
+  }
+
+  @override
+  int get hashCode => Object.hash(size, alignment);
 
   @override
   String toString() {
@@ -290,7 +307,7 @@ class LinearBorder extends OutlinedBorder {
     if (end != null && end!.size != 0 && side.style != BorderStyle.none) {
       final Rect insetRect = Rect.fromLTWH(rect.left, rect.top + insets.top, rect.width, rect.height - insets.vertical);
       final double x = rtl ? rect.left : rect.right - insets.right;
-      final double width = rtl ? insets.right : insets.left;
+      final double width = rtl ? insets.left : insets.right;
       final double height = insetRect.height * end!.size;
       final double y = (insetRect.height - height) * ((end!.alignment + 1) / 2);
       final Rect r = Rect.fromLTWH(x, y, width, height);
