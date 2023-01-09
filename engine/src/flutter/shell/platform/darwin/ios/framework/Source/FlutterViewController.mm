@@ -2022,15 +2022,15 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 #pragma mark - FlutterTextureRegistry
 
 - (int64_t)registerTexture:(NSObject<FlutterTexture>*)texture {
-  return [_engine.get() registerTexture:texture];
+  return [_engine.get().textureRegistry registerTexture:texture];
 }
 
 - (void)unregisterTexture:(int64_t)textureId {
-  [_engine.get() unregisterTexture:textureId];
+  [_engine.get().textureRegistry unregisterTexture:textureId];
 }
 
 - (void)textureFrameAvailable:(int64_t)textureId {
-  [_engine.get() textureFrameAvailable:textureId];
+  [_engine.get().textureRegistry textureFrameAvailable:textureId];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
