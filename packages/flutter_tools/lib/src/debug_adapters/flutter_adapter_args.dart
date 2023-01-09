@@ -17,6 +17,7 @@ class FlutterAttachRequestArguments
     this.customTool,
     this.customToolReplacesArgs,
     this.vmServiceUri,
+    this.program,
     super.restart,
     super.name,
     super.cwd,
@@ -35,6 +36,7 @@ class FlutterAttachRequestArguments
         customTool = obj['customTool'] as String?,
         customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
         vmServiceUri = obj['vmServiceUri'] as String?,
+        program = obj['program'] as String?,
         super.fromMap();
 
   static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
@@ -63,6 +65,9 @@ class FlutterAttachRequestArguments
 
   /// The VM Service URI of the running Flutter app to connect to.
   final String? vmServiceUri;
+
+  /// The program/Flutter app to be run.
+  final String? program;
 
   @override
   Map<String, Object?> toJson() => <String, Object?>{
@@ -151,7 +156,8 @@ class FlutterLaunchRequestArguments
         if (args != null) 'args': args,
         if (toolArgs != null) 'toolArgs': toolArgs,
         if (customTool != null) 'customTool': customTool,
-        if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
+        if (customToolReplacesArgs != null)
+          'customToolReplacesArgs': customToolReplacesArgs,
       };
 
   static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) =>
