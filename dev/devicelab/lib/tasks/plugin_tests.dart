@@ -33,6 +33,7 @@ class PluginTest {
     this.pluginCreateEnvironment,
     this.appCreateEnvironment,
     this.dartOnlyPlugin = false,
+    this.sharedDarwinSource = false,
     this.template = 'plugin',
   });
 
@@ -41,6 +42,7 @@ class PluginTest {
   final Map<String, String>? pluginCreateEnvironment;
   final Map<String, String>? appCreateEnvironment;
   final bool dartOnlyPlugin;
+  final bool sharedDarwinSource;
   final String template;
 
   Future<TaskResult> call() async {
@@ -57,6 +59,9 @@ class PluginTest {
           name: 'plugintest', template: template, environment: pluginCreateEnvironment);
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
+      }
+      if (sharedDarwinSource) {
+        await plugin.convertDefaultPluginToSharedDarwinPlugin();
       }
       section('Test plugin');
       if (runFlutterTest) {
@@ -157,6 +162,83 @@ class $dartPluginClass {
         await platformDir.delete(recursive: true);
       }
     }
+  }
+
+  /// Converts an iOS/macOS plugin created from the standard template to a shared
+  /// darwin directory plugin.
+  Future<void> convertDefaultPluginToSharedDarwinPlugin() async {
+    // Convert the metadata.
+    final File pubspec = pubspecFile;
+    String pubspecContent = await pubspec.readAsString();
+    const String originalIOSKey = '\n      ios:\n';
+    const String originalMacOSKey = '\n      macos:\n';
+    if (!pubspecContent.contains(originalIOSKey) || !pubspecContent.contains(originalMacOSKey)) {
+      print(pubspecContent);
+      throw TaskResult.failure('Missing expected darwin platform plugin keys');
+    }
+    pubspecContent = pubspecContent.replaceAll(
+        originalIOSKey,
+        '$originalIOSKey        sharedDarwinSource: true\n'
+    );
+    pubspecContent = pubspecContent.replaceAll(
+        originalMacOSKey,
+        '$originalMacOSKey        sharedDarwinSource: true\n'
+    );
+    await pubspec.writeAsString(pubspecContent, flush: true);
+
+    // Copy ios to darwin, and delete macos.
+    final Directory iosDir = Directory(path.join(rootPath, 'ios'));
+    final Directory darwinDir = Directory(path.join(rootPath, 'darwin'));
+    recursiveCopy(iosDir, darwinDir);
+
+    await iosDir.delete(recursive: true);
+    await Directory(path.join(rootPath, 'macos')).delete(recursive: true);
+
+    final File podspec = File(path.join(darwinDir.path, '$name.podspec'));
+    String podspecContent = await podspec.readAsString();
+    if (!podspecContent.contains('s.platform =')) {
+      print(podspecContent);
+      throw TaskResult.failure('Missing expected podspec platform');
+    }
+
+    // Remove "s.platform = :ios" to work on all platforms, including macOS.
+    podspecContent = podspecContent.replaceFirst(RegExp(r'.*s\.platform.*'), '');
+    podspecContent = podspecContent.replaceFirst("s.dependency 'Flutter'", "s.ios.dependency 'Flutter'\ns.osx.dependency 'FlutterMacOS'");
+
+    await podspec.writeAsString(podspecContent, flush: true);
+
+    // Make PlugintestPlugin.swift compile on iOS and macOS with target conditionals.
+    final String pluginClass = '${name[0].toUpperCase()}${name.substring(1)}Plugin';
+    print('pluginClass: $pluginClass');
+    final File pluginRegister = File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
+    final String pluginRegisterContent = '''
+#if os(macOS)
+import FlutterMacOS
+#elseif os(iOS)
+import Flutter
+#endif
+
+public class $pluginClass: NSObject, FlutterPlugin {
+  public static func register(with registrar: FlutterPluginRegistrar) {
+#if os(macOS)
+    let channel = FlutterMethodChannel(name: "$name", binaryMessenger: registrar.messenger)
+#elseif os(iOS)
+    let channel = FlutterMethodChannel(name: "$name", binaryMessenger: registrar.messenger())
+#endif
+    let instance = $pluginClass()
+    registrar.addMethodCallDelegate(instance, channel: channel)
+  }
+
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+#if os(macOS)
+    result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
+#elseif os(iOS)
+    result("iOS " + UIDevice.current.systemVersion)
+#endif
+  }
+}
+''';
+    await pluginRegister.writeAsString(pluginRegisterContent, flush: true);
   }
 
   Future<void> runFlutterTest() async {
