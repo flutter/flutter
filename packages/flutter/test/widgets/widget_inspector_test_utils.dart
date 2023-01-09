@@ -12,7 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
-  final Map<String, Map<String,List<Map<Object, Object?>>>> eventsDispatched = <String, Map<String, List<Map<Object, Object?>>>>{};
+  final Map<String, Map<String,List<Map<Object, Object?>>>> eventsDispatched
+    = <String, Map<String, List<Map<Object, Object?>>>>{};
   final  List<Object?> objectsInspected = <Object?>[];
 
   @override
@@ -25,7 +26,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   }
 
   @override
-  void postEvent(String eventKind, Map<Object, Object?> eventData, { String stream = 'Extension' }) {
+  void postEvent(
+    String eventKind, Map<Object, Object?> eventData,
+    { String stream = 'Extension' }
+  ) {
     dispatchedEvents(eventKind, stream: stream).add(eventData);
   }
 
