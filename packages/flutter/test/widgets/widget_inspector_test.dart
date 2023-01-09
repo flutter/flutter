@@ -1016,8 +1016,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(column, equals(15));
     },
-      // [intended] Test requires --track-widget-creation flag.
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -1049,7 +1048,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(objectsInspected, equals(<RenderObject?>[elementA.renderObject]));
 
       // ensure that a navigate event was sent for the renderObject
-      final List<Map<Object, Object?>> navigateEventsPosted 
+      final List<Map<Object, Object?>> navigateEventsPosted
         = service.dispatchedEvents('navigate', stream: 'toolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
@@ -1063,9 +1062,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(column, equals(15));
     },
-      // [intended] Test requires --track-widget-creation flag.
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); 
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets(
       'WidgetInspector selectButton inspection for tap',
@@ -1100,7 +1098,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(objectsInspected, equals(<RenderObject?>[childElement.renderObject]));
 
       // ensure that a navigate event was sent for the renderObject
-      final List<Map<Object, Object?>> navigateEventsPosted 
+      final List<Map<Object, Object?>> navigateEventsPosted
         = service.dispatchedEvents('navigate', stream: 'toolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
@@ -1114,8 +1112,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(column, equals(26));
     },
-      // [intended] Test requires --track-widget-creation flag.
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked()
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked() // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
