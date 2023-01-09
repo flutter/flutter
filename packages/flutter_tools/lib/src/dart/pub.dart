@@ -127,6 +127,7 @@ class PubContext {
   static final PubContext runTest = PubContext._(<String>['run_test']);
   static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
   static final PubContext updatePackages = PubContext._(<String>['update_packages']);
+  static final PubContext pubPostGetHook = PubContext._(<String>['_post_pub_get']);
 
   final List<String> _values;
 
@@ -223,6 +224,8 @@ abstract class Pub {
     bool generateSyntheticPackage = false,
     bool printProgress = true,
   });
+
+  Future<void> updateVersionAndPackageConfig(FlutterProject project);
 }
 
 class _DefaultPub implements Pub {
@@ -360,7 +363,8 @@ class _DefaultPub implements Pub {
       flutterRootOverride: flutterRootOverride,
       printProgress: printProgress
     );
-    await _updateVersionAndPackageConfig(project);
+    // TODO: probably don't remove this
+    await updateVersionAndPackageConfig(project);
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
@@ -566,9 +570,10 @@ class _DefaultPub implements Pub {
       context: context,
       printProgress: printProgress,
     );
-    if (touchesPackageConfig && project != null) {
-      await _updateVersionAndPackageConfig(project);
-    }
+    // TODO: moved to hook
+    // if (touchesPackageConfig && project != null) {
+    //   await _updateVersionAndPackageConfig(project);
+    // }
   }
 
   /// The command used for running pub.
@@ -717,7 +722,7 @@ class _DefaultPub implements Pub {
   ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
-  Future<void> _updateVersionAndPackageConfig(FlutterProject project) async {
+  Future<void> updateVersionAndPackageConfig(FlutterProject project) async {
     if (!project.packageConfigFile.existsSync()) {
       throwToolExit('${project.directory}: pub did not create .dart_tools/package_config.json file.');
     }

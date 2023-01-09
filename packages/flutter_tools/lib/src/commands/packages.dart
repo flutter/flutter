@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -24,6 +25,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions.", PubContext.pubUpgrade));
     addSubcommand(PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd));
     addSubcommand(PackagesGetCommand('remove', 'Removes a dependency from the current package.', PubContext.pubRemove));
+    addSubcommand(PackagesPostGetHook(PubContext.pubPostGetHook));
     addSubcommand(PackagesTestCommand());
     addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org.', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project.', requiresPubspec: true));
@@ -314,16 +316,19 @@ class PackagesGetCommand extends FlutterCommand {
       globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'failure');
       rethrow;
     }
-
-    if (rootProject != null) {
+    
+    // TODO: moved to hook
+    // if (rootProject != null) {
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).
-      await rootProject.regeneratePlatformSpecificTooling();
-      if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
-        final FlutterProject exampleProject = rootProject.example;
-        await exampleProject.regeneratePlatformSpecificTooling();
-      }
-    }
+      // await rootProject.regeneratePlatformSpecificTooling();
+      // if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
+      //   final FlutterProject exampleProject = rootProject.example;
+      //   await exampleProject.regeneratePlatformSpecificTooling();
+      // }
+    // }
+
+    // TODO: invoke hook
 
     return FlutterCommandResult.success();
   }
@@ -356,4 +361,55 @@ class PackagesGetCommand extends FlutterCommand {
       commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
     );
   }
+}
+
+// TODO: this doesn't seem right
+Pub get pub => context.get<Pub>()!;
+
+class PackagesPostGetHook extends FlutterCommand {
+  PackagesPostGetHook(this._context) {
+    argParser.addOption('directory', abbr: 'C', mandatory: true);
+    argParser.addFlag('example', defaultsTo: true);
+  }
+  final PubContext _context;
+
+  @override
+  bool get hidden => true;
+
+  @override
+  // TODO: implement description
+  String get description => throw UnimplementedError();
+
+  @override
+  // TODO: implement name
+  String get name => '_post_pub_get';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    // TODO: think about this part that actually happens before _runStdio
+    // generateLocalizationsSyntheticPackage
+
+    final String directoryOption = argResults!['directory'] as String;
+    final bool example = argResults!['example'] as bool;
+    final String? target = findProjectRoot(globals.fs, directoryOption);
+    if (target == null) {
+      throwToolExit('Expected to find project root in $directoryOption.');
+    }
+    final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
+
+    // TODO:
+    // if (touchesPackageConfig) {
+      await pub.updateVersionAndPackageConfig(rootProject);
+    // }
+
+    // regeneratePlatformSpecificTooling
+    await rootProject.regeneratePlatformSpecificTooling();
+    if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
+      final FlutterProject exampleProject = rootProject.example;
+      await exampleProject.regeneratePlatformSpecificTooling();
+    }
+    
+    return FlutterCommandResult.success();
+  }
+
 }
