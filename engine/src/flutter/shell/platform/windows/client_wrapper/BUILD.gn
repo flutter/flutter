@@ -113,7 +113,7 @@ win_client_wrapper_file_archive_list = [
 ]
 
 zip_bundle("client_wrapper_archive") {
-  output = "$full_platform_name/flutter-cpp-client-wrapper.zip"
+  output = "$full_target_platform_name/flutter-cpp-client-wrapper.zip"
   deps = [
     ":client_wrapper_windows",
     ":publish_wrapper_windows",
