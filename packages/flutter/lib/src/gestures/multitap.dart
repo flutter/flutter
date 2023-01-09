@@ -216,7 +216,13 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
           return false;
       }
     }
-    return super.isPointerAllowed(event);
+
+    // If second tap is not allowed, reset the state.
+    final bool isPointerAllowed = super.isPointerAllowed(event);
+    if (isPointerAllowed == false) {
+      _reset();
+    }
+    return isPointerAllowed;
   }
 
   @override
