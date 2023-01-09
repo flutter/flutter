@@ -1015,7 +1015,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(column, equals(15));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
-    
+
     testWidgets('WidgetInspectorService setSelection notifiers for a RenderObject',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1084,7 +1084,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Element childElement = child.evaluate().first;
 
       await tester.tap(child, warnIfMissed: false);
-      
+
       await tester.pump();
 
       // ensure that developer.inspect was called on the widget
@@ -1105,8 +1105,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Column numbers are more stable than line numbers.
       expect(column, equals(26));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
-    
-   
+
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
       await tester.pumpWidget(

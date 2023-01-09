@@ -2323,7 +2323,7 @@ mixin WidgetInspectorService {
   void postEvent(String eventKind, Map<Object, Object?> eventData, {String stream = 'Extension'}) {
     developer.postEvent(eventKind, eventData, stream: stream);
   }
-  
+
   /// All events dispatched by a [WidgetInspectorService] use this method
   /// instead of calling [developer.inspect] directly so that tests for
   /// [WidgetInspectorService] can track which events were dispatched by
