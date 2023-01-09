@@ -13,6 +13,9 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'plugins.dart';
 
+/// Whether or not Impeller Scene 3D model import is enabled.
+const bool kIs3dSceneSupported = false;
+
 const Set<String> _kValidPluginPlatforms = <String>{
   'android', 'ios', 'web', 'windows', 'linux', 'macos',
 };
@@ -370,9 +373,8 @@ class FlutterManifest {
     return fonts;
   }
 
-
   late final List<Uri> shaders = _extractAssetUris('shaders', 'Shader');
-  late final List<Uri> models = _extractAssetUris('models', 'Model');
+  late final List<Uri> models = kIs3dSceneSupported ? _extractAssetUris('models', 'Model') : [];
 
   List<Uri> _extractAssetUris(String key, String singularName) {
     if (!_flutterDescriptor.containsKey(key)) {

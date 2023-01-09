@@ -2722,6 +2722,7 @@ class FakeDevFS extends Fake implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
