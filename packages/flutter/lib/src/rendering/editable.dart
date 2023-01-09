@@ -1316,11 +1316,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Returns a list of rects that bound the given selection.
   ///
   /// See [TextPainter.getBoxesForSelection] for more details.
-  List<Rect> getBoxesForSelection(TextSelection selection) {
+  List<TextBox> getBoxesForSelection(TextSelection selection) {
     _computeTextMetricsIfNeeded();
     return _textPainter.getBoxesForSelection(selection)
-                       .map((TextBox textBox) => textBox.toRect().shift(_paintOffset))
-                       .toList();
+                       .map((TextBox textBox) => TextBox.fromLTRBD(
+                          textBox.left + _paintOffset.dx,
+                          textBox.top + _paintOffset.dy,
+                          textBox.right + _paintOffset.dx,
+                          textBox.bottom + _paintOffset.dy,
+                          textBox.direction
+                        )).toList();
   }
 
   @override
@@ -2092,6 +2097,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     _setSelection(newSelection, cause);
   }
+
+  /// {@macro flutter.painting.TextPainter.wordBoundaries}
+  WordBoundary get wordBoundaries => _textPainter.wordBoundaries;
 
   /// Select a word around the location of the last tap down.
   ///

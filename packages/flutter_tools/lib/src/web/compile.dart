@@ -25,7 +25,8 @@ Future<void> buildWeb(
   bool csp,
   String serviceWorkerStrategy,
   bool sourceMaps,
-  bool nativeNullAssertions, {
+  bool nativeNullAssertions,
+  bool isWasm, {
   String? dart2jsOptimization,
   String? baseHref,
   bool dumpInfo = false,
@@ -35,7 +36,7 @@ Future<void> buildWeb(
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = outputDirectoryPath == null
-      ? globals.fs.directory(getWebBuildDirectory())
+      ? globals.fs.directory(getWebBuildDirectory(isWasm))
       : globals.fs.directory(outputDirectoryPath);
   outputDirectory.createSync(recursive: true);
 
@@ -51,7 +52,7 @@ Future<void> buildWeb(
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(
-      WebServiceWorker(globals.fs, globals.cache, buildInfo.webRenderer),
+      WebServiceWorker(globals.fs, globals.cache, buildInfo.webRenderer, isWasm),
       Environment(
         projectDir: globals.fs.currentDirectory,
         outputDir: outputDirectory,
