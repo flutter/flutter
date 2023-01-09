@@ -24,6 +24,7 @@
 
 // This file intentionally assumes the tests run in order.
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';

@@ -990,7 +990,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   DevFSWriter? createDevFSWriter(
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     String? userIdentifier,
   ) {
     return null;

@@ -85,7 +85,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapDragUpDetails details) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
@@ -558,8 +558,6 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     });
   }
 
-  TextSelection? _lastSeenTextSelection;
-
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -567,12 +565,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         _showSelectionHandles = willShowSelectionHandles;
       });
     }
-    // TODO(chunhtai): The selection may be the same. We should remove this
-    // check once this is fixed https://github.com/flutter/flutter/issues/76349.
-    if (widget.onSelectionChanged != null && _lastSeenTextSelection != selection) {
-      widget.onSelectionChanged!(selection, cause);
-    }
-    _lastSeenTextSelection = selection;
+
+    widget.onSelectionChanged?.call(selection, cause);
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
@@ -659,7 +653,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         break;
 
       case TargetPlatform.macOS:
@@ -671,7 +665,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         break;
 
       case TargetPlatform.android:
@@ -700,7 +694,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     if (effectiveTextStyle == null || effectiveTextStyle.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style ?? _controller._textSpan.style);
     }
-    if (MediaQuery.boldTextOverride(context)) {
+    if (MediaQuery.boldTextOf(context)) {
       effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
     final Widget child = RepaintBoundary(

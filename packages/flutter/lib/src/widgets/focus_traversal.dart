@@ -1677,7 +1677,7 @@ class RequestFocusIntent extends Intent {
 /// logging, or undo and redo functionality.
 ///
 /// This [RequestFocusAction] class is the default action associated with the
-/// [RequestFocusIntent] in the [WidgetsApp], and it simply requests focus. You
+/// [RequestFocusIntent] in the [WidgetsApp]. It requests focus. You
 /// can redefine the associated action with your own [Actions] widget.
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.

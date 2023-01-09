@@ -11,8 +11,23 @@ import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
+TaskFunction createAndroidRunDebugTest() {
+  return AndroidRunOutputTest(release: false).call;
+}
+
 TaskFunction createAndroidRunReleaseTest() {
-  return AndroidRunOutputTest(release: true);
+  return AndroidRunOutputTest(release: true).call;
+}
+
+TaskFunction createMacOSRunDebugTest() {
+  return DesktopRunOutputTest(
+    // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
+    // Switch to dev/integration_tests/ui once we have CocoaPods working on M1 Macs.
+    '${flutterDirectory.path}/examples/hello_world',
+    'lib/main.dart',
+    release: false,
+    allowStderr: true,
+  ).call;
 }
 
 TaskFunction createMacOSRunReleaseTest() {
@@ -23,7 +38,23 @@ TaskFunction createMacOSRunReleaseTest() {
     'lib/main.dart',
     release: true,
     allowStderr: true,
-  );
+  ).call;
+}
+
+TaskFunction createWindowsRunDebugTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: false,
+  ).call;
+}
+
+TaskFunction createWindowsRunReleaseTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: true,
+  ).call;
 }
 
 class AndroidRunOutputTest extends RunOutputTask {
@@ -71,28 +102,34 @@ class AndroidRunOutputTest extends RunOutputTask {
 
   @override
   TaskResult verify(List<String> stdout, List<String> stderr) {
+    final String gradleTask = release ? 'assembleRelease' : 'assembleDebug';
+    final String apk = release ? 'app-release.apk' : 'app-debug.apk';
+
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Launching lib/main.dart on ') && line.endsWith(' in release mode...'),
+      (String line) => line.startsWith('Launching lib/main.dart on ') &&
+        line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
       'Launching lib/main.dart on',
     );
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith("Running Gradle task 'assembleRelease'..."),
-      "Running Gradle task 'assembleRelease'...",
+      (String line) => line.startsWith("Running Gradle task '$gradleTask'..."),
+      "Running Gradle task '$gradleTask'...",
+    );
+
+    // Size information is only included in release builds.
+    _findNextMatcherInList(
+      stdout,
+      (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') &&
+        (!release || line.contains('MB).')),
+      'Built build/app/outputs/flutter-apk/$apk',
     );
 
     _findNextMatcherInList(
       stdout,
-      (String line) => line.contains('Built build/app/outputs/flutter-apk/app-release.apk (') && line.contains('MB).'),
-      'Built build/app/outputs/flutter-apk/app-release.apk',
-    );
-
-    _findNextMatcherInList(
-      stdout,
-      (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/app-release.apk...'),
-      'Installing build/app/outputs/flutter-apk/app-release.apk...',
+      (String line) => line.startsWith('Installing build/app/outputs/flutter-apk/$apk...'),
+      'Installing build/app/outputs/flutter-apk/$apk...',
     );
 
     _findNextMatcherInList(
@@ -130,9 +167,9 @@ class DesktopRunOutputTest extends RunOutputTask {
   TaskResult verify(List<String> stdout, List<String> stderr) {
     _findNextMatcherInList(
       stdout,
-      (String line) => line.startsWith('Launching lib/main.dart on ') &&
+      (String line) => line.startsWith('Launching $testTarget on ') &&
         line.endsWith(' in ${release ? 'release' : 'debug'} mode...'),
-      'Launching lib/main.dart on',
+      'Launching $testTarget on',
     );
 
     _findNextMatcherInList(
@@ -158,6 +195,10 @@ abstract class RunOutputTask {
     this.testTarget, {
       required this.release,
     }
+  );
+
+  static final RegExp _engineLogRegex = RegExp(
+    r'\[(VERBOSE|INFO|WARNING|ERROR|FATAL):.+\(\d+\)\]',
   );
 
   /// The directory where the app under test is defined.
@@ -203,14 +244,14 @@ abstract class RunOutputTask {
             ready.complete();
           }
         });
-      run.stderr
+      final Stream<String> runStderr = run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
+        .asBroadcastStream();
+      runStderr.listen((String line) => print('run:stderr: $line'));
+      runStderr
         .skipWhile(isExpectedStderr)
-        .listen((String line) {
-          print('run:stderr: $line');
-          stderr.add(line);
-        });
+        .listen((String line) => stderr.add(line));
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null) {
@@ -222,6 +263,13 @@ abstract class RunOutputTask {
 
       if (stderr.isNotEmpty) {
         throw 'flutter run ${release ? '--release' : ''} had unexpected output on standard error.';
+      }
+
+      final List<String> engineLogs = List<String>.from(
+        stdout.where(_engineLogRegex.hasMatch),
+      );
+      if (engineLogs.isNotEmpty) {
+        throw 'flutter run had unexpected Flutter engine logs $engineLogs';
       }
 
       return verify(stdout, stderr);

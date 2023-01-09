@@ -1089,7 +1089,8 @@ abstract class FlutterCommand extends Command<void> {
         );
         // Extra frontend options are only provided if explicitly
         // requested.
-        if (languageVersion.major >= nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor) {
+        if ((languageVersion.major > nullSafeVersion.major) ||
+            (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
           nullSafetyMode = NullSafetyMode.sound;
         } else {
           nullSafetyMode = NullSafetyMode.unsound;

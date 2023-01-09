@@ -59,6 +59,7 @@ import 'package:flutter/widgets.dart';
 /// See also:
 ///
 ///  * [Icon], used to show these icons.
+@staticIconProvider
 class CupertinoIcons {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.

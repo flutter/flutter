@@ -1607,23 +1607,23 @@ void main() {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
           mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
-          expect(mnemonic0.data, equals('Ctrl A'));
+          expect(mnemonic0.data, equals('Ctrl+A'));
           mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
-          expect(mnemonic1.data, equals('⇧ B'));
+          expect(mnemonic1.data, equals('Shift+B'));
           mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
-          expect(mnemonic2.data, equals('Alt C'));
+          expect(mnemonic2.data, equals('Alt+C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
-          expect(mnemonic3.data, equals('Meta D'));
+          expect(mnemonic3.data, equals('Meta+D'));
           break;
         case TargetPlatform.windows:
           mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
-          expect(mnemonic0.data, equals('Ctrl A'));
+          expect(mnemonic0.data, equals('Ctrl+A'));
           mnemonic1 = tester.widget(findMnemonic(TestMenu.subSubMenu111.label));
-          expect(mnemonic1.data, equals('⇧ B'));
+          expect(mnemonic1.data, equals('Shift+B'));
           mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
-          expect(mnemonic2.data, equals('Alt C'));
+          expect(mnemonic2.data, equals('Alt+C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
-          expect(mnemonic3.data, equals('Win D'));
+          expect(mnemonic3.data, equals('Win+D'));
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -2146,24 +2146,26 @@ void main() {
       String expectedMeta;
       String expectedCtrl;
       String expectedAlt;
+      String expectedSeparator;
+      String expectedShift;
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
-          expectedCtrl = 'Ctrl';
-          expectedMeta = 'Meta';
-          expectedAlt = 'Alt';
-          break;
         case TargetPlatform.windows:
           expectedCtrl = 'Ctrl';
-          expectedMeta = 'Win';
+          expectedMeta = defaultTargetPlatform == TargetPlatform.windows ? 'Win' : 'Meta';
           expectedAlt = 'Alt';
+          expectedShift = 'Shift';
+          expectedSeparator = '+';
           break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           expectedCtrl = '⌃';
           expectedMeta = '⌘';
           expectedAlt = '⌥';
+          expectedShift = '⇧';
+          expectedSeparator = ' ';
           break;
       }
 
@@ -2174,7 +2176,7 @@ void main() {
         shift: true,
         alt: true,
       );
-      final String allExpected = '$expectedAlt $expectedCtrl $expectedMeta ⇧ A';
+      final String allExpected = <String>[expectedAlt, expectedCtrl, expectedMeta, expectedShift, 'A'].join(expectedSeparator);
       const CharacterActivator charShortcuts = CharacterActivator('ñ');
       const String charExpected = 'ñ';
       await tester.pumpWidget(
