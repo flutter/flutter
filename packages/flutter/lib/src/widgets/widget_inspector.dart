@@ -1530,7 +1530,7 @@ mixin WidgetInspectorService {
     inspect(object);
 
     final _Location? location = WidgetInspectorService.instance._getSelectedSummaryWidgetLocation(null);
-    if (location != null){
+    if (location != null) {
       postEvent(
         'navigate',
         <String, Object>{
