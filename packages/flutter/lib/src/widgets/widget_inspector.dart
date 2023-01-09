@@ -1529,7 +1529,7 @@ mixin WidgetInspectorService {
   void _sendInspectEvent(Object? object){
     inspect(object);
 
-    final _Location? location = WidgetInspectorService.instance._getSelectedSummaryWidgetLocation(null, 'my-group');
+    final _Location? location = WidgetInspectorService.instance._getSelectedSummaryWidgetLocation(null);
     if (location != null){
       postEvent(
         'navigate',
@@ -2232,15 +2232,13 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getSelectedWidget(String? previousSelectionId, String groupName) {
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
-    final Element? current = selection.currentElement;
     return _nodeToJson(
-      _getSelectedWidgetDiagnosticsNode(previousSelectionId, groupName),
+      _getSelectedWidgetDiagnosticsNode(previousSelectionId),
       InspectorSerializationDelegate(groupName: groupName, service: this),
     );
   }
 
-  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId, String groupName) {
+  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId) {
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     final Element? current = selection.currentElement;
     return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
@@ -2258,13 +2256,13 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));
   }
 
-  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId, String groupName) {
-     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId, groupName)?.value);
+  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
+     return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId)?.value);
   }
 
-  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId, String groupName) {
+  DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
     if (!isWidgetCreationTracked()) {
-      return _getSelectedWidgetDiagnosticsNode(previousSelectionId, groupName);
+      return _getSelectedWidgetDiagnosticsNode(previousSelectionId);
     }
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     Element? current = selection.currentElement;
@@ -2282,7 +2280,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getSelectedSummaryWidget(String? previousSelectionId, String groupName) {
-    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionId, groupName), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(_getSelectedSummaryDiagnosticsNode(previousSelectionId), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns whether [Widget] creation locations are available.
