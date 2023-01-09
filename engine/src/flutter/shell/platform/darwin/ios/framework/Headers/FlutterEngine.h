@@ -56,7 +56,7 @@ extern NSString* const FlutterDefaultInitialRoute;
  * One of these methods must be invoked before calling `-setViewController:`.
  */
 FLUTTER_DARWIN_EXPORT
-@interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
+@interface FlutterEngine : NSObject <FlutterPluginRegistry>
 
 /**
  * Default initializer for a FlutterEngine.
@@ -423,6 +423,11 @@ FLUTTER_DARWIN_EXPORT
  * channels).
  */
 @property(nonatomic, readonly) NSObject<FlutterBinaryMessenger>* binaryMessenger;
+
+/**
+ * The `FlutterTextureRegistry` associated with this FlutterEngine (used to register textures).
+ */
+@property(nonatomic, readonly) NSObject<FlutterTextureRegistry>* textureRegistry;
 
 /**
  * The UI Isolate ID of the engine.
