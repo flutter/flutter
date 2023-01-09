@@ -1060,7 +1060,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // would make this test fragile.
         expect(line, isNotNull);
         // Column numbers are more stable than line numbers.
-        expect(column, equals(15));
+        expect(column, equals(17));
       },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
@@ -1110,7 +1110,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // would make this test fragile.
         expect(line, isNotNull);
         // Column numbers are more stable than line numbers.
-        expect(column, equals(26));
+        expect(column, equals(28));
       },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked() // [intended] Test requires --track-widget-creation flag.
     );
