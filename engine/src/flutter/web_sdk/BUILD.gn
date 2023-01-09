@@ -551,7 +551,7 @@ if (!is_fuchsia) {
       # TODO(jacksongardner): remove this once we stop making platform-specific
       # flutter_web_sdk archives.
       # https://github.com/flutter/flutter/issues/113303
-      output = "flutter-web-sdk-${full_target_platform_name}.zip"
+      output = "flutter-web-sdk-${full_platform_name}.zip"
     }
     deps = [
              ":flutter_ddc_modules",
