@@ -10,9 +10,17 @@ _flutter.loader = null;
 (function () {
   "use strict";
 
-  const baseUri = ensureTrailingSlash(document.baseURI) || "/";
+  const baseUri = ensureTrailingSlash(getBaseURI());
+
+  function getBaseURI() {
+    const base = document.querySelector("base");
+    return (base && base.getAttribute('href')) || "";
+  }
 
   function ensureTrailingSlash(uri) {
+    if (uri == "") {
+      return uri;
+    }
     return uri.endsWith("/") ? uri : `${uri}/`;
   }
 
