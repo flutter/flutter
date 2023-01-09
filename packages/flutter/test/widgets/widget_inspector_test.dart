@@ -1003,10 +1003,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // ensure that a navigate event was sent for the element
       final List<Map<Object, Object?>> navigateEventsPosted
-        = service.dispatchedEvents('navigate', stream: 'toolEvent',);
+        = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
-      final String file = event['file']! as String;
+      final String file = event['fileUri']! as String;
       final int line = event['line']! as int;
       final int column = event['column']! as int;
       expect(file, endsWith('widget_inspector_test.dart'));
@@ -1049,10 +1049,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // ensure that a navigate event was sent for the renderObject
       final List<Map<Object, Object?>> navigateEventsPosted
-        = service.dispatchedEvents('navigate', stream: 'toolEvent',);
+        = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
-      final String file = event['file']! as String;
+      final String file = event['fileUri']! as String;
       final int line = event['line']! as int;
       final int column = event['column']! as int;
       expect(file, endsWith('widget_inspector_test.dart'));
@@ -1099,10 +1099,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       // ensure that a navigate event was sent for the renderObject
       final List<Map<Object, Object?>> navigateEventsPosted
-        = service.dispatchedEvents('navigate', stream: 'toolEvent',);
+        = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
-      final String file = event['file']! as String;
+      final String file = event['fileUri']! as String;
       final int line = event['line']! as int;
       final int column = event['column']! as int;
       expect(file, endsWith('widget_inspector_test.dart'));

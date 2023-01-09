@@ -2323,7 +2323,7 @@ mixin WidgetInspectorService {
   void postEvent(
     String eventKind,
     Map<Object, Object?> eventData,
-    {String stream = 'Extension'}
+    {String stream = 'Extension',}
   ) {
     developer.postEvent(eventKind, eventData, stream: stream);
   }
