@@ -526,8 +526,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 
   Widget _cupertinoBuilder(BuildContext context, Widget? child) {
-    final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-
+    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
+    
     return CupertinoTheme(
       data: effectiveThemeData,
       // DefaultTextStyle has to be declared here because
