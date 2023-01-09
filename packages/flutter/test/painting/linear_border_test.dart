@@ -73,24 +73,24 @@ void main() {
   });
 
   test('LinearBorderEdge, LinearBorder toString()', () {
-    expect(const LinearBorderEdge(size: 0.5, alignment: -1).toString(), 'LinearBorderEdge(size: 0.5, alignment: -1.0)');
+    expect(const LinearBorderEdge(size: 0.5, alignment: -0.5).toString(), 'LinearBorderEdge(size: 0.5, alignment: -0.5)');
     expect(LinearBorder.none.toString(), 'LinearBorder.none');
     const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
     expect(const LinearBorder(side: side).toString(), 'LinearBorder(side: BorderSide(color: Color(0xff123456), width: 10.0))');
     expect(
       const LinearBorder(
         side: side,
-        start: LinearBorderEdge(size: 0, alignment: -1),
+        start: LinearBorderEdge(size: 0, alignment: -0.75),
         end: LinearBorderEdge(size: 0.25, alignment: -0.5),
         top: LinearBorderEdge(size: 0.5, alignment: 0.5),
-        bottom: LinearBorderEdge(size: 0.75, alignment: 1),
+        bottom: LinearBorderEdge(size: 0.75, alignment: 0.75),
       ).toString(),
       'LinearBorder('
         'side: BorderSide(color: Color(0xff123456), width: 10.0), '
-        'start: LinearBorderEdge(size: 0.0, alignment: -1.0), '
+        'start: LinearBorderEdge(size: 0.0, alignment: -0.75), '
         'end: LinearBorderEdge(size: 0.25, alignment: -0.5), '
         'top: LinearBorderEdge(size: 0.5, alignment: 0.5), '
-        'bottom: LinearBorderEdge(size: 0.75, alignment: 1.0))'
+        'bottom: LinearBorderEdge(size: 0.75, alignment: 0.75))',
     );
   });
 
