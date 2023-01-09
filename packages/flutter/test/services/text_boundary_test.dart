@@ -151,22 +151,22 @@ void main() {
     const ParagraphBoundary boundaryA = ParagraphBoundary(textA);
 
     // Position enclosed inside of paragraph, 'abcd efg h|i\n'.
-    const TextPosition position = TextPosition(offset: 10);
+    const int position = 10;
 
     // The range includes the line terminator.
-    expect(boundaryA.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
-    expect(boundaryA.getTrailingTextBoundaryAt(position), const TextPosition(offset: 12, affinity: TextAffinity.upstream));
+    expect(boundaryA.getLeadingTextBoundaryAt(position), 0);
+    expect(boundaryA.getTrailingTextBoundaryAt(position), 12);
 
     // This text includes a carriage return followed by a line feed.
     const String textB = 'abcd efg hi\r\njklmno\npqrstuv';
     const ParagraphBoundary boundaryB = ParagraphBoundary(textB);
-    expect(boundaryB.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
-    expect(boundaryB.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));
+    expect(boundaryB.getLeadingTextBoundaryAt(position), 0);
+    expect(boundaryB.getTrailingTextBoundaryAt(position), 13);
 
     const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
     const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
-    expect(boundaryC.getLeadingTextBoundaryAt(position), const TextPosition(offset: 0));
-    expect(boundaryC.getTrailingTextBoundaryAt(position), const TextPosition(offset: 13, affinity: TextAffinity.upstream));
+    expect(boundaryC.getLeadingTextBoundaryAt(position), 0);
+    expect(boundaryC.getTrailingTextBoundaryAt(position), 13);
   });
 
   test('document boundary works', () {
