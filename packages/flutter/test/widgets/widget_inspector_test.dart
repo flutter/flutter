@@ -998,11 +998,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       service.setSelection(elementA, 'my-group');
 
       // ensure that developer.inspect was called on the widget
-      final List<Object?> objectsInspected = service.getObjectsInspected();
+      final List<Object?> objectsInspected = service.inspectedObjects();
       expect(objectsInspected, equals(<Element>[elementA]));
 
       // ensure that a navigate event was sent for the element
-      final List<Map<Object, Object?>> navigateEventsPosted = service.getEventsDispatched('navigate', stream: 'toolEvent',);
+      final List<Map<Object, Object?>> navigateEventsPosted = service.dispatchedEvents('navigate', stream: 'toolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
       final String file = event['file']! as String;
@@ -1040,11 +1040,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       service.setSelection(elementA.renderObject, 'my-group');
 
       // ensure that developer.inspect was called on the widget
-      final List<Object?> objectsInspected = service.getObjectsInspected();
+      final List<Object?> objectsInspected = service.inspectedObjects();
       expect(objectsInspected, equals(<RenderObject?>[elementA.renderObject]));
 
       // ensure that a navigate event was sent for the renderObject
-      final List<Map<Object, Object?>> navigateEventsPosted = service.getEventsDispatched('navigate', stream: 'toolEvent',);
+      final List<Map<Object, Object?>> navigateEventsPosted 
+        = service.dispatchedEvents('navigate', stream: 'toolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
       final String file = event['file']! as String;
@@ -1056,7 +1057,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(line, isNotNull);
       // Column numbers are more stable than line numbers.
       expect(column, equals(15));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+    },
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+    ); 
 
     testWidgets('WidgetInspector selectButton inspection for tap', (WidgetTester tester) async {
       final Key childKey = UniqueKey();
@@ -1088,11 +1092,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
 
       // ensure that developer.inspect was called on the widget
-      final List<Object?> objectsInspected = service.getObjectsInspected();
+      final List<Object?> objectsInspected = service.inspectedObjects();
       expect(objectsInspected, equals(<RenderObject?>[childElement.renderObject]));
 
       // ensure that a navigate event was sent for the renderObject
-      final List<Map<Object, Object?>> navigateEventsPosted = service.getEventsDispatched('navigate', stream: 'toolEvent',);
+      final List<Map<Object, Object?>> navigateEventsPosted 
+        = service.dispatchedEvents('navigate', stream: 'toolEvent',);
       expect(navigateEventsPosted.length, equals(1));
       final Map<Object,Object?> event = navigateEventsPosted[0];
       final String file = event['file']! as String;
@@ -1104,7 +1109,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(line, isNotNull);
       // Column numbers are more stable than line numbers.
       expect(column, equals(26));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+    },
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked()
+    );
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
@@ -3604,7 +3612,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       final List<Map<Object, Object?>> rebuildEvents =
-          service.getEventsDispatched('Flutter.RebuiltWidgets');
+          service.dispatchedEvents('Flutter.RebuiltWidgets');
       expect(rebuildEvents, isEmpty);
 
       expect(service.rebuildCount, equals(0));
@@ -3824,7 +3832,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       final List<Map<Object, Object?>> repaintEvents =
-          service.getEventsDispatched('Flutter.RepaintWidgets');
+          service.dispatchedEvents('Flutter.RepaintWidgets');
       expect(repaintEvents, isEmpty);
 
       expect(service.rebuildCount, equals(0));
@@ -4599,7 +4607,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     test('ext.flutter.inspector.structuredErrors', () async {
-      List<Map<Object, Object?>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+      List<Map<Object, Object?>> flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
       expect(flutterErrorEvents, isEmpty);
 
       final FlutterExceptionHandler oldHandler = FlutterError.presentError;
@@ -4622,7 +4630,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ));
 
         // Validate that we received an error.
-        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
         expect(flutterErrorEvents, hasLength(1));
 
         // Validate the error contents.
@@ -4645,7 +4653,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ));
 
         // Validate that the error count increased.
-        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
         expect(flutterErrorEvents, hasLength(2));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 1);
@@ -4673,7 +4681,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ));
 
         // And, validate that the error count has been reset.
-        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
         expect(flutterErrorEvents, hasLength(3));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 0);

@@ -1534,11 +1534,12 @@ mixin WidgetInspectorService {
       postEvent(
         'navigate',
         <String, Object>{
-          'file': location.file,
-          'line': location.line,
-          'column': location.column,
+          'fileUri': location.file, // URI file path of the location.
+          'line': location.line, // 1-based line number.
+          'column': location.column, // 1-based column number.
+          'source': 'FlutterWidgetInspector',
         },
-        stream: 'toolEvent',
+        stream: 'ToolEvent',
       );
     }
   }
@@ -2314,18 +2315,24 @@ mixin WidgetInspectorService {
   }
 
   /// All events dispatched by a [WidgetInspectorService] use this method
-  /// instead of calling [developer.postEvent] directly so that tests for
-  /// [WidgetInspectorService] can track which events were dispatched by
-  /// overriding this method.
+  /// instead of calling [developer.postEvent] directly.
+  ///
+  /// This allows tests for [WidgetInspectorService] to track which events were
+  /// dispatched by overriding this method.
   @protected
-  void postEvent(String eventKind, Map<Object, Object?> eventData, {String stream = 'Extension'}) {
+  void postEvent(
+    String eventKind,
+    Map<Object, Object?> eventData,
+    {String stream = 'Extension'},
+  ) {
     developer.postEvent(eventKind, eventData, stream: stream);
   }
 
   /// All events dispatched by a [WidgetInspectorService] use this method
-  /// instead of calling [developer.inspect] directly so that tests for
-  /// [WidgetInspectorService] can track which events were dispatched by
-  /// overriding this method.
+  /// instead of calling [developer.inspect].
+  ///
+  /// This allows tests for [WidgetInspectorService] to track which events were
+  /// dispatched by overriding this method.
   @protected
   void inspect(Object? object) {
     developer.inspect(object);
