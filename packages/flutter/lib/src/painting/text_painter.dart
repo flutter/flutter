@@ -294,6 +294,9 @@ class _TextLayout {
   bool get debugDisposed => _paragraph.debugDisposed;
 
   /// The horizontal space required to paint this text.
+  ///
+  /// If a line ends with trailing spaces, the trailing spaces may extend
+  /// outside of the horizontal paint bounds defined by [width].
   double get width => _applyFloatingPointHack(_paragraph.width);
 
   /// The vertical space required to paint this text.
@@ -305,7 +308,7 @@ class _TextLayout {
 
   /// The width at which increasing the width of the text no longer decreases the height.
   ///
-  /// include trailing spaces if any.
+  /// Includes trailing spaces if any.
   double get maxIntrinsicLineExtent => _applyFloatingPointHack(_paragraph.maxIntrinsicWidth);
 
   /// The distance from the left edge of the leftmost glyph to the right edge of
@@ -356,7 +359,7 @@ class _LineCaretMetrics implements _CaretMetrics {
   /// The offset of the top left corner of the caret from the top left
   /// corner of the paragraph.
   final Offset offset;
-  /// The writing direction
+  /// The writing direction of the glyph the _CaretMetrics is associated with.
   final TextDirection writingDirection;
   /// The full height of the glyph at the caret position.
   final double fullHeight;
@@ -1023,8 +1026,9 @@ class TextPainter {
     //
     // An exception to this is when the text is not left-aligned, and the input
     // width is double.infinity. Since the resulting Paragraph will have a width
-    // of double.infinity, an to make the text visible the paintOffset.dx is bound
-    // to be double.negativeInfinity, which invalidates all arithmetic operations.
+    // of double.infinity, and to make the text visible the paintOffset.dx is
+    // bound to be double.negativeInfinity, which invalidates all arithmetic
+    // operations.
     final bool needsLayout = cachedLayout == null
       || (maxWidth != cachedLayout.layout.width
         // Always needsLayout when the current paintOffset and the paragraph
