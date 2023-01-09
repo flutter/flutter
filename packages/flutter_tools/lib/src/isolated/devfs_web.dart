@@ -340,12 +340,11 @@ class WebAssetServer implements AssetReader {
   @visibleForTesting
   Uint8List? getMetadata(String path) => _webMemoryFS.metadataFiles[path];
 
-  @visibleForTesting
-
   /// The base path to serve from.
   ///
   /// It should have no leading or trailing slashes.
-  final String basePath;
+  @visibleForTesting
+  String basePath;
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
@@ -964,11 +963,10 @@ class ReleaseAssetServer {
   final FileSystemUtils _fileSystemUtils;
   final Platform _platform;
 
-  @visibleForTesting
-
   /// The base path to serve from.
   ///
   /// It should have no leading or trailing slashes.
+  @visibleForTesting
   final String basePath;
 
   // Locations where source files, assets, or source maps may be located.
