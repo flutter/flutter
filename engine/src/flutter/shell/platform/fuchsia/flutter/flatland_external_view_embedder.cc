@@ -13,11 +13,6 @@
 namespace flutter_runner {
 namespace {
 
-// Since the flatland hit-region can be transformed (rotated, scaled or
-// translated), we must ensure that the size of the hit-region will not cause
-// overflows on operations (like FLT_MAX would).
-constexpr float kMaxHitRegionSize = 1'000'000.f;
-
 void AttachClipTransformChild(
     FlatlandConnection* flatland,
     FlatlandExternalViewEmbedder::ClipTransform* parent_clip_transform,
@@ -59,19 +54,13 @@ FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
   if (intercept_all_input) {
     input_interceptor_transform_ = flatland_->NextTransformId();
     flatland_->flatland()->CreateTransform(*input_interceptor_transform_);
+    flatland_->flatland()->SetInfiniteHitRegion(
+        *input_interceptor_transform_,
+        fuchsia::ui::composition::HitTestInteraction::SEMANTICALLY_INVISIBLE);
 
     flatland_->flatland()->AddChild(root_transform_id_,
                                     *input_interceptor_transform_);
     child_transforms_.emplace_back(*input_interceptor_transform_);
-
-    // Attach full-screen hit testing shield. Note that since the hit-region
-    // may be transformed (translated, rotated), we do not want to set
-    // width/height to FLT_MAX. This will cause a numeric overflow.
-    flatland_->flatland()->SetHitRegions(
-        *input_interceptor_transform_,
-        {{{0, 0, kMaxHitRegionSize, kMaxHitRegionSize},
-          fuchsia::ui::composition::HitTestInteraction::
-              SEMANTICALLY_INVISIBLE}});
   }
 }
 
@@ -453,9 +442,9 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
       flatland_layer_index++;
     }
 
-    // Set up the input interceptor at the top of the
-    // scene, if applicable.  It will capture all input, and any unwanted input
-    // will be reinjected into embedded views.
+    // Set up the input interceptor at the top of the scene, if applicable. It
+    // will capture all input, and any unwanted input will be reinjected into
+    // embedded views.
     if (input_interceptor_transform_.has_value()) {
       flatland_->flatland()->AddChild(root_transform_id_,
                                       *input_interceptor_transform_);
