@@ -1248,7 +1248,7 @@ void main() {
       paints
         ..rect()
         ..rect(
-            color: Colors.orange[500],
+            color: Colors.orange[500]!.withAlpha(0),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
         ..rect(
