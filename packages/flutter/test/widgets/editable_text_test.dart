@@ -12672,6 +12672,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -12680,6 +12681,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -12697,6 +12699,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -12705,6 +12708,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -12730,6 +12734,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -12738,6 +12743,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -12777,6 +12783,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 ni',
+          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -12785,6 +12792,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
+          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -12906,6 +12914,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             controller.value,
             const TextEditingValue(
               text: '1 2 ni',
+              composing: TextRange(start: 4, end: 6),
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
@@ -12964,6 +12973,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             controller.value,
             const TextEditingValue(
               text: '1 2 ni',
+              composing: TextRange(start: 4, end: 6),
               selection: TextSelection.collapsed(offset: 6),
             ),
           );

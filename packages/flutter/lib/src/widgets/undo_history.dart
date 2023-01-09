@@ -143,12 +143,11 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     if (nextValue == _lastValue) {
       return;
     }
-    final T? lastValue = _lastValue;
     _lastValue = nextValue;
     _duringTrigger = true;
     try {
       widget.onTriggered(nextValue);
-      assert(widget.value.value == nextValue || widget.value.value == lastValue);
+      assert(widget.value.value == nextValue);
     } finally {
       _duringTrigger = false;
     }

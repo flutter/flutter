@@ -4291,11 +4291,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           child: UndoHistory<TextEditingValue>(
             value: widget.controller,
             onTriggered: (TextEditingValue value) {
-              userUpdateTextEditingValue(
-                widget.controller.value.copyWith(
-                  text: value.text,
-                  selection: value.selection,),
-                SelectionChangedCause.keyboard);
+              userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
             },
             shouldChangeUndoStack: (TextEditingValue? oldValue, TextEditingValue newValue) {
               if (newValue == TextEditingValue.empty) {
@@ -4324,7 +4320,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   break;
               }
 
-              return oldValue.text != newValue.text;
+              return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
             },
             focusNode: widget.focusNode,
             controller: widget.undoController,
