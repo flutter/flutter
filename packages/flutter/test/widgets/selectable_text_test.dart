@@ -5367,4 +5367,43 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.fontSize, textStyle.fontSize);
   });
+
+  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+    TextSelection? selection;
+    int count = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableText(
+          'I love Flutter!',
+          onSelectionChanged: (TextSelection s, _) {
+            selection = s;
+            count++;
+          },
+        ),
+      ),
+    );
+
+    expect(selection, null);
+    expect(count, 0);
+
+    // Tap to put the cursor before the "F".
+    const int index = 7;
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      selection,
+      const TextSelection.collapsed(offset: index),
+    );
+    expect(count, 1); // The `onSelectionChanged` will be triggered one time.
+
+    // Tap on the same location again.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      selection,
+      const TextSelection.collapsed(offset: index),
+    );
+    expect(count, 1); // The `onSelectionChanged` will not be triggered.
+  });
 }
