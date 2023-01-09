@@ -337,9 +337,8 @@ class _TextPainterLayoutCache {
 
   List<TextBox>? _inlinePlaceholderBoxes;
   List<ui.LineMetrics>? _lineMetricsCache;
-  // Holds the TextPosition and caretPrototype the last caret metrics were
-  // computed with. When new values are passed in, we recompute the caret metrics.
-  // only as necessary.
+  // Holds the TextPosition the last caret metrics were computed with. When new
+  // values are passed in, we recompute the caret metrics. only as necessary.
   TextPosition? _previousCaretPosition;
 }
 
@@ -810,6 +809,9 @@ class TextPainter {
     final List<TextBox> rawBoxes = layout._inlinePlaceholderBoxes
                                ??= layout.paragraph.getBoxesForPlaceholders();
     final Offset offset = layout.offset;
+    if (!offset.dx.isFinite || !offset.dy.isFinite) {
+      return <TextBox>[];
+    }
     if (offset == Offset.zero) {
       return rawBoxes;
     }
@@ -1021,14 +1023,14 @@ class TextPainter {
     //
     // An exception to this is when the text is not left-aligned, and the input
     // width is double.infinity. Since the resulting Paragraph will have a width
-    // of double.infinity, to make the text visible the paintOffset.dx is bound
+    // of double.infinity, an to make the text visible the paintOffset.dx is bound
     // to be double.negativeInfinity, which invalidates all arithmetic operations.
     final bool needsLayout = cachedLayout == null
       || (maxWidth != cachedLayout.layout.width
         // Always needsLayout when the current paintOffset and the paragraph
         // width are not finite: we won't be able to translate the paint offset
         // using addition/subtraction.
-        && (!(cachedLayout.offset.dx.isFinite || cachedLayout.layout._paragraph.width.isFinite)
+        && ((!cachedLayout.offset.dx.isFinite && !cachedLayout.paragraph.width.isFinite)
           || cachedLayout.layout.width < cachedLayout.layout.maxIntrinsicLineExtent
           || maxWidth < cachedLayout.layout.maxIntrinsicLineExtent));
 
@@ -1038,7 +1040,7 @@ class TextPainter {
       // when the text is not left-aligned. When maxIntrinsicWidth is still
       // unkown, use a relatively large number with decent precision instead of
       // double.infinity.
-      const double largeWidth = 32768; // 2¹⁵, mantissa precision: 2¹⁵/2⁵² ≅ 7.2759576e-12.
+      const double largeWidth = 32768; // 2^15, mantissa precision: 2^15/2^52 ≅ 7.2759576e-12.
       final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
       final double adjustedMaxWidth = !adjustMaxWidth
         ? maxWidth
@@ -1046,6 +1048,8 @@ class TextPainter {
 
       final ui.Paragraph paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth));
 
+      // If largeWidth is not large enough for the text, we'll have to (at least)
+      // re-run the line breaking algorithm.
       if (adjustMaxWidth && paragraph.maxIntrinsicWidth > adjustedMaxWidth) {
         paragraph.layout(ui.ParagraphConstraints(width: paragraph.maxIntrinsicWidth));
       }
@@ -1172,9 +1176,9 @@ class TextPainter {
   // Unicode value for a zero width joiner character.
   static const int _zwjUtf16 = 0x200d;
 
-  // Get the Rect of the cursor (in logical pixels) based off the near edge
-  // of the character upstream from the given string offset.
-  _CaretMetrics? _getRectFromUpstream(int offset) {
+  // Get the caret metrics (in logical pixels) based off the near edge of the
+  // character upstream from the given string offset.
+  _CaretMetrics? _getMetricsFromUpstream(int offset) {
     final int plainTextLength = plainText.length;
     if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
@@ -1218,9 +1222,9 @@ class TextPainter {
     return null;
   }
 
-  // Get the Rect of the cursor (in logical pixels) based off the near edge
-  // of the character downstream from the given string offset.
-  _CaretMetrics? _getRectFromDownstream(int offset) {
+  // Get the caret metrics (in logical pixels) based off the near edge of the
+  // character downstream from the given string offset.
+  _CaretMetrics? _getMetricsFromDownstream(int offset) {
     final int plainTextLength = plainText.length;
     if (plainTextLength == 0 || offset < 0) {
       return null;
@@ -1270,7 +1274,8 @@ class TextPainter {
     if (caretMetrics is _EmptyLineCaretMetrics) {
       final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
       // The full width is not (layoutCache.contentWidth - caretPrototype.width)
-      // because RenderEditable reserves cursor width on the right.
+      // because RenderEditable reserves cursor width on the right. Ideally this
+      // should be handled by
       final double dx = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
       return Offset(dx, caretMetrics.lineVerticalOffset);
     }
@@ -1321,11 +1326,11 @@ class TextPainter {
     final _CaretMetrics? metrics;
     switch (position.affinity) {
       case TextAffinity.upstream: {
-        metrics = _getRectFromUpstream(offset) ?? _getRectFromDownstream(offset);
+        metrics = _getMetricsFromUpstream(offset) ?? _getMetricsFromDownstream(offset);
         break;
       }
       case TextAffinity.downstream: {
-        metrics = _getRectFromDownstream(offset) ?? _getRectFromUpstream(offset);
+        metrics = _getMetricsFromDownstream(offset) ?? _getMetricsFromUpstream(offset);
         break;
       }
     }
@@ -1367,6 +1372,9 @@ class TextPainter {
       boxWidthStyle: boxWidthStyle,
     );
     final Offset offset = cachedLayout.offset;
+    if (!offset.dx.isFinite || !offset.dy.isFinite) {
+      return <TextBox>[];
+    }
     return offset == Offset.zero
       ? boxes
       : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
@@ -1414,6 +1422,8 @@ class TextPainter {
   }
 
   static ui.LineMetrics _shiftLineMetrics(ui.LineMetrics metrics, Offset offset) {
+    assert(offset.dx.isFinite);
+    assert(offset.dy.isFinite);
     return ui.LineMetrics(
       hardBreak: metrics.hardBreak,
       ascent: metrics.ascent,
@@ -1428,6 +1438,8 @@ class TextPainter {
   }
 
   static TextBox _shiftTextBox(TextBox box, Offset offset) {
+    assert(offset.dx.isFinite);
+    assert(offset.dy.isFinite);
     return TextBox.fromLTRBD(
       box.left + offset.dx,
       box.top + offset.dy,
@@ -1452,6 +1464,9 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     final _TextPainterLayoutCache layout = _layoutCache!;
     final List<ui.LineMetrics> rawMetrics = layout._lineMetricsCache ??= layout.paragraph.computeLineMetrics();
+    if (!layout.offset.dx.isFinite || !layout.offset.dy.isFinite) {
+      return const <ui.LineMetrics>[];
+    }
     return layout.offset == Offset.zero
       ? rawMetrics
       : rawMetrics.map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, layout.offset)).toList(growable: false);
