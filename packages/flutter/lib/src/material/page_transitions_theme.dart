@@ -610,17 +610,13 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     this.allowEnterRouteSnapshotting = true,
   });
 
-  /// Whether to enable snapshotting on the enter route during the
-  /// transition animation. Defaults to true.
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
   ///
+  /// If not specified, defaults to true.
   /// If false, the route snapshotting will not be applied to the route being
-  /// animating into, e.g. when transitioning from route A to route B, if
-  /// [allowEnterRouteSnapshotting] is false, no snapshots will be taken
-  /// for route B and all animations playing in route B will be painted as they
-  /// are. Compared to full route snapshotting mode, this reflects route content
-  /// changes during the transition animation for cases where the full route
-  /// snapshotting is not acceptable. Note that this is a trade-off between
-  /// performance and fidelity.
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
   final bool allowEnterRouteSnapshotting;
 
   @override
