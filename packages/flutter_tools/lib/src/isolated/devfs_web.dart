@@ -926,14 +926,31 @@ class WebDevFS implements DevFS {
   }
 
   @visibleForTesting
-  final File requireJS = globals.fs.file(globals.fs.path.join(
-    globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
-    'lib',
-    'dev_compiler',
-    'kernel',
-    'amd',
-    'require.js',
-  ));
+  final File requireJS = (() {
+    // TODO(nshahan): Remove the initilizing function once the file location
+    //                change in the Dart SDK has landed and rolled to the engine
+    //                and flutter repos. There is no long-term need for the
+    //                fallback logic.
+    //                See https://github.com/flutter/flutter/issues/118119
+    final File oldFile = globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+      'lib',
+      'dev_compiler',
+      'kernel',
+      'amd',
+      'require.js',
+    ));
+
+    return oldFile.existsSync()
+      ? oldFile
+      : globals.fs.file(globals.fs.path.join(
+          globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+          'lib',
+          'dev_compiler',
+          'amd',
+          'require.js',
+        ));
+  })();
 
   @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
