@@ -530,7 +530,8 @@ if (is_mac) {
 
 if (host_os == "linux" || host_os == "win") {
   zip_bundle("embedder-archive") {
-    output = "$full_platform_name/$full_platform_name-embedder.zip"
+    output =
+        "$full_target_platform_name/$full_target_platform_name-embedder.zip"
     deps = [
       "//flutter/shell/platform/embedder:copy_headers",
       "//flutter/shell/platform/embedder:flutter_engine_library",
