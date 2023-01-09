@@ -158,9 +158,9 @@ class ParagraphBoundary extends TextBoundary {
           // The boundary will be created at the line feed.
           continue;
         }
-        // if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
-        //   continue;
-        // }
+        if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
+          continue;
+        }
         if (currentTextPosition < targetTextOffset) {
           // The target text position has not been passed yet but we arrived at a
           // line terminator. Offset the position by the length of the line terminator
@@ -197,9 +197,9 @@ class ParagraphBoundary extends TextBoundary {
           // The boundary will be created at the line feed.
           continue;
         }
-        // if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
-        //   continue;
-        // }
+        if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
+          continue;
+        }
         if (currentTextPosition > targetTextOffset) {
           // The target text position was passed. This means that the target position
           // is contained inside of a paragraph boundary.
@@ -237,9 +237,9 @@ class ParagraphBoundary extends TextBoundary {
           // The boundary will be created at the line feed.
           continue;
         }
-        // if (graphemeEnd - currentCodeUnit.length == targetTextOffset) {
-        //   continue;
-        // }
+        if (graphemeEnd - currentCodeUnit.length == targetTextOffset) {
+          continue;
+        }
         if (graphemeEnd < targetTextOffset) {
           // The target text position has not been passed yet but we arrived at a
           // line terminator. Offset the position by the length of the line terminator
