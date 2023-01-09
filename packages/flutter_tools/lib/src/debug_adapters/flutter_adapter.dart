@@ -148,6 +148,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
       customTool: args.customTool,
       customToolReplacesArgs: args.customToolReplacesArgs,
       userToolArgs: args.toolArgs,
+      targetProgram: args.program,
     );
   }
 
