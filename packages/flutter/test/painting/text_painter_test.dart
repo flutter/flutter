@@ -190,9 +190,9 @@ void main() {
 
   test('TextPainter requires textDirection', () {
     final TextPainter painter1 = TextPainter(text: const TextSpan(text: ''));
-    expect(() { painter1.layout(); }, throwsAssertionError);
+    expect(painter1.layout, throwsStateError);
     final TextPainter painter2 = TextPainter(text: const TextSpan(text: ''), textDirection: TextDirection.rtl);
-    expect(() { painter2.layout(); }, isNot(throwsException));
+    expect(painter2.layout, isNot(throwsStateError));
   });
 
   test('TextPainter size test', () {

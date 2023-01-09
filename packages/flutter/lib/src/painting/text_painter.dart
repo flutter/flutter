@@ -325,7 +325,10 @@ class _TextLayout {
 }
 
 class _TextPainterLayoutCache {
-  _TextPainterLayoutCache(this.layout, this.offset, this.contentWidth);
+  _TextPainterLayoutCache(this.layout, this.offset, this.contentWidth)
+    : assert(offset.dy == 0),
+      assert(!offset.dx.isNaN);
+
   final _TextLayout layout;
   double contentWidth;
   Offset offset;
@@ -338,20 +341,35 @@ class _TextPainterLayoutCache {
   // computed with. When new values are passed in, we recompute the caret metrics.
   // only as necessary.
   TextPosition? _previousCaretPosition;
-  Rect? _previousCaretPrototype;
 }
 
 /// This is used to cache and pass the computed metrics regarding the
 /// caret's size and position. This is preferred due to the expensive
 /// nature of the calculation.
-class _CaretMetrics {
-  const _CaretMetrics({required this.offset, this.fullHeight});
+//  This should be a sealed class: A _CaretMetrics is either a _LineCaretMetrics
+//  or an _EmptyLineCaretMetrics.
+class _CaretMetrics {}
+
+// The _caretMetrics for carets located in a non-empty line. Carets located in a
+// non-empty line are associated with a glyph within the same line.
+class _LineCaretMetrics implements _CaretMetrics {
+  const _LineCaretMetrics({required this.offset, required this.writingDirection, required this.fullHeight});
   /// The offset of the top left corner of the caret from the top left
   /// corner of the paragraph.
   final Offset offset;
-
+  /// The writing direction
+  final TextDirection writingDirection;
   /// The full height of the glyph at the caret position.
-  final double? fullHeight;
+  final double fullHeight;
+}
+
+// The _CaretMetrics for carets that on an unoccupied line (when the text is
+// empty or immediately after a newline character).
+class _EmptyLineCaretMetrics implements _CaretMetrics {
+  const _EmptyLineCaretMetrics({ required this.lineVerticalOffset });
+
+  /// The y offset of the unoccupied line.
+  final double lineVerticalOffset;
 }
 
 /// An object that paints a [TextSpan] tree into a [Canvas].
@@ -627,6 +645,33 @@ class TextPainter {
     markNeedsLayout();
     _layoutTemplate?.dispose();
     _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
+  }
+
+  static double _computePaintOffsetFraction(TextAlign textAlign, TextDirection textDirection) {
+    switch (textAlign) {
+      case TextAlign.left:
+        return 0;
+      case TextAlign.right:
+        return 1;
+      case TextAlign.center:
+        return 0.5;
+      case TextAlign.start:
+      // eot is also considered a hard break.
+      case TextAlign.justify:
+        switch (textDirection) {
+          case TextDirection.rtl:
+            return 1;
+          case TextDirection.ltr:
+            return 0;
+        }
+      case TextAlign.end:
+        switch (textDirection) {
+          case TextDirection.rtl:
+            return 0;
+          case TextDirection.ltr:
+            return 1;
+        }
+    }
   }
 
   /// The number of font pixels for each logical pixel.
@@ -945,44 +990,6 @@ class TextPainter {
     return builder.build();
   }
 
-  Offset _computePaintOffsetWithConstraints(_TextLayout newLayout, double desiredWidth) {
-    final double newPaintOffsetX;
-    switch (textAlign) {
-      case TextAlign.left:
-        newPaintOffsetX = 0;
-        break;
-      case TextAlign.right:
-        newPaintOffsetX = desiredWidth - newLayout.width;
-        break;
-      case TextAlign.center:
-        newPaintOffsetX = (desiredWidth - newLayout.width) / 2;
-        break;
-      case TextAlign.start:
-      // eot is also considered a hard break.
-      case TextAlign.justify:
-        switch (textDirection!) {
-          case TextDirection.rtl:
-            newPaintOffsetX = desiredWidth - newLayout.width;
-            break;
-          case TextDirection.ltr:
-            newPaintOffsetX = 0;
-            break;
-        }
-        break;
-      case TextAlign.end:
-        switch (textDirection!) {
-          case TextDirection.rtl:
-            newPaintOffsetX = 0;
-            break;
-          case TextDirection.ltr:
-            newPaintOffsetX = desiredWidth - newLayout.width;
-            break;
-        }
-        break;
-    }
-    return Offset(newPaintOffsetX, 0);
-  }
-
   /// Computes the visual position of the glyphs for painting the text.
   ///
   /// The text will layout with a width that's as close to its max intrinsic
@@ -992,33 +999,60 @@ class TextPainter {
   /// The [text] and [textDirection] properties must be non-null before this is
   /// called.
   void layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
+    assert(!maxWidth.isNaN);
+    assert(!minWidth.isNaN);
     final InlineSpan? text = this.text;
     if (text == null) {
       throw StateError('TextPainter.text must be set to a non-null value before using the TextPainter.');
     }
-    assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
+    final TextDirection? textDirection = this.textDirection;
+    if (textDirection == null) {
+      throw StateError('TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
+    }
     final _TextPainterLayoutCache? cachedLayout = _layoutCache;
-    // This is done to match the SkParagraph behavior (which in turn is there
-    // to match the libtxt behavior).
-    //minWidth = minWidth.floorToDouble();
-    //maxWidth = maxWidth.floorToDouble();
+    final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection);
 
-    // If the given maxWidth is still greater than or equal to the max intrinsic
-    // width, there's no need to call layout on the paragraph again: there will
-    // be no soft line breaks so there's little point in running the line break
-    // algorithm again. For TextAlign.justify, eot is also considered a hard
-    // line break so it will behave exactly the same as TextAlign.start.
+    // The assumption here is that if a Paragraph's width is already >= its
+    // maxIntrinsicWidth, further increasing the input width does not change its
+    // layout (but may change the paint offset if it's not left-aligned). This is
+    // true even for TextAlign.justify, since eot is also considered a hard
+    // line break so it will behave exactly the same as TextAlign.start when its
+    // width >= maxIntrinsicWidth.
+    //
+    // An exception to this is when the text is not left-aligned, and the input
+    // width is double.infinity. Since the resulting Paragraph will have a width
+    // of double.infinity, to make the text visible the paintOffset.dx is bound
+    // to be double.negativeInfinity, which invalidates all arithmetic operations.
     final bool needsLayout = cachedLayout == null
-      || (maxWidth != cachedLayout.layout.width && (cachedLayout.layout.width < cachedLayout.layout.maxIntrinsicLineExtent || maxWidth < cachedLayout.layout.maxIntrinsicLineExtent));
+      || (maxWidth != cachedLayout.layout.width
+        // Always needsLayout when the current paintOffset and the paragraph
+        // width are not finite: we won't be able to translate the paint offset
+        // using addition/subtraction.
+        && (!(cachedLayout.offset.dx.isFinite || cachedLayout.layout._paragraph.width.isFinite)
+          || cachedLayout.layout.width < cachedLayout.layout.maxIntrinsicLineExtent
+          || maxWidth < cachedLayout.layout.maxIntrinsicLineExtent));
 
-    final double? knownMaxIntrinsicWidth = cachedLayout?.layout.maxIntrinsicLineExtent;
-    final double adjustedMaxWidth = knownMaxIntrinsicWidth != null
-     ? min(knownMaxIntrinsicWidth, maxWidth)
-     : maxWidth;
+    final _TextLayout newLayout;
+    if (needsLayout) {
+      // Try to avoid laying out the paragraph with maxWith=double.infinity
+      // when the text is not left-aligned. When maxIntrinsicWidth is still
+      // unkown, use a relatively large number with decent precision instead of
+      // double.infinity.
+      const double largeWidth = 32768; // 2¹⁵, mantissa precision: 2¹⁵/2⁵² ≅ 7.2759576e-12.
+      final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
+      final double adjustedMaxWidth = !adjustMaxWidth
+        ? maxWidth
+        : cachedLayout?.layout.maxIntrinsicLineExtent ?? largeWidth;
 
-    final _TextLayout newLayout = needsLayout
-      ? _TextLayout._(_createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth)))
-      : cachedLayout.layout;
+      final ui.Paragraph paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth));
+
+      if (adjustMaxWidth && paragraph.maxIntrinsicWidth > adjustedMaxWidth) {
+        paragraph.layout(ui.ParagraphConstraints(width: paragraph.maxIntrinsicWidth));
+      }
+      newLayout = _TextLayout._(paragraph);
+    } else {
+      newLayout = cachedLayout.layout;
+    }
 
     final double intrinsicWidth;
     switch (textWidthBasis) {
@@ -1032,31 +1066,17 @@ class TextPainter {
 
     // The content width the text painter should report after applying this
     // paintOffset;
-    final double contentWidth = minWidth.isFinite
-      ? clampDouble(intrinsicWidth, minWidth, maxWidth).floorToDouble()
-      : intrinsicWidth.floorToDouble();  // but why?
-    final Offset testPaintOffset = _computePaintOffsetWithConstraints(newLayout, contentWidth);
-    final Offset newPaintOffset;
-    assert(testPaintOffset.dy == 0);
-    // Unfortunately we can't deal with infinity so layout a second time.
-    if (!testPaintOffset.dx.isFinite) {
-      assert(maxWidth.isInfinite);
-      newLayout._paragraph.layout(ui.ParagraphConstraints(width: contentWidth));
-      newPaintOffset = _computePaintOffsetWithConstraints(newLayout, contentWidth);
-    } else {
-      newPaintOffset = testPaintOffset;
-    }
-    assert(newPaintOffset.dx.isFinite);
-    assert(newPaintOffset.dy == 0);
-
+    final double contentWidth = clampDouble(intrinsicWidth, minWidth, maxWidth);
+    final double originX = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * (contentWidth - newLayout._paragraph.width);
     if (needsLayout) {
+      // If needsLayout is false, we'll rebuild the paragraph in the paint method.
       _rebuildParagraphForPaint = false;
       _layoutCache?.paragraph.dispose();
-      _layoutCache = _TextPainterLayoutCache(newLayout, newPaintOffset, contentWidth);
+      _layoutCache = _TextPainterLayoutCache(newLayout, Offset(originX, 0), contentWidth);
     } else {
       assert(cachedLayout.layout == newLayout);
       cachedLayout.contentWidth = contentWidth;
-      cachedLayout.offset = testPaintOffset;
+      cachedLayout.offset = Offset(originX, 0);
     }
   }
 
@@ -1079,6 +1099,10 @@ class TextPainter {
         'TextPainter.paint called when text geometry was not yet calculated.\n'
         'Please call layout() before paint() to position the text before painting it.',
       );
+    }
+
+    if (!layoutCache.offset.dx.isFinite || !layoutCache.offset.dy.isFinite) {
+      return;
     }
 
     if (_rebuildParagraphForPaint) {
@@ -1150,7 +1174,7 @@ class TextPainter {
 
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
-  Rect? _getRectFromUpstream(int offset, Rect caretPrototype) {
+  _CaretMetrics? _getRectFromUpstream(int offset) {
     final int plainTextLength = plainText.length;
     if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
@@ -1187,22 +1211,16 @@ class TextPainter {
         continue;
       }
       final TextBox box = boxes.first;
-
-      if (prevCodeUnit == NEWLINE_CODE_UNIT) {
-        return Rect.fromLTRB(_emptyOffset.dx, box.bottom, _emptyOffset.dx, box.bottom + box.bottom - box.top);
-      }
-
-      final double caretEnd = box.end;
-      final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-      return Rect.fromLTRB(clampDouble(dx, 0, _layoutCache!.paragraph.width), box.top,
-          clampDouble(dx, 0, _layoutCache!.paragraph.width), box.bottom);
+      return prevCodeUnit == NEWLINE_CODE_UNIT
+        ? _EmptyLineCaretMetrics(lineVerticalOffset: box.bottom)
+        : _LineCaretMetrics(offset: Offset(box.end, box.top), writingDirection: box.direction, fullHeight: box.bottom - box.top);
     }
     return null;
   }
 
   // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character downstream from the given string offset.
-  Rect? _getRectFromDownstream(int offset, Rect caretPrototype) {
+  _CaretMetrics? _getRectFromDownstream(int offset) {
     final int plainTextLength = plainText.length;
     if (plainTextLength == 0 || offset < 0) {
       return null;
@@ -1237,49 +1255,42 @@ class TextPainter {
         continue;
       }
       final TextBox box = boxes.last;
-      final double caretStart = box.start;
-      final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-      return Rect.fromLTRB(clampDouble(dx, 0, _layoutCache!.paragraph.width), box.top, clampDouble(dx, 0, _layoutCache!.paragraph.width), box.bottom);
+      return _LineCaretMetrics(offset: Offset(box.start, box.top), writingDirection: box.direction, fullHeight: box.bottom - box.top);
     }
     return null;
-  }
-
-  Offset get _emptyOffset {
-    assert(_debugAssertTextLayoutIsValid); // implies textDirection is non-null
-    assert(textAlign != null);
-    switch (textAlign) {
-      case TextAlign.left:
-        return Offset.zero;
-      case TextAlign.right:
-        return Offset(_layoutCache!.layout.width, 0.0);
-      case TextAlign.center:
-        return Offset(_layoutCache!.layout.width / 2.0, 0.0);
-      case TextAlign.justify:
-      case TextAlign.start:
-        assert(textDirection != null);
-        switch (textDirection!) {
-          case TextDirection.rtl:
-            return Offset(_layoutCache!.layout.width, 0.0);
-          case TextDirection.ltr:
-            return Offset.zero;
-        }
-      case TextAlign.end:
-        assert(textDirection != null);
-        switch (textDirection!) {
-          case TextDirection.rtl:
-            return Offset.zero;
-          case TextDirection.ltr:
-            return Offset(_layoutCache!.layout.width, 0.0);
-        }
-    }
   }
 
   /// Returns the offset at which to paint the caret.
   ///
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    _computeCaretMetrics(position, caretPrototype);
-    return _caretMetrics.offset + _layoutCache!.offset;
+    final _CaretMetrics caretMetrics = _computeCaretMetrics(position);
+    final _TextPainterLayoutCache layoutCache = _layoutCache!;
+
+    if (caretMetrics is _EmptyLineCaretMetrics) {
+      final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
+      // The full width is not (layoutCache.contentWidth - caretPrototype.width)
+      // because RenderEditable reserves cursor width on the right.
+      final double dx = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
+      return Offset(dx, caretMetrics.lineVerticalOffset);
+    }
+
+    final Offset offset;
+    switch ((caretMetrics as _LineCaretMetrics).writingDirection) {
+      case TextDirection.rtl:
+        offset = Offset(caretMetrics.offset.dx - caretPrototype.width, caretMetrics.offset.dy) + layoutCache.offset;
+        break;
+      case TextDirection.ltr:
+        offset = caretMetrics.offset + layoutCache.offset;
+        break;
+    }
+    // If offset.dx is outside of the advertised content area, then the associated
+    // glyph belongs to a trailing newline character. Ideally the behavior
+    // should be handled by higher-level implementations (for instance,
+    // RenderEditable reserves width for showing the caret, it's best to handle
+    // the clamping there).
+    final double adjustedDx = clampDouble(offset.dx, 0, layoutCache.contentWidth);
+    return Offset(adjustedDx, offset.dy);
   }
 
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}
@@ -1288,8 +1299,8 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
-    _computeCaretMetrics(position, caretPrototype);
-    return _caretMetrics.fullHeight;
+    final _CaretMetrics caretMetrics = _computeCaretMetrics(position);
+    return caretMetrics is _LineCaretMetrics ? caretMetrics.fullHeight : null;
   }
 
   // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
@@ -1299,33 +1310,28 @@ class TextPainter {
 
   // Checks if the [position] and [caretPrototype] have changed from the cached
   // version and recomputes the metrics required to position the caret.
-  void _computeCaretMetrics(TextPosition position, Rect caretPrototype) {
+  _CaretMetrics _computeCaretMetrics(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     final _TextPainterLayoutCache cachedLayout = _layoutCache!;
-    if (position == cachedLayout._previousCaretPosition && caretPrototype == cachedLayout._previousCaretPrototype) {
-      return;
+    if (position == cachedLayout._previousCaretPosition) {
+      return _caretMetrics;
     }
     final int offset = position.offset;
     assert(position.affinity != null);
-    Rect? rect;
+    final _CaretMetrics? metrics;
     switch (position.affinity) {
       case TextAffinity.upstream: {
-        rect = _getRectFromUpstream(offset, caretPrototype) ?? _getRectFromDownstream(offset, caretPrototype);
+        metrics = _getRectFromUpstream(offset) ?? _getRectFromDownstream(offset);
         break;
       }
       case TextAffinity.downstream: {
-        rect = _getRectFromDownstream(offset, caretPrototype) ??  _getRectFromUpstream(offset, caretPrototype);
+        metrics = _getRectFromDownstream(offset) ?? _getRectFromUpstream(offset);
         break;
       }
     }
-    _caretMetrics = _CaretMetrics(
-      offset: rect?.topLeft ?? _emptyOffset,
-      fullHeight: rect != null ? rect.bottom - rect.top : null,
-    );
-
     // Cache the input parameters to prevent repeat work later.
     cachedLayout._previousCaretPosition = position;
-    cachedLayout._previousCaretPrototype = caretPrototype;
+    return _caretMetrics = metrics ?? const _EmptyLineCaretMetrics(lineVerticalOffset: 0);
   }
 
   /// Returns a list of rects that bound the given selection.
