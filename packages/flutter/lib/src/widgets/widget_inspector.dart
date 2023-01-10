@@ -1525,7 +1525,7 @@ mixin WidgetInspectorService {
     return false;
   }
 
-  /// Notify debuggers to open an inspector on the object.
+  /// Notify attached tools to navigate to an object's source location.
   void _sendInspectEvent(Object? object){
     inspect(object);
 
