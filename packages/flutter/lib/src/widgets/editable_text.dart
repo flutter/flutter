@@ -3093,12 +3093,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void connectionClosed() {
-    if (_hasInputConnection) {
-      _textInputConnection!.connectionClosedReceived();
-      _textInputConnection = null;
-      _lastKnownRemoteTextEditingValue = null;
-      _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
+    if (!_hasInputConnection) {
+      return;
     }
+    _textInputConnection = null;
+    _lastKnownRemoteTextEditingValue = null;
+    _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
   }
 
   /// Express interest in interacting with the keyboard.

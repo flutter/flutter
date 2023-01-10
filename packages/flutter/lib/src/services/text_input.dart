@@ -1463,10 +1463,14 @@ class TextInputConnection {
 
   /// Platform sent a notification informing the connection is closed.
   ///
-  /// [TextInputConnection] should clean current client connection.
+  /// [TextInputConnection] should clean the current client connection.
   void connectionClosedReceived() {
+    if (!attached) {
+      return;
+    }
     TextInput._instance._currentConnection = null;
     assert(!attached);
+    _client.connectionClosed();
   }
 }
 
@@ -1897,7 +1901,7 @@ class TextInput {
         ));
         break;
       case 'TextInputClient.onConnectionClosed':
-        _currentConnection!._client.connectionClosed();
+        _currentConnection!.connectionClosedReceived();
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
