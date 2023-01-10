@@ -116,8 +116,8 @@ class LinearBorderEdge {
 /// ```dart
 ///  TextButton(
 ///    style: TextButton.styleFrom(
-///      side: BorderSide(color: Colors.red),
-///      shape: LinearBorder(
+///      side: const BorderSide(color: Colors.red),
+///      shape: const LinearBorder(
 ///        side: BorderSide(color: Colors.blue),
 ///        bottom: LinearBorderEdge(),
 ///      ),
