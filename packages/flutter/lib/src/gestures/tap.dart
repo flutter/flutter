@@ -358,13 +358,16 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 /// one non-null `onTertiaryTap*` callback. If it has no callbacks, it is a
 /// no-op.
 ///
+/// {@template flutter.gestures.tap.TapGestureRecognizer.allowedButtonsFilter}
 /// The [allowedButtonsFilter] argument only gives this recognizer the
 /// ability to limit the buttons it accepts. It does not provide the
 /// ability to recognize any buttons beyond the ones it already accepts:
 /// kPrimaryButton, kSecondaryButton or kTertiaryButton. Therefore, a
 /// combined value of `kPrimaryButton & kSecondaryButton` would be ignored,
 /// but `kPrimaryButton | kSecondaryButton` would be allowed, as long as
-/// only one of them is tapped at a time.
+/// only one of them is selected at a time.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [GestureDetector.onTap], which uses this recognizer.
