@@ -44,6 +44,20 @@ class ActionButtonIconsData with Diagnosticable {
   /// fallbacks to the platform's default end drawer button icon.
   final WidgetBuilder? endDrawerButtonIconBuilder;
 
+  ActionButtonIconsData copyWith({
+    WidgetBuilder? backButtonIconBuilder,
+    WidgetBuilder? closeButtonIconBuilder,
+    WidgetBuilder? drawerButtonIconBuilder,
+    WidgetBuilder? endDrawerButtonIconBuilder,
+  }) {
+    return ActionButtonIconsData(
+      backButtonIconBuilder: backButtonIconBuilder ?? backButtonIconBuilder,
+      closeButtonIconBuilder: closeButtonIconBuilder ?? closeButtonIconBuilder,
+      drawerButtonIconBuilder: drawerButtonIconBuilder ?? drawerButtonIconBuilder,
+      endDrawerButtonIconBuilder: endDrawerButtonIconBuilder ?? endDrawerButtonIconBuilder,
+    );
+  }
+
   /// Linearly interpolate between two action button icons data.
   static ActionButtonIconsData? lerp(
       ActionButtonIconsData? a, ActionButtonIconsData? b, double t) {
