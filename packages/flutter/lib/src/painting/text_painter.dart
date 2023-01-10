@@ -348,9 +348,9 @@ class _TextPainterLayoutCache {
 /// This is used to cache and pass the computed metrics regarding the
 /// caret's size and position. This is preferred due to the expensive
 /// nature of the calculation.
-//  This should be a sealed class: A _CaretMetrics is either a _LineCaretMetrics
-//  or an _EmptyLineCaretMetrics.
-class _CaretMetrics {}
+// This should be a sealed class: A _CaretMetrics is either a _LineCaretMetrics
+// or an _EmptyLineCaretMetrics.
+class _CaretMetrics { }
 
 // The _caretMetrics for carets located in a non-empty line. Carets located in a
 // non-empty line are associated with a glyph within the same line.
@@ -652,26 +652,25 @@ class TextPainter {
   static double _computePaintOffsetFraction(TextAlign textAlign, TextDirection textDirection) {
     switch (textAlign) {
       case TextAlign.left:
-        return 0;
+        return 0.0;
       case TextAlign.right:
-        return 1;
+        return 1.0;
       case TextAlign.center:
         return 0.5;
       case TextAlign.start:
-      // eot is also considered a hard break.
       case TextAlign.justify:
         switch (textDirection) {
           case TextDirection.rtl:
-            return 1;
+            return 1.0;
           case TextDirection.ltr:
-            return 0;
+            return 0.0;
         }
       case TextAlign.end:
         switch (textDirection) {
           case TextDirection.rtl:
-            return 0;
+            return 0.0;
           case TextDirection.ltr:
-            return 1;
+            return 1.0;
         }
     }
   }
@@ -1014,15 +1013,16 @@ class TextPainter {
     if (textDirection == null) {
       throw StateError('TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     }
+    minWidth = minWidth.floorToDouble();
+    maxWidth = maxWidth.floorToDouble();
     final _TextPainterLayoutCache? cachedLayout = _layoutCache;
     final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection);
 
     // The assumption here is that if a Paragraph's width is already >= its
     // maxIntrinsicWidth, further increasing the input width does not change its
     // layout (but may change the paint offset if it's not left-aligned). This is
-    // true even for TextAlign.justify, since eot is also considered a hard
-    // line break so it will behave exactly the same as TextAlign.start when its
-    // width >= maxIntrinsicWidth.
+    // true even for TextAlign.justify, since when width >= maxIntrinsicWidth
+    // TextAlign.justify will behave exactly the same as TextAlign.start.
     //
     // An exception to this is when the text is not left-aligned, and the input
     // width is double.infinity. Since the resulting Paragraph will have a width
@@ -1040,22 +1040,23 @@ class TextPainter {
 
     final _TextLayout newLayout;
     if (needsLayout) {
-      // Try to avoid laying out the paragraph with maxWith=double.infinity
+      // Try to avoid laying out the paragraph with maxWidth=double.infinity
       // when the text is not left-aligned. When maxIntrinsicWidth is still
-      // unkown, use a relatively large number with decent precision instead of
-      // double.infinity.
+      // unknown, use a relatively large number with decent precision instead of
+      // double.infinity. If that width is still not large enough, a second
+      // layout call is needed now that maxIntrinsicWidth is avaiable.
       const double largeWidth = 32768; // 2^15, mantissa precision: 2^15/2^52 ≅ 7.2759576e-12.
       final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
       final double adjustedMaxWidth = !adjustMaxWidth
         ? maxWidth
         : cachedLayout?.layout.maxIntrinsicLineExtent ?? largeWidth;
 
-      final ui.Paragraph paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth));
+      final ui.Paragraph paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth.ceilToDouble()));
 
-      // If largeWidth is not large enough for the text, we'll have to (at least)
+      // If largeWidth is not large enough for the text, we'll have to at least
       // re-run the line breaking algorithm.
       if (adjustMaxWidth && paragraph.maxIntrinsicWidth > adjustedMaxWidth) {
-        paragraph.layout(ui.ParagraphConstraints(width: paragraph.maxIntrinsicWidth));
+        paragraph.layout(ui.ParagraphConstraints(width: paragraph.maxIntrinsicWidth.ceilToDouble()));
       }
       newLayout = _TextLayout._(paragraph);
     } else {
@@ -1072,8 +1073,7 @@ class TextPainter {
         break;
     }
 
-    // The content width the text painter should report after applying this
-    // paintOffset;
+    // The content width the text painter should report in TextPainter.width.
     final double contentWidth = clampDouble(intrinsicWidth, minWidth, maxWidth);
     final double originX = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * (contentWidth - newLayout._paragraph.width);
     if (needsLayout) {
@@ -1122,9 +1122,9 @@ class TextPainter {
       }());
 
       final ui.Paragraph paragraph = layoutCache.layout._paragraph;
-      // Unfortunately even we know for sure that there is only paint changes,
-      // there's no API to only make those updates so the paragraph has to be
-      // recreated and redo layout.
+      // Unfortunately even if we know that there is only paint changes, there's
+      // no API to only make those updates so the paragraph has to be recreated
+      // and redo layout.
       layoutCache.layout._paragraph = _createParagraph(text!)..layout(ui.ParagraphConstraints(width: layoutCache.layout.width));
       assert(paragraph.width == layoutCache.layout.width);
       paragraph.dispose();
