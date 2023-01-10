@@ -247,6 +247,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// The [duration] argument can be used to overwrite the default duration
   /// after which the long press will be recognized.
   ///
+  /// The [allowedButtonsFilter] argument only gives this recognizer the
+  /// ability to limit the buttons it accepts. It does not provide the
+  /// ability to recognize any buttons beyond the ones it already accepts:
+  /// kPrimaryButton, kSecondaryButton or kTertiaryButton. Therefore, a
+  /// combined value of `kPrimaryButton & kSecondaryButton` would be ignored,
+  /// but `kPrimaryButton | kSecondaryButton` would be allowed, as long as
+  /// only one of them is long pressed at a time.
+  ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
     Duration? duration,
