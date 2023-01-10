@@ -143,7 +143,7 @@ class CreateCommand extends CreateBase {
     }
   }
 
-  FlutterProjectType _getProjectType(Directory projectDir) {
+  Future<FlutterProjectType> _getProjectType(Directory projectDir) async {
     FlutterProjectType? template;
     FlutterProjectType? detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
@@ -154,7 +154,7 @@ class CreateCommand extends CreateBase {
     // If the project directory exists and isn't empty, then try to determine the template
     // type from the project directory.
     if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-      detectedProjectType = determineTemplateType();
+      detectedProjectType = await determineTemplateType();
       if (detectedProjectType == null && metadataExists) {
         // We can only be definitive that this is the wrong type if the .metadata file
         // exists and contains a type that we don't understand, or doesn't contain a type.
@@ -175,6 +175,8 @@ class CreateCommand extends CreateBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    // TODO validate template
+
     final String? listSamples = stringArg('list-samples');
     if (listSamples != null) {
       // _writeSamplesJson can potentially be long-lived.
@@ -203,7 +205,7 @@ class CreateCommand extends CreateBase {
       sampleCode = await _fetchSampleFromServer(sampleArgument);
     }
 
-    final FlutterProjectType template = _getProjectType(projectDir);
+    final FlutterProjectType template = await _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
     final bool generateMethodChannelsPlugin = template == FlutterProjectType.plugin;
     final bool generateFfiPlugin = template == FlutterProjectType.pluginFfi;

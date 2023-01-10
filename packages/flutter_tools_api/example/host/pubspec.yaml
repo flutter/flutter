@@ -1,0 +1,11 @@
+name: flutter_tools_api_example_host
+description: a minimal host that can be extended with the flutter_tools_api.
+
+publish_to: none
+
+environment:
+  sdk: '>=2.18.0 <4.0.0'
+
+dependencies:
+  flutter_tools_api:
+    path: ../..

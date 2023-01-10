@@ -21,6 +21,8 @@ dependencies:
   http: 0.13.6
   intl: 0.18.1
   meta: 1.9.1
+  flutter_tools_api:
+    path: '../flutter_tools_api'
   multicast_dns: 0.3.2+3
   mustache_template: 2.0.0
   package_config: 2.1.0

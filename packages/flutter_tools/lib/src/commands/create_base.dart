@@ -215,12 +215,11 @@ abstract class CreateBase extends FlutterCommand {
   /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
   @protected
-  FlutterProjectType? determineTemplateType() {
+  Future<FlutterProjectType?> determineTemplateType() async {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
     final File metadataFile = globals.fs
         .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
-    final FlutterProjectMetadata projectMetadata =
-        FlutterProjectMetadata(metadataFile, globals.logger);
+    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, globals.logger);
     final FlutterProjectType? projectType = projectMetadata.projectType;
     if (projectType != null) {
       return projectType;
