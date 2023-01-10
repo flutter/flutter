@@ -174,7 +174,7 @@ class ParagraphBoundary extends TextBoundary {
     int index = position;
     int endIndex = _text.length;
 
-    if (position > _text.length) {
+    if (position >= _text.length) {
       return null;
     }
 
