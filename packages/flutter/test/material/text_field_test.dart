@@ -26,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/live_text_input_tester.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -213,6 +214,8 @@ void main() {
   testWidgets(
     'Live Text button shows and hide correctly when LiveTextStatus changes.',
     (WidgetTester tester) async {
+      final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
       final TextEditingController controller = TextEditingController(text: '');
       const Key key = ValueKey<String>('TextField');
       final FocusNode focusNode = FocusNode();
@@ -229,7 +232,7 @@ void main() {
         ),
       );
 
-      mockClipboard.mockLiveTextInputEnabled = true;
+      liveTextInputTester.mockLiveTextInputEnabled = true;
       await tester.pumpWidget(app);
       focusNode.requestFocus();
       await tester.pumpAndSettle();
@@ -242,7 +245,7 @@ void main() {
         kIsWeb ? findsNothing : findsOneWidget,
       );
 
-      mockClipboard.mockLiveTextInputEnabled = false;
+      liveTextInputTester.mockLiveTextInputEnabled = false;
       await tester.longPress(textFinder);
       await tester.pumpAndSettle();
       expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsNothing);

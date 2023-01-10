@@ -26,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController;
+import '../widgets/live_text_input_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
@@ -159,7 +160,6 @@ class PathPointsMatcher extends Matcher {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -204,15 +204,20 @@ void main() {
   Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
+
   testWidgets(
     'Live Text button shows and hide correctly when LiveTextStatus changes.',
     (WidgetTester tester) async {
+      final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
+
       final TextEditingController controller = TextEditingController(text: '');
       const Key key = ValueKey<String>('TextField');
       final FocusNode focusNode = FocusNode();
@@ -229,7 +234,7 @@ void main() {
         ),
       );
 
-      mockClipboard.mockLiveTextInputEnabled = true;
+      liveTextInputTester.mockLiveTextInputEnabled = true;
       await tester.pumpWidget(app);
       focusNode.requestFocus();
       await tester.pumpAndSettle();
@@ -242,7 +247,7 @@ void main() {
         kIsWeb ? findsNothing : findsOneWidget,
       );
 
-      mockClipboard.mockLiveTextInputEnabled = false;
+      liveTextInputTester.mockLiveTextInputEnabled = false;
       await tester.longPress(textFinder);
       await tester.pumpAndSettle();
       expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsNothing);

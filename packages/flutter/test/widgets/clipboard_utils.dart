@@ -11,8 +11,6 @@ class MockClipboard {
 
   final bool hasStringsThrows;
 
-  bool mockLiveTextInputEnabled = false;
-
   dynamic clipboardData = <String, dynamic>{
     'text': null,
   };
@@ -31,8 +29,6 @@ class MockClipboard {
       case 'Clipboard.setData':
         clipboardData = methodCall.arguments;
         break;
-      case 'LiveText.isLiveTextInputAvailable':
-        return mockLiveTextInputEnabled;
     }
     return null;
   }
