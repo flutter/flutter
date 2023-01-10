@@ -70,6 +70,7 @@ enum AssetKind {
   regular,
   font,
   shader,
+  model,
 }
 
 abstract class AssetBundle {
@@ -770,6 +771,20 @@ class ManifestAssetBundle implements AssetBundle {
           assetKind: AssetKind.shader,
         );
       }
+    }
+
+    for (final Uri modelUri in flutterManifest.models) {
+      _parseAssetFromFile(
+        packageConfig,
+        flutterManifest,
+        assetBase,
+        cache,
+        result,
+        modelUri,
+        packageName: packageName,
+        attributedPackage: attributedPackage,
+        assetKind: AssetKind.model,
+      );
     }
 
     // Add assets referenced in the fonts section of the manifest.

@@ -13,6 +13,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/common.dart';
+import 'build_system/targets/scene_importer.dart';
 import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -158,6 +159,13 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
+  final SceneImporter sceneImporter = SceneImporter(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts!,
+  );
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -187,6 +195,12 @@ Future<void> writeBundle(
                 outputPath: file.path,
                 target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
                 json: targetPlatform == TargetPlatform.web_javascript,
+              );
+              break;
+            case AssetKind.model:
+              doCopy = !await sceneImporter.importScene(
+                input: input,
+                outputPath: file.path,
               );
               break;
           }
