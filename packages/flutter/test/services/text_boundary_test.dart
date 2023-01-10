@@ -161,12 +161,27 @@ void main() {
     const String textB = 'abcd efg hi\r\njklmno\npqrstuv';
     const ParagraphBoundary boundaryB = ParagraphBoundary(textB);
     expect(boundaryB.getLeadingTextBoundaryAt(position), 0);
-    expect(boundaryB.getTrailingTextBoundaryAt(position), 13);//11
+    expect(boundaryB.getTrailingTextBoundaryAt(position), 13);
 
     const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
     const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
+    const int positionC = 18;
     expect(boundaryC.getLeadingTextBoundaryAt(position), 0);
     expect(boundaryC.getTrailingTextBoundaryAt(position), 13);
+    expect(boundaryC.getLeadingTextBoundaryAt(positionC), 18);
+    expect(boundaryC.getTrailingTextBoundaryAt(positionC), 19);
+
+    const String textD = 'abcd efg hi\r\n\n\n\n';
+    const ParagraphBoundary boundaryD = ParagraphBoundary(textD);
+    const int positionD = 14;
+    expect(boundaryD.getLeadingTextBoundaryAt(positionD), 14);
+    expect(boundaryD.getTrailingTextBoundaryAt(positionD), 15);
+
+    const String textE = 'abcd efg hi\r\nhello\r\n\n';
+    const ParagraphBoundary boundaryE = ParagraphBoundary(textE);
+    const int positionE = 16;
+    expect(boundaryE.getLeadingTextBoundaryAt(positionE), 13);
+    expect(boundaryE.getTrailingTextBoundaryAt(positionE), 20);
   });
 
   test('document boundary works', () {

@@ -138,6 +138,7 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
+    print('target $position');
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
     int startIndex = 0;
@@ -147,16 +148,25 @@ class ParagraphBoundary extends TextBoundary {
     }
 
     while (index > 0) {
+      print('index $index');
       if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-        if (index == position) {
-          index--;
+        print('line terminator case');
+        final bool indexAtCRLF = codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD;
+        if (index == position && (indexAtCRLF || !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1]))) {
+          print('weird case');
+          index -= indexAtCRLF ? 2 : 1;
           continue;
         }
-        if (codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+        if (indexAtCRLF) {
+          print('case1');
+          //index--;
+          //continue;
           startIndex = index + 1;
         } else {
+          print('case2');
           startIndex = index;
         }
+        print('case 4');
         break;
       }
       index--;
@@ -180,13 +190,18 @@ class ParagraphBoundary extends TextBoundary {
 
     while (index < codeUnits.length) {
       if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-        if (index == position) {
-          index++;
+        final bool indexAtCRLF = index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA;
+        if (index == position && (indexAtCRLF || !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1]))) {
+          print('1');
+          index += indexAtCRLF ? 2 : 1;
           continue;
         }
-        if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
-          endIndex = index + 2;
+        if (indexAtCRLF) {
+          print('2');
+          index++;
+          continue;
         } else {
+          print('3');
           endIndex = index + 1;
         }
         break;
