@@ -158,8 +158,6 @@ class ParagraphBoundary extends TextBoundary {
       index--;
     }
 
-    print('start $startIndex');
-
     return startIndex >= 0 ? startIndex : null;
   }
 
@@ -168,7 +166,6 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    print('target position $position');
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
     int endIndex = _text.length;
@@ -180,16 +177,14 @@ class ParagraphBoundary extends TextBoundary {
           continue;
         }
         if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
-          endIndex = index;//+2
+          endIndex = index + 2;
         } else {
-          endIndex = index;//+1
+          endIndex = index + 1;
         }
         break;
       }
       index++;
     }
-
-    print('end $endIndex');
 
     return endIndex < _text.length ? endIndex : null;
   }
