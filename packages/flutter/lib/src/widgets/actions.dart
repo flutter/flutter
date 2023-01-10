@@ -830,7 +830,7 @@ class Actions extends StatefulWidget {
   }
 
   // Find the [Action] that handles the given `intent` in the given
-  // `_ActionsMarker`, and verify it has the right type parameter.
+  // `_ActionsScope`, and verify it has the right type parameter.
   static Action<T>? _castAction<T extends Intent>(_ActionsScope actionsMarker, { T? intent }) {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
     if (mappedAction is Action<T>?) {
