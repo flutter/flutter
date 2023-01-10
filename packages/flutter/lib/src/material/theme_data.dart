@@ -7,7 +7,9 @@ import 'dart:ui' show Color, lerpDouble;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
+import 'action_button_icons.dart';
 import 'app_bar_theme.dart';
+import 'back_button.dart';
 import 'badge_theme.dart';
 import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
@@ -24,6 +26,7 @@ import 'constants.dart';
 import 'data_table_theme.dart';
 import 'dialog_theme.dart';
 import 'divider_theme.dart';
+import 'drawer_button.dart';
 import 'drawer_theme.dart';
 import 'dropdown_menu_theme.dart';
 import 'elevated_button_theme.dart';
@@ -376,6 +379,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    ActionButtonIconsData? actionButtonIcons,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'Use colorScheme.secondary instead. '
@@ -731,6 +735,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
+      actionButtonIcons: actionButtonIcons,
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
@@ -845,6 +850,7 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
+    required this.actionButtonIcons,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'Use colorScheme.secondary instead. '
@@ -1674,6 +1680,10 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
+  /// A data for overriding icons in [BackButtonIcon], 
+  /// [CloseButtonIcon], [DrawerButtonIcon], or [EndDrawerButtonIcon]
+  final ActionButtonIconsData? actionButtonIcons;
+
   // DEPRECATED (newest deprecations at the bottom)
 
   /// Obsolete property that was originally used as the foreground
@@ -1942,6 +1952,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    ActionButtonIconsData? actionButtonIcons,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -2107,6 +2118,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
+      actionButtonIcons: actionButtonIcons ?? this.actionButtonIcons,
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: accentColor ?? _accentColor,
       accentColorBrightness: accentColorBrightness ?? _accentColorBrightness,
@@ -2307,6 +2319,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
+      actionButtonIcons: ActionButtonIconsData.lerp(a.actionButtonIcons, b.actionButtonIcons, t),
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Color.lerp(a.accentColor, b.accentColor, t),
       accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
@@ -2416,6 +2429,7 @@ class ThemeData with Diagnosticable {
         other.timePickerTheme == timePickerTheme &&
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
+        other.actionButtonIcons == actionButtonIcons &&
         // DEPRECATED (newest deprecations at the bottom)
         other.accentColor == accentColor &&
         other.accentColorBrightness == accentColorBrightness &&
@@ -2522,6 +2536,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme,
       toggleButtonsTheme,
       tooltipTheme,
+      actionButtonIcons,
       // DEPRECATED (newest deprecations at the bottom)
       accentColor,
       accentColorBrightness,
@@ -2630,6 +2645,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TimePickerThemeData>('timePickerTheme', timePickerTheme, defaultValue: defaultData.timePickerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ActionButtonIconsData>('actionButtonIcons', actionButtonIcons, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
     properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness, level: DiagnosticLevel.debug));

@@ -15,11 +15,11 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'drawer_button.dart';
 import 'flexible_space_bar.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
-import 'material_localizations.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
@@ -850,14 +850,6 @@ class _AppBarState extends State<AppBar> {
     super.dispose();
   }
 
-  void _handleDrawerButton() {
-    Scaffold.of(context).openDrawer();
-  }
-
-  void _handleDrawerButtonEnd() {
-    Scaffold.of(context).openEndDrawer();
-  }
-
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
       final bool oldScrolledUnder = _scrolledUnder;
@@ -1005,11 +997,8 @@ class _AppBarState extends State<AppBar> {
     Widget? leading = widget.leading;
     if (leading == null && widget.automaticallyImplyLeading) {
       if (hasDrawer) {
-        leading = IconButton(
-          icon: const Icon(Icons.menu),
+        leading = DrawerButton(
           iconSize: overallIconTheme.size ?? 24,
-          onPressed: _handleDrawerButton,
-          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
         // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
         // are migrated.
@@ -1091,11 +1080,8 @@ class _AppBarState extends State<AppBar> {
         children: widget.actions!,
       );
     } else if (hasEndDrawer) {
-      actions = IconButton(
-        icon: const Icon(Icons.menu),
+      actions = EndDrawerButton(
         iconSize: overallIconTheme.size ?? 24,
-        onPressed: _handleDrawerButtonEnd,
-        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );
     }
 

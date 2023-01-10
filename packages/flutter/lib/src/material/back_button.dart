@@ -30,9 +30,14 @@ class BackButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final WidgetBuilder? iconBuilder = theme.actionButtonIcons?.backButtonIconBuilder;
+    if (iconBuilder != null) {
+      return iconBuilder(context);
+    }
     final String? semanticsLabel;
     final IconData data;
-    switch (Theme.of(context).platform) {
+    switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -128,6 +133,50 @@ class BackButton extends StatelessWidget {
   }
 }
 
+/// A "close" icon that's appropriate for the current [TargetPlatform].
+///
+/// The current platform is determined by querying for the ambient [Theme].
+///
+/// See also:
+///
+///  * [CloseButton], an [IconButton] with a [CloseButtonIcon] that calls
+///    [Navigator.maybePop] to return to the previous route.
+///  * [IconButton], which is a more general widget for creating buttons
+///    with icons.
+///  * [Icon], a Material Design icon.
+///  * [ThemeData.platform], which specifies the current platform.
+class CloseButtonIcon extends StatelessWidget {
+  /// Creates an icon that shows the appropriate "close" image for
+  /// the current platform (as obtained from the [Theme]).
+  const CloseButtonIcon({ super.key });
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final WidgetBuilder? iconBuilder = theme.actionButtonIcons?.closeButtonIconBuilder;
+    if (iconBuilder != null) {
+      return iconBuilder(context);
+    }
+    final String? semanticsLabel;
+    // This can't use the platform from Theme because it is the Android OS that
+    // expects the duplicated tooltip and label.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        semanticsLabel = MaterialLocalizations.of(context).closeButtonTooltip;
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsLabel = null;
+        break;
+    }
+
+    return Icon(Icons.close, semanticLabel: semanticsLabel);
+  }
+}
+
 /// A Material Design close button.
 ///
 /// A [CloseButton] is an [IconButton] with a "close" icon. When pressed, the
@@ -167,23 +216,8 @@ class CloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final String? semanticsLabel;
-    // This can't use the platform from Theme because it is the Android OS that
-    // expects the duplicated tooltip and label.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        semanticsLabel = MaterialLocalizations.of(context).closeButtonTooltip;
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsLabel = null;
-        break;
-    }
     return IconButton(
-      icon: Icon(Icons.close, semanticLabel: semanticsLabel),
+      icon: const CloseButtonIcon(),
       color: color,
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
