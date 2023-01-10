@@ -6,8 +6,8 @@
 
 import 'package:flutter/cupertino.dart';
 
-const double _kItemExtent = 32.0;
-const List<String> _fruitNames = <String>[
+const double kItemExtent = 32.0;
+const List<String> fruitNames = <String>[
   'Apple',
   'Mango',
   'Banana',
@@ -29,6 +29,7 @@ class CupertinoPickerApp extends StatelessWidget {
     );
   }
 }
+
 class CupertinoPickerExample extends StatefulWidget {
   const CupertinoPickerExample({super.key});
 
@@ -37,7 +38,7 @@ class CupertinoPickerExample extends StatefulWidget {
 }
 
 class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
-  int _selectedFruit = 0;
+  int selectedFruit = 0;
 
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoPicker.
   void _showDialog(Widget child) {
@@ -57,7 +58,7 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
           top: false,
           child: child,
         ),
-      )
+      ),
     );
   }
 
@@ -85,24 +86,30 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                     magnification: 1.22,
                     squeeze: 1.2,
                     useMagnifier: true,
-                    itemExtent: _kItemExtent,
+                    itemExtent: kItemExtent,
+                    // This sets the initial item.
+                    scrollController: FixedExtentScrollController(
+                      initialItem: selectedFruit,
+                    ),
                     // This is called when selected item is changed.
                     onSelectedItemChanged: (int selectedItem) {
                       setState(() {
-                        _selectedFruit = selectedItem;
+                        selectedFruit = selectedItem;
                       });
                     },
-                    children: List<Widget>.generate(_fruitNames.length, (int index) {
+                    children:
+                        List<Widget>.generate(fruitNames.length, (int index) {
                       return Center(
                         child: Text(
-                          _fruitNames[index],
+                          fruitNames[index],
                         ),
                       );
                     }),
                   ),
                 ),
                 // This displays the selected fruit name.
-                child: Text(_fruitNames[_selectedFruit],
+                child: Text(
+                  fruitNames[selectedFruit],
                   style: const TextStyle(
                     fontSize: 22.0,
                   ),
