@@ -97,13 +97,8 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                         selectedFruit = selectedItem;
                       });
                     },
-                    children:
-                        List<Widget>.generate(fruitNames.length, (int index) {
-                      return Center(
-                        child: Text(
-                          fruitNames[index],
-                        ),
-                      );
+                    children: List<Widget>.generate(fruitNames.length, (int index) {
+                      return Center(child: Text(fruitNames[index]));
                     }),
                   ),
                 ),
