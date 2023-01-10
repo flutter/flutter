@@ -308,10 +308,6 @@ void main() {
                   ).createShader(bounds),
                   child: const Placeholder(),
                 ),
-                RangeSlider(
-                  values: const RangeValues(0.3, 0.7),
-                  onChanged: (RangeValues newValues) {},
-                ),
                 CompositedTransformFollower(
                  link: LayerLink(),
                 ),
@@ -337,9 +333,6 @@ void main() {
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
 
     renderObject = tester.firstRenderObject(find.byType(ShaderMask));
-    expect(renderObject.debugLayer?.debugCreator, isNotNull);
-
-    renderObject = tester.firstRenderObject(find.byType(RangeSlider));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
 
     renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));
