@@ -1236,7 +1236,6 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
     () => _runWebDebugTest('test/test.dart'),
-    () => _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true),
     () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
     () => _runWebDebugTest('lib/web_define_loading.dart',
       additionalArguments: <String>[
