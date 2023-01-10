@@ -6,8 +6,8 @@
 
 import 'package:flutter/cupertino.dart';
 
-const double kItemExtent = 32.0;
-const List<String> fruitNames = <String>[
+const double _kItemExtent = 32.0;
+const List<String> _fruitNames = <String>[
   'Apple',
   'Mango',
   'Banana',
@@ -86,7 +86,7 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                     magnification: 1.22,
                     squeeze: 1.2,
                     useMagnifier: true,
-                    itemExtent: kItemExtent,
+                    itemExtent: _kItemExtent,
                     // This sets the initial item.
                     scrollController: FixedExtentScrollController(
                       initialItem: selectedFruit,
@@ -97,14 +97,14 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                         selectedFruit = selectedItem;
                       });
                     },
-                    children: List<Widget>.generate(fruitNames.length, (int index) {
-                      return Center(child: Text(fruitNames[index]));
+                    children: List<Widget>.generate(_fruitNames.length, (int index) {
+                      return Center(child: Text(_fruitNames[index]));
                     }),
                   ),
                 ),
                 // This displays the selected fruit name.
                 child: Text(
-                  fruitNames[selectedFruit],
+                  _fruitNames[selectedFruit],
                   style: const TextStyle(
                     fontSize: 22.0,
                   ),
