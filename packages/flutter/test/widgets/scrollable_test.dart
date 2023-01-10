@@ -434,6 +434,33 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Scroll axis is not flipped for trackpad', (WidgetTester tester) async {
+    await pumpTest(
+      tester,
+      debugDefaultTargetPlatformOverride,
+      scrollDirection: Axis.horizontal,
+    );
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.trackpad);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not flipped.
+    expect(getScrollOffset(tester), 0.0);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)));
+    // Vertical input not accepted
+    expect(getScrollOffset(tester), 0.0);
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('Scrolls horizontally when custom key is pressed', (WidgetTester tester) async {
     await pumpTest(
       tester,

@@ -136,8 +136,8 @@ class ScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
   /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in
-  /// combination with a pointer scroll event, will flip the axes of the scroll
-  /// input.
+  /// combination with a [PointerDeviceKind.mouse] pointer scroll event, will
+  /// flip the axes of the scroll input.
   ///
   /// This will for example, result in the input of a vertical mouse wheel, to
   /// move the [ScrollPosition] of a [ScrollView] with an [Axis.horizontal]
