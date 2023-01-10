@@ -496,5 +496,24 @@ TEST(AccessibilityBridgeTest, AXTreeManagerTest) {
   ASSERT_EQ(manager, static_cast<ui::AXTreeManager*>(bridge.get()));
 }
 
+TEST(AccessibilityBridgeTest, LineBreakingObjectTest) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  const int32_t root_id = 0;
+
+  FlutterSemanticsNode root = CreateSemanticsNode(root_id, "root", {});
+
+  bridge->AddFlutterSemanticsNodeUpdate(&root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(root_id).lock();
+  auto root_data = root_node->GetData();
+  EXPECT_TRUE(root_data.HasBoolAttribute(
+      ax::mojom::BoolAttribute::kIsLineBreakingObject));
+  EXPECT_TRUE(root_data.GetBoolAttribute(
+      ax::mojom::BoolAttribute::kIsLineBreakingObject));
+}
+
 }  // namespace testing
 }  // namespace flutter
