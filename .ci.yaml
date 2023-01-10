@@ -4303,7 +4303,6 @@ targets:
 
   - name: Windows run_debug_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
