@@ -158,11 +158,11 @@ class ParagraphBoundary extends TextBoundary {
       index--;
     }
 
-    return startIndex >= 0 ? startIndex : null;
+    return startIndex;
   }
 
-  /// Returns the [int] representing the start position of the paragraph that
-  /// bounds the given `position`. The returned [int] is at the back of the trailing
+  /// Returns the [int] representing the end position of the paragraph that
+  /// bounds the given `position`. The returned [int] is at the front of the trailing
   /// line terminator that encloses the desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
@@ -186,7 +186,7 @@ class ParagraphBoundary extends TextBoundary {
       index++;
     }
 
-    return endIndex < _text.length ? endIndex : null;
+    return endIndex;
   }
 }
 
