@@ -16,31 +16,31 @@ import 'theme.dart';
 class ActionButtonIconsData with Diagnosticable {
   /// Creates an [ActionButtonIconsData].
   ///
-  /// The builders [backButtonIconBuilder], [closeButtonIconBuilder], 
+  /// The builders [backButtonIconBuilder], [closeButtonIconBuilder],
   /// [drawerButtonIconBuilder], [endDrawerButtonIconBuilder] may be null.
   const ActionButtonIconsData({ this.backButtonIconBuilder, this.closeButtonIconBuilder, this.drawerButtonIconBuilder, this.endDrawerButtonIconBuilder });
 
   /// Overrides [BackButtonIcon]'s icon.
   ///
-  /// If [backButtonIconBuilder] is null, then [BackButtonIcon] 
+  /// If [backButtonIconBuilder] is null, then [BackButtonIcon]
   /// fallbacks to the platform's default back button icon.
   final WidgetBuilder? backButtonIconBuilder;
 
   /// Overrides [CloseButtonIcon]'s icon.
   ///
-  /// If [closeButtonIconBuilder] is null, then [CloseButtonIcon] 
+  /// If [closeButtonIconBuilder] is null, then [CloseButtonIcon]
   /// fallbacks to the platform's default close button icon.
   final WidgetBuilder? closeButtonIconBuilder;
 
   /// Overrides [DrawerButtonIcon]'s icon.
   ///
-  /// If [drawerButtonIconBuilder] is null, then [DrawerButtonIcon] 
+  /// If [drawerButtonIconBuilder] is null, then [DrawerButtonIcon]
   /// fallbacks to the platform's default drawer button icon.
   final WidgetBuilder? drawerButtonIconBuilder;
 
   /// Overrides [EndDrawerButtonIcon]'s icon.
   ///
-  /// If [endDrawerButtonIconBuilder] is null, then [EndDrawerButtonIcon] 
+  /// If [endDrawerButtonIconBuilder] is null, then [EndDrawerButtonIcon]
   /// fallbacks to the platform's default end drawer button icon.
   final WidgetBuilder? endDrawerButtonIconBuilder;
 
@@ -78,7 +78,7 @@ class ActionButtonIconsData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ActionButtonIconsData 
+    return other is ActionButtonIconsData
         && other.backButtonIconBuilder == backButtonIconBuilder
         && other.closeButtonIconBuilder == closeButtonIconBuilder
         && other.drawerButtonIconBuilder == drawerButtonIconBuilder

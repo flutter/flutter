@@ -21,7 +21,7 @@ import 'theme.dart';
 ///  * [DrawerButton], an [IconButton] with a [DrawerButtonIcon] that calls
 ///    [ScaffoldState.openDrawer] to open the [Scaffold.drawer].
 ///  * [EndDrawerButton], an [IconButton] with an [EndDrawerButtonIcon] that
-///    calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer]. 
+///    calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer].
 ///  * [IconButton], which is a more general widget for creating buttons
 ///    with icons.
 ///  * [Icon], a Material Design icon.
@@ -66,7 +66,7 @@ class DrawerButtonIcon extends StatelessWidget {
 /// See also:
 ///
 ///  * [EndDrawerButton], an [IconButton] with an [EndDrawerButtonIcon] that
-///    calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer]. 
+///    calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer].
 ///  * [IconButton], which is a more general widget for creating buttons
 ///    with icons.
 ///  * [Icon], a Material Design icon.
@@ -121,7 +121,7 @@ class DrawerButton extends StatelessWidget {
 ///  * [DrawerButton], an [IconButton] with a [DrawerButtonIcon] that calls
 ///    [ScaffoldState.openDrawer] to open the [Scaffold.drawer].
 ///  * [EndDrawerButton], an [IconButton] with an [EndDrawerButtonIcon] that
-///    calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer] 
+///    calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer]
 ///  * [IconButton], which is a more general widget for creating buttons
 ///    with icons.
 ///  * [Icon], a Material Design icon.

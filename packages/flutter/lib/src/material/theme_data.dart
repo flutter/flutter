@@ -1680,7 +1680,7 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
-  /// A data for overriding icons in [BackButtonIcon], 
+  /// A data for overriding icons in [BackButtonIcon],
   /// [CloseButtonIcon], [DrawerButtonIcon], or [EndDrawerButtonIcon]
   final ActionButtonIconsData? actionButtonIcons;
 
