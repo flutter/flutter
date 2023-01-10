@@ -148,7 +148,7 @@ class ScrollBehavior {
   /// flipped.
   ///
   /// Defaults to [LogicalKeyboardKey.shiftLeft],
-  /// [LogicalKeyboardKey.shiftRight], cannot be null.
+  /// [LogicalKeyboardKey.shiftRight].
   Set<LogicalKeyboardKey> get pointerAxisModifiers => <LogicalKeyboardKey>{
     LogicalKeyboardKey.shiftLeft,
     LogicalKeyboardKey.shiftRight,
