@@ -42,7 +42,7 @@ class ThrowingPub implements Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.all,
+    bool printProgress = true,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }

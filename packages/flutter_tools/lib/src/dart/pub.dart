@@ -240,7 +240,7 @@ abstract class Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.all
+    bool printProgress = true,
   });
 }
 
@@ -401,9 +401,6 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
   }) async {
     int exitCode;
-    if (printProgress) {
-      _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
-    }
 
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
@@ -578,14 +575,14 @@ class _DefaultPub implements Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.all
+    bool printProgress = true,
   }) async {
     await _runWithStdioInherited(
       arguments,
       command: command,
       directory: _fileSystem.currentDirectory.path,
       context: context,
-      outputMode: outputMode,
+      printProgress: printProgress,
     );
     if (touchesPackageConfig && project != null) {
       await _updateVersionAndPackageConfig(project);
