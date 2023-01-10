@@ -1035,6 +1035,10 @@ class _AppBarState extends State<AppBar> {
 
           leading = Center(
             child: IconButtonTheme(
+              // This comparison is to check if there is a custom iconTheme. If true, it means that no
+              // custom iconTheme is provided, so iconButtonTheme is applied. Otherwise, we generate
+              // a new IconButtonThemeData based on the values from overallIconTheme. If iconButtonTheme only
+              // has null values, the default overallIconTheme will be applied below by IconTheme.merge
               data: overallIconTheme == defaults.iconTheme ? iconButtonTheme : IconButtonThemeData(
                 style: iconButtonTheme.style?.copyWith(
                   foregroundColor: leadingIconButtonStyle.foregroundColor,

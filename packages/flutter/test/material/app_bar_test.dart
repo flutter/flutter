@@ -3196,7 +3196,7 @@ void main() {
       expect(actionIconButtonColor(), actionsIconColor);
     });
 
-    testWidgets('The iconTheme property of the AppBar overrides any IconButtonTheme that is present in the theme - M3', (WidgetTester tester) async {
+    testWidgets('AppBar.iconTheme should override any IconButtonTheme present in the theme - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
@@ -3235,7 +3235,7 @@ void main() {
       expect(actionIconButtonSize(), 30.0);
     });
 
-    testWidgets('The actionsIconTheme property of the AppBar overrides any IconButtonTheme that is present in the theme - M3', (WidgetTester tester) async {
+    testWidgets('AppBar.actionsIconTheme should override any IconButtonTheme present in the theme - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
@@ -3275,7 +3275,7 @@ void main() {
       expect(actionIconButtonSize(), 30.0);
     });
 
-    testWidgets('The foregroundColor property of the AppBar overrides any IconButtonTheme that is present in the theme - M3', (WidgetTester tester) async {
+    testWidgets('The foregroundColor property of the AppBar overrides any IconButtonTheme present in the theme - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
           style: IconButton.styleFrom(
