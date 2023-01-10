@@ -570,7 +570,10 @@ class _DefaultPub implements Pub {
       context: context,
       printProgress: printProgress,
     );
+
     // TODO: moved to hook
+    // use touchesPackageConfig for flag --update-version-and-package-config
+
     // if (touchesPackageConfig && project != null) {
     //   await _updateVersionAndPackageConfig(project);
     // }
@@ -722,6 +725,7 @@ class _DefaultPub implements Pub {
   ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
+  @override
   Future<void> updateVersionAndPackageConfig(FlutterProject project) async {
     if (!project.packageConfigFile.existsSync()) {
       throwToolExit('${project.directory}: pub did not create .dart_tools/package_config.json file.');

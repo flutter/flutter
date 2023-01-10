@@ -370,6 +370,8 @@ class PackagesPostGetHook extends FlutterCommand {
   PackagesPostGetHook(this._context) {
     argParser.addOption('directory', abbr: 'C', mandatory: true);
     argParser.addFlag('example', defaultsTo: true);
+    argParser.addFlag('update-version-and-package-config');
+    argParser.addFlag('regenerate-platform-specific-tooling');
   }
   final PubContext _context;
 
@@ -387,28 +389,32 @@ class PackagesPostGetHook extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     // TODO: think about this part that actually happens before _runStdio
-    // generateLocalizationsSyntheticPackage
+    // - generateLocalizationsSyntheticPackage
 
     final String directoryOption = argResults!['directory'] as String;
-    final bool example = argResults!['example'] as bool;
     final String? target = findProjectRoot(globals.fs, directoryOption);
     if (target == null) {
       throwToolExit('Expected to find project root in $directoryOption.');
     }
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
-    // TODO:
-    // if (touchesPackageConfig) {
-      await pub.updateVersionAndPackageConfig(rootProject);
-    // }
+    final bool example = argResults!['example'] as bool;
+    final bool updateVersionAndPackageConfig = argResults!['update-version-and-package-config'] as bool;
+    final bool regeneratePlatformSpecificTooling = argResults!['regenerate-platform-specific-tooling'] as bool;
 
-    // regeneratePlatformSpecificTooling
-    await rootProject.regeneratePlatformSpecificTooling();
-    if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
-      final FlutterProject exampleProject = rootProject.example;
-      await exampleProject.regeneratePlatformSpecificTooling();
+    if (updateVersionAndPackageConfig) {
+      // original method doesn't check example flag either
+      await pub.updateVersionAndPackageConfig(rootProject);
     }
-    
+
+    if (regeneratePlatformSpecificTooling) {
+      await rootProject.regeneratePlatformSpecificTooling();
+      if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
+        final FlutterProject exampleProject = rootProject.example;
+        await exampleProject.regeneratePlatformSpecificTooling();
+      }
+    }
+
     return FlutterCommandResult.success();
   }
 
