@@ -22,6 +22,13 @@ impeller_component("display_list") {
     "//flutter/fml",
     "//third_party/skia",
   ]
+
+  if (!defined(defines)) {
+    defines = []
+  }
+  if (impeller_enable_3d) {
+    defines += [ "IMPELLER_ENABLE_3D" ]
+  }
 }
 
 impeller_component("display_list_unittests") {
@@ -37,4 +44,11 @@ impeller_component("display_list_unittests") {
     ":display_list",
     "../playground:playground_test",
   ]
+
+  if (!defined(defines)) {
+    defines = []
+  }
+  if (impeller_enable_3d) {
+    defines += [ "IMPELLER_ENABLE_3D" ]
+  }
 }
