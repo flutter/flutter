@@ -508,6 +508,149 @@ void main() {
     expect(appBar.surfaceTintColor, Colors.yellow);
   });
 
+  testWidgets('AppBarTheme.iconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+    const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(foregroundColor: Colors.red),
+        ),
+        appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final Color? leadingIconButtonColor = _iconStyle(tester, Icons.menu)?.color;
+    final Color? actionIconButtonColor = _iconStyle(tester, Icons.add)?.color;
+
+    expect(leadingIconButtonColor, overallIconTheme.color);
+    expect(actionIconButtonColor, overallIconTheme.color);
+  });
+
+  testWidgets('AppBarTheme.iconTheme.size takes priority over IconButtonTheme.iconSize - M3', (WidgetTester tester) async {
+    const IconThemeData overallIconTheme = IconThemeData(size: 30.0);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(iconSize: 32.0),
+        ),
+        appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final double? leadingIconButtonSize = _iconStyle(tester, Icons.menu)?.fontSize;
+    final double? actionIconButtonSize = _iconStyle(tester, Icons.add)?.fontSize;
+
+    expect(leadingIconButtonSize, overallIconTheme.size);
+    expect(actionIconButtonSize, overallIconTheme.size);
+  });
+
+
+  testWidgets('AppBarTheme.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+    const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow);
+    final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: Colors.red),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: iconButtonTheme,
+        appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final Color? leadingIconButtonColor = _iconStyle(tester, Icons.menu)?.color;
+    final Color? actionIconButtonColor = _iconStyle(tester, Icons.add)?.color;
+
+    expect(leadingIconButtonColor, Colors.red); // leading color should come from iconButtonTheme
+    expect(actionIconButtonColor, actionsIconTheme.color);
+  });
+
+  testWidgets('AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize - M3', (WidgetTester tester) async {
+    const IconThemeData actionsIconTheme = IconThemeData(size: 30.0);
+    final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      style: IconButton.styleFrom(iconSize: 32.0),
+    );
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        iconButtonTheme: iconButtonTheme,
+        appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
+        useMaterial3: true,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {},),
+          actions: <Widget>[ IconButton(icon: const Icon(Icons.add), onPressed: () {},) ],
+          title: const Text('Title'),
+        ),
+      ),
+    ));
+
+    final double? leadingIconButtonSize = _iconStyle(tester, Icons.menu)?.fontSize;
+    final double? actionIconButtonSize = _iconStyle(tester, Icons.add)?.fontSize;
+
+    expect(leadingIconButtonSize, 32.0); // The size of leading icon button should come from iconButtonTheme
+    expect(actionIconButtonSize, actionsIconTheme.size);
+  });
+
+  testWidgets('AppBarTheme.foregroundColor takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+    final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: Colors.red),
+    );
+    const AppBarTheme appBarTheme = AppBarTheme(
+      foregroundColor: Colors.green,
+    );
+    final ThemeData themeData = ThemeData(
+      iconButtonTheme: iconButtonTheme,
+      appBarTheme: appBarTheme,
+      useMaterial3: true,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('title'),
+            leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+            actions: <Widget>[
+              IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Color? leadingIconButtonColor = _iconStyle(tester, Icons.menu)?.color;
+    final Color? actionIconButtonColor = _iconStyle(tester, Icons.add)?.color;
+
+    expect(leadingIconButtonColor, appBarTheme.foregroundColor);
+    expect(actionIconButtonColor, appBarTheme.foregroundColor);
+  });
+
   testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
@@ -687,4 +830,11 @@ DefaultTextStyle _getAppBarText(WidgetTester tester) {
       matching: find.byType(DefaultTextStyle),
     ).first,
   );
+}
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }

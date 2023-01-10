@@ -11,12 +11,14 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'back_button.dart';
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flexible_space_bar.dart';
 import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -909,6 +911,7 @@ class _AppBarState extends State<AppBar> {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final AppBarTheme defaults = theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
@@ -1023,9 +1026,29 @@ class _AppBarState extends State<AppBar> {
       // a size of 48x48, and a highlight size of 40x40. Users can also put other
       // type of widgets on leading with the original config.
       if (theme.useMaterial3) {
-        leading =  ConstrainedBox(
+        if (leading is IconButton) {
+          // styleFrom method is used to generate a correct overlayColor based on the foregroundColor.
+          final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
+            foregroundColor: overallIconTheme.color,
+            iconSize: overallIconTheme.size,
+          );
+
+          leading = Center(
+            child: IconButtonTheme(
+              data: overallIconTheme == defaults.iconTheme ? iconButtonTheme : IconButtonThemeData(
+                style: iconButtonTheme.style?.copyWith(
+                  foregroundColor: leadingIconButtonStyle.foregroundColor,
+                  overlayColor: leadingIconButtonStyle.overlayColor,
+                  iconSize: leadingIconButtonStyle.iconSize,
+                ),
+              ),
+              child: leading
+            )
+          );
+        }
+        leading = ConstrainedBox(
           constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
-          child: leading is IconButton ? Center(child: leading) : leading,
+          child: leading,
         );
       } else {
         leading = ConstrainedBox(
@@ -1101,9 +1124,22 @@ class _AppBarState extends State<AppBar> {
 
     // Allow the trailing actions to have their own theme if necessary.
     if (actions != null) {
-      actions = IconTheme.merge(
-        data: actionsIconTheme,
-        child: actions,
+      final ButtonStyle actionsIconButtonStyle = IconButton.styleFrom(
+        foregroundColor: actionsIconTheme.color,
+        iconSize: actionsIconTheme.size,
+      );
+      actions = IconButtonTheme(
+        data: actionsIconTheme == defaults.actionsIconTheme ? iconButtonTheme : IconButtonThemeData(
+          style: iconButtonTheme.style?.copyWith(
+            foregroundColor: actionsIconButtonStyle.foregroundColor,
+            overlayColor: actionsIconButtonStyle.overlayColor,
+            iconSize: actionsIconButtonStyle.iconSize,
+          )
+        ),
+        child: IconTheme.merge(
+          data: actionsIconTheme,
+          child: actions,
+        ),
       );
     }
 
