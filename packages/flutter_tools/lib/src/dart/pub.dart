@@ -137,6 +137,12 @@ class PubContext {
   }
 }
 
+enum PubOutputMode {
+  none,
+  standard,
+  summaryOnly,
+}
+
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
@@ -179,7 +185,7 @@ abstract class Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.standard
   });
 
   /// Runs pub in 'batch' mode.
@@ -276,7 +282,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.standard,
   }) async {
     final String directory = project.directory.path;
     final File packageConfigFile = project.packageConfigFile;
@@ -350,7 +356,7 @@ class _DefaultPub implements Pub {
       directory: directory,
       failureMessage: 'pub $command failed',
       flutterRootOverride: flutterRootOverride,
-      printProgress: printProgress
+      outputMode: outputMode,
     );
 
     if (!packageConfigFile.existsSync()) {
@@ -385,14 +391,14 @@ class _DefaultPub implements Pub {
   Future<void> _runWithStdioInherited(
     List<String> arguments, {
     required String command,
-    required bool printProgress,
     required PubContext context,
     required String directory,
+    required PubOutputMode outputMode,
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
   }) async {
     int exitCode;
-    if (printProgress) {
+    if (outputMode != PubOutputMode.none) {
       _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
     }
 
@@ -400,7 +406,7 @@ class _DefaultPub implements Pub {
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
 
     try {
-      if (printProgress) {
+      if (outputMode != PubOutputMode.none) {
         final io.Stdio? stdio = _stdio;
         if (stdio == null) {
           // Let pub inherit stdio and output directly to the tool's stdout and
@@ -408,7 +414,10 @@ class _DefaultPub implements Pub {
           final io.Process process = await _processUtils.start(
             pubCommand,
             workingDirectory: _fileSystem.path.current,
-            environment: pubEnvironment,
+            environment: <String, String>{
+              ...pubEnvironment,
+              if (outputMode == PubOutputMode.summaryOnly) 'PUB_SUMMARY_ONLY': '1',
+            },
             mode: ProcessStartMode.inheritStdio,
           );
 
