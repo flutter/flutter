@@ -161,7 +161,7 @@ void main() {
     const String textB = 'abcd efg hi\r\njklmno\npqrstuv';
     const ParagraphBoundary boundaryB = ParagraphBoundary(textB);
     expect(boundaryB.getLeadingTextBoundaryAt(position), 0);
-    expect(boundaryB.getTrailingTextBoundaryAt(position), 13);
+    expect(boundaryB.getTrailingTextBoundaryAt(position), 13);//11
 
     const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
     const ParagraphBoundary boundaryC = ParagraphBoundary(textC);

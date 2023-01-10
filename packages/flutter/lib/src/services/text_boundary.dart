@@ -138,39 +138,29 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    final Iterator<int> codeUnitIter = _text.codeUnits.iterator;
-    final int targetTextOffset = position;
+    final List<int> codeUnits = _text.codeUnits;
+    int index = position;
+    int startIndex = 0;
 
-    int currentTextPosition = 0;
-    // If there is no line terminator then the default leading text position
-    // will be at the begining of the document.
-    int lastLineTerminatorPosition = 0;
-
-    while(codeUnitIter.moveNext()) {
-      final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
-      currentTextPosition += currentCodeUnit.length;
-      if (currentTextPosition > targetTextOffset) {
+    while (index > 0) {
+      if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+        if (index == position) {
+          index--;
+          continue;
+        }
+        if (codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+          startIndex = index + 1;
+        } else {
+          startIndex = index;
+        }
         break;
       }
-      if (TextLayoutMetrics.isLineTerminator(codeUnitIter.current)) {
-        if (codeUnitIter.current == 0xD && _text.codeUnitAt(currentTextPosition) == 0xA) {
-          // Do not create a new boundary when a carriage return is followed by a line feed.
-          // The boundary will be created at the line feed.
-          continue;
-        }
-        if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
-          continue;
-        }
-        if (currentTextPosition < targetTextOffset) {
-          // The target text position has not been passed yet but we arrived at a
-          // line terminator. Offset the position by the length of the line terminator
-          // to include it within the boundary.
-          lastLineTerminatorPosition = currentTextPosition - currentCodeUnit.length;
-        }
-      }
+      index--;
     }
 
-    return lastLineTerminatorPosition;
+    print('start $startIndex');
+
+    return startIndex >= 0 ? startIndex : null;
   }
 
   /// Returns the [int] representing the start position of the paragraph that
@@ -178,36 +168,30 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    final Iterator<int> codeUnitIter = _text.codeUnits.iterator;
-    final int targetTextOffset = position;
+    print('target position $position');
+    final List<int> codeUnits = _text.codeUnits;
+    int index = position;
+    int endIndex = _text.length;
 
-    int currentTextPosition = 0;
-    // If there is no line terminator then the default trailing text position
-    // will be at the end of the document.
-    int lastLineTerminatorPosition = _text.length;
-
-    while(codeUnitIter.moveNext()) {
-      final String currentCodeUnit = String.fromCharCode(codeUnitIter.current);
-      currentTextPosition += currentCodeUnit.length;
-      if (TextLayoutMetrics.isLineTerminator(codeUnitIter.current)) {
-        if (codeUnitIter.current == 0xD && _text.codeUnitAt(currentTextPosition) == 0xA) {
-          // Do not create a new boundary when a carriage return is followed by a line feed.
-          // The boundary will be created at the line feed.
+    while (index < codeUnits.length) {
+      if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+        if (index == position) {
+          index++;
           continue;
         }
-        if (currentTextPosition - currentCodeUnit.length == targetTextOffset) {
-          continue;
+        if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
+          endIndex = index;//+2
+        } else {
+          endIndex = index;//+1
         }
-        if (currentTextPosition > targetTextOffset) {
-          // The target text position was passed. This means that the target position
-          // is contained inside of a paragraph boundary.
-          lastLineTerminatorPosition = currentTextPosition;
-          break;
-        }
+        break;
       }
+      index++;
     }
 
-    return lastLineTerminatorPosition;
+    print('end $endIndex');
+
+    return endIndex < _text.length ? endIndex : null;
   }
 }
 
