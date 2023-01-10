@@ -435,6 +435,12 @@ void AccessibilityBridge::SetBooleanAttributesFromFlutterUpdate(
       ax::mojom::BoolAttribute::kEditableRoot,
       flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField &&
           (flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly) == 0);
+  // Mark nodes as line breaking so that screen readers don't
+  // merge all consecutive objects into one.
+  // TODO(schectman): When should a node have this attribute set?
+  // https://github.com/flutter/flutter/issues/118184
+  node_data.AddBoolAttribute(ax::mojom::BoolAttribute::kIsLineBreakingObject,
+                             true);
 }
 
 void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
