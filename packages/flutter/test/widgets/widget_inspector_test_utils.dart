@@ -9,11 +9,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Tuple-like test class for storing a [stream] and [eventKind].
+///
+/// Used to store the [stream] and [eventKind] that a dispatched event would be
+/// sent on.
+class DispatchedEventKey {
+  DispatchedEventKey({ required this.stream, required this.eventKind});
+
+  String stream;
+  String eventKind;
+}
+
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
-  final Map<String, Map<String, List<Map<Object, Object?>>>> eventsDispatched =
-    <String, Map<String, List<Map<Object, Object?>>>>{};
+  final Map<DispatchedEventKey, List<Map<Object, Object?>>> eventsDispatched =
+    <DispatchedEventKey, List<Map<Object, Object?>>>{};
   final  List<Object?> objectsInspected = <Object?>[];
 
   @override
@@ -43,12 +54,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     String eventKind, {
       String stream = 'Extension',
   }) {
-    final Map<String, List<Map<Object, Object?>>> eventKindEntry =
-      eventsDispatched.putIfAbsent(
-        eventKind,
-        () => <String, List<Map<Object, Object?>>>{},
-      );
-    return eventKindEntry.putIfAbsent(stream, () => <Map<Object, Object?>>[]);
+    return eventsDispatched.putIfAbsent(
+      DispatchedEventKey(stream: stream, eventKind: eventKind),
+      () => <Map<Object, Object?>>[],
+    );
   }
 
   List<Object?> inspectedObjects(){
