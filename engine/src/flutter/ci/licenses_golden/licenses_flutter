@@ -1703,7 +1703,8 @@ ORIGIN: ../../../flutter/lib/ui/dart_runtime_hooks.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/dart_ui.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/dart_ui.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/dart_wrapper.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/ui/experiments/compositing_3d.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/ui/experiments/scene.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/ui/experiments/setup_hooks.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/experiments/ui.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/geometry.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/hash_codes.dart + ../../../flutter/LICENSE
@@ -1783,6 +1784,10 @@ ORIGIN: ../../../flutter/lib/ui/painting/picture_recorder.cc + ../../../flutter/
 ORIGIN: ../../../flutter/lib/ui/painting/picture_recorder.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/painting/rrect.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/painting/rrect.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/ui/painting/scene/scene_node.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/ui/painting/scene/scene_node.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/ui/painting/scene/scene_shader.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/ui/painting/scene/scene_shader.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/painting/shader.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/painting/shader.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/painting/single_frame_codec.cc + ../../../flutter/LICENSE
@@ -1805,6 +1810,7 @@ ORIGIN: ../../../flutter/lib/ui/semantics/semantics_update_builder.cc + ../../..
 ORIGIN: ../../../flutter/lib/ui/semantics/semantics_update_builder.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/semantics/string_attribute.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/semantics/string_attribute.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/ui/setup_hooks.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/snapshot_delegate.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc + ../../../flutter/LICENSE
@@ -4178,7 +4184,8 @@ FILE: ../../../flutter/lib/ui/dart_runtime_hooks.h
 FILE: ../../../flutter/lib/ui/dart_ui.cc
 FILE: ../../../flutter/lib/ui/dart_ui.h
 FILE: ../../../flutter/lib/ui/dart_wrapper.h
-FILE: ../../../flutter/lib/ui/experiments/compositing_3d.dart
+FILE: ../../../flutter/lib/ui/experiments/scene.dart
+FILE: ../../../flutter/lib/ui/experiments/setup_hooks.dart
 FILE: ../../../flutter/lib/ui/experiments/ui.dart
 FILE: ../../../flutter/lib/ui/geometry.dart
 FILE: ../../../flutter/lib/ui/hash_codes.dart
@@ -4258,6 +4265,10 @@ FILE: ../../../flutter/lib/ui/painting/picture_recorder.cc
 FILE: ../../../flutter/lib/ui/painting/picture_recorder.h
 FILE: ../../../flutter/lib/ui/painting/rrect.cc
 FILE: ../../../flutter/lib/ui/painting/rrect.h
+FILE: ../../../flutter/lib/ui/painting/scene/scene_node.cc
+FILE: ../../../flutter/lib/ui/painting/scene/scene_node.h
+FILE: ../../../flutter/lib/ui/painting/scene/scene_shader.cc
+FILE: ../../../flutter/lib/ui/painting/scene/scene_shader.h
 FILE: ../../../flutter/lib/ui/painting/shader.cc
 FILE: ../../../flutter/lib/ui/painting/shader.h
 FILE: ../../../flutter/lib/ui/painting/single_frame_codec.cc
@@ -4280,6 +4291,7 @@ FILE: ../../../flutter/lib/ui/semantics/semantics_update_builder.cc
 FILE: ../../../flutter/lib/ui/semantics/semantics_update_builder.h
 FILE: ../../../flutter/lib/ui/semantics/string_attribute.cc
 FILE: ../../../flutter/lib/ui/semantics/string_attribute.h
+FILE: ../../../flutter/lib/ui/setup_hooks.dart
 FILE: ../../../flutter/lib/ui/snapshot_delegate.h
 FILE: ../../../flutter/lib/ui/text.dart
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc

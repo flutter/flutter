@@ -83,29 +83,6 @@ Future<developer.ServiceExtensionResponse> _getImpellerEnabled(
   }));
 }
 
-@pragma('vm:entry-point')
-void _setupHooks() {
-  assert(() {
-    // In debug mode, register the schedule frame extension.
-    developer.registerExtension('ext.ui.window.scheduleFrame', _scheduleFrame);
-
-    // In debug mode, allow shaders to be reinitialized.
-    developer.registerExtension(
-      'ext.ui.window.reinitializeShader',
-      _reinitializeShader,
-    );
-    return true;
-  }());
-
-  // In debug and profile mode, allow tools to display the current rendering backend.
-  if (!_kReleaseMode) {
-    developer.registerExtension(
-      'ext.ui.window.impellerEnabled',
-      _getImpellerEnabled,
-    );
-  }
-}
-
 const bool _kReleaseMode = bool.fromEnvironment('dart.vm.product');
 
 /// Returns runtime Dart compilation trace as a UTF-8 encoded memory buffer.

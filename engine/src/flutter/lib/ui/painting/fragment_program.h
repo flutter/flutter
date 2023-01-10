@@ -7,7 +7,6 @@
 
 #include "flutter/display_list/display_list_runtime_effect.h"
 #include "flutter/lib/ui/dart_wrapper.h"
-#include "flutter/lib/ui/painting/fragment_shader.h"
 #include "flutter/lib/ui/painting/shader.h"
 
 #include "third_party/tonic/dart_library_natives.h"

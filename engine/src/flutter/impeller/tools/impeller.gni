@@ -36,7 +36,7 @@ declare_args() {
   # Call glGetError after each OpenGL call and log failures.
   impeller_error_check_all_gl_calls = is_debug
 
-  # Eperimentally enable 3d code paths.
+  # Enable experimental 3D scene rendering.
   impeller_enable_3d = false
 }
 

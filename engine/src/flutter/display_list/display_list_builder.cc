@@ -9,6 +9,7 @@
 #include "flutter/display_list/display_list_canvas_dispatcher.h"
 #include "flutter/display_list/display_list_color_source.h"
 #include "flutter/display_list/display_list_ops.h"
+#include "fml/logging.h"
 
 namespace flutter {
 
@@ -206,6 +207,14 @@ void DisplayListBuilder::onSetColorSource(const DlColorSource* source) {
         Push<SetRuntimeEffectColorSourceOp>(0, 0, effect);
         break;
       }
+#ifdef IMPELLER_ENABLE_3D
+      case DlColorSourceType::kScene: {
+        const DlSceneColorSource* scene = source->asScene();
+        FML_DCHECK(scene);
+        Push<SetSceneColorSourceOp>(0, 0, scene);
+        break;
+      }
+#endif  // IMPELLER_ENABLE_3D
       case DlColorSourceType::kUnknown:
         Push<SetSkColorSourceOp>(0, 0, source->skia_object());
         break;

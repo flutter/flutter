@@ -287,12 +287,19 @@ Matrix Node::GetGlobalTransform() const {
 }
 
 bool Node::AddChild(std::shared_ptr<Node> node) {
-  // This ensures that cycles are impossible.
-  if (node->parent_ != nullptr) {
-    VALIDATION_LOG
-        << "Cannot add a node as a child which already has a parent.";
-    return false;
-  }
+  // TODO(bdero): Figure out a better paradigm/rules for nodes with multiple
+  //              parents. We should probably disallow this, make deep
+  //              copying of nodes cheap and easy, add mesh instancing, etc.
+  //              Today, the parent link is only used for skin posing, and so
+  //              it's reasonable to not have a check and allow multi-parenting.
+  //              Even still, there should still be some kind of cycle
+  //              prevention/detection, ideally at the protocol level.
+  //
+  // if (node->parent_ != nullptr) {
+  //   VALIDATION_LOG
+  //       << "Cannot add a node as a child which already has a parent.";
+  //   return false;
+  // }
   node->parent_ = this;
   children_.push_back(std::move(node));
 

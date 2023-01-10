@@ -71,6 +71,14 @@ source_set("display_list") {
     "//flutter/impeller/runtime_stage",
     "//third_party/skia",
   ]
+
+  if (!defined(defines)) {
+    defines = []
+  }
+  if (impeller_enable_3d) {
+    defines += [ "IMPELLER_ENABLE_3D" ]
+    public_deps += [ "//flutter/impeller/scene" ]
+  }
 }
 
 if (enable_unittests) {
