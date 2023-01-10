@@ -38,7 +38,7 @@ class CupertinoPickerExample extends StatefulWidget {
 }
 
 class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
-  int selectedFruit = 0;
+  int _selectedFruit = 0;
 
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoPicker.
   void _showDialog(Widget child) {
@@ -89,12 +89,12 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                     itemExtent: _kItemExtent,
                     // This sets the initial item.
                     scrollController: FixedExtentScrollController(
-                      initialItem: selectedFruit,
+                      initialItem: _selectedFruit,
                     ),
                     // This is called when selected item is changed.
                     onSelectedItemChanged: (int selectedItem) {
                       setState(() {
-                        selectedFruit = selectedItem;
+                        _selectedFruit = selectedItem;
                       });
                     },
                     children: List<Widget>.generate(_fruitNames.length, (int index) {
@@ -104,7 +104,7 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                 ),
                 // This displays the selected fruit name.
                 child: Text(
-                  _fruitNames[selectedFruit],
+                  _fruitNames[_selectedFruit],
                   style: const TextStyle(
                     fontSize: 22.0,
                   ),
