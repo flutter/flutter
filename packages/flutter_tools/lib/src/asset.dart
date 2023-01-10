@@ -484,7 +484,7 @@ class ManifestAssetBundle implements AssetBundle {
         return false;
       }
 
-      for (int index = 0; index < o1.length; index++) {
+      for (int index = 0; index < o1.length; index += 1) {
         if (o1[index] != o2[index]) {
           return false;
         }
