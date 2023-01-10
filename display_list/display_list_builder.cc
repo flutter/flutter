@@ -26,12 +26,16 @@ static void CopyV(void* dst, const S* src, int n, Rest&&... rest) {
   CopyV(SkTAddOffset<void>(dst, n * sizeof(S)), std::forward<Rest>(rest)...);
 }
 
+static constexpr inline bool is_power_of_two(int value) {
+  return (value & (value - 1)) == 0;
+}
+
 template <typename T, typename... Args>
 void* DisplayListBuilder::Push(size_t pod, int render_op_inc, Args&&... args) {
   size_t size = SkAlignPtr(sizeof(T) + pod);
   FML_DCHECK(size < (1 << 24));
   if (used_ + size > allocated_) {
-    static_assert(SkIsPow2(DL_BUILDER_PAGE),
+    static_assert(is_power_of_two(DL_BUILDER_PAGE),
                   "This math needs updating for non-pow2.");
     // Next greater multiple of DL_BUILDER_PAGE.
     allocated_ = (used_ + size + DL_BUILDER_PAGE) & ~(DL_BUILDER_PAGE - 1);
