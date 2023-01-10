@@ -120,7 +120,10 @@ class PubContext {
   static final PubContext interactive = PubContext._(<String>['interactive']);
   static final PubContext pubGet = PubContext._(<String>['get']);
   static final PubContext pubUpgrade = PubContext._(<String>['upgrade']);
+  static final PubContext pubAdd = PubContext._(<String>['add']);
+  static final PubContext pubRemove = PubContext._(<String>['remove']);
   static final PubContext pubForward = PubContext._(<String>['forward']);
+  static final PubContext pubPassThrough = PubContext._(<String>['passthrough']);
   static final PubContext runTest = PubContext._(<String>['run_test']);
   static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
   static final PubContext updatePackages = PubContext._(<String>['update_packages']);
@@ -161,7 +164,7 @@ abstract class Pub {
     required Stdio stdio,
   }) = _DefaultPub.test;
 
-  /// Runs `pub get` or `pub upgrade` for [project].
+  /// Runs `pub get` for [project].
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
@@ -173,7 +176,6 @@ abstract class Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     String? flutterRootOverride,
@@ -203,14 +205,23 @@ abstract class Pub {
 
   /// Runs pub in 'interactive' mode.
   ///
-  /// directly piping the stdin stream of this process to that of pub, and the
-  /// stdout/stderr stream of pub to the corresponding streams of this process.
+  /// This will run the pub process with StdioInherited (unless [_stdio] is set
+  /// for testing).
+  ///
+  /// The pub process will be run in current working directory, so `--directory`
+  /// should be passed appropriately in [arguments]. This ensures output from
+  /// pub will refer to relative paths correctly.
+  ///
+  /// [touchesPackageConfig] should be true if this is a command expexted to
+  /// create a new `.dart_tool/package_config.json` file.
   Future<void> interactively(
     List<String> arguments, {
-    String? directory,
-    required io.Stdio stdio,
+    FlutterProject? project,
+    required PubContext context,
+    required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
+    bool printProgress = true,
   });
 }
 
@@ -268,7 +279,6 @@ class _DefaultPub implements Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -280,8 +290,6 @@ class _DefaultPub implements Pub {
   }) async {
     final String directory = project.directory.path;
     final File packageConfigFile = project.packageConfigFile;
-    final Directory generatedDirectory = _fileSystem.directory(
-      _fileSystem.path.join(directory, '.dart_tool', 'flutter_gen'));
     final File lastVersion = _fileSystem.file(
       _fileSystem.path.join(directory, '.dart_tool', 'version'));
     final File currentVersion = _fileSystem.file(
@@ -352,25 +360,7 @@ class _DefaultPub implements Pub {
       flutterRootOverride: flutterRootOverride,
       printProgress: printProgress
     );
-
-    if (!packageConfigFile.existsSync()) {
-      throwToolExit('$directory: pub did not create .dart_tools/package_config.json file.');
-    }
-    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
-    await _updatePackageConfig(
-      packageConfigFile,
-      generatedDirectory,
-      project.manifest.generateSyntheticPackage,
-    );
-    if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
-      final Directory exampleGeneratedDirectory = _fileSystem.directory(
-        _fileSystem.path.join(project.example.directory.path, '.dart_tool', 'flutter_gen'));
-      await _updatePackageConfig(
-        project.example.packageConfigFile,
-        exampleGeneratedDirectory,
-        project.example.manifest.generateSyntheticPackage,
-      );
-    }
+    await _updateVersionAndPackageConfig(project);
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
@@ -392,9 +382,6 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
   }) async {
     int exitCode;
-    if (printProgress) {
-      _logger.printStatus('Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...');
-    }
 
     final List<String> pubCommand = _pubCommand(arguments);
     final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
@@ -567,64 +554,22 @@ class _DefaultPub implements Pub {
   @override
   Future<void> interactively(
     List<String> arguments, {
-    String? directory,
-    required io.Stdio stdio,
+    FlutterProject? project,
+    required PubContext context,
+    required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
+    bool printProgress = true,
   }) async {
-    // Fully resolved pub or pub.bat is calculated based on current platform.
-    final io.Process process = await _processUtils.start(
-      _pubCommand(<String>[
-          if (_logger.supportsColor) '--color',
-          ...arguments,
-      ]),
-      workingDirectory: directory,
-      environment: await _createPubEnvironment(PubContext.interactive),
+    await _runWithStdioInherited(
+      arguments,
+      command: command,
+      directory: _fileSystem.currentDirectory.path,
+      context: context,
+      printProgress: printProgress,
     );
-
-    // Pipe the Flutter tool stdin to the pub stdin.
-    unawaited(process.stdin.addStream(stdio.stdin)
-      // If pub exits unexpectedly with an error, that will be reported below
-      // by the tool exit after the exit code check.
-      .catchError((dynamic err, StackTrace stack) {
-        _logger.printTrace('Echoing stdin to the pub subprocess failed:');
-        _logger.printTrace('$err\n$stack');
-      }
-    ));
-
-    // Pipe the pub stdout and stderr to the tool stdout and stderr.
-    try {
-      await Future.wait<dynamic>(<Future<dynamic>>[
-        stdio.addStdoutStream(process.stdout),
-        stdio.addStderrStream(process.stderr),
-      ]);
-    } on Exception catch (err, stack) {
-      _logger.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
-      _logger.printTrace('$err\n$stack');
-    }
-
-    // Wait for pub to exit.
-    final int code = await process.exitCode;
-    if (code != 0) {
-      throwToolExit('pub finished with exit code $code', exitCode: code);
-    }
-
-    if (touchesPackageConfig) {
-      final String targetDirectory = directory ?? _fileSystem.currentDirectory.path;
-      final File packageConfigFile = _fileSystem.file(
-        _fileSystem.path.join(targetDirectory, '.dart_tool', 'package_config.json'));
-      final Directory generatedDirectory = _fileSystem.directory(
-        _fileSystem.path.join(targetDirectory, '.dart_tool', 'flutter_gen'));
-      final File lastVersion = _fileSystem.file(
-        _fileSystem.path.join(targetDirectory, '.dart_tool', 'version'));
-      final File currentVersion = _fileSystem.file(
-        _fileSystem.path.join(Cache.flutterRoot!, 'version'));
-        lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
-      await _updatePackageConfig(
-        packageConfigFile,
-        generatedDirectory,
-        generateSyntheticPackage,
-      );
+    if (touchesPackageConfig && project != null) {
+      await _updateVersionAndPackageConfig(project);
     }
   }
 
@@ -766,23 +711,46 @@ class _DefaultPub implements Pub {
     return environment;
   }
 
-  /// Update the package configuration file.
+  /// Updates the .dart_tool/version file to be equal to current Flutter
+  /// version.
   ///
-  /// Creates a corresponding `package_config_subset` file that is used by the build
-  /// system to avoid rebuilds caused by an updated pub timestamp.
+  /// Calls [_updatePackageConfig] for [project] and [project.example] (if it
+  /// exists).
   ///
-  /// if [generateSyntheticPackage] is true then insert flutter_gen synthetic
-  /// package into the package configuration. This is used by the l10n localization
-  /// tooling to insert a new reference into the package_config file, allowing the import
-  /// of a package URI that is not specified in the pubspec.yaml
+  /// This should be called after pub invocations that are expected to update
+  /// the packageConfig.
+  Future<void> _updateVersionAndPackageConfig(FlutterProject project) async {
+    if (!project.packageConfigFile.existsSync()) {
+      throwToolExit('${project.directory}: pub did not create .dart_tools/package_config.json file.');
+    }
+    final File lastVersion = _fileSystem.file(
+      _fileSystem.path.join(project.directory.path, '.dart_tool', 'version'),
+    );
+    final File currentVersion = _fileSystem.file(
+      _fileSystem.path.join(Cache.flutterRoot!, 'version'));
+    lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
+
+    await _updatePackageConfig(project);
+    if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+      await _updatePackageConfig(project.example);
+    }
+  }
+
+  /// Update the package configuration file in [project].
+  ///
+  /// Creates a corresponding `package_config_subset` file that is used by the
+  /// build system to avoid rebuilds caused by an updated pub timestamp.
+  ///
+  /// if `project.generateSyntheticPackage` is `true` then insert flutter_gen
+  /// synthetic package into the package configuration. This is used by the l10n
+  /// localization tooling to insert a new reference into the package_config
+  /// file, allowing the import of a package URI that is not specified in the
+  /// pubspec.yaml
   ///
   /// For more information, see:
   ///   * [generateLocalizations], `in lib/src/localizations/gen_l10n.dart`
-  Future<void> _updatePackageConfig(
-    File packageConfigFile,
-    Directory generatedDirectory,
-    bool generateSyntheticPackage,
-  ) async {
+  Future<void> _updatePackageConfig(FlutterProject project) async {
+    final File packageConfigFile = project.packageConfigFile;
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(packageConfigFile, logger: _logger);
 
     packageConfigFile.parent
@@ -792,7 +760,7 @@ class _DefaultPub implements Pub {
         _fileSystem,
       ));
 
-    if (!generateSyntheticPackage) {
+    if (!project.manifest.generateSyntheticPackage) {
       return;
     }
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
