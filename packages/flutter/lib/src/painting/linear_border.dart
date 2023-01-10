@@ -82,8 +82,8 @@ class LinearBorderEdge {
       return false;
     }
     return other is LinearBorderEdge
-      && other.size == size
-      && other.alignment == alignment;
+        && other.size == size
+        && other.alignment == alignment;
   }
 
   @override
@@ -180,7 +180,6 @@ class LinearBorder extends OutlinedBorder {
   /// for [TextDirection.rtl].
   final LinearBorderEdge? end;
 
-
   /// Defines the top edge.
   final LinearBorderEdge? top;
 
@@ -273,7 +272,6 @@ class LinearBorder extends OutlinedBorder {
     final Path path = Path();
     final Paint paint = Paint()
       ..strokeWidth = 0.0;
-
 
     void drawEdge(Rect rect, Color color) {
       paint.color = color;
