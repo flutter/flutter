@@ -953,6 +953,8 @@ class WebDevFS implements DevFS {
 
   @override
   Set<String> get shaderPathsToEvict => <String>{};
+
+  @override
   Set<String> get scenePathsToEvict => <String>{};
 }
 
