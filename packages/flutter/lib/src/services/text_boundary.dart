@@ -142,6 +142,10 @@ class ParagraphBoundary extends TextBoundary {
     int index = position;
     int startIndex = 0;
 
+    if (position < 0) {
+      return null;
+    }
+
     while (index > 0) {
       if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
         if (index == position) {
@@ -169,6 +173,10 @@ class ParagraphBoundary extends TextBoundary {
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
     int endIndex = _text.length;
+
+    if (position > _text.length) {
+      return null;
+    }
 
     while (index < codeUnits.length) {
       if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
