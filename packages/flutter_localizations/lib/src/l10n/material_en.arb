@@ -194,7 +194,7 @@
 
   "scanTextButtonLabel": "Scan text",
   "@scanTextButtonLabel": {
-    "description": "The label for scan text buttons and menu items."
+    "description": "The label for scan text buttons and menu items for starting the insertion of text via OCR."
   },
 
   "okButtonLabel": "OK",

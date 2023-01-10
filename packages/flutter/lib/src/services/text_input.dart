@@ -1058,10 +1058,13 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
-  /// Whether Live Text input is enabled, must not be null.
+  /// Whether Live Text input is enabled.
+  ///
+  /// Must not be null.
   ///
   /// See also:
-  ///  * [LiveText], where we can get the the availability of Live Text input.
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   bool get liveTextInputEnabled => false;
 
   /// Cut current selection to [Clipboard].
@@ -1092,8 +1095,8 @@ mixin TextSelectionDelegate {
 
   /// Start Live Text input.
   ///
-  /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
-  /// will be hidden and will start Live Text input.
+  /// Live Text input will be started regardless of what the cause is,
+  /// and the toolbar will be hidden.
   void startLiveTextInput(SelectionChangedCause cause);
 }
 
@@ -1357,8 +1360,10 @@ class TextInputConnection {
   /// Start Live Text input.
   ///
   /// This method should only be called when Live Text input is available.
+  ///
   /// See also:
-  ///  * [LiveText], where we can get the the availability of Live Text input.
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   void startLiveTextInput() {
     assert(attached);
     TextInput._instance._startLiveTextInput();
@@ -2192,8 +2197,10 @@ mixin TextInputControl {
   /// Requests that the text input control starts Live Text input.
   ///
   /// This method is called when the input control will start Live Text input.
+  ///
   /// See also:
-  ///  * [LiveText], where we can get the the availability of Live Text input.
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   void startLiveTextInput() {}
 
   /// Requests that the text input control is hidden.

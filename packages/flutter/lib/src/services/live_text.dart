@@ -8,9 +8,10 @@ import 'system_channels.dart';
 ///
 /// For example, the Live Text input feature of iOS turns the keyboard into a camera view for
 /// directly inserting text obtained through OCR into the active field.
+///
 /// See also:
-/// https://developer.apple.com/documentation/uikit/uiresponder/3778577-capturetextfromcamera?changes=_5
-/// https://support.apple.com/guide/iphone/use-live-text-iphcf0b71b0e/ios
+///  * <https://developer.apple.com/documentation/uikit/uiresponder/3778577-capturetextfromcamera>
+///  * <https://support.apple.com/guide/iphone/use-live-text-iphcf0b71b0e/ios>
 class LiveText {
   // This class is not meant to be instantiated or extended; this constructor
   // prevents instantiation and extension.

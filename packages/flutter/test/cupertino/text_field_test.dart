@@ -238,7 +238,9 @@ void main() {
       await tester.longPress(textFinder);
       await tester.pumpAndSettle();
       expect(
-          find.byIcon(CupertinoIcons.doc_text_viewfinder), kIsWeb ? findsNothing : findsOneWidget);
+        find.byIcon(CupertinoIcons.doc_text_viewfinder),
+        kIsWeb ? findsNothing : findsOneWidget,
+      );
 
       mockClipboard.mockLiveTextInputEnabled = false;
       await tester.longPress(textFinder);

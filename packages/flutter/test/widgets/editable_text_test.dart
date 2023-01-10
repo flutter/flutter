@@ -133,34 +133,34 @@ void main() {
   }
 
   testWidgets(
-    'Tap Live Text button can work correctly',
+    'Tapping the Live Text button calls onLiveTextInput.',
     (WidgetTester tester) async {
-
-      bool invokeLiveTextInputSuccessfully = false;
+      bool invokedLiveTextInputSuccessfully = false;
       final GlobalKey key = GlobalKey();
       final TextEditingController controller = TextEditingController(text: '');
-      await tester.pumpWidget(MaterialApp(
-        home: Align(
-          alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 400,
-            child: EditableText(
-              maxLines: 10,
-              controller: controller,
-              showSelectionHandles: true,
-              autofocus: true,
-              focusNode: FocusNode(),
-              style: Typography.material2018().black.subtitle1!,
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              keyboardType: TextInputType.text,
-              textAlign: TextAlign.right,
-              selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                EditableTextState editableTextState,
-              ) {
-                return CupertinoAdaptiveTextSelectionToolbar.editable(
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 400,
+              child: EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: FocusNode(),
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                selectionControls: materialTextSelectionHandleControls,
+                contextMenuBuilder: (
+                  BuildContext context,
+                  EditableTextState editableTextState,
+                ) {
+                  return CupertinoAdaptiveTextSelectionToolbar.editable(
                     key: key,
                     clipboardStatus: ClipboardStatus.pasteable,
                     onCopy: null,
@@ -168,14 +168,16 @@ void main() {
                     onPaste: null,
                     onSelectAll: null,
                     onLiveTextInput: () {
-                      invokeLiveTextInputSuccessfully = true;
+                      invokedLiveTextInputSuccessfully = true;
                     },
-                    anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero));
-              },
+                    anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+                  );
+                },
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       await tester.pump(); // Wait for autofocus to take effect.
 
@@ -191,7 +193,7 @@ void main() {
       expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
       await tester.tap(find.byIcon(CupertinoIcons.doc_text_viewfinder));
       await tester.pump();
-      expect(invokeLiveTextInputSuccessfully, isTrue);
+      expect(invokedLiveTextInputSuccessfully, isTrue);
     },
     skip: kIsWeb, // [intended]
   );

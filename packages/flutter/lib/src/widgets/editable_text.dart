@@ -1695,11 +1695,10 @@ class EditableText extends StatefulWidget {
     final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
 
     // Config button items with clip board.
-    if (onPaste != null && clipboardStatus == ClipboardStatus.unknown) {
+    if (onPaste == null || clipboardStatus != ClipboardStatus.unknown) {
       // If the paste button is enabled, don't render anything until the state
       // of the clipboard is known, since it's used to determine if paste is
       // shown.
-    } else {
       resultButtonItem.addAll(<ContextMenuButtonItem>[
         if (onCut != null)
           ContextMenuButtonItem(
@@ -1931,9 +1930,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
 
   /// Detects whether the Live Text input is enabled.
+  ///
   /// See also:
-  ///  * [LiveText], where we can get the the availability of Live Text input.
-  final LiveTextInputStatusNotifier? liveTextInputStatus =
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  final LiveTextInputStatusNotifier? _liveTextInputStatus =
       kIsWeb ? null : LiveTextInputStatusNotifier();
 
   TextInputConnection? _textInputConnection;
@@ -2071,7 +2071,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get liveTextInputEnabled {
-    return liveTextInputStatus?.value == LiveTextInputStatus.enabled &&
+    return _liveTextInputStatus?.value == LiveTextInputStatus.enabled &&
         !widget.obscureText &&
         !widget.readOnly &&
         textEditingValue.selection.isCollapsed;
@@ -2241,7 +2241,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void startLiveTextInput(SelectionChangedCause cause) {
-    if (!liveTextInputEnabled || widget.readOnly || widget.obscureText) {
+    if (!liveTextInputEnabled) {
       return;
     }
     if (_hasInputConnection) {
@@ -2482,7 +2482,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void initState() {
     super.initState();
     clipboardStatus?.addListener(_onChangedClipboardStatus);
-    liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
+    _liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_onEditableScroll);
@@ -2630,8 +2630,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     WidgetsBinding.instance.removeObserver(this);
     clipboardStatus?.removeListener(_onChangedClipboardStatus);
     clipboardStatus?.dispose();
-    liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
-    liveTextInputStatus?.dispose();
+    _liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
+    _liveTextInputStatus?.dispose();
     _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3778,7 +3778,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
     clipboardStatus?.update();
-    liveTextInputStatus?.update();
+    _liveTextInputStatus?.update();
     _selectionOverlay!.showToolbar();
     return true;
   }

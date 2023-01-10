@@ -27,8 +27,10 @@ enum ContextMenuButtonType {
   delete,
 
   /// A button for Live Text input.
+  ///
   /// See also:
-  ///  * [LiveText], where we can get the the availability of Live Text input.
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   liveTextInput,
 
   /// Anything other than the default button types.

@@ -3091,8 +3091,11 @@ enum ClipboardStatus {
   notPasteable,
 }
 
-/// A [ValueNotifier] whose [value] indicates whether the current device supports the live text
+/// A [ValueNotifier] whose [value] indicates whether the current device supports the Live Text
 /// (OCR) function.
+///
+/// See also:
+///  * [LiveText], where the availability of Live Text input can be obtained.
 ///
 /// Call [update] to asynchronously update [value] if needed.
 class LiveTextInputStatusNotifier extends ValueNotifier<LiveTextInputStatus> with WidgetsBindingObserver {
@@ -3179,6 +3182,9 @@ class LiveTextInputStatusNotifier extends ValueNotifier<LiveTextInputStatus> wit
 }
 
 /// An enumeration that indicates whether the current device is available for Live Text input.
+///
+/// See also:
+///  * [LiveText], where the availability of Live Text input can be obtained.
 enum LiveTextInputStatus {
   /// This device supports Live Text input currently.
   enabled,

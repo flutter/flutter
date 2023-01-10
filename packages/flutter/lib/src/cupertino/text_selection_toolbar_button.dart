@@ -121,7 +121,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     if (buttonItem == null) {
       return null;
     }
-    final IconData? iconData;
+    final IconData iconData;
     switch (buttonItem!.type) {
       case ContextMenuButtonType.cut:
       case ContextMenuButtonType.copy:
@@ -131,12 +131,10 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
       case ContextMenuButtonType.custom:
         return null;
       case ContextMenuButtonType.liveTextInput:
+        // TODO(luckysmg): Use text.viewfinder from the latest SF Icons when it's available.
+        // https://github.com/flutter/flutter/issues/60034
         iconData = CupertinoIcons.doc_text_viewfinder;
         break;
-    }
-
-    if (iconData == null) {
-      return null;
     }
 
     return Icon(
