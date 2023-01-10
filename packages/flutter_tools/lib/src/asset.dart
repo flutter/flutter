@@ -689,7 +689,9 @@ class ManifestAssetBundle implements AssetBundle {
     return manifest;
   }
 
-  static final RegExp _extractRatioFromAssetFilepathRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
+  // Matches path-like strings ending in a number followed by an 'x'.
+  // Example matches include "assets/animals/2.0x", "plants/3x", and "2.7x".
+  static final RegExp _extractPixelRatioFromKeyRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
   DevFSByteContent _createAssetManifestBinary(
     Map<String, List<String>> assetManifest
@@ -701,7 +703,7 @@ class ManifestAssetBundle implements AssetBundle {
         directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
       }
 
-      final Match? match = _extractRatioFromAssetFilepathRegExp.firstMatch(directoryPath);
+      final Match? match = _extractPixelRatioFromKeyRegExp.firstMatch(directoryPath);
       if (match != null && match.groupCount > 0) {
         return double.parse(match.group(1)!);
       }
