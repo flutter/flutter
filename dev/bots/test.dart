@@ -1138,7 +1138,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
-    for (String buildMode in _kAllBuildModes)
+    for (String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
         target: path.join('test_driver', 'failure.dart'),
@@ -1148,6 +1148,21 @@ Future<void> _runWebLongRunningTests() async {
         // logs. To avoid confusion, silence browser output.
         silenceBrowserOutput: true,
       ),
+      () => _runFlutterDriverWebTest(
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'example_test.dart'),
+        driver: path.join('test_driver', 'integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'canvaskit',
+      ),
+      () => _runFlutterDriverWebTest(
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'extended_test.dart'),
+        driver: path.join('test_driver', 'extended_integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'canvaskit',
+      ),
+    ],
 
     // This test specifically tests how images are loaded in HTML mode, so we don't run it in CanvasKit mode.
     () => _runWebE2eTest('image_loading_integration', buildMode: 'debug', renderer: 'html'),
@@ -1176,6 +1191,16 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'profile', renderer: 'canvaskit'),
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'release', renderer: 'html'),
+
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'debug', renderer: 'auto'),
+    () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'profile', renderer: 'canvaskit'),
+    () => _runWebE2eTest('capabilities_integration_html', buildMode: 'release', renderer: 'html'),
+
+    // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
+    // CacheWidth and CacheHeight are only currently supported in CanvasKit mode, so we don't run the test in HTML mode.
+    () => _runWebE2eTest('cache_width_cache_height_integration', buildMode: 'debug', renderer: 'auto'),
+    () => _runWebE2eTest('cache_width_cache_height_integration', buildMode: 'profile', renderer: 'canvaskit'),
 
     () => _runWebTreeshakeTest(),
 
@@ -1271,6 +1296,7 @@ Future<void> _runFlutterDriverWebTest({
   required String buildMode,
   required String renderer,
   required String testAppDirectory,
+  String? driver,
   bool expectFailure = false,
   bool silenceBrowserOutput = false,
 }) async {
@@ -1285,6 +1311,7 @@ Future<void> _runFlutterDriverWebTest({
     <String>[
       ...flutterTestArgs,
       'drive',
+      if (driver != null) '--driver=$driver',
       '--target=$target',
       '--browser-name=chrome',
       '--no-sound-null-safety',

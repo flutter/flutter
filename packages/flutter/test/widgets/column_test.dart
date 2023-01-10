@@ -368,9 +368,7 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: SizedBox(
-        width: 0.0,
-        height: 0.0,
+      child: SizedBox.shrink(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const <Widget>[
@@ -760,9 +758,7 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: SizedBox(
-        width: 0.0,
-        height: 0.0,
+      child: SizedBox.shrink(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           verticalDirection: VerticalDirection.up,

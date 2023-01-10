@@ -574,7 +574,7 @@ class _PopupMenu<T> extends StatelessWidget {
       );
       Widget item = route.items[i];
       if (route.initialValue != null && route.items[i].represents(route.initialValue)) {
-        item = Container(
+        item = ColoredBox(
           color: Theme.of(context).highlightColor,
           child: item,
         );
@@ -794,7 +794,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.capturedThemes,
     this.constraints,
     required this.clipBehavior,
-  }) : itemSizes = List<Size?>.filled(items.length, null);
+  }) : itemSizes = List<Size?>.filled(items.length, null),
+       // Menus always cycle focus through their items irrespective of the
+       // focus traversal edge behavior set in the Navigator.
+       super(traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop);
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
@@ -1375,7 +1378,7 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_150
 
 class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   _PopupMenuDefaultsM3(this.context)

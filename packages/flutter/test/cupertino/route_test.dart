@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';

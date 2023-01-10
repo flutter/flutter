@@ -23,12 +23,12 @@ import 'vmservice.dart';
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
 /// A description of the kind of workflow the device supports.
-class Category {
-  const Category._(this.value);
+enum Category {
+  web._('web'),
+  desktop._('desktop'),
+  mobile._('mobile');
 
-  static const Category web = Category._('web');
-  static const Category desktop = Category._('desktop');
-  static const Category mobile = Category._('mobile');
+  const Category._(this.value);
 
   final String value;
 
@@ -36,7 +36,7 @@ class Category {
   String toString() => value;
 
   static Category? fromString(String category) {
-    return <String, Category>{
+    return const <String, Category>{
       'web': web,
       'desktop': desktop,
       'mobile': mobile,
@@ -45,17 +45,17 @@ class Category {
 }
 
 /// The platform sub-folder that a device type supports.
-class PlatformType {
-  const PlatformType._(this.value);
+enum PlatformType {
+  web._('web'),
+  android._('android'),
+  ios._('ios'),
+  linux._('linux'),
+  macos._('macos'),
+  windows._('windows'),
+  fuchsia._('fuchsia'),
+  custom._('custom');
 
-  static const PlatformType web = PlatformType._('web');
-  static const PlatformType android = PlatformType._('android');
-  static const PlatformType ios = PlatformType._('ios');
-  static const PlatformType linux = PlatformType._('linux');
-  static const PlatformType macos = PlatformType._('macos');
-  static const PlatformType windows = PlatformType._('windows');
-  static const PlatformType fuchsia = PlatformType._('fuchsia');
-  static const PlatformType custom = PlatformType._('custom');
+  const PlatformType._(this.value);
 
   final String value;
 
@@ -63,7 +63,7 @@ class PlatformType {
   String toString() => value;
 
   static PlatformType? fromString(String platformType) {
-    return <String, PlatformType>{
+    return const <String, PlatformType>{
       'web': web,
       'android': android,
       'ios': ios,
@@ -1004,45 +1004,45 @@ class DebuggingOptions {
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
     DebuggingOptions._(
       buildInfo: buildInfo,
-      debuggingEnabled: (json['debuggingEnabled'] as bool?)!,
-      startPaused: (json['startPaused'] as bool?)!,
-      dartFlags: (json['dartFlags'] as String?)!,
-      dartEntrypointArgs: ((json['dartEntrypointArgs'] as List<dynamic>?)?.cast<String>())!,
-      disableServiceAuthCodes: (json['disableServiceAuthCodes'] as bool?)!,
-      enableDds: (json['enableDds'] as bool?)!,
-      cacheStartupProfile: (json['cacheStartupProfile'] as bool?)!,
-      enableSoftwareRendering: (json['enableSoftwareRendering'] as bool?)!,
-      skiaDeterministicRendering: (json['skiaDeterministicRendering'] as bool?)!,
-      traceSkia: (json['traceSkia'] as bool?)!,
+      debuggingEnabled: json['debuggingEnabled']! as bool,
+      startPaused: json['startPaused']! as bool,
+      dartFlags: json['dartFlags']! as String,
+      dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
+      disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+      enableDds: json['enableDds']! as bool,
+      cacheStartupProfile: json['cacheStartupProfile']! as bool,
+      enableSoftwareRendering: json['enableSoftwareRendering']! as bool,
+      skiaDeterministicRendering: json['skiaDeterministicRendering']! as bool,
+      traceSkia: json['traceSkia']! as bool,
       traceAllowlist: json['traceAllowlist'] as String?,
       traceSkiaAllowlist: json['traceSkiaAllowlist'] as String?,
-      traceSystrace: (json['traceSystrace'] as bool?)!,
-      endlessTraceBuffer: (json['endlessTraceBuffer'] as bool?)!,
-      dumpSkpOnShaderCompilation: (json['dumpSkpOnShaderCompilation'] as bool?)!,
-      cacheSkSL: (json['cacheSkSL'] as bool?)!,
-      purgePersistentCache: (json['purgePersistentCache'] as bool?)!,
-      useTestFonts: (json['useTestFonts'] as bool?)!,
-      verboseSystemLogs: (json['verboseSystemLogs'] as bool?)!,
+      traceSystrace: json['traceSystrace']! as bool,
+      endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+      dumpSkpOnShaderCompilation: json['dumpSkpOnShaderCompilation']! as bool,
+      cacheSkSL: json['cacheSkSL']! as bool,
+      purgePersistentCache: json['purgePersistentCache']! as bool,
+      useTestFonts: json['useTestFonts']! as bool,
+      verboseSystemLogs: json['verboseSystemLogs']! as bool,
       hostVmServicePort: json['hostVmServicePort'] as int? ,
       deviceVmServicePort: json['deviceVmServicePort'] as int?,
-      disablePortPublication: (json['disablePortPublication'] as bool?)!,
+      disablePortPublication: json['disablePortPublication']! as bool,
       ddsPort: json['ddsPort'] as int?,
       devToolsServerAddress: json['devToolsServerAddress'] != null ? Uri.parse(json['devToolsServerAddress']! as String) : null,
       port: json['port'] as String?,
       hostname: json['hostname'] as String?,
       webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
-      webUseSseForDebugProxy: (json['webUseSseForDebugProxy'] as bool?)!,
-      webUseSseForDebugBackend: (json['webUseSseForDebugBackend'] as bool?)!,
-      webUseSseForInjectedClient: (json['webUseSseForInjectedClient'] as bool?)!,
-      webRunHeadless: (json['webRunHeadless'] as bool?)!,
+      webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
+      webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
+      webUseSseForInjectedClient: json['webUseSseForInjectedClient']! as bool,
+      webRunHeadless: json['webRunHeadless']! as bool,
       webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
-      webBrowserFlags: ((json['webBrowserFlags'] as List<dynamic>?)?.cast<String>())!,
-      webEnableExpressionEvaluation: (json['webEnableExpressionEvaluation'] as bool?)!,
+      webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
+      webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
-      fastStart: (json['fastStart'] as bool?)!,
-      nullAssertions: (json['nullAssertions'] as bool?)!,
-      nativeNullAssertions: (json['nativeNullAssertions'] as bool?)!,
+      fastStart: json['fastStart']! as bool,
+      nullAssertions: json['nullAssertions']! as bool,
+      nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,

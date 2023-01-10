@@ -125,26 +125,26 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       cpu: x86
       device_os: iOS-15
-      xcode: 14a5294e
+      xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
   mac_arm64_ios:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "none"}
         ]
       os: Mac-12
       cpu: arm64
       device_os: iOS-15
-      xcode: 14a5294e
+      xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
   windows:
     properties:
       dependencies: >-
@@ -725,6 +725,7 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
+      - bin/internal/engine.version
       - .ci.yaml
 
   - name: Linux tool_integration_tests_1_4
@@ -2943,6 +2944,25 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac plugin_test_macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: plugin_test_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Mac_x64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -3894,7 +3914,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: spell_check_test
+      task_name: spell_check_test_ios
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// An example showing usage of [StarBorder].
+// An example showing usage of [StarBorder].
 
 import 'package:flutter/material.dart';
 
@@ -66,7 +66,7 @@ class _StarBorderExampleState extends State<StarBorderExample> {
       ),
       child: ListView(
         children: <Widget>[
-          Container(
+          ColoredBox(
             color: Colors.grey.shade200,
             child: Options(_model),
           ),

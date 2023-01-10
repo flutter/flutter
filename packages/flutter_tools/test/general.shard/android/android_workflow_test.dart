@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -569,20 +568,6 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
 
   @override
   String get platformName => '';
-}
-
-class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  CustomFakeOperatingSystemUtils({
-    HostPlatform hostPlatform = HostPlatform.linux_x64
-  })  : _hostPlatform = hostPlatform;
-
-  final HostPlatform _hostPlatform;
-
-  @override
-  String get name => 'Linux';
-
-  @override
-  HostPlatform get hostPlatform => _hostPlatform;
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
