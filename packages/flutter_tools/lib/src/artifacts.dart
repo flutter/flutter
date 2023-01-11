@@ -62,6 +62,8 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
+
+  flutterMigrate,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -109,8 +111,6 @@ enum HostArtifact {
   impellerc,
   // Impeller's tessellation library.
   libtessellator,
-
-  // flutterMigrateDill
 }
 
 // TODO(knopp): Remove once darwin artifacts are universal and moved out of darwin-x64
@@ -202,6 +202,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
+    case Artifact.flutterMigrate:
+      return 'flutter_migrate.dill';
   }
 }
 
@@ -256,9 +258,6 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'impellerc$exe';
     case HostArtifact.libtessellator:
       return 'libtessellator$dll';
-
-    // case HostArtifact.flutterMigrateDill:
-    //   return 'flutter_migrate.dill';
   }
 }
 
@@ -506,6 +505,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
+      case Artifact.flutterMigrate:
       case Artifact.flutterFramework:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterPatchedSdkPath:
@@ -545,6 +545,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
+      case Artifact.flutterMigrate:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
@@ -590,6 +591,7 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = _artifactToFileName(artifact, _platform, mode)!;
         return _fileSystem.path.join(root, runtime, artifactFileName);
       case Artifact.constFinder:
+      case Artifact.flutterMigrate:
       case Artifact.flutterFramework:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterTester:
@@ -677,6 +679,11 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact, _platform));
       case Artifact.fontSubset:
       case Artifact.constFinder:
+        return _cache.getArtifactDirectory('engine')
+                     .childDirectory(_enginePlatformDirectoryName(platform))
+                     .childFile(_artifactToFileName(artifact, _platform, mode)!)
+                     .path;
+      case Artifact.flutterMigrate:
         return _cache.getArtifactDirectory('engine')
                      .childDirectory(_enginePlatformDirectoryName(platform))
                      .childFile(_artifactToFileName(artifact, _platform, mode)!)
@@ -938,6 +945,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.constFinder:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
+      case Artifact.flutterMigrate:
+        return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.windowsDesktopPath:
@@ -1099,6 +1108,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
         case Artifact.constFinder:
+        case Artifact.flutterMigrate:
           break;
       }
     }

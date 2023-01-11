@@ -216,7 +216,8 @@ List<FlutterCommand> generateCommands({
   MigrateCommand(
     verbose: verbose,
     fileSystem: globals.fs,
-    processManager: globals.processManager,  
+    processManager: globals.processManager,
+    artifacts: globals.artifacts!,
   ),
   PackagesCommand(),
   PrecacheCommand(

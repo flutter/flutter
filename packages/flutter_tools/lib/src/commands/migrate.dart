@@ -7,6 +7,7 @@ import 'dart:io' as io show Process;
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../cache.dart';
@@ -17,9 +18,11 @@ class MigrateCommand extends FlutterCommand {
     bool verbose = false,
     required FileSystem fileSystem,
     required ProcessManager processManager,
+    required Artifacts artifacts,
   }) : _verbose = verbose,
        _fileSystem = fileSystem,
-       _processManager = processManager {
+       _processManager = processManager,
+       _artifacts = artifacts {
     requiresPubspecYaml();
   }
 
@@ -28,6 +31,8 @@ class MigrateCommand extends FlutterCommand {
   final FileSystem _fileSystem;
 
   final ProcessManager _processManager;
+
+  final Artifacts _artifacts;
 
   @override
   final String name = 'migrate';
@@ -52,7 +57,11 @@ class MigrateCommand extends FlutterCommand {
       'bin',
       'dart',
     ]);
-    const String dillPath = '/Users/garyq/packages/packages/flutter_migrate/bin/flutter_migrate.dill';
+    final File migrateArtifact = _fileSystem.file(
+      _artifacts.getArtifactPath(Artifact.flutterMigrate),
+    );
+    String dillPath = migrateArtifact.path;
+    // const String dillPath = '/Users/garyq/packages/packages/flutter_migrate/bin/flutter_migrate.dill';
     List<String> command = <String>[sdkPath, '--disable-dart-dev', dillPath, ...argResults!.arguments];
     print(command);
     return command;
