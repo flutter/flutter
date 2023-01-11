@@ -259,12 +259,13 @@ class UnderlineInputBorder extends InputBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is InputBorder
-        && other.borderSide == borderSide;
+    return other is UnderlineInputBorder
+        && other.borderSide == borderSide
+        && other.borderRadius == borderRadius;
   }
 
   @override
-  int get hashCode => borderSide.hashCode;
+  int get hashCode => Object.hash(borderSide, borderRadius);
 }
 
 /// Draws a rounded rectangle around an [InputDecorator]'s container.
