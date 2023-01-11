@@ -12,7 +12,6 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/GrYUVABackendTextures.h"
-#include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
 FLUTTER_ASSERT_ARC
 
