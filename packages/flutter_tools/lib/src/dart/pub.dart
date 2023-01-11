@@ -712,6 +712,7 @@ class _DefaultPub implements Pub {
     final Map<String, String> environment = <String, String>{
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
+      if (summaryOnly ?? false) 'PUB_SUMMARY_ONLY': '1',
     };
     final String? pubCache = _getPubCacheIfAvailable();
     if (pubCache != null) {
