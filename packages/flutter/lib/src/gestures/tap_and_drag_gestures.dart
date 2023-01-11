@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
+import 'package:flutter/services.dart' as TestServices show HardwareKeyboard, LogicalKeyboardKey;
 
 import 'constants.dart';
 import 'drag_details.dart';
@@ -96,7 +96,7 @@ class TapDragDownDetails with Diagnosticable {
   final int consecutiveTapCount;
 
   /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
+  final Set<TestServices.LogicalKeyboardKey> keysPressedOnDown;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -105,7 +105,7 @@ class TapDragDownDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+    properties.add(DiagnosticsProperty<Set<TestServices.LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -155,7 +155,7 @@ class TapDragUpDetails with Diagnosticable {
   final int consecutiveTapCount;
 
   /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
+  final Set<TestServices.LogicalKeyboardKey> keysPressedOnDown;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -164,7 +164,7 @@ class TapDragUpDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+    properties.add(DiagnosticsProperty<Set<TestServices.LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -227,7 +227,7 @@ class TapDragStartDetails with Diagnosticable {
   final int consecutiveTapCount;
 
   /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
+  final Set<TestServices.LogicalKeyboardKey> keysPressedOnDown;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -237,7 +237,7 @@ class TapDragStartDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+    properties.add(DiagnosticsProperty<Set<TestServices.LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -356,7 +356,7 @@ class TapDragUpdateDetails with Diagnosticable {
   final int consecutiveTapCount;
 
   /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
+  final Set<TestServices.LogicalKeyboardKey> keysPressedOnDown;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -370,7 +370,7 @@ class TapDragUpdateDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
     properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+    properties.add(DiagnosticsProperty<Set<TestServices.LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -434,7 +434,7 @@ class TapDragEndDetails with Diagnosticable {
   final int consecutiveTapCount;
 
   /// The keys that were pressed when the most recent [PointerDownEvent] occurred.
-  final Set<LogicalKeyboardKey> keysPressedOnDown;
+  final Set<TestServices.LogicalKeyboardKey> keysPressedOnDown;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -442,7 +442,7 @@ class TapDragEndDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DiagnosticsProperty<double?>('primaryVelocity', primaryVelocity));
     properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
+    properties.add(DiagnosticsProperty<Set<TestServices.LogicalKeyboardKey>>('keysPressedOnDown', keysPressedOnDown));
   }
 }
 
@@ -512,7 +512,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   //
   // When the timer between two taps elapses, the recognizer loses the arena, the gesture is cancelled
   // or the recognizer is disposed of then this value is reset.
-  Set<LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <LogicalKeyboardKey>{};
+  Set<TestServices.LogicalKeyboardKey> get keysPressedOnDown => _keysPressedOnDown ?? <TestServices.LogicalKeyboardKey>{};
 
   // The upper limit for the [consecutiveTapCount]. When this limit is reached
   // all tap related state is reset and a new tap series is tracked.
@@ -531,7 +531,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   PointerDownEvent? _down;
   PointerUpEvent? _up;
   int _consecutiveTapCount = 0;
-  Set<LogicalKeyboardKey>? _keysPressedOnDown;
+  Set<TestServices.LogicalKeyboardKey>? _keysPressedOnDown;
 
   OffsetPair? _originPosition;
   int? _previousButtons;
@@ -597,7 +597,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 
   void _trackTap(PointerDownEvent event) {
     _down = event;
-    _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
+    _keysPressedOnDown = TestServices.HardwareKeyboard.instance.logicalKeysPressed;
     _previousButtons = event.buttons;
     _lastTapOffset = event.position;
     _originPosition = OffsetPair(local: event.localPosition, global: event.position);
