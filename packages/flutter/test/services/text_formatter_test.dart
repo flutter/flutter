@@ -16,15 +16,15 @@ class TestTextInputFormatter extends TextInputFormatter {
 }
 
 void main() {
+  TextEditingValue testOldValue = TextEditingValue.empty;
+  TextEditingValue testNewValue = TextEditingValue.empty;
+
   test('test const constructor', () {
     const TestTextInputFormatter testValue1 = TestTextInputFormatter();
     const TestTextInputFormatter testValue2 = TestTextInputFormatter();
 
     expect(testValue1, same(testValue2));
   });
-
-  TextEditingValue testOldValue = TextEditingValue.empty;
-  TextEditingValue testNewValue = TextEditingValue.empty;
 
   test('withFunction wraps formatting function', () {
     testOldValue = TextEditingValue.empty;
