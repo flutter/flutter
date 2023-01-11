@@ -13227,7 +13227,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'Välilehti $tabIndex/$tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
   String get timePickerDialHelpText => 'VALITSE AIKA';
