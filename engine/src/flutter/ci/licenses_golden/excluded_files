@@ -384,6 +384,7 @@
 ../../../flutter/third_party/accessibility/gfx/test
 ../../../flutter/third_party/gn
 ../../../flutter/third_party/ninja
+../../../flutter/third_party/spring_animation/README.md
 ../../../flutter/third_party/test_shaders
 ../../../flutter/third_party/tonic/.clang-format
 ../../../flutter/third_party/tonic/AUTHORS
