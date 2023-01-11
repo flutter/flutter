@@ -614,7 +614,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 4.0;
 
-      canvas.drawRRect(borderTrackRRect, borderPaint);    
+      canvas.drawRRect(borderTrackRRect, borderPaint);
     }
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
