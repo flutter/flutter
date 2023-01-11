@@ -12485,7 +12485,7 @@ void main() {
           pointer: 7,
           kind: PointerDeviceKind.mouse,
         );
-    await tester.pumpAndSettle(kPressTimeout);
+    await tester.pumpAndSettle();
     await gesture.up();
     expect(textFieldTapCount, 0);
     expect(prefixTapCount, 1);
@@ -12496,7 +12496,7 @@ void main() {
       pointer: 7,
       kind: PointerDeviceKind.mouse,
     );
-    await tester.pumpAndSettle(kPressTimeout);
+    await tester.pumpAndSettle();
     await gesture.up();
     expect(textFieldTapCount, 0);
     expect(prefixTapCount, 1);
