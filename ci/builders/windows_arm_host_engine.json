@@ -1,0 +1,124 @@
+{
+    "builds": [
+        {
+            "archives": [
+                {
+                    "base_path": "out/host_debug_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/host_debug_arm64/zip_archives/windows-arm64/artifacts.zip",
+                        "out/host_debug_arm64/zip_archives/windows-arm64/windows-arm64-embedder.zip",
+                        "out/host_debug_arm64/zip_archives/windows-arm64/font-subset.zip",
+                        "out/host_debug_arm64/zip_archives/dart-sdk-windows-arm64.zip",
+                        "out/host_debug_arm64/zip_archives/windows-arm64-debug/windows-arm64-flutter.zip",
+                        "out/host_debug_arm64/zip_archives/windows-arm64/flutter-cpp-client-wrapper.zip",
+                        "out/host_debug_arm64/zip_archives/flutter-web-sdk-windows-arm64.zip"
+                    ],
+                    "name": "host_debug_arm64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "debug",
+                "--full-dart-sdk",
+                "--no-lto",
+                "--windows-cpu",
+                "arm64"
+            ],
+            "name": "host_debug_arm64",
+            "ninja": {
+                "config": "host_debug_arm64",
+                "targets": [
+                    "flutter/build/archives:artifacts",
+                    "flutter/build/archives:embedder",
+                    "flutter/tools/font-subset",
+                    "flutter/build/archives:dart_sdk_archive",
+                    "flutter/shell/platform/windows/client_wrapper:client_wrapper_archive",
+                    "flutter/build/archives:windows_flutter",
+                    "flutter/web_sdk"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/host_profile_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/host_profile_arm64/zip_archives/windows-arm64-profile/windows-arm64-flutter.zip"
+                    ],
+                    "name": "host_profile_arm64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "profile",
+                "--no-lto",
+                "--windows-cpu",
+                "arm64"
+            ],
+            "name": "host_profile_arm64",
+            "ninja": {
+                "config": "host_profile_arm64",
+                "targets": [
+                    "windows",
+                    "gen_snapshot",
+                    "flutter/build/archives:windows_flutter"
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/host_release_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/host_release_arm64/zip_archives/windows-arm64-release/windows-arm64-flutter.zip"
+                    ],
+                    "name": "host_profile_arm64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Windows-10"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "generators": {},
+            "gn": [
+                "--runtime-mode",
+                "release",
+                "--no-lto",
+                "--windows-cpu",
+                "arm64"
+            ],
+            "name": "host_release_arm64",
+            "ninja": {
+                "config": "host_release_arm64",
+                "targets": [
+                    "windows",
+                    "gen_snapshot",
+                    "flutter/build/archives:windows_flutter"
+                ]
+            },
+            "tests": []
+        }
+    ]
+}
