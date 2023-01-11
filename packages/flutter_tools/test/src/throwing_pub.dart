@@ -29,7 +29,7 @@ class ThrowingPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.standard,
+    bool printProgress = true,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
@@ -42,7 +42,7 @@ class ThrowingPub implements Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.standard,
+    bool printProgress = true,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }

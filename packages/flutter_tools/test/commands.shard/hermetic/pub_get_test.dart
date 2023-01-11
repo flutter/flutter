@@ -190,7 +190,7 @@ class FakePub extends Fake implements Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.standard,
+    bool printProgress = true,
   }) async {
     if (project != null) {
       fileSystem.directory(project.directory)

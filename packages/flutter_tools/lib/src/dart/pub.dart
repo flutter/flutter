@@ -140,12 +140,6 @@ class PubContext {
   }
 }
 
-enum PubOutputMode {
-  none,
-  standard,
-  summaryOnly,
-}
-
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
@@ -178,6 +172,10 @@ abstract class Pub {
   /// If [shouldSkipThirdPartyGenerator] is true, the overall pub get will be
   /// skipped if the package config file has a "generator" other than "pub".
   /// Defaults to true.
+  ///
+  /// If [printProgress] is true, `pub get` will inherit stdio from the current process.
+  /// Defaults to true.
+  ///
   /// Will also resolve dependencies in the example folder if present.
   Future<void> get({
     required PubContext context,
@@ -187,7 +185,7 @@ abstract class Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.standard
+    bool printProgress = true,
   });
 
   /// Runs pub in 'batch' mode.
@@ -227,7 +225,7 @@ abstract class Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.standard
+    bool printProgress = true,
   });
 }
 
@@ -292,7 +290,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.standard
+    bool printProgress = true,
   }) async {
     final String directory = project.directory.path;
     final File packageConfigFile = project.packageConfigFile;
@@ -364,7 +362,7 @@ class _DefaultPub implements Pub {
       directory: directory,
       failureMessage: 'pub $command failed',
       flutterRootOverride: flutterRootOverride,
-      outputMode: outputMode,
+      printProgress: printProgress,
     );
     await _updateVersionAndPackageConfig(project);
   }
@@ -381,19 +379,19 @@ class _DefaultPub implements Pub {
   Future<void> _runWithStdioInherited(
     List<String> arguments, {
     required String command,
-    required PubOutputMode outputMode,
     required PubContext context,
     required String directory,
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
+    bool printProgress = true
   }) async {
     int exitCode;
 
     final List<String> pubCommand = _pubCommand(arguments);
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride, summaryOnly: outputMode == PubOutputMode.summaryOnly);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride, summaryOnly: printProgress);
 
     try {
-      if (outputMode != PubOutputMode.none) {
+      if (printProgress) {
         final io.Stdio? stdio = _stdio;
         if (stdio == null) {
           // Let pub inherit stdio and output directly to the tool's stdout and
@@ -564,14 +562,14 @@ class _DefaultPub implements Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.standard
+    bool printProgress = true,
   }) async {
     await _runWithStdioInherited(
       arguments,
       command: command,
       directory: _fileSystem.currentDirectory.path,
       context: context,
-      outputMode: outputMode,
+      printProgress: printProgress,
     );
     if (touchesPackageConfig && project != null) {
       await _updateVersionAndPackageConfig(project);

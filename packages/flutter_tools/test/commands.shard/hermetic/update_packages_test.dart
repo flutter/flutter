@@ -282,7 +282,7 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.standard,
+    bool printProgress = true,
   }) async {
     pubGetDirectories.add(project.directory.path);
     project.directory.childFile('pubspec.lock')
