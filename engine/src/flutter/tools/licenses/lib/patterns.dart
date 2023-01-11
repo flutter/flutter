@@ -490,6 +490,19 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     )
   ),
 
+  // Seen in React Native files
+  LicenseFileReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    fileIndex: 3,
+    pattern: RegExp(
+      kIndent +
+      r'This source code is licensed under the MIT license found in the '
+      r'(LICENSE) file in the root directory of this source tree.'
+      .replaceAll(' ', _linebreak),
+      multiLine: true,
+    )
+  ),
 ];
 
 
