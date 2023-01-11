@@ -49,8 +49,7 @@ namespace {
 // Types imported for the realm_builder library.
 using component_testing::ChildRef;
 using component_testing::ConfigValue;
-using component_testing::LocalComponent;
-using component_testing::LocalComponentHandles;
+using component_testing::LocalComponentImpl;
 using component_testing::ParentRef;
 using component_testing::Protocol;
 using component_testing::Realm;
@@ -109,7 +108,7 @@ int ButtonsToInt(
 // us know what position and button press state the mouse cursor has.
 class MouseInputListenerServer
     : public fuchsia::ui::test::input::MouseInputListener,
-      public LocalComponent {
+      public LocalComponentImpl {
  public:
   explicit MouseInputListenerServer(async_dispatcher_t* dispatcher)
       : dispatcher_(dispatcher) {}
@@ -121,19 +120,18 @@ class MouseInputListenerServer
     events_.push(std::move(request));
   }
 
-  // |MockComponent::Start|
+  // |MockComponent::OnStart|
   // When the component framework requests for this component to start, this
   // method will be invoked by the realm_builder library.
-  void Start(std::unique_ptr<LocalComponentHandles> mock_handles) override {
+  void OnStart() override {
     FML_LOG(INFO) << "Starting MouseInputServer";
-    ASSERT_EQ(ZX_OK, mock_handles->outgoing()->AddPublicService(
+    ASSERT_EQ(ZX_OK, outgoing()->AddPublicService(
                          fidl::InterfaceRequestHandler<
                              fuchsia::ui::test::input::MouseInputListener>(
                              [this](auto request) {
                                bindings_.AddBinding(this, std::move(request),
                                                     dispatcher_);
                              })));
-    mock_handles_.emplace_back(std::move(mock_handles));
   }
 
   size_t SizeOfEvents() const { return events_.size(); }
@@ -156,7 +154,6 @@ class MouseInputListenerServer
   // Not owned.
   async_dispatcher_t* dispatcher_ = nullptr;
   fidl::BindingSet<fuchsia::ui::test::input::MouseInputListener> bindings_;
-  std::vector<std::unique_ptr<LocalComponentHandles>> mock_handles_;
   std::queue<
       fuchsia::ui::test::input::MouseInputListenerReportMouseInputRequest>
       events_;
@@ -191,7 +188,7 @@ class MouseInputTest : public PortableUITest,
   }
 
   MouseInputListenerServer* mouse_input_listener() {
-    return mouse_input_listener_.get();
+    return mouse_input_listener_;
   }
 
   // Helper method for checking the test.mouse.MouseInputListener response from
@@ -254,13 +251,17 @@ class MouseInputTest : public PortableUITest,
  private:
   void ExtendRealm() override {
     FML_LOG(INFO) << "Extending realm";
-    mouse_input_listener_ =
-        std::make_unique<MouseInputListenerServer>(dispatcher());
 
     // Key part of service setup: have this test component vend the
     // |MouseInputListener| service in the constructed realm.
-    realm_builder()->AddLocalChild(kMouseInputListener,
-                                   mouse_input_listener_.get());
+    auto mouse_input_listener =
+        std::make_unique<MouseInputListenerServer>(dispatcher());
+    mouse_input_listener_ = mouse_input_listener.get();
+    realm_builder()->AddLocalChild(
+        kMouseInputListener,
+        [mouse_input_listener = std::move(mouse_input_listener)]() mutable {
+          return std::move(mouse_input_listener);
+        });
 
     realm_builder()->AddChild(kMouseInputView, kMouseInputViewUrl,
                               component_testing::ChildOptions{
@@ -281,7 +282,7 @@ class MouseInputTest : public PortableUITest,
 
   ParamType GetTestUIStackUrl() override { return GetParam(); };
 
-  std::unique_ptr<MouseInputListenerServer> mouse_input_listener_;
+  MouseInputListenerServer* mouse_input_listener_;
 
   fuchsia::ui::scenic::ScenicPtr scenic_;
   uint32_t display_width_ = 0;
