@@ -37,7 +37,8 @@ void testMain() {
       expect(originalSurface.width(), 9);
       expect(originalSurface.height(), 19);
 
-      // Shrinking reuses the existing canvas but translates it so Skia renders into the visible area.
+      // Shrinking reuses the existing canvas but translates it so
+      // Skia renders into the visible area.
       final CkSurface shrunkSurface =
           surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
       final DomCanvasElement shrunk = surface.htmlCanvas!;
@@ -45,16 +46,16 @@ void testMain() {
       expect(shrunk.style.width, '9px');
       expect(shrunk.style.height, '19px');
       expect(shrunk.style.transform, _isTranslate(0, -4));
-      expect(shrunkSurface, isNot(same(original)));
+      expect(shrunkSurface, isNot(same(originalSurface)));
       expect(shrunkSurface.width(), 5);
       expect(shrunkSurface.height(), 15);
 
-      // The first increase will allocate a new canvas, but will overallocate
+      // The first increase will allocate a new surface, but will overallocate
       // by 40% to accommodate future increases.
       final CkSurface firstIncreaseSurface =
           surface.acquireFrame(const ui.Size(10, 20)).skiaSurface;
       final DomCanvasElement firstIncrease = surface.htmlCanvas!;
-      expect(firstIncrease, isNot(same(original)));
+      expect(firstIncrease, same(original));
       expect(firstIncreaseSurface, isNot(same(shrunkSurface)));
 
       // Expect overallocated dimensions
@@ -79,7 +80,7 @@ void testMain() {
       // Increases beyond the 40% limit will cause a new allocation.
       final CkSurface hugeSurface = surface.acquireFrame(const ui.Size(20, 40)).skiaSurface;
       final DomCanvasElement huge = surface.htmlCanvas!;
-      expect(huge, isNot(same(secondIncrease)));
+      expect(huge, same(secondIncrease));
       expect(hugeSurface, isNot(same(secondIncreaseSurface)));
 
       // Also over-allocated
