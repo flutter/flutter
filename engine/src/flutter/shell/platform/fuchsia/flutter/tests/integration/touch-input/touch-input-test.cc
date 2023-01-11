@@ -113,8 +113,7 @@ namespace {
 using component_testing::ChildRef;
 using component_testing::ConfigValue;
 using component_testing::DirectoryContents;
-using component_testing::LocalComponent;
-using component_testing::LocalComponentHandles;
+using component_testing::LocalComponentImpl;
 using component_testing::ParentRef;
 using component_testing::Protocol;
 using component_testing::Realm;
@@ -151,17 +150,17 @@ bool CompareDouble(double f0, double f1, double epsilon) {
 }
 
 // This component implements the TouchInput protocol
-// and the interface for a RealmBuilder LocalComponent. A LocalComponent
+// and the interface for a RealmBuilder LocalComponentImpl. A LocalComponentImpl
 // is a component that is implemented here in the test, as opposed to
 // elsewhere in the system. When it's inserted to the realm, it will act
 // like a proper component. This is accomplished, in part, because the
 // realm_builder library creates the necessary plumbing. It creates a manifest
 // for the component and routes all capabilities to and from it.
-// LocalComponent:
+// LocalComponentImpl:
 // https://fuchsia.dev/fuchsia-src/development/testing/components/realm_builder#mock-components
 class TouchInputListenerServer
     : public fuchsia::ui::test::input::TouchInputListener,
-      public LocalComponent {
+      public LocalComponentImpl {
  public:
   explicit TouchInputListenerServer(async_dispatcher_t* dispatcher)
       : dispatcher_(dispatcher) {}
@@ -174,21 +173,20 @@ class TouchInputListenerServer
     events_received_.push_back(std::move(request));
   }
 
-  // |LocalComponent::Start|
+  // |LocalComponentImpl::OnStart|
   // When the component framework requests for this component to start, this
   // method will be invoked by the realm_builder library.
-  void Start(std::unique_ptr<LocalComponentHandles> local_handles) override {
+  void OnStart() override {
     FML_LOG(INFO) << "Starting TouchInputListenerServer";
     // When this component starts, add a binding to the
     // protocol to this component's outgoing directory.
-    ASSERT_EQ(ZX_OK, local_handles->outgoing()->AddPublicService(
+    ASSERT_EQ(ZX_OK, outgoing()->AddPublicService(
                          fidl::InterfaceRequestHandler<
                              fuchsia::ui::test::input::TouchInputListener>(
                              [this](auto request) {
                                bindings_.AddBinding(this, std::move(request),
                                                     dispatcher_);
                              })));
-    local_handles_.emplace_back(std::move(local_handles));
   }
 
   const std::vector<
@@ -199,7 +197,6 @@ class TouchInputListenerServer
 
  private:
   async_dispatcher_t* dispatcher_ = nullptr;
-  std::vector<std::unique_ptr<LocalComponentHandles>> local_handles_;
   fidl::BindingSet<fuchsia::ui::test::input::TouchInputListener> bindings_;
   std::vector<
       fuchsia::ui::test::input::TouchInputListenerReportTouchInputRequest>
@@ -290,7 +287,7 @@ class FlutterTapTestBase : public PortableUITest,
 
   ParamType GetTestUIStackUrl() override { return GetParam(); };
 
-  std::unique_ptr<TouchInputListenerServer> touch_input_listener_server_;
+  TouchInputListenerServer* touch_input_listener_server_;
 };
 
 class FlutterTapTest : public FlutterTapTestBase {
@@ -299,10 +296,14 @@ class FlutterTapTest : public FlutterTapTestBase {
     FML_LOG(INFO) << "Extending realm";
     // Key part of service setup: have this test component vend the
     // |TouchInputListener| service in the constructed realm.
-    touch_input_listener_server_ =
+    auto touch_input_listener_server =
         std::make_unique<TouchInputListenerServer>(dispatcher());
-    realm_builder()->AddLocalChild(kMockTouchInputListener,
-                                   touch_input_listener_server_.get());
+    touch_input_listener_server_ = touch_input_listener_server.get();
+    realm_builder()->AddLocalChild(
+        kMockTouchInputListener, [touch_input_listener_server = std::move(
+                                      touch_input_listener_server)]() mutable {
+          return std::move(touch_input_listener_server);
+        });
 
     // Add touch-input-view to the Realm
     realm_builder()->AddChild(kTouchInputView, kTouchInputViewUrl,
@@ -381,10 +382,14 @@ class FlutterEmbedTapTest : public FlutterTapTestBase {
     FML_LOG(INFO) << "Extending realm";
     // Key part of service setup: have this test component vend the
     // |TouchInputListener| service in the constructed realm.
-    touch_input_listener_server_ =
+    auto touch_input_listener_server =
         std::make_unique<TouchInputListenerServer>(dispatcher());
-    realm_builder()->AddLocalChild(kMockTouchInputListener,
-                                   touch_input_listener_server_.get());
+    touch_input_listener_server_ = touch_input_listener_server.get();
+    realm_builder()->AddLocalChild(
+        kMockTouchInputListener, [touch_input_listener_server = std::move(
+                                      touch_input_listener_server)]() mutable {
+          return std::move(touch_input_listener_server);
+        });
 
     // Add touch-input-view to the Realm
     realm_builder()->AddChild(kTouchInputView, kTouchInputViewUrl,

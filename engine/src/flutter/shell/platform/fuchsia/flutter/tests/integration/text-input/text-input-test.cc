@@ -41,8 +41,7 @@ namespace {
 
 // Types imported for the realm_builder library.
 using component_testing::ChildRef;
-using component_testing::LocalComponent;
-using component_testing::LocalComponentHandles;
+using component_testing::LocalComponentImpl;
 using component_testing::ParentRef;
 using component_testing::Protocol;
 using component_testing::RealmBuilder;
@@ -76,7 +75,7 @@ constexpr auto kTestUIStackUrl =
 /// additions of characters, not just the end result.
 class KeyboardInputListenerServer
     : public fuchsia::ui::test::input::KeyboardInputListener,
-      public LocalComponent {
+      public LocalComponentImpl {
  public:
   explicit KeyboardInputListenerServer(async_dispatcher_t* dispatcher)
       : dispatcher_(dispatcher) {}
@@ -90,10 +89,9 @@ class KeyboardInputListenerServer
   }
 
   /// Starts this server.
-  void Start(std::unique_ptr<LocalComponentHandles> local_handles) override {
+  void OnStart() override {
     FML_LOG(INFO) << "Starting KeyboardInputListenerServer";
-    local_handles_ = std::move(local_handles);
-    ASSERT_EQ(ZX_OK, local_handles_->outgoing()->AddPublicService(
+    ASSERT_EQ(ZX_OK, outgoing()->AddPublicService(
                          bindings_.GetHandler(this, dispatcher_)));
   }
 
@@ -124,7 +122,6 @@ class KeyboardInputListenerServer
 
  private:
   async_dispatcher_t* dispatcher_ = nullptr;
-  std::unique_ptr<LocalComponentHandles> local_handles_;
   fidl::BindingSet<fuchsia::ui::test::input::KeyboardInputListener> bindings_;
   std::vector<std::string> response_list_;
   bool ready_ = false;
@@ -169,18 +166,22 @@ class TextInputTest : public PortableUITest,
 
   std::string GetTestUIStackUrl() override { return GetParam(); };
 
-  std::unique_ptr<KeyboardInputListenerServer> keyboard_input_listener_server_;
+  KeyboardInputListenerServer* keyboard_input_listener_server_;
 
  private:
   void ExtendRealm() override {
     FML_LOG(INFO) << "Extending realm";
     // Key part of service setup: have this test component vend the
     // |KeyboardInputListener| service in the constructed realm.
-    keyboard_input_listener_server_ =
+    auto keyboard_input_listener_server =
         std::make_unique<KeyboardInputListenerServer>(dispatcher());
-
-    realm_builder()->AddLocalChild(kKeyboardInputListener,
-                                   keyboard_input_listener_server_.get());
+    keyboard_input_listener_server_ = keyboard_input_listener_server.get();
+    realm_builder()->AddLocalChild(
+        kKeyboardInputListener,
+        [keyboard_input_listener_server =
+             std::move(keyboard_input_listener_server)]() mutable {
+          return std::move(keyboard_input_listener_server);
+        });
 
     // Add text-input-view to the Realm
     realm_builder()->AddChild(kTextInputView, kTextInputViewUrl,
