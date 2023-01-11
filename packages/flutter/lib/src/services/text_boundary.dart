@@ -138,41 +138,27 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    print('target $position');
-    final List<int> codeUnits = _text.codeUnits;
-    int index = position;
-    int startIndex = 0;
-
     if (position < 0) {
       return null;
     }
+    if (position >= _text.length) {
+      return getLeadingTextBoundaryAt(_text.length - 1);
+    }
+    assert(_text.isNotEmpty);
+    final List<int> codeUnits = _text.codeUnits;
+    int index = position;
 
-    while (index > 0) {
-      print('index $index');
-      if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-        print('line terminator case');
-        final bool indexAtCRLF = codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD;
-        if (index == position && (indexAtCRLF || !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1]))) {
-          print('weird case');
-          index -= indexAtCRLF ? 2 : 1;
-          continue;
-        }
-        if (indexAtCRLF) {
-          print('case1');
-          //index--;
-          //continue;
-          startIndex = index + 1;
-        } else {
-          print('case2');
-          startIndex = index;
-        }
-        print('case 4');
-        break;
-      }
+    if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+    } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
       index--;
     }
-
-    return startIndex;
+    while (index > 0 && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      index--;
+    }
+    if ((index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) || (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1]))) {
+      index++;
+    }
+    return max(index, 0);
   }
 
   /// Returns the [int] representing the end position of the paragraph that
@@ -180,36 +166,31 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    final List<int> codeUnits = _text.codeUnits;
-    int index = position;
-    int endIndex = _text.length;
-
     if (position >= _text.length) {
       return null;
     }
+    assert(_text.isNotEmpty);
 
-    while (index < codeUnits.length) {
-      if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-        final bool indexAtCRLF = index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA;
-        if (index == position && (indexAtCRLF || !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1]))) {
-          print('1');
-          index += indexAtCRLF ? 2 : 1;
-          continue;
-        }
-        if (indexAtCRLF) {
-          print('2');
-          index++;
-          continue;
-        } else {
-          print('3');
-          endIndex = index + 1;
-        }
-        break;
-      }
+    final List<int> codeUnits = _text.codeUnits;
+    int index = position;
+
+    if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
+      index += 2;
+    } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
       index++;
     }
 
-    return endIndex;
+    while (index < codeUnits.length && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      index++;
+    }
+
+    if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
+      index += 2;
+    } else if (index < codeUnits.length - 1 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      index++;
+    }
+
+    return min(index, _text.length);
   }
 }
 

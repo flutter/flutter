@@ -6448,7 +6448,7 @@ void main() {
       equals(
         TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 35 : 10,
+          extentOffset: platformCanSelectByParagraph ? 36 : 10,
         ),
       ),
       reason: 'on $platform',
@@ -6470,7 +6470,7 @@ void main() {
       equals(
         TextSelection(
           baseOffset: 10,
-          extentOffset: platformCanSelectByParagraph ? 19 : 10,
+          extentOffset: platformCanSelectByParagraph ? 20 : 10,
         ),
       ),
       reason: 'on $platform',
