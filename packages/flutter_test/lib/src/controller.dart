@@ -573,9 +573,9 @@ abstract class WidgetController {
   /// The `offset` represents a distance the pointer moves in global coordinate
   /// system of the screen.
   ///
-  /// Positive [offset.dy] values mean pointer moves downward. Negtive
+  /// Positive [offset.dy] values mean pointer moves downward. Negative
   /// [offset.dy] values mean pointer moves upwards. Accordingly, positive
-  /// [offset.dx] values mean pointer moves towards the right. Negtive
+  /// [offset.dx] values mean pointer moves towards the right. Negative
   /// [offset.dx] values mean pointer moves towards left.
   /// {@endtemplate}
   ///
