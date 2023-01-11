@@ -1089,10 +1089,6 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// Insert multiple items at [index] and start an animation that will be passed
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
   /// are visible.
-  ///
-  /// This method's semantics are the same as Dart's [List.insertAll] method: it
-  /// increases the length of the list of items by number of [length] and shifts
-  /// all items at or after [index] + [length] towards the end of the list of items.
   void insertAllItems(int index, int length, { Duration duration = _kDuration }) {
     for (int i = 0; i < length; i++) {
       insertItem(index + i, duration: duration);
