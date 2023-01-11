@@ -364,7 +364,7 @@ class _DefaultPub implements Pub {
       directory: directory,
       failureMessage: 'pub $command failed',
       flutterRootOverride: flutterRootOverride,
-      outputMode: PubOutputMode.standard,
+      outputMode: outputMode,
     );
     await _updateVersionAndPackageConfig(project);
   }
@@ -390,7 +390,7 @@ class _DefaultPub implements Pub {
     int exitCode;
 
     final List<String> pubCommand = _pubCommand(arguments);
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride, summaryOnly: outputMode == PubOutputMode.summaryOnly);
 
     try {
       if (outputMode != PubOutputMode.none) {
@@ -456,8 +456,7 @@ class _DefaultPub implements Pub {
             ? 'exists'
             : 'does not exist';
         buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
-        final Map<String, String> env = await _createPubEnvironment(context, flutterRootOverride);
-        buffer.write(_stringifyPubEnv(env));
+        buffer.write(_stringifyPubEnv(pubEnvironment));
         throw io.ProcessException(
           exception.executable,
           exception.arguments,
@@ -525,7 +524,7 @@ class _DefaultPub implements Pub {
     if (showTraceForErrors) {
       arguments.insert(0, '--trace');
     }
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride);
     final List<String> pubCommand = _pubCommand(arguments);
     final int code = await _processUtils.stream(
         pubCommand,
@@ -705,7 +704,11 @@ class _DefaultPub implements Pub {
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
-  Future<Map<String, String>> _createPubEnvironment(PubContext context, [ String? flutterRootOverride ]) async {
+  Future<Map<String, String>> _createPubEnvironment({
+    required PubContext context,
+    String? flutterRootOverride,
+    bool? summaryOnly = false,
+  }) async {
     final Map<String, String> environment = <String, String>{
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
