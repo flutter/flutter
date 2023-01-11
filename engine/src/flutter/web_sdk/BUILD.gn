@@ -547,6 +547,8 @@ if (!is_fuchsia) {
   zip_bundle_from_file("flutter_web_sdk_archive") {
     if (target_os == "wasm") {
       output = "flutter-web-sdk.zip"
+    } else if (is_win) {
+      output = "flutter-web-sdk-${full_target_platform_name}.zip"
     } else {
       # TODO(jacksongardner): remove this once we stop making platform-specific
       # flutter_web_sdk archives.
