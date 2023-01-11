@@ -140,9 +140,14 @@ class PubContext {
   }
 }
 
+/// Describes the amount of output that should get printed from a `pub` command.
+/// [PubOutputMode.all] indicates that the complete output is printed. This is
+/// typically the default.
+/// [PubOutputMode.none] indicates that no output should be printed.
+/// [PubOutputMode.summaryOnly] indicates that only summary information should be printed.
 enum PubOutputMode {
   none,
-  standard,
+  all,
   summaryOnly,
 }
 
@@ -178,6 +183,14 @@ abstract class Pub {
   /// If [shouldSkipThirdPartyGenerator] is true, the overall pub get will be
   /// skipped if the package config file has a "generator" other than "pub".
   /// Defaults to true.
+  ///
+  /// [outputMode] determines how verbose the output from `pub get` will be.
+  /// If [PubOutputMode.all] is used, `pub get` will print its typical output
+  /// which includes information about all changed dependencies. If
+  /// [PubOutputMode.summaryOnly] is used, only summary information will be printed.
+  /// This is useful for cases where the user is typically not interested in
+  /// what dependencies were changed, such as when running `flutter create`.
+  ///
   /// Will also resolve dependencies in the example folder if present.
   Future<void> get({
     required PubContext context,
@@ -187,7 +200,7 @@ abstract class Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.standard
+    PubOutputMode outputMode = PubOutputMode.all
   });
 
   /// Runs pub in 'batch' mode.
@@ -227,7 +240,7 @@ abstract class Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.standard
+    PubOutputMode outputMode = PubOutputMode.all
   });
 }
 
@@ -292,7 +305,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.standard
+    PubOutputMode outputMode = PubOutputMode.all
   }) async {
     final String directory = project.directory.path;
     final File packageConfigFile = project.packageConfigFile;
@@ -564,7 +577,7 @@ class _DefaultPub implements Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.standard
+    PubOutputMode outputMode = PubOutputMode.all
   }) async {
     await _runWithStdioInherited(
       arguments,

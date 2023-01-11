@@ -956,7 +956,7 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.standard,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
 }
 
