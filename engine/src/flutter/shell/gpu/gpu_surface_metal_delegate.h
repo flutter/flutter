@@ -10,7 +10,6 @@
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
 namespace flutter {
 
