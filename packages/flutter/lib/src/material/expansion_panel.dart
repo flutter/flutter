@@ -16,6 +16,7 @@ const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
     vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );
+const EdgeInsets _kExpandIconPadding = EdgeInsets.all(12.0);
 
 class _SaltedKey<S, V> extends LocalKey {
   const _SaltedKey(this.salt, this.value);
@@ -168,6 +169,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
+    this.expandIconColor,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -195,6 +197,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
     this.dividerColor,
     this.elevation = 2,
+    this.expandIconColor,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true;
@@ -248,6 +251,9 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// By default, the value of elevation is 2.
   final double elevation;
+
+  /// {@macro flutter.material.ExpandIcon.color}
+  final Color? expandIconColor;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -356,8 +362,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       Widget expandIconContainer = Container(
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
+          color: widget.expandIconColor,
           isExpanded: _isChildExpanded(index),
-          padding: const EdgeInsets.all(16.0),
+          padding: _kExpandIconPadding,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
