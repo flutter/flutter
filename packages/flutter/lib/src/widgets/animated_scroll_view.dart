@@ -139,10 +139,6 @@ class AnimatedList extends _AnimatedScrollView {
 /// The removed item's animation is passed to the [removeItem] builder
 /// parameter.
 ///
-/// When all items are removed with [removeAllItems] its animation is reversed.
-/// The removed item's animation is passed to the [removeAllItems] builder
-/// parameter.
-///
 /// An app that needs to insert or remove items in response to an event
 /// can refer to the [AnimatedList]'s state with a global key:
 ///
@@ -504,10 +500,6 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   /// Insert multiple items at [index] and start an animation that will be passed
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
   /// are visible.
-  ///
-  /// This method's semantics are the same as Dart's [List.insertAll] method: it
-  /// increases the length of the list of items by number of [length] and shifts
-  /// all items at or after [index] + [length] towards the end of the list of items.
   void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
     _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
   }
