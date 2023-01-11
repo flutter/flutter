@@ -42,7 +42,6 @@ class LinearBorderEdge {
   /// edge. Default is 1.0.
   final double size;
 
-
   /// A value between -1.0 and 1.0 that defines how edges for which [size]
   /// is less than 1.0 are aligned relative to the corresponding box edge.
   ///
