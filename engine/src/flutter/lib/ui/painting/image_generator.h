@@ -7,9 +7,13 @@
 
 #include <optional>
 #include "flutter/fml/macros.h"
+#include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
+#include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
-#include "third_party/skia/src/codec/SkCodecImageGenerator.h"
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/src/codec/SkCodecImageGenerator.h"  // nogncheck
 
 namespace flutter {
 
