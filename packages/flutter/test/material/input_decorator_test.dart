@@ -5339,22 +5339,22 @@ void main() {
     ));
     expect(outlineInputBorder, isNot(const OutlineInputBorder()));
 
-    // UnderlineInputBorder's equality is defined only by the borderSide
-    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
-    expect(underlineInputBorder, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)));
-    expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
-
     // UnderlineInputBorder's equality is defined by the borderSide and borderRadius
-    const UnderlineInputBorder underlineInputBorderRadius = UnderlineInputBorder(
-      borderSide: BorderSide(color: Colors.red),
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
     );
-    expect(underlineInputBorderRadius, const UnderlineInputBorder(
-      borderSide: BorderSide(color: Colors.red),
+    expect(underlineInputBorder, const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
     ));
-    expect(underlineInputBorderRadius, isNot(const UnderlineInputBorder(
+    expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
+    expect(underlineInputBorder, isNot(const UnderlineInputBorder(
       borderSide: BorderSide(color: Colors.red),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    )));
+    expect(underlineInputBorder, isNot(const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
     )));
   });
@@ -5373,21 +5373,21 @@ void main() {
     ).hashCode);
     expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
 
-    // UnderlineInputBorder's hashCode is defined only by the borderSide
-    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue));
-    expect(underlineInputBorder.hashCode, const UnderlineInputBorder(borderSide: BorderSide(color: Colors.blue)).hashCode);
-    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder().hashCode));
     // UnderlineInputBorder's hashCode is defined by the borderSide and borderRadius
-    const UnderlineInputBorder underlineInputBorderRadius = UnderlineInputBorder(
-      borderSide: BorderSide(color: Colors.red),
+    const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
     );
-    expect(underlineInputBorderRadius.hashCode, const UnderlineInputBorder(
-      borderSide: BorderSide(color: Colors.red),
+    expect(underlineInputBorder.hashCode, const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
     ).hashCode);
-    expect(underlineInputBorderRadius.hashCode, isNot(const UnderlineInputBorder(
+    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
       borderSide: BorderSide(color: Colors.red),
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+    ).hashCode));
+    expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
+      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
     ).hashCode));
   });
