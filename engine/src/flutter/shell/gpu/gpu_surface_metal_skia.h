@@ -10,7 +10,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
-#include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
 namespace flutter {
 
