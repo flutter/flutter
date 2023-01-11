@@ -675,7 +675,7 @@ exit code: 66
       await pub.get(
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
-        outputMode: PubOutputMode.none,
+        printProgress: false,
       );
     } on ToolExit {
       // Ignore.
