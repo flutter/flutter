@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Used to store the [stream] and [eventKind] that a dispatched event would be
 /// sent on.
 class DispatchedEventKey {
-  DispatchedEventKey({ required this.stream, required this.eventKind});
+  DispatchedEventKey({required this.stream, required this.eventKind});
 
   String stream;
   String eventKind;
@@ -24,7 +24,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
   final Map<DispatchedEventKey, List<Map<Object, Object?>>> eventsDispatched =
-    <DispatchedEventKey, List<Map<Object, Object?>>>{};
+      <DispatchedEventKey, List<Map<Object, Object?>>>{};
   final  List<Object?> objectsInspected = <Object?>[];
 
   @override
@@ -52,7 +52,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
   List<Map<Object, Object?>> dispatchedEvents(
     String eventKind, {
-      String stream = 'Extension',
+    String stream = 'Extension',
   }) {
     return eventsDispatched.putIfAbsent(
       DispatchedEventKey(stream: stream, eventKind: eventKind),

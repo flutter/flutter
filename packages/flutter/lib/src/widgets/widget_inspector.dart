@@ -1537,7 +1537,7 @@ mixin WidgetInspectorService {
           'fileUri': location.file, // URI file path of the location.
           'line': location.line, // 1-based line number.
           'column': location.column, // 1-based column number.
-          'source': 'FlutterWidgetInspector',
+          'source': 'flutter.inspector',
         },
         stream: 'ToolEvent',
       );
@@ -2322,9 +2322,9 @@ mixin WidgetInspectorService {
   @protected
   void postEvent(
     String eventKind,
-    Map<Object, Object?> eventData,
-    {String stream = 'Extension',}
-  ) {
+    Map<Object, Object?> eventData, {
+    String stream = 'Extension',
+  }) {
     developer.postEvent(eventKind, eventData, stream: stream);
   }
 
