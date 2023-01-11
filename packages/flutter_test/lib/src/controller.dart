@@ -569,8 +569,18 @@ abstract class WidgetController {
   ///
   /// The `speed` is in pixels per second in the direction given by `offset`.
   ///
+  /// {@template flutter.flutter_test.WidgetController.fling.offset}
+  /// The `offset` represents a distance the pointer moves in global coordinate
+  /// system of the screen.
+  ///
+  /// Positive [offset.dy] values mean pointer moves downward. Negtive
+  /// [offset.dy] values mean pointer moves upwards. Accordingly, positive
+  /// [offset.dx] values mean pointer moves towards the right. Negtive
+  /// [offset.dx] values mean pointer moves towards left.
+  /// {@endtemplate}
+  ///
   /// The `offset` and `speed` control the interval between each pointer event.
-  /// For example, if the `offset` is 200 pixels down, and the `speed` is 800
+  /// For example, if the `offset` is 20moveBy0 pixels down, and the `speed` is 800
   /// pixels per second, the pointer events will be sent for each increment
   /// of 4 pixels (200/50), over 250ms (200/800), meaning events will be sent
   /// every 1.25ms (250/200).
@@ -817,6 +827,8 @@ abstract class WidgetController {
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDrag].
   ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
+  ///
   /// {@template flutter.flutter_test.WidgetController.drag}
   /// By default, if the x or y component of offset is greater than
   /// [kDragSlopDefault], the gesture is broken up into two separate moves
@@ -952,6 +964,8 @@ abstract class WidgetController {
   /// time, starting in the middle of the widget.
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
   ///
   /// This is the timed version of [drag]. This may or may not result in a
   /// [fling] or ballistic animation, depending on the speed from
