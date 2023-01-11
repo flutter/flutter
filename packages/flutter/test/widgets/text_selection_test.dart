@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
-import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
+import 'package:flutter/gestures.dart' show PointerDeviceKind, TapDragDownDetails, TapDragEndDetails, TapDragStartDetails, TapDragUpDetails, TapDragUpdateDetails, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';

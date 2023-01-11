@@ -5,8 +5,12 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
+
+import 'constants.dart';
+import 'drag_details.dart';
+import 'events.dart';
+import 'recognizer.dart';
 
 double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
   assert(originPosition != null);
