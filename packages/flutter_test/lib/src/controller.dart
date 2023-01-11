@@ -580,7 +580,7 @@ abstract class WidgetController {
   /// {@endtemplate}
   ///
   /// The `offset` and `speed` control the interval between each pointer event.
-  /// For example, if the `offset` is 20moveBy0 pixels down, and the `speed` is 800
+  /// For example, if the `offset` is 200 pixels down, and the `speed` is 800
   /// pixels per second, the pointer events will be sent for each increment
   /// of 4 pixels (200/50), over 250ms (200/800), meaning events will be sent
   /// every 1.25ms (250/200).
