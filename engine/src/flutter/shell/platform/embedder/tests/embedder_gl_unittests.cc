@@ -11,6 +11,7 @@
 
 #include "vulkan/vulkan.h"
 
+#include "GLES3/gl3.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -34,7 +35,6 @@
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/src/gpu/gl/GrGLDefines.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 // CREATE_NATIVE_ENTRY is leaky by design
@@ -4033,9 +4033,9 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
       [&](int64_t, size_t, size_t) {
         resolve_called = true;
         auto res = std::make_unique<FlutterOpenGLTexture>();
-        res->target = GR_GL_TEXTURE_2D;
+        res->target = GL_TEXTURE_2D;
         res->name = name;
-        res->format = GR_GL_RGBA8;
+        res->format = GL_RGBA8;
         res->user_data = nullptr;
         res->destruction_callback = [](void*) {};
         res->width = res->height = 100;
