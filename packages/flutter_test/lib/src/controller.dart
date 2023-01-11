@@ -562,22 +562,22 @@ abstract class WidgetController {
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   ///
+  /// {@template flutter.flutter_test.WidgetController.fling.offset}
+  /// The `offset` represents a distance the pointer moves in global coordinate
+  /// system of the screen.
+  ///
+  /// Positive [Offset.dy] values mean pointer moves downward. Negative
+  /// [Offset.dy] values mean pointer moves upwards. Accordingly, positive
+  /// [Offset.dx] values mean pointer moves towards the right. Negative
+  /// [Offset.dx] values mean pointer moves towards left.
+  /// {@endtemplate}
+  ///
   /// {@template flutter.flutter_test.WidgetController.fling}
   /// This can pump frames.
   ///
   /// Exactly 50 pointer events are synthesized.
   ///
   /// The `speed` is in pixels per second in the direction given by `offset`.
-  ///
-  /// {@template flutter.flutter_test.WidgetController.fling.offset}
-  /// The `offset` represents a distance the pointer moves in global coordinate
-  /// system of the screen.
-  ///
-  /// Positive [offset.dy] values mean pointer moves downward. Negative
-  /// [offset.dy] values mean pointer moves upwards. Accordingly, positive
-  /// [offset.dx] values mean pointer moves towards the right. Negative
-  /// [offset.dx] values mean pointer moves towards left.
-  /// {@endtemplate}
   ///
   /// The `offset` and `speed` control the interval between each pointer event.
   /// For example, if the `offset` is 200 pixels down, and the `speed` is 800
