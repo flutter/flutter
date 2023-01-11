@@ -1215,6 +1215,7 @@ class FakePub extends Fake implements Pub {
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.standard,
   }) async {
     calledGet += 1;
   }
