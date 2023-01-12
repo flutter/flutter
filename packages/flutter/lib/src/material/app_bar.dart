@@ -1652,6 +1652,7 @@ class SliverAppBar extends StatefulWidget {
       actions: actions,
       flexibleSpace: flexibleSpace ?? _ScrollUnderFlexibleSpace(
         title: title,
+        foregroundColor: foregroundColor,
         variant: _ScrollUnderFlexibleVariant.medium,
         centerCollapsedTitle: centerTitle,
         primary: primary,
@@ -1753,6 +1754,7 @@ class SliverAppBar extends StatefulWidget {
       actions: actions,
       flexibleSpace: flexibleSpace ?? _ScrollUnderFlexibleSpace(
         title: title,
+        foregroundColor: foregroundColor,
         variant: _ScrollUnderFlexibleVariant.large,
         centerCollapsedTitle: centerTitle,
         primary: primary,
@@ -2227,12 +2229,14 @@ enum _ScrollUnderFlexibleVariant { medium, large }
 class _ScrollUnderFlexibleSpace extends StatelessWidget {
   const _ScrollUnderFlexibleSpace({
     this.title,
+    this.foregroundColor,
     required this.variant,
     this.centerCollapsedTitle,
     this.primary = true,
   });
 
   final Widget? title;
+  final Color? foregroundColor;
   final _ScrollUnderFlexibleVariant variant;
   final bool? centerCollapsedTitle;
   final bool primary;
@@ -2240,6 +2244,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     late final ThemeData theme = Theme.of(context);
+    late final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final double topPadding = primary ? MediaQuery.viewPaddingOf(context).top : 0;
     final double collapsedHeight = settings.minExtent - topPadding;
@@ -2259,13 +2264,13 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     if (title != null) {
       collapsedTitle = config.collapsedTextStyle != null
         ? DefaultTextStyle(
-            style: config.collapsedTextStyle!,
+            style: config.collapsedTextStyle!.copyWith(color: foregroundColor ?? appBarTheme.foregroundColor),
             child: title!,
           )
         : title;
       expandedTitle = config.expandedTextStyle != null
         ? DefaultTextStyle(
-            style: config.expandedTextStyle!,
+            style: config.expandedTextStyle!.copyWith(color: foregroundColor ?? appBarTheme.foregroundColor),
             child: title!,
           )
         : title;
@@ -2286,9 +2291,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
             return true;
         }
       }
-      centerTitle = centerCollapsedTitle
-        ?? theme.appBarTheme.centerTitle
-        ?? platformCenter();
+      centerTitle = centerCollapsedTitle ?? appBarTheme.centerTitle ?? platformCenter();
     }
 
     final bool isCollapsed = settings.isScrolledUnder ?? false;
@@ -2307,7 +2310,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
                 alignment: centerTitle
                   ? Alignment.center
                   : AlignmentDirectional.centerStart,
-                child: collapsedTitle
+                child: collapsedTitle,
               ),
             ),
           ),
