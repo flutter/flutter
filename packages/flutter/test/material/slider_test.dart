@@ -3437,9 +3437,12 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
+  testWidgets('Event on Slider should perform no-op if already unmounted',
+      (WidgetTester tester) async {
+    // Test covering crashing found in Google internal issue b/192329942.
     double value = 0.0;
-    final ValueNotifier<bool> shouldShowSliderListenable = ValueNotifier<bool>(true);
+    final ValueNotifier<bool> shouldShowSliderListenable =
+        ValueNotifier<bool>(true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3452,14 +3455,16 @@ void main() {
                   child: ValueListenableBuilder<bool>(
                     valueListenable: shouldShowSliderListenable,
                     builder: (BuildContext context, bool shouldShowSlider, _) {
-                      return shouldShowSlider ? Slider(
-                      value: value,
-                      onChanged: (double newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      },
-                    ) : const SizedBox.shrink();
+                      return shouldShowSlider
+                          ? Slider(
+                              value: value,
+                              onChanged: (double newValue) {
+                                setState(() {
+                                  value = newValue;
+                                });
+                              },
+                            )
+                          : const SizedBox.shrink();
                     },
                   ),
                 ),
@@ -3471,7 +3476,7 @@ void main() {
     );
 
     final TestGesture gesture = await tester
-          .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
+        .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
 
     // Intentioanlly not calling `await tester.pumpAndSettle()` to allow drag
     // event performed on `Slider` before it is about to get unmounted.
@@ -3485,7 +3490,7 @@ void main() {
     // This is supposed to trigger animation on `Slider` if it is mounted.
     await gesture.up();
 
-    await tester.pumpAndSettle();
+    expect(tester.takeException(), null);
   });
 
   group('Material 2', () {
