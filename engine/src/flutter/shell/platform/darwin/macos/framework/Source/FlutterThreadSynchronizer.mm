@@ -79,6 +79,11 @@
   fml::AutoResetWaitableEvent event;
   {
     std::unique_lock<std::mutex> lock(_mutex);
+    if (_shuttingDown) {
+      // Engine is shutting down, main thread may be blocked by the engine
+      // waiting for raster thread to finish.
+      return;
+    }
     fml::AutoResetWaitableEvent& e = event;
     _scheduledBlocks.push_back(^{
       notify();
