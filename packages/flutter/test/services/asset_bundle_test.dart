@@ -15,8 +15,8 @@ class TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
-    if (key == 'AssetManifest.json') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
+    if (key == 'AssetManifest.bin') {
+      return const StandardMessageCodec().encodeMessage(json.decode('{"one":[]}'))!;
     }
 
     if (key == 'one') {

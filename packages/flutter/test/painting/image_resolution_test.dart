@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 class TestAssetBundle extends CachingAssetBundle {
   TestAssetBundle(this._assetBundleMap);
 
-  final Map<String, List<String>> _assetBundleMap;
+  final Map<String, List<Map<Object?, Object?>>> _assetBundleMap;
 
   Map<String, int> loadCallCount = <String, int>{};
 
@@ -23,8 +23,8 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.json') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(_assetBundleContents)).buffer);
+    if (key == 'AssetManifest.bin') {
+      return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
     }
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
@@ -45,9 +45,10 @@ class TestAssetBundle extends CachingAssetBundle {
 void main() {
   group('1.0 scale device tests', () {
     void buildAndTestWithOneAsset(String mainAssetPath) {
-      final Map<String, List<String>> assetBundleMap = <String, List<String>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
-      assetBundleMap[mainAssetPath] = <String>[];
+      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
       final AssetImage assetImage = AssetImage(
         mainAssetPath,
@@ -93,11 +94,13 @@ void main() {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
       const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
-      final Map<String, List<String>> assetBundleMap =
-      <String, List<String>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
-      assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
-
+      final Map<dynamic, dynamic> mainAssetVariantManifestEntry = <dynamic, dynamic>{};
+      mainAssetVariantManifestEntry['asset'] = variantPath;
+      mainAssetVariantManifestEntry['dpr'] = 3.0;
+      assetBundleMap[mainAssetPath] = <Map<dynamic, dynamic>>[mainAssetVariantManifestEntry];
       final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 
       final AssetImage assetImage = AssetImage(
@@ -123,10 +126,10 @@ void main() {
     test('When high-res device and high-res asset not present in bundle then return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
-      final Map<String, List<String>> assetBundleMap =
-      <String, List<String>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
-      assetBundleMap[mainAssetPath] = <String>[mainAssetPath];
+      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
       final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 
@@ -162,10 +165,13 @@ void main() {
       double chosenAssetRatio,
       String expectedAssetPath,
     ) {
-      final Map<String, List<String>> assetBundleMap =
-      <String, List<String>>{};
+      final Map<String, List<Map<dynamic, dynamic>>> assetBundleMap =
+        <String, List<Map<dynamic, dynamic>>>{};
 
-      assetBundleMap[mainAssetPath] = <String>[mainAssetPath, variantPath];
+      final Map<dynamic, dynamic> mainAssetVariantManifestEntry = <dynamic, dynamic>{};
+      mainAssetVariantManifestEntry['asset'] = variantPath;
+      mainAssetVariantManifestEntry['dpr'] = 3.0;
+      assetBundleMap[mainAssetPath] = <Map<dynamic, dynamic>>[mainAssetVariantManifestEntry];
 
       final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
 
