@@ -89,6 +89,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: '(deprecated) Allow connections to the VM service without using authentication codes. '
               '(Not recommended! This can open your device to remote code execution attacks!)'
       )
+      ..addFlag('serve-observatory',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Serve the legacy Observatory developer tooling through the VM service.',
+      )
       ..addFlag('start-paused',
         defaultsTo: startPausedDefault,
         help: 'Start in a paused mode and wait for a debugger to connect.',
@@ -277,6 +282,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nativeNullAssertions: boolArgDeprecated('native-null-assertions'),
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
+        serveObservatory: boolArgDeprecated('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
       );
     }

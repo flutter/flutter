@@ -196,8 +196,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'interact with the VM service at runtime.\n'
               'This flag is ignored if "--start-paused" or coverage are requested, as '
               'the VM service will be enabled in those cases regardless.'
-      )
-      ..addOption('reporter',
+      )..addFlag('serve-observatory',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Serve the legacy Observatory developer tooling through the VM service.',
+      )..addOption('reporter',
         abbr: 'r',
         help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'github', 'json'],
@@ -404,6 +407,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArgDeprecated('disable-service-auth-codes'),
+      serveObservatory: boolArgDeprecated('serve-observatory'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,

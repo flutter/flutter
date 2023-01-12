@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -91,6 +92,27 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
     await _callConnectedVmServiceUriExtension(devicesWithExtension);
+
+    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[];
+    for (final FlutterDevice? device in devicesWithExtension) {
+      // Notify the DDS instances that there's a DevTools instance available so they can correctly
+      // redirect DevTools related requests.
+      device?.device?.dds.setExternalDevToolsUri(_devToolsLauncher!.devToolsUrl!);
+
+      // Notify the VM service if the user wants Observatory to be served.
+      if (_residentRunner.debuggingOptions.serveObservatory) {
+        serveObservatoryRequests.add(
+          device?.vmService?.callMethodWrapper('_serveObservatory') ??
+            Future<vm_service.Response?>.value(),
+        );
+      }
+    }
+    try {
+      await Future.wait(serveObservatoryRequests);
+    } on vm_service.RPCError {
+      _logger.printWarning('Unable to enable Observatory');
+    }
+
     if (_shutdown) {
       // If we're shutting down, no point reporting the debugger list.
       return;

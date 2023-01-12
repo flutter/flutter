@@ -104,6 +104,10 @@ class AttachCommand extends FlutterCommand {
         'debug-url',
         aliases: <String>[ 'debug-uri' ], // supported for historical reasons
         help: 'The URL at which the observatory is listening.',
+      )..addFlag('serve-observatory',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Serve the legacy Observatory developer tooling through the VM service.',
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the app. '
@@ -198,6 +202,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
     return uri;
   }
+
+  bool get serveObservatory => boolArg('serve-observatory') ?? false;
 
   String? get appId {
     return stringArgDeprecated('app-id');
@@ -460,6 +466,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       enableDds: enableDds,
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
+      serveObservatory: serveObservatory,
     );
 
     return buildInfo.isDebug
