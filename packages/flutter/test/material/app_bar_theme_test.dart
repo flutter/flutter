@@ -574,6 +574,78 @@ void main() {
     expect(navToolbar.middleSpacing, 40);
   });
 
+  testWidgets("SliverAppBar.medium's title uses AppBarTheme.foregroundColor", (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: foregroundColor)),
+      home: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar.medium(
+            title: const Text('Medium Title'),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+  });
+
+  testWidgets(
+    "SliverAppBar.medium's foregroundColor takes priority over AppBarTheme.foregroundColor", (WidgetTester tester) async {
+      const Color foregroundColor = Color(0xff00ff00);
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: Color(0xffff0000))),
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar.medium(
+              foregroundColor: foregroundColor,
+              title: const Text('Medium Title'),
+            ),
+          ],
+        ),
+      ));
+
+      final RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text.text.style!.color, foregroundColor);
+  });
+
+  testWidgets("SliverAppBar.large's title uses AppBarTheme.foregroundColor", (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xff00ff00);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: foregroundColor)),
+      home: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar.large(
+            title: const Text('Large Title'),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+  });
+
+  testWidgets(
+    "SliverAppBar.large's foregroundColor takes priority over AppBarTheme.foregroundColor", (WidgetTester tester) async {
+      const Color foregroundColor = Color(0xff00ff00);
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: Color(0xffff0000))),
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar.large(
+              foregroundColor: foregroundColor,
+              title: const Text('Large Title'),
+            ),
+          ],
+        ),
+      ));
+
+      final RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text.text.style!.color, foregroundColor);
+  });
+
   testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme().debugFillProperties(builder);
