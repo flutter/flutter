@@ -146,10 +146,7 @@ class ParagraphBoundary extends TextBoundary {
     }
     assert(_text.isNotEmpty);
 
-    final int codeUnitPosition = position > 0 ? position - 1 : position;
-    if (codeUnitPosition >= _text.length) {
-      return getLeadingTextBoundaryAt(_text.length - 1);
-    }
+    final int codeUnitPosition = position - 1;
 
     final List<int> codeUnits = _text.codeUnits;
     int index = codeUnitPosition;
