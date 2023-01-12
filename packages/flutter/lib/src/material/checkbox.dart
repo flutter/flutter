@@ -321,6 +321,7 @@ class Checkbox extends StatefulWidget {
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
+  ///  * [MaterialState.error].
   ///
   /// If this property is not a [MaterialStateBorderSide] and it is
   /// non-null, then it is only rendered when the checkbox's value is
@@ -396,7 +397,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide) {
-      return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
+      final Set<MaterialState> sideStates = widget.isError ? (states..add(MaterialState.error)) : states;
+      return MaterialStateProperty.resolveAs<BorderSide?>(side, sideStates);
     }
     if (!states.contains(MaterialState.selected)) {
       return side;
