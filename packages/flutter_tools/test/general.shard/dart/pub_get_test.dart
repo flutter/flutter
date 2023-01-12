@@ -555,9 +555,10 @@ exit code: 66
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
       ),
-      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', toolExitMessage)),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', null)),
     );
     expect(logger.statusText, isEmpty);
+    expect(logger.traceText, contains(toolExitMessage));
     expect(
       mockStdio.stdout.writes.map(utf8.decode),
       <String>[
