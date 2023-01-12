@@ -23,13 +23,18 @@ class MDnsObservatoryDiscovery {
   /// Dart observatory ports.
   MDnsObservatoryDiscovery({
     MDnsClient? mdnsClient,
+    MDnsClient? preliminaryMDnsClient,
     required Logger logger,
     required Usage flutterUsage,
-  }): _client = mdnsClient ?? MDnsClient(),
-      _logger = logger,
-      _flutterUsage = flutterUsage;
+  })  : _client = mdnsClient ?? MDnsClient(),
+        _preliminaryClient = preliminaryMDnsClient,
+        _logger = logger,
+        _flutterUsage = flutterUsage;
 
   final MDnsClient _client;
+
+  final MDnsClient? _preliminaryClient;
+
   final Logger _logger;
   final Usage _flutterUsage;
 
@@ -39,173 +44,364 @@ class MDnsObservatoryDiscovery {
   static MDnsObservatoryDiscovery? get instance => context.get<MDnsObservatoryDiscovery>();
 
   /// Executes an mDNS query for a Dart Observatory.
+  /// Checks for observatories that have already been launched.
+  /// If none found, will listen for new observatories to become active
+  /// and return first it finds that match parameters.
   ///
   /// The [applicationId] parameter may be used to specify which application
   /// to find. For Android, it refers to the package name; on iOS, it refers to
   /// the bundle ID.
   ///
-  /// If it is not null, this method will find the port and authentication code
+  /// The [deviceVmservicePort] parameter may be used to specify which port
+  /// to find.
+  ///
+  /// The [isNetworkDevice] parameter flags whether to get the device IP
+  /// and the [ipv6] parameter flags whether to get an iPv6 address
+  /// (otherwise it will get iPv4).
+  ///
+  /// The [timeout] parameter determines how long to continue to wait for
+  /// observatories to become active.
+  ///
+  /// If [applicationId] is not null, this method will find the port and authentication code
   /// of the Dart Observatory for that application. If it cannot find a Dart
-  /// Observatory matching that application identifier, it will call
+  /// Observatory matching that application identifier after the [timeout], it will call
   /// [throwToolExit].
   ///
-  /// If it is null and there are multiple ports available, the user will be
+  /// If [applicationId] is null and there are multiple ports available, the user will be
   /// prompted with a list of available observatory ports and asked to select
   /// one.
   ///
-  /// If it is null and there is only one available instance of Observatory,
-  /// it will return that instance's information regardless of what application
-  /// the Observatory instance is for.
+  /// If it is null and there is only one available or it's the first found instance
+  /// of Observatory, it will return that instance's information regardless of
+  /// what application the Observatory instance is for.
   @visibleForTesting
-  Future<MDnsObservatoryDiscoveryResult?> query({
+  Future<MDnsObservatoryDiscoveryResult?> queryForAttach({
     String? applicationId,
     int? deviceVmservicePort,
     bool ipv6 = false,
-    bool isNetworkDevice = false
+    bool isNetworkDevice = false,
+    Duration timeout = const Duration(minutes: 10),
+  }) async {
+    // Poll for 5 seconds to see if there are already services running.
+    // Use a new instance of MDnsClient so result don't get cached in _client.
+    // If no results are found, poll for a longer duration to wait for connections.
+    // If more than 1 result found, throw an error since we can't determine which to pick.
+    // If only one found, return it.
+    final List<MDnsObservatoryDiscoveryResult> results = await _pollingObservatory(
+      _preliminaryClient ?? MDnsClient(),
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+      ipv6: ipv6,
+      isNetworkDevice: isNetworkDevice,
+      timeout: const Duration(seconds: 5),
+    );
+    if (results.isEmpty) {
+      return firstMatchingObservatory(
+        _client,
+        applicationId: applicationId,
+        deviceVmservicePort: deviceVmservicePort,
+        ipv6: ipv6,
+        isNetworkDevice: isNetworkDevice,
+        timeout: timeout,
+      );
+    } else if (results.length > 1) {
+      final StringBuffer buffer = StringBuffer();
+      buffer.writeln('There are multiple observatory ports available.');
+      buffer.writeln('Rerun this command with one of the following passed in as the appId:');
+      buffer.writeln();
+      for (final MDnsObservatoryDiscoveryResult result in results) {
+        buffer.writeln(
+            '  flutter attach --app-id "${result.domainName.replaceAll('.$dartObservatoryName', '')}" --device-vmservice-port ${result.port}');
+      }
+      throwToolExit(buffer.toString());
+    }
+    return results.first;
+  }
+
+  /// Executes an mDNS query for a Dart Observatory.
+  /// Listens for new observatories to become active
+  /// and return first it finds that match parameters.
+  ///
+  /// The [applicationId] parameter must be set to specify which application
+  /// to find. For Android, it refers to the package name; on iOS, it refers to
+  /// the bundle ID.
+  ///
+  /// The [deviceVmservicePort] parameter must be set to specify which port
+  /// to find.
+  ///
+  /// [applicationId] and [deviceVmservicePort] are required for launch so that
+  /// if multiple flutter apps are running on different devices, it will
+  /// only match with the device running the desired app.
+  ///
+  /// The [isNetworkDevice] parameter flags whether to get the device IP
+  /// and the [ipv6] parameter flags whether to get an iPv6 address
+  /// (otherwise it will get iPv4).
+  ///
+  /// The [timeout] parameter determines how long to continue to wait for
+  /// observatories to become active.
+  ///
+  /// If a Dart Observatory matching the [applicationId] and [deviceVmservicePort]
+  /// cannot be found after the [timeout], it will call [throwToolExit].
+  @visibleForTesting
+  Future<MDnsObservatoryDiscoveryResult?> queryForLaunch({
+    required String applicationId,
+    required int deviceVmservicePort,
+    bool ipv6 = false,
+    bool isNetworkDevice = false,
+    Duration timeout = const Duration(minutes: 10),
+  }) async {
+    // Query for a specific application and device port.
+    return firstMatchingObservatory(
+      _client,
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+      ipv6: ipv6,
+      isNetworkDevice: isNetworkDevice,
+      timeout: timeout,
+    );
+  }
+
+  // Poll for observatories and return the first it finds that match
+  // the [applicationId]/[deviceVmservicePort] (if applicable).
+  // Return null if not results are found.
+  @visibleForTesting
+  Future<MDnsObservatoryDiscoveryResult?> firstMatchingObservatory(
+    MDnsClient client, {
+    String? applicationId,
+    int? deviceVmservicePort,
+    bool ipv6 = false,
+    bool isNetworkDevice = false,
+    Duration timeout = const Duration(minutes: 10),
+  }) async {
+    final List<MDnsObservatoryDiscoveryResult> results = await _pollingObservatory(
+      client,
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+      ipv6: ipv6,
+      isNetworkDevice: isNetworkDevice,
+      timeout: timeout,
+      quitOnFind: true,
+    );
+    if (results.isEmpty) {
+      return null;
+    }
+    return results.first;
+  }
+
+  Future<List<MDnsObservatoryDiscoveryResult>> _pollingObservatory(
+    MDnsClient client, {
+    String? applicationId,
+    int? deviceVmservicePort,
+    bool ipv6 = false,
+    bool isNetworkDevice = false,
+    required Duration timeout,
+    bool quitOnFind = false,
   }) async {
     _logger.printTrace('Checking for advertised Dart observatories...');
     try {
-      await _client.start();
+      await client.start();
 
-      List<PtrResourceRecord> pointerRecords = <PtrResourceRecord>[];
-      if (isNetworkDevice) {
-        // Keep checking for records every 2 seconds.
-        // Wireless debugging devices rely on the mDNS server,
-        // but must wait for user to accept local network permissions.
-        while(pointerRecords.isEmpty) {
-          pointerRecords = await _getServerPointerRecords(timeout: const Duration(seconds: 2));
+      final List<MDnsObservatoryDiscoveryResult> results =
+          <MDnsObservatoryDiscoveryResult>[];
+      final Set<String> uniqueDomainNames = <String>{};
+
+      // Listen for mDNS connections until timeout.
+      final Stream<PtrResourceRecord> ptrResourceStream = client.lookup<PtrResourceRecord>(
+        ResourceRecordQuery.serverPointer(dartObservatoryName),
+        timeout: timeout
+      );
+      await for (final PtrResourceRecord ptr in ptrResourceStream) {
+        uniqueDomainNames.add(ptr.domainName);
+
+        String? domainName;
+        if (applicationId != null) {
+          // If applicationId is set, we only want to find records that match it
+          if (ptr.domainName.toLowerCase().startsWith(applicationId.toLowerCase())) {
+            domainName = ptr.domainName;
+          } else {
+            continue;
+          }
+        } else {
+          domainName = ptr.domainName;
         }
-      } else {
-        pointerRecords = await _getServerPointerRecords();
-      }
-      if (pointerRecords.isEmpty) {
-        _logger.printTrace('No pointer records found.');
-        return null;
-      }
-      // We have no guarantee that we won't get multiple hits from the same
-      // service on this.
-      final Set<String> uniqueDomainNames = pointerRecords
-        .map<String>((PtrResourceRecord record) => record.domainName)
-        .toSet();
 
-      String? domainName;
-      if (applicationId != null) {
-        for (final String name in uniqueDomainNames) {
-          if (name.toLowerCase().startsWith(applicationId.toLowerCase())) {
-            domainName = name;
+        _logger.printTrace('Checking for available port on $domainName');
+        // Here, if we get more than one, it should just be a duplicate.
+        final List<SrvResourceRecord> srv = await client
+          .lookup<SrvResourceRecord>(
+            ResourceRecordQuery.service(domainName),
+          )
+          .toList();
+
+        if (srv.isEmpty) {
+          continue;
+        }
+        if (srv.length > 1) {
+          _logger.printWarning(
+              'Unexpectedly found more than one observatory report for $domainName '
+              '- using first one (${srv.first.port}).');
+        }
+
+        // If deviceVmservicePort is set, we only want to find records that match it
+        if (deviceVmservicePort != null && srv.first.port != deviceVmservicePort) {
+          continue;
+        }
+
+        // Get the IP address of the service if using a network device.
+        InternetAddress? ipAddress;
+        if (isNetworkDevice) {
+          List<IPAddressResourceRecord> ipAddresses = await client
+            .lookup<IPAddressResourceRecord>(
+              ipv6
+                  ? ResourceRecordQuery.addressIPv6(srv.first.target)
+                  : ResourceRecordQuery.addressIPv4(srv.first.target),
+            )
+            .toList();
+          if (ipAddresses.isEmpty) {
+            throwToolExit('Did not find IP for service ${srv.first.target}.');
+          }
+
+          // Filter out link-local addresses.
+          if (ipAddresses.length > 1) {
+            ipAddresses = ipAddresses.where((IPAddressResourceRecord element) => !element.address.isLinkLocal).toList();
+          }
+
+          if (ipAddresses.length > 1) {
+            _logger.printWarning(
+                'Unexpectedly found more than one IP for observatory for service ${srv.first.target} '
+                '- using first one (${ipAddresses.first.address}).');
+          }
+          ipAddress = ipAddresses.first.address;
+        }
+
+        _logger.printTrace('Checking for authentication code for $domainName');
+        final List<TxtResourceRecord> txt = await client
+          .lookup<TxtResourceRecord>(
+              ResourceRecordQuery.text(domainName),
+          )
+          .toList();
+        if (txt == null || txt.isEmpty) {
+          results.add(MDnsObservatoryDiscoveryResult(domainName, srv.first.port, ''));
+          if (quitOnFind) {
+            return results;
+          }
+          continue;
+        }
+        const String authCodePrefix = 'authCode=';
+        String? raw;
+        for (final String record in txt.first.text.split('\n')) {
+          if (record.startsWith(authCodePrefix)) {
+            raw = record;
             break;
           }
         }
-        if (domainName == null) {
-          throwToolExit('Did not find a observatory port advertised for $applicationId.');
+        if (raw == null) {
+          results.add(MDnsObservatoryDiscoveryResult(domainName, srv.first.port, ''));
+          if (quitOnFind) {
+            return results;
+          }
+          continue;
         }
-      } else if (uniqueDomainNames.length > 1) {
-        final StringBuffer buffer = StringBuffer();
-        buffer.writeln('There are multiple observatory ports available.');
-        buffer.writeln('Rerun this command with one of the following passed in as the appId:');
-        buffer.writeln();
-        for (final String uniqueDomainName in uniqueDomainNames) {
-          buffer.writeln('  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
-        }
-        throwToolExit(buffer.toString());
-      } else {
-        domainName = pointerRecords[0].domainName;
-      }
-      _logger.printTrace('Checking for available port on $domainName');
-      // Here, if we get more than one, it should just be a duplicate.
-      final List<SrvResourceRecord> srv = await _client
-        .lookup<SrvResourceRecord>(
-          ResourceRecordQuery.service(domainName),
-        )
-        .toList();
-      if (srv.isEmpty) {
-        return null;
-      }
-      if (srv.length > 1) {
-        _logger.printWarning('Unexpectedly found more than one observatory report for $domainName '
-                   '- using first one (${srv.first.port}).');
-      }
-
-      // Get the IP address of the service if using a network device.
-      InternetAddress? ipAddress;
-      if (isNetworkDevice) {
-        List<IPAddressResourceRecord> ipAddresses = await _client
-          .lookup<IPAddressResourceRecord>(
-            ipv6 ? ResourceRecordQuery.addressIPv6(srv.first.target) : ResourceRecordQuery.addressIPv4(srv.first.target),
-          )
-          .toList();
-        if (ipAddresses.isEmpty) {
-          throwToolExit('Did not find IP for service ${srv.first.target}.');
+        String authCode = raw.substring(authCodePrefix.length);
+        // The Observatory currently expects a trailing '/' as part of the
+        // URI, otherwise an invalid authentication code response is given.
+        if (!authCode.endsWith('/')) {
+          authCode += '/';
         }
 
-        // Filter out link-local addresses.
-        if (ipAddresses.length > 1) {
-          ipAddresses = ipAddresses.where((IPAddressResourceRecord element) => !element.address.isLinkLocal).toList();
+        results.add(MDnsObservatoryDiscoveryResult(
+          domainName,
+          srv.first.port,
+          authCode,
+          ipAddress: ipAddress
+        ));
+        if (quitOnFind) {
+          return results;
         }
+      }
 
-        if (ipAddresses.length > 1) {
-          _logger.printWarning('Unexpectedly found more than one IP for observatory for service ${srv.first.target} '
-                    '- using first one (${ipAddresses.first.address}).');
+      // If applicationId is set and quitOnFind is true and no results matching
+      // the applicationId were found but other results were found, throw an error.
+      if (applicationId != null &&
+          quitOnFind &&
+          results.isEmpty &&
+          uniqueDomainNames.isNotEmpty) {
+        String message = 'Did not find an observatory advertised for $applicationId';
+        if (deviceVmservicePort != null) {
+          message += ' on port $deviceVmservicePort';
         }
-        ipAddress = ipAddresses.first.address;
+        throwToolExit('$message.');
       }
 
-      _logger.printTrace('Checking for authentication code for $domainName');
-      final List<TxtResourceRecord> txt = await _client
-        .lookup<TxtResourceRecord>(
-            ResourceRecordQuery.text(domainName),
-        )
-        .toList();
-      if (txt == null || txt.isEmpty) {
-        return MDnsObservatoryDiscoveryResult(srv.first.port, '');
-      }
-      const String authCodePrefix = 'authCode=';
-      String? raw;
-      for (final String record in txt.first.text.split('\n')) {
-        if (record.startsWith(authCodePrefix)) {
-          raw = record;
-          break;
-        }
-      }
-      if (raw == null) {
-        return MDnsObservatoryDiscoveryResult(srv.first.port, '');
-      }
-      String authCode = raw.substring(authCodePrefix.length);
-      // The Observatory currently expects a trailing '/' as part of the
-      // URI, otherwise an invalid authentication code response is given.
-      if (!authCode.endsWith('/')) {
-        authCode += '/';
-      }
-      return MDnsObservatoryDiscoveryResult(srv.first.port, authCode, ipAddress: ipAddress);
+      return results;
     } finally {
-      _client.stop();
+      client.stop();
     }
   }
 
-  Future<List<PtrResourceRecord>> _getServerPointerRecords({
-    Duration timeout = const Duration(seconds: 5),
-  }) async {
-    final List<PtrResourceRecord> pointerRecords = await _client
-      .lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(dartObservatoryName),
-        timeout: timeout,
-      )
-      .toList();
-    return pointerRecords;
-  }
-
-  Future<Uri?> getObservatoryUri(String? applicationId, Device device, {
+  Future<Uri?> getObservatoryUriForAttach(
+    String? applicationId,
+    Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
     int? deviceVmservicePort,
     bool isNetworkDevice = false,
+    Duration timeout = const Duration(minutes: 10),
   }) async {
-    final MDnsObservatoryDiscoveryResult? result = await query(
+    final MDnsObservatoryDiscoveryResult? result = await queryForAttach(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
       isNetworkDevice: isNetworkDevice,
+      timeout: timeout,
     );
+    return _handleResult(
+      result,
+      device,
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+      hostVmservicePort: hostVmservicePort,
+      usesIpv6: usesIpv6,
+      isNetworkDevice: isNetworkDevice
+    );
+  }
+
+  Future<Uri?> getObservatoryUriForLaunch(
+    String applicationId,
+    Device device, {
+    bool usesIpv6 = false,
+    int? hostVmservicePort,
+    required int deviceVmservicePort,
+    bool isNetworkDevice = false,
+    Duration timeout = const Duration(minutes: 10),
+  }) async {
+    final MDnsObservatoryDiscoveryResult? result = await queryForLaunch(
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+      ipv6: usesIpv6,
+      isNetworkDevice: isNetworkDevice,
+      timeout: timeout,
+    );
+    return _handleResult(
+      result,
+      device,
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+      hostVmservicePort: hostVmservicePort,
+      usesIpv6: usesIpv6,
+      isNetworkDevice: isNetworkDevice
+    );
+  }
+
+  Future<Uri?> _handleResult(
+    MDnsObservatoryDiscoveryResult? result,
+    Device device, {
+    String? applicationId,
+    int? deviceVmservicePort,
+    int? hostVmservicePort,
+    bool usesIpv6 = false,
+    bool isNetworkDevice = false,
+  }) async {
     if (result == null) {
       await _checkForIPv4LinkLocal(device);
       return null;
@@ -296,7 +492,13 @@ class MDnsObservatoryDiscovery {
 }
 
 class MDnsObservatoryDiscoveryResult {
-  MDnsObservatoryDiscoveryResult(this.port, this.authCode, {this.ipAddress});
+  MDnsObservatoryDiscoveryResult(
+    this.domainName,
+    this.port,
+    this.authCode, {
+    this.ipAddress
+  });
+  final String domainName;
   final int port;
   final String authCode;
   final InternetAddress? ipAddress;

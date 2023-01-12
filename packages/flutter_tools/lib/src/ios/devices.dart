@@ -435,15 +435,18 @@ class IOSDevice extends Device {
       Uri? localUri;
       if (interfaceType == IOSDeviceConnectionInterface.network) {
         // Wait for iOS Observatory to start up.
-        await observatoryDiscovery?.uri;
+        final Uri? deviceURL = await observatoryDiscovery?.uri;
+        if (deviceURL == null) {
+          await iosDeployDebugger?.stopAndDumpBacktrace();
+          return LaunchResult.failed();
+        }
 
-        // If observatory url is not found within 2.2 seconds, change the status
-        // message to prompt users to click Allow. Wait 2.2 seconds because it
+        // If observatory url is not found within 5 seconds, change the status
+        // message to prompt users to click Allow. Wait 5 seconds because it
         // should only show this message if they have not already approved the permissions.
-        // MDnsObservatoryDiscovery takes at least 2 seconds to check and get
-        // observatory url and we give it 200 milliseconds wiggle room.
+        // MDnsObservatoryDiscovery usually takes less than 5 seconds to find it.
         Status? networkPermissionsStatus;
-        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 2, milliseconds: 200), () {
+        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
           installStatus.stop();
           networkPermissionsStatus = _logger.startProgress(
             'Waiting for approval of local network permissions...',
@@ -451,11 +454,11 @@ class IOSDevice extends Device {
         });
 
         // Get Observatory URL with the device IP.
-        localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUri(
+        localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUriForLaunch(
           packageId,
           this,
           usesIpv6: ipv6,
-          deviceVmservicePort: debuggingOptions.deviceVmServicePort,
+          deviceVmservicePort: deviceURL.port,
           isNetworkDevice: true,
         );
 
@@ -615,7 +618,6 @@ String decodeSyslog(String line) {
   }
 }
 
-@visibleForTesting
 class IOSDeviceLogReader extends DeviceLogReader {
   IOSDeviceLogReader._(
     this._iMobileDevice,

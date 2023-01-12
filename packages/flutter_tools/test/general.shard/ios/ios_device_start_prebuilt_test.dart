@@ -612,11 +612,14 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 
 class FakeMDnsObservatoryDiscovery extends Fake implements MDnsObservatoryDiscovery {
   @override
-  Future<Uri?> getObservatoryUri(String? applicationId, Device device, {
+  Future<Uri?> getObservatoryUriForLaunch(
+    String applicationId,
+    Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
-    int? deviceVmservicePort,
+    required int deviceVmservicePort,
     bool isNetworkDevice = false,
+    Duration timeout = Duration.zero,
   }) async {
     return Uri.tryParse('http://0.0.0.0:1234');
   }
