@@ -41,15 +41,14 @@ abstract class AssetManifest {
 /// New fields could be added to this object schema to support new asset variation
 /// features, such as themes, locale/region support, reading directions, and so on.
 class _AssetManifestBin implements AssetManifest {
-  _AssetManifestBin(Map<String, Object?> manifestData): _data = manifestData;
+  _AssetManifestBin(Map<Object?, Object?> standardMessageData): _data = standardMessageData;
 
   factory _AssetManifestBin.fromStandardMessageCodecMessage(ByteData message) {
-    final Object? data = const StandardMessageCodec().decodeMessage(message);
-    final Map<String, Object> typeCastedData = (data! as Map<Object?, Object?>).cast<String, Object>();
-    return _AssetManifestBin(typeCastedData);
+    final dynamic data = const StandardMessageCodec().decodeMessage(message);
+    return _AssetManifestBin(data as Map<Object?, Object?>);
   }
 
-  final Map<String, Object?> _data;
+  final Map<Object?, Object?> _data;
   final Map<String, Iterable<AssetVariant>> _typeCastedData = <String, Iterable<AssetVariant>>{};
 
   @override
@@ -71,7 +70,7 @@ class _AssetManifestBin implements AssetManifest {
 
   @override
   Iterable<String> listAssets() {
-    return <String>[..._data.keys, ..._typeCastedData.keys];
+    return <String>[..._data.keys.cast<String>(), ..._typeCastedData.keys];
   }
 }
 
