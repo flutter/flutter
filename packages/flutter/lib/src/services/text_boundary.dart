@@ -138,7 +138,7 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    if (position < 0) {
+    if (position <= 0) {
       return null;
     }
     assert(_text.isNotEmpty);
