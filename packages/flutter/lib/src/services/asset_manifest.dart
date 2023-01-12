@@ -57,8 +57,8 @@ class _AssetManifestBin implements AssetManifest {
     // large asset manifests.
     if (!_typeCastedData.containsKey(key)) {
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as List<Object?>)
-        .cast<Map<String, Object?>>()
-        .map((Map<String, Object?> data) => AssetVariant(
+        .cast<Map<Object?, Object?>>()
+        .map((Map<Object?, Object?> data) => AssetVariant(
             key: data['asset']! as String,
             targetDevicePixelRatio: data['dpr']! as double,
         ));
