@@ -45,6 +45,8 @@ struct Quaternion {
     return {x * m, y * m, z * m, w * m};
   }
 
+  Quaternion Invert() const { return {-x, -y, -z, w}; }
+
   Quaternion Slerp(const Quaternion& to, double time) const;
 
   Quaternion operator*(const Quaternion& o) const {

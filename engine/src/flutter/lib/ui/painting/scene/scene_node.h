@@ -48,6 +48,7 @@ class SceneNode : public RefCountedDartWrappable<SceneNode> {
 
   void SetAnimationState(const std::string& animation_name,
                          bool playing,
+                         bool loop,
                          double weight,
                          double time_scale);
 
