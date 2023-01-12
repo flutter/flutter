@@ -6,8 +6,9 @@ import '../base/file_system.dart';
 import '../base/project_migrator.dart';
 import '../xcode_project.dart';
 
-// Migrate Xcode Thin Binary build phase to use Info.plist from build directory
-// as an input file to avoid mDNS error.
+// Migrate Xcode Thin Binary build phase to depend on Info.plist from build directory
+// as an input file to ensure it has been created before inserting the NSBonjourServices key
+// to avoid an mDNS error.
 class XcodeThinBinaryBuildPhaseInputPathsMigration extends ProjectMigrator {
   XcodeThinBinaryBuildPhaseInputPathsMigration(XcodeBasedProject project, super.logger)
     : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
@@ -36,11 +37,9 @@ class XcodeThinBinaryBuildPhaseInputPathsMigration extends ProjectMigrator {
 		// 	 inputPaths = (
 		// 	 );
 
-    const String thinBinaryScriptIdentifier =  '3B06AD1E1E4923F5004D2608 /* Thin Binary */';
-
     String newProjectContents = originalProjectContents;
     const String thinBinaryBuildPhaseOriginal = '''
-		$thinBinaryScriptIdentifier = {
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -50,15 +49,15 @@ class XcodeThinBinaryBuildPhaseInputPathsMigration extends ProjectMigrator {
 			);
 ''';
 
-    const String thinBinaryBuildPhaseReplacement = '''
-		$thinBinaryScriptIdentifier = {
+    const String thinBinaryBuildPhaseReplacement = r'''
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"\${TARGET_BUILD_DIR}/\${INFOPLIST_PATH}",
+				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
 			);
 ''';
 
