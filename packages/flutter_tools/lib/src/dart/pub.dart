@@ -240,7 +240,7 @@ abstract class Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all
   });
 }
 
@@ -403,10 +403,10 @@ class _DefaultPub implements Pub {
     int exitCode;
 
     final List<String> pubCommand = _pubCommand(arguments);
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(context, flutterRootOverride);
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(context: context, flutterRootOverride: flutterRootOverride, summaryOnly: outputMode == PubOutputMode.summaryOnly);
 
     try {
-      if (printProgress) {
+      if (outputMode != PubOutputMode.none) {
         final io.Stdio? stdio = _stdio;
         if (stdio == null) {
           // Let pub inherit stdio and output directly to the tool's stdout and
@@ -575,14 +575,14 @@ class _DefaultPub implements Pub {
     required String command,
     bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all
   }) async {
     await _runWithStdioInherited(
       arguments,
       command: command,
       directory: _fileSystem.currentDirectory.path,
       context: context,
-      printProgress: printProgress,
+      outputMode: outputMode,
     );
     if (touchesPackageConfig && project != null) {
       await _updateVersionAndPackageConfig(project);

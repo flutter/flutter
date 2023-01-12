@@ -444,7 +444,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       upgrade: doUpgrade,
       offline: boolArgDeprecated('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
-      printProgress: false,
+      outputMode: PubOutputMode.none,
     );
 
     if (doUpgrade) {
