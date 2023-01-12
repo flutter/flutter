@@ -865,14 +865,11 @@ void main() {
   }));
 
   test('wasm build copies and generates specific files', () => testbed.run(() async {
-    globals.fs.file('bin/cache/dart-sdk/bin/dart2wasm_runtime.mjs')
-      .createSync(recursive: true);
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
       .createSync(recursive: true);
 
     await WebBuiltInAssets(globals.fs, globals.cache, true).build(environment);
 
-    expect(environment.outputDir.childFile('dart2wasm_runtime.mjs').existsSync(), true);
     expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
     expect(environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm')
