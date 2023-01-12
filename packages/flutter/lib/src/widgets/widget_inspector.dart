@@ -2417,6 +2417,9 @@ class _ElementLocationStatsTracker {
     }
     final _HasCreationLocation creationLocationSource = widget;
     final _Location location = creationLocationSource._location;
+    if(location == null) {
+      return;
+    }
     final int id = _toLocationId(location);
 
     _LocationCount entry;
