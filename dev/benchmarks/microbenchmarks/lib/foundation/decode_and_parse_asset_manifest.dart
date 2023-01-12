@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart' show  AssetManifest;
+import 'package:flutter/services.dart' show AssetManifest, PlatformAssetBundle, rootBundle;
 import 'package:flutter/widgets.dart';
 
 import '../common.dart';
@@ -15,10 +15,12 @@ void main() async {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
   final Stopwatch watch = Stopwatch();
+  final PlatformAssetBundle bundle = rootBundle as PlatformAssetBundle;
 
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
-    AssetManifest.loadFromRootBundle(cache: false);
+    await AssetManifest.loadFromAssetBundle(bundle);
+    bundle.clear();
   }
   watch.stop();
 
