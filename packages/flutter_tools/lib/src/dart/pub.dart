@@ -475,10 +475,8 @@ class _DefaultPub implements Pub {
       buffer.writeln('command: "${pubCommand.join(' ')}"');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
-      throwToolExit(
-        buffer.toString(),
-        exitCode: code,
-      );
+      _logger.printTrace(buffer.toString());
+      throwToolExit(null, exitCode: code);
     }
   }
 
