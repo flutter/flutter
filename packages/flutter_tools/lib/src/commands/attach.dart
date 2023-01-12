@@ -104,10 +104,6 @@ class AttachCommand extends FlutterCommand {
         'debug-url',
         aliases: <String>[ 'debug-uri' ], // supported for historical reasons
         help: 'The URL at which the observatory is listening.',
-      )..addFlag('serve-observatory',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Serve the legacy Observatory developer tooling through the VM service.',
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the app. '
@@ -142,6 +138,7 @@ class AttachCommand extends FlutterCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
+    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
   }
 

@@ -95,14 +95,17 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
     final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[];
     for (final FlutterDevice? device in devicesWithExtension) {
+      if (device == null) {
+        continue;
+      }
       // Notify the DDS instances that there's a DevTools instance available so they can correctly
       // redirect DevTools related requests.
-      device?.device?.dds.setExternalDevToolsUri(_devToolsLauncher!.devToolsUrl!);
+      device.device?.dds.setExternalDevToolsUri(_devToolsLauncher!.devToolsUrl!);
 
       // Notify the VM service if the user wants Observatory to be served.
       if (_residentRunner.debuggingOptions.serveObservatory) {
         serveObservatoryRequests.add(
-          device?.vmService?.callMethodWrapper('_serveObservatory') ??
+          device.vmService?.callMethodWrapper('_serveObservatory') ??
             Future<vm_service.Response?>.value(),
         );
       }

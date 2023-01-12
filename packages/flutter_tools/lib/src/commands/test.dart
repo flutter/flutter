@@ -196,10 +196,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'interact with the VM service at runtime.\n'
               'This flag is ignored if "--start-paused" or coverage are requested, as '
               'the VM service will be enabled in those cases regardless.'
-      )..addFlag('serve-observatory',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Serve the legacy Observatory developer tooling through the VM service.',
       )..addOption('reporter',
         abbr: 'r',
         help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
@@ -218,6 +214,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'or as the string "none" to disable the timeout entirely.',
       );
     addDdsOptions(verboseHelp: verboseHelp);
+    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
