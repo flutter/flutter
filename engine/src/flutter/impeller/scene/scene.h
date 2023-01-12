@@ -28,9 +28,9 @@ class Scene {
   Node& GetRoot();
 
   bool Render(const RenderTarget& render_target,
-              const Matrix& camera_transform) const;
+              const Matrix& camera_transform);
 
-  bool Render(const RenderTarget& render_target, const Camera& camera) const;
+  bool Render(const RenderTarget& render_target, const Camera& camera);
 
  private:
   std::shared_ptr<SceneContext> scene_context_;

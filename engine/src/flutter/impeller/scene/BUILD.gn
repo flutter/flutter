@@ -12,6 +12,7 @@ impeller_component("scene") {
     "animation/animation_clip.h",
     "animation/animation_player.cc",
     "animation/animation_player.h",
+    "animation/animation_transforms.h",
     "animation/property_resolver.cc",
     "animation/property_resolver.h",
     "camera.cc",

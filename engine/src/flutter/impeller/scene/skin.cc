@@ -41,12 +41,14 @@ std::unique_ptr<Skin> Skin::MakeFromFlatbuffer(
   }
 
   result.inverse_bind_matrices_.reserve(skin.inverse_bind_matrices()->size());
-  for (auto matrix : *skin.inverse_bind_matrices()) {
-    if (!matrix) {
-      result.inverse_bind_matrices_.push_back(Matrix());
-      continue;
-    }
-    result.inverse_bind_matrices_.push_back(importer::ToMatrix(*matrix));
+  for (size_t matrix_i = 0; matrix_i < skin.inverse_bind_matrices()->size();
+       matrix_i++) {
+    const auto* ip_matrix = skin.inverse_bind_matrices()->Get(matrix_i);
+    Matrix matrix = ip_matrix ? importer::ToMatrix(*ip_matrix) : Matrix();
+
+    result.inverse_bind_matrices_.push_back(matrix);
+    // Overwrite the joint transforms with the inverse bind pose.
+    result.joints_[matrix_i]->SetGlobalTransform(matrix.Invert());
   }
 
   return std::make_unique<Skin>(std::move(result));

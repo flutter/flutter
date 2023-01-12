@@ -21,6 +21,7 @@
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 
@@ -98,13 +99,16 @@ std::string SceneNode::initFromAsset(const std::string& asset_name,
   return "";
 }
 
+static impeller::Matrix ToMatrix(const tonic::Float64List& matrix4) {
+  return impeller::Matrix(matrix4[0], matrix4[1], matrix4[2], matrix4[3],    //
+                          matrix4[4], matrix4[5], matrix4[6], matrix4[7],    //
+                          matrix4[8], matrix4[9], matrix4[10], matrix4[11],  //
+                          matrix4[12], matrix4[13], matrix4[14], matrix4[15]);
+}
+
 void SceneNode::initFromTransform(const tonic::Float64List& matrix4) {
   node_ = std::make_shared<impeller::scene::Node>();
-  node_->SetLocalTransform(
-      impeller::Matrix(matrix4[0], matrix4[1], matrix4[2], matrix4[3],    //
-                       matrix4[4], matrix4[5], matrix4[6], matrix4[7],    //
-                       matrix4[8], matrix4[9], matrix4[10], matrix4[11],  //
-                       matrix4[12], matrix4[13], matrix4[14], matrix4[15]));
+  node_->SetLocalTransform(ToMatrix(matrix4));
 }
 
 void SceneNode::AddChild(Dart_Handle scene_node_handle) {
@@ -121,18 +125,32 @@ void SceneNode::AddChild(Dart_Handle scene_node_handle) {
 }
 
 void SceneNode::SetTransform(const tonic::Float64List& matrix4) {
-  // TODO(bdero): Implement mutation log.
+  impeller::scene::Node::MutationLog::SetTransformEntry entry = {
+      ToMatrix(matrix4)};
+  node_->AddMutation(entry);
 }
 
 void SceneNode::SetAnimationState(const std::string& animation_name,
                                   bool playing,
+                                  bool loop,
                                   double weight,
                                   double time_scale) {
-  // TODO(bdero): Implement mutation log.
+  impeller::scene::Node::MutationLog::SetAnimationStateEntry entry = {
+      .animation_name = animation_name,
+      .playing = playing,
+      .loop = loop,
+      .weight = static_cast<float>(weight),
+      .time_scale = static_cast<float>(time_scale),
+  };
+  node_->AddMutation(entry);
 }
 
 void SceneNode::SeekAnimation(const std::string& animation_name, double time) {
-  // TODO(bdero): Implement mutation log.
+  impeller::scene::Node::MutationLog::SeekAnimationEntry entry = {
+      .animation_name = animation_name,
+      .time = static_cast<float>(time),
+  };
+  node_->AddMutation(entry);
 }
 
 SceneNode::SceneNode() = default;

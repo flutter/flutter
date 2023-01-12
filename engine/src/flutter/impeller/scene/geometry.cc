@@ -95,7 +95,7 @@ std::shared_ptr<Geometry> Geometry::MakeFromFlatbuffer(
   }
 
   DeviceBufferDescriptor buffer_desc;
-  buffer_desc.size = vertices_bytes * indices_bytes;
+  buffer_desc.size = vertices_bytes + indices_bytes;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
 
   auto buffer = allocator.CreateBuffer(buffer_desc);

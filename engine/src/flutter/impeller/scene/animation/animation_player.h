@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <map>
 #include <memory>
 #include <optional>
-#include <unordered_map>
 #include <vector>
 
 #include "flutter/fml/hash_combine.h"
@@ -14,6 +14,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "impeller/base/timing.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/geometry/matrix_decomposition.h"
 #include "impeller/scene/animation/animation_clip.h"
 
 namespace impeller {
@@ -29,19 +30,18 @@ class AnimationPlayer final {
   AnimationPlayer(AnimationPlayer&&);
   AnimationPlayer& operator=(AnimationPlayer&&);
 
-  AnimationClip& AddAnimation(std::shared_ptr<Animation> animation,
+  AnimationClip* AddAnimation(const std::shared_ptr<Animation>& animation,
                               Node* bind_target);
+
+  AnimationClip* GetClip(const std::string& name) const;
 
   /// @brief  Advanced all clips and updates animated properties in the scene.
   void Update();
 
-  /// @brief  Reset all bound animation target transforms.
-  void Reset();
-
  private:
-  std::unordered_map<Node*, Matrix> default_target_transforms_;
+  std::unordered_map<Node*, AnimationTransforms> target_transforms_;
 
-  std::vector<AnimationClip> clips_;
+  std::map<std::string, AnimationClip> clips_;
 
   std::optional<TimePoint> previous_time_;
 
