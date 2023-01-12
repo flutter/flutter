@@ -397,7 +397,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   BorderSide? _resolveSide(BorderSide? side) {
     if (side is MaterialStateBorderSide) {
-      Set<MaterialState> sideStates = widget.isError ? (states..add(MaterialState.error)) : states;
+      final Set<MaterialState> sideStates = widget.isError ? (states..add(MaterialState.error)) : states;
       return MaterialStateProperty.resolveAs<BorderSide?>(side, sideStates);
     }
     if (!states.contains(MaterialState.selected)) {

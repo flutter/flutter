@@ -1660,9 +1660,8 @@ void main() {
   testWidgets('Checkbox MaterialStateBorderSide applies in error states - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     final ThemeData themeData = ThemeData(useMaterial3: true);
-    final Color borderColor = Color(0xffffeb3b);
+    final Color borderColor = const Color(0xffffeb3b);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    bool? value = true;
     Widget buildApp({bool autoFocus = true}) {
       return MaterialApp(
         theme: themeData,
@@ -1671,11 +1670,11 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Checkbox(
                 isError: true,
-                side: MaterialStateBorderSide.resolveWith((states) {
+                side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.error)) {
-                    return BorderSide(color: borderColor, width: 4);
+                    return const BorderSide(color: borderColor, width: 4);
                   }
-                  return BorderSide(color: Colors.red, width: 2);
+                  return const BorderSide(color: Colors.red, width: 2);
                 }),
                 value: false,
                 onChanged: (bool? newValue) {
