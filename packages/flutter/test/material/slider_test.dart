@@ -3437,8 +3437,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Event on Slider should perform no-op if already unmounted',
-      (WidgetTester tester) async {
+  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
     // Test covering crashing found in Google internal issue b/192329942.
     double value = 0.0;
     final ValueNotifier<bool> shouldShowSliderListenable =
