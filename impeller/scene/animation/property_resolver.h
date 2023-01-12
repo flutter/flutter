@@ -11,9 +11,11 @@
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
 #include "impeller/base/timing.h"
+#include "impeller/geometry/matrix_decomposition.h"
 #include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
+#include "impeller/scene/animation/animation_transforms.h"
 
 namespace impeller {
 namespace scene {
@@ -46,7 +48,9 @@ class PropertyResolver {
   ///         many different PropertyResolvers prior to rendering. For example,
   ///         an AnimationPlayer may blend multiple Animations together by
   ///         applying several AnimationClips.
-  virtual void Apply(Node& target, SecondsF time, Scalar weight) = 0;
+  virtual void Apply(AnimationTransforms& target,
+                     SecondsF time,
+                     Scalar weight) = 0;
 };
 
 class TimelineResolver : public PropertyResolver {
@@ -74,7 +78,9 @@ class TranslationTimelineResolver final : public TimelineResolver {
   ~TranslationTimelineResolver();
 
   // |Resolver|
-  void Apply(Node& target, SecondsF time, Scalar weight) override;
+  void Apply(AnimationTransforms& target,
+             SecondsF time,
+             Scalar weight) override;
 
  private:
   TranslationTimelineResolver();
@@ -91,7 +97,9 @@ class RotationTimelineResolver final : public TimelineResolver {
   ~RotationTimelineResolver();
 
   // |Resolver|
-  void Apply(Node& target, SecondsF time, Scalar weight) override;
+  void Apply(AnimationTransforms& target,
+             SecondsF time,
+             Scalar weight) override;
 
  private:
   RotationTimelineResolver();
@@ -108,7 +116,9 @@ class ScaleTimelineResolver final : public TimelineResolver {
   ~ScaleTimelineResolver();
 
   // |Resolver|
-  void Apply(Node& target, SecondsF time, Scalar weight) override;
+  void Apply(AnimationTransforms& target,
+             SecondsF time,
+             Scalar weight) override;
 
  private:
   ScaleTimelineResolver();

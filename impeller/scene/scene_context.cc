@@ -28,6 +28,9 @@ void SceneContextOptions::ApplyToPipelineDescriptor(
 
   desc.SetSampleCount(sample_count);
   desc.SetPrimitiveType(primitive_type);
+
+  desc.SetWindingOrder(WindingOrder::kCounterClockwise);
+  desc.SetCullMode(CullMode::kBackFace);
 }
 
 SceneContext::SceneContext(std::shared_ptr<Context> context)

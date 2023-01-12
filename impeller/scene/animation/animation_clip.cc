@@ -67,7 +67,7 @@ Scalar AnimationClip::GetWeight() const {
 }
 
 void AnimationClip::SetWeight(Scalar weight) {
-  weight_ = weight;
+  weight_ = std::max(0.0f, weight);
 }
 
 SecondsF AnimationClip::GetPlaybackTime() const {
@@ -110,9 +110,16 @@ void AnimationClip::Advance(SecondsF delta_time) {
   }
 }
 
-void AnimationClip::ApplyToBindings() const {
+void AnimationClip::ApplyToBindings(
+    std::unordered_map<Node*, AnimationTransforms>& transform_decomps,
+    Scalar weight_multiplier) const {
   for (auto& binding : bindings_) {
-    binding.channel.resolver->Apply(*binding.node, playback_time_, weight_);
+    auto transforms = transform_decomps.find(binding.node);
+    if (transforms == transform_decomps.end()) {
+      continue;
+    }
+    binding.channel.resolver->Apply(transforms->second, playback_time_,
+                                    weight_ * weight_multiplier);
   }
 }
 
