@@ -210,7 +210,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     }
     expect(option.help, isNot(endsWith(':')), reason: '${_header}Help for $target--${option.name}" ends with a colon, which seems unlikely to be correct.');
     expect(option.help, isNot(contains(_bannedUri)), reason: '${_header}Help for $target--${option.name}" uses the term "URI" rather than "URL".');
-    expect(option.help, isNot(contains(_nonSecureFlutterDartUrl)), reason: '${_header}Help for $target--${option.name}" links to an non-secure ("http") version of a Flutter or Dart site.');
+    expect(option.help, isNot(contains(_nonSecureFlutterDartUrl)), reason: '${_header}Help for $target--${option.name}" links to a non-secure ("http") version of a Flutter or Dart site.');
     // TODO(ianh): add some checking for embedded URLs to make sure we're consistent on how we format those.
     // TODO(ianh): arguably we should ban help text that starts with "Whether to..." since by definition a flag is to enable a feature, so the "whether to" is redundant.
   }
