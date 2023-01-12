@@ -6,7 +6,7 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -31,7 +31,7 @@
               "device_type=none",
               "os=Linux"
           ],
-          "gclient_custom_vars": {
+          "gclient_variables": {
               "download_android_deps": false
           },
           "gn": [
@@ -87,7 +87,7 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -127,7 +127,7 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -177,7 +177,7 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -210,6 +210,40 @@
                     "type": "local"
                 }
             ]
+        },
+        {
+            "archives": [
+                {
+                    "name": "wasm_release",
+                    "base_path": "out/wasm_release/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/wasm_release/zip_archives/flutter-web-sdk.zip"
+                    ]
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_emsdk": true,
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "release",
+                "--web",
+                "--build-canvaskit"
+            ],
+            "name": "wasm_release",
+            "ninja": {
+                "config": "wasm_release",
+                "targets": [
+                    "flutter/web_sdk"
+                ]
+            },
+            "tests": []
         }
     ],
     "tests": []
