@@ -13,11 +13,27 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Used to store the [stream] and [eventKind] that a dispatched event would be
 /// sent on.
+@immutable
 class DispatchedEventKey {
-  DispatchedEventKey({required this.stream, required this.eventKind});
+  const DispatchedEventKey({required this.stream, required this.eventKind});
 
-  String stream;
-  String eventKind;
+  final String stream;
+  final String eventKind;
+
+  @override
+  String toString() {
+    return '[DispatchedEventKey]($stream, $eventKind)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DispatchedEventKey &&
+        stream == other.stream &&
+        eventKind == other.eventKind;
+  }
+
+  @override
+  int get hashCode => Object.hash(stream, eventKind);
 }
 
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
