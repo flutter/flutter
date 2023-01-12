@@ -378,7 +378,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
-    ActionIconThemeData? actionButtonIcons,
+    ActionIconThemeData? actionIconTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'Use colorScheme.secondary instead. '
@@ -769,7 +769,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
-      actionIconTheme: actionButtonIcons,
+      actionIconTheme: actionIconTheme,
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
@@ -1717,8 +1717,8 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
-  /// A data for overriding icons in [BackButtonIcon],
-  /// [CloseButtonIcon], [DrawerButtonIcon], or [EndDrawerButtonIcon]
+  /// A theme for customizing icons of [BackButtonIcon], [CloseButtonIcon], 
+  /// [DrawerButtonIcon], or [EndDrawerButtonIcon].
   final ActionIconThemeData? actionIconTheme;
 
   // DEPRECATED (newest deprecations at the bottom)
@@ -1989,7 +1989,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
-    ActionIconThemeData? actionButtonIcons,
+    ActionIconThemeData? actionIconTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
@@ -2167,7 +2167,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
-      actionIconTheme: actionButtonIcons ?? this.actionIconTheme,
+      actionIconTheme: actionIconTheme ?? this.actionIconTheme,
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: accentColor ?? _accentColor,
       accentColorBrightness: accentColorBrightness ?? _accentColorBrightness,
@@ -2909,7 +2909,7 @@ class ThemeData with Diagnosticable {
         'tooltipTheme', tooltipTheme,
         level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ActionIconThemeData>(
-        'actionButtonIcons', actionIconTheme,
+        'actionIconTheme', actionIconTheme,
         level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
     properties.add(ColorProperty('accentColor', accentColor,

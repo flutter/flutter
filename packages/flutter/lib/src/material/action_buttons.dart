@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'action_buttons_theme.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -31,14 +32,14 @@ class BackButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final WidgetBuilder? iconBuilder = theme.actionIconTheme?.backButtonIconBuilder;
+    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
+    final WidgetBuilder? iconBuilder = actionIconTheme?.backButtonIconBuilder;
     if (iconBuilder != null) {
       return iconBuilder(context);
     }
     final String? semanticsLabel;
     final IconData data;
-    switch (theme.platform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -153,8 +154,8 @@ class CloseButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final WidgetBuilder? iconBuilder = theme.actionIconTheme?.closeButtonIconBuilder;
+    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
+    final WidgetBuilder? iconBuilder = actionIconTheme?.closeButtonIconBuilder;
     if (iconBuilder != null) {
       return iconBuilder(context);
     }
@@ -253,8 +254,8 @@ class DrawerButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final WidgetBuilder? iconBuilder = theme.actionIconTheme?.drawerButtonIconBuilder;
+    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
+    final WidgetBuilder? iconBuilder = actionIconTheme?.drawerButtonIconBuilder;
     if (iconBuilder != null) {
       return iconBuilder(context);
     }
@@ -353,8 +354,8 @@ class EndDrawerButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final WidgetBuilder? iconBuilder = theme.actionIconTheme?.endDrawerButtonIconBuilder;
+    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
+    final WidgetBuilder? iconBuilder = actionIconTheme?.endDrawerButtonIconBuilder;
     if (iconBuilder != null) {
       return iconBuilder(context);
     }
