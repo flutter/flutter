@@ -302,6 +302,12 @@ void main() {
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
+
+    // Ensure that package prefix is not duplicated after copying.
+    final TextStyle s11 = s8.copyWith();
+    expect(s11.fontFamilyFallback![0], 'packages/p/test');
+    expect(s11.fontFamilyFallback![1], 'packages/p/test2');
+    expect(s11.fontFamilyFallback!.length, 2);
   });
 
   test('TextStyle package font merge', () {
