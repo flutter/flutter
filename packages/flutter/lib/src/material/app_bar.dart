@@ -1022,34 +1022,43 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      // Based on the Material Design 3 specs, the leading IconButton should have
-      // a size of 48x48, and a highlight size of 40x40. Users can also put other
-      // type of widgets on leading with the original config.
       if (theme.useMaterial3) {
         if (leading is IconButton) {
-          // The [IconButton.styleFrom] method is used to generate a correct [overlayColor] based on the [foregroundColor].
-          final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
-            foregroundColor: overallIconTheme.color,
-            iconSize: overallIconTheme.size,
-          );
+          final IconButtonThemeData effectiveIconButtonTheme;
+
+          // This comparison is to check if there is a custom [overallIconTheme]. If true, it means that no
+          // custom [overallIconTheme] is provided, so [iconButtonTheme] is applied. Otherwise, we generate
+          // a new [IconButtonThemeData] based on the values from [overallIconTheme]. If [iconButtonTheme] only
+          // has null values, the default [overallIconTheme] will be applied below by [IconTheme.merge]
+          if (overallIconTheme == defaults.iconTheme) {
+            effectiveIconButtonTheme = iconButtonTheme;
+          } else {
+            // The [IconButton.styleFrom] method is used to generate a correct [overlayColor] based on the [foregroundColor].
+            final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
+              foregroundColor: overallIconTheme.color,
+              iconSize: overallIconTheme.size,
+            );
+
+            effectiveIconButtonTheme = IconButtonThemeData(
+              style: iconButtonTheme.style?.copyWith(
+                foregroundColor: leadingIconButtonStyle.foregroundColor,
+                overlayColor: leadingIconButtonStyle.overlayColor,
+                iconSize: leadingIconButtonStyle.iconSize,
+              )
+            );
+          }
 
           leading = Center(
             child: IconButtonTheme(
-              // This comparison is to check if there is a custom [overallIconTheme]. If true, it means that no
-              // custom [overallIconTheme] is provided, so [iconButtonTheme] is applied. Otherwise, we generate
-              // a new [IconButtonThemeData] based on the values from [overallIconTheme]. If [iconButtonTheme] only
-              // has null values, the default [overallIconTheme] will be applied below by [IconTheme.merge]
-              data: overallIconTheme == defaults.iconTheme ? iconButtonTheme : IconButtonThemeData(
-                style: iconButtonTheme.style?.copyWith(
-                  foregroundColor: leadingIconButtonStyle.foregroundColor,
-                  overlayColor: leadingIconButtonStyle.overlayColor,
-                  iconSize: leadingIconButtonStyle.iconSize,
-                ),
-              ),
+              data: effectiveIconButtonTheme,
               child: leading
             )
           );
         }
+
+        // Based on the Material Design 3 specs, the leading IconButton should have
+        // a size of 48x48, and a highlight size of 40x40. Users can also put other
+        // type of widgets on leading with the original config.
         leading = ConstrainedBox(
           constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
           child: leading,
@@ -1128,18 +1137,26 @@ class _AppBarState extends State<AppBar> {
 
     // Allow the trailing actions to have their own theme if necessary.
     if (actions != null) {
-      final ButtonStyle actionsIconButtonStyle = IconButton.styleFrom(
-        foregroundColor: actionsIconTheme.color,
-        iconSize: actionsIconTheme.size,
-      );
-      actions = IconButtonTheme(
-        data: actionsIconTheme == defaults.actionsIconTheme ? iconButtonTheme : IconButtonThemeData(
+      final IconButtonThemeData effectiveActionsIconButtonTheme;
+      if (actionsIconTheme == defaults.actionsIconTheme) {
+        effectiveActionsIconButtonTheme = iconButtonTheme;
+      } else {
+        final ButtonStyle actionsIconButtonStyle = IconButton.styleFrom(
+          foregroundColor: actionsIconTheme.color,
+          iconSize: actionsIconTheme.size,
+        );
+
+        effectiveActionsIconButtonTheme = IconButtonThemeData(
           style: iconButtonTheme.style?.copyWith(
             foregroundColor: actionsIconButtonStyle.foregroundColor,
             overlayColor: actionsIconButtonStyle.overlayColor,
             iconSize: actionsIconButtonStyle.iconSize,
           )
-        ),
+        );
+      }
+
+      actions = IconButtonTheme(
+        data: effectiveActionsIconButtonTheme,
         child: IconTheme.merge(
           data: actionsIconTheme,
           child: actions,
