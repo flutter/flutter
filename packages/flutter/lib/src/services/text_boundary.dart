@@ -138,26 +138,35 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
+    print('getLeadingTextBoundaryAt $position');
     if (position < 0) {
       return null;
     }
-    if (position >= _text.length) {
+    int codeUnitPosition = position - 1;
+    if (codeUnitPosition >= _text.length) {
       return getLeadingTextBoundaryAt(_text.length - 1);
     }
     assert(_text.isNotEmpty);
     final List<int> codeUnits = _text.codeUnits;
-    int index = position;
+    int index = codeUnitPosition;
 
     if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+      print('CRLF found at initial position');
+      index -= 2;
     } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
+      print('Line terminator found at initial position');
       index--;
     }
     while (index > 0 && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      print('sub $index ${String.fromCharCode(codeUnits[index])}');
       index--;
     }
-    if ((index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) || (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1]))) {
+
+    if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      print('place cursor after line terminator');
       index++;
     }
+    print(max(index, 0));
     return max(index, 0);
   }
 
@@ -166,28 +175,46 @@ class ParagraphBoundary extends TextBoundary {
   /// line terminator that encloses the desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
+    print('getTrailingTextBoundaryAt $position');
     if (position >= _text.length) {
       return null;
     }
     assert(_text.isNotEmpty);
+    print(_text.length);
 
     final List<int> codeUnits = _text.codeUnits;
-    int index = position;
+    int codeUnitPosition;
+    // If the position is at the beginning of a line do not move it.
+    codeUnitPosition = position > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[position - 1]) ? position : position + 1;
+    codeUnitPosition = position >= 0 && TextLayoutMetrics.isLineTerminator(codeUnits[position]) ? position : position + 1;
+    int index = codeUnitPosition;
+    print(index);
 
-    if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
-      index += 2;
-    } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
-      index++;
-    }
+    // if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
+    //   print('Encountered CRLF at initial position, lets skip over it');
+    //   index += 2;
+    // } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
+    //   print('Encountered line terminator at initial position');
+    //   index++;
+    // }
 
     while (index < codeUnits.length && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      // print('add $index ${String.fromCharCode(codeUnits[index])}');
+      print('add $index ${String.fromCharCode(codeUnits[index])}');
       index++;
     }
 
-    if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
-      index += 2;
-    } else if (index < codeUnits.length - 1 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      index++;
+    print('made it');
+
+    if (index < codeUnits.length && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      print('line terminator at end $index ${codeUnits[index] == 0xD} && ${codeUnits[index + 1] == 0xA} ${codeUnits[index]}');
+      if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
+        print('CRLF at end');
+        index += 2;
+      } else {
+        print('normal end');
+        index++;
+      }
     }
 
     return min(index, _text.length);
