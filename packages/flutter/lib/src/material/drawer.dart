@@ -830,10 +830,11 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Token database version: v0_150
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
-  const _DrawerDefaultsM3(this.context)
+  _DrawerDefaultsM3(this.context)
       : super(elevation: 1.0);
 
   final BuildContext context;
+  late final TextDirection direction = Directionality.of(context);
 
   @override
   Color? get backgroundColor => Theme.of(context).colorScheme.surface;
@@ -844,18 +845,22 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   @override
   Color? get shadowColor => Colors.transparent;
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get shape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+  ShapeBorder? get shape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      end: Radius.circular(16.0),
+    ).resolve(direction),
   );
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get endShape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(left: Radius.circular(16.0)),
+  ShapeBorder? get endShape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      start: Radius.circular(16.0),
+    ).resolve(direction),
   );
 }
 
