@@ -558,6 +558,7 @@ exit code: 66
       throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', null)),
     );
     expect(logger.statusText, isEmpty);
+    expect(logger.traceText, contains(toolExitMessage));
     expect(
       mockStdio.stdout.writes.map(utf8.decode),
       <String>[
