@@ -3270,7 +3270,6 @@ targets:
 
   - name: Mac_arm64_android run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     runIf:
       - dev/**
@@ -3377,7 +3376,6 @@ targets:
   - name: Mac_ios complex_layout_scroll_perf_bad_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3791,7 +3789,6 @@ targets:
   - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3937,7 +3934,6 @@ targets:
   - name: Mac channels_integration_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
@@ -3974,7 +3970,6 @@ targets:
 
   - name: Mac_arm64_ios run_debug_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4303,7 +4298,6 @@ targets:
 
   - name: Windows run_debug_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
