@@ -6,6 +6,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 
 #include <functional>
+#include <thread>
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/window/platform_message.h"
@@ -666,6 +667,19 @@ TEST_F(FlutterEngineTest, ResponseFromBackgroundThread) {
   while (!didCallCallback) {
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
   }
+}
+
+TEST(EngineTest, ThreadSynchronizerNotBlockingRasterThreadAfterShutdown) {
+  FlutterThreadSynchronizer* threadSynchronizer = [[FlutterThreadSynchronizer alloc] init];
+  [threadSynchronizer shutdown];
+
+  std::thread rasterThread([&threadSynchronizer] {
+    [threadSynchronizer performCommit:CGSizeMake(100, 100)
+                               notify:^{
+                               }];
+  });
+
+  rasterThread.join();
 }
 
 }  // namespace flutter::testing
