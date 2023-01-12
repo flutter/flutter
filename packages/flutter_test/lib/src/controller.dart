@@ -563,13 +563,13 @@ abstract class WidgetController {
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   ///
   /// {@template flutter.flutter_test.WidgetController.fling.offset}
-  /// The `offset` represents a distance the pointer moves in global coordinate
-  /// system of the screen.
+  /// The `offset` represents a distance the pointer moves in the global
+  /// coordinate system of the screen.
   ///
-  /// Positive [Offset.dy] values mean pointer moves downward. Negative
-  /// [Offset.dy] values mean pointer moves upwards. Accordingly, positive
-  /// [Offset.dx] values mean pointer moves towards the right. Negative
-  /// [Offset.dx] values mean pointer moves towards left.
+  /// Positive [Offset.dy] values mean the pointer moves downward. Negative
+  /// [Offset.dy] values mean the pointer moves upwards. Accordingly, positive
+  /// [Offset.dx] values mean the pointer moves towards the right. Negative
+  /// [Offset.dx] values mean the pointer moves towards left.
   /// {@endtemplate}
   ///
   /// {@template flutter.flutter_test.WidgetController.fling}
