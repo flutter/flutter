@@ -308,6 +308,14 @@ void main() {
     expect(s11.fontFamilyFallback![0], 'packages/p/test');
     expect(s11.fontFamilyFallback![1], 'packages/p/test2');
     expect(s11.fontFamilyFallback!.length, 2);
+    expect(s8, s11);
+
+    // Ensure that package prefix is not duplicated after applying.
+    final TextStyle s12 = s8.apply();
+    expect(s12.fontFamilyFallback![0], 'packages/p/test');
+    expect(s12.fontFamilyFallback![1], 'packages/p/test2');
+    expect(s12.fontFamilyFallback!.length, 2);
+    expect(s8, s12);
   });
 
   test('TextStyle package font merge', () {
