@@ -151,6 +151,7 @@ final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
 final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
 final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
 final RegExp _bannedUri = RegExp(r'\b[Uu][Rr][Ii]\b');
+final RegExp _nonSecureFlutterDartUrl = RegExp(r'http://([a-z0-9-]+\.)*(flutter|dart)\.dev', caseSensitive: false);
 const String _needHelp = "Every option must have help explaining what it does, even if it's "
                          'for testing purposes, because this is the bare minimum of '
                          'documentation we can add just for ourselves. If it is not intended '
@@ -209,6 +210,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     }
     expect(option.help, isNot(endsWith(':')), reason: '${_header}Help for $target--${option.name}" ends with a colon, which seems unlikely to be correct.');
     expect(option.help, isNot(contains(_bannedUri)), reason: '${_header}Help for $target--${option.name}" uses the term "URI" rather than "URL".');
+    expect(option.help, isNot(contains(_nonSecureFlutterDartUrl)), reason: '${_header}Help for $target--${option.name}" links to a non-secure ("http") version of a Flutter or Dart site.');
     // TODO(ianh): add some checking for embedded URLs to make sure we're consistent on how we format those.
     // TODO(ianh): arguably we should ban help text that starts with "Whether to..." since by definition a flag is to enable a feature, so the "whether to" is redundant.
   }
