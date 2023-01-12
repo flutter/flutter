@@ -392,7 +392,9 @@ class PersistedPhysicalShape extends PersistedContainerSurface
         path,
         SurfacePaintData()
           ..style = ui.PaintingStyle.fill
-          ..color = color.value);
+          ..color = color.value,
+        '${pathBounds2.right}',
+        '${pathBounds2.bottom}');
 
     /// Render element behind the clipped content.
     rootElement!.insertBefore(_svgElement!, childContainer);
