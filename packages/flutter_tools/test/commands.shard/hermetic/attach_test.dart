@@ -84,7 +84,7 @@ void main() {
     group('with one device and no specified target file', () {
       const int devicePort = 499;
       const int hostPort = 42;
-      final int year3000 = DateTime(3000).millisecondsSinceEpoch;
+      final int future = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
 
       late FakeDeviceLogReader fakeLogReader;
       late RecordingPortForwarder portForwarder;
@@ -218,16 +218,16 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
-              PtrResourceRecord('foo', year3000, domainName: 'bar'),
+              PtrResourceRecord('foo', future, domainName: 'bar'),
             ],
             <String, List<SrvResourceRecord>>{
               'bar': <SrvResourceRecord>[
-                SrvResourceRecord('bar', year3000, port: devicePort, weight: 1, priority: 1, target: 'appId'),
+                SrvResourceRecord('bar', future, port: devicePort, weight: 1, priority: 1, target: 'appId'),
               ],
             },
             txtResponse: <String, List<TxtResourceRecord>>{
               'bar': <TxtResourceRecord>[
-                TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+                TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
               ],
             },
           ),
@@ -285,11 +285,11 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
-              PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
+              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
             ],
             <String, List<SrvResourceRecord>>{
               'srv-foo': <SrvResourceRecord>[
-                SrvResourceRecord('srv-foo', year3000, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
               ],
             },
             ipResponse: <String, List<IPAddressResourceRecord>>{
@@ -299,7 +299,7 @@ void main() {
             },
             txtResponse: <String, List<TxtResourceRecord>>{
               'srv-foo': <TxtResourceRecord>[
-                TxtResourceRecord('srv-foo', year3000, text: 'authCode=xyz\n'),
+                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
               ],
             },
           ),
@@ -357,15 +357,15 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
-              PtrResourceRecord('bar', year3000, domainName: 'srv-bar'),
-              PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
+              PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
             ],
             <String, List<SrvResourceRecord>>{
               'srv-bar': <SrvResourceRecord>[
-                SrvResourceRecord('srv-bar', year3000, port: 321, weight: 1, priority: 1, target: 'target-bar'),
+                SrvResourceRecord('srv-bar', future, port: 321, weight: 1, priority: 1, target: 'target-bar'),
               ],
               'srv-foo': <SrvResourceRecord>[
-                SrvResourceRecord('srv-foo', year3000, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
               ],
             },
             ipResponse: <String, List<IPAddressResourceRecord>>{
@@ -375,7 +375,7 @@ void main() {
             },
             txtResponse: <String, List<TxtResourceRecord>>{
               'srv-foo': <TxtResourceRecord>[
-                TxtResourceRecord('srv-foo', year3000, text: 'authCode=xyz\n'),
+                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
               ],
             },
           ),
@@ -433,15 +433,15 @@ void main() {
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
-              PtrResourceRecord('bar', year3000, domainName: 'srv-bar'),
-              PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
+              PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
             ],
             <String, List<SrvResourceRecord>>{
               'srv-bar': <SrvResourceRecord>[
-                SrvResourceRecord('srv-bar', year3000, port: 321, weight: 1, priority: 1, target: 'target-bar'),
+                SrvResourceRecord('srv-bar', future, port: 321, weight: 1, priority: 1, target: 'target-bar'),
               ],
               'srv-foo': <SrvResourceRecord>[
-                SrvResourceRecord('srv-foo', year3000, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
               ],
             },
             ipResponse: <String, List<IPAddressResourceRecord>>{
@@ -451,7 +451,7 @@ void main() {
             },
             txtResponse: <String, List<TxtResourceRecord>>{
               'srv-foo': <TxtResourceRecord>[
-                TxtResourceRecord('srv-foo', year3000, text: 'authCode=xyz\n'),
+                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
               ],
             },
           ),

@@ -17,7 +17,7 @@ import '../src/common.dart';
 
 void main() {
   group('mDNS Discovery', () {
-    final int year3000 = DateTime(3000).millisecondsSinceEpoch;
+    final int future = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
 
     setUp(() {
       setNetworkInterfaceLister(
@@ -43,11 +43,11 @@ void main() {
       testWithoutContext('Find result in preliminary client', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
           },
         );
@@ -66,11 +66,11 @@ void main() {
       testWithoutContext('Do not find result in preliminary client, but find in main client', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
           },
         );
@@ -89,15 +89,15 @@ void main() {
       testWithoutContext('Find multiple in preliminary client', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
-            PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
+            PtrResourceRecord('baz', future, domainName: 'fiz'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
             'fiz': <SrvResourceRecord>[
-              SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+              SrvResourceRecord('fiz', future, port: 321, weight: 1, priority: 1, target: 'local'),
             ],
           },
         );
@@ -143,11 +143,11 @@ void main() {
       testWithoutContext('One port available, no appId', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
           },
         );
@@ -165,16 +165,16 @@ void main() {
       testWithoutContext('One port available, no appId, with authCode', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
           },
           txtResponse: <String, List<TxtResourceRecord>>{
             'bar': <TxtResourceRecord>[
-              TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+              TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
             ],
           },
         );
@@ -193,15 +193,15 @@ void main() {
       testWithoutContext('Multiple ports available, with appId', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
-            PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
+            PtrResourceRecord('baz', future, domainName: 'fiz'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
             'fiz': <SrvResourceRecord>[
-              SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+              SrvResourceRecord('fiz', future, port: 321, weight: 1, priority: 1, target: 'local'),
             ],
           },
         );
@@ -219,17 +219,17 @@ void main() {
       testWithoutContext('Multiple ports available per process, with appId', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
-            PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
+            PtrResourceRecord('baz', future, domainName: 'fiz'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 1234, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
             'fiz': <SrvResourceRecord>[
-              SrvResourceRecord('fiz', year3000, port: 4321, weight: 1, priority: 1, target: 'local'),
-              SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+              SrvResourceRecord('fiz', future, port: 4321, weight: 1, priority: 1, target: 'local'),
+              SrvResourceRecord('fiz', future, port: 321, weight: 1, priority: 1, target: 'local'),
             ],
           },
         );
@@ -265,11 +265,11 @@ void main() {
       testWithoutContext('Correctly builds Observatory URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
           },
         );
@@ -288,11 +288,11 @@ void main() {
       testWithoutContext('Get network device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 1234, weight: 1, priority: 1, target: 'appId'),
             ],
           },
           ipResponse: <String, List<IPAddressResourceRecord>>{
@@ -302,7 +302,7 @@ void main() {
           },
           txtResponse: <String, List<TxtResourceRecord>>{
             'bar': <TxtResourceRecord>[
-              TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+              TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
             ],
           },
         );
@@ -325,11 +325,11 @@ void main() {
       testWithoutContext('Get network device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 1234, weight: 1, priority: 1, target: 'appId'),
             ],
           },
           ipResponse: <String, List<IPAddressResourceRecord>>{
@@ -339,7 +339,7 @@ void main() {
           },
           txtResponse: <String, List<TxtResourceRecord>>{
             'bar': <TxtResourceRecord>[
-              TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+              TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
             ],
           },
         );
@@ -362,19 +362,19 @@ void main() {
       testWithoutContext('Throw error if unable to find observatory with app id and device port', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
-            PtrResourceRecord('bar', year3000, domainName: 'srv-bar'),
-            PtrResourceRecord('baz', year3000, domainName: 'srv-boo'),
+            PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+            PtrResourceRecord('baz', future, domainName: 'srv-boo'),
           ],
           <String, List<SrvResourceRecord>>{
             'srv-foo': <SrvResourceRecord>[
-              SrvResourceRecord('srv-foo', year3000, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+              SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
             ],
             'srv-bar': <SrvResourceRecord>[
-              SrvResourceRecord('srv-bar', year3000, port: 123, weight: 1, priority: 1, target: 'target-bar'),
+              SrvResourceRecord('srv-bar', future, port: 123, weight: 1, priority: 1, target: 'target-bar'),
             ],
             'srv-baz': <SrvResourceRecord>[
-              SrvResourceRecord('srv-baz', year3000, port: 123, weight: 1, priority: 1, target: 'target-baz'),
+              SrvResourceRecord('srv-baz', future, port: 123, weight: 1, priority: 1, target: 'target-baz'),
             ],
           },
         );
@@ -400,11 +400,11 @@ void main() {
       testWithoutContext('Throw error if unable to find observatory with app id', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
+            PtrResourceRecord('foo', future, domainName: 'srv-foo'),
           ],
           <String, List<SrvResourceRecord>>{
             'srv-foo': <SrvResourceRecord>[
-              SrvResourceRecord('srv-foo', year3000, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+              SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
             ],
           },
         );
@@ -483,11 +483,11 @@ void main() {
       testWithoutContext('Correctly builds Observatory URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
             ],
           },
         );
@@ -510,11 +510,11 @@ void main() {
       testWithoutContext('Get network device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 1234, weight: 1, priority: 1, target: 'appId'),
             ],
           },
           ipResponse: <String, List<IPAddressResourceRecord>>{
@@ -524,7 +524,7 @@ void main() {
           },
           txtResponse: <String, List<TxtResourceRecord>>{
             'bar': <TxtResourceRecord>[
-              TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+              TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
             ],
           },
         );
@@ -547,11 +547,11 @@ void main() {
       testWithoutContext('Get network device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar'),
           ],
           <String, List<SrvResourceRecord>>{
             'bar': <SrvResourceRecord>[
-              SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+              SrvResourceRecord('bar', future, port: 1234, weight: 1, priority: 1, target: 'appId'),
             ],
           },
           ipResponse: <String, List<IPAddressResourceRecord>>{
@@ -561,7 +561,7 @@ void main() {
           },
           txtResponse: <String, List<TxtResourceRecord>>{
             'bar': <TxtResourceRecord>[
-              TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+              TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
             ],
           },
         );
@@ -584,19 +584,19 @@ void main() {
       testWithoutContext('Throw error if unable to find observatory with app id and device port', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
-            PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
-            PtrResourceRecord('bar', year3000, domainName: 'srv-bar'),
-            PtrResourceRecord('baz', year3000, domainName: 'srv-boo'),
+            PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+            PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+            PtrResourceRecord('baz', future, domainName: 'srv-boo'),
           ],
           <String, List<SrvResourceRecord>>{
             'srv-foo': <SrvResourceRecord>[
-              SrvResourceRecord('srv-foo', year3000, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+              SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
             ],
             'srv-bar': <SrvResourceRecord>[
-              SrvResourceRecord('srv-bar', year3000, port: 123, weight: 1, priority: 1, target: 'target-bar'),
+              SrvResourceRecord('srv-bar', future, port: 123, weight: 1, priority: 1, target: 'target-bar'),
             ],
             'srv-baz': <SrvResourceRecord>[
-              SrvResourceRecord('srv-baz', year3000, port: 123, weight: 1, priority: 1, target: 'target-baz'),
+              SrvResourceRecord('srv-baz', future, port: 123, weight: 1, priority: 1, target: 'target-baz'),
             ],
           },
         );
@@ -621,19 +621,19 @@ void main() {
     testWithoutContext('Find firstMatchingObservatory with many available and no application id', () async {
       final MDnsClient client = FakeMDnsClient(
         <PtrResourceRecord>[
-          PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
-          PtrResourceRecord('bar', year3000, domainName: 'srv-bar'),
-          PtrResourceRecord('baz', year3000, domainName: 'srv-boo'),
+          PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+          PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+          PtrResourceRecord('baz', future, domainName: 'srv-boo'),
         ],
         <String, List<SrvResourceRecord>>{
           'srv-foo': <SrvResourceRecord>[
-            SrvResourceRecord('srv-foo', year3000, port: 123, weight: 1, priority: 1, target: 'target-foo'),
+            SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
           ],
           'srv-bar': <SrvResourceRecord>[
-            SrvResourceRecord('srv-bar', year3000, port: 123, weight: 1, priority: 1, target: 'target-bar'),
+            SrvResourceRecord('srv-bar', future, port: 123, weight: 1, priority: 1, target: 'target-bar'),
           ],
           'srv-baz': <SrvResourceRecord>[
-            SrvResourceRecord('srv-baz', year3000, port: 123, weight: 1, priority: 1, target: 'target-baz'),
+            SrvResourceRecord('srv-baz', future, port: 123, weight: 1, priority: 1, target: 'target-baz'),
           ],
         },
       );
@@ -650,20 +650,20 @@ void main() {
     testWithoutContext('Find firstMatchingObservatory app id', () async {
       final MDnsClient client = FakeMDnsClient(
         <PtrResourceRecord>[
-          PtrResourceRecord('foo', year3000, domainName: 'srv-foo'),
-          PtrResourceRecord('bar', year3000, domainName: 'srv-bar'),
-          PtrResourceRecord('baz', year3000, domainName: 'srv-boo'),
+          PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+          PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+          PtrResourceRecord('baz', future, domainName: 'srv-boo'),
         ],
         <String, List<SrvResourceRecord>>{
           'srv-foo': <SrvResourceRecord>[
-            SrvResourceRecord('srv-foo', year3000, port: 111, weight: 1, priority: 1, target: 'target-foo'),
+            SrvResourceRecord('srv-foo', future, port: 111, weight: 1, priority: 1, target: 'target-foo'),
           ],
           'srv-bar': <SrvResourceRecord>[
-            SrvResourceRecord('srv-bar', year3000, port: 222, weight: 1, priority: 1, target: 'target-bar'),
-            SrvResourceRecord('srv-bar', year3000, port: 333, weight: 1, priority: 1, target: 'target-bar-2'),
+            SrvResourceRecord('srv-bar', future, port: 222, weight: 1, priority: 1, target: 'target-bar'),
+            SrvResourceRecord('srv-bar', future, port: 333, weight: 1, priority: 1, target: 'target-bar-2'),
           ],
           'srv-baz': <SrvResourceRecord>[
-            SrvResourceRecord('srv-baz', year3000, port: 444, weight: 1, priority: 1, target: 'target-baz'),
+            SrvResourceRecord('srv-baz', future, port: 444, weight: 1, priority: 1, target: 'target-baz'),
           ],
         },
       );

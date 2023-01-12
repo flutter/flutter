@@ -313,19 +313,21 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           device.majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
           !isNetworkDevice;
 
-        final Timer timer = Timer(const Duration(seconds: 30), () {
-          _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
-
-          // If relying on mDNS to find observatory, remind the user to allow local network permissions.
-          if (!compatibleWithProtocolDiscovery) {
-            _logger.printError(
-              'Click to "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
-              'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
-              "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.");
-          }
-        });
-
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        final Status observatoryStatus = _logger.startSpinner(
+          timeout: const Duration(seconds: 30),
+          slowWarningCallback: () {
+            // If relying on mDNS to find observatory, remind the user to allow local network permissions.
+            if (!compatibleWithProtocolDiscovery) {
+              return 'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...\n\n'
+                'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.";
+            }
+
+            return 'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...';
+          },
+        );
 
         int? devicePort;
         if (debugPort != null) {
@@ -365,7 +367,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             <Future<Uri?>>[mDNSDiscoveryFuture, protocolDiscoveryFuture]
           );
         }
-        timer.cancel();
+        observatoryStatus.stop();
 
         observatoryUri = foundUrl == null
           ? null

@@ -33,6 +33,8 @@ class MDnsObservatoryDiscovery {
 
   final MDnsClient _client;
 
+  // Used when discovering observatories with `queryForAttach` to do a preliminary
+  // check for already running services so that results are not cached in _client.
   final MDnsClient? _preliminaryClient;
 
   final Logger _logger;
@@ -45,8 +47,8 @@ class MDnsObservatoryDiscovery {
 
   /// Executes an mDNS query for a Dart Observatory.
   /// Checks for observatories that have already been launched.
-  /// If none found, will listen for new observatories to become active
-  /// and return first it finds that match parameters.
+  /// If none are found, it will listen for new observatories to become active
+  /// and return the first it finds that match the parameters.
   ///
   /// The [applicationId] parameter may be used to specify which application
   /// to find. For Android, it refers to the package name; on iOS, it refers to
@@ -83,10 +85,10 @@ class MDnsObservatoryDiscovery {
     Duration timeout = const Duration(minutes: 10),
   }) async {
     // Poll for 5 seconds to see if there are already services running.
-    // Use a new instance of MDnsClient so result don't get cached in _client.
+    // Use a new instance of MDnsClient so results don't get cached in _client.
     // If no results are found, poll for a longer duration to wait for connections.
-    // If more than 1 result found, throw an error since we can't determine which to pick.
-    // If only one found, return it.
+    // If more than 1 result is found, throw an error since it can't be determined which to pick.
+    // If only one is found, return it.
     final List<MDnsObservatoryDiscoveryResult> results = await _pollingObservatory(
       _preliminaryClient ?? MDnsClient(),
       applicationId: applicationId,
@@ -120,7 +122,7 @@ class MDnsObservatoryDiscovery {
 
   /// Executes an mDNS query for a Dart Observatory.
   /// Listens for new observatories to become active
-  /// and return first it finds that match parameters.
+  /// and returns the first it finds that match the parameters.
   ///
   /// The [applicationId] parameter must be set to specify which application
   /// to find. For Android, it refers to the package name; on iOS, it refers to
@@ -161,9 +163,9 @@ class MDnsObservatoryDiscovery {
     );
   }
 
-  // Poll for observatories and return the first it finds that match
-  // the [applicationId]/[deviceVmservicePort] (if applicable).
-  // Return null if not results are found.
+  /// Polls for observatories and returns the first it finds that match
+  /// the [applicationId]/[deviceVmservicePort] (if applicable).
+  /// Returns null if no results are found.
   @visibleForTesting
   Future<MDnsObservatoryDiscoveryResult?> firstMatchingObservatory(
     MDnsClient client, {
@@ -215,7 +217,7 @@ class MDnsObservatoryDiscovery {
 
         String? domainName;
         if (applicationId != null) {
-          // If applicationId is set, we only want to find records that match it
+          // If applicationId is set, only use records that match it
           if (ptr.domainName.toLowerCase().startsWith(applicationId.toLowerCase())) {
             domainName = ptr.domainName;
           } else {
@@ -226,24 +228,25 @@ class MDnsObservatoryDiscovery {
         }
 
         _logger.printTrace('Checking for available port on $domainName');
-        // Here, if we get more than one, it should just be a duplicate.
-        final List<SrvResourceRecord> srv = await client
+        final List<SrvResourceRecord> srvRecords = await client
           .lookup<SrvResourceRecord>(
             ResourceRecordQuery.service(domainName),
           )
           .toList();
-
-        if (srv.isEmpty) {
+        if (srvRecords.isEmpty) {
           continue;
         }
-        if (srv.length > 1) {
+
+        // If more than one SrvResourceRecord found, it should just be a duplicate.
+        final SrvResourceRecord srvRecord = srvRecords.first;
+        if (srvRecords.length > 1) {
           _logger.printWarning(
               'Unexpectedly found more than one observatory report for $domainName '
-              '- using first one (${srv.first.port}).');
+              '- using first one (${srvRecord.port}).');
         }
 
-        // If deviceVmservicePort is set, we only want to find records that match it
-        if (deviceVmservicePort != null && srv.first.port != deviceVmservicePort) {
+        // If deviceVmservicePort is set, only use records that match it
+        if (deviceVmservicePort != null && srvRecord.port != deviceVmservicePort) {
           continue;
         }
 
@@ -253,12 +256,12 @@ class MDnsObservatoryDiscovery {
           List<IPAddressResourceRecord> ipAddresses = await client
             .lookup<IPAddressResourceRecord>(
               ipv6
-                  ? ResourceRecordQuery.addressIPv6(srv.first.target)
-                  : ResourceRecordQuery.addressIPv4(srv.first.target),
+                  ? ResourceRecordQuery.addressIPv6(srvRecord.target)
+                  : ResourceRecordQuery.addressIPv4(srvRecord.target),
             )
             .toList();
           if (ipAddresses.isEmpty) {
-            throwToolExit('Did not find IP for service ${srv.first.target}.');
+            throwToolExit('Did not find IP for service ${srvRecord.target}.');
           }
 
           // Filter out link-local addresses.
@@ -266,12 +269,12 @@ class MDnsObservatoryDiscovery {
             ipAddresses = ipAddresses.where((IPAddressResourceRecord element) => !element.address.isLinkLocal).toList();
           }
 
+          ipAddress = ipAddresses.first.address;
           if (ipAddresses.length > 1) {
             _logger.printWarning(
-                'Unexpectedly found more than one IP for observatory for service ${srv.first.target} '
-                '- using first one (${ipAddresses.first.address}).');
+                'Unexpectedly found more than one IP for observatory for service ${srvRecord.target} '
+                '- using first one ($ipAddress).');
           }
-          ipAddress = ipAddresses.first.address;
         }
 
         _logger.printTrace('Checking for authentication code for $domainName');
@@ -281,7 +284,7 @@ class MDnsObservatoryDiscovery {
           )
           .toList();
         if (txt == null || txt.isEmpty) {
-          results.add(MDnsObservatoryDiscoveryResult(domainName, srv.first.port, ''));
+          results.add(MDnsObservatoryDiscoveryResult(domainName, srvRecord.port, ''));
           if (quitOnFind) {
             return results;
           }
@@ -296,7 +299,7 @@ class MDnsObservatoryDiscovery {
           }
         }
         if (raw == null) {
-          results.add(MDnsObservatoryDiscoveryResult(domainName, srv.first.port, ''));
+          results.add(MDnsObservatoryDiscoveryResult(domainName, srvRecord.port, ''));
           if (quitOnFind) {
             return results;
           }
@@ -311,7 +314,7 @@ class MDnsObservatoryDiscovery {
 
         results.add(MDnsObservatoryDiscoveryResult(
           domainName,
-          srv.first.port,
+          srvRecord.port,
           authCode,
           ipAddress: ipAddress
         ));
@@ -339,6 +342,13 @@ class MDnsObservatoryDiscovery {
     }
   }
 
+  /// Gets Observatory Uri for `flutter attach`.
+  /// Executes an mDNS query and waits until an observatory service is found.
+  ///
+  /// Differs from `getObservatoryUriForLaunch` because it can search for any available observatory.
+  /// Since [applicationId] and [deviceVmservicePort] are optional, it can either look for any observatory
+  /// or a specific observatory matching [applicationId]/[deviceVmservicePort].
+  /// It may find more than one observatory, which will throw an error listing the found observatories.
   Future<Uri?> getObservatoryUriForAttach(
     String? applicationId,
     Device device, {
@@ -366,6 +376,11 @@ class MDnsObservatoryDiscovery {
     );
   }
 
+  /// Gets Observatory Uri for `flutter run`.
+  /// Executes an mDNS query and waits until the observatory service is found.
+  ///
+  /// Differs from `getObservatoryUriForAttach` because it only searches for a specific observatory.
+  /// This is enforced by [applicationId] and [deviceVmservicePort] being required.
   Future<Uri?> getObservatoryUriForLaunch(
     String applicationId,
     Device device, {
