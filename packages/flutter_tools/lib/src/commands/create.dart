@@ -414,6 +414,7 @@ class CreateCommand extends CreateBase {
         context: pubContext,
         project: project,
         offline: boolArgDeprecated('offline'),
+        outputMode: PubOutputMode.summaryOnly,
       );
       await project.ensureReadyForPlatformSpecificTooling(
         androidPlatform: includeAndroid,
