@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -16,10 +15,6 @@ class TestAssetBundle extends CachingAssetBundle {
   final Map<String, List<Map<Object?, Object?>>> _assetBundleMap;
 
   Map<String, int> loadCallCount = <String, int>{};
-
-  String get _assetBundleContents {
-    return json.encode(_assetBundleMap);
-  }
 
   @override
   Future<ByteData> load(String key) async {
