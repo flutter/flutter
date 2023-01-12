@@ -811,6 +811,7 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      actionIconTheme: null,
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.black,
       accentColorBrightness: Brightness.dark,
@@ -932,6 +933,7 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      actionIconTheme: null,
 
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.white,

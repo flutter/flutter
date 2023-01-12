@@ -5,20 +5,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'back_button.dart';
-import 'drawer_button.dart';
+import 'action_buttons.dart';
 import 'theme.dart';
 
-/// A [ActionButtonIconsData] that overrides the default icons of
+/// A [ActionIconThemeData] that overrides the default icons of
 /// [BackButton], [CloseButton], [DrawerButton], and [EndDrawerButton] with the
-/// overall [Theme]'s [ThemeData.actionButtonIcons].
+/// overall [Theme]'s [ThemeData.actionIconTheme].
 @immutable
-class ActionButtonIconsData with Diagnosticable {
-  /// Creates an [ActionButtonIconsData].
+class ActionIconThemeData with Diagnosticable {
+  /// Creates an [ActionIconThemeData].
   ///
   /// The builders [backButtonIconBuilder], [closeButtonIconBuilder],
   /// [drawerButtonIconBuilder], [endDrawerButtonIconBuilder] may be null.
-  const ActionButtonIconsData({ this.backButtonIconBuilder, this.closeButtonIconBuilder, this.drawerButtonIconBuilder, this.endDrawerButtonIconBuilder });
+  const ActionIconThemeData({ this.backButtonIconBuilder, this.closeButtonIconBuilder, this.drawerButtonIconBuilder, this.endDrawerButtonIconBuilder });
 
   /// Overrides [BackButtonIcon]'s icon.
   ///
@@ -44,13 +43,15 @@ class ActionButtonIconsData with Diagnosticable {
   /// fallbacks to the platform's default end drawer button icon.
   final WidgetBuilder? endDrawerButtonIconBuilder;
 
-  ActionButtonIconsData copyWith({
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  ActionIconThemeData copyWith({
     WidgetBuilder? backButtonIconBuilder,
     WidgetBuilder? closeButtonIconBuilder,
     WidgetBuilder? drawerButtonIconBuilder,
     WidgetBuilder? endDrawerButtonIconBuilder,
   }) {
-    return ActionButtonIconsData(
+    return ActionIconThemeData(
       backButtonIconBuilder: backButtonIconBuilder ?? backButtonIconBuilder,
       closeButtonIconBuilder: closeButtonIconBuilder ?? closeButtonIconBuilder,
       drawerButtonIconBuilder: drawerButtonIconBuilder ?? drawerButtonIconBuilder,
@@ -58,14 +59,14 @@ class ActionButtonIconsData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two action button icons data.
-  static ActionButtonIconsData? lerp(
-      ActionButtonIconsData? a, ActionButtonIconsData? b, double t) {
+  /// Linearly interpolate between two action icon themes.
+  static ActionIconThemeData? lerp(
+      ActionIconThemeData? a, ActionIconThemeData? b, double t) {
     assert(t != null);
     if (a == null && b == null) {
       return null;
     }
-    return ActionButtonIconsData(
+    return ActionIconThemeData(
       backButtonIconBuilder: t < 0.5 ? a?.backButtonIconBuilder : b?.backButtonIconBuilder,
       closeButtonIconBuilder: t < 0.5 ? a?.closeButtonIconBuilder : b?.closeButtonIconBuilder,
       drawerButtonIconBuilder: t < 0.5 ? a?.drawerButtonIconBuilder : b?.drawerButtonIconBuilder,
@@ -92,7 +93,7 @@ class ActionButtonIconsData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ActionButtonIconsData
+    return other is ActionIconThemeData
         && other.backButtonIconBuilder == backButtonIconBuilder
         && other.closeButtonIconBuilder == closeButtonIconBuilder
         && other.drawerButtonIconBuilder == drawerButtonIconBuilder
@@ -128,4 +129,49 @@ class ActionButtonIconsData with Diagnosticable {
       ),
     );
   }
+}
+
+
+/// An inherited widget that overrides the default of [BackButtonIcon],
+/// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] in this
+/// widget's subtree.
+///
+/// Values specified here override the defaults for [Badge] properties which
+/// are not given an explicit non-null value.
+class ActionIconTheme extends InheritedTheme {
+  /// Creates a theme that overrides the default icon of [BackButtonIcon],
+  /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] in this
+  /// widget's subtree.
+  const ActionIconTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  }) : assert(data != null);
+
+  /// Specifies the default icon overrides for descendant [BackButtonIcon],
+  /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] widgets.
+  final ActionIconThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [ActionIconTheme] widget, then
+  /// [ThemeData.actionIconTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ActionIconThemeData theme = ActionIconTheme.of(context);
+  /// ```
+  static ActionIconThemeData? of(BuildContext context) {
+    final ActionIconTheme? badgeTheme = context.dependOnInheritedWidgetOfExactType<ActionIconTheme>();
+    return badgeTheme?.data ?? Theme.of(context).actionIconTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return ActionIconTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotify(ActionIconTheme oldWidget) => data != oldWidget.data;
 }
