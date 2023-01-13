@@ -133,6 +133,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   }) : assert(startPressure != null),
        assert(peakPressure != null),
        assert(interpolation != null),
