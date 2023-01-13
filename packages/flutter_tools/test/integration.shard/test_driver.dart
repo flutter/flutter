@@ -503,7 +503,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool singleWidgetReloads = false,
-    bool serveObservatory = false,
+    bool serveObservatory = true,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -514,7 +514,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
-        if (serveObservatory) '--serve-observatory',
+        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',
         if (chrome)
@@ -543,7 +543,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool singleWidgetReloads = false,
-    bool serveObservatory = false,
+    bool serveObservatory = true,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -554,7 +554,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         if (!spawnDdsInstance)
           '--no-dds',
-        if (serveObservatory) '--serve-observatory',
+        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         '-d',
         'flutter-tester',
         '--debug-port',

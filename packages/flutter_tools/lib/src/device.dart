@@ -753,7 +753,7 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
-    this.serveObservatory = false,
+    this.serveObservatory = true,
     this.enableDartProfiling = true,
    }) : debuggingEnabled = true;
 
@@ -952,7 +952,6 @@ class DebuggingOptions {
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller) '--enable-impeller',
-      if (serveObservatory) '--serve-observatory',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--observatory-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
