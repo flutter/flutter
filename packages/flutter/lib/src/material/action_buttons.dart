@@ -13,6 +13,63 @@ import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
+abstract class _ActionButton extends StatelessWidget {
+  /// Creates a Material Design button.
+  const _ActionButton({
+    super.key,
+    this.color,
+    required this.icon,
+    this.iconSize,
+    required this.onPressed,
+  });
+
+  /// The icon to display inside the button.
+  final Widget icon;
+
+  /// The callback that is called when the button is tapped 
+  /// or otherwise activated.
+  ///
+  /// If this is set to null, the button will do a default action
+  /// when it is tapped or activated.
+  final VoidCallback? onPressed;
+
+  /// The color to use for the icon.
+  ///
+  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
+  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
+  final Color? color;
+
+  /// The size to use for the icon.
+  ///
+  /// Defaults to the [IconThemeData.size] specified in the ambient [IconTheme],
+  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
+  final double? iconSize;
+
+  String _getTooltip(BuildContext context);
+
+  /// This is the default function that is called when [onPressed] is set
+  /// to null.
+  void _onPressedCallback(BuildContext context);
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    return IconButton(
+      icon: icon,
+      color: color,
+      iconSize: iconSize,
+      tooltip: _getTooltip(context),
+      onPressed: () {
+        if (onPressed != null) {
+          onPressed!();
+        } else {
+          _onPressedCallback(context);
+        }
+      },
+    );
+  }
+}
+
 /// A "back" icon that's appropriate for the current [TargetPlatform].
 ///
 /// The current platform is determined by querying for the ambient [Theme].
@@ -96,42 +153,17 @@ class BackButtonIcon extends StatelessWidget {
 ///    icons.
 ///  * [CloseButton], an alternative which may be more appropriate for leaf
 ///    node pages in the navigation tree.
-class BackButton extends StatelessWidget {
+class BackButton extends _ActionButton {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ super.key, this.color, this.onPressed });
-
-  /// The color to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final Color? color;
-
-  /// An override callback to perform instead of the default behavior which is
-  /// to pop the [Navigator].
-  ///
-  /// It can, for instance, be used to pop the platform's navigation stack
-  /// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
-  /// situations.
-  ///
-  /// Defaults to null.
-  final VoidCallback? onPressed;
+  const BackButton({ super.key, super.color, super.onPressed, }) : super(icon: const BackButtonIcon());
 
   @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
-    return IconButton(
-      icon: const BackButtonIcon(),
-      color: color,
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-      onPressed: () {
-        if (onPressed != null) {
-          onPressed!();
-        } else {
-          Navigator.maybePop(context);
-        }
-      },
-    );
+  void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
+
+  @override
+  String _getTooltip(BuildContext context) {
+    return MaterialLocalizations.of(context).backButtonTooltip;
   }
 }
 
@@ -195,41 +227,16 @@ class CloseButtonIcon extends StatelessWidget {
 ///    navigation tree or where pages can be popped instantaneously with
 ///    no user data consequence.
 ///  * [IconButton], to create other Material Design icon buttons.
-class CloseButton extends StatelessWidget {
+class CloseButton extends _ActionButton {
   /// Creates a Material Design close button.
-  const CloseButton({ super.key, this.color, this.onPressed });
-
-  /// The color to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final Color? color;
-
-  /// An override callback to perform instead of the default behavior which is
-  /// to pop the [Navigator].
-  ///
-  /// It can, for instance, be used to pop the platform's navigation stack
-  /// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
-  /// situations.
-  ///
-  /// Defaults to null.
-  final VoidCallback? onPressed;
+  const CloseButton({ super.key, super.color, super.onPressed }) : super(icon: const CloseButtonIcon());
 
   @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
-    return IconButton(
-      icon: const CloseButtonIcon(),
-      color: color,
-      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-      onPressed: () {
-        if (onPressed != null) {
-          onPressed!();
-        } else {
-          Navigator.maybePop(context);
-        }
-      },
-    );
+  void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
+
+  @override
+  String _getTooltip(BuildContext context) {
+    return MaterialLocalizations.of(context).closeButtonTooltip;
   }
 }
 
@@ -292,44 +299,21 @@ class DrawerButtonIcon extends StatelessWidget {
 ///    with icons.
 ///  * [Icon], a Material Design icon.
 ///  * [ThemeData.platform], which specifies the current platform.
-class DrawerButton extends StatelessWidget {
+class DrawerButton extends _ActionButton {
   /// Creates a Material Design drawer button.
-  const DrawerButton({ super.key, this.color, this.onPressed, this.iconSize });
-
-  /// The color to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final Color? color;
-
-  /// An override callback to perform instead of the default behavior which is
-  /// to open the [Scaffold.drawer].
-  ///
-  /// Defaults to null.
-  final VoidCallback? onPressed;
-
-  /// The size to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.size] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final double? iconSize;
+  const DrawerButton({ 
+    super.key, 
+    super.color, 
+    super.iconSize, 
+    super.onPressed,
+  }) : super(icon: const DrawerButtonIcon());
 
   @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
-    return IconButton(
-      icon: const DrawerButtonIcon(),
-      color: color,
-      iconSize: iconSize,
-      tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      onPressed: () {
-        if (onPressed != null) {
-          onPressed!();
-        } else {
-          Scaffold.of(context).openDrawer();
-        }
-      },
-    );
+  void _onPressedCallback(BuildContext context) => Scaffold.of(context).openDrawer();
+
+  @override
+  String _getTooltip(BuildContext context) {
+    return MaterialLocalizations.of(context).openAppDrawerTooltip;
   }
 }
 
@@ -392,43 +376,20 @@ class EndDrawerButtonIcon extends StatelessWidget {
 ///    with icons.
 ///  * [Icon], a Material Design icon.
 ///  * [ThemeData.platform], which specifies the current platform.
-class EndDrawerButton extends StatelessWidget {
+class EndDrawerButton extends _ActionButton {
   /// Creates a Material Design end-drawer button.
-  const EndDrawerButton({ super.key, this.color, this.onPressed, this.iconSize });
-
-  /// The color to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final Color? color;
-
-  /// An override callback to perform instead of the default behavior which is
-  /// to open the [Scaffold.endDrawer].
-  ///
-  /// Defaults to null.
-  final VoidCallback? onPressed;
-
-  /// The size to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.size] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final double? iconSize;
+  const EndDrawerButton({
+    super.key,
+    super.color,
+    super.iconSize,
+    super.onPressed,
+  }) : super(icon: const EndDrawerButtonIcon());
 
   @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterialLocalizations(context));
-    return IconButton(
-      icon: const EndDrawerButtonIcon(),
-      color: color,
-      iconSize: iconSize,
-      tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      onPressed: () {
-        if (onPressed != null) {
-          onPressed!();
-        } else {
-          Scaffold.of(context).openEndDrawer();
-        }
-      },
-    );
+  void _onPressedCallback(BuildContext context) => Scaffold.of(context).openEndDrawer();
+
+  @override
+  String _getTooltip(BuildContext context) {
+    return MaterialLocalizations.of(context).openAppDrawerTooltip;
   }
 }
