@@ -1778,4 +1778,33 @@ void _paragraphTests() {
       canvasKit.TextHeightBehavior.DisableAll,
     );
   });
+
+  test('MakeOnScreenGLSurface test', () {
+    final DomCanvasElement canvas = createDomCanvasElement(
+      width: 100,
+      height: 100,
+    );
+    final WebGLContext gl = canvas.getGlContext(webGLVersion);
+    final int sampleCount = gl.getParameter(gl.samples);
+    final int stencilBits = gl.getParameter(gl.stencilBits);
+
+    final int glContext = canvasKit.GetWebGLContext(
+      canvas,
+      SkWebGLContextOptions(
+        antialias: 0,
+        majorVersion: webGLVersion.toDouble(),
+      ),
+    ).toInt();
+    final SkGrContext grContext =  canvasKit.MakeGrContext(glContext);
+    final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
+      grContext,
+      100,
+      100,
+      SkColorSpaceSRGB,
+      sampleCount,
+      stencilBits
+    );
+
+    expect(skSurface, isNotNull);
+  }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 }
