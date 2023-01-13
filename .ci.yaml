@@ -80,6 +80,7 @@ platform_properties:
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_arm64:
     properties:
       dependencies: >-
@@ -90,6 +91,7 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_x64:
     properties:
       dependencies: >-
@@ -100,6 +102,7 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
+      cleanup_xcode_cache: "true"
   mac_android:
     properties:
       dependencies: >-
@@ -3270,7 +3273,6 @@ targets:
 
   - name: Mac_arm64_android run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     runIf:
       - dev/**
@@ -3377,7 +3379,6 @@ targets:
   - name: Mac_ios complex_layout_scroll_perf_bad_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3791,7 +3792,6 @@ targets:
   - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3937,7 +3937,6 @@ targets:
   - name: Mac channels_integration_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
@@ -3974,7 +3973,6 @@ targets:
 
   - name: Mac_arm64_ios run_debug_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4303,7 +4301,6 @@ targets:
 
   - name: Windows run_debug_test_windows
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

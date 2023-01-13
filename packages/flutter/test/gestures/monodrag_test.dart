@@ -78,6 +78,57 @@ void main() {
       ),
     );
   });
+
+  group('Recognizers on different button filters:', () {
+    final List<String> recognized = <String>[];
+    late HorizontalDragGestureRecognizer primaryRecognizer;
+    late HorizontalDragGestureRecognizer secondaryRecognizer;
+    setUp(() {
+      primaryRecognizer = HorizontalDragGestureRecognizer(
+          allowedButtonsFilter: (int buttons) => kPrimaryButton == buttons)
+        ..onStart = (DragStartDetails details) {
+          recognized.add('onStartPrimary');
+        };
+      secondaryRecognizer = HorizontalDragGestureRecognizer(
+          allowedButtonsFilter: (int buttons) => kSecondaryButton == buttons)
+        ..onStart = (DragStartDetails details) {
+          recognized.add('onStartSecondary');
+        };
+    });
+
+    tearDown(() {
+      recognized.clear();
+      primaryRecognizer.dispose();
+      secondaryRecognizer.dispose();
+    });
+
+    testGesture('Primary button works', (GestureTester tester) {
+      const PointerDownEvent down1 = PointerDownEvent(
+        pointer: 6,
+        position: Offset(10.0, 10.0),
+      );
+
+      primaryRecognizer.addPointer(down1);
+      secondaryRecognizer.addPointer(down1);
+      tester.closeArena(down1.pointer);
+      tester.route(down1);
+      expect(recognized, <String>['onStartPrimary']);
+    });
+
+    testGesture('Secondary button works', (GestureTester tester) {
+      const PointerDownEvent down1 = PointerDownEvent(
+        pointer: 6,
+        position: Offset(10.0, 10.0),
+        buttons: kSecondaryMouseButton,
+      );
+
+      primaryRecognizer.addPointer(down1);
+      secondaryRecognizer.addPointer(down1);
+      tester.closeArena(down1.pointer);
+      tester.route(down1);
+      expect(recognized, <String>['onStartSecondary']);
+    });
+  });
 }
 
 class MockHitTestTarget implements HitTestTarget {
