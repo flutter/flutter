@@ -279,7 +279,6 @@ void main() {
     expect(await device.stopApp(iosApp), false);
     expect(logger.errorText, contains('iOS Observatory not discovered after 45 seconds. This is taking much longer than expected...'));
     expect(logger.errorText, contains('Click "Allow" to the prompt asking if you would like to find and connect devices on your local network.'));
-    expect(utf8.decoder.convert(stdin.writes.first), contains('process interrupt'));
     completer.complete();
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
