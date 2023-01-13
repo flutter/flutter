@@ -196,7 +196,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'interact with the VM service at runtime.\n'
               'This flag is ignored if "--start-paused" or coverage are requested, as '
               'the VM service will be enabled in those cases regardless.'
-      )..addOption('reporter',
+      )
+      ..addOption('reporter',
         abbr: 'r',
         help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'github', 'json'],
