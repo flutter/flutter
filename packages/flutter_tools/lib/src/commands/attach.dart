@@ -322,10 +322,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
               return 'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...\n\n'
                 'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
                 'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
-                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.";
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
             }
 
-            return 'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...';
+            return 'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...\n';
           },
         );
 
