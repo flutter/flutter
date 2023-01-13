@@ -501,6 +501,7 @@ flutter:
             '--spirv=$outputPath.spirv',
             '--input=/$shaderPath',
             '--input-type=frag',
+             '--remap-samplers',
             '--include=/$assetsPath',
             '--include=$shaderLibDir',
           ],
@@ -570,7 +571,7 @@ flutter:
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
       );
-
+      expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
