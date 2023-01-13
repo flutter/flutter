@@ -9,8 +9,8 @@ import 'action_buttons.dart';
 import 'theme.dart';
 
 /// A [ActionIconThemeData] that overrides the default icons of
-/// [BackButton], [CloseButton], [DrawerButton], and [EndDrawerButton] with the
-/// overall [Theme]'s [ThemeData.actionIconTheme].
+/// [BackButton], [CloseButton], [DrawerButton], and [EndDrawerButton] with
+/// [ActionIconTheme.of] or the overall [Theme]'s [ThemeData.actionIconTheme].
 @immutable
 class ActionIconThemeData with Diagnosticable {
   /// Creates an [ActionIconThemeData].
@@ -132,12 +132,9 @@ class ActionIconThemeData with Diagnosticable {
 }
 
 
-/// An inherited widget that overrides the default of [BackButtonIcon],
+/// An inherited widget that overrides the default icon of [BackButtonIcon],
 /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] in this
 /// widget's subtree.
-///
-/// Values specified here override the defaults for [Badge] properties which
-/// are not given an explicit non-null value.
 class ActionIconTheme extends InheritedTheme {
   /// Creates a theme that overrides the default icon of [BackButtonIcon],
   /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] in this
@@ -163,8 +160,8 @@ class ActionIconTheme extends InheritedTheme {
   /// ActionIconThemeData theme = ActionIconTheme.of(context);
   /// ```
   static ActionIconThemeData? of(BuildContext context) {
-    final ActionIconTheme? badgeTheme = context.dependOnInheritedWidgetOfExactType<ActionIconTheme>();
-    return badgeTheme?.data ?? Theme.of(context).actionIconTheme;
+    final ActionIconTheme? actionIconTheme = context.dependOnInheritedWidgetOfExactType<ActionIconTheme>();
+    return actionIconTheme?.data ?? Theme.of(context).actionIconTheme;
   }
 
   @override
