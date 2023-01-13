@@ -134,8 +134,8 @@ class ParagraphBoundary extends TextBoundary {
   final String _text;
 
   /// Returns the [int] representing the start position of the paragraph that
-  /// bounds the given `position`. The returned [int] is at the front of the leading
-  /// line terminator that encloses the desired paragraph.
+  /// bounds the given `position`. The returned [int] is the position of the code unit
+  /// that follows the line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
     if (position < 0 || position > _text.length) {
@@ -158,7 +158,7 @@ class ParagraphBoundary extends TextBoundary {
       index--;
     }
 
-    if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+    if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
       index++;
     }
 
@@ -166,8 +166,9 @@ class ParagraphBoundary extends TextBoundary {
   }
 
   /// Returns the [int] representing the end position of the paragraph that
-  /// bounds the given `position`. The returned [int] is at the front of the trailing
-  /// line terminator that encloses the desired paragraph.
+  /// bounds the given `position`. The returned [int] is the position of the
+  /// code unit representing the trailing line terminator that encloses the
+  /// desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
     if (position < 0 || position > _text.length) {
@@ -179,22 +180,14 @@ class ParagraphBoundary extends TextBoundary {
     assert(_text.isNotEmpty);
 
     final List<int> codeUnits = _text.codeUnits;
-    int codeUnitPosition;
-    // If the position is at the beginning of a line or at the end of a line do not move it.
-    codeUnitPosition = position > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[position - 1]) ? position : position + 1;
-    codeUnitPosition = position >= 0 && TextLayoutMetrics.isLineTerminator(codeUnits[position]) ? position : position + 1;
-    int index = codeUnitPosition;
+    int index = position;
 
     while (index < codeUnits.length && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       index++;
     }
 
-    if (index < codeUnits.length && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
-        index += 2;
-      } else {
-        index++;
-      }
+    if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
+      index++;
     }
 
     return min(index, _text.length);

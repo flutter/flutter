@@ -3920,6 +3920,32 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       : null;
   }
 
+  TextPosition _moveToParagraphBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
+    assert(extent.offset >= 0);
+    final List<int> codeUnits = _value.text.codeUnits;
+    late final int adjustedCodeUnitPosition;
+    int caretPosition = extent.offset;
+    if (forward) {
+      caretPosition = caretPosition == codeUnits.length ? caretPosition - 1 : caretPosition;
+      adjustedCodeUnitPosition = caretPosition > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[caretPosition - 1])
+                                        || caretPosition >= 0 && TextLayoutMetrics.isLineTerminator(codeUnits[caretPosition])
+                                        ? caretPosition
+                                        : caretPosition + 1;
+    } else {
+      adjustedCodeUnitPosition = caretPosition == 0 ? caretPosition : caretPosition - 1;
+    }
+
+    int newOffset = forward
+      ? textBoundary.getTrailingTextBoundaryAt(adjustedCodeUnitPosition) ?? _value.text.length
+      : textBoundary.getLeadingTextBoundaryAt(adjustedCodeUnitPosition) ?? 0;
+
+    if (newOffset != codeUnits.length && forward) {
+      // Place caret after the new offset when the resulting offset is not at the end of the text.
+      newOffset += 1;
+    }
+    return TextPosition(offset: newOffset);
+  }
+
   // Returns the closest boundary location to `extent` but not including `extent`
   // itself (unless already at the start/end of the text), in the direction
   // specified by `forward`.
@@ -4219,7 +4245,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
-    ExtendSelectionToParagraphBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToParagraphBoundaryIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+    ExtendSelectionToParagraphBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToParagraphBoundaryIntent>(this, _paragraphBoundary, _moveToParagraphBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
