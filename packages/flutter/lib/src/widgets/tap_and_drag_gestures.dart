@@ -702,6 +702,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     super.debugOwner,
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   }) : _deadline = kPressTimeout,
       dragStartBehavior = DragStartBehavior.start,
       slopTolerance = kTouchSlop;
