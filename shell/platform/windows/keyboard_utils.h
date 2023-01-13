@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_WIN32_COMMON_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_KEYBOARD_WIN32_COMMON_H_
 
-#include <assert.h>
 #include <stdint.h>
+
 #include <string>
 
 namespace flutter {

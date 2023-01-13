@@ -83,7 +83,8 @@ void KeyboardKeyHandler::ResolvePendingEvent(uint64_t sequence_id,
       PendingEvent& event = **iter;
       event.any_handled = event.any_handled || handled;
       event.unreplied -= 1;
-      assert(event.unreplied >= 0);
+      FML_DCHECK(event.unreplied >= 0)
+          << "Pending events must have unreplied count > 0";
       // If all delegates have replied, report if any of them handled the event.
       if (event.unreplied == 0) {
         std::unique_ptr<PendingEvent> event_ptr = std::move(*iter);
@@ -95,7 +96,8 @@ void KeyboardKeyHandler::ResolvePendingEvent(uint64_t sequence_id,
     }
   }
   // The pending event should always be found.
-  assert(false);
+  FML_LOG(FATAL) << "Could not find pending key event for sequence ID "
+                 << sequence_id;
 }
 
 }  // namespace flutter
