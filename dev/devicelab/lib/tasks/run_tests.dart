@@ -19,6 +19,22 @@ TaskFunction createAndroidRunReleaseTest() {
   return AndroidRunOutputTest(release: true).call;
 }
 
+TaskFunction createLinuxRunDebugTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: false,
+  ).call;
+}
+
+TaskFunction createLinuxRunReleaseTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: true,
+  ).call;
+}
+
 TaskFunction createMacOSRunDebugTest() {
   return DesktopRunOutputTest(
     // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
