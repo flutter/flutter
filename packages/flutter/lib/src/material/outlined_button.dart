@@ -413,20 +413,36 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     required super.onPressed,
     super.onLongPress,
     super.focusNode,
+    super.style,
     bool? autofocus,
     Clip? clipBehavior,
     super.statesController,
-    required ButtonStyle style,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
        assert(label != null),
        super(
          autofocus: autofocus ?? false,
-         style: style.copyWith(padding: style.padding!.copyWith(left: style.padding!.left * 2/3)),
          clipBehavior: clipBehavior ?? Clip.none,
          child: _OutlinedButtonWithIconChild(icon: icon, label: label),
       );
+
+  @override
+  ButtonStyle defaultStyleOf(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    if (!useMaterial3) {
+      return super.defaultStyleOf(context);
+    }
+    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+      const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+      const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+      const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+      MediaQuery.textScaleFactorOf(context),
+    );
+    return super.defaultStyleOf(context).copyWith(
+      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+    );
+  }
 }
 
 class _OutlinedButtonWithIconChild extends StatelessWidget {

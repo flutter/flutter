@@ -270,7 +270,7 @@ class TextButton extends ButtonStyleButton {
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `textScaleFactor <= 1` - (horizontal(12),vertical(8))
   ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
@@ -320,7 +320,7 @@ class TextButton extends ButtonStyleButton {
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - all(8)
+  ///   * `textScaleFactor <= 1` - lerp(horizontal(8), horizontal(4))
   ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
@@ -378,8 +378,9 @@ class TextButton extends ButtonStyleButton {
 }
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+  final bool useMaterial3 = Theme.of(context).useMaterial3;
   return ButtonStyleButton.scaledPadding(
-    const EdgeInsets.all(8),
+    useMaterial3 ?  const EdgeInsets.symmetric(horizontal: 12,vertical: 8) :  const EdgeInsets.all(8),
     const EdgeInsets.symmetric(horizontal: 8),
     const EdgeInsets.symmetric(horizontal: 4),
     MediaQuery.textScaleFactorOf(context),
@@ -491,8 +492,9 @@ class _TextButtonWithIcon extends TextButton {
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      const EdgeInsets.all(8),
+      useMaterial3 ? const EdgeInsets.only(top: 8, bottom: 8, left: 12, right: 16) : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
       MediaQuery.textScaleFactorOf(context),

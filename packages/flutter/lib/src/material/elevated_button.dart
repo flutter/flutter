@@ -333,10 +333,10 @@ class ElevatedButton extends ButtonStyleButton {
   ///   * hovered - 3
   ///   * focused or pressed - 1
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - horizontal(16)
-  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(16), horizontal(8))
-  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
-  ///   * `3 < textScaleFactor` - horizontal(4)
+  ///   * `textScaleFactor <= 1` - horizontal(24)
+  ///   * `1 < textScaleFactor <= 2` - lerp(horizontal(24), horizontal(12))
+  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(12), horizontal(6))
+  ///   * `3 < textScaleFactor` - horizontal(6)
   /// * `minimumSize` - Size(64, 40)
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite
@@ -498,7 +498,13 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final EdgeInsetsGeometry scaledPadding = useMaterial3 ?  ButtonStyleButton.scaledPadding(
+      const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+      const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+      const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+      MediaQuery.textScaleFactorOf(context),
+    ) : ButtonStyleButton.scaledPadding(
       const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
