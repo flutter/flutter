@@ -48,6 +48,11 @@ enum DragStartBehavior {
   start,
 }
 
+/// Signature for `allowedButtonsFilter` in [GestureRecognizer].
+/// Used to filter the input buttons of incoming pointer events.
+/// The parameter `buttons` comes from [PointerEvent.buttons].
+typedef AllowedButtonsFilter = bool Function(int buttons);
+
 /// The base class that all gesture recognizers inherit from.
 ///
 /// Provides a basic API that can be used by classes that work with
@@ -79,8 +84,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     )
     PointerDeviceKind? kind,
     Set<PointerDeviceKind>? supportedDevices,
+    AllowedButtonsFilter? allowedButtonsFilter,
   }) : assert(kind == null || supportedDevices == null),
-       _supportedDevices = kind == null ? supportedDevices : <PointerDeviceKind>{ kind };
+       _supportedDevices = kind == null ? supportedDevices : <PointerDeviceKind>{ kind },
+       _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
 
   /// The recognizer's owner.
   ///
@@ -97,6 +104,29 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// These cannot both be set. If both are null, events from all device kinds will be
   /// tracked and recognized.
   final Set<PointerDeviceKind>? _supportedDevices;
+
+  /// {@template flutter.gestures.multidrag._allowedButtonsFilter}
+  /// Called when interaction starts. This limits the dragging behavior
+  /// for custom clicks (such as scroll click). Its parameter comes
+  /// from [PointerEvent.buttons].
+  ///
+  /// Due to how [kPrimaryButton], [kSecondaryButton], etc., use integers,
+  /// bitwise operations can help filter how buttons are pressed.
+  /// For example, if someone simultaneously presses the primary and secondary
+  /// buttons, the default behavior will return false. The following code
+  /// accepts any button press with primary:
+  /// `(int buttons) => buttons & kPrimaryButton != 0`.
+  ///
+  /// When value is `(int buttons) => false`, allow no interactions.
+  /// When value is `(int buttons) => true`, allow all interactions.
+  ///
+  /// Defaults to all buttons.
+  /// {@endtemplate}
+  final AllowedButtonsFilter _allowedButtonsFilter;
+
+  // The default value for [allowedButtonsFilter].
+  // Accept any input.
+  static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
@@ -185,9 +215,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
   @protected
   bool isPointerAllowed(PointerDownEvent event) {
-    // Currently, it only checks for device kind. But in the future we could check
-    // for other things e.g. mouse button.
-    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
+    return (_supportedDevices == null ||
+            _supportedDevices!.contains(event.kind)) &&
+        _allowedButtonsFilter(event.buttons);
   }
 
   /// Handles a pointer pan/zoom being added that's not allowed by this recognizer.
@@ -298,6 +328,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
@@ -511,6 +542,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   }) : assert(
          preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be positive or null',

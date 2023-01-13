@@ -334,6 +334,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
     this.dragStartBehavior = DragStartBehavior.down,
     this.trackpadScrollCausesScale = false,
     this.trackpadScrollToScaleFactor = kDefaultTrackpadScrollToScaleFactor,
