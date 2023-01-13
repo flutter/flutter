@@ -7,7 +7,6 @@
 #include <dwmapi.h>
 
 #include <filesystem>
-#include <iostream>
 #include <sstream>
 
 #include "flutter/fml/logging.h"
