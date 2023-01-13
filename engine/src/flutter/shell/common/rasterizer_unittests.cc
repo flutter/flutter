@@ -785,6 +785,61 @@ TEST(
   latch.Wait();
 }
 
+TEST(
+    RasterizerTest,
+    FrameTimingRecorderShouldStartRecordingRasterTimeBeforeSurfaceAcquireFrame) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::Platform | ThreadHost::Type::RASTER |
+                             ThreadHost::Type::IO | ThreadHost::Type::UI);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  EXPECT_CALL(delegate, GetTaskRunners())
+      .WillRepeatedly(ReturnRef(task_runners));
+  EXPECT_CALL(delegate, OnFrameRasterized(_))
+      .WillOnce([&](const FrameTiming& frame_timing) {
+        fml::TimePoint now = fml::TimePoint::Now();
+        fml::TimePoint raster_start =
+            frame_timing.Get(FrameTiming::kRasterStart);
+        EXPECT_TRUE(now - raster_start < fml::TimeDelta::FromSecondsF(1));
+      });
+
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+  auto is_gpu_disabled_sync_switch =
+      std::make_shared<const fml::SyncSwitch>(false);
+  ON_CALL(delegate, GetIsGpuDisabledSyncSwitch())
+      .WillByDefault(Return(is_gpu_disabled_sync_switch));
+  ON_CALL(*surface, AcquireFrame(SkISize()))
+      .WillByDefault(::testing::Invoke([] { return nullptr; }));
+  EXPECT_CALL(*surface, AcquireFrame(SkISize()));
+  EXPECT_CALL(*surface, MakeRenderContextCurrent())
+      .WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
+  rasterizer->Setup(std::move(surface));
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto pipeline = std::make_shared<LayerTreePipeline>(/*depth=*/10);
+    auto layer_tree = std::make_shared<LayerTree>(/*frame_size=*/SkISize(),
+                                                  /*device_pixel_ratio=*/2.0f);
+    auto layer_tree_item = std::make_unique<LayerTreeItem>(
+        std::move(layer_tree), CreateFinishedBuildRecorder());
+    PipelineProduceResult result =
+        pipeline->Produce().Complete(std::move(layer_tree_item));
+    EXPECT_TRUE(result.success);
+    auto no_discard = [](LayerTree&) { return false; };
+    RasterStatus status = rasterizer->Draw(pipeline, no_discard);
+    EXPECT_EQ(status, RasterStatus::kFailed);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
 TEST(RasterizerTest,
      drawLayerTreeWithCorrectFrameTimingWhenPipelineIsMoreAvailable) {
   std::string test_name =
