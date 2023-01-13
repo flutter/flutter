@@ -1245,7 +1245,7 @@ void main() {
         matching: find.byType(Padding),
       ),
     );
-   expect(paddingWidget.padding, const EdgeInsets.only(left: 12.0, top:8.0, right: 16.0, bottom: 8.0));
+   expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8));
   });
 
   testWidgets('Fixed size TextButtons', (WidgetTester tester) async {
