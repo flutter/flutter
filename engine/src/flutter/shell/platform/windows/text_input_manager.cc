@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 #include "flutter/shell/platform/windows/text_input_manager.h"
 
 #include <imm.h>
 
-#include <cassert>
 #include <memory>
+
+#include "flutter/fml/logging.h"
 
 namespace flutter {
 
@@ -21,7 +18,7 @@ class ImmContext {
   ImmContext(HWND window_handle)
       : context_(::ImmGetContext(window_handle)),
         window_handle_(window_handle) {
-    assert(window_handle);
+    FML_DCHECK(window_handle);
   }
 
   ~ImmContext() {
@@ -39,7 +36,7 @@ class ImmContext {
 
   // Returns the IMM context.
   HIMC get() {
-    assert(context_);
+    FML_DCHECK(context_);
     return context_;
   }
 

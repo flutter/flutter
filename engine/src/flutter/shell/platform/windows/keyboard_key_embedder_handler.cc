@@ -4,13 +4,13 @@
 
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 
-#include <assert.h>
 #include <windows.h>
 
 #include <chrono>
 #include <iostream>
 #include <string>
 
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/keyboard_utils.h"
 
 namespace flutter {
@@ -38,7 +38,7 @@ char _GetBit(char32_t ch, size_t start, size_t end) {
 
 std::string ConvertChar32ToUtf8(char32_t ch) {
   std::string result;
-  assert(0 <= ch && ch <= 0x10FFFF);
+  FML_DCHECK(0 <= ch && ch <= 0x10FFFF) << "Character out of range";
   if (ch <= 0x007F) {
     result.push_back(ch);
   } else if (ch <= 0x07FF) {
@@ -160,8 +160,8 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     std::function<void(bool)> callback) {
   const uint64_t physical_key = GetPhysicalKey(scancode, extended);
   const uint64_t logical_key = GetLogicalKey(key, extended, scancode);
-  assert(action == WM_KEYDOWN || action == WM_KEYUP ||
-         action == WM_SYSKEYDOWN || action == WM_SYSKEYUP);
+  FML_DCHECK(action == WM_KEYDOWN || action == WM_KEYUP ||
+             action == WM_SYSKEYDOWN || action == WM_SYSKEYUP);
 
   auto last_logical_record_iter = pressingRecords_.find(physical_key);
   bool had_record = last_logical_record_iter != pressingRecords_.end();
@@ -230,7 +230,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
       if (was_down) {
         // A normal repeated key.
         type = kFlutterKeyEventTypeRepeat;
-        assert(had_record);
+        FML_DCHECK(had_record);
         ConvertUtf32ToUtf8_(character_bytes, character);
         eventual_logical_record = last_logical_record;
         result_logical_key = last_logical_record;
@@ -245,7 +245,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     } else {
       // A normal down event (whether the system event is a repeat or not).
       type = kFlutterKeyEventTypeDown;
-      assert(!had_record);
+      FML_DCHECK(!had_record);
       ConvertUtf32ToUtf8_(character_bytes, character);
       eventual_logical_record = logical_key;
       result_logical_key = logical_key;
@@ -260,7 +260,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     } else {
       // A normal up event.
       type = kFlutterKeyEventTypeUp;
-      assert(had_record);
+      FML_DCHECK(had_record);
       // Up events never have character.
       character_bytes[0] = '\0';
       eventual_logical_record = 0;
@@ -278,7 +278,7 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     if (record_iter != pressingRecords_.end()) {
       pressingRecords_.erase(record_iter);
     } else {
-      assert(false);
+      FML_DCHECK(false);
     }
   }
 
@@ -375,7 +375,7 @@ void KeyboardKeyEmbedderHandler::SynchronizeCriticalToggledStates(
       // Never seen this key.
       continue;
     }
-    assert(key_info.logical_key != 0);
+    FML_DCHECK(key_info.logical_key != 0);
 
     // Check toggling state first, because it might alter pressing state.
     if (key_info.check_toggled) {
@@ -440,7 +440,7 @@ void KeyboardKeyEmbedderHandler::SynchronizeCriticalPressedStates(
       // Never seen this key.
       continue;
     }
-    assert(key_info.logical_key != 0);
+    FML_DCHECK(key_info.logical_key != 0);
     if (key_info.check_pressed) {
       SHORT true_pressed = get_key_state_(virtual_key) & kStateMaskPressed;
       auto pressing_record_iter = pressingRecords_.find(key_info.physical_key);

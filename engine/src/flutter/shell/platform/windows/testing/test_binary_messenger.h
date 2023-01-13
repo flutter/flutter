@@ -5,11 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_TEST_BINARY_MESSENGER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_TEST_BINARY_MESSENGER_H_
 
-#include <cassert>
 #include <functional>
 #include <map>
 #include <string>
 
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 
 namespace flutter {
@@ -53,7 +53,7 @@ class TestBinaryMessenger : public BinaryMessenger {
             size_t message_size,
             BinaryReply reply) const override {
     // If something under test sends a message, the test should be handling it.
-    assert(send_handler_);
+    FML_DCHECK(send_handler_);
     send_handler_(channel, message, message_size, reply);
   }
 

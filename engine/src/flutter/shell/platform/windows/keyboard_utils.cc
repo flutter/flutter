@@ -4,14 +4,16 @@
 
 #include "keyboard_utils.h"
 
+#include "flutter/fml/logging.h"
+
 namespace flutter {
 
 std::u16string EncodeUtf16(char32_t character) {
   // Algorithm: https://en.wikipedia.org/wiki/UTF-16#Description
   std::u16string result;
   // Invalid value.
-  assert(!(character >= 0xD800 && character <= 0xDFFF) &&
-         !(character > 0x10FFFF));
+  FML_DCHECK(!(character >= 0xD800 && character <= 0xDFFF) &&
+             !(character > 0x10FFFF));
   if ((character >= 0xD800 && character <= 0xDFFF) || (character > 0x10FFFF)) {
     return result;
   }
