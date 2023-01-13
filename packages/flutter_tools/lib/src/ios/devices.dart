@@ -427,9 +427,9 @@ class IOSDevice extends Device {
             'you can turn it on in Settings > Your App Name > Local Network. '
             "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again."
           );
+        } else {
+          iosDeployDebugger?.pauseDumpBacktraceResume();
         }
-
-        iosDeployDebugger?.pauseDumpBacktraceResume();
       });
 
       Uri? localUri;
