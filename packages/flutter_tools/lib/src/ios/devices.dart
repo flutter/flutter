@@ -353,7 +353,7 @@ class IOSDevice extends Device {
       ipv6: ipv6,
       interfaceType: interfaceType,
     );
-    final Status installStatus = _logger.startProgress(
+    Status startAppStatus = _logger.startProgress(
       'Installing and launching...',
     );
     try {
@@ -422,7 +422,7 @@ class IOSDevice extends Device {
         // user to allow local network permissions.
         if (interfaceType == IOSDeviceConnectionInterface.network) {
           _logger.printError(
-            'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
+            '\nClick "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
             'This is required for wireless debugging. If you selected "Don\'t Allow", '
             'you can turn it on in Settings > Your App Name > Local Network. '
             "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again."
@@ -445,10 +445,9 @@ class IOSDevice extends Device {
         // message to prompt users to click Allow. Wait 5 seconds because it
         // should only show this message if they have not already approved the permissions.
         // MDnsObservatoryDiscovery usually takes less than 5 seconds to find it.
-        Status? networkPermissionsStatus;
         final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
-          installStatus.stop();
-          networkPermissionsStatus = _logger.startProgress(
+          startAppStatus.stop();
+          startAppStatus = _logger.startProgress(
             'Waiting for approval of local network permissions...',
           );
         });
@@ -463,7 +462,6 @@ class IOSDevice extends Device {
         );
 
         mDNSLookupTimer.cancel();
-        networkPermissionsStatus?.stop();
       } else {
         localUri = await observatoryDiscovery?.uri;
       }
@@ -478,7 +476,7 @@ class IOSDevice extends Device {
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
-      installStatus.stop();
+      startAppStatus.stop();
     }
   }
 
