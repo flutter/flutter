@@ -146,8 +146,10 @@ class ParagraphBoundary extends TextBoundary {
     }
     assert(_text.isNotEmpty);
 
+    final int codeUnitPosition = position - 1;
+
     final List<int> codeUnits = _text.codeUnits;
-    int index = position;
+    int index = codeUnitPosition;
 
     if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
       index -= 2;
