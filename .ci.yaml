@@ -3026,11 +3026,9 @@ targets:
       - .ci.yaml
 
   - name: Mac_arm64 tool_host_cross_arch_tests
-    bringup: true # Mac_arm64 variant https://github.com/flutter/flutter/pull/109889
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      ignore_flakiness: "true"
       cpu: arm64
       dependencies: >-
         [
