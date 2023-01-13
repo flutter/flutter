@@ -308,7 +308,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
   ///
-  /// For the [OutlinedButton.icon] factory, the [start] (generally the left) value of
+  /// For the [OutlinedButton.icon] factory, the start (generally the left) value of
   /// [padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {

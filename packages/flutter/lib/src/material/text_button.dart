@@ -339,7 +339,7 @@ class TextButton extends ButtonStyleButton {
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
   ///
-  /// For the [TextButton.icon] factory, the [end] (generally the right) value of
+  /// For the [TextButton.icon] factory, the end (generally the right) value of
   /// [padding] is increased from 12 to 16.
   /// {@endtemplate}
   @override

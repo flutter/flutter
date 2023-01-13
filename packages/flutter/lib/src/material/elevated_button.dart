@@ -352,7 +352,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
   ///
-  /// For the [ElevatedButton.icon] factory, the [start] (generally the left) value of
+  /// For the [ElevatedButton.icon] factory, the start (generally the left) value of
   /// [padding] is reduced from 24 to 16.
 
   @override
