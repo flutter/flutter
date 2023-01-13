@@ -117,6 +117,8 @@ extension CanvasKitExtension on CanvasKit {
     int width,
     int height,
     ColorSpace colorSpace,
+    int sampleCount,
+    int stencil,
   );
   external SkSurface MakeSWCanvasSurface(DomCanvasElement canvas);
 

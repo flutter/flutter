@@ -624,6 +624,27 @@ extension DomCanvasElementExtension on DomCanvasElement {
 
   DomCanvasRenderingContext2D get context2D =>
       getContext('2d')! as DomCanvasRenderingContext2D;
+
+  WebGLContext getGlContext(int majorVersion) {
+    if (majorVersion == 1) {
+      return getContext('webgl')! as WebGLContext;
+    }
+    return getContext('webgl2')! as WebGLContext;
+  }
+}
+
+@JS()
+@staticInterop
+class WebGLContext {}
+
+extension WebGLContextExtension on WebGLContext {
+  external int getParameter(int value);
+
+  @JS('SAMPLES')
+  external int get samples;
+
+  @JS('STENCIL_BITS')
+  external int get stencilBits;
 }
 
 @JS()
