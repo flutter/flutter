@@ -504,12 +504,16 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
     embedder_root_canvas = external_view_embedder_->GetRootCanvas();
   }
 
+  frame_timings_recorder.RecordRasterStart(fml::TimePoint::Now());
+
   // On Android, the external view embedder deletes surfaces in `BeginFrame`.
   //
   // Deleting a surface also clears the GL context. Therefore, acquire the
   // frame after calling `BeginFrame` as this operation resets the GL context.
   auto frame = surface_->AcquireFrame(layer_tree.frame_size());
   if (frame == nullptr) {
+    frame_timings_recorder.RecordRasterEnd(
+        &compositor_context_->raster_cache());
     return RasterStatus::kFailed;
   }
 
@@ -536,7 +540,6 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
   );
   if (compositor_frame) {
     compositor_context_->raster_cache().BeginFrame();
-    frame_timings_recorder.RecordRasterStart(fml::TimePoint::Now());
 
     std::unique_ptr<FrameDamage> damage;
     // when leaf layer tracing is enabled we wish to repaint the whole frame
