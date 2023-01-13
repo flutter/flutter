@@ -618,6 +618,42 @@ class FlutterPlugin implements Plugin<Project> {
         return false;
     }
 
+    // Sets up Vulkan validation layers for the Flutter application.
+    private void configureVulkanValidationLayers() {
+      // If the environment variable is not set, validation layers aren't enabled.
+      if (getVulkanValidationLibsZipPath() == null) {
+        return
+      }
+
+      // unzip the validation layers to the src/main/vklibs folder
+      project.task('unzipVulkanValidationLibs', type: Copy) {
+        from zipTree(getVulkanValidationLibsZipPath())
+        into new File(project.projectDir, 'src/main/vklibs')
+      }
+
+      // add the unzip task as a dependency of the build task
+      project.tasks.build.dependsOn 'unzipVulkanValidationLibs'
+
+      // add vklibs folder to the jniLibs.srcDirs
+      project.android.sourceSets.main.jniLibs.srcDirs += new File(project.projectDir, 'src/main/vklibs')
+    }
+
+    // Returns the path to Vulkan validation lib binaries distribution.
+    // This is used to copy the binaries to the APK. This path is directed
+    // by the environment variable FLUTTER_VULKAN_VALIDATION_LIBS_ZIP_PATH.
+    // If the environment variable is not set, validation layers aren't enabled.
+    private String getVulkanValidationLibsZipPath() {
+      String vulkanValidationLibsZipPath = System.getenv("FLUTTER_VULKAN_VALIDATION_LIBS_ZIP_PATH")
+      // check if the path is valid if it is not null or empty
+      if (vulkanValidationLibsZipPath != null && !vulkanValidationLibsZipPath.isEmpty()) {
+        File vulkanValidationLibsZipFile = new File(vulkanValidationLibsZipPath)
+        if (!vulkanValidationLibsZipFile.exists()) {
+          throw new GradleException("Vulkan validation lib zip file does not exist: " + vulkanValidationLibsZipPath)
+        }
+      }
+      return vulkanValidationLibsZipPath
+    }
+
     private Boolean useLocalEngine() {
         return project.hasProperty('local-engine-repo')
     }
