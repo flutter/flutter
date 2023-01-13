@@ -320,7 +320,7 @@ class TextButton extends ButtonStyleButton {
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - lerp(horizontal(8), horizontal(4))
+  ///   * `textScaleFactor <= 1` - lerp(horizontal(12), horizontal(4))
   ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
   ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
   ///   * `3 < textScaleFactor` - horizontal(4)
@@ -338,6 +338,9 @@ class TextButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  ///
+  /// For the [TextButton.icon] factory, the [end] (generally the right) value of
+  /// [padding] is increased from 12 to 16.
   /// {@endtemplate}
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
@@ -494,7 +497,7 @@ class _TextButtonWithIcon extends TextButton {
   ButtonStyle defaultStyleOf(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      useMaterial3 ? const EdgeInsets.only(top: 8, bottom: 8, left: 12, right: 16) : const EdgeInsets.all(8),
+      useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
       MediaQuery.textScaleFactorOf(context),

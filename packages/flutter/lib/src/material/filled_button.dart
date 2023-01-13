@@ -386,6 +386,9 @@ class FilledButton extends ButtonStyleButton {
   /// * `enableFeedback` - true
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
+  ///
+  /// For the [FilledButton.icon] factory, the [start] (generally the left) value of
+  /// [padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     switch (_variant) {
