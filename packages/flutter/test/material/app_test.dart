@@ -411,7 +411,7 @@ void main() {
     );
   });
 
-  testWidgets("WidgetsApp don't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
+  testWidgets("WidgetsApp doesn't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/37878
     int routeBuildCount = 0;
     int dependentBuildCount = 0;
