@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 
-#include <iostream>
 #include <string>
 #include <vector>
 
