@@ -858,20 +858,6 @@ class ManifestAssetBundle implements AssetBundle {
       );
     }
 
-    for (final Uri modelUri in flutterManifest.models) {
-      _parseAssetFromFile(
-        packageConfig,
-        flutterManifest,
-        assetBase,
-        cache,
-        result,
-        modelUri,
-        packageName: packageName,
-        attributedPackage: attributedPackage,
-        assetKind: AssetKind.model,
-      );
-    }
-
     // Add assets referenced in the fonts section of the manifest.
     for (final Font font in flutterManifest.fonts) {
       for (final FontAsset fontAsset in font.fontAssets) {
