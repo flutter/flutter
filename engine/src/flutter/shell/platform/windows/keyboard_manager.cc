@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <assert.h>
 #include <memory>
 #include <string>
 
@@ -323,7 +322,8 @@ bool KeyboardManager::HandleMessage(UINT const action,
       return !IsSysAction(action);
     }
     default:
-      assert(false);
+      FML_LOG(FATAL) << "No event handler for keyboard event with action "
+                     << action;
   }
   return false;
 }
@@ -336,7 +336,7 @@ void KeyboardManager::ProcessNextEvent() {
   auto pending_event = std::move(pending_events_.front());
   pending_events_.pop_front();
   PerformProcessEvent(std::move(pending_event), [this] {
-    assert(processing_event_);
+    FML_DCHECK(processing_event_);
     processing_event_ = false;
     ProcessNextEvent();
   });
@@ -392,7 +392,7 @@ void KeyboardManager::DispatchText(const PendingEvent& event) {
   // keys defined by `IsPrintable` are certain characters at lower ASCII range.
   // These ASCII control characters are sent as WM_CHAR events for all control
   // key shortcuts.
-  assert(!event.session.empty());
+  FML_DCHECK(!event.session.empty());
   bool is_printable = IsPrintable(event.session.back().wparam);
   bool valid = event.character != 0 && is_printable;
   if (valid) {

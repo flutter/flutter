@@ -159,7 +159,7 @@ bool ScopedClipboard::HasString() {
 }
 
 std::variant<std::wstring, int> ScopedClipboard::GetString() {
-  assert(opened_);
+  FML_DCHECK(opened_) << "Called GetString when clipboard is closed";
 
   HANDLE data = ::GetClipboardData(CF_UNICODETEXT);
   if (data == nullptr) {
@@ -174,7 +174,7 @@ std::variant<std::wstring, int> ScopedClipboard::GetString() {
 }
 
 int ScopedClipboard::SetString(const std::wstring string) {
-  assert(opened_);
+  FML_DCHECK(opened_) << "Called GetString when clipboard is closed";
   if (!::EmptyClipboard()) {
     return ::GetLastError();
   }

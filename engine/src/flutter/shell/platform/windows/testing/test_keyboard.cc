@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
-#include "flutter/shell/platform/common/json_message_codec.h"
-#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 
 #include <rapidjson/document.h>
+
+#include "flutter/fml/logging.h"
+#include "flutter/shell/platform/common/json_message_codec.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 
 namespace flutter {
 namespace testing {
@@ -205,7 +207,8 @@ void MockMessageQueue::PushBack(const Win32Message* message) {
 }
 
 LRESULT MockMessageQueue::DispatchFront() {
-  assert(!_pending_messages.empty());
+  FML_DCHECK(!_pending_messages.empty())
+      << "Called DispatchFront while pending message queue is empty";
   Win32Message message = _pending_messages.front();
   _pending_messages.pop_front();
   _sent_messages.push_back(message);

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
@@ -103,7 +104,8 @@ class TestKeyboardManager : public KeyboardManager {
 
  protected:
   void RedispatchEvent(std::unique_ptr<PendingEvent> event) override {
-    assert(!during_redispatch_);
+    FML_DCHECK(!during_redispatch_)
+        << "RedispatchEvent called while already redispatching an event";
     during_redispatch_ = true;
     KeyboardManager::RedispatchEvent(std::move(event));
     during_redispatch_ = false;
@@ -235,7 +237,7 @@ class MockKeyboardManagerDelegate : public KeyboardManager::WindowDelegate,
           break;
         }
         default:
-          assert(false);
+          FML_LOG(FATAL) << "Unhandled KeyboardChange type " << change.type;
       }
     }
   }
@@ -337,7 +339,7 @@ class TestFlutterWindowsView : public FlutterWindowsView {
                      const char* args) {
     rapidjson::Document args_doc;
     args_doc.Parse(args);
-    assert(!args_doc.HasParseError());
+    FML_DCHECK(!args_doc.HasParseError());
 
     rapidjson::Document message_doc(rapidjson::kObjectType);
     auto& allocator = message_doc.GetAllocator();
@@ -473,7 +475,7 @@ class KeyboardTester {
   }
 
   void InjectKeyboardChanges(std::vector<KeyboardChange> changes) {
-    assert(window_ != nullptr);
+    FML_DCHECK(window_ != nullptr);
     window_->InjectKeyboardChanges(changes);
   }
 
