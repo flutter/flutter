@@ -26,7 +26,7 @@ abstract class _ActionButton extends StatelessWidget {
   /// The icon to display inside the button.
   final Widget icon;
 
-  /// The callback that is called when the button is tapped 
+  /// The callback that is called when the button is tapped
   /// or otherwise activated.
   ///
   /// If this is set to null, the button will do a default action
@@ -70,6 +70,51 @@ abstract class _ActionButton extends StatelessWidget {
   }
 }
 
+typedef _ActionIconBuilderCallback = WidgetBuilder? Function(ActionIconThemeData? actionIconTheme);
+typedef _ActionIconDataCallback = IconData Function(BuildContext context);
+typedef _AndroidSemanticsLabelCallback = String Function(MaterialLocalizations materialLocalization);
+
+class _ActionIcon extends StatelessWidget {
+  const _ActionIcon({
+    required this.iconBuilderCallback,
+    required this.getIcon,
+    required this.getAndroidSemanticsLabel,
+  });
+
+  final _ActionIconBuilderCallback iconBuilderCallback;
+  final _ActionIconDataCallback getIcon;
+  final _AndroidSemanticsLabelCallback getAndroidSemanticsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
+    final WidgetBuilder? iconBuilder = iconBuilderCallback(actionIconTheme);
+    if (iconBuilder != null) {
+      return iconBuilder(context);
+    }
+
+    final IconData data = getIcon(context);
+    final String? semanticsLabel;
+    // This can't use the platform from Theme because it is the Android OS that
+    // expects the duplicated tooltip and label.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        semanticsLabel =
+            getAndroidSemanticsLabel(MaterialLocalizations.of(context));
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsLabel = null;
+        break;
+    }
+
+    return Icon(data, semanticLabel: semanticsLabel);
+  }
+}
+
 /// A "back" icon that's appropriate for the current [TargetPlatform].
 ///
 /// The current platform is determined by querying for the ambient [Theme].
@@ -89,41 +134,26 @@ class BackButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
-    final WidgetBuilder? iconBuilder = actionIconTheme?.backButtonIconBuilder;
-    if (iconBuilder != null) {
-      return iconBuilder(context);
-    }
-    final String? semanticsLabel;
-    final IconData data;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        data = Icons.arrow_back;
-        break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        data = Icons.arrow_back_ios;
-        break;
-    }
-    // This can't use the platform from Theme because it is the Android OS that
-    // expects the duplicated tooltip and label.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        semanticsLabel = MaterialLocalizations.of(context).backButtonTooltip;
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsLabel = null;
-        break;
-    }
-
-    return Icon(data, semanticLabel: semanticsLabel);
+    return _ActionIcon(
+      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+        return actionIconTheme?.backButtonIconBuilder;
+      },
+      getIcon: (BuildContext context) {
+        switch (Theme.of(context).platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            return Icons.arrow_back;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return Icons.arrow_back_ios;
+        }
+      },
+      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+        return materialLocalization.backButtonTooltip;
+      },
+    );
   }
 }
 
@@ -133,6 +163,10 @@ class BackButtonIcon extends StatelessWidget {
 /// current [TargetPlatform]. When pressed, the back button calls
 /// [Navigator.maybePop] to return to the previous route unless a custom
 /// [onPressed] callback is provided.
+///
+/// The [onPressed] callback can, for instance, be used to pop the platform's navigation stack
+/// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
+/// situations.
 ///
 /// When deciding to display a [BackButton], consider using
 /// `ModalRoute.of(context)?.canPop` to check whether the current route can be
@@ -156,7 +190,11 @@ class BackButtonIcon extends StatelessWidget {
 class BackButton extends _ActionButton {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ super.key, super.color, super.onPressed, }) : super(icon: const BackButtonIcon());
+  const BackButton({
+    super.key,
+    super.color,
+    super.onPressed,
+  }) : super(icon: const BackButtonIcon());
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -186,28 +224,15 @@ class CloseButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
-    final WidgetBuilder? iconBuilder = actionIconTheme?.closeButtonIconBuilder;
-    if (iconBuilder != null) {
-      return iconBuilder(context);
-    }
-    final String? semanticsLabel;
-    // This can't use the platform from Theme because it is the Android OS that
-    // expects the duplicated tooltip and label.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        semanticsLabel = MaterialLocalizations.of(context).closeButtonTooltip;
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsLabel = null;
-        break;
-    }
-
-    return Icon(Icons.close, semanticLabel: semanticsLabel);
+    return _ActionIcon(
+      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+        return actionIconTheme?.closeButtonIconBuilder;
+      },
+      getIcon: (BuildContext context) => Icons.close,
+      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+        return materialLocalization.closeButtonTooltip;
+      },
+    );
   }
 }
 
@@ -215,6 +240,10 @@ class CloseButtonIcon extends StatelessWidget {
 ///
 /// A [CloseButton] is an [IconButton] with a "close" icon. When pressed, the
 /// close button calls [Navigator.maybePop] to return to the previous route.
+///
+/// The [onPressed] callback can, for instance, be used to pop the platform's navigation stack
+/// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
+/// situations.
 ///
 /// Use a [CloseButton] instead of a [BackButton] on fullscreen dialogs or
 /// pages that may solicit additional actions to close.
@@ -229,7 +258,8 @@ class CloseButtonIcon extends StatelessWidget {
 ///  * [IconButton], to create other Material Design icon buttons.
 class CloseButton extends _ActionButton {
   /// Creates a Material Design close button.
-  const CloseButton({ super.key, super.color, super.onPressed }) : super(icon: const CloseButtonIcon());
+  const CloseButton({ super.key, super.color, super.onPressed })
+      : super(icon: const CloseButtonIcon());
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -261,28 +291,15 @@ class DrawerButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
-    final WidgetBuilder? iconBuilder = actionIconTheme?.drawerButtonIconBuilder;
-    if (iconBuilder != null) {
-      return iconBuilder(context);
-    }
-    final String? semanticsLabel;
-    // This can't use the platform from Theme because it is the Android OS that
-    // expects the duplicated tooltip and label.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        semanticsLabel = MaterialLocalizations.of(context).openAppDrawerTooltip;
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsLabel = null;
-        break;
-    }
-
-    return Icon(Icons.menu, semanticLabel: semanticsLabel);
+    return _ActionIcon(
+      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+        return actionIconTheme?.drawerButtonIconBuilder;
+      },
+      getIcon: (BuildContext context) => Icons.menu,
+      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+        return materialLocalization.openAppDrawerTooltip;
+      },
+    );
   }
 }
 
@@ -290,6 +307,8 @@ class DrawerButtonIcon extends StatelessWidget {
 ///
 /// A [DrawerButton] is an [IconButton] with a "drawer" icon. When pressed, the
 /// close button calls [ScaffoldState.openDrawer] to the [Scaffold.drawer].
+///
+/// The default behaviour on press can be overriden with [onPressed].
 ///
 /// See also:
 ///
@@ -301,10 +320,10 @@ class DrawerButtonIcon extends StatelessWidget {
 ///  * [ThemeData.platform], which specifies the current platform.
 class DrawerButton extends _ActionButton {
   /// Creates a Material Design drawer button.
-  const DrawerButton({ 
-    super.key, 
-    super.color, 
-    super.iconSize, 
+  const DrawerButton({
+    super.key,
+    super.color,
+    super.iconSize,
     super.onPressed,
   }) : super(icon: const DrawerButtonIcon());
 
@@ -338,28 +357,15 @@ class EndDrawerButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
-    final WidgetBuilder? iconBuilder = actionIconTheme?.endDrawerButtonIconBuilder;
-    if (iconBuilder != null) {
-      return iconBuilder(context);
-    }
-    final String? semanticsLabel;
-    // This can't use the platform from Theme because it is the Android OS that
-    // expects the duplicated tooltip and label.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        semanticsLabel = MaterialLocalizations.of(context).openAppDrawerTooltip;
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsLabel = null;
-        break;
-    }
-
-    return Icon(Icons.menu, semanticLabel: semanticsLabel);
+    return _ActionIcon(
+      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+        return actionIconTheme?.endDrawerButtonIconBuilder;
+      },
+      getIcon: (BuildContext context) => Icons.menu,
+      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+        return materialLocalization.openAppDrawerTooltip;
+      },
+    );
   }
 }
 
@@ -367,6 +373,8 @@ class EndDrawerButtonIcon extends StatelessWidget {
 ///
 /// A [EndDrawerButton] is an [IconButton] with a "drawer" icon. When pressed, the
 /// end drawer button calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer].
+///
+/// The default behaviour on press can be overriden with [onPressed].
 ///
 /// See also:
 ///
