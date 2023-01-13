@@ -186,29 +186,26 @@ void testMain() {
   });
 
   test('FragmentProgram can be created from JSON IPLR bundle', () async {
-    // TODO(hterkelsen): Remove this check when local CanvasKit is default.
-    if (isRuntimeEffectAvailable) {
-      final Uint8List data = utf8.encode(kJsonIPLR) as Uint8List;
-      final CkFragmentProgram program = await CkFragmentProgram.fromBytes('test', data);
+    final Uint8List data = utf8.encode(kJsonIPLR) as Uint8List;
+    final CkFragmentProgram program = await CkFragmentProgram.fromBytes('test', data);
 
-      expect(program.effect, isNotNull);
-      expect(program.floatCount, 32);
-      expect(program.textureCount, 0);
-      expect(program.uniforms, hasLength(17));
-      expect(program.name, 'test');
+    expect(program.effect, isNotNull);
+    expect(program.floatCount, 32);
+    expect(program.textureCount, 0);
+    expect(program.uniforms, hasLength(17));
+    expect(program.name, 'test');
 
-      final ui.FragmentShader shader = program.fragmentShader();
+    final ui.FragmentShader shader = program.fragmentShader();
 
-      shader.setFloat(0, 4);
-      shader.dispose();
+    shader.setFloat(0, 4);
+    shader.dispose();
 
-      expect(shader.debugDisposed, true);
+    expect(shader.debugDisposed, true);
 
-      final ui.FragmentShader shader2 = program.fragmentShader();
+    final ui.FragmentShader shader2 = program.fragmentShader();
 
-      shader.setFloat(0, 5);
-      shader2.dispose();
-      expect(shader2.debugDisposed, true);
-    }
+    shader.setFloat(0, 5);
+    shader2.dispose();
+    expect(shader2.debugDisposed, true);
   });
 }

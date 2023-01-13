@@ -136,15 +136,7 @@ extension CanvasKitExtension on CanvasKit {
     Object src,
     SkPartialImageInfo info,
   );
-
-  /// Retrieve the RuntimeEffect namespace for null checking.
-  external Object? get RuntimeEffect;
 }
-
-// TODO(jonahwilliams): remove this once all CanvasKit versions
-// are built in the SDK.
-// https://github.com/flutter/flutter/issues/114260
-final bool isRuntimeEffectAvailable = windowFlutterCanvasKit?.RuntimeEffect != null;
 
 @JS('window.CanvasKitInit')
 external Object _CanvasKitInit(CanvasKitInitOptions options);
