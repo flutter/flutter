@@ -1669,8 +1669,14 @@ void _paragraphTests() {
     expectAlmost(paragraph.getMaxIntrinsicWidth(), 263);
     expectAlmost(paragraph.getMinIntrinsicWidth(), 135);
     expectAlmost(paragraph.getMaxWidth(), 500);
+    final SkRectWithDirection rectWithDirection =
+      paragraph.getRectsForRange(
+        1,
+        3,
+        canvasKit.RectHeightStyle.Tight,
+        canvasKit.RectWidthStyle.Max).single! as SkRectWithDirection;
     expect(
-      paragraph.getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max).single,
+      rectWithDirection.rect,
       hasLength(4),
     );
     expect(paragraph.getRectsForPlaceholders(), hasLength(1));
@@ -1739,17 +1745,15 @@ void _paragraphTests() {
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
-    expect(
-      paragraph.getRectsForRange(
-        0,
-        1,
-        canvasKit.RectHeightStyle.Strut,
-        canvasKit.RectWidthStyle.Tight,
-      ),
-      <List<double>>[
-        <double>[0, 0, 13.770000457763672, 75],
-      ],
-    );
+    final List<SkRectWithDirection> rects = paragraph.getRectsForRange(
+      0,
+      1,
+      canvasKit.RectHeightStyle.Strut,
+      canvasKit.RectWidthStyle.Tight,
+    ).cast<SkRectWithDirection>();
+    expect(rects.length, 1);
+    final SkRectWithDirection rect = rects.first;
+    expect(rect.rect, <double>[0, 0, 13.770000457763672, 75]);
   });
 
   test('TextHeightBehavior', () {

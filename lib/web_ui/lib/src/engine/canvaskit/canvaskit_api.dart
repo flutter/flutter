@@ -2170,6 +2170,16 @@ extension SkLineMetricsExtension on SkLineMetrics {
 @JS()
 @anonymous
 @staticInterop
+class SkRectWithDirection {}
+
+extension SkRectWithDirectionExtension on SkRectWithDirection {
+  external Float32List rect;
+  external SkTextDirection dir;
+}
+
+@JS()
+@anonymous
+@staticInterop
 class SkParagraph {}
 
 extension SkParagraphExtension on SkParagraph {
@@ -2182,13 +2192,13 @@ extension SkParagraphExtension on SkParagraph {
   external double getMaxIntrinsicWidth();
   external double getMinIntrinsicWidth();
   external double getMaxWidth();
-  external /* List<Float32List> */ List<Object?> getRectsForRange(
+  external /* List<SkRectWithDirection> */ List<Object?> getRectsForRange(
     int start,
     int end,
     SkRectHeightStyle heightStyle,
     SkRectWidthStyle widthStyle,
   );
-  external /* List<Float32List> */ List<Object?> getRectsForPlaceholders();
+  external /* List<SkRectWithDirection> */ List<Object?> getRectsForPlaceholders();
   external SkTextPosition getGlyphPositionAtCoordinate(
     double x,
     double y,
