@@ -1,4 +1,4 @@
-Signature: 5682d715ec30ed409e9cd21d30a89616
+Signature: 8de32506c6d0938eb59c268bc016d4b6
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8882,6 +8882,7 @@ ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../th
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegSegmentScan.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegSegmentScan.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
 FILE: ../../../third_party/skia/src/codec/SkJpegGainmap.cpp
@@ -8890,6 +8891,7 @@ FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h
 FILE: ../../../third_party/skia/src/codec/SkJpegSegmentScan.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegSegmentScan.h
+FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google Inc.
 
