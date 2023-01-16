@@ -734,7 +734,7 @@ void main() {
     });
   });
 
-    test('Supports gesture recognizer semantics', () {
+  test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
         TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
@@ -745,7 +745,18 @@ void main() {
     );
     layout(paragraph);
 
-    paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    final List<SemanticsNode> children = <SemanticsNode>[];
+    node.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    expect(children.length, 4);
+    expect(children[0].getSemanticsData().actions, 0);
+    expect(children[1].getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(children[2].getSemanticsData().hasAction(SemanticsAction.longPress), true);
+    expect(children[3].getSemanticsData().hasAction(SemanticsAction.tap), true);
   });
 
   test('Supports empty text span with spell out', () {
@@ -799,7 +810,7 @@ void main() {
   test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
     final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
       TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
-      const WidgetSpan(child: SizedBox(width: 0, height: 0)),
+      const WidgetSpan(child: SizedBox.shrink()),
       TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
     ]);
     final List<RenderBox> renderBoxes = <RenderBox>[
@@ -1064,8 +1075,13 @@ void main() {
         ),
       );
       selection = paragraph.selections[0];
-      expect(selection.start, 0); // [how ]are you
-      expect(selection.end, 4);
+      if (isBrowser && !isCanvasKit) {
+        // how [are you\n]
+        expect(selection, const TextRange(start: 4, end: 12));
+      } else {
+        // [how ]are you
+        expect(selection, const TextRange(start: 0, end: 4));
+      }
     });
 
     test('can granularly extend selection - document', () async {
@@ -1298,6 +1314,54 @@ void main() {
       expect(selection.start, 28);
       expect(selection.end, 31);
     });
+  });
+
+  test('can just update the gesture recognizer', () async {
+    final TapGestureRecognizer recognizerBefore = TapGestureRecognizer()..onTap = () {};
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(text: 'How are you \n', recognizer: recognizerBefore),
+      textDirection: TextDirection.ltr,
+    );
+
+    int semanticsUpdateCount = 0;
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
+      listener: () {
+        ++semanticsUpdateCount;
+      },
+    );
+
+    layout(paragraph);
+
+    expect((paragraph.text as TextSpan).recognizer, same(recognizerBefore));
+    final SemanticsNode nodeBefore = SemanticsNode();
+    paragraph.assembleSemanticsNode(nodeBefore, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(semanticsUpdateCount, 0);
+    List<SemanticsNode> children = <SemanticsNode>[];
+    nodeBefore.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    SemanticsData data = children.single.getSemanticsData();
+    expect(data.hasAction(SemanticsAction.longPress), false);
+    expect(data.hasAction(SemanticsAction.tap), true);
+
+    final LongPressGestureRecognizer recognizerAfter = LongPressGestureRecognizer()..onLongPress = () {};
+    paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
+
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    expect((paragraph.text as TextSpan).recognizer, same(recognizerAfter));
+    final SemanticsNode nodeAfter = SemanticsNode();
+    paragraph.assembleSemanticsNode(nodeAfter, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(semanticsUpdateCount, 1);
+    children = <SemanticsNode>[];
+    nodeAfter.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    data = children.single.getSemanticsData();
+    expect(data.hasAction(SemanticsAction.longPress), true);
+    expect(data.hasAction(SemanticsAction.tap), false);
   });
 }
 

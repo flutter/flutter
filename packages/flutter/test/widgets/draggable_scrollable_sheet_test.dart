@@ -45,7 +45,7 @@ void main() {
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
-                    child: Container(
+                    child: ColoredBox(
                       key: containerKey,
                       color: const Color(0xFFABCDEF),
                       child: ListView.builder(

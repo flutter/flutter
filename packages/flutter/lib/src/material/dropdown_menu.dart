@@ -36,17 +36,23 @@ const double _kDefaultHorizontalPadding = 12.0;
 /// See also:
 ///
 /// * [DropdownMenu]
-class DropdownMenuEntry {
+class DropdownMenuEntry<T> {
   /// Creates an entry that is used with [DropdownMenu.dropdownMenuEntries].
   ///
   /// [label] must be non-null.
   const DropdownMenuEntry({
+    required this.value,
     required this.label,
     this.leadingIcon,
     this.trailingIcon,
     this.enabled = true,
     this.style,
   });
+
+  /// the value used to identify the entry.
+  ///
+  /// This value must be unique across all entries in a [DropdownMenu].
+  final T value;
 
   /// The label displayed in the center of the menu item.
   final String label;
@@ -101,7 +107,7 @@ class DropdownMenuEntry {
 ///   The [DropdownMenu] uses a [TextField] as the "anchor".
 /// * [TextField], which is a text input widget that uses an [InputDecoration].
 /// * [DropdownMenuEntry], which is used to build the [MenuItemButton] in the [DropdownMenu] list.
-class DropdownMenu extends StatefulWidget {
+class DropdownMenu<T> extends StatefulWidget {
   /// Creates a const [DropdownMenu].
   ///
   /// The leading and trailing icons in the text field can be customized by using
@@ -126,6 +132,9 @@ class DropdownMenu extends StatefulWidget {
     this.textStyle,
     this.inputDecorationTheme,
     this.menuStyle,
+    this.controller,
+    this.initialSelection,
+    this.onSelected,
     required this.dropdownMenuEntries,
   });
 
@@ -204,25 +213,40 @@ class DropdownMenu extends StatefulWidget {
   /// The default width of the menu is set to the width of the text field.
   final MenuStyle? menuStyle;
 
+  /// Controls the text being edited or selected in the menu.
+  ///
+  /// If null, this widget will create its own [TextEditingController].
+  final TextEditingController? controller;
+
+  /// The value used to for an initial selection.
+  ///
+  /// Defaults to null.
+  final T? initialSelection;
+
+  /// The callback is called when a selection is made.
+  ///
+  /// Defaults to null. If null, only the text field is updated.
+  final ValueChanged<T?>? onSelected;
+
   /// Descriptions of the menu items in the [DropdownMenu].
   ///
   /// This is a required parameter. It is recommended that at least one [DropdownMenuEntry]
   /// is provided. If this is an empty list, the menu will be empty and only
   /// contain space for padding.
-  final List<DropdownMenuEntry> dropdownMenuEntries;
+  final List<DropdownMenuEntry<T>> dropdownMenuEntries;
 
   @override
-  State<DropdownMenu> createState() => _DropdownMenuState();
+  State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
 
-class _DropdownMenuState extends State<DropdownMenu> {
-  final MenuController _controller = MenuController();
+class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   final FocusNode _textFocusNode = FocusNode();
-  final TextEditingController _textEditingController = TextEditingController();
+  final MenuController _controller = MenuController();
+  late final TextEditingController _textEditingController;
   late bool _enableFilter;
-  late List<DropdownMenuEntry> filteredEntries;
+  late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
   double? leadingPadding;
@@ -231,21 +255,36 @@ class _DropdownMenuState extends State<DropdownMenu> {
   @override
   void initState() {
     super.initState();
+    _textEditingController = widget.controller ?? TextEditingController();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
-    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry entry) => entry.enabled);
+    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
+    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
+    if (index != -1) {
+      _textEditingController.text = filteredEntries[index].label;
+      _textEditingController.selection =
+          TextSelection.collapsed(offset: _textEditingController.text.length);
+    }
     refreshLeadingPadding();
   }
 
   @override
-  void didUpdateWidget(DropdownMenu oldWidget) {
+  void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
-      _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry entry) => entry.enabled);
+      _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
+    }
+    if (oldWidget.initialSelection != widget.initialSelection) {
+      final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
+      if (index != -1) {
+        _textEditingController.text = filteredEntries[index].label;
+        _textEditingController.selection =
+            TextSelection.collapsed(offset: _textEditingController.text.length);
+      }
     }
   }
 
@@ -266,25 +305,25 @@ class _DropdownMenuState extends State<DropdownMenu> {
     return null;
   }
 
-  List<DropdownMenuEntry> filter(List<DropdownMenuEntry> entries, TextEditingController textEditingController) {
+  List<DropdownMenuEntry<T>> filter(List<DropdownMenuEntry<T>> entries, TextEditingController textEditingController) {
     final String filterText = textEditingController.text.toLowerCase();
     return entries
-      .where((DropdownMenuEntry entry) => entry.label.toLowerCase().contains(filterText))
+      .where((DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(filterText))
       .toList();
   }
 
-  int? search(List<DropdownMenuEntry> entries, TextEditingController textEditingController) {
+  int? search(List<DropdownMenuEntry<T>> entries, TextEditingController textEditingController) {
     final String searchText = textEditingController.value.text.toLowerCase();
     if (searchText.isEmpty) {
       return null;
     }
-    final int index = entries.indexWhere((DropdownMenuEntry entry) => entry.label.toLowerCase().contains(searchText));
+    final int index = entries.indexWhere((DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(searchText));
 
     return index != -1 ? index : null;
   }
 
   List<Widget> _buildButtons(
-    List<DropdownMenuEntry> filteredEntries,
+    List<DropdownMenuEntry<T>> filteredEntries,
     TextEditingController textEditingController,
     TextDirection textDirection,
     { int? focusedIndex }
@@ -306,7 +345,7 @@ class _DropdownMenuState extends State<DropdownMenu> {
     }
 
     for (int i = 0; i < filteredEntries.length; i++) {
-      final DropdownMenuEntry entry = filteredEntries[i];
+      final DropdownMenuEntry<T> entry = filteredEntries[i];
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;
@@ -328,8 +367,9 @@ class _DropdownMenuState extends State<DropdownMenu> {
           ? () {
               textEditingController.text = entry.label;
               textEditingController.selection =
-                  TextSelection.collapsed(offset: textEditingController.text.length);
-              currentHighlight = widget.enableSearch ? i : -1;
+                TextSelection.collapsed(offset: textEditingController.text.length);
+              currentHighlight = widget.enableSearch ? i : null;
+              widget.onSelected?.call(entry.value);
             }
           : null,
         requestFocusOnHover: false,
@@ -351,7 +391,8 @@ class _DropdownMenuState extends State<DropdownMenu> {
     while (!filteredEntries[currentHighlight!].enabled) {
       currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
     }
-    _textEditingController.text = filteredEntries[currentHighlight!].label;
+    final String currentLabel = filteredEntries[currentHighlight!].label;
+    _textEditingController.text = currentLabel;
     _textEditingController.selection =
       TextSelection.collapsed(offset: _textEditingController.text.length);
   });
@@ -366,14 +407,15 @@ class _DropdownMenuState extends State<DropdownMenu> {
     while (!filteredEntries[currentHighlight!].enabled) {
       currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
     }
-    _textEditingController.text = filteredEntries[currentHighlight!].label;
+    final String currentLabel = filteredEntries[currentHighlight!].label;
+    _textEditingController.text = currentLabel;
     _textEditingController.selection =
       TextSelection.collapsed(offset: _textEditingController.text.length);
   });
 
   void handlePressed(MenuController controller) {
     if (controller.isOpen) {
-      currentHighlight = -1;
+      currentHighlight = null;
       controller.close();
     } else {  // close to open
       if (_textEditingController.text.isNotEmpty) {
@@ -443,6 +485,7 @@ class _DropdownMenuState extends State<DropdownMenu> {
           controller: _controller,
           menuChildren: menu,
           crossAxisUnconstrained: false,
+          onClose: () { setState(() {}); }, // To update the status of the IconButton
           builder: (BuildContext context, MenuController controller, Widget? child) {
             assert(_initialMenu != null);
             final Widget trailingButton = Padding(
@@ -473,16 +516,27 @@ class _DropdownMenuState extends State<DropdownMenu> {
                   controller: _textEditingController,
                   onEditingComplete: () {
                     if (currentHighlight != null) {
-                      _textEditingController.text = filteredEntries[currentHighlight!].label;
-                      _textEditingController.selection =
-                          TextSelection.collapsed(offset: _textEditingController.text.length);
+                      final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
+                      if (entry.enabled) {
+                        _textEditingController.text = entry.label;
+                        _textEditingController.selection =
+                            TextSelection.collapsed(offset: _textEditingController.text.length);
+                        widget.onSelected?.call(entry.value);
+                      }
+                    } else {
+                      widget.onSelected?.call(null);
                     }
-                    controller.close();
+                    if (!widget.enableSearch) {
+                      currentHighlight = null;
+                    }
+                    if (_textEditingController.text.isNotEmpty) {
+                      controller.close();
+                    }
                   },
                   onTap: () {
                     handlePressed(controller);
                   },
-                  onChanged: (_) {
+                  onChanged: (String text) {
                     controller.open();
                     setState(() {
                       filteredEntries = widget.dropdownMenuEntries;

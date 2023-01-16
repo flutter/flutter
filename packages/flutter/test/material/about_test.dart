@@ -997,6 +997,24 @@ void main() {
     final double appIconBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
     expect(appIconBottomPadding, 18.0);
   });
+
+  testWidgets('Error handling test', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() => Stream<LicenseEntry>.error(Exception('Injected failure')));
+    await tester.pumpWidget(const MaterialApp(home: Material(child: AboutListTile())));
+    await tester.tap(find.byType(ListTile));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.tap(find.text('VIEW LICENSES'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    final Finder finder = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_PackagesView');
+    // force the stream to complete (has to be done in a runAsync block since it's areal async process)
+    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>); // ignore: avoid_dynamic_calls
+    expect(tester.takeException().toString(), 'Exception: Injected failure');
+    await tester.pumpAndSettle();
+    expect(tester.takeException().toString(), 'Exception: Injected failure');
+    expect(find.text('Exception: Injected failure'), findsOneWidget);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

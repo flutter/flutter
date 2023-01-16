@@ -130,5 +130,10 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Тушаал",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Цэсний талбарын цэс"
+  "menuBarMenuLabel": "Цэсний талбарын цэс",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }
