@@ -191,14 +191,14 @@ class Card extends StatelessWidget {
 // Hand coded defaults based on Material Design 2.
 class _CardDefaultsM2 extends CardTheme {
   const _CardDefaultsM2(this.context)
-      : super(
-          clipBehavior: Clip.none,
-          elevation: 1.0,
-          margin: const EdgeInsets.all(4.0),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(4.0)),
-          )
-        );
+    : super(
+        clipBehavior: Clip.none,
+        elevation: 1.0,
+        margin: const EdgeInsets.all(4.0),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+        )
+      );
 
   final BuildContext context;
 
