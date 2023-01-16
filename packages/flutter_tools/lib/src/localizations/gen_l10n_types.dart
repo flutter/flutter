@@ -5,6 +5,7 @@
 import 'package:intl/locale.dart';
 
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../convert.dart';
 import 'localizations_utils.dart';
 import 'message_parser.dart';
@@ -138,15 +139,29 @@ class L10nParserException extends L10nException {
     this.messageString,
     this.charNumber
   ): super('''
-$error
-[$fileName:$messageId] $messageString
-${List<String>.filled(4 + fileName.length + messageId.length + charNumber, ' ').join()}^''');
+[$fileName:$messageId] $error
+    $messageString
+    ${List<String>.filled(charNumber, ' ').join()}^''');
 
   final String error;
   final String fileName;
   final String messageId;
   final String messageString;
+  // Position of character within the "messageString" where the error is.
   final int charNumber;
+}
+
+class L10nMissingPlaceholderException extends L10nParserException {
+  L10nMissingPlaceholderException(
+    super.error,
+    super.fileName,
+    super.messageId,
+    super.messageString,
+    super.charNumber,
+    this.placeholderName,
+  );
+
+  final String placeholderName;
 }
 
 // One optional named parameter to be used by a NumberFormat.
@@ -319,7 +334,10 @@ class Message {
     AppResourceBundleCollection allBundles,
     this.resourceId,
     bool isResourceAttributeRequired,
-    { this.useEscaping = false }
+    {
+      this.useEscaping = false,
+      this.logger,
+    }
   ) : assert(templateBundle != null),
       assert(allBundles != null),
       assert(resourceId != null && resourceId.isNotEmpty),
@@ -335,64 +353,16 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      parsedMessages[bundle.locale] = translation == null ? null : Parser(resourceId, bundle.file.basename, translation, useEscaping: useEscaping).parse();
+      parsedMessages[bundle.locale] = translation == null ? null : Parser(
+        resourceId,
+        bundle.file.basename,
+        translation,
+        useEscaping: useEscaping,
+        logger: logger
+      ).parse();
     }
-    // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
-    for (final LocaleInfo locale in parsedMessages.keys) {
-      if (parsedMessages[locale] == null) {
-        continue;
-      }
-      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
-      while (traversalStack.isNotEmpty) {
-        final Node node = traversalStack.removeLast();
-        if (node.type == ST.pluralExpr) {
-          final Placeholder? placeholder = placeholders[node.children[1].value!];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified plural placeholder is defined in your arb file.',
-              filenames[locale]!,
-              resourceId,
-              messages[locale]!,
-              node.children[1].positionInMessage
-            );
-          }
-          placeholders[node.children[1].value!]!.isPlural = true;
-        }
-        if (node.type == ST.selectExpr) {
-          final Placeholder? placeholder = placeholders[node.children[1].value!];
-          if (placeholder == null) {
-            throw L10nParserException(
-              'Make sure that the specified select placeholder is defined in your arb file.',
-              filenames[locale]!,
-              resourceId,
-              messages[locale]!,
-              node.children[1].positionInMessage
-            );
-          }
-          placeholders[node.children[1].value!]!.isSelect = true;
-        }
-        traversalStack.addAll(node.children);
-      }
-    }
-    for (final Placeholder placeholder in placeholders.values) {
-      if (placeholder.isPlural && placeholder.isSelect) {
-        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
-      } else if (placeholder.isPlural) {
-        if (placeholder.type == null) {
-          placeholder.type = 'num';
-        }
-        else if (!<String>['num', 'int'].contains(placeholder.type)) {
-          throw L10nException("Placeholders used in plurals must be of type 'num' or 'int'");
-        }
-      } else if (placeholder.isSelect) {
-        if (placeholder.type == null) {
-          placeholder.type = 'String';
-        } else if (placeholder.type != 'String') {
-          throw L10nException("Placeholders used in selects must be of type 'String'");
-        }
-      }
-      placeholder.type ??= 'Object';
-    }
+    // Infer the placeholders
+    _inferPlaceholders(filenames);
   }
 
   final String resourceId;
@@ -402,6 +372,7 @@ class Message {
   final Map<LocaleInfo, Node?> parsedMessages;
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
+  final Logger? logger;
 
   bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
 
@@ -495,6 +466,63 @@ class Message {
         return MapEntry<String, Placeholder>(placeholderName, Placeholder(resourceId, placeholderName, value));
       }),
     );
+  }
+
+  // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
+  // For undeclared placeholders, create a new placeholder.
+  void _inferPlaceholders(Map<LocaleInfo, String> filenames) {
+    // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
+    final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
+    // Helper for getting placeholder by name.
+    Placeholder? getPlaceholder(String name) => placeholders[name] ?? undeclaredPlaceholders[name];
+    for (final LocaleInfo locale in parsedMessages.keys) {
+      if (parsedMessages[locale] == null) {
+        continue;
+      }
+      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
+      while (traversalStack.isNotEmpty) {
+        final Node node = traversalStack.removeLast();
+        if (<ST>[ST.placeholderExpr, ST.pluralExpr, ST.selectExpr].contains(node.type)) {
+          final String identifier = node.children[1].value!;
+          Placeholder? placeholder = getPlaceholder(identifier);
+          if (placeholder == null) {
+            placeholder = Placeholder(resourceId, identifier, <String, Object?>{});
+            undeclaredPlaceholders[identifier] = placeholder;
+          }
+          if (node.type == ST.pluralExpr) {
+            placeholder.isPlural = true;
+          } else if (node.type == ST.selectExpr) {
+            placeholder.isSelect = true;
+          }
+        }
+        traversalStack.addAll(node.children);
+      }
+    }
+    placeholders.addEntries(
+      undeclaredPlaceholders.entries
+        .toList()
+        ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
+    );
+
+    for (final Placeholder placeholder in placeholders.values) {
+      if (placeholder.isPlural && placeholder.isSelect) {
+        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
+      } else if (placeholder.isPlural) {
+        if (placeholder.type == null) {
+          placeholder.type = 'num';
+        }
+        else if (!<String>['num', 'int'].contains(placeholder.type)) {
+          throw L10nException("Placeholders used in plurals must be of type 'num' or 'int'");
+        }
+      } else if (placeholder.isSelect) {
+        if (placeholder.type == null) {
+          placeholder.type = 'String';
+        } else if (placeholder.type != 'String') {
+          throw L10nException("Placeholders used in selects must be of type 'String'");
+        }
+      }
+      placeholder.type ??= 'Object';
+    }
   }
 }
 
@@ -834,50 +862,3 @@ final Set<String> _iso639Languages = <String>{
   'zh',
   'zu',
 };
-
-// Used in LocalizationsGenerator._generateMethod.generateHelperMethod.
-class HelperMethod {
-  HelperMethod(this.dependentPlaceholders, {this.helper, this.placeholder, this.string }):
-    assert((() {
-      // At least one of helper, placeholder, string must be nonnull.
-      final bool a = helper == null;
-      final bool b = placeholder == null;
-      final bool c = string == null;
-      return (!a && b && c) || (a && !b && c) || (a && b && !c);
-    })());
-
-  Set<Placeholder> dependentPlaceholders;
-  String? helper;
-  Placeholder? placeholder;
-  String? string;
-
-  String get helperOrPlaceholder {
-    if (helper != null) {
-      return '$helper($methodArguments)';
-    } else if (string != null) {
-      return '$string';
-    } else {
-      if (placeholder!.requiresFormatting) {
-        return '${placeholder!.name}String';
-      } else {
-        return placeholder!.name;
-      }
-    }
-  }
-
-  String get methodParameters {
-    assert(helper != null);
-    return dependentPlaceholders.map((Placeholder placeholder) =>
-      (placeholder.requiresFormatting)
-        ? 'String ${placeholder.name}String'
-        : '${placeholder.type} ${placeholder.name}').join(', ');
-  }
-
-  String get methodArguments {
-    assert(helper != null);
-    return dependentPlaceholders.map((Placeholder placeholder) =>
-      (placeholder.requiresFormatting)
-        ? '${placeholder.name}String'
-        : placeholder.name).join(', ');
-  }
-}

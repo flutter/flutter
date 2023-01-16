@@ -611,15 +611,15 @@ class NavigatorObserver {
   /// The navigator that the observer is observing, if any.
   NavigatorState? get navigator => _navigators[this];
 
-  /// Expando mapping instances of NavigatorObserver to their associated
-  /// NavigatorState (or `null`, if there is no associated NavigatorState). The
-  /// reason we don't simply use a private instance field of type
-  /// `NavigatorState?` is because as part of implementing
-  /// https://github.com/dart-lang/language/issues/2020, it will soon become a
-  /// runtime error to invoke a private member that is mocked in another
-  /// library. By using an expando rather than an instance field, we ensure
-  /// that a mocked NavigatorObserver can still properly keep track of its
-  /// associated NavigatorState.
+  // Expando mapping instances of NavigatorObserver to their associated
+  // NavigatorState (or `null`, if there is no associated NavigatorState). The
+  // reason we don't use a private instance field of type
+  // `NavigatorState?` is because as part of implementing
+  // https://github.com/dart-lang/language/issues/2020, it will soon become a
+  // runtime error to invoke a private member that is mocked in another
+  // library. By using an expando rather than an instance field, we ensure
+  // that a mocked NavigatorObserver can still properly keep track of its
+  // associated NavigatorState.
   static final Expando<NavigatorState> _navigators = Expando<NavigatorState>();
 
   /// The [Navigator] pushed `route`.
@@ -1093,6 +1093,13 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
   }
 }
 
+/// The default value of [Navigator.routeTraversalEdgeBehavior].
+///
+/// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
+const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
+  ? TraversalEdgeBehavior.leaveFlutterView
+  : TraversalEdgeBehavior.closedLoop;
+
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
 /// Many apps have a navigator near the top of their widget hierarchy in order
@@ -1402,10 +1409,12 @@ class Navigator extends StatefulWidget {
     this.observers = const <NavigatorObserver>[],
     this.requestFocus = true,
     this.restorationScopeId,
+    this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
   }) : assert(pages != null),
        assert(onGenerateInitialRoutes != null),
        assert(transitionDelegate != null),
        assert(observers != null),
+       assert(routeTraversalEdgeBehavior != null),
        assert(reportsRouteUpdateToEngine != null);
 
   /// The list of pages with which to populate the history.
@@ -1512,6 +1521,21 @@ class Navigator extends StatefulWidget {
   ///    to push a restorable route unto the navigator.
   /// {@endtemplate}
   final String? restorationScopeId;
+
+  /// Controls the transfer of focus beyond the first and the last items of a
+  /// focus scope that defines focus traversal of widgets within a route.
+  ///
+  /// {@template flutter.widgets.navigator.routeTraversalEdgeBehavior}
+  /// The focus inside routes installed in the top of the app affects how
+  /// the app behaves with respect to the platform content surrounding it.
+  /// For example, on the web, an app is at a minimum surrounded by browser UI,
+  /// such as the address bar, browser tabs, and more. The user should be able
+  /// to reach browser UI using normal focus shortcuts. Similarly, if the app
+  /// is embedded within an `<iframe>` or inside a custom element, it should
+  /// be able to participate in the overall focus traversal, including elements
+  /// not rendered by Flutter.
+  /// {@endtemplate}
+  final TraversalEdgeBehavior routeTraversalEdgeBehavior;
 
   /// The name for the default route of the application.
   ///
@@ -3687,15 +3711,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       oldEntriesBottom += 1;
     }
 
-    int pagelessRoutesToSkip = 0;
+    final List<_RouteEntry> unattachedPagelessRoutes=<_RouteEntry>[];
     // Scans the top of the list until we found a page-based route that cannot be
     // updated.
     while ((oldEntriesBottom <= oldEntriesTop) && (newPagesBottom <= newPagesTop)) {
       final _RouteEntry oldEntry = _history[oldEntriesTop];
       assert(oldEntry != null && oldEntry.currentState != _RouteLifecycle.disposed);
       if (!oldEntry.pageBased) {
-        // This route might need to be skipped if we can not find a page above.
-        pagelessRoutesToSkip += 1;
+        unattachedPagelessRoutes.add(oldEntry);
         oldEntriesTop -= 1;
         continue;
       }
@@ -3703,14 +3726,22 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (!oldEntry.canUpdateFrom(newPage)) {
         break;
       }
-      // We found the page for all the consecutive pageless routes below. Those
-      // pageless routes do not need to be skipped.
-      pagelessRoutesToSkip = 0;
+
+      // We found the page for all the consecutive pageless routes below. Attach these
+      // pageless routes to the page.
+      if(unattachedPagelessRoutes.isNotEmpty) {
+         pageRouteToPagelessRoutes.putIfAbsent(
+          oldEntry,
+          () =>  List<_RouteEntry>.from(unattachedPagelessRoutes),
+        );
+        unattachedPagelessRoutes.clear();
+      }
+
       oldEntriesTop -= 1;
       newPagesTop -= 1;
     }
     // Reverts the pageless routes that cannot be updated.
-    oldEntriesTop += pagelessRoutesToSkip;
+    oldEntriesTop += unattachedPagelessRoutes.length;
 
     // Scans middle of the old entries and records the page key to old entry map.
     int oldEntriesBottomToScan = oldEntriesBottom;

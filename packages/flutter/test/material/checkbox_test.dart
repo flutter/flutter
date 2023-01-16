@@ -1656,6 +1656,85 @@ void main() {
     await gestureLongPress.up();
     await tester.pump();
   });
+
+  testWidgets('Checkbox MaterialStateBorderSide applies in error states - M3', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+    const Color borderColor = Color(0xffffeb3b);
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool? value = false;
+    Widget buildApp({bool autoFocus = true}) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Checkbox(
+                isError: true,
+                side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.error)) {
+                    return const BorderSide(color: borderColor, width: 4);
+                  }
+                  return const BorderSide(color: Colors.red, width: 2);
+                }),
+                value: value,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+                autofocus: autoFocus,
+                focusNode: focusNode,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    void expectBorder() {
+      expect(
+        tester.renderObject<RenderBox>(find.byType(Checkbox)),
+        paints
+        ..drrect(
+          color: borderColor,
+          outer: RRect.fromLTRBR(15, 15, 33, 33, const Radius.circular(1)),
+          inner: RRect.fromLTRBR(19, 19, 29, 29, Radius.zero),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    // Focused
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expectBorder();
+
+    // Default color
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildApp(autoFocus: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expectBorder();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+    expectBorder();
+
+    // Start pressing
+    final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pump();
+    expectBorder();
+    await gestureLongPress.up();
+    await tester.pump();
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {

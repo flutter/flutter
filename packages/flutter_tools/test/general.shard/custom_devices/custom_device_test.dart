@@ -137,6 +137,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(linuxApp), false);
       expect(await device.isAppInstalled(linuxApp), false);
       expect(await device.stopApp(linuxApp), false);
+      expect(await device.stopApp(null), false);
       expect(device.category, Category.mobile);
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);

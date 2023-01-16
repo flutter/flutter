@@ -607,8 +607,7 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData data = MediaQuery.of(context);
-    if (data.orientation == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.linear) {
+    if (MediaQuery.orientationOf(context) == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.linear) {
       return Align(
         heightFactor: 1,
         child: Row(
@@ -1114,7 +1113,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout
       ?? bottomTheme.landscapeLayout
       ?? BottomNavigationBarLandscapeLayout.spread;
-    final double additionalBottomPadding = MediaQuery.of(context).viewPadding.bottom;
+    final double additionalBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     Color? backgroundColor;
     switch (_effectiveType) {
@@ -1180,14 +1179,13 @@ class _Bar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData data = MediaQuery.of(context);
     Widget alignedChild = child;
-    if (data.orientation == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.centered) {
+    if (MediaQuery.orientationOf(context) == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.centered) {
       alignedChild = Align(
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
         child: SizedBox(
-          width: data.size.height,
+          width: MediaQuery.sizeOf(context).height,
           child: child,
         ),
       );

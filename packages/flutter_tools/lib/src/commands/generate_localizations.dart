@@ -201,6 +201,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             'contained within pairs of single quotes as normal strings and treat all '
             'consecutive pairs of single quotes as a single quote character.',
     );
+    argParser.addFlag(
+      'suppress-warnings',
+      help: 'When specified, all warnings will be suppressed.\n'
+    );
   }
 
   final FileSystem _fileSystem;
@@ -258,6 +262,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       final bool areResourceAttributesRequired = boolArgDeprecated('required-resource-attributes');
       final bool usesNullableGetter = boolArgDeprecated('nullable-getter');
       final bool useEscaping = boolArgDeprecated('use-escaping');
+      final bool suppressWarnings = boolArgDeprecated('suppress-warnings');
 
       precacheLanguageAndRegionTags();
 
@@ -281,6 +286,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           usesNullableGetter: usesNullableGetter,
           useEscaping: useEscaping,
           logger: _logger,
+          suppressWarnings: suppressWarnings,
         )
           ..loadResources()
           ..writeOutputFiles())
@@ -295,7 +301,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       if (outputFileList.isEmpty) {
         return FlutterCommandResult.success();
       }
-      final String dartBinary = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+      final String dartBinary = _artifacts.getArtifactPath(Artifact.engineDartBinary);
       final List<String> command = <String>[dartBinary, 'format', ...outputFileList];
       final ProcessResult result = await _processManager.run(command);
       if (result.exitCode != 0) {
