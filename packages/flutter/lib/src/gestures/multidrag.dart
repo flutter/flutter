@@ -223,7 +223,11 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
+
+  // Accept the input if, and only if, [kPrimaryButton] is pressed.
+  static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
@@ -382,6 +386,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -439,6 +444,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -496,6 +502,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -606,6 +613,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   }) : assert(delay != null);
 
   /// The amount of time the pointer must remain in the same place for the drag

@@ -128,5 +128,10 @@
   "keyboardKeySpace": "Spasie",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "Kieslysbalkkieslys"
+  "menuBarMenuLabel": "Kieslysbalkkieslys",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }
