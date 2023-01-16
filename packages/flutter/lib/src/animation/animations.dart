@@ -255,8 +255,8 @@ class ProxyAnimation extends Animation<double>
 /// If the parent animation is running forward from 0.0 to 1.0, this animation
 /// is running in reverse from 1.0 to 0.0.
 ///
-/// Using a [ReverseAnimation] is different from simply using a [Tween] with a
-/// begin of 1.0 and an end of 0.0 because the tween does not change the status
+/// Using a [ReverseAnimation] is different from using a [Tween] with a
+/// `begin` of 1.0 and an `end` of 0.0 because the tween does not change the status
 /// or direction of the animation.
 ///
 /// See also:

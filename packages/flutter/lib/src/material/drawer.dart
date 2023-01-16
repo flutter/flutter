@@ -382,11 +382,11 @@ class DrawerController extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// `MediaQuery.paddingOf(context)` that corresponds to [alignment].
   /// This ensures that the drag area for notched devices is not obscured. For
   /// example, if [alignment] is set to [DrawerAlignment.start] and
   /// `TextDirection.of(context)` is set to [TextDirection.ltr],
-  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  /// 20.0 will be added to `MediaQuery.paddingOf(context).left`.
   final double? edgeDragWidth;
 
   /// Whether or not the drawer is opened or closed.
@@ -680,7 +680,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final EdgeInsets padding = MediaQuery.of(context).padding;
     final TextDirection textDirection = Directionality.of(context);
     final bool isDesktop;
     switch (Theme.of(context).platform) {
@@ -698,6 +697,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
+      final EdgeInsets padding = MediaQuery.paddingOf(context);
       switch (textDirection) {
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
@@ -827,13 +827,14 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_150
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
-  const _DrawerDefaultsM3(this.context)
+  _DrawerDefaultsM3(this.context)
       : super(elevation: 1.0);
 
   final BuildContext context;
+  late final TextDirection direction = Directionality.of(context);
 
   @override
   Color? get backgroundColor => Theme.of(context).colorScheme.surface;
@@ -844,18 +845,22 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   @override
   Color? get shadowColor => Colors.transparent;
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get shape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+  ShapeBorder? get shape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      end: Radius.circular(16.0),
+    ).resolve(direction),
   );
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get endShape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(left: Radius.circular(16.0)),
+  ShapeBorder? get endShape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      start: Radius.circular(16.0),
+    ).resolve(direction),
   );
 }
 
