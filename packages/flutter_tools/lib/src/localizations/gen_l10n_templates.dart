@@ -139,33 +139,23 @@ const String methodTemplate = '''
   String @(name)(@(parameters)) {
 @(dateFormatting)
 @(numberFormatting)
-@(helperMethods)
-    return @(message);
+@(tempVars)    return @(message);
   }''';
 
-const String messageHelperTemplate = '''
-    String @(name)(@(parameters)) {
-      return @(message);
-    }''';
-
-const String pluralHelperTemplate = '''
-    String @(name)(@(parameters)) {
-      return intl.Intl.pluralLogic(
-        @(count),
-        locale: localeName,
+const String pluralVariableTemplate = '''
+    String @(varName) = intl.Intl.pluralLogic(
+      @(count),
+      locale: localeName,
 @(pluralLogicArgs)
-      );
-    }''';
+    );''';
 
-const String selectHelperTemplate = '''
-    String @(name)(@(parameters)) {
-      return intl.Intl.selectLogic(
-        @(choice),
-        {
+const String selectVariableTemplate = '''
+    String @(varName) = intl.Intl.selectLogic(
+      @(choice),
+      {
 @(selectCases)
-        },
-      );
-    }''';
+      },
+    );''';
 
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';
@@ -189,14 +179,14 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String @(name)(@(parameters));

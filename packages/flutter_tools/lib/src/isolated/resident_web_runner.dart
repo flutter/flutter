@@ -298,6 +298,7 @@ class ResidentWebRunner extends ResidentRunner {
             kNoneWorker,
             true,
             debuggingOptions.nativeNullAssertions,
+            false,
           );
         }
         await device!.device!.startApp(
@@ -370,6 +371,7 @@ class ResidentWebRunner extends ResidentRunner {
           kNoneWorker,
           true,
           debuggingOptions.nativeNullAssertions,
+          false,
           baseHref: kBaseHref,
         );
       } on ToolExit {

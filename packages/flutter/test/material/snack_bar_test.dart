@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui';
 
@@ -229,7 +230,7 @@ void main() {
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
-            width = MediaQuery.of(context).size.width;
+            width = MediaQuery.sizeOf(context).width;
 
             return GestureDetector(
               key: tapTarget,
@@ -1276,6 +1277,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getSemantics(find.text('snack')), matchesSemantics(
+      isLiveRegion: true,
+      hasDismissAction: true,
+      hasScrollDownAction: true,
+      hasScrollUpAction: true,
       label: 'snack',
       textDirection: TextDirection.ltr,
     ));
