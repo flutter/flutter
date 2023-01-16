@@ -371,14 +371,14 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
     return _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
 
-  Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
+  Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity, ScrollMetrics metrics) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: tolerance);
+    return ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: toleranceFor(metrics));
   }
 
-  Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity) {
+  Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity, ScrollMetrics metrics) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
+    return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: toleranceFor(metrics));
   }
 
   @override
@@ -396,10 +396,10 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
         return simulation;
       }
       if (dragVelocity > 0.0) {
-        return _toMidScrollOffsetSimulation(offset, dragVelocity);
+        return _toMidScrollOffsetSimulation(offset, dragVelocity, position);
       }
       if (dragVelocity < 0.0) {
-        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity, position);
       }
     } else {
       // The user ended the drag with little or no velocity. If they
@@ -408,10 +408,10 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       // otherwise snap to zero.
       final double snapThreshold = midScrollOffset / 2.0;
       if (offset >= snapThreshold && offset < midScrollOffset) {
-        return _toMidScrollOffsetSimulation(offset, dragVelocity);
+        return _toMidScrollOffsetSimulation(offset, dragVelocity, position);
       }
       if (offset > 0.0 && offset < snapThreshold) {
-        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity, position);
       }
     }
     return simulation;
@@ -520,7 +520,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
 
     final List<Widget> headings = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
-      headings.add(Container(
+      headings.add(ColoredBox(
           color: _kAppBackgroundColor,
           child: ClipRect(
             child: _AllSectionsView(

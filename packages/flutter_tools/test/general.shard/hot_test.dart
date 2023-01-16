@@ -572,6 +572,9 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> shaderPathsToEvict= <String>{};
 
   @override
+  Set<String> scenePathsToEvict= <String>{};
+
+  @override
   Uri? baseUri;
 }
 
@@ -607,7 +610,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     return true;

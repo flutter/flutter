@@ -15,7 +15,7 @@ import 'sliver.dart';
 
 /// A base class for sliver render objects that resemble their children.
 ///
-/// A proxy sliver has a single child and simply mimics all the properties of
+/// A proxy sliver has a single child and mimics all the properties of
 /// that child by calling through to the child for each function in the render
 /// sliver protocol. For example, a proxy sliver determines its geometry by
 /// asking its sliver child to layout with the same constraints and then
@@ -33,7 +33,7 @@ import 'sliver.dart';
 abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
   /// Creates a proxy render sliver.
   ///
-  /// Proxy render slivers aren't created directly because they simply proxy
+  /// Proxy render slivers aren't created directly because they proxy
   /// the render sliver protocol to their sliver [child]. Instead, use one of
   /// the subclasses.
   RenderProxySliver([RenderSliver? child]) {
@@ -94,7 +94,7 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
 ///
 /// For values of opacity other than 0.0 and 1.0, this class is relatively
 /// expensive, because it requires painting the sliver child into an intermediate
-/// buffer. For the value 0.0, the sliver child is simply not painted at all.
+/// buffer. For the value 0.0, the sliver child is not painted at all.
 /// For the value 1.0, the sliver child is painted immediately without an
 /// intermediate buffer.
 class RenderSliverOpacity extends RenderProxySliver {

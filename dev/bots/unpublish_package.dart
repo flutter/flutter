@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 /// This script removes published archives from the cloud storage and the
 /// corresponding JSON metadata file that the website uses to determine what
 /// releases are available.
@@ -10,6 +9,7 @@
 /// If asked to remove a release that is currently the release on that channel,
 /// it will replace that release with the next most recent release on that
 /// channel.
+library;
 
 import 'dart:async';
 import 'dart:convert';
