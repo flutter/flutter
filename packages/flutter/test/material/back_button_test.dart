@@ -108,9 +108,9 @@ void main() {
     final Icon linuxIcon = tester.widget(find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
     final Icon macOSIcon = tester.widget(find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
     final Icon windowsIcon = tester.widget(find.descendant(of: find.byKey(windowsKey), matching: find.byType(Icon)));
-    expect(iOSIcon.icon == androidIcon.icon, isFalse);
+    expect(iOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
     expect(linuxIcon.icon == androidIcon.icon, isTrue);
-    expect(macOSIcon.icon == androidIcon.icon, isFalse);
+    expect(macOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
     expect(macOSIcon.icon == iOSIcon.icon, isTrue);
     expect(windowsIcon.icon == androidIcon.icon, isTrue);
   });

@@ -139,6 +139,10 @@ class BackButtonIcon extends StatelessWidget {
         return actionIconTheme?.backButtonIconBuilder;
       },
       getIcon: (BuildContext context) {
+        if (kIsWeb) {
+          // Always use 'Icons.arrow_back' as a back_button icon in web.
+          return Icons.arrow_back;
+        }
         switch (Theme.of(context).platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
