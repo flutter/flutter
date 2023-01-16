@@ -5,7 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'action_buttons_theme.dart';
+import 'action_icons_theme.dart';
+import 'button_style.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -14,13 +15,14 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 abstract class _ActionButton extends StatelessWidget {
-  /// Creates a Material Design button.
+  /// Creates a Material Design icon button.
   const _ActionButton({
     super.key,
     this.color,
     required this.icon,
     this.iconSize,
     required this.onPressed,
+    this.style,
   });
 
   /// The icon to display inside the button.
@@ -44,6 +46,19 @@ abstract class _ActionButton extends StatelessWidget {
   /// Defaults to the [IconThemeData.size] specified in the ambient [IconTheme],
   /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
   final double? iconSize;
+
+  /// Customizes this icon button's appearance.
+  ///
+  /// The [style] is only used for Material 3 [IconButton]. If [ThemeData.useMaterial3]
+  /// is set to true, [style] is preferred for icon button customization, and any
+  /// parameters defined in [style] will override the same parameters in [IconButton].
+  ///
+  /// For example, if [IconButton]'s [visualDensity] is set to [VisualDensity.standard]
+  /// and [style]'s [visualDensity] is set to [VisualDensity.compact],
+  /// the icon button will have [VisualDensity.compact] to define the button's layout.
+  ///
+  /// Null by default.
+  final ButtonStyle? style;
 
   String _getTooltip(BuildContext context);
 
@@ -161,7 +176,7 @@ class BackButtonIcon extends StatelessWidget {
   }
 }
 
-/// A Material Design back button.
+/// A Material Design back icon button.
 ///
 /// A [BackButton] is an [IconButton] with a "back" icon appropriate for the
 /// current [TargetPlatform]. When pressed, the back button calls
@@ -197,6 +212,7 @@ class BackButton extends _ActionButton {
   const BackButton({
     super.key,
     super.color,
+    super.style,
     super.onPressed,
   }) : super(icon: const BackButtonIcon());
 
@@ -240,7 +256,7 @@ class CloseButtonIcon extends StatelessWidget {
   }
 }
 
-/// A Material Design close button.
+/// A Material Design close icon button.
 ///
 /// A [CloseButton] is an [IconButton] with a "close" icon. When pressed, the
 /// close button calls [Navigator.maybePop] to return to the previous route.
@@ -261,8 +277,8 @@ class CloseButtonIcon extends StatelessWidget {
 ///    no user data consequence.
 ///  * [IconButton], to create other Material Design icon buttons.
 class CloseButton extends _ActionButton {
-  /// Creates a Material Design close button.
-  const CloseButton({ super.key, super.color, super.onPressed })
+  /// Creates a Material Design close icon button.
+  const CloseButton({ super.key, super.color, super.onPressed, super.style })
       : super(icon: const CloseButtonIcon());
 
   @override
@@ -307,7 +323,7 @@ class DrawerButtonIcon extends StatelessWidget {
   }
 }
 
-/// A Material Design drawer button.
+/// A Material Design drawer icon button.
 ///
 /// A [DrawerButton] is an [IconButton] with a "drawer" icon. When pressed, the
 /// close button calls [ScaffoldState.openDrawer] to the [Scaffold.drawer].
@@ -323,10 +339,10 @@ class DrawerButtonIcon extends StatelessWidget {
 ///  * [Icon], a Material Design icon.
 ///  * [ThemeData.platform], which specifies the current platform.
 class DrawerButton extends _ActionButton {
-  /// Creates a Material Design drawer button.
+  /// Creates a Material Design drawer icon button.
   const DrawerButton({
     super.key,
-    super.color,
+    super.style,
     super.iconSize,
     super.onPressed,
   }) : super(icon: const DrawerButtonIcon());
@@ -373,7 +389,7 @@ class EndDrawerButtonIcon extends StatelessWidget {
   }
 }
 
-/// A Material Design drawer button.
+/// A Material Design end drawer icon button.
 ///
 /// A [EndDrawerButton] is an [IconButton] with a "drawer" icon. When pressed, the
 /// end drawer button calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer].
@@ -389,10 +405,10 @@ class EndDrawerButtonIcon extends StatelessWidget {
 ///  * [Icon], a Material Design icon.
 ///  * [ThemeData.platform], which specifies the current platform.
 class EndDrawerButton extends _ActionButton {
-  /// Creates a Material Design end-drawer button.
+  /// Creates a Material Design end drawer icon button.
   const EndDrawerButton({
     super.key,
-    super.color,
+    super.style,
     super.iconSize,
     super.onPressed,
   }) : super(icon: const EndDrawerButtonIcon());
