@@ -71,6 +71,22 @@
     "description": "The tooltip for the button that shows a popup menu."
   },
 
+  "scrimLabel": "Scrim",
+  "@scrimLabel": {
+    "description": "The label for the scrim rendered underneath the content of a modal route."
+  },
+
+  "bottomSheetLabel": "Bottom Sheet",
+  "@bottomSheetLabel": {
+    "description": "The label for a BottomSheet."
+  },
+
+  "scrimOnTapHint": "Close $modalRouteContentName",
+  "@scrimOnTapHint": {
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route which users can tap to dismiss the content",
+    "parameters": "modalRouteContentName"
+  },
+
   "aboutListTileTitle": "About $applicationName",
   "@aboutListTileTitle": {
     "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
@@ -393,6 +409,11 @@
     "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
   },
 
+  "currentDateLabel": "Today",
+  "@currentDateLabel": {
+    "description": "Label indicating that the focused date is the current date."
+  },
+
   "reorderItemToStart": "Move to the start",
   "@reorderItemToStart": {
     "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
@@ -684,6 +705,11 @@
   "keyboardKeySelect": "Select",
   "@keyboardKeySelect": {
     "description": "Part of a keyboard shortcut label for the keyboard key 'Select' (select) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+
+  "keyboardKeyShift": "Shift",
+  "@keyboardKeyShift": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Shift' (shift) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is the shift modifier key on the left or right sides of the keyboard."
   },
 
   "keyboardKeySpace": "Space",

@@ -842,14 +842,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.radius != oldWidget.radius ||
         widget.borderRadius != oldWidget.borderRadius ||
         widget.highlightShape != oldWidget.highlightShape) {
-      final InkHighlight? hoverHighLight = _highlights[_HighlightType.hover];
-      if (hoverHighLight != null) {
-        hoverHighLight.dispose();
+      final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
+      if (hoverHighlight != null) {
+        hoverHighlight.dispose();
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       }
-      final InkHighlight? focusHighLight = _highlights[_HighlightType.focus];
-      if (focusHighLight != null) {
-        focusHighLight.dispose();
+      final InkHighlight? focusHighlight = _highlights[_HighlightType.focus];
+      if (focusHighlight != null) {
+        focusHighlight.dispose();
         // Do not call updateFocusHighlights() here because it is called below
       }
     }
@@ -857,6 +857,13 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       statesController.update(MaterialState.disabled, !enabled);
       if (!enabled) {
         statesController.update(MaterialState.pressed, false);
+        // Remove the existing hover highlight immediately when enabled is false.
+        // Do not rely on updateHighlight or InkHighlight.deactivate to not break
+        // the expected lifecycle which is updating _hovering when the mouse exit.
+        // Manually updating _hovering here or calling InkHighlight.deactivate
+        // will lead to onHover not being called or call when it is not allowed.
+        final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
+        hoverHighlight?.dispose();
       }
       // Don't call widget.onHover because many widgets, including the button
       // widgets, apply setState to an ancestor context from onHover.
@@ -937,7 +944,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
-          color: resolvedOverlayColor,
+          color: enabled ? resolvedOverlayColor : resolvedOverlayColor.withAlpha(0),
           shape: widget.highlightShape,
           radius: widget.radius,
           borderRadius: widget.borderRadius,
@@ -1018,7 +1025,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _shouldShowFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && _hasFocus;
@@ -1166,7 +1173,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && widget.canRequestFocus;

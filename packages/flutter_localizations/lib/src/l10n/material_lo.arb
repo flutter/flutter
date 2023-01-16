@@ -128,5 +128,10 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "ເມນູແຖບເມນູ"
+  "menuBarMenuLabel": "ເມນູແຖບເມນູ",
+  "currentDateLabel": "Date of today",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "Bottom Sheet",
+  "scrimOnTapHint": "Close $modalRouteName",
+  "keyboardKeyShift": "Shift"
 }
