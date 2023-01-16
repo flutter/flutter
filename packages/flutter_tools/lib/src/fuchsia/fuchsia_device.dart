@@ -293,7 +293,7 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant FuchsiaApp package, {
+    FuchsiaApp package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -471,7 +471,7 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    covariant FuchsiaApp app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     if (await isSession) {

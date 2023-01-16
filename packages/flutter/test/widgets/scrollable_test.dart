@@ -1429,6 +1429,51 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Two panel semantics is added to the sibling nodes of direct children', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          key: key,
+          children: const <Widget>[
+            TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                prefixText: 'prefix',
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+    // Wait for focus.
+    await tester.pumpAndSettle();
+
+    final SemanticsNode scrollableNode = tester.getSemantics(find.byKey(key));
+    SemanticsNode? intermediateNode;
+    scrollableNode.visitChildren((SemanticsNode node) {
+      intermediateNode = node;
+      return true;
+    });
+    SemanticsNode? syntheticScrollableNode;
+    intermediateNode!.visitChildren((SemanticsNode node) {
+      syntheticScrollableNode = node;
+      return true;
+    });
+    expect(syntheticScrollableNode!.hasFlag(ui.SemanticsFlag.hasImplicitScrolling), isTrue);
+
+    int numberOfChild = 0;
+    syntheticScrollableNode!.visitChildren((SemanticsNode node) {
+      expect(node.isTagged(RenderViewport.useTwoPaneSemantics), isTrue);
+      numberOfChild += 1;
+      return true;
+    });
+    expect(numberOfChild, 2);
+
+    handle.dispose();
+  });
+
   testWidgets('Scroll inertia cancel event', (WidgetTester tester) async {
     await pumpTest(tester, null);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);

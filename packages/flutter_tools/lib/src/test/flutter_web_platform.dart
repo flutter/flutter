@@ -188,7 +188,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
     'lib',
     'dev_compiler',
     'kernel',
@@ -198,7 +198,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
     'lib',
     'dev_compiler',
     'web',

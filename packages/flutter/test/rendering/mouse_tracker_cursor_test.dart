@@ -462,7 +462,7 @@ class _CursorUpdateDetails extends MethodCall {
   Map<String, dynamic> get arguments => super.arguments as Map<String, dynamic>;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(other, this)) {
       return true;
     }
