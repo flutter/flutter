@@ -124,10 +124,10 @@ class EmulatorManager {
       return CreateEmulatorResult(emulatorName,
           success: false,
           error:
-              'No suitable Android AVD system images are available. You may need to install these'
-              ' using sdkmanager, for example:\n'
-              ' sdkmanager "system-images;android-33;google_apis_playstore;x86_64"\n'
-              ' See all available images with sdkmanager --list.');
+              'No suitable Android AVD system images are available. You may need to install these '
+              'using sdkmanager, for example:\n '
+              'sdkmanager "system-images;android-33;google_apis_playstore;x86_64"\n '
+              'See all available images with sdkmanager --list.');
     }
 
     // Cleans up error output from avdmanager to make it more suitable to show
