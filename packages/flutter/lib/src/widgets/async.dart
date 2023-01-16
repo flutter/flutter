@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Widgets that handle interaction with asynchronous computations.
-///
-/// Asynchronous computations are represented by [Future]s and [Stream]s.
-
 import 'dart:async' show StreamSubscription;
 
 import 'package:flutter/foundation.dart';
@@ -446,6 +442,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=zEdw_1B7JHY}
 ///
 /// The [future] must have been obtained earlier, e.g. during [State.initState],
 /// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be

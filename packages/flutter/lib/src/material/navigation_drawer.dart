@@ -57,6 +57,8 @@ class NavigationDrawer extends StatelessWidget {
     this.shadowColor,
     this.surfaceTintColor,
     this.elevation,
+    this.indicatorColor,
+    this.indicatorShape,
     this.onDestinationSelected,
     this.selectedIndex = 0,
   });
@@ -89,6 +91,18 @@ class NavigationDrawer extends StatelessWidget {
   /// If null, [NavigationDrawerThemeData.elevation] is used. If that
   /// is also null, it will be 1.0.
   final double? elevation;
+
+  /// The color of the [indicatorShape] when this destination is selected.
+  ///
+  /// If this is null, [NavigationDrawerThemeData.indicatorColor] is used.
+  /// If that is also null, defaults to [ColorScheme.secondaryContainer].
+  final Color? indicatorColor;
+
+  /// The shape of the selected inidicator.
+  ///
+  /// If this is null, [NavigationDrawerThemeData.indicatorShape] is used.
+  /// If that is also null, defaults to [StadiumBorder].
+  final ShapeBorder? indicatorShape;
 
   /// Defines the appearance of the items within the navigation drawer.
   ///
@@ -125,6 +139,8 @@ class NavigationDrawer extends StatelessWidget {
             index: index,
             totalNumberOfDestinations: totalNumberOfDestinations,
             selectedAnimation: animation,
+            indicatorColor: indicatorColor,
+            indicatorShape: indicatorShape,
             onTap: () {
               if (onDestinationSelected != null) {
                 onDestinationSelected!(index);
@@ -148,9 +164,11 @@ class NavigationDrawer extends StatelessWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       elevation: elevation,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: wrappedChildren,
+      child: SafeArea(
+        bottom: false,
+        child: ListView(
+          children: wrappedChildren,
+        ),
       ),
     );
   }
@@ -315,9 +333,9 @@ class _NavigationDestinationBuilder extends StatelessWidget {
               alignment: Alignment.center,
               children: <Widget>[
                 NavigationIndicator(
-                  animation: _NavigationDrawerDestinationInfo.of(context).selectedAnimation,
-                  color: navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
-                  shape: navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+                  animation: info.selectedAnimation,
+                  color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
+                  shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
                   width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
                   height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
                 ),
@@ -433,6 +451,8 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
     required this.index,
     required this.totalNumberOfDestinations,
     required this.selectedAnimation,
+    required this.indicatorColor,
+    required this.indicatorShape,
     required this.onTap,
     required super.child,
   });
@@ -477,6 +497,16 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// Indicates whether or not this destination is selected, from 0 (unselected)
   /// to 1 (selected).
   final Animation<double> selectedAnimation;
+
+  /// The color of the indicator.
+  ///
+  /// This is used by destinations to override the indicator color.
+  final Color? indicatorColor;
+
+  /// The shape of the indicator.
+  ///
+  /// This is used by destinations to override the indicator shape.
+  final ShapeBorder? indicatorShape;
 
   /// The callback that should be called when this destination is tapped.
   ///
@@ -628,7 +658,7 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_150
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   const _NavigationDrawerDefaultsM3(this.context)

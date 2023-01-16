@@ -136,9 +136,9 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => Scaffold(
         key: containerKey1,
-        body: Container(
-          color: const Color(0xff00ffff),
-          child: const Hero(
+        body: const ColoredBox(
+          color: Color(0xff00ffff),
+          child: Hero(
             tag: kHeroTag,
             child: Text('Home'),
           ),

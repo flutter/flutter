@@ -992,6 +992,264 @@ void main() {
     expect(secondTapped, 1);
   });
 
+  testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return Material(
+                  color: index.isEven ? Colors.yellow : Colors.red,
+                  child: InkWell(
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                    child: Text('Index $index'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+  testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return Material(
+                  color: index.isEven ? Colors.yellow : Colors.red,
+                  child: InkWell(
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                    child: Text('Index $index'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+  testWidgets('SliverList.separated can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.separated(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return Material(
+                  color: index.isEven ? Colors.yellow : Colors.red,
+                  child: InkWell(
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                    child: Text('Index $index'),
+                  ),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) => Text('Separator $index'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+  testWidgets('SliverList.separated has correct number of children', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.separated(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) => const Text('item'),
+              separatorBuilder: (BuildContext context, int index) => const Text('separator'),
+            ),
+          ],
+        ),
+      ),
+    ));
+    expect(find.text('item'), findsNWidgets(2));
+    expect(find.text('separator'), findsNWidgets(1));
+  });
+
+  testWidgets('SliverList.list can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              children: <Widget>[
+                Material(
+                  color: Colors.yellow,
+                  child: InkWell(
+                    onTap: () => firstTapped++,
+                    child: const Text('Index 0'),
+                  ),
+                ),
+                Material(
+                  color: Colors.red,
+                  child: InkWell(
+                    onTap: () => secondTapped++,
+                    child: const Text('Index 1'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+  testWidgets('SliverFixedExtentList.builder can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverFixedExtentList.builder(
+              itemCount: 2,
+              itemExtent: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Material(
+                  color: index.isEven ? Colors.yellow : Colors.red,
+                  child: InkWell(
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                    child: Text('Index $index'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
+    testWidgets('SliverList.list can build children', (WidgetTester tester) async {
+    int firstTapped = 0;
+    int secondTapped = 0;
+    final Key key = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: key,
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverFixedExtentList.list(
+              itemExtent: 100,
+              children: <Widget>[
+                Material(
+                  color: Colors.yellow,
+                  child: InkWell(
+                    onTap: () => firstTapped++,
+                    child: const Text('Index 0'),
+                  ),
+                ),
+                Material(
+                  color: Colors.red,
+                  child: InkWell(
+                    onTap: () => secondTapped++,
+                    child: const Text('Index 1'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct hit testing
+    await tester.tap(find.text('Index 0'));
+    expect(firstTapped, 1);
+    expect(secondTapped, 0);
+    firstTapped = 0;
+    await tester.tap(find.text('Index 1'));
+    expect(firstTapped, 0);
+    expect(secondTapped, 1);
+  });
+
   testWidgets('SliverGrid.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
