@@ -386,74 +386,75 @@ class ThemeData with Diagnosticable {
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-        Color? accentColor,
+    Color? accentColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-        Brightness? accentColorBrightness,
+    Brightness? accentColorBrightness,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-        TextTheme? accentTextTheme,
+    TextTheme? accentTextTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/theme-data-accent-properties#migration-guide. '
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
-        IconThemeData? accentIconTheme,
+    IconThemeData? accentIconTheme,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.3.0-0.2.pre.',
     )
-        Color? buttonColor,
+    Color? buttonColor,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
-        bool? fixTextFieldOutlineLabel,
+    bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
-        Brightness? primaryColorBrightness,
+    Brightness? primaryColorBrightness,
     @Deprecated(
-        'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-        'This feature was deprecated after v2.13.0-0.0.pre.')
-        AndroidOverscrollIndicator? androidOverscrollIndicator,
+      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
+      'This feature was deprecated after v2.13.0-0.0.pre.'
+    )
+    AndroidOverscrollIndicator? androidOverscrollIndicator,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v3.4.0-19.0.pre.',
     )
-        Color? toggleableActiveColor,
+    Color? toggleableActiveColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-        Color? selectedRowColor,
+    Color? selectedRowColor,
     @Deprecated(
       'Use colorScheme.error instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-        Color? errorColor,
+    Color? errorColor,
     @Deprecated(
       'Use colorScheme.background instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-        Color? backgroundColor,
+    Color? backgroundColor,
     @Deprecated(
       'Use BottomAppBarTheme.color instead. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
-        Color? bottomAppBarColor,
+    Color? bottomAppBarColor,
   }) {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -1717,7 +1718,7 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
-  /// A theme for customizing icons of [BackButtonIcon], [CloseButtonIcon], 
+  /// A theme for customizing icons of [BackButtonIcon], [CloseButtonIcon],
   /// [DrawerButtonIcon], or [EndDrawerButtonIcon].
   final ActionIconThemeData? actionIconTheme;
 
