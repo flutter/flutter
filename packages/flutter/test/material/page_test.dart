@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
@@ -284,6 +285,89 @@ void main() {
       tester.binding.window.physicalSizeTestValue = oldSize;
       tester.binding.window.viewInsetsTestValue = oldInsets;
     }
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+
+
+  testWidgets(
+      'test page transition (_ZoomPageTransition) with rasterization disables snapshotting for enter route',
+      (WidgetTester tester) async {
+    Iterable<Layer> findLayers(Finder of) {
+      return tester.layerListOf(
+        find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
+      );
+    }
+
+    bool isTransitioningWithoutSnapshotting(Finder of) {
+      // When snapshotting is off, the OpacityLayer and TransformLayer will be
+      // applied directly.
+      final Iterable<Layer> layers = findLayers(of);
+      return layers.whereType<OpacityLayer>().length == 1 &&
+          layers.whereType<TransformLayer>().length == 1;
+    }
+
+    bool isSnapshotted(Finder of) {
+      final Iterable<Layer> layers = findLayers(of);
+      // The scrim and the snapshot image are the only two layers.
+      return layers.length == 2 &&
+          layers.whereType<OffsetLayer>().length == 1 &&
+          layers.whereType<PictureLayer>().length == 1;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/1': (_) => const Material(child: Text('Page 1')),
+          '/2': (_) => const Material(child: Text('Page 2')),
+        },
+        initialRoute: '/1',
+        builder: (BuildContext context, Widget? child) {
+          final ThemeData themeData = Theme.of(context);
+          return Theme(
+            data: themeData.copyWith(
+              pageTransitionsTheme: PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  ...themeData.pageTransitionsTheme.builders,
+                  TargetPlatform.android: const ZoomPageTransitionsBuilder(
+                    allowEnterRouteSnapshotting: false,
+                  ),
+                },
+              ),
+            ),
+            child: Builder(builder: (_) => child!),
+          );
+        },
+      ),
+    );
+
+    final Finder page1Finder = find.text('Page 1');
+    final Finder page2Finder = find.text('Page 2');
+
+    // Page 1 on top.
+    expect(isSnapshotted(page1Finder), isFalse);
+
+    // Transitioning from page 1 to page 2.
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/2');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(isSnapshotted(page1Finder), isTrue);
+    expect(isTransitioningWithoutSnapshotting(page2Finder), isTrue);
+
+    // Page 2 on top.
+    await tester.pumpAndSettle();
+    expect(isSnapshotted(page2Finder), isFalse);
+
+    // Transitioning back from page 2 to page 1.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(isTransitioningWithoutSnapshotting(page1Finder), isTrue);
+    expect(isSnapshotted(page2Finder), isTrue);
+
+    // Page 1 on top.
+    await tester.pumpAndSettle();
+    expect(isSnapshotted(page1Finder), isFalse);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {

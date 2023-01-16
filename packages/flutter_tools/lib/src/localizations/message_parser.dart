@@ -6,6 +6,7 @@
 // See https://flutter.dev/go/icu-message-parser.
 
 // Symbol Types
+import '../base/logger.dart';
 import 'gen_l10n_types.dart';
 
 enum ST {
@@ -69,6 +70,7 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ],
   ST.selectPart: <List<ST>>[
     <ST>[ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.number, ST.openBrace, ST.message, ST.closeBrace],
     <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
   ],
 };
@@ -181,13 +183,17 @@ class Parser {
     this.messageId,
     this.filename,
     this.messageString,
-    { this.useEscaping = false }
+    {
+      this.useEscaping = false,
+      this.logger
+    }
   );
 
   final String messageId;
   final String messageString;
   final String filename;
   final bool useEscaping;
+  final Logger? logger;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
@@ -297,6 +303,11 @@ class Parser {
           // Do not add whitespace as a token.
           startIndex = match.end;
           continue;
+        } else if (<ST>[ST.plural, ST.select].contains(matchedType) && tokens.last.type == ST.openBrace) {
+          // Treat "plural" or "select" as identifier if it comes right after an open brace.
+          tokens.add(Node(ST.identifier, startIndex, value: match.group(0)));
+          startIndex = match.end;
+          continue;
         } else {
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
@@ -398,6 +409,7 @@ class Parser {
         case ST.selectParts:
           if (tokens.isNotEmpty && (
             tokens[0].type == ST.identifier ||
+            tokens[0].type == ST.number ||
             tokens[0].type == ST.other
           )) {
             parseAndConstructNode(ST.selectParts, 0);
@@ -408,8 +420,10 @@ class Parser {
         case ST.selectPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.selectPart, 0);
-          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.number) {
             parseAndConstructNode(ST.selectPart, 1);
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+            parseAndConstructNode(ST.selectPart, 2);
           } else {
             throw L10nParserException(
               'ICU Syntax Error: Select parts must be of the form "identifier { message }"',
@@ -566,8 +580,17 @@ class Parser {
   }
 
   Node parse() {
-    final Node syntaxTree = compress(parseIntoTree());
-    checkExtraRules(syntaxTree);
-    return syntaxTree;
+    try {
+      final Node syntaxTree = compress(parseIntoTree());
+      checkExtraRules(syntaxTree);
+      return syntaxTree;
+    } on L10nParserException catch (error) {
+      // For debugging purposes.
+      if (logger == null) {
+        rethrow;
+      }
+      logger?.printError(error.toString());
+      return Node(ST.empty, 0, value: '');
+    }
   }
 }

@@ -851,10 +851,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
           intent: matchedIntent,
         );
         if (action != null && action.isEnabled(matchedIntent)) {
-          Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
-          return action.consumesKey(matchedIntent)
-              ? KeyEventResult.handled
-              : KeyEventResult.skipRemainingHandlers;
+          final Object? invokeResult = Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
+          return action.toKeyEventResult(matchedIntent, invokeResult);
         }
       }
     }
@@ -871,6 +869,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 
 /// A widget that creates key bindings to specific actions for its
 /// descendants.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=6ZcQmdoz9N8}
 ///
 /// This widget establishes a [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an

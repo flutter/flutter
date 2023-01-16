@@ -83,6 +83,7 @@ void main() {
     pixels: 0,
     viewportDimension: 100,
     axisDirection: AxisDirection.down,
+    devicePixelRatio: 3.0,
   );
 
   test(

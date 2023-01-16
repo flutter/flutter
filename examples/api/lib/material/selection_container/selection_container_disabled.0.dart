@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter example for [SelectionContainer.disabled].
+// Flutter example for [SelectionContainer.disabled].
 
 import 'package:flutter/material.dart';
 
