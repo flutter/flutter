@@ -394,7 +394,7 @@ void DisplayListDispatcher::setColorSource(
         contents->SetStops(stops);
         contents->SetEndPoints(start_point, end_point);
         contents->SetTileMode(tile_mode);
-        contents->SetMatrix(matrix);
+        contents->SetEffectTransform(matrix);
         return contents;
       };
       return;
@@ -418,7 +418,7 @@ void DisplayListDispatcher::setColorSource(
         contents->SetStops(stops);
         contents->SetCenterAndRadius(center, radius);
         contents->SetTileMode(tile_mode);
-        contents->SetMatrix(matrix);
+        contents->SetEffectTransform(matrix);
         return contents;
       };
       return;
@@ -445,7 +445,7 @@ void DisplayListDispatcher::setColorSource(
         contents->SetColors(colors);
         contents->SetStops(stops);
         contents->SetTileMode(tile_mode);
-        contents->SetMatrix(matrix);
+        contents->SetEffectTransform(matrix);
         return contents;
       };
       return;
@@ -465,7 +465,7 @@ void DisplayListDispatcher::setColorSource(
         contents->SetTexture(texture);
         contents->SetTileModes(x_tile_mode, y_tile_mode);
         contents->SetSamplerDescriptor(desc);
-        contents->SetMatrix(matrix);
+        contents->SetEffectTransform(matrix);
         return contents;
       };
       return;
