@@ -446,6 +446,7 @@ void main() {
         key: outerContainerKey,
         child: LookupBoundary(
           child: Container(
+            padding: const EdgeInsets.all(10),
             color: Colors.blue,
             child: Container(
               key: innerContainerKey,
@@ -956,6 +957,192 @@ void main() {
         tester.element(find.byKey(child3)),
       ]);
 
+    });
+  });
+
+  group('LookupBoundary.debugIsHidingAncestorWidgetOfExactType', () {
+    testWidgets('is hiding', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Container(
+        padding: const EdgeInsets.all(10),
+        color: Colors.blue,
+        child: LookupBoundary(
+          child: Builder(
+            builder: (BuildContext context) {
+              isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
+              return Container();
+            },
+          ),
+        ),
+      ));
+      expect(isHidden, isTrue);
+    });
+
+    testWidgets('is not hiding entity within boundary', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Container(
+        padding: const EdgeInsets.all(10),
+        color: Colors.blue,
+        child: LookupBoundary(
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            color: Colors.red,
+            child: Builder(
+              builder: (BuildContext context) {
+                isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      ));
+      expect(isHidden, isFalse);
+    });
+
+    testWidgets('is not hiding if no boundary exists', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Container(
+        padding: const EdgeInsets.all(10),
+        color: Colors.blue,
+        child: Builder(
+          builder: (BuildContext context) {
+            isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
+            return Container();
+          },
+        ),
+      ));
+      expect(isHidden, isFalse);
+    });
+
+    testWidgets('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Builder(
+        builder: (BuildContext context) {
+          isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);
+          return Container();
+        },
+      ));
+      expect(isHidden, isFalse);
+    });
+  });
+
+  group('LookupBoundary.debugIsHidingAncestorStateOfType', () {
+    testWidgets('is hiding', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(MyStatefulContainer(
+        child: LookupBoundary(
+          child: Builder(
+            builder: (BuildContext context) {
+              isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
+              return Container();
+            },
+          ),
+        ),
+      ));
+      expect(isHidden, isTrue);
+    });
+
+    testWidgets('is not hiding entity within boundary', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(MyStatefulContainer(
+        child: LookupBoundary(
+          child: MyStatefulContainer(
+            child: Builder(
+              builder: (BuildContext context) {
+                isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      ));
+      expect(isHidden, isFalse);
+    });
+
+    testWidgets('is not hiding if no boundary exists', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(MyStatefulContainer(
+        child: Builder(
+          builder: (BuildContext context) {
+            isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
+            return Container();
+          },
+        ),
+      ));
+      expect(isHidden, isFalse);
+    });
+
+    testWidgets('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Builder(
+        builder: (BuildContext context) {
+          isHidden = LookupBoundary.debugIsHidingAncestorStateOfType<MyStatefulContainerState>(context);
+          return Container();
+        },
+      ));
+      expect(isHidden, isFalse);
+    });
+  });
+
+  group('LookupBoundary.debugIsHidingAncestorRenderObjectOfType', () {
+    testWidgets('is hiding', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Padding(
+        padding: EdgeInsets.zero,
+        child: LookupBoundary(
+          child: Builder(
+            builder: (BuildContext context) {
+              isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
+              return Container();
+            },
+          ),
+        ),
+      ));
+      expect(isHidden, isTrue);
+    });
+
+    testWidgets('is not hiding entity within boundary', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Padding(
+        padding: EdgeInsets.zero,
+        child: LookupBoundary(
+          child: Padding(
+            padding: EdgeInsets.zero,
+            child: Builder(
+              builder: (BuildContext context) {
+                isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
+                return Container();
+              },
+            ),
+          ),
+        ),
+      ));
+      expect(isHidden, isFalse);
+    });
+
+    testWidgets('is not hiding if no boundary exists', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Padding(
+        padding: EdgeInsets.zero,
+        child: Builder(
+          builder: (BuildContext context) {
+            isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
+            return Container();
+          },
+        ),
+      ));
+      expect(isHidden, isFalse);
+    });
+
+    testWidgets('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
+      bool? isHidden;
+      await tester.pumpWidget(Builder(
+        builder: (BuildContext context) {
+          isHidden = LookupBoundary.debugIsHidingAncestorRenderObjectOfType<RenderPadding>(context);
+          return Container();
+        },
+      ));
+      expect(isHidden, isFalse);
     });
   });
 }

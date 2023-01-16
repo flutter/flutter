@@ -1213,6 +1213,7 @@ class FocusScopeNode extends FocusNode {
     super.onKey,
     super.skipTraversal,
     super.canRequestFocus,
+    this.traversalEdgeBehavior = TraversalEdgeBehavior.closedLoop,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
         super(
@@ -1221,6 +1222,14 @@ class FocusScopeNode extends FocusNode {
 
   @override
   FocusScopeNode get nearestScope => this;
+
+  /// Controls the transfer of focus beyond the first and the last items of a
+  /// [FocusScopeNode].
+  ///
+  /// Changing this field value has no immediate effect on the UI. Instead, next time
+  /// focus traversal takes place [FocusTraversalPolicy] will read this value
+  /// and apply the new behavior.
+  TraversalEdgeBehavior traversalEdgeBehavior;
 
   /// Returns true if this scope is the focused child of its parent scope.
   bool get isFirstFocus => enclosingScope!.focusedChild == this;
@@ -1349,6 +1358,7 @@ class FocusScopeNode extends FocusNode {
       return child.toStringShort();
     }).toList();
     properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: const Iterable<String>.empty()));
+    properties.add(DiagnosticsProperty<TraversalEdgeBehavior>('traversalEdgeBehavior', traversalEdgeBehavior, defaultValue: TraversalEdgeBehavior.closedLoop));
   }
 }
 

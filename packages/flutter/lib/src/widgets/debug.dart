@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'lookup_boundary.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'table.dart';
@@ -468,12 +469,17 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasOverlay(BuildContext context) {
   assert(() {
-    if (context.widget is! Overlay && context.findAncestorWidgetOfExactType<Overlay>() == null) {
+    if (LookupBoundary.findAncestorWidgetOfExactType<Overlay>(context) == null) {
+      final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Overlay>(context);
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No Overlay widget found.'),
+        ErrorSummary('No Overlay widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+        if (hiddenByBoundary)
+          ErrorDescription(
+              'There is an ancestor Overlay widget, but it is hidden by a LookupBoundary.'
+          ),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require an Overlay '
-          'widget ancestor.\n'
+          'widget ancestor within the closest LookupBoundary.\n'
           'An overlay lets widgets float on top of other widget children.',
         ),
         ErrorHint(

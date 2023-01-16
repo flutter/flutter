@@ -84,8 +84,43 @@ enum TraversalDirection {
   left,
 }
 
-/// An object used to specify a focus traversal policy used for configuring a
-/// [FocusTraversalGroup] widget.
+/// Controls the transfer of focus beyond the first and the last items of a
+/// [FocusScopeNode].
+///
+/// This enumeration only controls the traversal behavior performed by
+/// [FocusTraversalPolicy]. Other methods of focus transfer, such as direct
+/// calls to [FocusNode.requestFocus] and [FocusNode.unfocus], are not affected
+/// by this enumeration.
+///
+/// See also:
+///
+/// * [FocusTraversalPolicy], which implements the logic behind this enum.
+/// * [FocusScopeNode], which is configured by this enum.
+enum TraversalEdgeBehavior {
+  /// Keeps the focus among the items of the focus scope.
+  ///
+  /// Requesting the next focus after the last focusable item will transfer the
+  /// focus to the first item, and requesting focus previous to the first item
+  /// will transfer the focus to the last item, thus forming a closed loop of
+  /// focusable items.
+  closedLoop,
+
+  /// Allows the focus to leave the [FlutterView].
+  ///
+  /// Requesting next focus after the last focusable item or previous to the
+  /// first item will unfocus any focused nodes. If the focus traversal action
+  /// was initiated by the embedder (e.g. the Flutter Engine) the embedder
+  /// receives a result indicating that the focus is no longer within the
+  /// current [FlutterView]. For example, [NextFocusAction] invoked via keyboard
+  /// (typically the TAB key) would receive [KeyEventResult.skipRemainingHandlers]
+  /// allowing the embedder handle the shortcut. On the web, typically the
+  /// control is transfered to the browser, allowing the user to reach the
+  /// address bar, escape an `iframe`, or focus on HTML elements other than
+  /// those managed by Flutter.
+  leaveFlutterView,
+}
+
+/// Determines how focusable widgets are traversed within a [FocusTraversalGroup].
 ///
 /// The focus traversal policy is what determines which widget is "next",
 /// "previous", or in a direction from the widget associated with the currently
@@ -407,12 +442,24 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       return false;
     }
     if (forward && focusedChild == sortedNodes.last) {
-      _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
-      return true;
+      switch (nearestScope.traversalEdgeBehavior) {
+        case TraversalEdgeBehavior.leaveFlutterView:
+          focusedChild!.unfocus();
+          return false;
+        case TraversalEdgeBehavior.closedLoop:
+          _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+          return true;
+      }
     }
     if (!forward && focusedChild == sortedNodes.first) {
-      _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
-      return true;
+      switch (nearestScope.traversalEdgeBehavior) {
+        case TraversalEdgeBehavior.leaveFlutterView:
+          focusedChild!.unfocus();
+          return false;
+        case TraversalEdgeBehavior.closedLoop:
+          _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+          return true;
+      }
     }
 
     final Iterable<FocusNode> maybeFlipped = forward ? sortedNodes : sortedNodes.reversed;
@@ -1592,7 +1639,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
   // The internal focus node used to collect the children of this node into a
   // group, and to provide a context for the traversal algorithm to sort the
   // group with.
-  FocusNode? focusNode;
+  late final FocusNode focusNode;
 
   @override
   void initState() {
@@ -1606,7 +1653,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 
   @override
   void dispose() {
-    focusNode?.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
@@ -1614,7 +1661,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
   Widget build(BuildContext context) {
     return _FocusTraversalGroupMarker(
       policy: widget.policy,
-      focusNode: focusNode!,
+      focusNode: focusNode,
       child: Focus(
         focusNode: focusNode,
         canRequestFocus: false,
@@ -1677,7 +1724,7 @@ class RequestFocusIntent extends Intent {
 /// logging, or undo and redo functionality.
 ///
 /// This [RequestFocusAction] class is the default action associated with the
-/// [RequestFocusIntent] in the [WidgetsApp], and it simply requests focus. You
+/// [RequestFocusIntent] in the [WidgetsApp]. It requests focus. You
 /// can redefine the associated action with your own [Actions] widget.
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
@@ -1705,9 +1752,20 @@ class NextFocusIntent extends Intent {
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
 class NextFocusAction extends Action<NextFocusIntent> {
+  /// Attempts to pass the focus to the next widget.
+  ///
+  /// Returns true if a widget was focused as a result of invoking this action.
+  ///
+  /// Returns false when the traversal reached the end and the engine must pass
+  /// focus to platform UI.
   @override
-  void invoke(NextFocusIntent intent) {
-    primaryFocus!.nextFocus();
+  bool invoke(NextFocusIntent intent) {
+    return primaryFocus!.nextFocus();
+  }
+
+  @override
+  KeyEventResult toKeyEventResult(NextFocusIntent intent, bool invokeResult) {
+    return invokeResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
   }
 }
 
@@ -1729,9 +1787,20 @@ class PreviousFocusIntent extends Intent {
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
 class PreviousFocusAction extends Action<PreviousFocusIntent> {
+  /// Attempts to pass the focus to the previous widget.
+  ///
+  /// Returns true if a widget was focused as a result of invoking this action.
+  ///
+  /// Returns false when the traversal reached the beginning and the engine must
+  /// pass focus to platform UI.
   @override
-  void invoke(PreviousFocusIntent intent) {
-    primaryFocus!.previousFocus();
+  bool invoke(PreviousFocusIntent intent) {
+    return primaryFocus!.previousFocus();
+  }
+
+  @override
+  KeyEventResult toKeyEventResult(PreviousFocusIntent intent, bool invokeResult) {
+    return invokeResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
   }
 }
 

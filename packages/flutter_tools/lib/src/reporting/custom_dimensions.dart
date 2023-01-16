@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of reporting;
+part of 'reporting.dart';
 
 /// The collection of custom dimensions understood by the analytics backend.
 /// When adding to this list, first ensure that the custom dimension is

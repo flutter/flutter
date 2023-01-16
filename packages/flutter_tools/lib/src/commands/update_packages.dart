@@ -39,6 +39,10 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
+  // https://github.com/flutter/flutter/issues/116376
+  'path_provider_android': '2.0.21',
+  // https://github.com/flutter/flutter/issues/117163
+  'intl': '0.17.0',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -440,6 +444,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       upgrade: doUpgrade,
       offline: boolArgDeprecated('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
+      outputMode: PubOutputMode.none,
     );
 
     if (doUpgrade) {
@@ -533,7 +538,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
-            printProgress: false,
+            outputMode: PubOutputMode.none,
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;

@@ -455,8 +455,8 @@ class MatrixUtils {
   ///
   /// The `radius` simulates the radius of the cylinder the plane is being
   /// wrapped onto. If the transformation is applied to a 0-dimensional dot
-  /// instead of a plane, the dot would simply translate by +/- `radius` pixels
-  /// along the `orientation` [Axis] when rotating from 0 to +/- 90 degrees.
+  /// instead of a plane, the dot would translate by ± `radius` pixels
+  /// along the `orientation` [Axis] when rotating from 0 to ±90 degrees.
   ///
   /// A positive radius means the object is closest at 0 `angle` and a negative
   /// radius means the object is closest at π `angle` or 180 degrees.
@@ -478,7 +478,7 @@ class MatrixUtils {
   /// The `orientation` is the direction of the rotation axis.
   ///
   /// Because the viewing position is a point, it's never possible to see the
-  /// outer side of the cylinder at or past +/- π / 2 or 90 degrees and it's
+  /// outer side of the cylinder at or past ±π/2 or 90 degrees and it's
   /// almost always possible to end up seeing the inner side of the cylinder
   /// or the back side of the transformed plane before π / 2 when perspective > 0.
   static Matrix4 createCylindricalProjectionTransform({

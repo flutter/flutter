@@ -235,7 +235,7 @@ class ButtonThemeData with Diagnosticable {
   /// Defaults to [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
-  /// Simply a convenience that returns [minWidth] and [height] as a
+  /// Convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object.
   BoxConstraints get constraints {
     return BoxConstraints(

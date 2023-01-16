@@ -1200,7 +1200,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1284,7 +1288,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1403,7 +1411,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -2443,7 +2455,7 @@ void main() {
                       value: 1,
                       child: Builder(
                         builder: (BuildContext context) {
-                          mediaQueryPadding = MediaQuery.of(context).padding;
+                          mediaQueryPadding = MediaQuery.paddingOf(context);
                           return Text('-1-' * 500); // A long long text string.
                         },
                       ),
@@ -3011,6 +3023,80 @@ void main() {
 
     material = tester.widget<Material>(find.byType(Material).last);
     expect(material.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
+    FocusNode nodeA() => Focus.of(find.text('A').evaluate().single);
+    FocusNode nodeB() => Focus.of(find.text('B').evaluate().single);
+
+    final GlobalKey popupButtonKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: PopupMenuButton<String>(
+            key: popupButtonKey,
+            itemBuilder: (_) => const <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'a',
+                child: Text('A'),
+              ),
+              PopupMenuItem<String>(
+                value: 'b',
+                child: Text('B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    // Start at A
+    nodeA().requestFocus();
+    await tester.pump();
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+
+    // A -> B
+    expect(await nextFocus(), true);
+    expect(nodeA().hasFocus, false);
+    expect(nodeB().hasFocus, true);
+
+    // B -> A (wrap around)
+    expect(await nextFocus(), true);
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+
+    // B <- A
+    expect(await previousFocus(), true);
+    expect(nodeA().hasFocus, false);
+    expect(nodeB().hasFocus, true);
+
+    // A <- B (wrap around)
+    expect(await previousFocus(), true);
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
   });
 }
 

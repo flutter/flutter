@@ -163,6 +163,16 @@ abstract class MaterialLocalizations {
   /// Label indicating that a given date is the current date.
   String get currentDateLabel;
 
+  /// Label for the scrim rendered underneath the content of a modal route.
+  String get scrimLabel;
+
+  /// Label for a BottomSheet.
+  String get bottomSheetLabel;
+
+  /// Hint text announced when tapping on the scrim underneath the content of
+  /// a modal route.
+  String scrimOnTapHint(String modalRouteContentName);
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -582,6 +592,9 @@ abstract class MaterialLocalizations {
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.select].
   String get keyboardKeySelect;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.shift].
+  String get keyboardKeyShift;
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.space].
   String get keyboardKeySpace;
@@ -1022,6 +1035,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get currentDateLabel => 'Today';
 
   @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
+  String scrimOnTapHint(String modalRouteContentName) => 'Close $modalRouteContentName';
+
+  @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';
 
   @override
@@ -1320,6 +1342,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';

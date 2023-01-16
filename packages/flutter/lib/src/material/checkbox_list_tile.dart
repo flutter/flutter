@@ -50,7 +50,7 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: CheckboxListTile(
@@ -219,7 +219,7 @@ class CheckboxListTile extends StatelessWidget {
 
   /// The color to use when this checkbox is checked.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The color to use for the check icon when this checkbox is checked.

@@ -34,10 +34,14 @@ enum Artifact {
   engineDartSdkPath,
   /// The dart binary used to execute any of the required snapshots.
   engineDartBinary,
+  /// The dart binary for running aot snapshots
+  engineDartAotRuntime,
   /// The snapshot of frontend_server compiler.
   frontendServerSnapshotForEngineDartSdk,
   /// The dart snapshot of the dart2js compiler.
   dart2jsSnapshot,
+  /// The dart snapshot of the dart2wasm compiler.
+  dart2wasmSnapshot,
 
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
@@ -103,6 +107,8 @@ enum HostArtifact {
 
   // The Impeller shader compiler.
   impellerc,
+  // The Impeller Scene 3D model importer.
+  scenec,
   // Impeller's tessellation library.
   libtessellator,
 }
@@ -168,8 +174,12 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'dart-sdk';
     case Artifact.engineDartBinary:
       return 'dart$exe';
+    case Artifact.engineDartAotRuntime:
+      return 'dartaotruntime$exe';
     case Artifact.dart2jsSnapshot:
       return 'dart2js.dart.snapshot';
+    case Artifact.dart2wasmSnapshot:
+      return 'dart2wasm_product.snapshot';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
     case Artifact.linuxDesktopPath:
@@ -244,6 +254,8 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'dart_sdk.js.map';
     case HostArtifact.impellerc:
       return 'impellerc$exe';
+    case HostArtifact.scenec:
+      return 'scenec$exe';
     case HostArtifact.libtessellator:
       return 'libtessellator$dll';
   }
@@ -424,6 +436,7 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
+      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final String engineDir = _getEngineArtifactsPath(_currentHostPlatform(_platform, _operatingSystemUtils))!;
@@ -488,7 +501,9 @@ class CachedArtifacts implements Artifacts {
         return _fileSystem.path.join(engineDir, hostPlatform, _artifactToFileName(artifact, _platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
+      case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
+      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterFramework:
@@ -525,7 +540,9 @@ class CachedArtifacts implements Artifacts {
         return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem, _platform);
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
+      case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
+      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
@@ -580,7 +597,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fontSubset:
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
+      case Artifact.engineDartAotRuntime:
       case Artifact.dart2jsSnapshot:
+      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
@@ -613,6 +632,7 @@ class CachedArtifacts implements Artifacts {
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
       case Artifact.dart2jsSnapshot:
+      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(
           _dartSdkPath(_cache), 'bin', 'snapshots',
@@ -634,6 +654,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartSdkPath:
         return _dartSdkPath(_cache);
       case Artifact.engineDartBinary:
+      case Artifact.engineDartAotRuntime:
         return _fileSystem.path.join(_dartSdkPath(_cache), 'bin', _artifactToFileName(artifact, _platform));
       case Artifact.flutterMacOSFramework:
       case Artifact.linuxDesktopPath:
@@ -850,6 +871,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
+      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final File file = _fileSystem.file(_fileSystem.path.join(_hostEngineOutPath, artifactFileName));
@@ -925,13 +947,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.engineDartSdkPath:
         return _getDartSdkPath();
       case Artifact.engineDartBinary:
+      case Artifact.engineDartAotRuntime:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', artifactFileName);
       case Artifact.dart2jsSnapshot:
-        return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
+      case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-        return _fileSystem.path.join(
-          _getDartSdkPath(), 'bin', 'snapshots', artifactFileName,
-        );
+        return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
     }
   }
 
@@ -1048,10 +1069,12 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.engineDartSdkPath:
           return _getDartSdkPath();
         case Artifact.engineDartBinary:
+        case Artifact.engineDartAotRuntime:
           return _fileSystem.path.join(
             _getDartSdkPath(), 'bin',
             _artifactToFileName(artifact, _platform, mode));
         case Artifact.dart2jsSnapshot:
+        case Artifact.dart2wasmSnapshot:
         case Artifact.frontendServerSnapshotForEngineDartSdk:
           return _fileSystem.path.join(
             _getDartSdkPath(), 'bin', 'snapshots',
@@ -1134,6 +1157,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.iproxy:
       case HostArtifact.skyEnginePath:
       case HostArtifact.impellerc:
+      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         return _parent.getHostArtifact(artifact);
     }

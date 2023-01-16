@@ -215,11 +215,11 @@ class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
   /// Pan and scale callbacks cannot be used simultaneously because scale is a
-  /// superset of pan. Simply use the scale callbacks instead.
+  /// superset of pan. Use the scale callbacks instead.
   ///
   /// Horizontal and vertical drag callbacks cannot be used simultaneously
-  /// because a combination of a horizontal and vertical drag is a pan. Simply
-  /// use the pan callbacks instead.
+  /// because a combination of a horizontal and vertical drag is a pan.
+  /// Use the pan callbacks instead.
   ///
   /// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
   ///
@@ -288,6 +288,8 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.trackpadScrollCausesScale = false,
+    this.trackpadScrollToScaleFactor = kDefaultTrackpadScrollToScaleFactor,
     this.supportedDevices,
   }) : assert(excludeFromSemantics != null),
        assert(dragStartBehavior != null),
@@ -1014,10 +1016,16 @@ class GestureDetector extends StatelessWidget {
   /// If set to null, events from all device types will be recognized. Defaults to null.
   final Set<PointerDeviceKind>? supportedDevices;
 
+  /// {@macro flutter.gestures.scale.trackpadScrollCausesScale}
+  final bool trackpadScrollCausesScale;
+
+  /// {@macro flutter.gestures.scale.trackpadScrollToScaleFactor}
+  final Offset trackpadScrollToScaleFactor;
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
 
     if (onTapDown != null ||
         onTapUp != null ||
@@ -1186,7 +1194,9 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onScaleUpdate
             ..onEnd = onScaleEnd
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..trackpadScrollCausesScale = trackpadScrollCausesScale
+            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor;
         },
       );
     }

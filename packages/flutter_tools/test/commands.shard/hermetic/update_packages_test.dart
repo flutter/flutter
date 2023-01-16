@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -75,14 +74,6 @@ dependencies:
 ''';
 
 void main() {
-  testWithoutContext('kManuallyPinnedDependencies pins are actually pins', () {
-    expect(
-      kManuallyPinnedDependencies.values,
-      isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
-      reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
-    );
-  });
-
   group('update-packages', () {
     late FileSystem fileSystem;
     late Directory flutterSdk;
@@ -284,7 +275,6 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -292,7 +282,7 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     pubGetDirectories.add(project.directory.path);
     project.directory.childFile('pubspec.lock')

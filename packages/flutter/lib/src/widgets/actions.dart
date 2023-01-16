@@ -251,6 +251,25 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// The default implementation returns true.
   bool consumesKey(T intent) => true;
 
+  /// Converts the result of [invoke] of this action to a [KeyEventResult].
+  ///
+  /// This is typically used when the action is invoked in response to a keyboard
+  /// shortcut.
+  ///
+  /// The [invokeResult] argument is the value returned by the [invoke] method.
+  ///
+  /// By default, calls [consumesKey] and converts the returned boolean to
+  /// [KeyEventResult.handled] if it's true, and [KeyEventResult.skipRemainingHandlers]
+  /// if it's false.
+  ///
+  /// Concrete implementations may refine the type of [invokeResult], since
+  /// they know the type returned by [invoke].
+  KeyEventResult toKeyEventResult(T intent, covariant Object? invokeResult) {
+    return consumesKey(intent)
+      ? KeyEventResult.handled
+      : KeyEventResult.skipRemainingHandlers;
+  }
+
   /// Called when the action is to be performed.
   ///
   /// This is called by the [ActionDispatcher] when an action is invoked via
@@ -541,7 +560,13 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(T intent) => onInvoke(intent);
 }
 
-/// An action dispatcher that simply invokes the actions given to it.
+/// An action dispatcher that invokes the actions given to it.
+///
+/// The [invokeAction] method on this class directly calls the [Action.invoke]
+/// method on the [Action] object.
+///
+/// For [ContextAction] actions, if no `context` is provided, the
+/// [BuildContext] of the [primaryFocus] is used instead.
 ///
 /// See also:
 ///
@@ -1230,7 +1255,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+      final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
       switch (mode) {
         case NavigationMode.traditional:
           return target.enabled;
@@ -1271,7 +1296,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return widget.enabled;
