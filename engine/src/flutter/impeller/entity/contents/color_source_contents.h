@@ -20,7 +20,7 @@ class ColorSourceContents : public Contents {
 
   void SetGeometry(std::shared_ptr<Geometry> geometry);
 
-  void SetMatrix(Matrix matrix);
+  void SetEffectTransform(Matrix matrix);
 
   void SetAlpha(Scalar alpha);
 

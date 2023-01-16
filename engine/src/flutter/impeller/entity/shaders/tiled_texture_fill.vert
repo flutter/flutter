@@ -7,7 +7,8 @@
 
 uniform VertInfo {
   mat4 mvp;
-  mat4 matrix;
+  mat4 effect_transform;
+  vec2 bounds_origin;
   vec2 texture_size;
 }
 vert_info;
@@ -18,6 +19,7 @@ out vec2 v_texture_coords;
 
 void main() {
   gl_Position = vert_info.mvp * vec4(position, 0.0, 1.0);
-  vec2 transformed = IPVec2TransformPosition(vert_info.matrix, position);
-  v_texture_coords = transformed / vert_info.texture_size;
+  v_texture_coords = IPVec2TransformPosition(
+      vert_info.effect_transform,
+      (position - vert_info.bounds_origin) / vert_info.texture_size);
 }

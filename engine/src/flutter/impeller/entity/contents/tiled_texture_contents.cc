@@ -50,14 +50,21 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
+  auto geometry = GetGeometry();
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
+  // TODO(bdero): The geometry should be fetched from GetPositionUVBuffer and
+  //              contain coverage-mapped UVs, and this should use
+  //              position_uv.vert.
+  //              https://github.com/flutter/flutter/issues/118553
+
   VS::VertInfo vert_info;
   vert_info.mvp = geometry_result.transform;
-  vert_info.matrix = GetInverseMatrix();
-  vert_info.texture_size = Vector2{static_cast<Scalar>(texture_size.width),
-                                   static_cast<Scalar>(texture_size.height)};
+  vert_info.effect_transform = GetInverseMatrix();
+  vert_info.bounds_origin = geometry->GetCoverage(Matrix())->origin;
+  vert_info.texture_size = Vector2(static_cast<Scalar>(texture_size.width),
+                                   static_cast<Scalar>(texture_size.height));
 
   FS::FragInfo frag_info;
   frag_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
