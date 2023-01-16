@@ -29,7 +29,7 @@ Scalar ColorSourceContents::GetAlpha() const {
   return alpha_;
 }
 
-void ColorSourceContents::SetMatrix(Matrix matrix) {
+void ColorSourceContents::SetEffectTransform(Matrix matrix) {
   inverse_matrix_ = matrix.Invert();
 }
 

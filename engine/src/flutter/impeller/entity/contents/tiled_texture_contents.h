@@ -36,8 +36,8 @@ class TiledTextureContents final : public ColorSourceContents {
  private:
   std::shared_ptr<Texture> texture_;
   SamplerDescriptor sampler_descriptor_ = {};
-  Entity::TileMode x_tile_mode_;
-  Entity::TileMode y_tile_mode_;
+  Entity::TileMode x_tile_mode_ = Entity::TileMode::kClamp;
+  Entity::TileMode y_tile_mode_ = Entity::TileMode::kClamp;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TiledTextureContents);
 };
