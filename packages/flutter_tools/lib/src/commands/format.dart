@@ -45,7 +45,7 @@ class FormatCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String dartBinary = globals.artifacts!.getArtifactPath(Artifact.engineDartBinary);
     final List<String> command = <String>[
       dartBinary,
       'format',

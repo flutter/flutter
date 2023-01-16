@@ -301,7 +301,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       if (outputFileList.isEmpty) {
         return FlutterCommandResult.success();
       }
-      final String dartBinary = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+      final String dartBinary = _artifacts.getArtifactPath(Artifact.engineDartBinary);
       final List<String> command = <String>[dartBinary, 'format', ...outputFileList];
       final ProcessResult result = await _processManager.run(command);
       if (result.exitCode != 0) {

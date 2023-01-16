@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -1943,7 +1944,7 @@ flutter:
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelDill');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1974,7 +1975,7 @@ flutter:
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       '${globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path}/');
-    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformSoundKernelDill');
+    expect(residentCompiler.platformDill, 'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill');
   }, overrides: <Type, Generator>{
     Artifacts: () => Artifacts.test(),
     FileSystem: () => MemoryFileSystem.test(),
@@ -2649,7 +2650,7 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     appStopped = true;
     return true;
   }
@@ -2664,7 +2665,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => NoOpDeviceLogReader(name);
 
@@ -2695,6 +2696,9 @@ class FakeDevFS extends Fake implements DevFS {
   Set<String> shaderPathsToEvict = <String>{};
 
   @override
+  Set<String> scenePathsToEvict = <String>{};
+
+  @override
   bool didUpdateFontManifest = false;
 
   UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
@@ -2722,6 +2726,7 @@ class FakeDevFS extends Fake implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,

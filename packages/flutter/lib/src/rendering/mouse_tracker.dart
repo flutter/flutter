@@ -302,8 +302,8 @@ class MouseTracker extends ChangeNotifier {
   /// [MouseTracker] filter which to react to.
   ///
   /// The `getResult` is a function to return the hit test result at the
-  /// position of the event. It should not simply return cached hit test
-  /// result, because the cache does not change throughout a tap sequence.
+  /// position of the event. It should not return a cached hit test
+  /// result, because the cache would not change during a tap sequence.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
     if (event.kind != PointerDeviceKind.mouse) {
       return;

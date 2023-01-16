@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [MouseRegion].
+// Flutter code sample for [MouseRegion].
 
 import 'package:flutter/material.dart';
 
@@ -67,7 +67,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         onEnter: _incrementEnter,
         onHover: _updateLocation,
         onExit: _incrementExit,
-        child: Container(
+        child: ColoredBox(
           color: Colors.lightBlueAccent,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

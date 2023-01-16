@@ -54,7 +54,9 @@ class PreparePackageException implements Exception {
 
 enum Branch {
   beta,
-  stable;
+  stable,
+  master,
+  main;
 }
 
 /// A helper class for classes that want to run a process, optionally have the

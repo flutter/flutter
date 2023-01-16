@@ -526,6 +526,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     required super.pixels,
     required super.viewportDimension,
     required super.axisDirection,
+    required super.devicePixelRatio,
     required this.minRange,
     required this.maxRange,
     required this.correctionOffset,
@@ -538,6 +539,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
     double? pixels,
     double? viewportDimension,
     AxisDirection? axisDirection,
+    double? devicePixelRatio,
     double? minRange,
     double? maxRange,
     double? correctionOffset,
@@ -548,6 +550,7 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       minRange: minRange ?? this.minRange,
       maxRange: maxRange ?? this.maxRange,
       correctionOffset: correctionOffset ?? this.correctionOffset,
@@ -815,6 +818,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       minRange: minRange,
       maxRange: maxRange,
       correctionOffset: correctionOffset,
+      devicePixelRatio: _outerPosition!.devicePixelRatio,
     );
   }
 
@@ -903,7 +907,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     goIdle();
     updateUserScrollDirection(

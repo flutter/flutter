@@ -143,7 +143,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: ColoredBox(
             color: Colors.green,
             child: IntrinsicHeight(
               child: RichText(
