@@ -114,7 +114,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ))..failOnce = true;
 
     await expectLater(
@@ -139,7 +139,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -170,7 +170,7 @@ void main() {
     final FakeDevtoolsLauncher launcher = FakeDevtoolsLauncher();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService, devtoolsLauncher: launcher);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -202,7 +202,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -232,7 +232,7 @@ void main() {
     ]);
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final Device device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
     final FakeDartDevelopmentService dds = device.dds as FakeDartDevelopmentService;
 
@@ -258,7 +258,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -290,7 +290,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(processManager: processManager, vmService: fakeVmServiceHost.vmService);
     final FakeDevice device = FakeDevice(LaunchResult.succeeded(
-      observatoryUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+      vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
     ));
 
     await driverService.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile), true);
@@ -552,7 +552,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
+    Uri vmServiceUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,

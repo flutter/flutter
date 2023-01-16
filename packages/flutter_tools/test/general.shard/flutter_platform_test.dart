@@ -26,14 +26,14 @@ void main() {
 
   group('FlutterPlatform', () {
     testUsingContext('ensureConfiguration throws an error if an '
-      'explicitObservatoryPort is specified and more than one test file', () async {
+      'explicitVmServicePort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
         shellPath: '/',
         debuggingOptions: DebuggingOptions.enabled(
           BuildInfo.debug,
           hostVmServicePort: 1234,
         ),
-        enableObservatory: false,
+        enableVmService: false,
       );
       flutterPlatform.loadChannel('test1.dart', FakeSuitePlatform());
 
@@ -49,7 +49,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         shellPath: '/',
         precompiledDillPath: 'example.dill',
-        enableObservatory: false,
+        enableVmService: false,
       );
       flutterPlatform.loadChannel('test1.dart', FakeSuitePlatform());
 
@@ -87,7 +87,7 @@ void main() {
           disableServiceAuthCodes: true,
           hostVmServicePort: 200,
         ),
-        enableObservatory: true,
+        enableVmService: true,
         machine: true,
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
@@ -107,7 +107,7 @@ void main() {
       expect(flutterPlatform.debuggingOptions.startPaused, equals(true));
       expect(flutterPlatform.debuggingOptions.disableServiceAuthCodes, equals(true));
       expect(flutterPlatform.debuggingOptions.hostVmServicePort, equals(200));
-      expect(flutterPlatform.enableObservatory, equals(true));
+      expect(flutterPlatform.enableVmService, equals(true));
       expect(flutterPlatform.machine, equals(true));
       expect(flutterPlatform.host, InternetAddress.loopbackIPv6);
       expect(flutterPlatform.precompiledDillPath, equals('def'));

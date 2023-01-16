@@ -358,10 +358,10 @@ class IOSDevice extends Device {
       'Installing and launching...',
     );
     try {
-      ProtocolDiscovery? observatoryDiscovery;
+      ProtocolDiscovery? vmServiceDiscovery;
       int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
-        _logger.printTrace('Debugging is enabled, connecting to observatory');
+        _logger.printTrace('Debugging is enabled, connecting to vmService');
         final DeviceLogReader deviceLogReader = getLogReader(app: package);
 
         // If the device supports syslog reading, prefer launching the app without
@@ -379,7 +379,7 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        observatoryDiscovery = ProtocolDiscovery.observatory(
+        vmServiceDiscovery = ProtocolDiscovery.vmService(
           deviceLogReader,
           portForwarder: portForwarder,
           hostPort: debuggingOptions.hostVmServicePort,
@@ -412,18 +412,18 @@ class IOSDevice extends Device {
         return LaunchResult.succeeded();
       }
 
-      _logger.printTrace('Application launched on the device. Waiting for observatory url.');
+      _logger.printTrace('Application launched on the device. Waiting for VM Service url.');
       final Timer timer = Timer(discoveryTimeout ?? const Duration(seconds: 30), () {
-        _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
+        _logger.printError('iOS VM Service not discovered after 30 seconds. This is taking much longer than expected...');
         iosDeployDebugger?.pauseDumpBacktraceResume();
       });
-      final Uri? localUri = await observatoryDiscovery?.uri;
+      final Uri? localUri = await vmServiceDiscovery?.uri;
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
         return LaunchResult.failed();
       }
-      return LaunchResult.succeeded(observatoryUri: localUri);
+      return LaunchResult.succeeded(vmServiceUri: localUri);
     } on ProcessException catch (e) {
       await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);

@@ -152,7 +152,7 @@ void main() {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
-      expect(launchResult.hasObservatory, isFalse);
+      expect(launchResult.hasVmService, isFalse);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
@@ -167,7 +167,7 @@ void main() {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isTrue);
-      expect(launchResult.hasObservatory, isFalse);
+      expect(launchResult.hasVmService, isFalse);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
@@ -194,7 +194,7 @@ void main() {
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true, debuggingOptions: debuggingOptions);
       expect(launchResult.started, isFalse);
-      expect(launchResult.hasObservatory, isFalse);
+      expect(launchResult.hasVmService, isFalse);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
@@ -220,7 +220,7 @@ void main() {
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true, debuggingOptions: debuggingOptions);
       expect(launchResult.started, isTrue);
-      expect(launchResult.hasObservatory, isFalse);
+      expect(launchResult.hasVmService, isFalse);
       expect(await device.stopApp(app), isTrue);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
@@ -252,7 +252,7 @@ void main() {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.debug);
       expect(launchResult.started, isTrue);
-      expect(launchResult.hasObservatory, isTrue);
+      expect(launchResult.hasVmService, isTrue);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
@@ -413,7 +413,7 @@ void main() {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
-      expect(launchResult.hasObservatory, isFalse);
+      expect(launchResult.hasVmService, isFalse);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,
@@ -429,7 +429,7 @@ void main() {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
-      expect(launchResult.hasObservatory, isFalse);
+      expect(launchResult.hasVmService, isFalse);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => memoryFileSystem,

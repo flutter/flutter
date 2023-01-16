@@ -659,7 +659,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       description: 'Should the device use port forwarding? '
         'Using port forwarding is the default because it works in all cases, however if your '
         'remote device has a static IP address and you have a way of '
-        'specifying the "--observatory-host=<ip>" engine option, you might prefer '
+        'specifying the "--vm-service-host=<ip>" engine option, you might prefer '
         'not using port forwarding.',
     );
 

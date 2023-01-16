@@ -78,7 +78,7 @@ void main() {
     );
 
     expect(result.started, true);
-    expect(result.observatoryUri, Uri.parse('http://127.0.0.1:64494/fZ_B2N6JRwY=/'));
+    expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:64494/fZ_B2N6JRwY=/'));
   });
 }
 

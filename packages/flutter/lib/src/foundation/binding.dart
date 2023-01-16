@@ -138,7 +138,7 @@ abstract class BindingBase {
   /// First calls [initInstances] to have bindings initialize their
   /// instance pointers and other state, then calls
   /// [initServiceExtensions] to have bindings initialize their
-  /// observatory service extensions, if any.
+  /// VM service extensions, if any.
   BindingBase() {
     developer.Timeline.startSync('Framework initialization');
     assert(() {

@@ -922,7 +922,7 @@ class DebuggingOptions {
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
-      if (disablePortPublication) '--disable-observatory-publication',
+      if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
       if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty)
@@ -949,11 +949,11 @@ class DebuggingOptions {
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller) '--enable-impeller',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
-        '--observatory-port=$deviceVmServicePort',
+        '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
       // Use the suggested host port.
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
-        '--observatory-port=$hostVmServicePort',
+        '--vm-service-port=$hostVmServicePort',
     ];
   }
 
@@ -1050,21 +1050,21 @@ class DebuggingOptions {
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.observatoryUri }) : started = true;
+  LaunchResult.succeeded({ this.vmServiceUri }) : started = true;
   LaunchResult.failed()
     : started = false,
-      observatoryUri = null;
+      vmServiceUri = null;
 
-  bool get hasObservatory => observatoryUri != null;
+  bool get hasVmService => vmServiceUri != null;
 
   final bool started;
-  final Uri? observatoryUri;
+  final Uri? vmServiceUri;
 
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (observatoryUri != null) {
-      buf.write(', observatory=$observatoryUri');
+    if (vmServiceUri != null) {
+      buf.write(', vmService=$vmServiceUri');
     }
     return buf.toString();
   }
@@ -1093,9 +1093,9 @@ abstract class DeviceLogReader {
 
 /// Describes an app running on the device.
 class DiscoveredApp {
-  DiscoveredApp(this.id, this.observatoryPort);
+  DiscoveredApp(this.id, this.vmServicePort);
   final String id;
-  final int observatoryPort;
+  final int vmServicePort;
 }
 
 // An empty device log reader

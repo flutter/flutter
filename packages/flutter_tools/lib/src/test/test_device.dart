@@ -21,8 +21,8 @@ abstract class TestDevice {
   /// or raw source file.
   Future<StreamChannel<String>> start(String entrypointPath);
 
-  /// Should complete with null if the observatory is not enabled.
-  Future<Uri?> get observatoryUri;
+  /// Should complete with null if the VM Service is not enabled.
+  Future<Uri?> get vmServiceUri;
 
   /// Terminates the test device.
   Future<void> kill();

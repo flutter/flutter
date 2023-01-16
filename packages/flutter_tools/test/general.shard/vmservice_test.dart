@@ -59,7 +59,7 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
 );
 
 void main() {
-  testWithoutContext('VmService registers reloadSources', () async {
+  testWithoutContext('VM Service registers reloadSources', () async {
     Future<void> reloadSources(String isolateId, { bool? pause, bool? force}) async {}
 
     final MockVMService mockVMService = MockVMService();
@@ -76,7 +76,7 @@ void main() {
     expect(mockVMService.services, containsPair('reloadSources', 'Flutter Tools'));
   });
 
-  testWithoutContext('VmService registers flutterMemoryInfo service', () async {
+  testWithoutContext('VM Service registers flutterMemoryInfo service', () async {
     final FakeDevice mockDevice = FakeDevice();
 
     final MockVMService mockVMService = MockVMService();
@@ -93,7 +93,7 @@ void main() {
     expect(mockVMService.services, containsPair('flutterMemoryInfo', 'Flutter Tools'));
   });
 
-  testWithoutContext('VmService registers flutterGetSkSL service', () async {
+  testWithoutContext('VM Service registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
       null,
@@ -108,7 +108,7 @@ void main() {
     expect(mockVMService.services, containsPair('flutterGetSkSL', 'Flutter Tools'));
   });
 
-  testWithoutContext('VmService throws tool exit on service registration failure.', () async {
+  testWithoutContext('VM Service throws tool exit on service registration failure.', () async {
     final MockVMService mockVMService = MockVMService()
       ..errorOnRegisterService = true;
 
@@ -123,7 +123,7 @@ void main() {
     ), throwsToolExit());
   });
 
-  testWithoutContext('VmService throws tool exit on service registration failure with awaited future.', () async {
+  testWithoutContext('VM Service throws tool exit on service registration failure with awaited future.', () async {
     final MockVMService mockVMService = MockVMService()
       ..errorOnRegisterService = true;
 
@@ -138,7 +138,7 @@ void main() {
     ), throwsToolExit());
   });
 
-  testWithoutContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
+  testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
       null,
@@ -152,7 +152,7 @@ void main() {
     expect(mockVMService.listenedStreams, contains(vm_service.EventStreams.kExtension));
   });
 
-  testWithoutContext('VMService returns correct FlutterVersion', () async {
+  testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
       null,
@@ -167,7 +167,7 @@ void main() {
     expect(mockVMService.services, containsPair('flutterVersion', 'Flutter Tools'));
   });
 
-  testUsingContext('VMService prints messages for connection failures', () {
+  testUsingContext('VM Service prints messages for connection failures', () {
     final BufferLogger logger = BufferLogger.test();
     FakeAsync().run((FakeAsync time) {
       final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');

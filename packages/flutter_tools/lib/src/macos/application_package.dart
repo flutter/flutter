@@ -29,7 +29,7 @@ abstract class MacOSApp extends ApplicationPackage {
   /// `applicationBinary` is the path to the framework directory created by an
   /// Xcode build. By default, this is located under
   /// "~/Library/Developer/Xcode/DerivedData/" and contains an executable
-  /// which is expected to start the application and send the observatory
+  /// which is expected to start the application and send the vmService
   /// port over stdout.
   static MacOSApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final _BundleInfo? bundleInfo = _executableFromBundle(applicationBinary);

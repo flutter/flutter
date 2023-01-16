@@ -37,7 +37,7 @@ void main() {
     testWithoutContext('No ports available', () async {
       final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
@@ -49,12 +49,12 @@ void main() {
     testWithoutContext('Prints helpful message when there is no ipv4 link local address.', () async {
       final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
       final BufferLogger logger = BufferLogger.test();
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: logger,
         flutterUsage: TestUsage(),
       );
-      final Uri? uri = await portDiscovery.getObservatoryUri(
+      final Uri? uri = await portDiscovery.getVmServiceUri(
         '',
         FakeIOSDevice(),
       );
@@ -74,7 +74,7 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
@@ -100,12 +100,12 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final MDnsObservatoryDiscoveryResult? result = await portDiscovery.query();
+      final MDnsVmServiceDiscoveryResult? result = await portDiscovery.query();
       expect(result?.port, 123);
       expect(result?.authCode, 'xyz/');
     });
@@ -126,7 +126,7 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
@@ -150,7 +150,7 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
@@ -177,7 +177,7 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
@@ -192,7 +192,7 @@ void main() {
          <String, List<SrvResourceRecord>>{},
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
@@ -205,7 +205,7 @@ void main() {
       final MDnsClient client = FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}, osErrorOnStart: true);
 
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
@@ -216,7 +216,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Correctly builds Observatory URI with hostVmservicePort == 0', () async {
+    testWithoutContext('Correctly builds VmService URI with hostVmservicePort == 0', () async {
       final MDnsClient client = FakeMDnsClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -229,12 +229,12 @@ void main() {
       );
 
       final FakeIOSDevice device = FakeIOSDevice();
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         flutterUsage: TestUsage(),
       );
-      final Uri? uri = await portDiscovery.getObservatoryUri('bar', device, hostVmservicePort: 0);
+      final Uri? uri = await portDiscovery.getVmServiceUri('bar', device, hostVmservicePort: 0);
       expect(uri.toString(), 'http://127.0.0.1:123/');
     });
   });
@@ -268,7 +268,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
-    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsObservatoryDiscovery.dartObservatoryName) {
+    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
     }
     if (T == SrvResourceRecord) {

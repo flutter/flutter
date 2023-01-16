@@ -1180,7 +1180,7 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
-  /// Used by the `showPerformanceOverlay` observatory extension.
+  /// Used by the `showPerformanceOverlay` VM service extension.
   static bool showPerformanceOverlayOverride = false;
 
   /// If true, forces the widget inspector to be visible.
@@ -1190,12 +1190,12 @@ class WidgetsApp extends StatefulWidget {
   /// The inspector allows you to select a location on your device or emulator
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
-  /// more detailed information is shown in the IDE or Observatory.
+  /// more detailed information is shown in the IDE or DevTools.
   static bool debugShowWidgetInspectorOverride = false;
 
   /// If false, prevents the debug banner from being visible.
   ///
-  /// Used by the `debugAllowBanner` observatory extension.
+  /// Used by the `debugAllowBanner` VM service extension.
   ///
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".

@@ -116,8 +116,8 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
-            // The "Observatory URL on device" message is output by the ProtocolDiscovery when it found the observatory.
+          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
             completer.complete();
           }
         });
@@ -144,14 +144,14 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
         ),
       });
 
-      testUsingContext('finds observatory port and forwards', () async {
+      testUsingContext('finds VM Service port and forwards', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
@@ -160,8 +160,8 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Observatory URL on device: http://127.0.0.1:$devicePort') {
-            // The "Observatory URL on device" message is output by the ProtocolDiscovery when it found the observatory.
+          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
             completer.complete();
           }
         });
@@ -190,7 +190,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('Fails with tool exit on bad Observatory uri', () async {
+      testUsingContext('Fails with tool exit on bad VmService uri', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
@@ -236,7 +236,7 @@ void main() {
           bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
-        hotRunner.isWaitingForObservatory = false;
+        hotRunner.isWaitingForVmService = false;
 
         final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
           ..hotRunner = hotRunner;
@@ -309,7 +309,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       },);
 
-      testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
+      testUsingContext('exits when vm-service-port is specified and debug-port is not', () async {
         device.onGetLogReader = () {
           fakeLogReader.addLine('Foo');
           fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
@@ -328,10 +328,10 @@ void main() {
           fileSystem: testFileSystem,
         );
         await expectLater(
-          createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
+          createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
           throwsToolExit(
             message: 'When the --debug-port or --debug-url is unknown, this command does not use '
-                     'the value of --observatory-port.',
+                     'the value of --vm-service-port.',
           ),
         );
       }, overrides: <Type, Generator>{
@@ -426,7 +426,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('skips in ipv4 mode with a provided observatory port', () async {
+      testUsingContext('skips in ipv4 mode with a provided VM Service port', () async {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
@@ -451,7 +451,7 @@ void main() {
             'attach',
             '--debug-port',
             '$devicePort',
-            '--observatory-port',
+            '--vm-service-port',
             '$hostPort',
             // Ensure DDS doesn't use hostPort by binding to a random port.
             '--dds-port',
@@ -471,7 +471,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('skips in ipv6 mode with a provided observatory port', () async {
+      testUsingContext('skips in ipv6 mode with a provided VM Service port', () async {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
@@ -496,7 +496,7 @@ void main() {
             'attach',
             '--debug-port',
             '$devicePort',
-            '--observatory-port',
+            '--vm-service-port',
             '$hostPort',
             '--ipv6',
             // Ensure DDS doesn't use hostPort by binding to a random port.
@@ -683,7 +683,7 @@ class FakeHotRunner extends Fake implements HotRunner {
   bool exited = false;
 
   @override
-  bool isWaitingForObservatory = true;
+  bool isWaitingForVmService = true;
 
   @override
   Future<int> attach({
@@ -889,7 +889,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
+    Uri vmServiceUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,
@@ -1054,7 +1054,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
-    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsObservatoryDiscovery.dartObservatoryName) {
+    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
     }
     if (T == SrvResourceRecord) {

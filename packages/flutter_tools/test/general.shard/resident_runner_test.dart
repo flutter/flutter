@@ -1472,7 +1472,7 @@ flutter:
           '',
           '💪 Running with sound null safety 💪',
           '',
-          'An Observatory debugger and profiler on FakeDevice is available at: null',
+          'A Dart VM Service on FakeDevice is available at: null',
           '',
         ].join('\n')
     ));
@@ -1503,7 +1503,7 @@ flutter:
           '',
           '💪 Running with sound null safety 💪',
           '',
-          'An Observatory debugger and profiler on FakeDevice is available at: null',
+          'A Dart VM Service on FakeDevice is available at: null',
           '',
         ].join('\n')
     ));
@@ -2094,7 +2094,7 @@ flutter:
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
-      observatoryUris: Stream<Uri>.value(testUri),
+      vmServiceUris: Stream<Uri>.value(testUri),
     );
     bool caught = false;
     final Completer<void>done = Completer<void>();
@@ -2142,7 +2142,7 @@ flutter:
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
-      observatoryUris: Stream<Uri>.value(testUri),
+      vmServiceUris: Stream<Uri>.value(testUri),
     );
     await flutterDevice.connect(allowExistingDdsInstance: true, ipv6: true, disableServiceAuthCodes: true);
     await done.future;
@@ -2183,7 +2183,7 @@ flutter:
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
-      observatoryUris: Stream<Uri>.value(testUri),
+      vmServiceUris: Stream<Uri>.value(testUri),
     );
     await flutterDevice.connect(allowExistingDdsInstance: true, ipv6: true, disableServiceAuthCodes: true);
     await done.future;
@@ -2223,7 +2223,7 @@ flutter:
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
-      observatoryUris: Stream<Uri>.value(testUri),
+      vmServiceUris: Stream<Uri>.value(testUri),
     );
     bool caught = false;
     final Completer<void>done = Completer<void>();
@@ -2391,13 +2391,13 @@ class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceE
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(super.device, { Stream<Uri>? observatoryUris })
-    : _observatoryUris = observatoryUris, super(buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler());
+  TestFlutterDevice(super.device, { Stream<Uri>? vmServiceUris })
+    : _vmServiceUris = vmServiceUris, super(buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler());
 
-  final Stream<Uri>? _observatoryUris;
+  final Stream<Uri>? _vmServiceUris;
 
   @override
-  Stream<Uri> get observatoryUris => _observatoryUris!;
+  Stream<Uri> get vmServiceUris => _vmServiceUris!;
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
@@ -2434,7 +2434,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform get targetPlatform => TargetPlatform.android;
 
   @override
-  Stream<Uri?> get observatoryUris => Stream<Uri?>.value(testUri);
+  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
 
   @override
   FlutterVmService? get vmService => vmServiceHost?.call()?.vmService;

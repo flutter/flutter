@@ -499,7 +499,7 @@ void main() {
         <String>['run', '-dflutter-tester', testScript],
         testDirectory,
         <Transition>[
-          Barrier(RegExp(r'^An Observatory debugger and profiler on Flutter test device is available at: ')),
+          Barrier(RegExp(r'^A Dart VM Service on Flutter test device is available at: ')),
           Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
             return 'r';
           }),
@@ -592,7 +592,7 @@ void main() {
       '',
       contains('Running with sound null safety'),
       '',
-      startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
+      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Flutter run key commands.',
@@ -621,7 +621,7 @@ void main() {
       '',
       contains('Running with sound null safety'),
       '',
-      startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
+      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Application finished.',

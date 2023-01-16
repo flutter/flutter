@@ -1067,7 +1067,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         '--purge-persistent-cache',
         '--dart-flags=--baz,--null_assertions',
         '--enable-impeller',
-        '--observatory-port=0',
+        '--vm-service-port=0',
       ]));
     }, overrides: <Type, Generator>{
       PlistParser: () => testPlistParser,

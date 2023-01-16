@@ -146,7 +146,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
   });
 
@@ -184,7 +184,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
   });
 
@@ -224,9 +224,9 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
-    expect(logger.errorText, contains('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...'));
+    expect(logger.errorText, contains('iOS VmService not discovered after 30 seconds. This is taking much longer than expected...'));
     expect(utf8.decoder.convert(stdin.writes.first), contains('process interrupt'));
     completer.complete();
     expect(processManager, hasNoRemainingExpectations);
@@ -255,7 +255,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, false);
+    expect(launchResult.hasVmService, false);
     expect(await device.stopApp(iosApp), false);
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -282,7 +282,7 @@ void main() {
           <String>[
             '--enable-dart-profiling',
             '--disable-service-auth-codes',
-            '--disable-observatory-publication',
+            '--disable-vm-service-publication',
             '--start-paused',
             '--dart-flags="--foo,--null_assertions"',
             '--use-test-fonts',

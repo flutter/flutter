@@ -707,14 +707,14 @@ Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
 bool canRun(String path) => _processManager.canRun(path);
 
 final RegExp _obsRegExp =
-  RegExp('An Observatory debugger .* is available at: ');
+  RegExp('A Dart VM Service .* is available at: ');
 final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
 final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
 /// Tries to extract a port from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+/// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
 int? parseServicePort(String line, {
   Pattern? prefix,
 }) {
@@ -732,7 +732,7 @@ int? parseServicePort(String line, {
 /// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+/// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
 Uri? parseServiceUri(String line, {
   Pattern? prefix,
 }) {

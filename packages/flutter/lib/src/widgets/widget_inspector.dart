@@ -707,7 +707,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 /// operation making it easier to avoid memory leaks.
 ///
 /// All methods in this class are appropriate to invoke from debugging tools
-/// using the Observatory service protocol to evaluate Dart expressions of the
+/// using the VM service protocol to evaluate Dart expressions of the
 /// form `WidgetInspectorService.instance.methodName(arg1, arg2, ...)`. If you
 /// make changes to any instance method of this class you need to verify that
 /// the [Flutter IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
@@ -716,7 +716,7 @@ class _WidgetInspectorService = Object with WidgetInspectorService;
 /// All methods returning String values return JSON.
 mixin WidgetInspectorService {
   /// Ring of cached JSON values to prevent JSON from being garbage
-  /// collected before it can be requested over the Observatory protocol.
+  /// collected before it can be requested over the VM service protocol.
   final List<String?> _serializeRing = List<String?>.filled(20, null);
   int _serializeRingIndex = 0;
 
@@ -743,7 +743,7 @@ mixin WidgetInspectorService {
   /// when the inspection target changes on device.
   InspectorSelectionChangedCallback? selectionChangedCallback;
 
-  /// The Observatory protocol does not keep alive object references so this
+  /// The VM service protocol does not keep alive object references so this
   /// class needs to manually manage groups of objects that should be kept
   /// alive.
   final Map<String, Set<_InspectorReferenceData>> _groups = <String, Set<_InspectorReferenceData>>{};
@@ -1679,7 +1679,7 @@ mixin WidgetInspectorService {
 
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
   /// the Dart garbage collector from collecting objects between when
-  /// the value is returned over the Observatory protocol and when the
+  /// the value is returned over the VM service protocol and when the
   /// separate observatory protocol command has to be used to retrieve its full
   /// contents.
   //

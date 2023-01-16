@@ -153,7 +153,7 @@ abstract class ChromiumDevice extends Device {
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
-    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(vmServiceUri: url != null ? Uri.parse(url): null);
   }
 
   @override
@@ -474,7 +474,7 @@ class WebServerDevice extends Device {
       'Consider using the Chrome or Edge devices for an improved development workflow.'
     );
     _logger.sendEvent('app.webLaunchUrl', <String, Object?>{'url': url, 'launched': false});
-    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(vmServiceUri: url != null ? Uri.parse(url): null);
   }
 
   @override
