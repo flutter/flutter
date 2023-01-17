@@ -2443,7 +2443,7 @@ void main() {
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.body>]\n'
       '     CustomMultiChildLayout\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'

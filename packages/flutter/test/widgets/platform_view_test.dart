@@ -2494,7 +2494,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2591,7 +2591,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2686,7 +2686,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
