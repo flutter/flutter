@@ -471,9 +471,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               trailing: widget.trailing ?? _buildTrailingIcon(context),
             ),
           ),
-          if (widget.child != null) 
-            Flexible(child: expandedChild,) 
-          else 
+          if (widget.child != null)
+            Flexible(child: expandedChild,)
+          else
             expandedChild
         ],
       ),
