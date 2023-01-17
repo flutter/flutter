@@ -32,47 +32,48 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Flexible(
-          child: ExpansionTile(
-            title: const Text('Expansion tile with Scrollable content'),
-            children: [
-              Flexible(
-                child: ListView(
-                  children: [
-                    for (int i = 0; i < 30; ++i)
-                      ListTile(title: Text('Tile $i')),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Flexible(
-          child: ExpansionTile(
-            title: const Text('Nested ExpansionTile'),
-            subtitle: const Text('Trailing expansion arrow icon'),
-            children: <Widget>[
-              Flexible(
-                child: ExpansionTile(
-                  title: const Text('Expansion tile'),
-                  children: [
-                    Flexible(
-                      child: ListView(
-                        children: [
-                          for (int i = 0; i < 30; ++i)
-                            ListTile(title: Text('Tile $i')),
-                        ],
-                      ),
+        ExpansionTile.single(
+            title: const Text(
+                'Expansion tile with fixed height Scrollable content'),
+            child: SizedBox(
+              height: 200,
+              child: Column(
+                children: [
+                  Flexible(
+                    child: ListView(
+                      children: [
+                        for (int i = 0; i < 30; ++i)
+                          ListTile(title: Text('Tile $i')),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            )),
+        Flexible(
+          child: ExpansionTile.single(
+            title: const Text('Nested ExpansionTile'),
+            subtitle: const Text('Takes up the available space'),
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: ExpansionTile.single(
+                    title:
+                        const Text('Expansion tile takes up the parent space'),
+                    child: ListView(
+                      children: [
+                        for (int i = 0; i < 30; ++i)
+                          ListTile(title: Text('Tile $i')),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const ExpansionTile(
