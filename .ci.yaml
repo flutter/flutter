@@ -4336,6 +4336,24 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Windows plugin_test_windows
+    bringup: true # New task
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
   - name: Windows run_debug_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
