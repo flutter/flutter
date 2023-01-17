@@ -632,8 +632,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     canvas.drawRRect(trackRRect, paint);
 
     if(_isFocused) {
-      // Paints a border with a slight gap around the switch in the active color.
-      final RRect borderTrackRRect = trackRRect.inflate(2.5);
+      // Paints a border around the switch in the focus color.
+      final RRect borderTrackRRect = trackRRect.inflate(2.0);
 
       final Paint borderPaint = Paint()
         ..color = focusColor
