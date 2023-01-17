@@ -39,6 +39,7 @@ Future<void> runTasks(
   String? luciBuilder,
   String? resultsPath,
   List<String>? taskArgs,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
   @visibleForTesting Function(String) print = print,
   @visibleForTesting List<String>? logs,
@@ -59,6 +60,7 @@ Future<void> runTasks(
         gitBranch: gitBranch,
         luciBuilder: luciBuilder,
         isolateParams: isolateParams,
+        useEmulator: useEmulator,
       );
 
       if (!result.succeeded) {
@@ -104,6 +106,7 @@ Future<TaskResult> rerunTask(
   String? resultsPath,
   String? gitBranch,
   String? luciBuilder,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   section('Running task "$taskName"');
@@ -116,6 +119,7 @@ Future<TaskResult> rerunTask(
     silent: silent,
     taskArgs: taskArgs,
     isolateParams: isolateParams,
+    useEmulator: useEmulator,
   );
 
   print('Task result:');
@@ -152,12 +156,20 @@ Future<TaskResult> runTask(
   String? localEngineSrcPath,
   String? deviceId,
   List<String>? taskArgs,
+  bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync()) {
     throw 'Executable Dart file not found: $taskExecutable';
+  }
+
+  if (useEmulator) {
+    taskArgs ??= <String>[];
+    taskArgs
+      ..add('--android-emulator')
+      ..add('--browser-name=android-chrome');
   }
 
   final Process runner = await startProcess(
