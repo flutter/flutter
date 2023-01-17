@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../globals.dart' as globals;
-import 'helper.dart';
 
 /// The caching strategy for the generated service worker.
 enum ServiceWorkerStrategy {
@@ -22,6 +21,7 @@ enum ServiceWorkerStrategy {
 /// invalidation will automatically reactivate workers whenever a new
 /// version is deployed.
 String generateServiceWorker(
+  String fileGeneratorsPath,
   Map<String, String> resources,
   List<String> coreBundle, {
   required ServiceWorkerStrategy serviceWorkerStrategy,
@@ -31,7 +31,7 @@ String generateServiceWorker(
   }
 
   final String flutterServiceWorkerJsPath = globals.localFileSystem.path.join(
-    fileGeneratorsRoot,
+    fileGeneratorsPath,
     'js',
     'flutter_service_worker.js',
   );

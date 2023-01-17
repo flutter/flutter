@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 import '../../globals.dart' as globals;
-import 'helper.dart';
 
 /// Generates the flutter.js file.
 ///
 /// flutter.js should be completely static, so **do not use any parameter or
 /// environment variable to generate this file**.
-String generateFlutterJsFile() {
+String generateFlutterJsFile(String fileGeneratorsPath) {
   final String flutterJsPath = globals.localFileSystem.path.join(
-    fileGeneratorsRoot,
+    fileGeneratorsPath,
     'js',
     'flutter.js',
   );
