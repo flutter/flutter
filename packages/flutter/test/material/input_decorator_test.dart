@@ -1829,6 +1829,33 @@ void main() {
     expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
   });
 
+
+  testWidgets('InputDecorator errorBuilder', (WidgetTester tester) async {
+    /// when errorBuilder is defined error message will be from the validator,
+    /// the errorMessage will never be null
+    await tester.pumpWidget(
+        buildInputDecorator(
+            decoration: InputDecoration(
+              errorBuilder: (String errorMessage) => Text(errorMessage),
+            )
+        )
+    );
+
+    /// When errorText and errorBuilder is defined,
+    await tester.pumpWidget(
+        buildInputDecorator(
+            decoration: InputDecoration(
+                errorBuilder: (String errorMessage) => Text(errorMessage),
+                errorText: 'errorText'
+            )
+        )
+    );
+
+
+  });
+
+
+
   testWidgets('InputDecorator tall prefix with border', (WidgetTester tester) async {
     const Key pKey = Key('p');
     await tester.pumpWidget(
