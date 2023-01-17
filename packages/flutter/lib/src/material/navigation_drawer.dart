@@ -164,9 +164,11 @@ class NavigationDrawer extends StatelessWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       elevation: elevation,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: wrappedChildren,
+      child: SafeArea(
+        bottom: false,
+        child: ListView(
+          children: wrappedChildren,
+        ),
       ),
     );
   }
@@ -656,7 +658,7 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_150
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   const _NavigationDrawerDefaultsM3(this.context)

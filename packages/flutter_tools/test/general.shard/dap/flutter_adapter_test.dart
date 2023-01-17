@@ -209,6 +209,34 @@ void main() {
         expect(adapter.processArgs, containsAllInOrder(<String>['attach', '--machine']));
       });
 
+      test('runs "flutter attach" with program if passed in', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterAttachRequestArguments args =
+            FlutterAttachRequestArguments(
+          cwd: '/project',
+          program: 'program/main.dart',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.attachRequest(
+            MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(
+            adapter.processArgs,
+            containsAllInOrder(<String>[
+              'attach',
+              '--machine',
+              '--target',
+              'program/main.dart'
+            ]));
+      });
+
       test('does not record the VMs PID for terminating', () async {
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),

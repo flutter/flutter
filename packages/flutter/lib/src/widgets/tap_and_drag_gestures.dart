@@ -702,6 +702,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     super.debugOwner,
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   }) : _deadline = kPressTimeout,
       dragStartBehavior = DragStartBehavior.start,
       slopTolerance = kTouchSlop;
@@ -850,6 +851,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   // Tap related state.
   bool _pastSlopTolerance = false;
   bool _sentTapDown = false;
+  bool _wonArenaForPrimaryPointer = false;
 
   // Primary pointer being tracked by this recognizer.
   int? _primaryPointer;
@@ -934,7 +936,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   void handleNonAllowedPointer(PointerDownEvent event) {
     // There can be multiple drags simultaneously. Their effects are combined.
     if (event.buttons != kPrimaryButton) {
-      if (!_sentTapDown) {
+      if (!_wonArenaForPrimaryPointer) {
         super.handleNonAllowedPointer(event);
       }
     }
@@ -956,6 +958,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _checkTapDown(currentDown!);
     }
 
+    _wonArenaForPrimaryPointer = true;
+
     if (_start != null) {
       _acceptDrag(_start!);
     }
@@ -976,7 +980,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       case _DragState.possible:
         if (_pastSlopTolerance) {
           // This means the pointer was not accepted as a tap.
-          if (_sentTapDown) {
+          if (_wonArenaForPrimaryPointer) {
             // If the recognizer has already won the arena for the primary pointer being tracked
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
@@ -1043,7 +1047,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
         // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
         // received that moves the pointer a sufficient global distance to be considered a drag.
-        if (_start != null && _sentTapDown) {
+        if (_start != null) {
           _acceptDrag(_start!);
         }
       }
@@ -1085,6 +1089,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   String get debugDescription => 'tap_and_drag';
 
   void _acceptDrag(PointerEvent event) {
+    if (!_wonArenaForPrimaryPointer) {
+      return;
+    }
     _dragState = _DragState.accepted;
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
@@ -1138,7 +1145,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _checkTapUp(PointerUpEvent event) {
-    if (!_sentTapDown) {
+    if (!_wonArenaForPrimaryPointer) {
       return;
     }
 
@@ -1265,6 +1272,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   void _resetTaps() {
     _sentTapDown = false;
+    _wonArenaForPrimaryPointer = false;
     _primaryPointer = null;
   }
 

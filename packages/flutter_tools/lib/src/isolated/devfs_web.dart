@@ -27,6 +27,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/targets/scene_importer.dart';
 import '../build_system/targets/shader_compiler.dart';
 import '../build_system/targets/web.dart';
 import '../bundle_builder.dart';
@@ -816,6 +817,7 @@ class WebDevFS implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -926,14 +928,31 @@ class WebDevFS implements DevFS {
   }
 
   @visibleForTesting
-  final File requireJS = globals.fs.file(globals.fs.path.join(
-    globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
-    'lib',
-    'dev_compiler',
-    'kernel',
-    'amd',
-    'require.js',
-  ));
+  final File requireJS = (() {
+    // TODO(nshahan): Remove the initilizing function once the file location
+    //                change in the Dart SDK has landed and rolled to the engine
+    //                and flutter repos. There is no long-term need for the
+    //                fallback logic.
+    //                See https://github.com/flutter/flutter/issues/118119
+    final File oldFile = globals.fs.file(globals.fs.path.join(
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+      'lib',
+      'dev_compiler',
+      'kernel',
+      'amd',
+      'require.js',
+    ));
+
+    return oldFile.existsSync()
+      ? oldFile
+      : globals.fs.file(globals.fs.path.join(
+          globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+          'lib',
+          'dev_compiler',
+          'amd',
+          'require.js',
+        ));
+  })();
 
   @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
@@ -951,6 +970,9 @@ class WebDevFS implements DevFS {
 
   @override
   Set<String> get shaderPathsToEvict => <String>{};
+
+  @override
+  Set<String> get scenePathsToEvict => <String>{};
 }
 
 class ReleaseAssetServer {
