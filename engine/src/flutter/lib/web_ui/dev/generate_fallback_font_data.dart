@@ -111,9 +111,10 @@ class GenerateFallbackFontDataCommand extends Command<bool>
     sb.writeln('// dev/generate_fallback_font_data.dart');
     sb.writeln("import 'noto_font.dart';");
     sb.writeln();
-    sb.writeln('const List<NotoFont> fallbackFonts = <NotoFont>[');
+    sb.writeln('final List<NotoFont> fallbackFonts = <NotoFont>[');
+
     for (final String family in fallbackFonts) {
-      sb.write("  NotoFont('$family', '${urlForFamily[family]!}', ");
+      sb.writeln(" NotoFont('$family', '${urlForFamily[family]!}',");
       final List<String> starts = <String>[];
       final List<String> ends = <String>[];
       for (final String range in charsetForFamily[family]!.split(' ')) {
@@ -126,15 +127,22 @@ class GenerateFallbackFontDataCommand extends Command<bool>
           ends.add(parts[1]);
         }
       }
-      sb.write('<int>[');
+
+      // Print the unicode ranges in a readable format for easier review. This
+      // shouldn't affect code size because comments are removed in release mode.
+      sb.write('   // <int>[');
       for (final String start in starts) {
         sb.write('0x$start,');
       }
-      sb.write('], <int>[');
+      sb.writeln('],');
+      sb.write('   // <int>[');
       for (final String end in ends) {
         sb.write('0x$end,');
       }
-      sb.writeln(']),');
+      sb.writeln(']');
+
+      sb.writeln("   '${_packFontRanges(starts, ends)}',");
+      sb.writeln(' ),');
     }
     sb.writeln('];');
 
@@ -293,3 +301,23 @@ const List<String> fallbackFonts = <String>[
   'Noto Sans Yi',
   'Noto Sans Zanabazar Square',
 ];
+
+String _packFontRanges(List<String> starts, List<String> ends) {
+  assert(starts.length == ends.length);
+
+  final StringBuffer sb = StringBuffer();
+
+  for (int i = 0; i < starts.length; i++) {
+    final int start = int.parse(starts[i], radix: 16);
+    final int end = int.parse(ends[i], radix: 16);
+
+    sb.write(start.toRadixString(36));
+    sb.write('|');
+    if (start != end) {
+      sb.write((end - start).toRadixString(36));
+    }
+    sb.write(';');
+  }
+
+  return sb.toString();
+}
