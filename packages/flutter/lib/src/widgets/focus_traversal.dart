@@ -47,7 +47,7 @@ void _focusAndEnsureVisible(
 // sorting their contents.
 class _FocusTraversalGroupInfo {
   _FocusTraversalGroupInfo(
-    _FocusTraversalGroupMarker? marker, {
+    _FocusTraversalGroupScope? marker, {
     FocusTraversalPolicy? defaultPolicy,
     List<FocusNode>? members,
   })  : groupNode = marker?.focusNode,
@@ -84,8 +84,43 @@ enum TraversalDirection {
   left,
 }
 
-/// An object used to specify a focus traversal policy used for configuring a
-/// [FocusTraversalGroup] widget.
+/// Controls the transfer of focus beyond the first and the last items of a
+/// [FocusScopeNode].
+///
+/// This enumeration only controls the traversal behavior performed by
+/// [FocusTraversalPolicy]. Other methods of focus transfer, such as direct
+/// calls to [FocusNode.requestFocus] and [FocusNode.unfocus], are not affected
+/// by this enumeration.
+///
+/// See also:
+///
+/// * [FocusTraversalPolicy], which implements the logic behind this enum.
+/// * [FocusScopeNode], which is configured by this enum.
+enum TraversalEdgeBehavior {
+  /// Keeps the focus among the items of the focus scope.
+  ///
+  /// Requesting the next focus after the last focusable item will transfer the
+  /// focus to the first item, and requesting focus previous to the first item
+  /// will transfer the focus to the last item, thus forming a closed loop of
+  /// focusable items.
+  closedLoop,
+
+  /// Allows the focus to leave the [FlutterView].
+  ///
+  /// Requesting next focus after the last focusable item or previous to the
+  /// first item will unfocus any focused nodes. If the focus traversal action
+  /// was initiated by the embedder (e.g. the Flutter Engine) the embedder
+  /// receives a result indicating that the focus is no longer within the
+  /// current [FlutterView]. For example, [NextFocusAction] invoked via keyboard
+  /// (typically the TAB key) would receive [KeyEventResult.skipRemainingHandlers]
+  /// allowing the embedder handle the shortcut. On the web, typically the
+  /// control is transfered to the browser, allowing the user to reach the
+  /// address bar, escape an `iframe`, or focus on HTML elements other than
+  /// those managed by Flutter.
+  leaveFlutterView,
+}
+
+/// Determines how focusable widgets are traversed within a [FocusTraversalGroup].
 ///
 /// The focus traversal policy is what determines which widget is "next",
 /// "previous", or in a direction from the widget associated with the currently
@@ -284,20 +319,20 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   @protected
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode);
 
-  _FocusTraversalGroupMarker? _getMarker(BuildContext? context) {
-    return context?.getElementForInheritedWidgetOfExactType<_FocusTraversalGroupMarker>()?.widget as _FocusTraversalGroupMarker?;
+  _FocusTraversalGroupScope? _getMarker(BuildContext? context) {
+    return context?.getElementForInheritedWidgetOfExactType<_FocusTraversalGroupScope>()?.widget as _FocusTraversalGroupScope?;
   }
 
   // Sort all descendants, taking into account the FocusTraversalGroup
   // that they are each in, and filtering out non-traversable/focusable nodes.
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope, FocusNode currentNode) {
     assert(scope != null);
-    final _FocusTraversalGroupMarker? scopeGroupMarker = _getMarker(scope.context);
+    final _FocusTraversalGroupScope? scopeGroupMarker = _getMarker(scope.context);
     final FocusTraversalPolicy defaultPolicy = scopeGroupMarker?.policy ?? ReadingOrderTraversalPolicy();
     // Build the sorting data structure, separating descendants into groups.
     final Map<FocusNode?, _FocusTraversalGroupInfo> groups = <FocusNode?, _FocusTraversalGroupInfo>{};
     for (final FocusNode node in scope.descendants) {
-      final _FocusTraversalGroupMarker? groupMarker = _getMarker(node.context);
+      final _FocusTraversalGroupScope? groupMarker = _getMarker(node.context);
       final FocusNode? groupNode = groupMarker?.focusNode;
       // Group nodes need to be added to their parent's node, or to the "null"
       // node if no parent is found. This creates the hierarchy of group nodes
@@ -309,7 +344,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         // looking with that node's parent, since _getMarker will return the
         // context it was called on if it matches the type.
         final BuildContext? parentContext = _getAncestor(groupNode!.context!, count: 2);
-        final _FocusTraversalGroupMarker? parentMarker = _getMarker(parentContext);
+        final _FocusTraversalGroupScope? parentMarker = _getMarker(parentContext);
         final FocusNode? parentNode = parentMarker?.focusNode;
         groups[parentNode] ??= _FocusTraversalGroupInfo(parentMarker, members: <FocusNode>[], defaultPolicy: defaultPolicy);
         assert(!groups[parentNode]!.members.contains(node));
@@ -407,12 +442,24 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       return false;
     }
     if (forward && focusedChild == sortedNodes.last) {
-      _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
-      return true;
+      switch (nearestScope.traversalEdgeBehavior) {
+        case TraversalEdgeBehavior.leaveFlutterView:
+          focusedChild!.unfocus();
+          return false;
+        case TraversalEdgeBehavior.closedLoop:
+          _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+          return true;
+      }
     }
     if (!forward && focusedChild == sortedNodes.first) {
-      _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
-      return true;
+      switch (nearestScope.traversalEdgeBehavior) {
+        case TraversalEdgeBehavior.leaveFlutterView:
+          focusedChild!.unfocus();
+          return false;
+        case TraversalEdgeBehavior.closedLoop:
+          _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+          return true;
+      }
     }
 
     final Iterable<FocusNode> maybeFlipped = forward ? sortedNodes : sortedNodes.reversed;
@@ -1539,7 +1586,7 @@ class FocusTraversalGroup extends StatefulWidget {
   ///    [FocusTraversalGroup] ancestor is found.
   static FocusTraversalPolicy of(BuildContext context) {
     assert(context != null);
-    final _FocusTraversalGroupMarker? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupMarker>();
+    final _FocusTraversalGroupScope? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupScope>();
     assert(() {
       if (inherited == null) {
         throw FlutterError(
@@ -1574,7 +1621,7 @@ class FocusTraversalGroup extends StatefulWidget {
   ///    ancestor is found.
   static FocusTraversalPolicy? maybeOf(BuildContext context) {
     assert(context != null);
-    final _FocusTraversalGroupMarker? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupMarker>();
+    final _FocusTraversalGroupScope? inherited = context.dependOnInheritedWidgetOfExactType<_FocusTraversalGroupScope>();
     return inherited?.policy;
   }
 
@@ -1592,7 +1639,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
   // The internal focus node used to collect the children of this node into a
   // group, and to provide a context for the traversal algorithm to sort the
   // group with.
-  FocusNode? focusNode;
+  late final FocusNode focusNode;
 
   @override
   void initState() {
@@ -1606,15 +1653,15 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 
   @override
   void dispose() {
-    focusNode?.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _FocusTraversalGroupMarker(
+    return _FocusTraversalGroupScope(
       policy: widget.policy,
-      focusNode: focusNode!,
+      focusNode: focusNode,
       child: Focus(
         focusNode: focusNode,
         canRequestFocus: false,
@@ -1629,8 +1676,8 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 }
 
 // A "marker" inherited widget to make the group faster to find.
-class _FocusTraversalGroupMarker extends InheritedWidget {
-  const _FocusTraversalGroupMarker({
+class _FocusTraversalGroupScope extends InheritedWidget {
+  const _FocusTraversalGroupScope({
     required this.policy,
     required this.focusNode,
     required super.child,
@@ -1705,9 +1752,20 @@ class NextFocusIntent extends Intent {
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
 class NextFocusAction extends Action<NextFocusIntent> {
+  /// Attempts to pass the focus to the next widget.
+  ///
+  /// Returns true if a widget was focused as a result of invoking this action.
+  ///
+  /// Returns false when the traversal reached the end and the engine must pass
+  /// focus to platform UI.
   @override
-  void invoke(NextFocusIntent intent) {
-    primaryFocus!.nextFocus();
+  bool invoke(NextFocusIntent intent) {
+    return primaryFocus!.nextFocus();
+  }
+
+  @override
+  KeyEventResult toKeyEventResult(NextFocusIntent intent, bool invokeResult) {
+    return invokeResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
   }
 }
 
@@ -1729,9 +1787,20 @@ class PreviousFocusIntent extends Intent {
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
 class PreviousFocusAction extends Action<PreviousFocusIntent> {
+  /// Attempts to pass the focus to the previous widget.
+  ///
+  /// Returns true if a widget was focused as a result of invoking this action.
+  ///
+  /// Returns false when the traversal reached the beginning and the engine must
+  /// pass focus to platform UI.
   @override
-  void invoke(PreviousFocusIntent intent) {
-    primaryFocus!.previousFocus();
+  bool invoke(PreviousFocusIntent intent) {
+    return primaryFocus!.previousFocus();
+  }
+
+  @override
+  KeyEventResult toKeyEventResult(PreviousFocusIntent intent, bool invokeResult) {
+    return invokeResult ? KeyEventResult.handled : KeyEventResult.skipRemainingHandlers;
   }
 }
 

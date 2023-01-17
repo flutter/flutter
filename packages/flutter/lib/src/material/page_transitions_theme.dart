@@ -157,6 +157,7 @@ class _ZoomPageTransition extends StatelessWidget {
     required this.animation,
     required this.secondaryAnimation,
     required this.allowSnapshotting,
+    required this.allowEnterRouteSnapshotting,
     this.child,
   }) : assert(animation != null),
        assert(secondaryAnimation != null);
@@ -207,6 +208,15 @@ class _ZoomPageTransition extends StatelessWidget {
   /// [secondaryAnimation].
   final Widget? child;
 
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
+
   @override
   Widget build(BuildContext context) {
     return DualTransitionBuilder(
@@ -218,7 +228,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          allowSnapshotting: allowSnapshotting,
+          allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
           child: child,
         );
       },
@@ -243,7 +253,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            allowSnapshotting: allowSnapshotting,
+            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
             reverse: true,
             child: child,
           );
@@ -596,7 +606,18 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
-  const ZoomPageTransitionsBuilder();
+  const ZoomPageTransitionsBuilder({
+    this.allowEnterRouteSnapshotting = true,
+  });
+
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
 
   @override
   Widget buildTransitions<T>(
@@ -610,6 +631,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
       animation: animation,
       secondaryAnimation: secondaryAnimation,
       allowSnapshotting: route?.allowSnapshotting ?? true,
+      allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
   }

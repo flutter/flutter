@@ -851,10 +851,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
           intent: matchedIntent,
         );
         if (action != null && action.isEnabled(matchedIntent)) {
-          Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
-          return action.consumesKey(matchedIntent)
-              ? KeyEventResult.handled
-              : KeyEventResult.skipRemainingHandlers;
+          final Object? invokeResult = Actions.of(primaryContext).invokeAction(action, matchedIntent, primaryContext);
+          return action.toKeyEventResult(matchedIntent, invokeResult);
         }
       }
     }
@@ -1279,8 +1277,8 @@ class ShortcutRegistry with ChangeNotifier {
   ///    it doesn't find a [ShortcutRegistrar] ancestor.
   static ShortcutRegistry of(BuildContext context) {
     assert(context != null);
-    final _ShortcutRegistrarMarker? inherited =
-      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
+    final _ShortcutRegistrarScope? inherited =
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
     assert(() {
       if (inherited == null) {
         throw FlutterError(
@@ -1315,8 +1313,8 @@ class ShortcutRegistry with ChangeNotifier {
   ///    [ShortcutRegistrar] ancestor.
   static ShortcutRegistry? maybeOf(BuildContext context) {
     assert(context != null);
-    final _ShortcutRegistrarMarker? inherited =
-      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarMarker>();
+    final _ShortcutRegistrarScope? inherited =
+      context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
     return inherited?.registry;
   }
 
@@ -1433,7 +1431,7 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
 
   @override
   Widget build(BuildContext context) {
-    return _ShortcutRegistrarMarker(
+    return _ShortcutRegistrarScope(
       registry: registry,
       child: Shortcuts.manager(
         manager: manager,
@@ -1443,8 +1441,8 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   }
 }
 
-class _ShortcutRegistrarMarker extends InheritedWidget {
-  const _ShortcutRegistrarMarker({
+class _ShortcutRegistrarScope extends InheritedWidget {
+  const _ShortcutRegistrarScope({
     required this.registry,
     required super.child,
   });
@@ -1452,7 +1450,7 @@ class _ShortcutRegistrarMarker extends InheritedWidget {
   final ShortcutRegistry registry;
 
   @override
-  bool updateShouldNotify(covariant _ShortcutRegistrarMarker oldWidget) {
+  bool updateShouldNotify(covariant _ShortcutRegistrarScope oldWidget) {
     return registry != oldWidget.registry;
   }
 }

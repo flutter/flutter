@@ -716,6 +716,7 @@ class StartupTest {
           break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.linux:
           break;
         case DeviceOperatingSystem.ios:
         case DeviceOperatingSystem.macos:
@@ -860,6 +861,7 @@ class DevtoolsStartupTest {
           break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.linux:
         case DeviceOperatingSystem.macos:
         case DeviceOperatingSystem.windows:
           break;
@@ -1571,6 +1573,8 @@ class CompileTest {
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.linux:
+        throw Exception('Unsupported option for Linux devices');
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -1634,6 +1638,8 @@ class CompileTest {
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.linux:
+        throw Exception('Unsupported option for Linux devices');
       case DeviceOperatingSystem.macos:
         unawaited(stderr.flush());
         options.insert(0, 'macos');
@@ -1687,6 +1693,7 @@ class CompileTest {
       case DeviceOperatingSystem.androidArm64:
       case DeviceOperatingSystem.fake:
       case DeviceOperatingSystem.fuchsia:
+      case DeviceOperatingSystem.linux:
       case DeviceOperatingSystem.windows:
         throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
     }
