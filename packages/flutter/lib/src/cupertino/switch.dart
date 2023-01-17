@@ -343,7 +343,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
-    final activeColor = CupertinoDynamicColor.resolve(
+    final Color activeColor = CupertinoDynamicColor.resolve(
       widget.activeColor
       ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
       ?? CupertinoColors.systemGreen,
