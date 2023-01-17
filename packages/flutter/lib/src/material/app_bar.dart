@@ -11,12 +11,14 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'back_button.dart';
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flexible_space_bar.dart';
 import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -909,6 +911,7 @@ class _AppBarState extends State<AppBar> {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final AppBarTheme defaults = theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
@@ -1019,13 +1022,46 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      // Based on the Material Design 3 specs, the leading IconButton should have
-      // a size of 48x48, and a highlight size of 40x40. Users can also put other
-      // type of widgets on leading with the original config.
       if (theme.useMaterial3) {
-        leading =  ConstrainedBox(
+        if (leading is IconButton) {
+          final IconButtonThemeData effectiveIconButtonTheme;
+
+          // This comparison is to check if there is a custom [overallIconTheme]. If true, it means that no
+          // custom [overallIconTheme] is provided, so [iconButtonTheme] is applied. Otherwise, we generate
+          // a new [IconButtonThemeData] based on the values from [overallIconTheme]. If [iconButtonTheme] only
+          // has null values, the default [overallIconTheme] will be applied below by [IconTheme.merge]
+          if (overallIconTheme == defaults.iconTheme) {
+            effectiveIconButtonTheme = iconButtonTheme;
+          } else {
+            // The [IconButton.styleFrom] method is used to generate a correct [overlayColor] based on the [foregroundColor].
+            final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
+              foregroundColor: overallIconTheme.color,
+              iconSize: overallIconTheme.size,
+            );
+
+            effectiveIconButtonTheme = IconButtonThemeData(
+              style: iconButtonTheme.style?.copyWith(
+                foregroundColor: leadingIconButtonStyle.foregroundColor,
+                overlayColor: leadingIconButtonStyle.overlayColor,
+                iconSize: leadingIconButtonStyle.iconSize,
+              )
+            );
+          }
+
+          leading = Center(
+            child: IconButtonTheme(
+              data: effectiveIconButtonTheme,
+              child: leading
+            )
+          );
+        }
+
+        // Based on the Material Design 3 specs, the leading IconButton should have
+        // a size of 48x48, and a highlight size of 40x40. Users can also put other
+        // type of widgets on leading with the original config.
+        leading = ConstrainedBox(
           constraints: BoxConstraints.tightFor(width: widget.leadingWidth ?? _kLeadingWidth),
-          child: leading is IconButton ? Center(child: leading) : leading,
+          child: leading,
         );
       } else {
         leading = ConstrainedBox(
@@ -1101,9 +1137,30 @@ class _AppBarState extends State<AppBar> {
 
     // Allow the trailing actions to have their own theme if necessary.
     if (actions != null) {
-      actions = IconTheme.merge(
-        data: actionsIconTheme,
-        child: actions,
+      final IconButtonThemeData effectiveActionsIconButtonTheme;
+      if (actionsIconTheme == defaults.actionsIconTheme) {
+        effectiveActionsIconButtonTheme = iconButtonTheme;
+      } else {
+        final ButtonStyle actionsIconButtonStyle = IconButton.styleFrom(
+          foregroundColor: actionsIconTheme.color,
+          iconSize: actionsIconTheme.size,
+        );
+
+        effectiveActionsIconButtonTheme = IconButtonThemeData(
+          style: iconButtonTheme.style?.copyWith(
+            foregroundColor: actionsIconButtonStyle.foregroundColor,
+            overlayColor: actionsIconButtonStyle.overlayColor,
+            iconSize: actionsIconButtonStyle.iconSize,
+          )
+        );
+      }
+
+      actions = IconButtonTheme(
+        data: effectiveActionsIconButtonTheme,
+        child: IconTheme.merge(
+          data: actionsIconTheme,
+          child: actions,
+        ),
       );
     }
 
@@ -1652,6 +1709,7 @@ class SliverAppBar extends StatefulWidget {
       actions: actions,
       flexibleSpace: flexibleSpace ?? _ScrollUnderFlexibleSpace(
         title: title,
+        foregroundColor: foregroundColor,
         variant: _ScrollUnderFlexibleVariant.medium,
         centerCollapsedTitle: centerTitle,
         primary: primary,
@@ -1753,6 +1811,7 @@ class SliverAppBar extends StatefulWidget {
       actions: actions,
       flexibleSpace: flexibleSpace ?? _ScrollUnderFlexibleSpace(
         title: title,
+        foregroundColor: foregroundColor,
         variant: _ScrollUnderFlexibleVariant.large,
         centerCollapsedTitle: centerTitle,
         primary: primary,
@@ -2227,12 +2286,14 @@ enum _ScrollUnderFlexibleVariant { medium, large }
 class _ScrollUnderFlexibleSpace extends StatelessWidget {
   const _ScrollUnderFlexibleSpace({
     this.title,
+    this.foregroundColor,
     required this.variant,
     this.centerCollapsedTitle,
     this.primary = true,
   });
 
   final Widget? title;
+  final Color? foregroundColor;
   final _ScrollUnderFlexibleVariant variant;
   final bool? centerCollapsedTitle;
   final bool primary;
@@ -2240,6 +2301,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     late final ThemeData theme = Theme.of(context);
+    late final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final double topPadding = primary ? MediaQuery.viewPaddingOf(context).top : 0;
     final double collapsedHeight = settings.minExtent - topPadding;
@@ -2259,13 +2321,13 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     if (title != null) {
       collapsedTitle = config.collapsedTextStyle != null
         ? DefaultTextStyle(
-            style: config.collapsedTextStyle!,
+            style: config.collapsedTextStyle!.copyWith(color: foregroundColor ?? appBarTheme.foregroundColor),
             child: title!,
           )
         : title;
       expandedTitle = config.expandedTextStyle != null
         ? DefaultTextStyle(
-            style: config.expandedTextStyle!,
+            style: config.expandedTextStyle!.copyWith(color: foregroundColor ?? appBarTheme.foregroundColor),
             child: title!,
           )
         : title;
@@ -2286,9 +2348,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
             return true;
         }
       }
-      centerTitle = centerCollapsedTitle
-        ?? theme.appBarTheme.centerTitle
-        ?? platformCenter();
+      centerTitle = centerCollapsedTitle ?? appBarTheme.centerTitle ?? platformCenter();
     }
 
     final bool isCollapsed = settings.isScrolledUnder ?? false;
@@ -2307,7 +2367,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
                 alignment: centerTitle
                   ? Alignment.center
                   : AlignmentDirectional.centerStart,
-                child: collapsedTitle
+                child: collapsedTitle,
               ),
             ),
           ),

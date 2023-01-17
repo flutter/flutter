@@ -1208,7 +1208,6 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     PubContext? context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -1216,6 +1215,7 @@ class FakePub extends Fake implements Pub {
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     calledGet += 1;
   }
