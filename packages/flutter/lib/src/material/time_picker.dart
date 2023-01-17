@@ -3392,9 +3392,8 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
-// Generated version v0_150
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);
 
