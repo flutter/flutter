@@ -1,4 +1,4 @@
-Signature: fa5cb2d7013f9608f7c3570a5f475c67
+Signature: 853869ed01bd550bdf4fa57bf98c31b6
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3794,7 +3794,6 @@ ORIGIN: ../../../third_party/skia/include/private/SkSLModifiers.h + ../../../thi
 ORIGIN: ../../../third_party/skia/include/private/SkSLProgramElement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkSLStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkSLSymbol.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSafe_math.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SingleOwner.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/sksg/slides/SVGPongSlide.cpp + ../../../third_party/skia/LICENSE
@@ -4108,7 +4107,6 @@ FILE: ../../../third_party/skia/include/private/SkSLModifiers.h
 FILE: ../../../third_party/skia/include/private/SkSLProgramElement.h
 FILE: ../../../third_party/skia/include/private/SkSLStatement.h
 FILE: ../../../third_party/skia/include/private/SkSLSymbol.h
-FILE: ../../../third_party/skia/include/private/SkSafe_math.h
 FILE: ../../../third_party/skia/include/private/base/SingleOwner.h
 FILE: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h
 FILE: ../../../third_party/skia/modules/sksg/slides/SVGPongSlide.cpp
