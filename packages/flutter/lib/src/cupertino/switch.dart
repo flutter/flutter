@@ -127,7 +127,7 @@ class CupertinoSwitch extends StatefulWidget {
   final Color? thumbColor;
 
   /// The color to use for the focus highlight for keyboard interactions.
-  /// 
+  ///
   /// Defaults to a a slightly transparent [activeColor].
   final Color? focusColor;
 
