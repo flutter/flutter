@@ -625,7 +625,6 @@ void main() {
             break;
         }
  
-
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
       });
