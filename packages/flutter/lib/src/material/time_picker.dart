@@ -3394,7 +3394,6 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 
 // Token database version: v0_152
 
-// Generated version v0_152
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);
 
