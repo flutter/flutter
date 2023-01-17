@@ -77,9 +77,9 @@ class MultidexProject extends Project {
   class MyApp extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
-      return new MaterialApp(
+      return MaterialApp(
         title: 'Flutter Demo',
-        home: new Container(),
+        home: Container(),
       );
     }
   }

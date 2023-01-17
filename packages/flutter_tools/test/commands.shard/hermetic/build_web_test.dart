@@ -26,8 +26,8 @@ void main() {
   FileSystem fileSystem;
   final Platform fakePlatform = FakePlatform(
     environment: <String, String>{
-      'FLUTTER_ROOT': '/'
-    }
+      'FLUTTER_ROOT': '/',
+    },
   );
 
   setUpAll(() {
@@ -90,9 +90,11 @@ void main() {
     final BuildCommand buildCommand = BuildCommand();
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a']);
+    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a', '--dart2js-optimization=O3']);
 
-    expect(fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
+    final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
+
+    expect(buildDir.existsSync(), true);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -106,6 +108,7 @@ void main() {
         'SourceMaps': 'false',
         'NativeNullAssertions': 'true',
         'ServiceWorkerStrategy': 'offline-first',
+        'Dart2jsOptimization': 'O3',
         'BuildMode': 'release',
         'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
         'DartObfuscation': 'false',
@@ -141,6 +144,31 @@ void main() {
     final BuildInfo buildInfo =
         await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
     expect(buildInfo.dartDefines, contains('FLUTTER_WEB_AUTO_DETECT=true'));
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+  });
+
+  testUsingContext('Web build supports build-name and build-number', () async {
+    final TestWebBuildCommand buildCommand = TestWebBuildCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+    setupFileSystemForEndToEndTest(fileSystem);
+
+    await runner.run(<String>[
+      'build',
+      'web',
+      '--no-pub',
+      '--build-name=1.2.3',
+      '--build-number=42',
+    ]);
+
+    final BuildInfo buildInfo = await buildCommand.webCommand
+        .getBuildInfo(forcedBuildMode: BuildMode.debug);
+    expect(buildInfo.buildNumber, '42');
+    expect(buildInfo.buildName, '1.2.3');
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

@@ -19,6 +19,8 @@ enum _StockMenuItem { autorefresh, refresh, speedUp, speedDown }
 enum StockHomeTab { market, portfolio }
 
 class _NotImplementedDialog extends StatelessWidget {
+  const _NotImplementedDialog();
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -97,7 +99,7 @@ class StockHomeState extends State<StockHome> {
       case _StockMenuItem.refresh:
         showDialog<void>(
           context: context,
-          builder: (BuildContext context) => _NotImplementedDialog(),
+          builder: (BuildContext context) => const _NotImplementedDialog(),
         );
         break;
       case _StockMenuItem.speedUp:
@@ -303,7 +305,7 @@ class StockHomeState extends State<StockHome> {
   void _handleCreateCompany() {
     showModalBottomSheet<void>(
       context: context,
-      builder: (BuildContext context) => _CreateCompanySheet(),
+      builder: (BuildContext context) => const _CreateCompanySheet(),
     );
   }
 
@@ -339,6 +341,8 @@ class StockHomeState extends State<StockHome> {
 }
 
 class _CreateCompanySheet extends StatelessWidget {
+  const _CreateCompanySheet();
+
   @override
   Widget build(BuildContext context) {
     return Column(

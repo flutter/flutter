@@ -68,7 +68,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  const BigSliver({ Key? key }) : super(key: key);
+  const BigSliver({ super.key });
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
     return RenderBigSliver();
@@ -105,7 +105,7 @@ class RenderOverlappingSliver extends RenderSliver {
 }
 
 class OverlappingSliver extends LeafRenderObjectWidget {
-  const OverlappingSliver({ Key? key }) : super(key: key);
+  const OverlappingSliver({ super.key });
   @override
   RenderOverlappingSliver createRenderObject(BuildContext context) {
     return RenderOverlappingSliver();

@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+
 import 'text_input.dart';
+
+export 'text_input.dart' show TextEditingValue, TextInputClient, TextInputConfiguration, TextInputConnection;
 
 /// A collection of commonly used autofill hint strings on different platforms.
 ///

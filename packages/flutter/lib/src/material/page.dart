@@ -36,13 +36,12 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
   /// must not be null.
   MaterialPageRoute({
     required this.builder,
-    RouteSettings? settings,
+    super.settings,
     this.maintainState = true,
-    bool fullscreenDialog = false,
+    super.fullscreenDialog,
   }) : assert(builder != null),
        assert(maintainState != null),
-       assert(fullscreenDialog != null),
-       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+       assert(fullscreenDialog != null) {
     assert(opaque);
   }
 
@@ -158,14 +157,13 @@ class MaterialPage<T> extends Page<T> {
     required this.child,
     this.maintainState = true,
     this.fullscreenDialog = false,
-    LocalKey? key,
-    String? name,
-    Object? arguments,
-    String? restorationId,
+    super.key,
+    super.name,
+    super.arguments,
+    super.restorationId,
   }) : assert(child != null),
        assert(maintainState != null),
-       assert(fullscreenDialog != null),
-       super(key: key, name: name, arguments: arguments, restorationId: restorationId);
+       assert(fullscreenDialog != null);
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;

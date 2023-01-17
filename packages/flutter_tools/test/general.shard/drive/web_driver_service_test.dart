@@ -24,6 +24,18 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 import '../../src/common.dart';
 import '../../src/context.dart';
 
+const List<String> kChromeArgs = <String>[
+  '--bwsi',
+  '--disable-background-timer-throttling',
+  '--disable-default-apps',
+  '--disable-extensions',
+  '--disable-popup-blocking',
+  '--disable-translate',
+  '--no-default-browser-check',
+  '--no-sandbox',
+  '--no-first-run',
+];
+
 void main() {
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
     final Map<String, dynamic> expected = <String, dynamic>{
@@ -36,24 +48,16 @@ void main() {
       'chromeOptions': <String, dynamic>{
         'w3c': false,
         'args': <String>[
-          '--bwsi',
-          '--disable-background-timer-throttling',
-          '--disable-default-apps',
-          '--disable-extensions',
-          '--disable-popup-blocking',
-          '--disable-translate',
-          '--no-default-browser-check',
-          '--no-sandbox',
-          '--no-first-run',
-          '--headless'
+          ...kChromeArgs,
+          '--headless',
         ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
           'devtools.timeline,'
-              'v8,blink.console,benchmark,blink,'
-              'blink.user_timing'
-        }
-      }
+          'v8,blink.console,benchmark,blink,'
+          'blink.user_timing',
+        },
+      },
     };
 
     expect(getDesiredCapabilities(Browser.chrome, true), expected);
@@ -71,28 +75,51 @@ void main() {
       'chromeOptions': <String, dynamic>{
         'binary': chromeBinary,
         'w3c': false,
+        'args': kChromeArgs,
+        'perfLoggingPrefs': <String, String>{
+          'traceCategories':
+          'devtools.timeline,'
+          'v8,blink.console,benchmark,blink,'
+          'blink.user_timing',
+        },
+      },
+    };
+
+    expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary: chromeBinary), expected);
+
+  });
+
+  testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
+    const List<String> webBrowserFlags = <String>[
+      '--autoplay-policy=no-user-gesture-required',
+      '--incognito',
+      '--auto-select-desktop-capture-source="Entire screen"',
+    ];
+    final Map<String, dynamic> expected = <String, dynamic>{
+      'acceptInsecureCerts': true,
+      'browserName': 'chrome',
+      'goog:loggingPrefs': <String, String>{
+        sync_io.LogType.browser: 'INFO',
+        sync_io.LogType.performance: 'ALL',
+      },
+      'chromeOptions': <String, dynamic>{
+        'w3c': false,
         'args': <String>[
-          '--bwsi',
-          '--disable-background-timer-throttling',
-          '--disable-default-apps',
-          '--disable-extensions',
-          '--disable-popup-blocking',
-          '--disable-translate',
-          '--no-default-browser-check',
-          '--no-sandbox',
-          '--no-first-run',
+          ...kChromeArgs,
+          '--autoplay-policy=no-user-gesture-required',
+          '--incognito',
+          '--auto-select-desktop-capture-source="Entire screen"',
         ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
           'devtools.timeline,'
               'v8,blink.console,benchmark,blink,'
-              'blink.user_timing'
-        }
-      }
+              'blink.user_timing',
+        },
+      },
     };
 
-    expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary), expected);
-
+    expect(getDesiredCapabilities(Browser.chrome, false, webBrowserFlags: webBrowserFlags), expected);
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
@@ -109,10 +136,10 @@ void main() {
           'media.gmp-provider.enabled': false,
           'network.captive-portal-service.enabled': false,
           'security.insecure_field_warning.contextual.enabled': false,
-          'test.currentTimeOffsetSeconds': 11491200
+          'test.currentTimeOffsetSeconds': 11491200,
         },
-        'log': <String, String>{'level': 'trace'}
-      }
+        'log': <String, String>{'level': 'trace'},
+      },
     };
 
     expect(getDesiredCapabilities(Browser.firefox, true), expected);
@@ -132,13 +159,43 @@ void main() {
           'media.gmp-provider.enabled': false,
           'network.captive-portal-service.enabled': false,
           'security.insecure_field_warning.contextual.enabled': false,
-          'test.currentTimeOffsetSeconds': 11491200
+          'test.currentTimeOffsetSeconds': 11491200,
         },
-        'log': <String, String>{'level': 'trace'}
-      }
+        'log': <String, String>{'level': 'trace'},
+      },
     };
 
     expect(getDesiredCapabilities(Browser.firefox, false), expected);
+  });
+
+  testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
+    const List<String> webBrowserFlags = <String>[
+      '-url=https://example.com',
+      '-private',
+    ];
+    final Map<String, dynamic> expected = <String, dynamic>{
+      'acceptInsecureCerts': true,
+      'browserName': 'firefox',
+      'moz:firefoxOptions' : <String, dynamic>{
+        'args': <String>[
+          '-url=https://example.com',
+          '-private',
+        ],
+        'prefs': <String, dynamic>{
+          'dom.file.createInChild': true,
+          'dom.timeout.background_throttling_max_budget': -1,
+          'media.autoplay.default': 0,
+          'media.gmp-manager.url': '',
+          'media.gmp-provider.enabled': false,
+          'network.captive-portal-service.enabled': false,
+          'security.insecure_field_warning.contextual.enabled': false,
+          'test.currentTimeOffsetSeconds': 11491200,
+        },
+        'log': <String, String>{'level': 'trace'},
+      },
+    };
+
+    expect(getDesiredCapabilities(Browser.firefox, false, webBrowserFlags: webBrowserFlags), expected);
   });
 
   testWithoutContext('getDesiredCapabilities Edge', () {
@@ -162,23 +219,31 @@ void main() {
     final Map<String, dynamic> expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
-      'safari:useSimulator': true
+      'safari:useSimulator': true,
     };
 
     expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
   });
 
   testWithoutContext('getDesiredCapabilities android chrome', () {
+    const List<String> webBrowserFlags = <String>[
+      '--autoplay-policy=no-user-gesture-required',
+      '--incognito',
+    ];
     final Map<String, dynamic> expected = <String, dynamic>{
       'browserName': 'chrome',
       'platformName': 'android',
       'goog:chromeOptions': <String, dynamic>{
         'androidPackage': 'com.android.chrome',
-        'args': <String>['--disable-fullscreen']
+        'args': <String>[
+          '--disable-fullscreen',
+          '--autoplay-policy=no-user-gesture-required',
+          '--incognito',
+        ],
       },
     };
 
-    expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
+    expect(getDesiredCapabilities(Browser.androidChrome, false, webBrowserFlags: webBrowserFlags), expected);
   });
 
   testUsingContext('WebDriverService starts and stops an app', () async {

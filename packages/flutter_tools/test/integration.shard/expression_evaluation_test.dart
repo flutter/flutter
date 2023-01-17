@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 
 import 'package:vm_service/vm_service.dart';
@@ -16,8 +14,8 @@ import 'test_utils.dart';
 
 void batch1() {
   final BasicProject project = BasicProject();
-  Directory tempDir;
-  FlutterRunTestDriver flutter;
+  late Directory tempDir;
+  late FlutterRunTestDriver flutter;
 
   Future<void> initProject() async {
     tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
@@ -95,8 +93,8 @@ void batch1() {
 
 void batch2() {
   final TestsProject project = TestsProject();
-  Directory tempDir;
-  FlutterTestTestDriver flutter;
+  late Directory tempDir;
+  late FlutterTestTestDriver flutter;
 
   Future<void> initProject() async {
     tempDir = createResolvedTempDirectorySync('test_expression_eval_test.');
@@ -105,7 +103,7 @@ void batch2() {
   }
 
   Future<void> cleanProject() async {
-    await flutter?.waitForCompletion();
+    await flutter.waitForCompletion();
     tryToDelete(tempDir);
   }
 
@@ -157,25 +155,22 @@ Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
 }
 
 Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
-  final ObjRef res = await flutter.evaluateInFrame('new DateTime.now().year');
-  expectValueOfType(res, InstanceKind.kInt, DateTime.now().year.toString());
+  final ObjRef res = await flutter.evaluateInFrame('new DateTime(2000).year');
+  expectValueOfType(res, InstanceKind.kInt, '2000');
 }
 
 Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
-  final DateTime now = DateTime.now();
-  final ObjRef resp = await flutter.evaluateInFrame('new DateTime.now()');
+  final DateTime date = DateTime(2000);
+  final ObjRef resp = await flutter.evaluateInFrame('new DateTime(2000)');
   expectInstanceOfClass(resp, 'DateTime');
-  // Ensure we got a reasonable approximation. The more accurate we try to
-  // make this, the more likely it'll fail due to differences in the time
-  // in the remote VM and the local VM at the time the code runs.
-  final ObjRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
-  expectValue(res, '${now.year}-${now.month}-${now.day}');
+  final ObjRef res = await flutter.evaluate(resp.id!, r'"$year-$month-$day"');
+  expectValue(res, '${date.year}-${date.month}-${date.day}');
 }
 
 void expectInstanceOfClass(ObjRef result, String name) {
   expect(result,
     const TypeMatcher<InstanceRef>()
-      .having((InstanceRef instance) => instance.classRef.name, 'resp.classRef.name', name));
+      .having((InstanceRef instance) => instance.classRef!.name, 'resp.classRef.name', name));
 }
 
 void expectValueOfType(ObjRef result, String kind, String message) {

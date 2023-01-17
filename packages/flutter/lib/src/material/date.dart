@@ -182,9 +182,9 @@ enum DatePickerEntryMode {
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a dialog that contains a material design
+///  * [showDatePicker], which shows a dialog that contains a Material Design
 ///    date picker.
-///  * [CalendarDatePicker], widget which implements the material design date picker.
+///  * [CalendarDatePicker], widget which implements the Material Design date picker.
 enum DatePickerMode {
   /// Choosing a month and day.
   day,
@@ -231,8 +231,9 @@ class DateTimeRange {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is DateTimeRange
       && other.start == start
       && other.end == end;

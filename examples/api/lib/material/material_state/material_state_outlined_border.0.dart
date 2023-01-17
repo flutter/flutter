@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
 
 class SelectedBorder extends RoundedRectangleBorder
     implements MaterialStateOutlinedBorder {
+  const SelectedBorder();
+
   @override
   OutlinedBorder? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
@@ -34,7 +36,7 @@ class SelectedBorder extends RoundedRectangleBorder
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -54,7 +56,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             isSelected = value;
           });
         },
-        shape: SelectedBorder(),
+        shape: const SelectedBorder(),
       ),
     );
   }

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -146,6 +145,31 @@ void main() {
       expect(diagnosticNodes[2].name, 'child 3');
       expect(diagnosticNodes[2].style, DiagnosticsTreeStyle.sparse);
     });
+  });
+
+  test('Stack in Flex can layout with no children', () {
+    // Render an empty Stack in a Flex
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <RenderBox>[
+        RenderStack(
+          textDirection: TextDirection.ltr,
+          children: <RenderBox>[],
+        ),
+      ]
+    );
+
+    bool stackFlutterErrorThrown = false;
+    layout(
+      flex,
+      constraints: BoxConstraints.tight(const Size(100.0, 100.0)),
+      onErrors: () {
+        stackFlutterErrorThrown = true;
+      }
+    );
+
+    expect(stackFlutterErrorThrown, false);
   });
 
   // More tests in ../widgets/stack_test.dart

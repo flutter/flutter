@@ -15,6 +15,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.content.Context;
 import androidx.annotation.NonNull;
 
@@ -64,6 +66,16 @@ public class MainActivity extends FlutterActivity {
             }
             AccessibilityNodeInfo node = provider.createAccessibilityNodeInfo(id);
             result.success(convertSemantics(node, id));
+            return;
+        }
+        if (methodCall.method.equals("setClipboard")) {
+            Map<String, Object> data = methodCall.arguments();
+            @SuppressWarnings("unchecked")
+            String message = (String) data.get("message");
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("message", message);
+            clipboard.setPrimaryClip(clip);
+            result.success(null);
             return;
         }
         result.notImplemented();

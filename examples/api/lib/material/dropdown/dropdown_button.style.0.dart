@@ -6,34 +6,31 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const DropdownButtonApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class DropdownButtonApp extends StatelessWidget {
+  const DropdownButtonApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('DropdownButton Sample')),
+        body: const DropdownButtonExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class DropdownButtonExample extends StatefulWidget {
+  const DropdownButtonExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DropdownButtonExample> createState() => _DropdownButtonExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  List<String> options = <String>['One', 'Two', 'Free', 'Four'];
+class _DropdownButtonExampleState extends State<DropdownButtonExample> {
+  List<String> options = <String>['One', 'Two', 'Three', 'Four'];
   String dropdownValue = 'One';
 
   @override
@@ -43,17 +40,24 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       color: Colors.blue,
       child: DropdownButton<String>(
         value: dropdownValue,
-        onChanged: (String? newValue) {
+        onChanged: (String? value) {
+          // This is called when the user selects an item.
           setState(() {
-            dropdownValue = newValue!;
+            dropdownValue = value!;
           });
         },
         style: const TextStyle(color: Colors.blue),
         selectedItemBuilder: (BuildContext context) {
+          // This is the widget that will be shown when you select an item.
+          // Here custom text style, alignment and layout size can be applied
+          // to selected item string.
           return options.map((String value) {
-            return Text(
-              dropdownValue,
-              style: const TextStyle(color: Colors.white),
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                dropdownValue,
+                style: const TextStyle(color: Colors.white),
+              ),
             );
           }).toList();
         },

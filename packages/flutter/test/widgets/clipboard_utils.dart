@@ -11,22 +11,23 @@ class MockClipboard {
 
   final bool hasStringsThrows;
 
-  dynamic _clipboardData = <String, dynamic>{
+  dynamic clipboardData = <String, dynamic>{
     'text': null,
   };
 
   Future<Object?> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
-        return _clipboardData;
+        return clipboardData;
       case 'Clipboard.hasStrings':
-        if (hasStringsThrows)
+        if (hasStringsThrows) {
           throw Exception();
-        final Map<String, dynamic>? clipboardDataMap = _clipboardData as Map<String, dynamic>?;
+        }
+        final Map<String, dynamic>? clipboardDataMap = clipboardData as Map<String, dynamic>?;
         final String? text = clipboardDataMap?['text'] as String?;
         return <String, bool>{'value': text != null && text.isNotEmpty};
       case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
+        clipboardData = methodCall.arguments;
         break;
     }
     return null;

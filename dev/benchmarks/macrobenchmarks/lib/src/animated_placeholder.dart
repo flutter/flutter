@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:ui' as ui show Codec;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -57,11 +58,11 @@ class DelayedBase64Image extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(int key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: Future<ui.Codec>.delayed(
         delay,
-        () => decode(base64.decode(data)),
+        () async => decode(await ImmutableBuffer.fromUint8List(base64.decode(data))),
       ),
       scale: 1.0,
     );

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:io' as io show ProcessSignal;
 
 import 'package:file/file.dart';
@@ -17,7 +15,7 @@ import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 import 'test_utils.dart';
 
@@ -32,14 +30,14 @@ void main() {
     }
     testWithoutContext(
         'should log a message to stderr when lock is not acquired', () async {
-      final String oldRoot = Cache.flutterRoot;
+      final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final BufferLogger logger = BufferLogger(
         terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
         outputPreferences: OutputPreferences(),
       );
       logger.fatalWarnings = true;
-      Process process;
+      Process? process;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
         final Cache cache = Cache.test(
@@ -48,10 +46,10 @@ void main() {
           logger: logger,
         );
         final File cacheFile = fileSystem.file(fileSystem.path
-            .join(Cache.flutterRoot, 'bin', 'cache', 'lockfile'))
+            .join(Cache.flutterRoot!, 'bin', 'cache', 'lockfile'))
           ..createSync(recursive: true);
         final File script = fileSystem.file(fileSystem.path
-            .join(Cache.flutterRoot, 'bin', 'cache', 'test_lock.dart'));
+            .join(Cache.flutterRoot!, 'bin', 'cache', 'test_lock.dart'));
         script.writeAsStringSync(r'''
 import 'dart:async';
 import 'dart:io';
@@ -113,7 +111,7 @@ Future<void> main(List<String> args) async {
     });
     testWithoutContext(
         'should log a warning message for unknown version ', () async {
-      final String oldRoot = Cache.flutterRoot;
+      final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final BufferLogger logger = BufferLogger(
         terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
@@ -164,8 +162,8 @@ Future<void> main(List<String> args) async {
 }
 
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
-  void Function(String, Uri, Directory) onDownloadZipArchive;
-  void Function(String, Uri, Directory) onDownloadZipTarball;
+  void Function(String, Uri, Directory)? onDownloadZipArchive;
+  void Function(String, Uri, Directory)? onDownloadZipTarball;
 
   @override
   Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
@@ -189,7 +187,7 @@ class FakeVersionlessArtifact extends CachedArtifact {
   );
 
   @override
-  String get version => null;
+  String? get version => null;
 
   @override
   Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }

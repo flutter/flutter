@@ -11,6 +11,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:test/fake.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
@@ -214,7 +216,7 @@ void main() {
           'example_url',
         ],
         stderr: kDevtoolsStderr,
-      )
+      ),
     ]);
 
     await expectReturnsNormallyLater(
@@ -253,7 +255,7 @@ void main() {
           'example_url',
         ],
         stderr: kDevtoolsStderr,
-      )
+      ),
     ]);
 
     await expectReturnsNormallyLater(
@@ -324,6 +326,32 @@ void main() {
         debugPort: 10000,
       )
     );
+  });
+
+  testWithoutContext('can launch chrome with arbitrary flags', () async {
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+        '--remote-debugging-port=12345',
+        ...kChromeArgs,
+        '--autoplay-policy=no-user-gesture-required',
+        '--incognito',
+        '--auto-select-desktop-capture-source="Entire screen"',
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
+
+    await expectReturnsNormallyLater(chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      webBrowserFlags: <String>[
+        '--autoplay-policy=no-user-gesture-required',
+        '--incognito',
+        '--auto-select-desktop-capture-source="Entire screen"',
+      ],
+    ));
   });
 
   testWithoutContext('can launch chrome headless', () async {
@@ -556,6 +584,48 @@ void main() {
     );
     expect(logger.errorText, contains('SocketException'));
   });
+
+  test('can recover if getTabs throws a connection exception', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher);
+    expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
+    expect(logger.errorText, isEmpty);
+  });
+
+  test('exits if getTabs throws a connection exception consistently', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeChromeConnection chromeConnection = FakeChromeConnection();
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher);
+    await expectToolExitLater(
+      chromiumLauncher.connect(chrome, false),
+        allOf(
+          contains('Unable to connect to Chrome debug port'),
+          contains('incorrect format'),
+        ));
+    expect(logger.errorText,
+      allOf(
+          contains('incorrect format'),
+          contains('OK'),
+          contains('<html> ...'),
+        ));
+  });
 }
 
 Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
@@ -574,4 +644,37 @@ Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager proces
     'example_url',
     skipCheck: true,
   );
+}
+
+/// Fake chrome connection that fails to get tabs a few times.
+class FakeChromeConnection extends Fake implements ChromeConnection {
+
+  /// Create a connection that throws a connection exception on first
+  /// [maxRetries] calls to [getTabs].
+  /// If [maxRetries] is `null`, [getTabs] calls never succeed.
+  FakeChromeConnection({this.maxRetries}): _retries = 0;
+
+  final List<ChromeTab> tabs = <ChromeTab>[];
+  final int? maxRetries;
+  int _retries;
+
+  @override
+  Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
+    return tabs.firstWhere(accept);
+  }
+
+  @override
+  Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
+    _retries ++;
+    if (maxRetries == null || _retries < maxRetries!) {
+      throw ConnectionException(
+        formatException: const FormatException('incorrect format'),
+        responseStatus: 'OK,',
+        responseBody: '<html> ...');
+    }
+    return tabs;
+  }
+
+  @override
+  void close() {}
 }

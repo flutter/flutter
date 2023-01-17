@@ -190,11 +190,11 @@ class ProcessRunner {
       }
     } on ProcessException catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw UnpublishException(message);
     } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw UnpublishException(message);
     }
 

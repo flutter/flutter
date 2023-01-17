@@ -28,7 +28,7 @@ class Pair<T> {
 /// and the other child in the bottom half. It will swap which child is on top
 /// and which is on bottom every time the widget is rendered.
 abstract class Swapper extends RenderObjectWidget {
-  const Swapper({ Key? key, this.stable, this.swapper }) : super(key: key);
+  const Swapper({ super.key, this.stable, this.swapper });
 
   final Widget? stable;
   final Widget? swapper;
@@ -42,10 +42,10 @@ abstract class Swapper extends RenderObjectWidget {
 
 class SwapperWithProperOverrides extends Swapper {
   const SwapperWithProperOverrides({
-    Key? key,
-    Widget? stable,
-    Widget? swapper,
-  }) : super(key: key, stable: stable, swapper: swapper);
+    super.key,
+    super.stable,
+    super.swapper,
+  });
 
   @override
   SwapperElement createElement() => SwapperElementWithProperOverrides(this);
@@ -53,17 +53,17 @@ class SwapperWithProperOverrides extends Swapper {
 
 class SwapperWithNoOverrides extends Swapper {
   const SwapperWithNoOverrides({
-    Key? key,
-    Widget? stable,
-    Widget? swapper,
-  }) : super(key: key, stable: stable, swapper: swapper);
+    super.key,
+    super.stable,
+    super.swapper,
+  });
 
   @override
   SwapperElement createElement() => SwapperElementWithNoOverrides(this);
 }
 
 abstract class SwapperElement extends RenderObjectElement {
-  SwapperElement(Swapper widget) : super(widget);
+  SwapperElement(Swapper super.widget);
 
   Element? stable;
   Element? swapper;
@@ -80,10 +80,12 @@ abstract class SwapperElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (stable != null)
+    if (stable != null) {
       visitor(stable!);
-    if (swapper != null)
+    }
+    if (swapper != null) {
       visitor(swapper!);
+    }
   }
 
   @override
@@ -106,16 +108,17 @@ abstract class SwapperElement extends RenderObjectElement {
 }
 
 class SwapperElementWithProperOverrides extends SwapperElement {
-  SwapperElementWithProperOverrides(Swapper widget) : super(widget);
+  SwapperElementWithProperOverrides(super.widget);
 
   @override
   void insertRenderObjectChild(RenderBox child, Object? slot) {
     insertSlots.add(slot);
     assert(child != null);
-    if (slot == 'stable')
+    if (slot == 'stable') {
       renderObject.stable = child;
-    else
+    } else {
       renderObject.setSwapper(child, slot! as bool);
+    }
   }
 
   @override
@@ -128,28 +131,32 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   @override
   void removeRenderObjectChild(RenderBox child, Object? slot) {
     removeSlots.add(slot);
-    if (slot == 'stable')
+    if (slot == 'stable') {
       renderObject.stable = null;
-    else
+    } else {
       renderObject.setSwapper(null, slot! as bool);
+    }
   }
 }
 
 class SwapperElementWithNoOverrides extends SwapperElement {
-  SwapperElementWithNoOverrides(Swapper widget) : super(widget);
+  SwapperElementWithNoOverrides(super.widget);
 }
 
 class RenderSwapper extends RenderBox {
   RenderBox? _stable;
   RenderBox? get stable => _stable;
   set stable(RenderBox? child) {
-    if (child == _stable)
+    if (child == _stable) {
       return;
-    if (_stable != null)
+    }
+    if (_stable != null) {
       dropChild(_stable!);
+    }
     _stable = child;
-    if (child != null)
+    if (child != null) {
       adoptChild(child);
+    }
   }
 
   bool? _swapperIsOnTop;
@@ -160,21 +167,26 @@ class RenderSwapper extends RenderBox {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
     }
-    if (child == _swapper)
+    if (child == _swapper) {
       return;
-    if (_swapper != null)
+    }
+    if (_swapper != null) {
       dropChild(_swapper!);
+    }
     _swapper = child;
-    if (child != null)
+    if (child != null) {
       adoptChild(child);
+    }
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (_stable != null)
+    if (_stable != null) {
       visitor(_stable!);
-    if (_swapper != null)
+    }
+    if (_swapper != null) {
       visitor(_swapper!);
+    }
   }
 
   @override

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget _boilerplate(VoidCallback? onButtonPressed, {
+  Widget boilerplateWidget(VoidCallback? onButtonPressed, {
     DraggableScrollableController? controller,
     int itemCount = 100,
     double initialChildSize = .5,
@@ -63,9 +63,57 @@ void main() {
     );
   }
 
+  testWidgets('Do not crash when replacing scroll position during the drag', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89681
+    bool showScrollbars = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.2,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (BuildContext context, ScrollController scrollController) {
+                showScrollbars = !showScrollbars;
+                // Change the scroll behavior will trigger scroll position replace.
+                final ScrollBehavior behavior = const ScrollBehavior().copyWith(scrollbars: showScrollbars);
+                return ScrollConfiguration(
+                  behavior: behavior,
+                  child: ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    controller: scrollController,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemCount: 100,
+                    itemBuilder: (_, int index) => SizedBox(
+                      height: 100,
+                      child: ColoredBox(
+                        color: Colors.primaries[index % Colors.primaries.length],
+                        child: Text('Item $index'),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('Item 1'), const Offset(0, 200), 350);
+    await tester.pumpAndSettle();
+
+    // Go without throw.
+  });
+
   testWidgets('Scrolls correct amount when maxChildSize < 1.0', (WidgetTester tester) async {
     const Key key = ValueKey<String>('container');
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       maxChildSize: .6,
       initialChildSize: .25,
@@ -81,7 +129,7 @@ void main() {
 
   testWidgets('Scrolls correct amount when maxChildSize == 1.0', (WidgetTester tester) async {
     const Key key = ValueKey<String>('container');
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       initialChildSize: .25,
       itemExtent: 25.0,
@@ -95,20 +143,20 @@ void main() {
   });
 
   testWidgets('Invalid snap targets throw assertion errors.', (WidgetTester tester) async {
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       maxChildSize: .8,
       snapSizes: <double>[.9],
     ));
     expect(tester.takeException(), isAssertionError);
 
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       snapSizes: <double>[.1],
     ));
     expect(tester.takeException(), isAssertionError);
 
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       snapSizes: <double>[.6, .6, .9],
     ));
@@ -118,7 +166,7 @@ void main() {
   group('Scroll Physics', () {
     testWidgets('Can be dragged up without covering its container', (WidgetTester tester) async {
       int taps = 0;
-      await tester.pumpWidget(_boilerplate(() => taps++));
+      await tester.pumpWidget(boilerplateWidget(() => taps++));
 
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
@@ -138,7 +186,7 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Can be dragged down when not full height', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(null));
+      await tester.pumpWidget(boilerplateWidget(null));
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 21'), findsOneWidget);
       expect(find.text('Item 36'), findsNothing);
@@ -151,7 +199,7 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Can be dragged down when list is shorter than full height', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(null, itemCount: 30, initialChildSize: .25));
+      await tester.pumpWidget(boilerplateWidget(null, itemCount: 30, initialChildSize: .25));
 
       expect(find.text('Item 1').hitTestable(), findsOneWidget);
       expect(find.text('Item 29').hitTestable(), findsNothing);
@@ -169,7 +217,7 @@ void main() {
 
     testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (WidgetTester tester) async {
       int taps = 0;
-      await tester.pumpWidget(_boilerplate(() => taps++));
+      await tester.pumpWidget(boilerplateWidget(() => taps++));
 
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
@@ -198,7 +246,7 @@ void main() {
 
     testWidgets('Can be flung up gently', (WidgetTester tester) async {
       int taps = 0;
-      await tester.pumpWidget(_boilerplate(() => taps++));
+      await tester.pumpWidget(boilerplateWidget(() => taps++));
 
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
@@ -221,7 +269,7 @@ void main() {
 
     testWidgets('Can be flung up', (WidgetTester tester) async {
       int taps = 0;
-      await tester.pumpWidget(_boilerplate(() => taps++));
+      await tester.pumpWidget(boilerplateWidget(() => taps++));
 
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
@@ -241,7 +289,7 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(null));
+      await tester.pumpWidget(boilerplateWidget(null));
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 21'), findsOneWidget);
       expect(find.text('Item 36'), findsNothing);
@@ -255,7 +303,7 @@ void main() {
 
     testWidgets('Can be flung up and then back down', (WidgetTester tester) async {
       int taps = 0;
-      await tester.pumpWidget(_boilerplate(() => taps++));
+      await tester.pumpWidget(boilerplateWidget(() => taps++));
 
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
@@ -294,7 +342,7 @@ void main() {
 
     testWidgets('Ballistic animation on fling can be interrupted', (WidgetTester tester) async {
       int taps = 0;
-      await tester.pumpWidget(_boilerplate(() => taps++));
+      await tester.pumpWidget(boilerplateWidget(() => taps++));
 
       expect(find.text('TapHere'), findsOneWidget);
       await tester.tap(find.text('TapHere'));
@@ -326,13 +374,65 @@ void main() {
       expect(find.text('Item 70'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    debugDefaultTargetPlatformOverride = null;
+    testWidgets('Ballistic animation on fling should not leak Ticker', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/101061
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.8,
+                minChildSize: 0.2,
+                maxChildSize: 0.9,
+                expand: false,
+                builder: (_, ScrollController scrollController) {
+                  return ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    controller: scrollController,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemCount: 100,
+                    itemBuilder: (_, int index) => SizedBox(
+                      height: 100,
+                      child: ColoredBox(
+                        color: Colors.primaries[index % Colors.primaries.length],
+                        child: Text('Item $index'),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.flingFrom(
+        tester.getCenter(find.text('Item 1')),
+        const Offset(0, 50),
+        10000,
+      );
+
+      // Pumps several times to let the DraggableScrollableSheet react to scroll position changes.
+      const int numberOfPumpsBeforeError = 22;
+      for (int i = 0; i < numberOfPumpsBeforeError; i++) {
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+
+      // Dispose the DraggableScrollableSheet
+      await tester.pumpWidget(const SizedBox.shrink());
+
+      // When a Ticker leaks an exception is thrown
+      expect(tester.takeException(), isNull);
+    });
   });
 
   testWidgets('Does not snap away from initial child on build', (WidgetTester tester) async {
     const Key containerKey = ValueKey<String>('container');
     const Key stackKey = ValueKey<String>('stack');
-    await tester.pumpWidget(_boilerplate(null,
+    await tester.pumpWidget(boilerplateWidget(null,
       snap: true,
       initialChildSize: .7,
       containerKey: containerKey,
@@ -353,7 +453,7 @@ void main() {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
       final DraggableScrollableController controller = DraggableScrollableController();
-      await tester.pumpWidget(_boilerplate(
+      await tester.pumpWidget(boilerplateWidget(
         null,
         controller: controller,
         snap: true,
@@ -388,7 +488,7 @@ void main() {
   testWidgets('Zero velocity drag snaps to nearest snap target', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
-    await tester.pumpWidget(_boilerplate(null,
+    await tester.pumpWidget(boilerplateWidget(null,
       snap: true,
       stackKey: stackKey,
       containerKey: containerKey,
@@ -442,7 +542,7 @@ void main() {
     testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
-      await tester.pumpWidget(_boilerplate(null,
+      await tester.pumpWidget(boilerplateWidget(null,
         snap: true,
         stackKey: stackKey,
         containerKey: containerKey,
@@ -470,7 +570,7 @@ void main() {
   testWidgets('Min and max are implicitly added to snapSizes', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
-    await tester.pumpWidget(_boilerplate(null,
+    await tester.pumpWidget(boilerplateWidget(null,
       snap: true,
       stackKey: stackKey,
       containerKey: containerKey,
@@ -497,7 +597,7 @@ void main() {
   testWidgets('Changes to widget parameters are propagated', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       stackKey: stackKey,
       containerKey: containerKey,
@@ -510,7 +610,7 @@ void main() {
     );
 
     // Pump the same widget but with a new initial child size.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       stackKey: stackKey,
       containerKey: containerKey,
@@ -525,7 +625,7 @@ void main() {
     );
 
     // Pump the same widget but with a new max child size.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       stackKey: stackKey,
       containerKey: containerKey,
@@ -547,7 +647,7 @@ void main() {
     );
 
     // Pump the same widget but with a new max child size and initial size.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       stackKey: stackKey,
       containerKey: containerKey,
@@ -567,7 +667,7 @@ void main() {
     await tester.drag(find.text('Item 1'), Offset(0, .2 * screenHeight));
 
     // Pump the same widget but with snapping enabled.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       snap: true,
       stackKey: stackKey,
@@ -586,7 +686,7 @@ void main() {
     final List<double> snapSizes = <double>[.6];
 
     // Change the snap sizes.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       snap: true,
       stackKey: stackKey,
@@ -605,7 +705,7 @@ void main() {
   testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
-    await tester.pumpWidget(_boilerplate(null,
+    await tester.pumpWidget(boilerplateWidget(null,
       snap: true,
       stackKey: stackKey,
       containerKey: containerKey,
@@ -631,23 +731,80 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets("Changing parameters with an un-listened controller doesn't throw", (WidgetTester tester) async {
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       snap: true,
       // Will prevent the sheet's child from listening to the controller.
       ignoreController: true,
     ));
     await tester.pumpAndSettle();
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       snap: true,
     ));
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Transitioning between scrollable children sharing a scroll controller will not throw', (WidgetTester tester) async {
+    int s = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: DraggableScrollableSheet(
+              initialChildSize: 0.25,
+              snap: true,
+              snapSizes: const <double>[0.25, 0.5, 1.0],
+              builder: (BuildContext context, ScrollController scrollController) {
+                return PrimaryScrollController(
+                  controller: scrollController,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: (s.isEven)
+                      ? ListView(
+                        children: <Widget>[
+                          ElevatedButton(
+                            onPressed: () => setState(() => ++s),
+                            child: const Text('Switch to 2'),
+                          ),
+                          Container(
+                            height: 400,
+                            color: Colors.blue,
+                          ),
+                        ],
+                      )
+                      : SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () => setState(() => ++s),
+                              child: const Text('Switch to 1'),
+                            ),
+                            Container(
+                              height: 400,
+                              color: Colors.blue,
+                            ),
+                          ],
+                        )
+                      ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    ));
+
+    // Trigger the AnimatedSwitcher between ListViews
+    await tester.tap(find.text('Switch to 2'));
+    await tester.pump();
+    // Completes without throwing
+  });
+
   testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       onScrollNotification: (ScrollNotification notification) {
         notificationTypes.add(notification.runtimeType);
@@ -668,7 +825,7 @@ void main() {
 
   testWidgets('ScrollNotification correctly dispatched when flung with contents scroll', (WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       onScrollNotification: (ScrollNotification notification) {
         notificationTypes.add(notification.runtimeType);
@@ -691,7 +848,7 @@ void main() {
 
   testWidgets('Do not crash when remove the tree during animation.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89214
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       onScrollNotification: (ScrollNotification notification) {
         return false;
@@ -712,7 +869,7 @@ void main() {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       final DraggableScrollableController controller = DraggableScrollableController();
-      await tester.pumpWidget(_boilerplate(
+      await tester.pumpWidget(boilerplateWidget(
         null,
         controller: controller,
         stackKey: stackKey,
@@ -789,7 +946,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
       stackKey: stackKey,
@@ -836,7 +993,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
       stackKey: stackKey,
@@ -845,7 +1002,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Pump a new sheet with the same controller. This will dispose of the old sheet first.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
       stackKey: stackKey,
@@ -868,7 +1025,7 @@ void main() {
     final DraggableScrollableController controller = DraggableScrollableController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: _boilerplate(
+      child: boilerplateWidget(
         null,
         controller: controller,
         stackKey: stackKey,
@@ -904,7 +1061,7 @@ void main() {
     final DraggableScrollableController controller = DraggableScrollableController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: _boilerplate(
+      child: boilerplateWidget(
         null,
         controller: controller,
         stackKey: stackKey,
@@ -937,7 +1094,7 @@ void main() {
     final DraggableScrollableController controller = DraggableScrollableController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: _boilerplate(
+      child: boilerplateWidget(
         null,
         controller: controller,
         stackKey: stackKey,
@@ -977,7 +1134,7 @@ void main() {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
       stackKey: stackKey,
@@ -1009,14 +1166,14 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Stack(
         children: <Widget>[
-          _boilerplate(
+          boilerplateWidget(
             null,
             controller: controller,
           ),
-          _boilerplate(
+          boilerplateWidget(
             null,
             controller: controller,
-          )
+          ),
         ],
       ),
     ), null, EnginePhase.build);
@@ -1031,7 +1188,7 @@ void main() {
     controller.addListener(() {
       loggedSizes.add(controller.size);
     });
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
       stackKey: stackKey,
@@ -1079,7 +1236,7 @@ void main() {
     controller.addListener(() {
       loggedSizes.add(controller.size);
     });
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
       stackKey: stackKey,
@@ -1098,7 +1255,7 @@ void main() {
     loggedSizes.clear();
 
     // Update a parameter without forcing a change in the current size.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       minChildSize: .1,
       controller: controller,
@@ -1121,7 +1278,7 @@ void main() {
     controller.addListener(() {
       loggedSizes.add(controller.size);
     });
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
       stackKey: stackKey,
@@ -1136,7 +1293,7 @@ void main() {
 
     // Set a new `initialChildSize` which will trigger a size change because we
     // haven't moved away initial size yet.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       initialChildSize: .6,
       controller: controller,
@@ -1153,7 +1310,7 @@ void main() {
     loggedSizes.clear();
 
     // Set a `minChildSize` greater than the current size.
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       minChildSize: .4,
       controller: controller,
@@ -1174,7 +1331,7 @@ void main() {
     expect(() => controller.pixelsToSize(0), throwsAssertionError);
     expect(() => controller.sizeToPixels(0), throwsAssertionError);
 
-    await tester.pumpWidget(_boilerplate(
+    await tester.pumpWidget(boilerplateWidget(
       null,
       controller: controller,
     ));
@@ -1195,4 +1352,33 @@ void main() {
     // Can't use animateTo with a zero duration.
     expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
   });
+
+  testWidgets('DraggableScrollableController must be attached before using any of its paramters', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    expect(controller.isAttached, false);
+    expect(()=>controller.size, throwsAssertionError);
+    final Widget boilerplate = boilerplateWidget(
+        null,
+        minChildSize: 0.4,
+        controller: controller,
+      );
+    await tester.pumpWidget(boilerplate);
+    expect(controller.isAttached, true);
+    expect(controller.size, isNotNull);
+    });
+
+    testWidgets('DraggableScrollableController.animateTo should not leak Ticker', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/102483
+      final DraggableScrollableController controller = DraggableScrollableController();
+      await tester.pumpWidget(boilerplateWidget(() {}, controller: controller));
+
+      controller.animateTo(0.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+      await tester.pump();
+
+      // Dispose the DraggableScrollableSheet
+      await tester.pumpWidget(const SizedBox.shrink());
+      // Controller should be detached and no exception should be thrown
+      expect(controller.isAttached, false);
+      expect(tester.takeException(), isNull);
+    });
 }

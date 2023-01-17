@@ -657,7 +657,7 @@ void main() {
             jsonResponse: <String, Object>{
               'views': <Object>[
                 for (FlutterView view in views)
-                  view.toJson()
+                  view.toJson(),
               ],
             },
           ),
@@ -874,26 +874,6 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
   Future<void> dispose() async {
     disposed = true;
   }
-}
-
-class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
-
-  @override
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
-    return FakeFuchsiaIsolateDiscoveryProtocol();
-  }
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia_arm64;
-}
-
-class FakeFuchsiaIsolateDiscoveryProtocol implements FuchsiaIsolateDiscoveryProtocol {
-  @override
-  FutureOr<Uri> get uri => Uri.parse('http://[::1]:37');
-
-  @override
-  void dispose() {}
 }
 
 class FakeFuchsiaFfx implements FuchsiaFfx {

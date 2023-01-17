@@ -22,11 +22,11 @@ void main() {
       }) async {
         final List<FakeNetworkInterface> interfaces = <FakeNetworkInterface>[
           FakeNetworkInterface(<FakeInternetAddress>[
-            const FakeInternetAddress('127.0.0.1')
+            const FakeInternetAddress('127.0.0.1'),
           ]),
           FakeNetworkInterface(<FakeInternetAddress>[
-            const FakeInternetAddress('::1')
-          ])
+            const FakeInternetAddress('::1'),
+          ]),
         ];
 
         return Future<List<NetworkInterface>>.value(interfaces);

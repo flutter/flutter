@@ -48,7 +48,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -94,10 +94,10 @@ class _MyAppState extends State<MyApp> {
 
 class Home extends StatelessWidget {
   const Home({
-    Key? key,
+    super.key,
     required this.isLightTheme,
     required this.toggleTheme,
-  }) : super(key: key);
+  });
 
   final bool isLightTheme;
   final void Function() toggleTheme;

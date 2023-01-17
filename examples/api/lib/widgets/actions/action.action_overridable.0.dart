@@ -21,12 +21,12 @@ void main() {
 // [DeleteCharacterIntent] intent.
 class DigitInput extends StatefulWidget {
   const DigitInput({
-    Key? key,
+    super.key,
     required this.controller,
     required this.focusNode,
     this.maxLength,
     this.textInputAction = TextInputAction.next,
-  }) : super(key: key);
+  });
 
   final int? maxLength;
   final TextEditingController controller;
@@ -73,7 +73,7 @@ class DigitInputState extends State<DigitInput> {
 }
 
 class SimpleUSPhoneNumberEntry extends StatefulWidget {
-  const SimpleUSPhoneNumberEntry({Key? key}) : super(key: key);
+  const SimpleUSPhoneNumberEntry({super.key});
 
   @override
   State<SimpleUSPhoneNumberEntry> createState() =>

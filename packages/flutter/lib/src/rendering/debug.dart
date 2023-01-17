@@ -116,6 +116,8 @@ bool debugCheckIntrinsicSizes = false;
 ///  * [debugProfileBuildsEnabled], which does something similar for widgets
 ///    being rebuilt.
 ///  * [debugProfilePaintsEnabled], which does something similar for painting.
+///  * [debugEnhanceLayoutTimelineArguments], which enhances the trace with
+///    debugging information related to [RenderObject] layouts.
 bool debugProfileLayoutsEnabled = false;
 
 /// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
@@ -143,7 +145,51 @@ bool debugProfileLayoutsEnabled = false;
 ///  * The discussion at [RendererBinding.drawFrame].
 ///  * [RepaintBoundary], which can be used to contain repaints when unchanged
 ///    areas are being excessively repainted.
+///  * [debugEnhancePaintTimelineArguments], which enhances the trace with
+///    debugging information related to [RenderObject] paints.
 bool debugProfilePaintsEnabled = false;
+
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// layouts.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "LAYOUT" timeline event and for
+/// all [RenderObject] layout [Timeline] events, which are the events that are
+/// added when [debugProfileLayoutsEnabled] is true. The debugging information
+/// that will be added in trace arguments includes stats around [RenderObject]
+/// dirty states and [RenderObject] diagnostic information (i.e. [RenderObject]
+/// properties).
+///
+/// See also:
+///
+///  * [debugProfileLayoutsEnabled], which adds [Timeline] events for every
+///    [RenderObject] layout.
+///  * [debugEnhancePaintTimelineArguments], which does something similar for
+///    events related to [RenderObject] paints.
+///  * [debugEnhanceBuildTimelineArguments], which does something similar for
+///    events related to [Widget] builds.
+bool debugEnhanceLayoutTimelineArguments = false;
+
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// paints.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "PAINT" timeline event and for
+/// all [RenderObject] paint [Timeline] events, which are the [Timeline] events
+/// that are added when [debugProfilePaintsEnabled] is true. The debugging
+/// information that will be added in trace arguments includes stats around
+/// [RenderObject] dirty states and [RenderObject] diagnostic information
+/// (i.e. [RenderObject] properties).
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which adds [Timeline] events for every
+///    [RenderObject] paint.
+///  * [debugEnhanceLayoutTimelineArguments], which does something similar for
+///    events related to [RenderObject] layouts.
+///  * [debugEnhanceBuildTimelineArguments], which does something similar for
+///    events related to [Widget] builds.
+bool debugEnhancePaintTimelineArguments = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
 typedef ProfilePaintCallback = void Function(RenderObject renderObject);

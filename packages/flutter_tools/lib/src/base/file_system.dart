@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
+import 'common.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'process.dart';
@@ -218,7 +219,12 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   @override
   Directory get systemTempDirectory {
     if (_systemTemp == null) {
-      _systemTemp = super.systemTempDirectory.createTempSync('flutter_tools.')
+      if (!superSystemTempDirectory.existsSync()) {
+        throwToolExit('Your system temp directory (${superSystemTempDirectory.path}) does not exist. '
+          'Did you set an invalid override in your environment? See issue https://github.com/flutter/flutter/issues/74042 for more context.'
+        );
+      }
+      _systemTemp = superSystemTempDirectory.createTempSync('flutter_tools.')
         ..createSync(recursive: true);
       // Make sure that the temporary directory is cleaned up if the tool is
       // killed by a signal.
@@ -239,4 +245,8 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
     }
     return _systemTemp!;
   }
+
+  // This only exist because the memory file system does not support a systemTemp that does not exists #74042
+  @visibleForTesting
+  Directory get superSystemTempDirectory => super.systemTempDirectory;
 }

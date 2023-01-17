@@ -34,7 +34,7 @@ void main() {
         'statusBarBrightness': 'Brightness.dark',
         'statusBarIconBrightness': 'Brightness.light',
         'systemNavigationBarIconBrightness': 'Brightness.light',
-        'systemNavigationBarContrastEnforced': null
+        'systemNavigationBarContrastEnforced': null,
       },
     ));
     log.clear();
@@ -47,7 +47,7 @@ void main() {
 
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemStatusBarContrastEnforced: false,
-      systemNavigationBarContrastEnforced: true
+      systemNavigationBarContrastEnforced: true,
     ));
     expect(tester.binding.microtaskCount, equals(1));
     await tester.idle();
@@ -62,7 +62,7 @@ void main() {
         'statusBarBrightness': null,
         'statusBarIconBrightness': null,
         'systemNavigationBarIconBrightness': null,
-        'systemNavigationBarContrastEnforced': true
+        'systemNavigationBarContrastEnforced': true,
       },
     ));
   });

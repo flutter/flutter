@@ -145,7 +145,7 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri?> getObservatoryUri(String applicationId, Device device, {
+  Future<Uri?> getObservatoryUri(String? applicationId, Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
     int? deviceVmservicePort,
@@ -217,7 +217,6 @@ class MDnsObservatoryDiscovery {
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_uwp_x64:
       case TargetPlatform.windows_x64:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
         break;

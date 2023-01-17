@@ -49,8 +49,9 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
   static TestRenderingFlutterBinding ensureInitialized({ VoidCallback? onErrors }) {
-    if (_instance != null)
+    if (_instance != null) {
       return _instance!;
+    }
     return TestRenderingFlutterBinding(onErrors: onErrors);
   }
 
@@ -143,20 +144,25 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
     };
     try {
       pipelineOwner.flushLayout();
-      if (phase == EnginePhase.layout)
+      if (phase == EnginePhase.layout) {
         return;
+      }
       pipelineOwner.flushCompositingBits();
-      if (phase == EnginePhase.compositingBits)
+      if (phase == EnginePhase.compositingBits) {
         return;
+      }
       pipelineOwner.flushPaint();
-      if (phase == EnginePhase.paint)
+      if (phase == EnginePhase.paint) {
         return;
+      }
       renderView.compositeFrame();
-      if (phase == EnginePhase.composite)
+      if (phase == EnginePhase.composite) {
         return;
+      }
       pipelineOwner.flushSemantics();
-      if (phase == EnginePhase.flushSemantics)
+      if (phase == EnginePhase.flushSemantics) {
         return;
+      }
       assert(phase == EnginePhase.flushSemantics || phase == EnginePhase.sendSemanticsUpdate);
     } finally {
       FlutterError.onError = oldErrorHandler;

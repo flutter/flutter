@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
@@ -24,8 +22,8 @@ final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAg
 final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
 
 void main() {
-  FakeCache cache;
-  FakeProcessManager processManager;
+  late FakeCache cache;
+  late FakeProcessManager processManager;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -70,7 +68,7 @@ void main() {
             stdout: '0.1.2-3-1234abcd',
           ),
           FakeCommand(
-            command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
+            command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
             stdout: 'origin/$channel',
           ),
           const FakeCommand(
@@ -78,31 +76,22 @@ void main() {
             stdout: flutterUpstreamUrl,
           ),
           FakeCommand(
-            command: const <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
             stdout: getChannelUpToDateVersion().toString(),
           ),
           const FakeCommand(
-            command: <String>['git', 'remote'],
-          ),
-          const FakeCommand(
-            command: <String>['git', 'remote', 'add', '__flutter_version_check__', flutterUpstreamUrl],
+            command: <String>['git', 'fetch', '--tags'],
           ),
           FakeCommand(
-            command: <String>['git', 'fetch', '__flutter_version_check__', channel],
-          ),
-          FakeCommand(
-            command: <String>['git', '-c', 'log.showSignature=false', 'log', '__flutter_version_check__/$channel', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', '@{upstream}', '-n', '1', '--pretty=format:%ad', '--date=iso'],
             stdout: getChannelOutOfDateVersion().toString(),
-          ),
-          const FakeCommand(
-            command: <String>['git', 'remote'],
           ),
           const FakeCommand(
             command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ar'],
             stdout: '1 second ago',
           ),
           FakeCommand(
-            command: const <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
             stdout: getChannelUpToDateVersion().toString(),
           ),
           FakeCommand(
@@ -114,6 +103,7 @@ void main() {
         final FlutterVersion flutterVersion = globals.flutterVersion;
         await flutterVersion.checkFlutterVersionFreshness();
         expect(flutterVersion.channel, channel);
+        expect(flutterVersion.repositoryUrl, flutterUpstreamUrl);
         expect(flutterVersion.frameworkRevision, '1234abcd');
         expect(flutterVersion.frameworkRevisionShort, '1234abcd');
         expect(flutterVersion.frameworkVersion, '0.0.0-unknown');
@@ -282,7 +272,7 @@ void main() {
       });
 
       group('$VersionCheckStamp for $channel', () {
-        void _expectDefault(VersionCheckStamp stamp) {
+        void expectDefault(VersionCheckStamp stamp) {
           expect(stamp.lastKnownRemoteVersion, isNull);
           expect(stamp.lastTimeVersionWasChecked, isNull);
           expect(stamp.lastTimeWarningWasPrinted, isNull);
@@ -291,19 +281,19 @@ void main() {
         testWithoutContext('loads blank when stamp file missing', () async {
           cache.versionStamp = null;
 
-          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is malformed JSON', () async {
           cache.versionStamp = '<';
 
-          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads blank when stamp file is well-formed but invalid JSON', () async {
           cache.versionStamp = '[]';
 
-          _expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
+          expectDefault(await VersionCheckStamp.load(cache, BufferLogger.test()));
         });
 
         testWithoutContext('loads valid JSON', () async {
@@ -331,15 +321,15 @@ void main() {
       const String flutterNonStandardUrlDotGit = 'https://githubmirror.com/flutter/flutter.git';
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
-      VersionCheckError runUpstreamValidator({
-        String versionUpstreamUrl,
-        String flutterGitUrl,
+      VersionCheckError? runUpstreamValidator({
+        String? versionUpstreamUrl,
+        String? flutterGitUrl,
       }){
         final Platform testPlatform = FakePlatform(environment: <String, String> {
           if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl,
         });
         return VersionUpstreamValidator(
-          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
+          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl, channel: 'master'),
           platform: testPlatform,
         ).run();
       }
@@ -347,7 +337,7 @@ void main() {
       testWithoutContext('returns error if repository url is null', () {
         final VersionCheckError error = runUpstreamValidator(
           // repositoryUrl is null by default
-        );
+        )!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -360,7 +350,7 @@ void main() {
       });
 
       testWithoutContext('returns error at non-standard remote url with FLUTTER_GIT_URL unset', () {
-        final VersionCheckError error = runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit);
+        final VersionCheckError error = runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit)!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -383,7 +373,7 @@ void main() {
         final VersionCheckError error = runUpstreamValidator(
             versionUpstreamUrl: flutterStandardUrlDotGit,
             flutterGitUrl: flutterNonStandardUrlDotGit,
-        );
+        )!;
         expect(error, isNotNull);
         expect(
           error.message,
@@ -423,7 +413,7 @@ void main() {
         stdout: '0.1.2-3-1234abcd',
       ),
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'],
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
         stdout: 'feature-branch',
       ),
       const FakeCommand(
@@ -526,7 +516,8 @@ void main() {
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
-    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
+    final FakePlatform platform = FakePlatform();
+    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, platform, workingDirectory: '.');
     expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
   });
 
@@ -545,7 +536,9 @@ void main() {
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
-    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
+    final FakePlatform platform = FakePlatform();
+
+    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, platform, workingDirectory: '.');
     expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
   });
 
@@ -569,7 +562,9 @@ void main() {
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
-    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: '.');
+    final FakePlatform platform = FakePlatform();
+
+    final GitTagVersion gitTagVersion = GitTagVersion.determine(processUtils, platform, workingDirectory: '.');
     // reported version should increment the y
     expect(gitTagVersion.frameworkVersionFor(headRevision), '1.3.0-0.0.pre.12');
   });
@@ -588,8 +583,9 @@ void main() {
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
+    final FakePlatform platform = FakePlatform();
 
-    GitTagVersion.determine(processUtils, workingDirectory: '.');
+    GitTagVersion.determine(processUtils, platform, workingDirectory: '.');
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -611,8 +607,9 @@ void main() {
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
+    final FakePlatform platform = FakePlatform();
 
-    GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
+    GitTagVersion.determine(processUtils, platform, workingDirectory: '.', fetchTags: true);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -637,8 +634,9 @@ void main() {
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
+    final FakePlatform platform = FakePlatform();
 
-    GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
+    GitTagVersion.determine(processUtils, platform, workingDirectory: '.', fetchTags: true);
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -663,18 +661,17 @@ void main() {
       processManager: fakeProcessManager,
       logger: BufferLogger.test(),
     );
+    final FakePlatform platform = FakePlatform(
+      environment: <String, String> {'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git'},
+    );
 
-    GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
+    GitTagVersion.determine(processUtils, platform, workingDirectory: '.', fetchTags: true);
     expect(fakeProcessManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{
-    Platform: () => FakePlatform(environment: <String, String>{
-      'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git',
-    }),
   });
 }
 
 class FakeCache extends Fake implements Cache {
-  String versionStamp;
+  String? versionStamp;
   bool setVersionStamp = false;
 
   @override
@@ -690,7 +687,7 @@ class FakeCache extends Fake implements Cache {
   void checkLockAcquired() { }
 
   @override
-  String getStampFor(String artifactName) {
+  String? getStampFor(String artifactName) {
     if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
       return versionStamp;
     }
@@ -706,11 +703,11 @@ class FakeCache extends Fake implements Cache {
 }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
-  FakeFlutterVersion({this.channel, this.repositoryUrl});
+  FakeFlutterVersion({required this.channel, this.repositoryUrl});
 
   @override
   final String channel;
 
   @override
-  final String repositoryUrl;
+  final String? repositoryUrl;
 }

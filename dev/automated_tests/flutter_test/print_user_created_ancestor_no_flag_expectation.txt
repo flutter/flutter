@@ -13,4 +13,5 @@ When the exception was thrown, this was the stack:
   Test failed\. See exception logs above\.
   The test description was: Rendering Error
  *
+To run this test again: .*\.dart -p vm --plain-name 'Rendering Error'
 .*..:.. \+0 -1: Some tests failed\. *

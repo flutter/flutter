@@ -347,7 +347,12 @@ class _ChipDemoState extends State<ChipDemo> {
                 borderRadius: BorderRadius.circular(10.0),
               ))
             : theme.chipTheme,
-        child: Scrollbar(child: ListView(children: tiles)),
+        child: Scrollbar(
+          child: ListView(
+            primary: true,
+            children: tiles,
+          )
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(_reset),

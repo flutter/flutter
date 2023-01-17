@@ -67,7 +67,7 @@ final GetStackPointerCallback getStackPointer = () {
       // "mov r0, sp"  in machine code: 0D00A0E1.
       0x0d, 0x00, 0xa0, 0xe1,
       // "bx lr"       in machine code: 1EFF2FE1.
-      0x1e, 0xff, 0x2f, 0xe1
+      0x1e, 0xff, 0x2f, 0xe1,
     ]
   );
 

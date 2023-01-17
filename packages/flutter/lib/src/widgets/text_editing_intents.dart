@@ -65,14 +65,13 @@ class DeleteToLineBreakIntent extends DirectionalTextEditingIntent {
 abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingIntent {
   /// Creates a [DirectionalCaretMovementIntent].
   const DirectionalCaretMovementIntent(
-    bool forward,
+    super.forward,
     this.collapseSelection,
     [
       this.collapseAtReversal = false,
       this.continuesAtWrap = false,
     ]
-  ) : assert(!collapseSelection || !collapseAtReversal),
-      super(forward);
+  ) : assert(!collapseSelection || !collapseAtReversal);
 
   /// Whether this [Intent] should make the selection collapsed (so it becomes a
   /// caret), after the movement.
@@ -329,4 +328,11 @@ class UpdateSelectionIntent extends Intent {
 
   /// {@macro flutter.widgets.TextEditingIntents.cause}
   final SelectionChangedCause cause;
+}
+
+/// An [Intent] that represents a user interaction that attempts to swap the
+/// characters immediately around the cursor.
+class TransposeCharactersIntent extends Intent {
+  /// Creates a [TransposeCharactersIntent].
+  const TransposeCharactersIntent();
 }

@@ -92,10 +92,10 @@ abstract class Notification {
 class NotificationListener<T extends Notification> extends ProxyWidget {
   /// Creates a widget that listens for notifications.
   const NotificationListener({
-    Key? key,
-    required Widget child,
+    super.key,
+    required super.child,
     this.onNotification,
-  }) : super(key: key, child: child);
+  });
 
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
@@ -121,7 +121,7 @@ class NotificationListener<T extends Notification> extends ProxyWidget {
 
 /// An element used to host [NotificationListener] elements.
 class _NotificationElement<T extends Notification> extends ProxyElement with NotifiableElementMixin {
-  _NotificationElement(NotificationListener<T> widget) : super(widget);
+  _NotificationElement(NotificationListener<T> super.widget);
 
   @override
   bool onNotification(Notification notification) {

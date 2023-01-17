@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
@@ -13,6 +12,113 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/105833
+  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.1, 0.5);
+    bool dragStarted = false;
+    final Key sliderKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 20)),
+                      child: RangeSlider(
+                        key: sliderKey,
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    // Less than configured touch slop, more than default touch slop
+    await drag.moveBy(const Offset(19.0, 0));
+    await tester.pump();
+
+    expect(values, const RangeValues(0.1, 0.5));
+    expect(dragStarted, true);
+
+    dragStarted = false;
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump(kPressTimeout);
+
+    bool sliderEnd = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onHorizontalDragStart: (DragStartDetails details) {
+                      dragStarted = true;
+                    },
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 10)),
+                      child: RangeSlider(
+                        key: sliderKey,
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                        onChangeEnd: (RangeValues newValues) {
+                          sliderEnd = true;
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // More than touch slop.
+    await drag.moveBy(const Offset(12.0, 0));
+
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(sliderEnd, true);
+    expect(dragStarted, false);
+  });
+
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
@@ -940,7 +1046,7 @@ void main() {
     expect(endValues.end, moreOrLessEquals(90, epsilon: 1));
   });
 
-  ThemeData _buildTheme() {
+  ThemeData buildTheme() {
     return ThemeData(
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
@@ -961,7 +1067,7 @@ void main() {
     );
   }
 
-  Widget _buildThemedApp({
+  Widget buildThemedApp({
     required ThemeData theme,
     Color? activeColor,
     Color? inactiveColor,
@@ -995,10 +1101,10 @@ void main() {
   }
 
   testWidgets('Range Slider uses the right theme colors for the right shapes for a default enabled slider', (WidgetTester tester) async {
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme));
+    await tester.pumpWidget(buildThemedApp(theme: theme));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1025,10 +1131,10 @@ void main() {
 
   testWidgets('Range Slider uses the right theme colors for the right shapes when setting the active color', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, activeColor: activeColor));
+    await tester.pumpWidget(buildThemedApp(theme: theme, activeColor: activeColor));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1053,10 +1159,10 @@ void main() {
 
   testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (WidgetTester tester) async {
     const Color inactiveColor = Color(0xdeadbeef);
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, inactiveColor: inactiveColor));
+    await tester.pumpWidget(buildThemedApp(theme: theme, inactiveColor: inactiveColor));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1081,10 +1187,10 @@ void main() {
   testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(
+    await tester.pumpWidget(buildThemedApp(
       theme: theme,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
@@ -1112,10 +1218,10 @@ void main() {
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider', (WidgetTester tester) async {
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, divisions: 3));
+    await tester.pumpWidget(buildThemedApp(theme: theme, divisions: 3));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1144,11 +1250,11 @@ void main() {
   testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
 
-    await tester.pumpWidget(_buildThemedApp(
+    await tester.pumpWidget(buildThemedApp(
       theme: theme,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
@@ -1183,10 +1289,10 @@ void main() {
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes for a default disabled slider', (WidgetTester tester) async {
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, enabled: false));
+    await tester.pumpWidget(buildThemedApp(theme: theme, enabled: false));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1205,10 +1311,10 @@ void main() {
   testWidgets('Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(
+    await tester.pumpWidget(buildThemedApp(
       theme: theme,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
@@ -1230,7 +1336,7 @@ void main() {
   });
 
   testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
-    final ThemeData theme = _buildTheme();
+    final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
     RangeValues values = const RangeValues(0.5, 0.75);
 
@@ -1277,8 +1383,10 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..paragraph(),
+        ..paragraph()
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
@@ -1361,7 +1469,7 @@ void main() {
     );
 
     // Represents the Raised Button and Range Slider.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 3));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 6));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 3));
 
     await tester.tap(find.text('Next'));
@@ -1371,16 +1479,16 @@ void main() {
     expect(
       valueIndicatorBox,
       isNot(
-       paints
-         ..path(color: fillColor)
-         ..paragraph()
-         ..path(color: fillColor)
-         ..paragraph(),
+      paints
+        ..path(color: fillColor)
+        ..paragraph()
+        ..path(color: fillColor)
+        ..paragraph(),
       ),
     );
 
     // Represents the raised button with inner page text.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawParagraph, 1));
 
     // Don't stop holding the value indicator.
@@ -1520,6 +1628,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1595,6 +1705,8 @@ void main() {
     expect(
       valueIndicatorBox,
       paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
@@ -1679,6 +1791,65 @@ void main() {
         ..circle()
         ..circle(color: sliderTheme.overlappingShapeStrokeColor)
         ..circle(),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/101868
+  testWidgets('RangeSlider.label info should not write to semantic node', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData.light(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: RangeSlider(
+                values: const RangeValues(10.0, 12.0),
+                max: 100.0,
+                onChanged: (RangeValues v) { },
+                labels: const RangeLabels('Begin', 'End'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSemantics(find.byType(RangeSlider)),
+      matchesSemantics(
+        scopesRoute: true,
+        children:<Matcher>[
+          matchesSemantics(
+            children:  <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '10%',
+                decreasedValue: '5%',
+                label: ''
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '12%',
+                increasedValue: '17%',
+                decreasedValue: '12%',
+                label: ''
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   });
 
@@ -1880,8 +2051,9 @@ void main() {
 
     late Rect activeTrackRect;
     expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect)
+      if (method != #drawRect) {
         return false;
+      }
       activeTrackRect = arguments[0] as Rect;
       return true;
     }));

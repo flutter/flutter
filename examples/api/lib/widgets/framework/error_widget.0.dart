@@ -4,21 +4,15 @@
 
 // Flutter code sample for ErrorWidget
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   // Set the ErrorWidget's builder before the app is started.
   ErrorWidget.builder = (FlutterErrorDetails details) {
-    // This is how to tell if you're in debug mode: Assertions are only executed in
-    // debug mode.
-    bool inDebug = false;
-    assert(() {
-      inDebug = true;
-      return true;
-    }());
     // If we're in debug mode, use the normal error widget which shows the error
     // message:
-    if (inDebug) {
+    if (kDebugMode) {
       return ErrorWidget(details.exception);
     }
     // In release builds, show a yellow-on-blue message instead:
@@ -38,7 +32,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'ErrorWidget Sample';
 

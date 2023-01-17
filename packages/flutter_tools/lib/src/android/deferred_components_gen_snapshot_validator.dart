@@ -84,7 +84,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     XmlDocument document;
     try {
       document = XmlDocument.parse(appManifestFile.readAsStringSync());
-    } on XmlParserException {
+    } on XmlException {
       invalidFiles[appManifestFile.path] = 'Error parsing $appManifestFile '
         'Please ensure that the android manifest is a valid XML document and '
         'try again.';
@@ -234,7 +234,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         return loadingUnits;
       }
       if (data['loading-units'] != null) {
-        for (final Object? loadingUnitData in data['loading-units']) {
+        for (final Object? loadingUnitData in data['loading-units'] as List<Object?>) {
           if (loadingUnitData is! YamlMap) {
             invalidFiles[cacheFile.path] = "Invalid loading units yaml file, 'loading-units' "
                                              'is not a list of maps.';
@@ -267,7 +267,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     // Parse out validated yaml.
     if (data.containsKey('loading-units')) {
       if (data['loading-units'] != null) {
-        for (final Object? loadingUnitData in data['loading-units']) {
+        for (final Object? loadingUnitData in data['loading-units'] as List<Object?>) {
           final YamlMap? loadingUnitDataMap = loadingUnitData as YamlMap?;
           final List<String> libraries = <String>[];
           final YamlList? nodes = loadingUnitDataMap?['libraries'] as YamlList?;

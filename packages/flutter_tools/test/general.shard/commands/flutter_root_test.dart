@@ -13,13 +13,13 @@ import '../../src/common.dart';
 void main() {
   testWithoutContext('Cache can initialize flutter root from environment variable', () {
     final String defaultFlutterRoot = Cache.defaultFlutterRoot(
-        fileSystem: MemoryFileSystem.test(),
-        userMessages: UserMessages(),
-        platform: FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': 'path/to/flutter'
-            }
-        )
+      fileSystem: MemoryFileSystem.test(),
+      userMessages: UserMessages(),
+      platform: FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': 'path/to/flutter',
+        },
+      ),
     );
 
     expect(defaultFlutterRoot, '/path/to/flutter');

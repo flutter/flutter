@@ -226,7 +226,7 @@ void main() {
     const Size kCommonScreenSizePortrait = Size(1070, 1770);
     const Size kCommonScreenSizeLandscape = Size(1770, 1070);
 
-    Future<void> _showPicker(WidgetTester tester, Locale locale, Size size) async {
+    Future<void> showPicker(WidgetTester tester, Locale locale, Size size) async {
       tester.binding.window.physicalSizeTestValue = size;
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.devicePixelRatioTestValue = 1.0;
@@ -260,22 +260,22 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/20171
     testWidgets('common screen size - portrait - Chinese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizePortrait);
+      await showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizePortrait);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - landscape - Chinese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizeLandscape);
+      await showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizeLandscape);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - portrait - Japanese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizePortrait);
+      await showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizePortrait);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('common screen size - landscape - Japanese', (WidgetTester tester) async {
-      await _showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizeLandscape);
+      await showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizeLandscape);
       expect(tester.takeException(), isNull);
     });
   });

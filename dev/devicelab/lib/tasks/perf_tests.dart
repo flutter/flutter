@@ -10,7 +10,6 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '../common.dart';
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/host_agent.dart';
@@ -354,6 +353,13 @@ TaskFunction createFullscreenTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createClipperCachePerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/clipper_cache_perf_e2e.dart',
+  ).run;
+}
+
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -375,6 +381,13 @@ TaskFunction createColorFilterCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_cache_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createRasterCacheUseMemoryPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/raster_cache_use_memory_perf_e2e.dart',
   ).run;
 }
 
@@ -409,6 +422,14 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/multi_widget_construction_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createListTextLayoutPerfE2ETest({bool enableImpeller = false}) {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/list_text_layout_perf_e2e.dart',
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -553,6 +574,34 @@ TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_col_of_alpha_savelayer_rows_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createGradientDynamicPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/gradient_dynamic_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createGradientConsistentPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/gradient_consistent_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createGradientStaticPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/gradient_static_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createAnimatedComplexOpacityPerfE2ETest() {
+  return PerfTest.e2e(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test/animated_complex_opacity_perf_e2e.dart',
   ).run;
 }
 
@@ -1286,6 +1335,21 @@ class CompileTest {
         ...compileSecondDebug,
       };
 
+      final File mainDart = File('$testDirectory/lib/main.dart');
+      if (mainDart.existsSync()) {
+        final List<int> bytes = mainDart.readAsBytesSync();
+        // "Touch" the file
+        mainDart.writeAsStringSync(' ', mode: FileMode.append, flush: true);
+        // Build after "edit" without clean should be faster than first build
+        final Map<String, dynamic> compileAfterEditDebug = await _compileDebug(
+          clean: false,
+          metricKey: 'debug_compile_after_edit_millis',
+        );
+        metrics.addAll(compileAfterEditDebug);
+        // Revert the changes
+        mainDart.writeAsBytesSync(bytes, flush: true);
+      }
+
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
   }
@@ -1767,9 +1831,9 @@ class _UnzipListEntry {
   final String path;
 }
 
-/// Wait for up to 400 seconds for the file to appear.
+/// Wait for up to 1 hour for the file to appear.
 Future<File> waitForFile(String path) async {
-  for (int i = 0; i < 20; i += 1) {
+  for (int i = 0; i < 180; i += 1) {
     final File file = File(path);
     print('looking for ${file.path}');
     if (file.existsSync()) {
@@ -1777,7 +1841,7 @@ Future<File> waitForFile(String path) async {
     }
     await Future<void>.delayed(const Duration(seconds: 20));
   }
-  throw StateError('Did not find vmservice out file after 400 seconds');
+  throw StateError('Did not find vmservice out file after 1 hour');
 }
 
 String? _findIosAppInBuildDirectory(String searchDirectory) {

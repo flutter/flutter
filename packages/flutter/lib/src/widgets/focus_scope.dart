@@ -114,7 +114,7 @@ class Focus extends StatefulWidget {
   ///
   /// The [autofocus] argument must not be null.
   const Focus({
-    Key? key,
+    super.key,
     required this.child,
     this.focusNode,
     this.autofocus = false,
@@ -136,8 +136,7 @@ class Focus extends StatefulWidget {
         _debugLabel = debugLabel,
         assert(child != null),
         assert(autofocus != null),
-        assert(includeSemantics != null),
-        super(key: key);
+        assert(includeSemantics != null);
 
   /// Creates a Focus widget that uses the given [focusNode] as the source of
   /// truth for attributes on the node, rather than the attributes of this widget.
@@ -465,20 +464,13 @@ class Focus extends StatefulWidget {
 // constructor is used.
 class _FocusWithExternalFocusNode extends Focus {
   const _FocusWithExternalFocusNode({
-    Key? key,
-    required Widget child,
-    required FocusNode focusNode,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
-    bool includeSemantics = true,
-  }) : super(
-    key: key,
-    child: child,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    onFocusChange: onFocusChange,
-    includeSemantics: includeSemantics,
-  );
+    super.key,
+    required super.child,
+    required FocusNode super.focusNode,
+    super.autofocus,
+    super.onFocusChange,
+    super.includeSemantics,
+  });
 
   @override
   bool get _usingExternalFocus => true;
@@ -747,29 +739,20 @@ class FocusScope extends Focus {
   ///
   /// The [autofocus] argument must not be null.
   const FocusScope({
-    Key? key,
+    super.key,
     FocusScopeNode? node,
-    required Widget child,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
-    bool? canRequestFocus,
-    bool? skipTraversal,
-    FocusOnKeyEventCallback? onKeyEvent,
-    FocusOnKeyCallback? onKey,
-    String? debugLabel,
+    required super.child,
+    super.autofocus,
+    super.onFocusChange,
+    super.canRequestFocus,
+    super.skipTraversal,
+    super.onKeyEvent,
+    super.onKey,
+    super.debugLabel,
   })  : assert(child != null),
         assert(autofocus != null),
         super(
-          key: key,
-          child: child,
           focusNode: node,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-          canRequestFocus: canRequestFocus,
-          skipTraversal: skipTraversal,
-          onKeyEvent: onKeyEvent,
-          onKey: onKey,
-          debugLabel: debugLabel,
         );
 
   /// Creates a FocusScope widget that uses the given [focusScopeNode] as the
@@ -804,17 +787,13 @@ class FocusScope extends Focus {
 // constructor is used.
 class _FocusScopeWithExternalFocusNode extends FocusScope {
   const _FocusScopeWithExternalFocusNode({
-    Key? key,
-    required Widget child,
+    super.key,
+    required super.child,
     required FocusScopeNode focusScopeNode,
-    bool autofocus = false,
-    ValueChanged<bool>? onFocusChange,
+    super.autofocus,
+    super.onFocusChange,
   }) : super(
-    key: key,
-    child: child,
     node: focusScopeNode,
-    autofocus: autofocus,
-    onFocusChange: onFocusChange,
   );
 
 
@@ -862,12 +841,11 @@ class _FocusScopeState extends _FocusState {
 // The InheritedWidget marker for Focus and FocusScope.
 class _FocusMarker extends InheritedNotifier<FocusNode> {
   const _FocusMarker({
-    Key? key,
     required FocusNode node,
-    required Widget child,
+    required super.child,
   })  : assert(node != null),
         assert(child != null),
-        super(key: key, notifier: node, child: child);
+        super(notifier: node);
 }
 
 /// A widget that controls whether or not the descendants of this widget are
@@ -888,12 +866,11 @@ class ExcludeFocus extends StatelessWidget {
   ///
   /// The [child] argument is required, and must not be null.
   const ExcludeFocus({
-    Key? key,
+    super.key,
     this.excluding = true,
     required this.child,
   })  : assert(excluding != null),
-        assert(child != null),
-        super(key: key);
+        assert(child != null);
 
   /// If true, will make this widget's descendants unfocusable.
   ///

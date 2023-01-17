@@ -182,8 +182,9 @@ abstract class WidgetController {
 
   T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
-    if (element is StatefulElement)
+    if (element is StatefulElement) {
       return element.state as T;
+    }
     throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
@@ -722,7 +723,7 @@ abstract class WidgetController {
               delta: offsets[t+1] - offsets[t],
               pointer: pointer,
               buttons: buttons,
-            )
+            ),
           ]),
       ],
       PointerEventRecord(duration, <PointerEvent>[
@@ -734,7 +735,7 @@ abstract class WidgetController {
           // change = PointerChange.up, which translates to PointerUpEvent,
           // doesn't provide the button field.
           // buttons: buttons,
-        )
+        ),
       ]),
     ];
     return TestAsyncUtils.guard<void>(() async {
@@ -780,6 +781,12 @@ abstract class WidgetController {
   ///
   /// You can use [createGesture] if your gesture doesn't begin with an initial
   /// down gesture.
+  ///
+  /// See also:
+  ///  * [WidgetController.drag], a method to simulate a drag.
+  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given widget in a given duration.
+  ///    It sends move events at a given frequency and it is useful when there are listeners involved.
+  ///  * [WidgetController.fling], a method to simulate a fling.
   Future<TestGesture> startGesture(
     Offset downLocation, {
     int? pointer,
@@ -982,6 +989,14 @@ abstract class WidgetController {
   /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
   /// supported.
   ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
+  /// Specify the `character` for the event to override what is included in the
+  /// simulated event. If not specified, it uses a default derived from the
+  /// logical `key`.
+  ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
@@ -997,11 +1012,16 @@ abstract class WidgetController {
   ///
   ///  - [sendKeyDownEvent] to simulate only a key down event.
   ///  - [sendKeyUpEvent] to simulate only a key up event.
-  Future<bool> sendKeyEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyEvent(
+    LogicalKeyboardKey key, {
+    String platform = _defaultPlatform,
+    String? character,
+    PhysicalKeyboardKey? physicalKey
+  }) async {
     assert(platform != null);
-    final bool handled = await simulateKeyDownEvent(key, platform: platform);
+    final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
     // Internally wrapped in async guard.
-    await simulateKeyUpEvent(key, platform: platform);
+    await simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
     return handled;
   }
 
@@ -1016,6 +1036,14 @@ abstract class WidgetController {
   /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
   /// supported.
   ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
+  /// Specify the `character` for the event to override what is included in the
+  /// simulated event. If not specified, it uses a default derived from the
+  /// logical `key`.
+  ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
@@ -1028,10 +1056,15 @@ abstract class WidgetController {
   ///  - [sendKeyUpEvent] and [sendKeyRepeatEvent] to simulate the corresponding
   ///    key up and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyDownEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyDownEvent(
+    LogicalKeyboardKey key, {
+    String platform = _defaultPlatform,
+    String? character,
+    PhysicalKeyboardKey? physicalKey
+  }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyDownEvent(key, character: character, platform: platform);
+    return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
 
   /// Simulates sending a physical key up event through the system channel.
@@ -1044,6 +1077,10 @@ abstract class WidgetController {
   /// that type of system. Defaults to "web" on web, and "android" everywhere
   /// else. May not be null.
   ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
@@ -1054,13 +1091,17 @@ abstract class WidgetController {
   ///  - [sendKeyDownEvent] and [sendKeyRepeatEvent] to simulate the
   ///    corresponding key down and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyUpEvent(
+      LogicalKeyboardKey key, {
+        String platform = _defaultPlatform,
+        PhysicalKeyboardKey? physicalKey
+      }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyUpEvent(key, platform: platform);
+    return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
 
-  /// Simulates sending a physical key repeat event.
+  /// Simulates sending a key repeat event from a physical keyboard.
   ///
   /// This only simulates key repeat events coming from a physical keyboard, not
   /// from a soft keyboard.
@@ -1069,6 +1110,14 @@ abstract class WidgetController {
   /// [platform.Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
   /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  ///
+  /// Specify the `physicalKey` for the event to override what is included in
+  /// the simulated event. If not specified, it uses a default from the US
+  /// keyboard layout for the corresponding logical `key`.
+  ///
+  /// Specify the `character` for the event to override what is included in the
+  /// simulated event. If not specified, it uses a default derived from the
+  /// logical `key`.
   ///
   /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
   /// controlled by [debugKeyEventSimulatorTransitModeOverride]. If through [RawKeyEvent],
@@ -1083,15 +1132,20 @@ abstract class WidgetController {
   ///  - [sendKeyDownEvent] and [sendKeyUpEvent] to simulate the corresponding
   ///    key down and up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
-  Future<bool> sendKeyRepeatEvent(LogicalKeyboardKey key, { String? character, String platform = _defaultPlatform }) async {
+  Future<bool> sendKeyRepeatEvent(
+      LogicalKeyboardKey key, {
+        String platform = _defaultPlatform,
+        String? character,
+        PhysicalKeyboardKey? physicalKey
+      }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
-    return simulateKeyRepeatEvent(key, character: character, platform: platform);
+    return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
 
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
-  Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
+  Rect getRect(Finder finder) => Rect.fromPoints(getTopLeft(finder), getBottomRight(finder));
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
@@ -1108,8 +1162,9 @@ abstract class WidgetController {
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
   SemanticsNode getSemantics(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null)
+    if (binding.pipelineOwner.semanticsOwner == null) {
       throw StateError('Semantics are not enabled.');
+    }
     final Iterable<Element> candidates = finder.evaluate();
     if (candidates.isEmpty) {
       throw StateError('Finder returned no matching elements.');
@@ -1124,8 +1179,9 @@ abstract class WidgetController {
       renderObject = renderObject.parent as RenderObject?;
       result = renderObject?.debugSemantics;
     }
-    if (result == null)
+    if (result == null) {
       throw StateError('No Semantics data found.');
+    }
     return result;
   }
 
@@ -1250,8 +1306,9 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<void> pump([Duration? duration]) async {
-    if (duration != null)
+    if (duration != null) {
       await Future<void>.delayed(duration);
+    }
     binding.scheduleFrame();
     await binding.endOfFrame;
   }

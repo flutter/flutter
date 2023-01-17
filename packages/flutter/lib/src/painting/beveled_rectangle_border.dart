@@ -24,11 +24,10 @@ class BeveledRectangleBorder extends OutlinedBorder {
   ///
   /// The arguments must not be null.
   const BeveledRectangleBorder({
-    BorderSide side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
-       assert(borderRadius != null),
-       super(side: side);
+       assert(borderRadius != null);
 
   /// The radii for each corner.
   ///
@@ -43,7 +42,14 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.width);
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        return EdgeInsets.all(side.width);
+      case StrokeAlign.center:
+        return EdgeInsets.all(side.width / 2);
+      case StrokeAlign.outside:
+        return EdgeInsets.zero;
+    }
   }
 
   @override
@@ -119,7 +125,21 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
+    final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+    final RRect adjustedRect;
+    switch (side.strokeAlign) {
+      case StrokeAlign.inside:
+        adjustedRect = borderRect.deflate(side.width);
+        break;
+      case StrokeAlign.center:
+        adjustedRect = borderRect.deflate(side.width / 2);
+        break;
+      case StrokeAlign.outside:
+        adjustedRect = borderRect;
+        break;
+    }
+
+    return _getPath(adjustedRect);
   }
 
   @override
@@ -129,13 +149,27 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
-    if (rect.isEmpty)
+    if (rect.isEmpty) {
       return;
+    }
     switch (side.style) {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection)
+        final RRect borderRect = borderRadius.resolve(textDirection).toRRect(rect);
+        final RRect adjustedRect;
+        switch (side.strokeAlign) {
+          case StrokeAlign.inside:
+            adjustedRect = borderRect;
+            break;
+          case StrokeAlign.center:
+            adjustedRect = borderRect.inflate(side.width / 2);
+            break;
+          case StrokeAlign.outside:
+            adjustedRect = borderRect.inflate(side.width);
+            break;
+        }
+        final Path path = _getPath(adjustedRect)
           ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
         break;
@@ -144,8 +178,9 @@ class BeveledRectangleBorder extends OutlinedBorder {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is BeveledRectangleBorder
         && other.side == side
         && other.borderRadius == borderRadius;

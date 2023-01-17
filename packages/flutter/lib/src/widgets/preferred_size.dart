@@ -32,7 +32,7 @@ abstract class PreferredSizeWidget implements Widget {
   /// In many cases it's only necessary to define one preferred dimension.
   /// For example the [Scaffold] only depends on its app bar's preferred
   /// height. In that case implementations of this method can just return
-  /// `new Size.fromHeight(myAppBarHeight)`.
+  /// `Size.fromHeight(myAppBarHeight)`.
   Size get preferredSize;
 }
 
@@ -68,10 +68,10 @@ abstract class PreferredSizeWidget implements Widget {
 class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a widget that has a preferred size that the parent can query.
   const PreferredSize({
-    Key? key,
+    super.key,
     required this.child,
     required this.preferredSize,
-  }) : super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///

@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -16,14 +17,12 @@ const double _kActivityIndicatorMargin = 16.0;
 
 class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   const _CupertinoSliverRefresh({
-    Key? key,
     this.refreshIndicatorLayoutExtent = 0.0,
     this.hasLayoutExtent = false,
-    Widget? child,
+    super.child,
   }) : assert(refreshIndicatorLayoutExtent != null),
        assert(refreshIndicatorLayoutExtent >= 0.0),
-       assert(hasLayoutExtent != null),
-       super(key: key, child: child);
+       assert(hasLayoutExtent != null);
 
   // The amount of space the indicator should occupy in the sliver in a
   // resting state when in the refreshing mode.
@@ -77,8 +76,9 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   set refreshIndicatorLayoutExtent(double value) {
     assert(value != null);
     assert(value >= 0.0);
-    if (value == _refreshIndicatorExtent)
+    if (value == _refreshIndicatorExtent) {
       return;
+    }
     _refreshIndicatorExtent = value;
     markNeedsLayout();
   }
@@ -90,8 +90,9 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   bool _hasLayoutExtent;
   set hasLayoutExtent(bool value) {
     assert(value != null);
-    if (value == _hasLayoutExtent)
+    if (value == _hasLayoutExtent) {
       return;
+    }
     _hasLayoutExtent = value;
     markNeedsLayout();
   }
@@ -297,7 +298,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// The [onRefresh] argument will be called when pulled far enough to trigger
   /// a refresh.
   const CupertinoSliverRefreshControl({
-    Key? key,
+    super.key,
     this.refreshTriggerPullDistance = _defaultRefreshTriggerPullDistance,
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
     this.builder = buildRefreshIndicator,
@@ -310,8 +311,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
          refreshTriggerPullDistance >= refreshIndicatorExtent,
          'The refresh indicator cannot take more space in its final state '
          'than the amount initially created by overscrolling.',
-       ),
-       super(key: key);
+       );
 
   /// The amount of overscroll the scrollable must be dragged to trigger a reload.
   ///
@@ -378,7 +378,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    final double percentageComplete = (pulledExtent / refreshTriggerPullDistance).clamp(0.0, 1.0);
+    final double percentageComplete = clampDouble(pulledExtent / refreshTriggerPullDistance, 0.0, 1.0);
 
     // Place the indicator at the top of the sliver that opens up. Note that we're using
     // a Stack/Positioned widget because the CupertinoActivityIndicator does some internal

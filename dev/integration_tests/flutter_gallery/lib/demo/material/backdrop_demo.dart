@@ -104,6 +104,7 @@ class CategoryView extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return Scrollbar(
       child: ListView(
+        primary: true,
         key: PageStorageKey<Category?>(category),
         padding: const EdgeInsets.symmetric(
           vertical: 16.0,

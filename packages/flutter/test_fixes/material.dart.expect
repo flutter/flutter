@@ -527,4 +527,15 @@ void main() {
 
   // Change made in https://github.com/flutter/flutter/pull/100381
   SelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/105291
+  ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
+    foregroundColor: Colors.white, backgroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38), disabledBackgroundColor: Colors.grey.withOpacity(0.12),
+  );
+  ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+  );
+  ButtonStyle textButtonStyle = TextButton.styleFrom(
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+  );
 }

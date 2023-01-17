@@ -50,11 +50,11 @@ class _NoSplashFactory extends InteractiveInkFeatureFactory {
 class NoSplash extends InteractiveInkFeature {
   /// Create an [InteractiveInkFeature] that doesn't paint a splash.
   NoSplash({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Color color,
-    VoidCallback? onRemoved,
-  }) : super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved);
+    required super.controller,
+    required super.referenceBox,
+    required super.color,
+    super.onRemoved,
+  });
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
   /// material [Theme], or [ButtonStyle].

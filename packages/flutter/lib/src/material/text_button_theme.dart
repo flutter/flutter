@@ -47,8 +47,9 @@ class TextButtonThemeData with Diagnosticable {
   /// Linearly interpolate between two text button themes.
   static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
     assert (t != null);
-    if (a == null && b == null)
+    if (a == null && b == null) {
       return null;
+    }
     return TextButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
     );
@@ -59,10 +60,12 @@ class TextButtonThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TextButtonThemeData && other.style == style;
   }
 
@@ -89,10 +92,10 @@ class TextButtonTheme extends InheritedTheme {
   ///
   /// The [data] parameter must not be null.
   const TextButtonTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null), super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The configuration of this theme.
   final TextButtonThemeData data;

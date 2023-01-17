@@ -11,6 +11,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 // Examples can assume:
+// bool? _throwShotAway = false;
 // void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
@@ -121,11 +122,12 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// The value of [tristate] must not be null.
   const CheckboxListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
     this.checkColor,
+    this.enabled,
     this.tileColor,
     this.title,
     this.subtitle,
@@ -150,8 +152,7 @@ class CheckboxListTile extends StatelessWidget {
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
        assert(controlAffinity != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(autofocus != null);
 
   /// Whether this checkbox is checked.
   final bool? value;
@@ -164,6 +165,8 @@ class CheckboxListTile extends StatelessWidget {
   ///
   /// If null, the checkbox will be displayed as disabled.
   ///
+  /// {@tool snippet}
+  ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
@@ -171,14 +174,15 @@ class CheckboxListTile extends StatelessWidget {
   /// ```dart
   /// CheckboxListTile(
   ///   value: _throwShotAway,
-  ///   onChanged: (bool newValue) {
+  ///   onChanged: (bool? newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: Text('Throw away your shot'),
+  ///   title: const Text('Throw away your shot'),
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<bool?>? onChanged;
 
   /// The color to use when this checkbox is checked.
@@ -292,6 +296,13 @@ class CheckboxListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// Whether the CheckboxListTile is interactive.
+  ///
+  /// If false, this list tile is styled with the disabled color from the
+  /// current [Theme] and the [ListTile.onTap] callback is
+  /// inoperative.
+  final bool? enabled;
+
   void _handleValueChange() {
     assert(onChanged != null);
     switch (value) {
@@ -311,7 +322,7 @@ class CheckboxListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
       value: value,
-      onChanged: onChanged,
+      onChanged: enabled ?? true ? onChanged : null ,
       activeColor: activeColor,
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -342,7 +353,7 @@ class CheckboxListTile extends StatelessWidget {
           trailing: trailing,
           isThreeLine: isThreeLine,
           dense: dense,
-          enabled: onChanged != null,
+          enabled: enabled ?? onChanged != null,
           onTap: onChanged != null ? _handleValueChange : null,
           selected: selected,
           autofocus: autofocus,

@@ -190,7 +190,6 @@ void main() {
     // Drag by mouse to select the entire selectable text.
     TestGesture gesture =
         await tester.startGesture(topLeft, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
     await gesture.moveTo(topRight);
     await gesture.up();
 
@@ -213,7 +212,6 @@ void main() {
       firstWordOffset,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await gesture.up();
     await gesture.down(firstWordOffset);
     await gesture.up();
@@ -226,7 +224,6 @@ void main() {
       lastWordOffset,
       kind: PointerDeviceKind.mouse,
     );
-    addTearDown(gesture.removePointer);
     await gesture.up();
     await gesture.down(lastWordOffset);
     await gesture.up();

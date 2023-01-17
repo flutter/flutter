@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show ProcessSignal, Process;
@@ -101,7 +99,6 @@ void main() {
     final DateTime fiveSecondsAgo = file.statSync().modified.subtract(const Duration(seconds: 5));
     expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
     expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
-    expect(content.isModifiedAfter(null), isTrue);
 
     file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
 
@@ -186,7 +183,7 @@ void main() {
       requests: <VmServiceExpectation>[createDevFSRequest],
       httpAddress: Uri.parse('http://localhost'),
     );
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.dill')
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[1, 2, 3, 4, 5]);
@@ -212,7 +209,7 @@ void main() {
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, responseError: const OSError('Connection Reset by peer')),
         // This is the value of `<int>[1, 2, 3, 4, 5]` run through `osUtils.gzipLevel1Stream`.
-        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk])
+        FakeRequest(Uri.parse('http://localhost'), method: HttpMethod.put, body: <int>[for (List<int> chunk in expectedEncoded) ...chunk]),
       ]),
       uploadRetryThrottle: Duration.zero,
     );
@@ -250,10 +247,10 @@ void main() {
     );
 
     await devFS.create();
-    final DateTime previousCompile = devFS.lastCompiled;
+    final DateTime? previousCompile = devFS.lastCompiled;
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       return const CompilerOutput('lib/foo.dill', 2, <Uri>[]);
     };
 
@@ -289,10 +286,10 @@ void main() {
     );
 
     await devFS.create();
-    final DateTime previousCompile = devFS.lastCompiled;
+    final DateTime? previousCompile = devFS.lastCompiled;
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -330,10 +327,10 @@ void main() {
     );
 
     await devFS.create();
-    final DateTime previousCompile = devFS.lastCompiled;
+    final DateTime? previousCompile = devFS.lastCompiled;
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -380,7 +377,7 @@ void main() {
     await devFS.create();
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('example').createSync();
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -456,7 +453,7 @@ void main() {
     await devFS.create();
 
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    residentCompiler.onRecompile = (Uri mainUri, List<Uri> invalidatedFiles) async {
+    residentCompiler.onRecompile = (Uri mainUri, List<Uri>? invalidatedFiles) async {
       fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
       return const CompilerOutput('lib/foo.txt.dill', 0, <Uri>[]);
     };
@@ -506,7 +503,7 @@ void main() {
           await Future<dynamic>.delayed(const Duration(milliseconds: 5));
         }
 
-        String boundaryKey;
+        String? boundaryKey;
         while(processed < frontendServerStdIn.writes.length) {
           final List<int> data = frontendServerStdIn.writes[processed];
           final String stringData = utf8.decode(data);
@@ -581,10 +578,10 @@ void main() {
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
-  Future<CompilerOutput> Function(Uri mainUri, List<Uri> invalidatedFiles) onRecompile;
+  Future<CompilerOutput> Function(Uri mainUri, List<Uri>? invalidatedFiles)? onRecompile;
 
   @override
-  Future<CompilerOutput> recompile(Uri mainUri, List<Uri> invalidatedFiles, {String outputPath, PackageConfig packageConfig, String projectRootPath, FileSystem fs, bool suppressErrors = false, bool checkDartPluginRegistry = false}) {
+  Future<CompilerOutput> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {String? outputPath, PackageConfig? packageConfig, String? projectRootPath, FileSystem? fs, bool suppressErrors = false, bool checkDartPluginRegistry = false}) {
     return onRecompile?.call(mainUri, invalidatedFiles)
       ?? Future<CompilerOutput>.value(const CompilerOutput('', 1, <Uri>[]));
   }
@@ -605,12 +602,12 @@ class LoggingLogger extends BufferLogger {
   List<String> messages = <String>[];
 
   @override
-  void printError(String message, {StackTrace stackTrace, bool emphasis, TerminalColor color, int indent, int hangingIndent, bool wrap}) {
+  void printError(String message, {StackTrace? stackTrace, bool? emphasis, TerminalColor? color, int? indent, int? hangingIndent, bool? wrap}) {
     messages.add(message);
   }
 
   @override
-  void printStatus(String message, {bool emphasis, TerminalColor color, bool newline, int indent, int hangingIndent, bool wrap}) {
+  void printStatus(String message, {bool? emphasis, TerminalColor? color, bool? newline, int? indent, int? hangingIndent, bool? wrap}) {
     messages.add(message);
   }
 
@@ -625,7 +622,7 @@ class FakeBundle extends AssetBundle {
   List<File> get additionalDependencies => <File>[];
 
   @override
-  Future<int> build({String manifestPath = defaultManifestPath, String assetDirPath, String packagesPath, bool deferredComponentsEnabled = false, TargetPlatform targetPlatform}) async {
+  Future<int> build({String manifestPath = defaultManifestPath, String? assetDirPath, String? packagesPath, bool deferredComponentsEnabled = false, TargetPlatform? targetPlatform}) async {
     return 0;
   }
 
@@ -634,6 +631,9 @@ class FakeBundle extends AssetBundle {
 
   @override
   Map<String, DevFSContent> get entries => <String, DevFSContent>{};
+
+  @override
+  Map<String, AssetKind> get entryKinds => <String, AssetKind>{};
 
   @override
   List<File> get inputFiles => <File>[];
@@ -657,7 +657,7 @@ class AnsweringFakeProcessManager implements ProcessManager {
   final IOSink stdin;
 
   @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
+  bool canRun(dynamic executable, {String? workingDirectory}) {
     return true;
   }
 
@@ -667,17 +667,17 @@ class AnsweringFakeProcessManager implements ProcessManager {
   }
 
   @override
-  Future<ProcessResult> run(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) async {
+  Future<ProcessResult> run(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding? stdoutEncoding = systemEncoding, Encoding? stderrEncoding = systemEncoding}) async {
     throw UnimplementedError();
   }
 
   @override
-  ProcessResult runSync(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding stdoutEncoding = systemEncoding, Encoding stderrEncoding = systemEncoding}) {
+  ProcessResult runSync(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, Encoding? stdoutEncoding = systemEncoding, Encoding? stderrEncoding = systemEncoding}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<Process> start(List<Object> command, {String workingDirectory, Map<String, String> environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
+  Future<Process> start(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
     return AnsweringFakeProcess(stdout, stderr, stdin);
   }
 }

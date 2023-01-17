@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -86,5 +84,5 @@ void main() {
 }
 
 Future<String> getValueAsString(String key, AssetBundle asset) async {
-  return String.fromCharCodes(await asset.entries[key].contentsAsBytes());
+  return String.fromCharCodes(await asset.entries[key]!.contentsAsBytes());
 }

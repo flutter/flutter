@@ -51,12 +51,11 @@ class SliderTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   const SliderTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
+    required super.child,
   }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+       assert(data != null);
 
   /// Specifies the color and shape values for descendant slider widgets.
   final SliderThemeData data;
@@ -71,7 +70,7 @@ class SliderTheme extends InheritedTheme {
   ///
   /// ```dart
   /// class Launch extends StatefulWidget {
-  ///   const Launch({Key? key}) : super(key: key);
+  ///   const Launch({super.key});
   ///
   ///   @override
   ///   State createState() => LaunchState();
@@ -151,7 +150,7 @@ enum Thumb {
   end,
 }
 
-/// Holds the color, shape, and typography values for a material design slider
+/// Holds the color, shape, and typography values for a Material Design slider
 /// theme.
 ///
 /// Use this class to configure a [SliderTheme] widget, or to set the
@@ -241,7 +240,7 @@ class SliderThemeData with Diagnosticable {
   ///
   /// ```dart
   /// class Blissful extends StatefulWidget {
-  ///   const Blissful({Key? key}) : super(key: key);
+  ///   const Blissful({super.key});
   ///
   ///   @override
   ///   State createState() => BlissfulState();
@@ -1587,11 +1586,13 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
 
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx, trackRect.bottom);
-    if (!leftTrackSegment.isEmpty)
+    if (!leftTrackSegment.isEmpty) {
       context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
+    }
     final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
-    if (!rightTrackSegment.isEmpty)
+    if (!rightTrackSegment.isEmpty) {
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
+    }
   }
 }
 
@@ -1828,14 +1829,17 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
       isDiscrete: isDiscrete,
     );
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, leftThumbOffset.dx, trackRect.bottom);
-    if (!leftTrackSegment.isEmpty)
+    if (!leftTrackSegment.isEmpty) {
       context.canvas.drawRect(leftTrackSegment, inactivePaint);
+    }
     final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx, trackRect.top, rightThumbOffset.dx, trackRect.bottom);
-    if (!middleTrackSegment.isEmpty)
+    if (!middleTrackSegment.isEmpty) {
       context.canvas.drawRect(middleTrackSegment, activePaint);
+    }
     final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx, trackRect.top, trackRect.right, trackRect.bottom);
-    if (!rightTrackSegment.isEmpty)
+    if (!rightTrackSegment.isEmpty) {
       context.canvas.drawRect(rightTrackSegment, inactivePaint);
+    }
   }
 }
 
@@ -2287,7 +2291,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
-  /// If it is not provided, then the material default of 10 is used.
+  /// If it is not provided, then the Material Design default of 10 is used.
   final double enabledThumbRadius;
 
   /// The preferred radius of the round thumb shape when the slider is disabled.
@@ -2362,7 +2366,19 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
     final Path path = Path()
       ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        _debugDrawShadow(canvas, path, evaluatedElevation);
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    if (paintShadows) {
+      canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+    }
 
     canvas.drawCircle(
       center,
@@ -2395,7 +2411,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
-  /// If it is not provided, then the material default of 10 is used.
+  /// If it is not provided, then the Material Design default of 10 is used.
   final double enabledThumbRadius;
 
   /// The preferred radius of the round thumb shape when the slider is disabled.
@@ -2471,7 +2487,19 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     final double evaluatedElevation = isPressed! ? elevationTween.evaluate(activationAnimation) : elevation;
     final Path shadowPath = Path()
       ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+
+    bool paintShadows = true;
+    assert(() {
+      if (debugDisableShadows) {
+        _debugDrawShadow(canvas, shadowPath, evaluatedElevation);
+        paintShadows = false;
+      }
+      return true;
+    }());
+
+    if (paintShadows) {
+      canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+    }
 
     canvas.drawCircle(
       center,
@@ -3181,7 +3209,7 @@ class _PaddleSliderValueIndicatorPathPainter {
     // factor of the value indicator.
     final double neckStretchBaseline = math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
     final double t = math.pow(inverseTextScale, 3.0) as double;
-    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final double stretch = clampDouble(neckStretchBaseline * t, 0.0, 10.0 * neckStretchBaseline);
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation || () {
@@ -3298,8 +3326,9 @@ class RangeValues {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RangeValues
         && other.start == start
         && other.end == end;
@@ -3338,8 +3367,9 @@ class RangeLabels {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is RangeLabels
         && other.start == start
         && other.end == end;
@@ -3351,5 +3381,17 @@ class RangeLabels {
   @override
   String toString() {
     return '${objectRuntimeType(this, 'RangeLabels')}($start, $end)';
+  }
+}
+
+void _debugDrawShadow(Canvas canvas, Path path, double elevation) {
+  if (elevation > 0.0) {
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = Colors.black
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = elevation * 2.0,
+    );
   }
 }

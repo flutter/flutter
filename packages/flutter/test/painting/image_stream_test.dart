@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -76,24 +75,6 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
         },
       );
     }
-  }
-}
-
-class SynchronousTestImageProvider extends ImageProvider<int> {
-  const SynchronousTestImageProvider(this.image);
-
-  final Image image;
-
-  @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<int>(1);
-  }
-
-  @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
-    );
   }
 }
 

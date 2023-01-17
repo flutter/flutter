@@ -389,7 +389,7 @@ void main() {
               const SizedBox(
                 key: key2,
                 height: 200,
-              )
+              ),
             ],
           ),
         )
@@ -416,10 +416,10 @@ void main() {
                 key: key2,
                 height: 200,
                 child: animatedSize,
-              )
+              ),
             ],
           ),
-        )
+        ),
       );
 
       expect(

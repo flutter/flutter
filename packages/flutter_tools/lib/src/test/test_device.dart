@@ -22,7 +22,7 @@ abstract class TestDevice {
   Future<StreamChannel<String>> start(String entrypointPath);
 
   /// Should complete with null if the observatory is not enabled.
-  Future<Uri> get observatoryUri;
+  Future<Uri?> get observatoryUri;
 
   /// Terminates the test device.
   Future<void> kill();

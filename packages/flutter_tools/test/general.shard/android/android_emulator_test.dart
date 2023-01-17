@@ -145,7 +145,7 @@ void main() {
     testWithoutContext('succeeds with coldboot launch', () async {
       final List<String> kEmulatorLaunchColdBootCommand = <String>[
         ...kEmulatorLaunchCommand,
-        '-no-snapshot-load'
+        '-no-snapshot-load',
       ];
       final AndroidEmulator emulator = AndroidEmulator(emulatorID,
         processManager: FakeProcessManager.list(<FakeCommand>[

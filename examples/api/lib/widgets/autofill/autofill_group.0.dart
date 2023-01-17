@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -84,13 +84,13 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 TextField(
                   controller: billingAddress1,
                   autofillHints: const <String>[
-                    AutofillHints.streetAddressLine1
+                    AutofillHints.streetAddressLine1,
                   ],
                 ),
                 TextField(
                   controller: billingAddress2,
                   autofillHints: const <String>[
-                    AutofillHints.streetAddressLine2
+                    AutofillHints.streetAddressLine2,
                   ],
                 ),
               ],
@@ -109,7 +109,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               TextField(
                 controller: creditCardSecurityCode,
                 autofillHints: const <String>[
-                  AutofillHints.creditCardSecurityCode
+                  AutofillHints.creditCardSecurityCode,
                 ],
               ),
             ],

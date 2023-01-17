@@ -44,7 +44,7 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.red.shade800,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'underlines'); },
@@ -52,7 +52,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.orange.shade700,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'fallback'); },
@@ -60,7 +60,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.black,
+                    foregroundColor: Colors.black,
                     backgroundColor: Colors.yellow.shade700,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'bidi'); },
@@ -68,7 +68,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.black,
+                    foregroundColor: Colors.black,
                     backgroundColor: Colors.green.shade400,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'fuzzer'); },
@@ -76,7 +76,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.blue.shade400,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'zalgo'); },
@@ -84,7 +84,7 @@ class _HomeState extends State<Home> {
                 ),
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.black,
+                    foregroundColor: Colors.black,
                     backgroundColor: Colors.purple.shade200,
                   ),
                   onPressed: () { Navigator.pushNamed(context, 'painting'); },
@@ -618,7 +618,7 @@ class _UnderlinesState extends State<Underlines> {
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
-                      primary: Colors.white,
+                      foregroundColor: Colors.white,
                       backgroundColor: Colors.red,
                     ),
                     onPressed: _text == '' ? null : () {

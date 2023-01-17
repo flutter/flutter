@@ -264,7 +264,7 @@ void main() {
 }
 
 class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({required this.child, Key? key}) : super(key: key);
+  const TestStatefulWidget({required this.child, super.key});
 
   final Widget child;
 

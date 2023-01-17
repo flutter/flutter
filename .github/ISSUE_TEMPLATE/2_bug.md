@@ -61,7 +61,8 @@ assignees: ''
       Run your application with `flutter run --verbose` and attach all the
       log output below between the lines with the backticks. If there is an
       exception, please see if the error message includes enough information
-      to explain how to solve the issue.
+      to explain how to solve the issue. If there is a crash, please include
+      the entirety of the crash log including the backtrace.
 -->
 
 ```

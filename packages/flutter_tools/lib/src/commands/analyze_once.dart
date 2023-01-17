@@ -35,19 +35,7 @@ class AnalyzeOnce extends AnalyzeBase {
   Future<void> analyze() async {
     final String currentDirectory =
         (workingDirectory ?? fileSystem.currentDirectory).path;
-
-    // find directories or files from argResults.rest
-    final Set<String> items = Set<String>.of(argResults.rest
-        .map<String>((String path) => fileSystem.path.canonicalize(path)));
-    if (items.isNotEmpty) {
-      for (final String item in items) {
-        final FileSystemEntityType type = fileSystem.typeSync(item);
-
-        if (type == FileSystemEntityType.notFound) {
-          throwToolExit("'$item' does not exist");
-        }
-      }
-    }
+    final Set<String> items = findDirectories(argResults, fileSystem);
 
     if (isFlutterRepo) {
       // check for conflicting dependencies

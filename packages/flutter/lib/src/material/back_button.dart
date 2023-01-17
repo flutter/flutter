@@ -20,12 +20,12 @@ import 'theme.dart';
 ///    [Navigator.maybePop] to return to the previous route.
 ///  * [IconButton], which is a more general widget for creating buttons
 ///    with icons.
-///  * [Icon], a material design icon.
+///  * [Icon], a Material Design icon.
 ///  * [ThemeData.platform], which specifies the current platform.
 class BackButtonIcon extends StatelessWidget {
   /// Creates an icon that shows the appropriate "back" image for
   /// the current platform (as obtained from the [Theme]).
-  const BackButtonIcon({ Key? key }) : super(key: key);
+  const BackButtonIcon({ super.key });
 
   /// Returns the appropriate "back" icon for the given `platform`.
   static IconData _getIconData(TargetPlatform platform) {
@@ -45,7 +45,7 @@ class BackButtonIcon extends StatelessWidget {
   Widget build(BuildContext context) => Icon(_getIconData(Theme.of(context).platform));
 }
 
-/// A material design back button.
+/// A Material Design back button.
 ///
 /// A [BackButton] is an [IconButton] with a "back" icon appropriate for the
 /// current [TargetPlatform]. When pressed, the back button calls
@@ -74,7 +74,7 @@ class BackButtonIcon extends StatelessWidget {
 class BackButton extends StatelessWidget {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ Key? key, this.color, this.onPressed }) : super(key: key);
+  const BackButton({ super.key, this.color, this.onPressed });
 
   /// The color to use for the icon.
   ///
@@ -110,7 +110,7 @@ class BackButton extends StatelessWidget {
   }
 }
 
-/// A material design close button.
+/// A Material Design close button.
 ///
 /// A [CloseButton] is an [IconButton] with a "close" icon. When pressed, the
 /// close button calls [Navigator.maybePop] to return to the previous route.
@@ -125,10 +125,10 @@ class BackButton extends StatelessWidget {
 ///  * [BackButton], which is more appropriate for middle nodes in the
 ///    navigation tree or where pages can be popped instantaneously with
 ///    no user data consequence.
-///  * [IconButton], to create other material design icon buttons.
+///  * [IconButton], to create other Material Design icon buttons.
 class CloseButton extends StatelessWidget {
   /// Creates a Material Design close button.
-  const CloseButton({ Key? key, this.color, this.onPressed }) : super(key: key);
+  const CloseButton({ super.key, this.color, this.onPressed });
 
   /// The color to use for the icon.
   ///

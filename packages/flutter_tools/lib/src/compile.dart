@@ -19,6 +19,12 @@ import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
+/// Opt-in changes to the dart compilers.
+const List<String> kDartCompilerExperiments = <String>[
+  // improve AOT code size.
+  '--compact-async',
+];
+
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
@@ -183,11 +189,13 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
           '-Ddart.vm.profile=true',
         if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
           '-Ddart.vm.product=false',
+        ...kDartCompilerExperiments,
       ];
     case BuildMode.release:
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
+        ...kDartCompilerExperiments,
       ];
   }
   throw Exception('Unknown BuildMode: $mode');
@@ -307,6 +315,7 @@ class KernelCompiler {
         fileSystemScheme,
       ],
       if (initializeFromDill != null) ...<String>[
+        '--incremental',
         '--initialize-from-dill',
         initializeFromDill,
       ],
@@ -321,6 +330,8 @@ class KernelCompiler {
         'package:flutter/src/dart_plugin_registrant.dart',
         '-Dflutter.dart_plugin_registrant=${dartPluginRegistrant.uri}',
       ],
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
       ...?extraFrontEndOptions,
       mainUri,
     ];
@@ -787,6 +798,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
         platformDill!,
       ],
       if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
       ...?extraFrontEndOptions,
     ];
     _logger.printTrace(command.join(' '));

@@ -18,6 +18,7 @@ Exception handling in test harness - string
   Test failed\. See exception logs above\.
   The test description was: Exception handling in test harness - string
  *
+To run this test again: .*
 [^═]*(this line contains the test framework's output with the clock and so forth)?
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
 The following assertion was thrown running a test:
@@ -38,6 +39,7 @@ Exception handling in test harness - FlutterError
   Test failed\. See exception logs above\.
   The test description was: Exception handling in test harness - FlutterError
  *
+To run this test again: .*
 [^═]*(this line contains the test framework's output with the clock and so forth)?
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
 The following message was thrown running a test:
@@ -61,4 +63,5 @@ Exception handling in test harness - uncaught Future error
   Test failed\. See exception logs above\.
   The test description was: Exception handling in test harness - uncaught Future error
  *
+To run this test again: .*
 .*..:.. \+0 -3: Some tests failed\. *

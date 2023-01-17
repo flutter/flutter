@@ -7,7 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
-import 'tolerance.dart';
+
+export 'tolerance.dart' show Tolerance;
 
 /// A simulation that applies a drag to slow a particle down.
 ///
@@ -24,12 +25,11 @@ class FrictionSimulation extends Simulation {
     double drag,
     double position,
     double velocity, {
-    Tolerance tolerance = Tolerance.defaultTolerance,
+    super.tolerance,
   }) : _drag = drag,
        _dragLog = math.log(drag),
        _x = position,
-       _v = velocity,
-       super(tolerance: tolerance);
+       _v = velocity;
 
   /// Creates a new friction simulation with its fluid drag coefficient (_cₓ_) set so
   /// as to ensure that the simulation starts and ends at the specified
@@ -83,10 +83,12 @@ class FrictionSimulation extends Simulation {
   ///
   /// Returns `double.infinity` if the simulation will never reach [x].
   double timeAtX(double x) {
-    if (x == _x)
+    if (x == _x) {
       return 0.0;
-    if (_v == 0.0 || (_v > 0 ? (x < _x || x > finalX) : (x > _x || x < finalX)))
+    }
+    if (_v == 0.0 || (_v > 0 ? (x < _x || x > finalX) : (x > _x || x < finalX))) {
       return double.infinity;
+    }
     return math.log(_dragLog * (x - _x) / _v + 1.0) / _dragLog;
   }
 
@@ -111,20 +113,19 @@ class BoundedFrictionSimulation extends FrictionSimulation {
   /// in the same units as the initial position, and the initial position must
   /// be within the given range.
   BoundedFrictionSimulation(
-    double drag,
-    double position,
-    double velocity,
+    super.drag,
+    super.position,
+    super.velocity,
     this._minX,
     this._maxX,
-  ) : assert(position.clamp(_minX, _maxX) == position),
-      super(drag, position, velocity);
+  ) : assert(clampDouble(position, _minX, _maxX) == position);
 
   final double _minX;
   final double _maxX;
 
   @override
   double x(double time) {
-    return super.x(time).clamp(_minX, _maxX);
+    return clampDouble(super.x(time), _minX, _maxX);
   }
 
   @override

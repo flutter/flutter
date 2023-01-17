@@ -286,3 +286,20 @@ class PackageDependencyTracker {
     return result;
   }
 }
+
+/// Find directories or files from argResults.rest.
+Set<String> findDirectories(ArgResults argResults, FileSystem fileSystem) {
+  final Set<String> items = Set<String>.of(argResults.rest
+      .map<String>((String path) => fileSystem.path.canonicalize(path)));
+  if (items.isNotEmpty) {
+    for (final String item in items) {
+      final FileSystemEntityType type = fileSystem.typeSync(item);
+
+      if (type == FileSystemEntityType.notFound) {
+        throwToolExit("You provided the path '$item', however it does not exist on disk");
+      }
+    }
+  }
+
+  return items;
+}

@@ -147,8 +147,8 @@ void main() {
   });
 
   test('BoxShadow toString test', () {
-    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.normal'));
-    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0), BlurStyle.solid'));
+    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.normal)'));
+    expect(const BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.solid).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0, BlurStyle.solid)'));
   });
 
   testWidgets('BoxShadow BoxStyle.solid', (WidgetTester tester) async {

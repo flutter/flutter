@@ -789,7 +789,7 @@ void main() {
                       ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
                         content: const SizedBox(width: 100, height: 100),
                         actions: List<Widget>.generate(actionCount, (int index) {
-                          if (index == 0)
+                          if (index == 0) {
                             return SizedBox(
                               width: 64,
                               height: 48,
@@ -799,6 +799,7 @@ void main() {
                                 onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
+                          }
 
                           return SizedBox(
                             width: 64,
@@ -911,7 +912,7 @@ void main() {
                       ScaffoldMessenger.of(context).showMaterialBanner(MaterialBanner(
                         content: const SizedBox(width: 100, height: 100),
                         actions: List<Widget>.generate(actionCount, (int index) {
-                          if (index == 0)
+                          if (index == 0) {
                             return SizedBox(
                               width: 200,
                               height: 10,
@@ -921,6 +922,7 @@ void main() {
                                 onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
+                          }
 
                           return SizedBox(
                             width: 200,
@@ -1016,7 +1018,7 @@ void main() {
                         overflowAlignment: overflowAlignment,
                         content: const SizedBox(width: 100, height: 100),
                         actions: List<Widget>.generate(actionCount, (int index) {
-                          if (index == 0)
+                          if (index == 0) {
                             return SizedBox(
                               width: 200,
                               height: 10,
@@ -1026,6 +1028,7 @@ void main() {
                                 onTap: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                               ),
                             );
+                          }
 
                           return SizedBox(
                             width: 200,
@@ -1072,6 +1075,35 @@ void main() {
     }
     await tester.tap(dismissTarget);
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('ScaffoldMessenger will alert for MaterialBanners that cannot be presented', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/103004
+    await tester.pumpWidget(const MaterialApp(
+      home: Center(),
+    ));
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
+    );
+    expect(
+      () {
+        scaffoldMessengerState.showMaterialBanner(const MaterialBanner(
+          content: Text('Banner'),
+          actions: <Widget>[],
+        ));
+      },
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains(
+            'ScaffoldMessenger.showMaterialBanner was called, but there are currently '
+            'no descendant Scaffolds to present to.'
+          )
+        ),
+      ),
+    );
   });
 }
 

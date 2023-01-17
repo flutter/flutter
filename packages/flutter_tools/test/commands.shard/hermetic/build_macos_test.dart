@@ -202,7 +202,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -218,7 +218,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -234,7 +234,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug', verbose: true)
+      setUpFakeXcodeBuildHandler('Debug', verbose: true),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -251,7 +251,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Profile')
+      setUpFakeXcodeBuildHandler('Profile'),
     ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
@@ -268,7 +268,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Release')
+      setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -323,7 +323,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Release')
+      setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -333,7 +333,7 @@ STDERR STUFF
   testUsingContext('build settings contains Flutter Xcode environment variables', () async {
 
     macosPlatformCustomEnv.environment = Map<String, String>.unmodifiable(<String, String>{
-      'FLUTTER_XCODE_ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon.special'
+      'FLUTTER_XCODE_ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon.special',
     });
 
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
@@ -398,7 +398,7 @@ STDERR STUFF
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-      setUpFakeXcodeBuildHandler('Debug')
+      setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),

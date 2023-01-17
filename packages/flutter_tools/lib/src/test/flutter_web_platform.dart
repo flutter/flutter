@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
-import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
@@ -41,19 +38,19 @@ import 'test_compiler.dart';
 
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root, {
-    FlutterProject flutterProject,
-    String shellPath,
+    FlutterProject? flutterProject,
+    String? shellPath,
     this.updateGoldens,
     this.nullAssertions,
-    @required this.buildInfo,
-    @required this.webMemoryFS,
-    @required FileSystem fileSystem,
-    @required PackageConfig flutterToolPackageConfig,
-    @required ChromiumLauncher chromiumLauncher,
-    @required Logger logger,
-    @required Artifacts artifacts,
-    @required ProcessManager processManager,
-    @required Cache cache,
+    required this.buildInfo,
+    required this.webMemoryFS,
+    required FileSystem fileSystem,
+    required PackageConfig flutterToolPackageConfig,
+    required ChromiumLauncher chromiumLauncher,
+    required Logger logger,
+    required Artifacts? artifacts,
+    required ProcessManager processManager,
+    required Cache cache,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
@@ -63,7 +60,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(createStaticHandler(
-          fileSystem.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
+          fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
           serveFilesOutsidePath: true,
         ))
         .add(_handleStaticArtifact)
@@ -93,9 +90,9 @@ class FlutterWebPlatform extends PlatformPlugin {
   final PackageConfig _flutterToolPackageConfig;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
-  final Artifacts _artifacts;
-  final bool updateGoldens;
-  final bool nullAssertions;
+  final Artifacts? _artifacts;
+  final bool? updateGoldens;
+  final bool? nullAssertions;
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
@@ -106,28 +103,28 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// to lead to flaky tests.
   final Pool _suiteLock = Pool(1);
 
-  BrowserManager _browserManager;
-  TestGoldenComparator _testGoldenComparator;
+  BrowserManager? _browserManager;
+  late TestGoldenComparator _testGoldenComparator;
 
   static Future<FlutterWebPlatform> start(String root, {
-    FlutterProject flutterProject,
-    String shellPath,
+    FlutterProject? flutterProject,
+    String? shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
     bool nullAssertions = false,
-    @required BuildInfo buildInfo,
-    @required WebMemoryFS webMemoryFS,
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required ChromiumLauncher chromiumLauncher,
-    @required Artifacts artifacts,
-    @required ProcessManager processManager,
-    @required Cache cache,
+    required BuildInfo buildInfo,
+    required WebMemoryFS webMemoryFS,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ChromiumLauncher chromiumLauncher,
+    required Artifacts? artifacts,
+    required ProcessManager processManager,
+    required Cache cache,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       fileSystem.file(fileSystem.path.join(
-        Cache.flutterRoot,
+        Cache.flutterRoot!,
         'packages',
         'flutter_tools',
         '.dart_tool',
@@ -158,7 +155,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   bool get _closed => _closeMemo.hasRun;
 
   /// Uri of the test package.
-  Uri get testUri => _flutterToolPackageConfig['test'].packageUriRoot;
+  Uri get testUri => _flutterToolPackageConfig['test']!.packageUriRoot;
 
   WebRendererMode get _rendererMode  {
     return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
@@ -178,7 +175,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ahem text file.
   File get _ahem => _fileSystem.file(_fileSystem.path.join(
-    Cache.flutterRoot,
+    Cache.flutterRoot!,
     'packages',
     'flutter_tools',
     'static',
@@ -187,7 +184,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'kernel',
@@ -197,7 +194,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
     'lib',
     'dev_compiler',
     'web',
@@ -205,10 +202,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]![_nullSafetyMode]!));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode][_nullSafetyMode]));
+    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]![_nullSafetyMode]!));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -254,7 +251,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
       final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
-        nullAssertions: nullAssertions,
+        nullAssertions: nullAssertions!,
         nativeNullAssertions: true,
         bootstrapModule: '${_fileSystem.path.basename(leadingPath)}.dart.bootstrap',
         entrypoint: '/$generatedFile'
@@ -317,7 +314,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
     if (request.requestedUri.pathSegments.first == 'packages') {
-      final Uri fileUri = buildInfo.packageConfig.resolve(Uri(
+      final Uri? fileUri = buildInfo.packageConfig.resolve(Uri(
         scheme: 'package',
         pathSegments: request.requestedUri.pathSegments.skip(1),
       ));
@@ -344,16 +341,16 @@ class FlutterWebPlatform extends PlatformPlugin {
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
       final Map<String, Object> body = json.decode(await request.readAsString()) as Map<String, Object>;
-      final Uri goldenKey = Uri.parse(body['key'] as String);
-      final Uri testUri = Uri.parse(body['testUri'] as String);
-      final num width = body['width'] as num;
-      final num height = body['height'] as num;
+      final Uri goldenKey = Uri.parse(body['key']! as String);
+      final Uri testUri = Uri.parse(body['testUri']! as String);
+      final num width = body['width']! as num;
+      final num height = body['height']! as num;
       Uint8List bytes;
 
       try {
-        final ChromeTab chromeTab = await _browserManager._browser.chromeConnection.getTab((ChromeTab tab) {
-          return tab.url.contains(_browserManager._browser.url);
-        });
+        final ChromeTab chromeTab = await (_browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
+          return tab.url.contains(_browserManager!._browser.url!);
+        }) as FutureOr<ChromeTab>);
         final WipConnection connection = await chromeTab.connect();
         final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
           // Clip the screenshot to include only the element.
@@ -367,9 +364,9 @@ class FlutterWebPlatform extends PlatformPlugin {
             'width': width.toDouble(),
             'height': height.toDouble(),
             'scale': 1.0,
-          }
+          },
         });
-        bytes = base64.decode(response.result['data'] as String);
+        bytes = base64.decode(response.result!['data'] as String);
       } on WipError catch (ex) {
         _logger.printError('Caught WIPError: $ex');
         return shelf.Response.ok('WIP error: $ex');
@@ -382,7 +379,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.ok('Unknown error, bytes is null');
       }
 
-      final String errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
+      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
       return shelf.Response.ok(errorMessage ?? 'true');
     } else {
       return shelf.Response.notFound('Not Found');
@@ -473,8 +470,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     final String pathFromTest = _fileSystem.path.relative(path, from: _fileSystem.path.join(_root, 'test'));
     final Uri suiteUrl = url.resolveUri(_fileSystem.path.toUri('${_fileSystem.path.withoutExtension(pathFromTest)}.html'));
     final String relativePath = _fileSystem.path.relative(_fileSystem.path.normalize(path), from: _fileSystem.currentDirectory.path);
-    final RunnerSuite suite = await _browserManager.load(relativePath, suiteUrl, suiteConfig, message, onDone: () async {
-      await _browserManager.close();
+    final RunnerSuite suite = await _browserManager!.load(relativePath, suiteUrl, suiteConfig, message, onDone: () async {
+      await _browserManager!.close();
       _browserManager = null;
       lockResource.release();
     });
@@ -516,7 +513,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   @override
   Future<void> closeEphemeral() async {
     if (_browserManager != null) {
-      await _browserManager.close();
+      await _browserManager!.close();
     }
   }
 
@@ -524,7 +521,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   Future<void> close() => _closeMemo.runOnce(() async {
     await Future.wait<void>(<Future<dynamic>>[
       if (_browserManager != null)
-        _browserManager.close(),
+        _browserManager!.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);
@@ -561,7 +558,7 @@ class OneOffHandler {
       return shelf.Response.notFound(null);
     }
     final String path = components.removeAt(0);
-    final FutureOr<shelf.Response> Function(shelf.Request) handler =
+    final FutureOr<shelf.Response> Function(shelf.Request)? handler =
         _handlers.remove(path);
     if (handler == null) {
       return shelf.Response.notFound(null);
@@ -590,8 +587,8 @@ class BrowserManager {
     // Whenever we get a message, no matter which child channel it's for, we know
     // the browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
-      webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object> stream) {
-        return stream.map((Object message) {
+      webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
+        return stream.map((Object? message) {
           if (!_closed) {
             _timer.reset();
           }
@@ -615,7 +612,7 @@ class BrowserManager {
   /// The channel used to communicate with the browser.
   ///
   /// This is connected to a page running `static/host.dart`.
-  MultiChannel<dynamic> _channel;
+  late MultiChannel<dynamic> _channel;
 
   /// The ID of the next suite to be loaded.
   ///
@@ -630,14 +627,14 @@ class BrowserManager {
   ///
   /// This will be `null` as long as the browser isn't displaying a pause
   /// screen.
-  CancelableCompleter<dynamic> _pauseCompleter;
+  CancelableCompleter<dynamic>? _pauseCompleter;
 
   /// The controller for [_BrowserEnvironment.onRestart].
   final StreamController<dynamic> _onRestartController =
       StreamController<dynamic>.broadcast();
 
   /// The environment to attach to each suite.
-  Future<_BrowserEnvironment> _environment;
+  late Future<_BrowserEnvironment> _environment;
 
   /// Controllers for every suite in this browser.
   ///
@@ -649,7 +646,7 @@ class BrowserManager {
   //
   // Because the browser stops running code when the user is actively debugging,
   // this lets us detect whether they're debugging reasonably accurately.
-  RestartableTimer _timer;
+  late RestartableTimer _timer;
 
   final AsyncMemoizer<dynamic> _closeMemoizer = AsyncMemoizer<dynamic>();
 
@@ -662,6 +659,8 @@ class BrowserManager {
   ///
   /// The browser will start in headless mode if [headless] is true.
   ///
+  /// Add arbitrary browser flags via [webBrowserFlags].
+  ///
   /// The [settings] indicate how to invoke this browser's executable.
   ///
   /// Returns the browser manager, or throws an [ApplicationException] if a
@@ -673,35 +672,35 @@ class BrowserManager {
     Future<WebSocketChannel> future, {
     bool debug = false,
     bool headless = true,
+    List<String> webBrowserFlags = const <String>[],
   }) async {
-    final Chromium chrome = await chromiumLauncher.launch(url.toString(), headless: headless);
+    final Chromium chrome = await chromiumLauncher.launch(
+      url.toString(),
+      headless: headless,
+      webBrowserFlags: webBrowserFlags,
+    );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then((int browserExitCode) {
+    unawaited(chrome.onExit.then((int? browserExitCode) {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
-    }).catchError((dynamic error, StackTrace stackTrace) {
-      if (completer.isCompleted) {
-        return null;
+    }).catchError((Object error, StackTrace stackTrace) {
+      if (!completer.isCompleted) {
+        completer.completeError(error, stackTrace);
       }
-      completer.completeError(error, stackTrace);
     }));
     unawaited(future.then((WebSocketChannel webSocket) {
       if (completer.isCompleted) {
         return;
       }
       completer.complete(BrowserManager._(chrome, runtime, webSocket));
-    }).catchError((dynamic error, StackTrace stackTrace) {
+    }).catchError((Object error, StackTrace stackTrace) {
       chrome.close();
-      if (completer.isCompleted) {
-        return null;
+      if (!completer.isCompleted) {
+        completer.completeError(error, stackTrace);
       }
-      completer.completeError(error, stackTrace);
     }));
 
-    return completer.future.timeout(const Duration(seconds: 30), onTimeout: () {
-      chrome.close();
-      throwToolExit('Timed out waiting for ${runtime.name} to connect.');
-    });
+    return completer.future;
   }
 
   /// Loads [_BrowserEnvironment].
@@ -723,7 +722,7 @@ class BrowserManager {
     Uri url,
     SuiteConfiguration suiteConfig,
     Object message, {
-      Future<void> Function() onDone,
+      Future<void> Function()? onDone,
     }
   ) async {
     url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
@@ -732,7 +731,7 @@ class BrowserManager {
     })));
 
     final int suiteID = _suiteID++;
-    RunnerSuiteController controller;
+    RunnerSuiteController? controller;
     void closeIframe() {
       if (_closed) {
         return;
@@ -750,7 +749,7 @@ class BrowserManager {
       StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
         closeIframe();
         sink.close();
-        onDone();
+        onDone!();
       }),
     );
 
@@ -777,25 +776,25 @@ class BrowserManager {
   /// An implementation of [Environment.displayPause].
   CancelableOperation<dynamic> _displayPause() {
     if (_pauseCompleter != null) {
-      return _pauseCompleter.operation;
+      return _pauseCompleter!.operation;
     }
     _pauseCompleter = CancelableCompleter<dynamic>(onCancel: () {
       _channel.sink.add(<String, String>{'command': 'resume'});
       _pauseCompleter = null;
     });
-    _pauseCompleter.operation.value.whenComplete(() {
+    _pauseCompleter!.operation.value.whenComplete(() {
       _pauseCompleter = null;
     });
     _channel.sink.add(<String, String>{'command': 'displayPause'});
 
-    return _pauseCompleter.operation;
+    return _pauseCompleter!.operation;
   }
 
   /// The callback for handling messages received from the host page.
   void _onMessage(dynamic message) {
     assert(message is Map<String, dynamic>);
     if (message is Map<String, dynamic>) {
-      switch (message['command'] as String) {
+      switch (message['command'] as String?) {
         case 'ping':
           break;
         case 'restart':
@@ -803,7 +802,7 @@ class BrowserManager {
           break;
         case 'resume':
           if (_pauseCompleter != null) {
-            _pauseCompleter.complete();
+            _pauseCompleter!.complete();
           }
           break;
         default:
@@ -821,7 +820,7 @@ class BrowserManager {
       _closed = true;
       _timer.cancel();
       if (_pauseCompleter != null) {
-        _pauseCompleter.complete();
+        _pauseCompleter!.complete();
       }
       _pauseCompleter = null;
       _controllers.clear();
@@ -847,7 +846,7 @@ class _BrowserEnvironment implements Environment {
   final bool supportsDebugging = true;
 
   @override
-  final Uri observatoryUrl;
+  final Uri? observatoryUrl;
 
   @override
   final Uri remoteDebuggerUrl;

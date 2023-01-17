@@ -162,7 +162,7 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
           'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
           'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '19'
+          'FLUTTER_ENGINE_SWITCHES': '19',
         }
       ),
     ]);
@@ -209,7 +209,7 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
           'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
           'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCHES': '4'
+          'FLUTTER_ENGINE_SWITCHES': '4',
         }
       ),
     ]);

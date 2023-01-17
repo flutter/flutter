@@ -1016,8 +1016,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1));
       expect(flying(tester, find.text('Page 2')), findsOneWidget);
       final Size size = tester.getSize(flying(tester, find.text('Page 2')));
-      if (previousSize != null)
+      if (previousSize != null) {
         expect(size, previousSize);
+      }
       previousSize = size;
     }
   });

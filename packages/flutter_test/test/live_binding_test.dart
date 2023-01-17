@@ -34,7 +34,6 @@ void main() {
     await gesture.moveTo(location);
     expect(hoverEvent, isNotNull);
     expect(hoverEvent!.position, location);
-    await gesture.removePointer();
   });
 
   testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {

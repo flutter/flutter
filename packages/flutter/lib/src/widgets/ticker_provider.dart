@@ -20,11 +20,10 @@ class TickerMode extends StatefulWidget {
   ///
   /// The [enabled] argument must not be null.
   const TickerMode({
-    Key? key,
+    super.key,
     required this.enabled,
     required this.child,
-  }) : assert(enabled != null),
-       super(key: key);
+  }) : assert(enabled != null);
 
   /// The requested ticker mode for this subtree.
   ///
@@ -146,12 +145,10 @@ class _TickerModeState extends State<TickerMode> {
 
 class _EffectiveTickerMode extends InheritedWidget {
   const _EffectiveTickerMode({
-    Key? key,
     required this.enabled,
     required this.notifier,
-    required Widget child,
-  }) : assert(enabled != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(enabled != null);
 
   final bool enabled;
   final ValueNotifier<bool> notifier;
@@ -183,8 +180,9 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   @override
   Ticker createTicker(TickerCallback onTick) {
     assert(() {
-      if (_ticker == null)
+      if (_ticker == null) {
         return true;
+      }
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('$runtimeType is a SingleTickerProviderStateMixin but multiple tickers were created.'),
         ErrorDescription('A SingleTickerProviderStateMixin can only be used as a TickerProvider once.'),
@@ -204,8 +202,9 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   @override
   void dispose() {
     assert(() {
-      if (_ticker == null || !_ticker!.isActive)
+      if (_ticker == null || !_ticker!.isActive) {
         return true;
+      }
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('$this was disposed with an active Ticker.'),
         ErrorDescription(
@@ -257,14 +256,15 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     super.debugFillProperties(properties);
     String? tickerDescription;
     if (_ticker != null) {
-      if (_ticker!.isActive && _ticker!.muted)
+      if (_ticker!.isActive && _ticker!.muted) {
         tickerDescription = 'active but muted';
-      else if (_ticker!.isActive)
+      } else if (_ticker!.isActive) {
         tickerDescription = 'active';
-      else if (_ticker!.muted)
+      } else if (_ticker!.muted) {
         tickerDescription = 'inactive and muted';
-      else
+      } else {
         tickerDescription = 'inactive';
+      }
     }
     properties.add(DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
   }
@@ -382,7 +382,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _WidgetTicker extends Ticker {
-  _WidgetTicker(TickerCallback onTick, this._creator, { String? debugLabel }) : super(onTick, debugLabel: debugLabel);
+  _WidgetTicker(super.onTick, this._creator, { super.debugLabel });
 
   final TickerProviderStateMixin _creator;
 

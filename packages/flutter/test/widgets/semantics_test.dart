@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -60,6 +59,34 @@ void main() {
     ));
     semantics.dispose();
   }, semanticsEnabled: false);
+
+  testWidgets('Semantics tooltip', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          tooltip: 'test1',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      Semantics(
+        tooltip: 'test1',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      expectedSemantics,
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
+    semantics.dispose();
+  });
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1562,8 +1589,35 @@ void main() {
       textDirection: TextDirection.ltr,
     ));
   });
+
+  testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110671.
+    // Construct a widget tree that will end up with a fitted box that applies
+    // a zero transform because it does not actually draw its children.
+    // Assert that this subtree gets dropped (the root node has no children).
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        SizedBox(
+          height: 0,
+          width: 500,
+          child: FittedBox(
+            child: SizedBox(
+              height: 55,
+              width: 266,
+              child: SingleChildScrollView(child: Column()),
+            ),
+          ),
+        ),
+      ],
+    ));
+
+    final SemanticsNode node = RendererBinding.instance.renderView.debugSemantics!;
+
+    expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
+    expect(node.childrenCount, 0);
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String? name}) : super(order, name: name);
+  const CustomSortKey(super.order, {super.name});
 }

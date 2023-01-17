@@ -127,13 +127,15 @@ void main() {
         ..translate(x: 0.0, y: 0.0)
         ..translate(x: tapDownOffset.dx, y: tapDownOffset.dy)
         ..something((Symbol method, List<dynamic> arguments) {
-          if (method != #drawCircle)
+          if (method != #drawCircle) {
             return false;
+          }
           final Offset center = arguments[0] as Offset;
           final double radius = arguments[1] as double;
           final Paint paint = arguments[2] as Paint;
-          if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha)
+          if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha) {
             return true;
+          }
           throw '''
             Expected: center == $expectedCenter, radius == $expectedRadius, alpha == $expectedAlpha
             Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
@@ -423,11 +425,13 @@ void main() {
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
     expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
+      if (method != #drawCircle) {
         return true;
+      }
       final Paint paint = arguments[2] as Paint;
-      if (paint.color.alpha == 0)
+      if (paint.color.alpha == 0) {
         return true;
+      }
       throw 'Expected: paint.color.alpha == 0, found: ${paint.color.alpha}';
     }));
   });

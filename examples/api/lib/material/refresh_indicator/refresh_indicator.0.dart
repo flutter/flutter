@@ -9,23 +9,18 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'RefreshIndicator Sample';
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: RefreshIndicatorExample(title: _title),
+      home: RefreshIndicatorExample(),
     );
   }
 }
 
 class RefreshIndicatorExample extends StatefulWidget {
-  const RefreshIndicatorExample({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const RefreshIndicatorExample({super.key});
 
   @override
   State<RefreshIndicatorExample> createState() => _RefreshIndicatorExampleState();
@@ -39,7 +34,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('RefreshIndicator Sample'),
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,

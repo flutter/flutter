@@ -168,7 +168,7 @@ void main() {
 }
 
 class _RestorableWidget extends StatefulWidget {
-  const _RestorableWidget({Key? key}) : super(key: key);
+  const _RestorableWidget();
 
   @override
   State<_RestorableWidget> createState() => _RestorableWidgetState();

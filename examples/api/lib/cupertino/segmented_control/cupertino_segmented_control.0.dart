@@ -14,30 +14,28 @@ Map<Sky, Color> skyColors = <Sky, Color> {
   Sky.cerulean: const Color(0xff007ba7),
 };
 
-void main() => runApp(const MyApp());
+void main() => runApp(const SegmentedControlApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'CupertinoSegmentedControl Sample';
+class SegmentedControlApp extends StatelessWidget {
+  const SegmentedControlApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: SegmentedControlSample(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: SegmentedControlExample(),
     );
   }
 }
 
-class SegmentedControlSample extends StatefulWidget {
-  const SegmentedControlSample({Key? key}) : super(key: key);
+class SegmentedControlExample extends StatefulWidget {
+  const SegmentedControlExample({super.key});
 
   @override
-  State<SegmentedControlSample> createState() => _SegmentedControlSampleState();
+  State<SegmentedControlExample> createState() => _SegmentedControlExampleState();
 }
 
-class _SegmentedControlSampleState extends State<SegmentedControlSample> {
+class _SegmentedControlExampleState extends State<SegmentedControlExample> {
   Sky _selectedSegment = Sky.midnight;
 
   @override
@@ -61,24 +59,15 @@ class _SegmentedControlSampleState extends State<SegmentedControlSample> {
           children: const <Sky, Widget>{
             Sky.midnight: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Midnight',
-                style: TextStyle(color: CupertinoColors.white),
-              ),
+              child: Text('Midnight'),
             ),
             Sky.viridian: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Viridian',
-                style: TextStyle(color: CupertinoColors.white),
-              ),
+              child: Text('Viridian'),
             ),
             Sky.cerulean: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Cerulean',
-                style: TextStyle(color: CupertinoColors.white),
-              ),
+              child: Text('Cerulean'),
             ),
           },
         ),

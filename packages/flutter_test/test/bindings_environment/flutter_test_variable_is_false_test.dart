@@ -10,6 +10,6 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized(<String, String>{'FLUTTER_TEST': 'false'});
     expect(WidgetsBinding.instance, isA<LiveTestWidgetsFlutterBinding>());
   }, onPlatform: const <String, dynamic>{
-    'browser': <Skip>[Skip('Browser will not use the live binding')]
+    'browser': <Skip>[Skip('Browser will not use the live binding')],
   });
 }

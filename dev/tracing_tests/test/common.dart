@@ -4,7 +4,6 @@
 
 import 'dart:developer' as developer;
 import 'dart:isolate' as isolate;
-import 'dart:ui';
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';

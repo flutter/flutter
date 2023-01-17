@@ -4,7 +4,6 @@
 
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
@@ -33,8 +32,9 @@ class _Vector {
 
   double operator *(_Vector a) {
     double result = 0.0;
-    for (int i = 0; i < _length; i += 1)
+    for (int i = 0; i < _length; i += 1) {
       result += this[i] * a[i];
+    }
     return result;
   }
 
@@ -100,8 +100,10 @@ class LeastSquaresSolver {
   ///
   /// When there is not enough data to fit a curve null is returned.
   PolynomialFit? solve(int degree) {
-    if (degree > x.length) // Not enough data to fit a curve.
+    if (degree > x.length) {
+      // Not enough data to fit a curve.
       return null;
+    }
 
     final PolynomialFit result = PolynomialFit(degree);
 
@@ -113,8 +115,9 @@ class LeastSquaresSolver {
     final _Matrix a = _Matrix(n, m);
     for (int h = 0; h < m; h += 1) {
       a.set(0, h, w[h]);
-      for (int i = 1; i < n; i += 1)
+      for (int i = 1; i < n; i += 1) {
         a.set(i, h, a.get(i - 1, h) * x[h]);
+      }
     }
 
     // Apply the Gram-Schmidt process to A to obtain its QR decomposition.
@@ -124,12 +127,14 @@ class LeastSquaresSolver {
     // Upper triangular matrix, row-major order.
     final _Matrix r = _Matrix(n, n);
     for (int j = 0; j < n; j += 1) {
-      for (int h = 0; h < m; h += 1)
+      for (int h = 0; h < m; h += 1) {
         q.set(j, h, a.get(j, h));
+      }
       for (int i = 0; i < j; i += 1) {
         final double dot = q.getRow(j) * q.getRow(i);
-        for (int h = 0; h < m; h += 1)
+        for (int h = 0; h < m; h += 1) {
           q.set(j, h, q.get(j, h) - dot * q.get(i, h));
+        }
       }
 
       final double norm = q.getRow(j).norm();
@@ -139,21 +144,25 @@ class LeastSquaresSolver {
       }
 
       final double inverseNorm = 1.0 / norm;
-      for (int h = 0; h < m; h += 1)
+      for (int h = 0; h < m; h += 1) {
         q.set(j, h, q.get(j, h) * inverseNorm);
-      for (int i = 0; i < n; i += 1)
+      }
+      for (int i = 0; i < n; i += 1) {
         r.set(j, i, i < j ? 0.0 : q.getRow(j) * a.getRow(i));
+      }
     }
 
     // Solve R B = Qt W Y to find B. This is easy because R is upper triangular.
     // We just work from bottom-right to top-left calculating B's coefficients.
     final _Vector wy = _Vector(m);
-    for (int h = 0; h < m; h += 1)
+    for (int h = 0; h < m; h += 1) {
       wy[h] = y[h] * w[h];
+    }
     for (int i = n - 1; i >= 0; i -= 1) {
       result.coefficients[i] = q.getRow(i) * wy;
-      for (int j = n - 1; j > i; j -= 1)
+      for (int j = n - 1; j > i; j -= 1) {
         result.coefficients[i] -= r.get(i, j) * result.coefficients[j];
+      }
       result.coefficients[i] /= r.get(i, i);
     }
 
@@ -163,8 +172,9 @@ class LeastSquaresSolver {
     // error), and sumSquaredTotal is the total sum of squares (variance of the
     // data) where each has been weighted.
     double yMean = 0.0;
-    for (int h = 0; h < m; h += 1)
+    for (int h = 0; h < m; h += 1) {
       yMean += y[h];
+    }
     yMean /= m;
 
     double sumSquaredError = 0.0;

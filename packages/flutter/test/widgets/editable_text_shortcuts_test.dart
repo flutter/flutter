@@ -4,9 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'clipboard_utils.dart';
 
 Future<void> sendKeyCombination(
   WidgetTester tester,
@@ -41,6 +42,18 @@ Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final MockClipboard mockClipboard = MockClipboard();
+
+  setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    await Clipboard.setData(const ClipboardData(text: 'empty'));
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+  });
+
   const String testText =
       'Now is the time for\n' // 20
       'all good people\n'     // 20 + 16 => 36
@@ -125,7 +138,7 @@ void main() {
 
   group('Common text editing shortcuts: ',
     () {
-      final TargetPlatformVariant allExceptMacOS = TargetPlatformVariant(TargetPlatform.values.toSet()..remove(TargetPlatform.macOS));
+      final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS});
 
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
@@ -492,8 +505,8 @@ void main() {
       group('word modifier + backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
         SingleActivator wordModifierBackspace() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, control: !isMacOS, alt: isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
         testWidgets('WordModifier-backspace', (WidgetTester tester) async {
@@ -632,8 +645,8 @@ void main() {
       group('word modifier + delete', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
         SingleActivator wordModifierDelete() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, control: !isMacOS, alt: isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
         testWidgets('WordModifier-delete', (WidgetTester tester) async {
@@ -765,8 +778,8 @@ void main() {
       group('line modifier + backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
         SingleActivator lineModifierBackspace() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, meta: isMacOS, alt: !isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
         testWidgets('alt-backspace', (WidgetTester tester) async {
@@ -946,8 +959,8 @@ void main() {
       group('line modifier + delete', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
         SingleActivator lineModifierDelete() {
-          final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
-          return SingleActivator(trigger, meta: isMacOS, alt: !isMacOS);
+          final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+          return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
         testWidgets('alt-delete', (WidgetTester tester) async {
@@ -1168,7 +1181,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 4,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
 
           testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1182,7 +1195,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 20,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
         });
 
         group('right', () {
@@ -1231,7 +1244,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 10,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
 
          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1246,7 +1259,7 @@ void main() {
               offset: 35, // Before the newline character.
               affinity: TextAffinity.upstream,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
         });
 
         group('With initial non-collapsed selection', () {
@@ -1353,7 +1366,7 @@ void main() {
             expect(controller.selection, const TextSelection.collapsed(
               offset: 28, // After "good".
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
 
          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
@@ -1407,7 +1420,7 @@ void main() {
               offset: 35, // After "people".
               affinity: TextAffinity.upstream,
             ));
-          }, variant: allExceptMacOS);
+          }, variant: allExceptApple);
         });
 
         group('vertical movement', () {
@@ -1798,4 +1811,328 @@ void main() {
       ));
     }, variant: macOSOnly);
   }, skip: kIsWeb); // [intended] on web these keys are handled by the browser.
+
+  group('Web does not accept', () {
+    final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS });
+    const TargetPlatformVariant appleOnly = TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.iOS });
+    group('macOS shortcuts', () {
+
+      testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+        controller.text = testText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 7,   // Before the first "the"
+        );
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true));
+        await tester.pump();
+
+        expect(controller.selection, const TextSelection.collapsed(offset: 7));
+      }, variant: appleOnly);
+
+      testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+        controller.text = testText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 7,   // Before the first "the"
+        );
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true));
+        await tester.pump();
+
+        expect(controller.selection, const TextSelection.collapsed(offset: 7));
+      }, variant: appleOnly);
+
+      testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+        controller.text = testText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 24,   // Before the "good".
+        );
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true));
+        await tester.pump();
+
+        expect(controller.selection, const TextSelection.collapsed(offset: 24,));
+      }, variant: appleOnly);
+
+      testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+        controller.text = testText;
+        controller.selection = const TextSelection.collapsed(
+          offset: 24,   // Before the "good".
+        );
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true));
+        await tester.pump();
+
+        expect(controller.selection, const TextSelection.collapsed(
+          offset: 24, // Before the newline character.
+        ));
+      }, variant: appleOnly);
+
+      testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+        controller.text = testText;
+        controller.selection = const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        );
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true));
+        await tester.pump();
+
+        expect(controller.selection, const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        ));
+
+        controller.selection = const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        );
+        await tester.pump();
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true));
+        await tester.pump();
+        expect(controller.selection, const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        ));
+
+        controller.selection = const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        );
+        await tester.pump();
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true));
+        await tester.pump();
+        expect(controller.selection, const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        ));
+
+        // "good" to "come" is selected.
+        controller.selection = const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        );
+        await tester.pump();
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true));
+        await tester.pump();
+        expect(controller.selection, const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        ));
+      }, variant: appleOnly);
+
+      testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+        controller.text = testText;
+        // "good" to "come" is selected.
+        controller.selection = const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        );
+        await tester.pumpWidget(buildEditableText());
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true));
+        await tester.pump();
+
+        expect(controller.selection, const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        ));
+
+        // "good" to "come" is selected.
+        controller.selection = const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        );
+        await tester.pump();
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true));
+        await tester.pump();
+        expect(controller.selection, const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        ));
+
+        // "good" to "come" is selected.
+        controller.selection = const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        );
+        await tester.pump();
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true));
+        await tester.pump();
+        expect(controller.selection, const TextSelection(
+          baseOffset: 24,
+          extentOffset: 43,
+        ));
+
+        // "good" to "come" is selected.
+        controller.selection = const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        );
+        await tester.pump();
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true));
+        await tester.pump();
+        expect(controller.selection, const TextSelection(
+          baseOffset: 43,
+          extentOffset: 24,
+        ));
+      }, variant: appleOnly);
+    });
+
+    testWidgets('vertical movement', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection.collapsed(
+        offset: 0,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+
+      for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowDown)) {
+        await sendKeyCombination(tester, activator);
+        await tester.pump();
+
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 0),
+          reason: activator.toString(),
+        );
+      }
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('horizontal movement', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection.collapsed(
+        offset: 0,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+
+      for (final SingleActivator activator in allModifierVariants(LogicalKeyboardKey.arrowRight)) {
+        await sendKeyCombination(tester, activator);
+        await tester.pump();
+
+        expect(controller.selection, const TextSelection.collapsed(offset: 0));
+      }
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('select all non apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection.collapsed(
+        offset: 0,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
+      await tester.pump();
+
+      expect(controller.selection, const TextSelection.collapsed(offset: 0));
+    }, variant: allExceptApple);
+
+    testWidgets('select all apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection.collapsed(
+        offset: 0,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, meta: true));
+      await tester.pump();
+
+      expect(controller.selection, const TextSelection.collapsed(offset: 0));
+    }, variant: appleOnly);
+
+    testWidgets('copy non apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 4,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
+      await tester.pump();
+
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'empty');
+    }, variant: allExceptApple);
+
+    testWidgets('copy apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 4,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
+      await tester.pump();
+
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'empty');
+    }, variant: appleOnly);
+
+    testWidgets('cut non apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 4,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyX, control: true));
+      await tester.pump();
+
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'empty');
+      expect(controller.selection, const TextSelection(
+        baseOffset: 0,
+        extentOffset: 4,
+      ));
+    }, variant: allExceptApple);
+
+    testWidgets('cut apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection(
+        baseOffset: 0,
+        extentOffset: 4,
+      );
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyX, meta: true));
+      await tester.pump();
+
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'empty');
+      expect(controller.selection, const TextSelection(
+        baseOffset: 0,
+        extentOffset: 4,
+      ));
+    }, variant: appleOnly);
+
+    testWidgets('paste non apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      mockClipboard.clipboardData = <String, dynamic>{
+        'text': 'some text',
+      };
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyV, control: true));
+      await tester.pump();
+      expect(controller.selection, const TextSelection.collapsed(offset: 0));
+      expect(controller.text, testText);
+    }, variant: allExceptApple);
+
+    testWidgets('paste apple', (WidgetTester tester) async {
+      controller.text = testText;
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      mockClipboard.clipboardData = <String, dynamic>{
+        'text': 'some text',
+      };
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyV, meta: true));
+      await tester.pump();
+      expect(controller.selection, const TextSelection.collapsed(offset: 0));
+      expect(controller.text, testText);
+    }, variant: appleOnly);
+
+  }, skip: !kIsWeb);// [intended] specific tests target web.
 }

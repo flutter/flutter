@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class ProbeWidget extends StatefulWidget {
-  const ProbeWidget({ Key? key }) : super(key: key);
+  const ProbeWidget({ super.key });
   @override
   ProbeWidgetState createState() => ProbeWidgetState();
 }
@@ -37,7 +37,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
 }
 
 class BadWidget extends StatelessWidget {
-  const BadWidget(this.parentState, { Key? key }) : super(key: key);
+  const BadWidget(this.parentState, { super.key });
 
   final BadWidgetParentState parentState;
 
@@ -49,7 +49,7 @@ class BadWidget extends StatelessWidget {
 }
 
 class BadWidgetParent extends StatefulWidget {
-  const BadWidgetParent({ Key? key }) : super(key: key);
+  const BadWidgetParent({ super.key });
   @override
   BadWidgetParentState createState() => BadWidgetParentState();
 }
@@ -69,7 +69,7 @@ class BadWidgetParentState extends State<BadWidgetParent> {
 }
 
 class BadDisposeWidget extends StatefulWidget {
-  const BadDisposeWidget({ Key? key }) : super(key: key);
+  const BadDisposeWidget({ super.key });
   @override
   BadDisposeWidgetState createState() => BadDisposeWidgetState();
 }
@@ -89,9 +89,9 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 
 class StatefulWrapper extends StatefulWidget {
   const StatefulWrapper({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -120,9 +120,9 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -215,8 +215,9 @@ void main() {
       state.oldBuilt = state.built!;
       state.trigger();
     }
-    for (final StateSetter setState in setStates)
+    for (final StateSetter setState in setStates) {
       setState(() { });
+    }
 
     StatefulWrapperState.buildId = 0;
     middle = part1;

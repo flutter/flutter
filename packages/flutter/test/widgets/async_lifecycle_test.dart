@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class InvalidOnInitLifecycleWidget extends StatefulWidget {
-  const InvalidOnInitLifecycleWidget({Key? key}) : super(key: key);
+  const InvalidOnInitLifecycleWidget({super.key});
 
   @override
   InvalidOnInitLifecycleWidgetState createState() => InvalidOnInitLifecycleWidgetState();
@@ -25,7 +25,7 @@ class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidg
 }
 
 class InvalidDidUpdateWidgetLifecycleWidget extends StatefulWidget {
-  const InvalidDidUpdateWidgetLifecycleWidget({Key? key, required this.id}) : super(key: key);
+  const InvalidDidUpdateWidgetLifecycleWidget({super.key, required this.id});
 
   final int id;
 

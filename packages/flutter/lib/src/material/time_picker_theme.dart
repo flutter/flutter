@@ -301,10 +301,12 @@ class TimePickerThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TimePickerThemeData
         && other.backgroundColor == backgroundColor
         && other.hourMinuteTextColor == hourMinuteTextColor
@@ -357,11 +359,10 @@ class TimePickerTheme extends InheritedTheme {
   /// Creates a time picker theme that controls the configurations for
   /// time pickers displayed in its widget subtree.
   const TimePickerTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : assert(data != null),
-       super(key: key, child: child);
+    required super.child,
+  }) : assert(data != null);
 
   /// The properties for descendant time picker widgets.
   final TimePickerThemeData data;

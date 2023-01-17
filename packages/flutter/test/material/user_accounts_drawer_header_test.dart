@@ -19,9 +19,15 @@ Future<void> pumpTestWidget(
       bool withOnDetailsPressedHandler = true,
       Size otherAccountsPictureSize = const Size.square(40.0),
       Size currentAccountPictureSize  = const Size.square(72.0),
+      Color? primaryColor,
+      Color? colorSchemePrimary,
     }) async {
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(
+        primaryColor: primaryColor,
+        colorScheme: const ColorScheme.light().copyWith(primary: colorSchemePrimary),
+      ),
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -75,6 +81,19 @@ void main() {
     of: find.byType(UserAccountsDrawerHeader),
     matching: find.byType(Transform),
   );
+
+  testWidgets('UserAccountsDrawerHeader inherits ColorScheme.primary', (WidgetTester tester) async {
+    const Color primaryColor = Color(0xff00ff00);
+    const Color colorSchemePrimary = Color(0xff0000ff);
+
+    await pumpTestWidget(tester, primaryColor: primaryColor, colorSchemePrimary: colorSchemePrimary);
+
+    final BoxDecoration? boxDecoration = tester.widget<DrawerHeader>(
+      find.byType(DrawerHeader),
+    ).decoration as BoxDecoration?;
+    expect(boxDecoration?.color == primaryColor, false);
+    expect(boxDecoration?.color == colorSchemePrimary, true);
+  });
 
   testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
     await pumpTestWidget(tester);

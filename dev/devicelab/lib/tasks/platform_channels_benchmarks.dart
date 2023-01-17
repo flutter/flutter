@@ -29,7 +29,7 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
         'ios,android',
         '--no-overwrite',
         '-v',
-        '.'
+        '.',
       ];
       print('\nExecuting: $flutterExe $createArgs $appDir');
       await utils.eval(flutterExe, createArgs);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
@@ -22,9 +20,9 @@ import '../src/context.dart';
 
 void main() {
   group('Dart plugin registrant', () {
-    FileSystem fs;
-    FakeFlutterProject flutterProject;
-    FakeFlutterManifest flutterManifest;
+    late FileSystem fs;
+    late FakeFlutterProject flutterProject;
+    late FakeFlutterManifest flutterManifest;
 
     setUp(() async {
       fs = MemoryFileSystem.test();
@@ -669,7 +667,7 @@ void main() {
       platforms:
         macos:
           dartPluginClass: AwesomeMacOS
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -803,7 +801,7 @@ void main() {
       platforms:
         macos:
           invalid:
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -844,7 +842,7 @@ void main() {
   flutter:
     plugin:
       implements: url_launcher
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -944,7 +942,7 @@ void main() {
       platforms:
         macos:
           dartPluginClass: MacOSPlugin
-'''
+''',
           });
 
         final Directory libDir = flutterProject.directory.childDirectory('lib');
@@ -1023,38 +1021,35 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  FlutterManifest manifest;
+  late FlutterManifest manifest;
 
   @override
-  Directory directory;
+  late Directory directory;
 
   @override
-  File flutterPluginsFile;
+  late File flutterPluginsFile;
 
   @override
-  File flutterPluginsDependenciesFile;
+  late File flutterPluginsDependenciesFile;
 
   @override
-  File dartPluginRegistrant;
+  late File dartPluginRegistrant;
 
   @override
-  IosProject ios;
+  late IosProject ios;
 
   @override
-  AndroidProject android;
+  late AndroidProject android;
 
   @override
-  WebProject web;
+  late WebProject web;
 
   @override
-  MacOSProject macos;
+  late MacOSProject macos;
 
   @override
-  LinuxProject linux;
+  late LinuxProject linux;
 
   @override
-  WindowsProject windows;
-
-  @override
-  WindowsUwpProject windowsUwp;
+  late WindowsProject windows;
 }

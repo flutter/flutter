@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
-  TestOverlayRoute({ RouteSettings? settings }) : super(settings: settings);
+  TestOverlayRoute({ super.settings });
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield OverlayEntry(builder: _build);
@@ -15,7 +15,7 @@ class TestOverlayRoute extends OverlayRoute<void> {
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
-  const PersistentBottomSheetTest({ Key? key }) : super(key: key);
+  const PersistentBottomSheetTest({ super.key });
 
   @override
   PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();

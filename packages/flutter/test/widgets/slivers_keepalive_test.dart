@@ -402,8 +402,8 @@ List<Widget> createSwitchedChildList(List<Widget> childList, int i, int j) {
 class SwitchingChildBuilderTest extends StatefulWidget {
   const SwitchingChildBuilderTest({
     required this.children,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<Widget> children;
 
@@ -474,8 +474,8 @@ class SwitchingChildListTest extends StatefulWidget {
   const SwitchingChildListTest({
     required this.children,
     this.viewportFraction = 1.0,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<Widget> children;
   final double viewportFraction;
@@ -511,8 +511,8 @@ class SwitchingSliverListTest extends StatefulWidget {
   const SwitchingSliverListTest({
     required this.children,
     this.viewportFraction = 1.0,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<Widget> children;
   final double viewportFraction;
@@ -547,8 +547,8 @@ class WidgetTest0 extends StatefulWidget {
   const WidgetTest0({
     required this.text,
     this.keepAlive = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String text;
   final bool keepAlive;
@@ -580,8 +580,8 @@ class WidgetTest1 extends StatefulWidget {
   const WidgetTest1({
     required this.text,
     this.keepAlive = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String text;
   final bool keepAlive;
@@ -613,8 +613,8 @@ class WidgetTest2 extends StatefulWidget {
   const WidgetTest2({
     required this.text,
     this.keepAlive = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String text;
   final bool keepAlive;

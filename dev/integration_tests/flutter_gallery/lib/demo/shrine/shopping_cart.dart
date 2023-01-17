@@ -78,7 +78,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   right: 16.0,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: kShrinePink100,
+                      backgroundColor: kShrinePink100,
                       shape: const BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),

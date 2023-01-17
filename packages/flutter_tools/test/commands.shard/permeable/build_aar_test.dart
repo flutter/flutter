@@ -170,7 +170,7 @@ void main() {
           '--split-debug-info',
           '/project-name/v1.2.3/',
           '--obfuscate',
-          '--dart-define=foo=bar'
+          '--dart-define=foo=bar',
         ],
       );
 

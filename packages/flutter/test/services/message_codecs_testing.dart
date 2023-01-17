@@ -32,14 +32,18 @@ void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
 }
 
 bool deepEquals(dynamic valueA, dynamic valueB) {
-  if (valueA is TypedData)
+  if (valueA is TypedData) {
     return valueB is TypedData && deepEqualsTypedData(valueA, valueB);
-  if (valueA is List)
+  }
+  if (valueA is List) {
     return valueB is List && deepEqualsList(valueA, valueB);
-  if (valueA is Map)
+  }
+  if (valueA is Map) {
     return valueB is Map && deepEqualsMap(valueA, valueB);
-  if (valueA is double && valueA.isNaN)
+  }
+  if (valueA is double && valueA.isNaN) {
     return valueB is double && valueB.isNaN;
+  }
   return valueA == valueB;
 }
 
@@ -48,35 +52,44 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
     return valueB is ByteData
         && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
   }
-  if (valueA is Uint8List)
+  if (valueA is Uint8List) {
     return valueB is Uint8List && deepEqualsList(valueA, valueB);
-  if (valueA is Int32List)
+  }
+  if (valueA is Int32List) {
     return valueB is Int32List && deepEqualsList(valueA, valueB);
-  if (valueA is Int64List)
+  }
+  if (valueA is Int64List) {
     return valueB is Int64List && deepEqualsList(valueA, valueB);
-  if (valueA is Float32List)
+  }
+  if (valueA is Float32List) {
     return valueB is Float32List && deepEqualsList(valueA, valueB);
-  if (valueA is Float64List)
+  }
+  if (valueA is Float64List) {
     return valueB is Float64List && deepEqualsList(valueA, valueB);
+  }
   throw 'Unexpected typed data: $valueA';
 }
 
 bool deepEqualsList(List<dynamic> valueA, List<dynamic> valueB) {
-  if (valueA.length != valueB.length)
+  if (valueA.length != valueB.length) {
     return false;
+  }
   for (int i = 0; i < valueA.length; i++) {
-    if (!deepEquals(valueA[i], valueB[i]))
+    if (!deepEquals(valueA[i], valueB[i])) {
       return false;
+    }
   }
   return true;
 }
 
 bool deepEqualsMap(Map<dynamic, dynamic> valueA, Map<dynamic, dynamic> valueB) {
-  if (valueA.length != valueB.length)
+  if (valueA.length != valueB.length) {
     return false;
+  }
   for (final dynamic key in valueA.keys) {
-    if (!valueB.containsKey(key) || !deepEquals(valueA[key], valueB[key]))
+    if (!valueB.containsKey(key) || !deepEquals(valueA[key], valueB[key])) {
       return false;
+    }
   }
   return true;
 }

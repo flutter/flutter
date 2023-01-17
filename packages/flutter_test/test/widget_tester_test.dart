@@ -526,8 +526,8 @@ void main() {
                 position: location,
                 buttons: kSecondaryMouseButton,
                 pointer: 1,
-              )
-            ])
+              ),
+            ]),
         ],
         PointerEventRecord(const Duration(milliseconds: 80), <PointerEvent>[
           PointerUpEvent(
@@ -535,8 +535,8 @@ void main() {
             position: location,
             buttons: kSecondaryMouseButton,
             pointer: 1,
-          )
-        ])
+          ),
+        ]),
       ];
       final List<Duration> timeDiffs = await tester.handlePointerEventRecord(records);
       expect(timeDiffs.length, records.length);
@@ -720,13 +720,29 @@ void main() {
       expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
-      if (debugDefaultTargetPlatformOverride == null) {
-        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
-      } else {
-        numberOfVariationsRun += 1;
-      }
-    }, variant: TargetPlatformVariant.all());
+    group('all', () {
+      testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
+        if (debugDefaultTargetPlatformOverride == null) {
+          expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+        } else {
+          numberOfVariationsRun += 1;
+        }
+      }, variant: TargetPlatformVariant.all());
+
+      const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{ TargetPlatform.android, TargetPlatform.linux };
+      testWidgets('TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding', (WidgetTester tester) async {
+        if (debugDefaultTargetPlatformOverride == null) {
+          expect(numberOfVariationsRun, equals(TargetPlatform.values.length - excludePlatforms.length));
+          expect(
+            excludePlatforms,
+            isNot(contains(debugDefaultTargetPlatformOverride)),
+            reason: 'this test should not run on any platform in excludePlatforms'
+          );
+        } else {
+          numberOfVariationsRun += 1;
+        }
+      }, variant: TargetPlatformVariant.all(excluding: excludePlatforms));
+    });
 
     testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
       final TargetPlatformVariant all = TargetPlatformVariant.all();
@@ -780,31 +796,6 @@ class FakeMatcher extends AsyncMatcher {
 
   @override
   Description describe(Description description) => description.add('--fake--');
-}
-
-class _SingleTickerTest extends StatefulWidget {
-  const _SingleTickerTest();
-
-  @override
-  _SingleTickerTestState createState() => _SingleTickerTestState();
-}
-
-class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 100),
-    )  ;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
 }
 
 class _AlwaysAnimating extends StatefulWidget {

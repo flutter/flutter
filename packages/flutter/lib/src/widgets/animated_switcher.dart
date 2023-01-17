@@ -109,7 +109,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// The [duration], [transitionBuilder], [layoutBuilder], [switchInCurve], and
   /// [switchOutCurve] parameters must not be null.
   const AnimatedSwitcher({
-    Key? key,
+    super.key,
     this.child,
     required this.duration,
     this.reverseDuration,
@@ -121,8 +121,7 @@ class AnimatedSwitcher extends StatefulWidget {
        assert(switchInCurve != null),
        assert(switchOutCurve != null),
        assert(transitionBuilder != null),
-       assert(layoutBuilder != null),
-       super(key: key);
+       assert(layoutBuilder != null);
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new
@@ -273,8 +272,9 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     // transitions.
     if (widget.transitionBuilder != oldWidget.transitionBuilder) {
       _outgoingEntries.forEach(_updateTransitionForEntry);
-      if (_currentEntry != null)
+      if (_currentEntry != null) {
         _updateTransitionForEntry(_currentEntry!);
+      }
       _markChildWidgetCacheAsDirty();
     }
 
@@ -308,8 +308,9 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
-    if (widget.child == null)
+    if (widget.child == null) {
       return;
+    }
     final AnimationController controller = AnimationController(
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
@@ -381,10 +382,12 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   @override
   void dispose() {
-    if (_currentEntry != null)
+    if (_currentEntry != null) {
       _currentEntry!.controller.dispose();
-    for (final _ChildEntry entry in _outgoingEntries)
+    }
+    for (final _ChildEntry entry in _outgoingEntries) {
       entry.controller.dispose();
+    }
     super.dispose();
   }
 

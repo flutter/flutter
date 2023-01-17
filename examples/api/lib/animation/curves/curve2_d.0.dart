@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -43,12 +43,12 @@ final CatmullRomSpline path = CatmullRomSpline(
 
 class FollowCurve2D extends StatefulWidget {
   const FollowCurve2D({
-    Key? key,
+    super.key,
     required this.path,
     this.curve = Curves.easeInOut,
     required this.child,
     this.duration = const Duration(seconds: 1),
-  }) : super(key: key);
+  });
 
   final Curve2D path;
   final Curve curve;
@@ -97,7 +97,7 @@ class _FollowCurve2DState extends State<FollowCurve2D>
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

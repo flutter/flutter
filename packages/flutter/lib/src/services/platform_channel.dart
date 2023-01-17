@@ -3,13 +3,125 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 
 import 'binary_messenger.dart';
 import 'binding.dart';
+import 'debug.dart' show debugProfilePlatformChannels;
 import 'message_codec.dart';
 import 'message_codecs.dart';
+
+export 'binary_messenger.dart' show BinaryMessenger;
+export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
+
+bool _debugProfilePlatformChannelsIsRunning = false;
+const Duration _debugProfilePlatformChannelsRate = Duration(seconds: 1);
+final Expando<BinaryMessenger> _debugBinaryMessengers = Expando<BinaryMessenger>();
+
+class _ProfiledBinaryMessenger implements BinaryMessenger {
+  const _ProfiledBinaryMessenger(this.proxy, this.channelTypeName, this.codecTypeName);
+  final BinaryMessenger proxy;
+  final String channelTypeName;
+  final String codecTypeName;
+
+  @override
+  Future<void> handlePlatformMessage(String channel, ByteData? data, PlatformMessageResponseCallback? callback) {
+    return proxy.handlePlatformMessage(channel, data, callback);
+  }
+
+  Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
+    final TimelineTask task = TimelineTask();
+    _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
+    task.start('Platform Channel send $channel$postfix');
+    final ByteData? result;
+    try {
+      result = await proxy.send(channel, message);
+    } finally {
+      task.finish();
+    }
+    _debugRecordDownStream(channelTypeName, '$channel$postfix', codecTypeName, result);
+    return result;
+  }
+
+  @override
+  Future<ByteData?>? send(String channel, ByteData? message) =>
+    sendWithPostfix(channel, '', message);
+
+  @override
+  void setMessageHandler(String channel, MessageHandler? handler) {
+    proxy.setMessageHandler(channel, handler);
+  }
+}
+
+class _PlatformChannelStats {
+  _PlatformChannelStats(this.channel, this.codec, this.type);
+
+  final String channel;
+  final String codec;
+  final String type;
+
+  int _upCount = 0;
+  int _upBytes = 0;
+  int get upBytes => _upBytes;
+  void addUpStream(int bytes) {
+    _upCount += 1;
+    _upBytes += bytes;
+  }
+
+  int _downCount = 0;
+  int _downBytes = 0;
+  int get downBytes => _downBytes;
+  void addDownStream(int bytes) {
+    _downCount += 1;
+    _downBytes += bytes;
+  }
+
+  double get averageUpPayload => _upBytes / _upCount;
+  double get averageDownPayload => _downBytes / _downCount;
+}
+
+final Map<String, _PlatformChannelStats> _debugProfilePlatformChannelsStats = <String, _PlatformChannelStats>{};
+
+Future<void> _debugLaunchProfilePlatformChannels() async {
+  if (!_debugProfilePlatformChannelsIsRunning) {
+    _debugProfilePlatformChannelsIsRunning = true;
+    await Future<dynamic>.delayed(_debugProfilePlatformChannelsRate);
+    _debugProfilePlatformChannelsIsRunning = false;
+    final StringBuffer log = StringBuffer();
+    log.writeln('Platform Channel Stats:');
+    final List<_PlatformChannelStats> allStats =
+        _debugProfilePlatformChannelsStats.values.toList();
+    // Sort highest combined bandwidth first.
+    allStats.sort((_PlatformChannelStats x, _PlatformChannelStats y) =>
+        (y.upBytes + y.downBytes) - (x.upBytes + x.downBytes));
+    for (final _PlatformChannelStats stats in allStats) {
+      log.writeln(
+          '  (name:"${stats.channel}" type:"${stats.type}" codec:"${stats.codec}" upBytes:${stats.upBytes} upBytes_avg:${stats.averageUpPayload.toStringAsFixed(1)} downBytes:${stats.downBytes} downBytes_avg:${stats.averageDownPayload.toStringAsFixed(1)})');
+    }
+    debugPrint(log.toString());
+    _debugProfilePlatformChannelsStats.clear();
+  }
+}
+
+void _debugRecordUpStream(String channelTypeName, String name,
+    String codecTypeName, ByteData? bytes) {
+  final _PlatformChannelStats stats =
+      _debugProfilePlatformChannelsStats[name] ??=
+          _PlatformChannelStats(name, codecTypeName, channelTypeName);
+  stats.addUpStream(bytes?.lengthInBytes ?? 0);
+  _debugLaunchProfilePlatformChannels();
+}
+
+void _debugRecordDownStream(String channelTypeName, String name,
+    String codecTypeName, ByteData? bytes) {
+  final _PlatformChannelStats stats =
+      _debugProfilePlatformChannelsStats[name] ??=
+          _PlatformChannelStats(name, codecTypeName, channelTypeName);
+  stats.addDownStream(bytes?.lengthInBytes ?? 0);
+  _debugLaunchProfilePlatformChannels();
+}
 
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
@@ -49,7 +161,15 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger {
+    final BinaryMessenger result =
+        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+    return !kReleaseMode && debugProfilePlatformChannels
+        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+            // ignore: no_runtimetype_tostring
+            result, runtimeType.toString(), codec.runtimeType.toString())
+        : result;
+  }
   final BinaryMessenger? _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
@@ -129,7 +249,15 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger {
+    final BinaryMessenger result =
+        _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+    return !kReleaseMode && debugProfilePlatformChannels
+        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+            // ignore: no_runtimetype_tostring
+            result, runtimeType.toString(), codec.runtimeType.toString())
+        : result;
+  }
   final BinaryMessenger? _binaryMessenger;
 
   /// Backend implementation of [invokeMethod].
@@ -154,10 +282,11 @@ class MethodChannel {
   @optionalTypeArgs
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     assert(method != null);
-    final ByteData? result = await binaryMessenger.send(
-      name,
-      codec.encodeMethodCall(MethodCall(method, arguments)),
-    );
+    final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
+    final ByteData? result =
+      !kReleaseMode && debugProfilePlatformChannels ?
+        await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
+        await binaryMessenger.send(name, input);
     if (result == null) {
       if (missingOk) {
         return null;
@@ -198,6 +327,9 @@ class MethodChannel {
   ///
   /// ```dart
   /// class Music {
+  ///   // Class cannot be instantiated.
+  ///   const Music._();
+  ///
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
@@ -213,7 +345,7 @@ class MethodChannel {
   ///     // the actual values involved would support such a typed container.
   ///     // The correct type cannot be inferred with any value of `T`.
   ///     final List<dynamic>? songs = await _channel.invokeMethod<List<dynamic>>('getSongs');
-  ///     return songs?.map(Song.fromJson).toList() ?? <Song>[];
+  ///     return songs?.cast<Map<String, Object?>>().map<Song>(Song.fromJson).toList() ?? <Song>[];
   ///   }
   ///
   ///   static Future<void> play(Song song, double volume) async {
@@ -225,7 +357,7 @@ class MethodChannel {
   ///         'volume': volume,
   ///       });
   ///     } on PlatformException catch (e) {
-  ///       throw 'Unable to play ${song.title}: ${e.message}';
+  ///       throw ArgumentError('Unable to play ${song.title}: ${e.message}');
   ///     }
   ///   }
   /// }
@@ -237,8 +369,8 @@ class MethodChannel {
   ///   final String title;
   ///   final String artist;
   ///
-  ///   static Song fromJson(dynamic json) {
-  ///     return Song(json['id'] as String, json['title'] as String, json['artist'] as String);
+  ///   static Song fromJson(Map<String, Object?> json) {
+  ///     return Song(json['id']! as String, json['title']! as String, json['artist']! as String);
   ///   }
   /// }
   /// ```
@@ -427,8 +559,7 @@ class MethodChannel {
 /// {@macro flutter.services.method_channel.FIFO}
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-    : super(name, codec, binaryMessenger);
+  const OptionalMethodChannel(super.name, [super.codec, super.binaryMessenger]);
 
   @override
   Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) async {

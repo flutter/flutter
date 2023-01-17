@@ -6,54 +6,55 @@
 
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutter/material.dart';
+void main() => runApp(const ScrollbarApp());
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class ScrollbarApp extends StatelessWidget {
+  const ScrollbarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
-      ),
+    return const CupertinoApp(
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: ScrollbarExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class ScrollbarExample extends StatefulWidget {
+  const ScrollbarExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ScrollbarExample> createState() => _ScrollbarExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ScrollbarExampleState extends State<ScrollbarExample> {
   final ScrollController _controllerOne = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoScrollbar(
-      thickness: 6.0,
-      thicknessWhileDragging: 10.0,
-      radius: const Radius.circular(34.0),
-      radiusWhileDragging: Radius.zero,
-      controller: _controllerOne,
-      thumbVisibility: true,
-      child: ListView.builder(
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoScrollbar Sample'),
+      ),
+      child: CupertinoScrollbar(
+        thickness: 6.0,
+        thicknessWhileDragging: 10.0,
+        radius: const Radius.circular(34.0),
+        radiusWhileDragging: Radius.zero,
         controller: _controllerOne,
-        itemCount: 120,
-        itemBuilder: (BuildContext context, int index) {
-          return Center(
-            child: Text('item $index'),
-          );
-        },
+        thumbVisibility: true,
+        child: ListView.builder(
+          controller: _controllerOne,
+          itemCount: 120,
+          itemBuilder: (BuildContext context, int index) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Item $index'),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -8,6 +8,10 @@ import 'assertions.dart';
 import 'platform.dart';
 import 'print.dart';
 
+export 'dart:ui' show Brightness;
+
+export 'print.dart' show DebugPrintCallback;
+
 /// Returns true if none of the foundation library debug variables have been
 /// changed.
 ///
@@ -26,8 +30,9 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
-        debugBrightnessOverride != null)
+        debugBrightnessOverride != null) {
       throw FlutterError(reason);
+    }
     return true;
   }());
   return true;
@@ -81,23 +86,6 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> Function() acti
     return action();
   }
 }
-
-/// Argument passed to [dart:developer.Timeline] events in order to cause those
-/// events to be shown in the developer-centric version of the Observatory
-/// Timeline.
-///
-/// Generally these indicate landmark events such as the build phase or layout.
-///
-/// [DiagnosticsNode.toTimelineArguments] includes these properties in its
-/// result.
-///
-/// See also:
-///
-///  * [dart:developer.Timeline.startSync], which typically takes this value as
-///    its `arguments` argument.
-const Map<String, String> timelineArgumentsIndicatingLandmarkEvent = <String, String>{
-  'mode': 'basic',
-};
 
 /// Configure [debugFormatDouble] using [num.toStringAsPrecision].
 ///

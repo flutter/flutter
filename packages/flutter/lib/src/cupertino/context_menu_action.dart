@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
@@ -13,7 +14,7 @@ import 'colors.dart';
 class CupertinoContextMenuAction extends StatefulWidget {
   /// Construct a CupertinoContextMenuAction.
   const CupertinoContextMenuAction({
-    Key? key,
+    super.key,
     required this.child,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
@@ -21,8 +22,7 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.trailingIcon,
   }) : assert(child != null),
        assert(isDefaultAction != null),
-       assert(isDestructiveAction != null),
-       super(key: key);
+       assert(isDestructiveAction != null);
 
   /// The widget that will be placed inside the action.
   final Widget child;
@@ -106,43 +106,46 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      key: _globalKey,
-      onTapDown: onTapDown,
-      onTapUp: onTapUp,
-      onTapCancel: onTapCancel,
-      onTap: widget.onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: _kButtonHeight,
-        ),
-        child: Semantics(
-          button: true,
-          child: Container(
-            decoration: BoxDecoration(
-              color: _isPressed
-                ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
-                : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
-            ),
-            padding: const EdgeInsets.symmetric(
-              vertical: 16.0,
-              horizontal: 10.0,
-            ),
-            child: DefaultTextStyle(
-              style: _textStyle,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Flexible(
-                    child: widget.child,
-                  ),
-                  if (widget.trailingIcon != null)
-                    Icon(
-                      widget.trailingIcon,
-                      color: _textStyle.color,
+    return MouseRegion(
+      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: GestureDetector(
+        key: _globalKey,
+        onTapDown: onTapDown,
+        onTapUp: onTapUp,
+        onTapCancel: onTapCancel,
+        onTap: widget.onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: _kButtonHeight,
+          ),
+          child: Semantics(
+            button: true,
+            child: Container(
+              decoration: BoxDecoration(
+                color: _isPressed
+                  ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
+                  : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+              ),
+              padding: const EdgeInsets.symmetric(
+                vertical: 16.0,
+                horizontal: 10.0,
+              ),
+              child: DefaultTextStyle(
+                style: _textStyle,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Flexible(
+                      child: widget.child,
                     ),
-                ],
+                    if (widget.trailingIcon != null)
+                      Icon(
+                        widget.trailingIcon,
+                        color: _textStyle.color,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

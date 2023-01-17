@@ -6,30 +6,28 @@
 
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CupertinoTextFieldApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class CupertinoTextFieldApp extends StatelessWidget {
+  const CupertinoTextFieldApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      theme: CupertinoThemeData(brightness: Brightness.light),
+      home: CupertinoTextFieldExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+class CupertinoTextFieldExample extends StatefulWidget {
+  const CupertinoTextFieldExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<CupertinoTextFieldExample> createState() => _CupertinoTextFieldExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _CupertinoTextFieldExampleState extends State<CupertinoTextFieldExample> {
   late TextEditingController _textController;
 
   @override
@@ -47,6 +45,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoTextField Sample'),
+      ),
       child: Center(
         child: CupertinoTextField(
           controller: _textController,

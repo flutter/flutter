@@ -5,12 +5,11 @@
 // Flutter code sample for MaterialStateMouseCursor
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -29,6 +28,8 @@ class MyApp extends StatelessWidget {
 }
 
 class ListTileCursor extends MaterialStateMouseCursor {
+  const ListTileCursor();
+
   @override
   MouseCursor resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
@@ -42,12 +43,12 @@ class ListTileCursor extends MaterialStateMouseCursor {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Disabled ListTile'),
+    return const ListTile(
+      title: Text('Disabled ListTile'),
       enabled: false,
       mouseCursor: ListTileCursor(),
     );

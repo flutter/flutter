@@ -5,50 +5,83 @@
 import 'dart:io';
 
 abstract class TokenTemplate {
-  const TokenTemplate(this.fileName, this.tokens, {
+  const TokenTemplate(this.blockName, this.fileName, this.tokens, {
     this.colorSchemePrefix = 'Theme.of(context).colorScheme.',
     this.textThemePrefix = 'Theme.of(context).textTheme.'
   });
 
+  /// Name of the code block that this template will generate.
+  ///
+  /// Used to identify an existing block when updating it.
+  final String blockName;
+
+  /// Name of the file that will be updated with the generated code.
+  final String fileName;
+
+  /// Map of token data extracted from the Material Design token database.
+  final Map<String, dynamic> tokens;
+
+  /// Optional prefix prepended to color definitions.
+  ///
+  /// Defaults to 'Theme.of(context).colorScheme.'
+  final String colorSchemePrefix;
+
+  /// Optional prefix prepended to text style definitians.
+  ///
+  /// Defaults to 'Theme.of(context).textTheme.'
+  final String textThemePrefix;
+
   static const String beginGeneratedComment = '''
 
-// BEGIN GENERATED TOKEN PROPERTIES
-''';
+// BEGIN GENERATED TOKEN PROPERTIES''';
 
   static const String headerComment = '''
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 ''';
 
   static const String endGeneratedComment = '''
 
-// END GENERATED TOKEN PROPERTIES
-''';
-
-  final String fileName;
-  final Map<String, dynamic> tokens;
-  final String colorSchemePrefix;
-  final String textThemePrefix;
+// END GENERATED TOKEN PROPERTIES''';
 
   /// Replace or append the contents of the file with the text from [generate].
   ///
-  /// If the file already contains generated block at the end, it will
-  /// be replaced by the [generate] output. Otherwise the content will
-  /// just be appended to the end of the file.
+  /// If the file already contains a generated text block matching the
+  /// [blockName], it will be replaced by the [generate] output. Otherwise
+  /// the content will just be appended to the end of the file.
   Future<void> updateFile() async {
-    String contents = File(fileName).readAsStringSync();
-    final int previousGeneratedIndex = contents.indexOf(beginGeneratedComment);
-    if (previousGeneratedIndex != -1) {
-      contents = contents.substring(0, previousGeneratedIndex);
+    final String contents = File(fileName).readAsStringSync();
+    final String beginComment = '$beginGeneratedComment - $blockName\n';
+    final String endComment = '$endGeneratedComment - $blockName\n';
+    final int beginPreviousBlock = contents.indexOf(beginComment);
+    final int endPreviousBlock = contents.indexOf(endComment);
+    late String contentBeforeBlock;
+    late String contentAfterBlock;
+    if (beginPreviousBlock != -1) {
+      if (endPreviousBlock < beginPreviousBlock) {
+        print('Unable to find block named $blockName in $fileName, skipping code generation.');
+        return;
+      }
+      // Found a valid block matching the name, so record the content before and after.
+      contentBeforeBlock = contents.substring(0, beginPreviousBlock);
+      contentAfterBlock = contents.substring(endPreviousBlock + endComment.length);
+    } else {
+      // Just append to the bottom.
+      contentBeforeBlock = contents;
+      contentAfterBlock = '';
     }
-    final StringBuffer buffer = StringBuffer(contents);
-    buffer.write(beginGeneratedComment);
+
+    final StringBuffer buffer = StringBuffer(contentBeforeBlock);
+    buffer.write(beginComment);
     buffer.write(headerComment);
+    buffer.write('// Token database version: ${tokens['version']}\n\n');
     buffer.write(generate());
-    buffer.write(endGeneratedComment);
+    buffer.write(endComment);
+    buffer.write(contentAfterBlock);
     File(fileName).writeAsStringSync(buffer.toString());
   }
 
@@ -149,6 +182,6 @@ abstract class TokenTemplate {
 
   /// Generate a [TextTheme] text style name for the given component token.
   String textStyle(String componentToken) {
-    return '$textThemePrefix${tokens["$componentToken.text-style"]!.toString()}';
+    return '$textThemePrefix${tokens["$componentToken.text-style"]}';
   }
 }

@@ -8,7 +8,6 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -64,7 +63,7 @@ void main() {
     });
 
     testWithoutContext('successfully instantiates on Mac OS', () {
-      IOSDevice(
+      final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -77,6 +76,23 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         interfaceType: IOSDeviceConnectionInterface.usb,
       );
+      expect(device.isSupported(), isTrue);
+    });
+
+    testWithoutContext('32-bit devices are unsupported', () {
+      final IOSDevice device = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.armv7,
+        interfaceType: IOSDeviceConnectionInterface.usb,
+      );
+      expect(device.isSupported(), isFalse);
     });
 
     testWithoutContext('parses major version', () {
@@ -419,7 +435,7 @@ void main() {
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
       });
       await added.future;
       expect(iosDevices.deviceNotifier!.items.length, 2);
@@ -427,7 +443,7 @@ void main() {
       expect(iosDevices.deviceNotifier!.items, contains(device2));
 
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
       });
       await removed.future;
       expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
@@ -435,7 +451,7 @@ void main() {
       // Remove stream will throw over-completion if called more than once
       // which proves this is ignored.
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'bogus'
+        XCDeviceEvent.detach: 'bogus',
       });
 
       expect(addedCount, 2);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -33,8 +31,8 @@ final BuildInfo debugBuild = BuildInfo(
 );
 
 void main() {
-  FakeResidentCompiler residentCompiler;
-  FileSystem fileSystem;
+  late FakeResidentCompiler residentCompiler;
+  late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -149,8 +147,7 @@ environment:
 
     await testCompiler.compile(Uri.parse('test/foo.dart'));
 
-    final File generatedMain = fileSystem
-      .directory('.dart_tool')
+    final File generatedMain = fileSystem.directory('.dart_tool')
       .childDirectory('flutter_build')
       .childFile('dart_plugin_registrant.dart');
 
@@ -170,17 +167,17 @@ environment:
 /// Override the creation of the Resident Compiler to simplify testing.
 class FakeTestCompiler extends TestCompiler {
   FakeTestCompiler(
-    BuildInfo buildInfo,
-    FlutterProject flutterProject,
+    super.buildInfo,
+    super.flutterProject,
     this.residentCompiler, {
-      String precompiledDillPath,
+      super.precompiledDillPath,
     }
-  ) : super(buildInfo, flutterProject, precompiledDillPath: precompiledDillPath);
+  );
 
-  final FakeResidentCompiler residentCompiler;
+  final FakeResidentCompiler? residentCompiler;
 
   @override
-  Future<ResidentCompiler> createCompiler() async {
+  Future<ResidentCompiler?> createCompiler() async {
     return residentCompiler;
   }
 }
@@ -188,24 +185,24 @@ class FakeTestCompiler extends TestCompiler {
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   FakeResidentCompiler(this.fileSystem);
 
-  final FileSystem fileSystem;
+  final FileSystem? fileSystem;
 
-  CompilerOutput compilerOutput;
+  CompilerOutput? compilerOutput;
   bool didShutdown = false;
 
   @override
-  Future<CompilerOutput> recompile(
+  Future<CompilerOutput?> recompile(
     Uri mainUri,
-    List<Uri> invalidatedFiles, {
-    String outputPath,
-    PackageConfig packageConfig,
-    String projectRootPath,
-    FileSystem fs,
+    List<Uri>? invalidatedFiles, {
+    String? outputPath,
+    PackageConfig? packageConfig,
+    String? projectRootPath,
+    FileSystem? fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
   }) async {
     if (compilerOutput != null) {
-      fileSystem.file(compilerOutput.outputFilename).createSync(recursive: true);
+      fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);
     }
     return compilerOutput;
   }
@@ -217,7 +214,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   void reset() { }
 
   @override
-  Future<void> shutdown() async {
+  Future<Object> shutdown() async {
     didShutdown = true;
+    return Object();
   }
 }

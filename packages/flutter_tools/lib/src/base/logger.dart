@@ -732,16 +732,20 @@ class BufferLogger extends Logger {
     required this.terminal,
     required OutputPreferences outputPreferences,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    bool verbose = false,
   }) : _outputPreferences = outputPreferences,
-       _stopwatchFactory = stopwatchFactory;
+       _stopwatchFactory = stopwatchFactory,
+       _verbose = verbose;
 
   /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal? terminal,
     OutputPreferences? outputPreferences,
+    bool verbose = false,
   }) : terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-       _stopwatchFactory = const StopwatchFactory();
+       _stopwatchFactory = const StopwatchFactory(),
+       _verbose = verbose;
 
   @override
   final OutputPreferences _outputPreferences;
@@ -751,8 +755,10 @@ class BufferLogger extends Logger {
 
   final StopwatchFactory _stopwatchFactory;
 
+  final bool _verbose;
+
   @override
-  bool get isVerbose => false;
+  bool get isVerbose => _verbose;
 
   @override
   bool get supportsColor => terminal.supportsColor;
@@ -895,7 +901,7 @@ class BufferLogger extends Logger {
   void sendEvent(String name, [Map<String, dynamic>? args]) {
     _events.write(json.encode(<String, Object?>{
       'name': name,
-      'args': args
+      'args': args,
     }));
   }
 }

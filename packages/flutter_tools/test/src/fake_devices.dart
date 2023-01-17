@@ -28,8 +28,8 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
-        'startPaused': true
-      }
+        'startPaused': true,
+      },
     }
   ),
   FakeDeviceJsonData(
@@ -50,9 +50,9 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
-        'startPaused': true
-      }
-    }
+        'startPaused': true,
+      },
+    },
   ),
 ];
 

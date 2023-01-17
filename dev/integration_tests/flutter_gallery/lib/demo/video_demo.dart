@@ -418,6 +418,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
             connectedCompleter: connectedCompleter,
             child: Scrollbar(
               child: ListView(
+                primary: true,
                 children: <Widget>[
                   VideoCard(
                     title: 'Butterfly',

@@ -151,13 +151,14 @@ class _ElevationOpacity {
   final double opacity;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES
+// BEGIN GENERATED TOKEN PROPERTIES - SurfaceTint
 
-// Generated code to the end of this file. Do not edit by hand.
-// These defaults are generated from the Material Design Token
-// database by the script dev/tools/gen_defaults/bin/gen_defaults.dart.
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Generated version v0_92
+// Token database version: v0_101
 
 // Surface tint opacities based on elevations according to the
 // Material Design 3 specification:
@@ -172,4 +173,4 @@ const List<_ElevationOpacity> _surfaceTintElevationOpacities = <_ElevationOpacit
   _ElevationOpacity(12.0, 0.14), // Elevation level 5
 ];
 
-// END GENERATED TOKEN PROPERTIES
+// END GENERATED TOKEN PROPERTIES - SurfaceTint

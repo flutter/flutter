@@ -543,6 +543,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model layer paint
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: borderColor,
@@ -576,6 +578,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model layer paint
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: selectedBorderColor,
@@ -608,6 +612,8 @@ void main() {
       expect(
         toggleButtonRenderObject,
         paints
+          // physical model layer paint
+          ..path()
           ..path(
             style: PaintingStyle.stroke,
             color: disabledBorderColor,

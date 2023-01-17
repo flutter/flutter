@@ -13,11 +13,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
-
-// The test_api package is not for general use... it's literally for our use.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
 
 import 'mock_canvas.dart';
 import 'recording_canvas.dart';
@@ -53,38 +48,6 @@ class _FakeEditableTextState with TextSelectionDelegate {
 
   @override
   void copySelection(SelectionChangedCause cause) { }
-}
-
-@isTest
-void testVariants(
-  String description,
-  AsyncValueGetter<void> callback, {
-  bool? skip,
-  test_package.Timeout? timeout,
-  TestVariant<Object?> variant = const DefaultTestVariant(),
-  dynamic tags,
-}) {
-  assert(variant != null);
-  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
-  for (final dynamic value in variant.values) {
-    final String variationDescription = variant.describeValue(value);
-    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
-    test(
-      combinedDescription,
-      () async {
-        Object? memento;
-        try {
-          memento = await variant.setUp(value);
-          await callback();
-        } finally {
-          await variant.tearDown(value, memento);
-        }
-      },
-      skip: skip, // [intended] just part of the API.
-      timeout: timeout,
-      tags: tags,
-    );
-  }
 }
 
 void main() {
@@ -126,6 +89,28 @@ void main() {
       context.paintChild(editable, Offset.zero);
       expect(context.clipBehavior, equals(clip));
     }
+  });
+
+  test('Editable respect clipBehavior in describeApproximatePaintClip', () {
+    final String longString = 'a' * 10000;
+    final RenderEditable editable = RenderEditable(
+      text: TextSpan(text: longString),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+      clipBehavior: Clip.none,
+    );
+    layout(editable);
+
+    bool visited = false;
+    editable.visitChildren((RenderObject child) {
+      visited = true;
+      expect(editable.describeApproximatePaintClip(child), null);
+    });
+    expect(visited, true);
   });
 
   test('editable intrinsics', () {
@@ -914,8 +899,9 @@ void main() {
       editable.paintCount = 0;
 
       final AbstractNode? parent = editable.parent;
-      if (parent is RenderConstrainedBox)
+      if (parent is RenderConstrainedBox) {
         parent.child = null;
+      }
     });
 
     test('paints in the correct order', () {
@@ -1628,22 +1614,14 @@ void main() {
 
 class _TestRenderEditable extends RenderEditable {
   _TestRenderEditable({
-    required TextDirection textDirection,
-    required ViewportOffset offset,
-    required TextSelectionDelegate textSelectionDelegate,
-    TextSpan? text,
-    required LayerLink startHandleLayerLink,
-    required LayerLink endHandleLayerLink,
-    TextSelection? selection,
-  }) : super(
-      textDirection: textDirection,
-      offset: offset,
-      textSelectionDelegate: textSelectionDelegate,
-      text: text,
-      startHandleLayerLink: startHandleLayerLink,
-      endHandleLayerLink: endHandleLayerLink,
-      selection: selection,
-    );
+    required super.textDirection,
+    required super.offset,
+    required super.textSelectionDelegate,
+    TextSpan? super.text,
+    required super.startHandleLayerLink,
+    required super.endHandleLayerLink,
+    super.selection,
+  });
 
   int paintCount = 0;
 

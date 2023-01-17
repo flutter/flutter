@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const ExampleApp());
 
 class ExampleApp extends StatelessWidget {
-  const ExampleApp({Key? key}) : super(key: key);
+  const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +87,7 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
 }
 
 class ExampleWidget extends StatelessWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+  const ExampleWidget({super.key});
 
   static const Map<String, Color> _colors = <String, Color>{
     'Red': Colors.red,

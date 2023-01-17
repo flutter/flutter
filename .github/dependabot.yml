@@ -14,7 +14,7 @@ updates:
     labels:
       - "team"
       - "team: infra"
-      - "waiting for tree to go green"
+      - "autosubmit"
   - package-ecosystem: "docker"
     directory: "/dev/ci/docker_linux"
     schedule:
@@ -26,7 +26,7 @@ updates:
     labels:
       - "team"
       - "team: infra"
-      - "waiting for tree to go green"
+      - "autosubmit"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -37,4 +37,4 @@ updates:
     labels:
       - "team"
       - "team: infra"
-      - "waiting for tree to go green"
+      - "autosubmit"

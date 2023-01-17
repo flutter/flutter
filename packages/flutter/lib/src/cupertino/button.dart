@@ -39,7 +39,7 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
   const CupertinoButton({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.color,
@@ -52,8 +52,7 @@ class CupertinoButton extends StatefulWidget {
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
        assert(alignment != null),
-       _filled = false,
-       super(key: key);
+       _filled = false;
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -62,7 +61,7 @@ class CupertinoButton extends StatefulWidget {
   /// To specify a custom background color, use the [color] argument of the
   /// default constructor.
   const CupertinoButton.filled({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
@@ -75,8 +74,7 @@ class CupertinoButton extends StatefulWidget {
        assert(disabledColor != null),
        assert(alignment != null),
        color = null,
-       _filled = true,
-       super(key: key);
+       _filled = true;
 
   /// The widget below this widget in the tree.
   ///
@@ -216,15 +214,17 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _animate() {
-    if (_animationController.isAnimating)
+    if (_animationController.isAnimating) {
       return;
+    }
     final bool wasHeldDown = _buttonHeldDown;
     final TickerFuture ticker = _buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration, curve: Curves.easeInOutCubicEmphasized)
         : _animationController.animateTo(0.0, duration: kFadeInDuration, curve: Curves.easeOutCubic);
     ticker.then<void>((void value) {
-      if (mounted && wasHeldDown != _buttonHeldDown)
+      if (mounted && wasHeldDown != _buttonHeldDown) {
         _animate();
+      }
     });
   }
 

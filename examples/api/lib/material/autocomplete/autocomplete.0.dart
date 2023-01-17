@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
-  const AutocompleteExampleApp({Key? key}) : super(key: key);
+  const AutocompleteExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class AutocompleteExampleApp extends StatelessWidget {
 }
 
 class AutocompleteBasicExample extends StatelessWidget {
-  const AutocompleteBasicExample({Key? key}) : super(key: key);
+  const AutocompleteBasicExample({super.key});
 
   static const List<String> _kOptions = <String>[
     'aardvark',
