@@ -1730,6 +1730,7 @@ class _NavigationBarTransition extends StatelessWidget {
       bottomNavBar: bottomNavBar,
       topNavBar: topNavBar,
       directionality: Directionality.of(context),
+      context: context,
     );
 
     final List<Widget> children = <Widget>[
@@ -1809,6 +1810,7 @@ class _NavigationBarComponentsTransition {
     required _TransitionableNavigationBar bottomNavBar,
     required _TransitionableNavigationBar topNavBar,
     required TextDirection directionality,
+    required BuildContext context,
   }) : bottomComponents = bottomNavBar.componentsKeys,
        topComponents = topNavBar.componentsKeys,
        bottomNavBarBox = bottomNavBar.renderBox,
@@ -2098,7 +2100,9 @@ class _NavigationBarComponentsTransition {
 
     if (bottomLargeTitle != null && topBackLabel != null) {
       // Move from current position to the top page's back label position.
-      return slideFromLeadingEdge(
+      return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+      child: slideFromLeadingEdge(
         fromKey: bottomComponents.largeTitleKey,
         fromNavBarBox: bottomNavBarBox,
         toKey: topComponents.backLabelKey,
@@ -2120,7 +2124,7 @@ class _NavigationBarComponentsTransition {
             ),
           ),
         ),
-      );
+      ));
     }
 
     if (bottomLargeTitle != null && topLeading != null) {
