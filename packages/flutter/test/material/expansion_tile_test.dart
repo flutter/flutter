@@ -666,4 +666,37 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
   });
+  testWidgets('ExpansionTile renders scrollable content', (WidgetTester tester) async {
+
+    final Widget flexibleWidget = Flexible(
+      child: ListView(
+        children: <Widget>[
+          for (int i = 0; i < 30; ++i) ListTile(title: Text('Tile $i')),
+        ],
+      ),
+    );
+  /// This is failing right now
+    expect(() => MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          title: const Text('Expansion tile'),
+          children: <Widget>[ flexibleWidget ],
+        ),
+      ),
+    ), throwsAssertionError);
+
+    await tester.pumpWidget( MaterialApp(
+      home: Material(
+        child: ExpansionTile.single(
+          title: const Text('Expansion tile'),
+          child: flexibleWidget
+        ),
+      ),
+    ));
+
+    expect(find.byType(ExpansionTile), findsOneWidget);
+    expect(find.byType(ListTile), findsWidgets);
+
+  });
 }
