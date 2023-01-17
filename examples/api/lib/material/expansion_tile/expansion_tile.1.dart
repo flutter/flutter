@@ -37,7 +37,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-          Flexible(
+        Flexible(
           child: ExpansionTile(
             title: const Text('Expansion tile with Scrollable content'),
             children: [

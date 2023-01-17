@@ -74,12 +74,12 @@ class ExpansionTile extends StatefulWidget {
     this.clipBehavior,
     this.controlAffinity,
   }) : child = null,
-  assert(initiallyExpanded != null),
+       assert(initiallyExpanded != null),
        assert(maintainState != null),
        assert(
-       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
-       'CrossAxisAlignment.baseline is not supported since the expanded children '
-           'are aligned in a column, not a row. Try to use another constant.',
+        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+        'CrossAxisAlignment.baseline is not supported since the expanded children '
+        'are aligned in a column, not a row. Try to use another constant.',
        );
 
   /// a constructor for the [ExpansionTile] that allows a single [child] instead of a list of [children].
@@ -441,7 +441,15 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
             bottom: BorderSide(color: Colors.transparent),
           );
     final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
-
+    final Widget expandedChild = ClipRect(
+            child: Align(
+              alignment: widget.expandedAlignment
+                ?? expansionTileTheme.expandedAlignment
+                ?? Alignment.center,
+              heightFactor: _heightFactor.value,
+              child: child,
+            ),
+           );
     return Container(
       clipBehavior: clipBehavior,
       decoration: ShapeDecoration(
@@ -463,23 +471,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               trailing: widget.trailing ?? _buildTrailingIcon(context),
             ),
           ),
-       if (widget.child != null) Flexible(child: ClipRect(
-            child: Align(
-              alignment: widget.expandedAlignment
-                ?? expansionTileTheme.expandedAlignment
-                ?? Alignment.center,
-              heightFactor: _heightFactor.value,
-              child: child,
-            ),
-           ),) else ClipRect(
-            child: Align(
-              alignment: widget.expandedAlignment
-                ?? expansionTileTheme.expandedAlignment
-                ?? Alignment.center,
-              heightFactor: _heightFactor.value,
-              child: child,
-            ),
-           ),
+          if (widget.child != null) 
+            Flexible(child: expandedChild,) 
+          else 
+            expandedChild
         ],
       ),
     );
@@ -531,7 +526,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         enabled: !closed,
         child: Padding(
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
-          child: widget.child?? Column(
+          child: widget.child ?? Column(
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
             children: widget.children,
           ),
