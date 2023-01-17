@@ -624,7 +624,7 @@ void main() {
             expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
             break;
         }
- 
+
         await tester.tap(find.text(okString));
         await tester.pumpAndSettle();
       });
