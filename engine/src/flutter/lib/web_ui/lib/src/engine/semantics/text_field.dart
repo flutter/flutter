@@ -364,11 +364,7 @@ class TextField extends RoleManager {
     // element, so that both the framework and the browser agree on what's
     // currently focused.
     bool needsDomFocusRequest = false;
-    final EditingState editingState = EditingState(
-      text: semanticsObject.value,
-      baseOffset: semanticsObject.textSelectionBase,
-      extentOffset: semanticsObject.textSelectionExtent,
-    );
+
     if (semanticsObject.hasFocus) {
       if (!_hasFocused) {
         _hasFocused = true;
@@ -378,13 +374,8 @@ class TextField extends RoleManager {
       if (domDocument.activeElement != editableElement) {
         needsDomFocusRequest = true;
       }
-      // Focused elements should have full text editing state applied.
-      SemanticsTextEditingStrategy.instance.setEditingState(editingState);
     } else if (_hasFocused) {
       SemanticsTextEditingStrategy.instance.deactivate(this);
-
-      // Only apply text, because this node is not focused.
-      editingState.applyTextToDomElement(editableElement);
 
       if (_hasFocused && domDocument.activeElement == editableElement) {
         // Unlike `editableElement.focus()` we don't need to schedule `blur`
