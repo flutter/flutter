@@ -3736,7 +3736,7 @@ class InputDecoration {
         && other.enabled == enabled
         && other.semanticCounterText == semanticCounterText
         && other.alignLabelWithHint == alignLabelWithHint
-        && other.constraints == constraints;
+        && other.constraints == constraints
         && other.errorBuilder == errorBuilder;
   }
 
@@ -4278,15 +4278,6 @@ class InputDecorationTheme with Diagnosticable {
   ///    given decorator.
   final BoxConstraints? constraints;
 
-  /// Widget that allows to customize the error text.
-  /// Widget that appears below the [InputDecorator.child] and the border.
-  /// If non-null, the border's color animates to red and the [helperText] is
-  /// not shown.
-  ///
-  /// If both [errorText] and [errorBuilder] are specified, the [errorMessage]
-  /// is equal to the [errorText] and never null.
-  final Widget Function(String errorMessage)? errorBuilder;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationTheme copyWith({
@@ -4322,7 +4313,6 @@ class InputDecorationTheme with Diagnosticable {
     InputBorder? border,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
-    Widget Function(String? errorMessage)? errorBuilder,
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -4357,7 +4347,6 @@ class InputDecorationTheme with Diagnosticable {
       border: border ?? this.border,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
-      errorBuilder: errorBuilder ?? this.errorBuilder,
     );
   }
 
@@ -4396,7 +4385,6 @@ class InputDecorationTheme with Diagnosticable {
       border,
       alignLabelWithHint,
       constraints,
-      errorBuilder,
     ),
   );
 
@@ -4442,7 +4430,6 @@ class InputDecorationTheme with Diagnosticable {
         && other.alignLabelWithHint == alignLabelWithHint
         && other.constraints == constraints
         && other.disabledBorder == disabledBorder;
-        && other.errorBuilder == errorBuilder;
   }
 
   @override
@@ -4481,7 +4468,6 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
     properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: defaultTheme.constraints));
-    properties.add(DiagnosticsProperty<Widget Function(String errorMessage)>('errorBuilder', errorBuilder, defaultValue: defaultTheme.errorBuilder));
   }
 }
 
