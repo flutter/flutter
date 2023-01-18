@@ -278,8 +278,6 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
 /// A render object for an iOS UIKit UIView.
 ///
-/// {@template flutter.rendering.RenderUiKitView}
-///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS
 /// [UIView](https://developer.apple.com/documentation/uikit/uiview).
 ///
