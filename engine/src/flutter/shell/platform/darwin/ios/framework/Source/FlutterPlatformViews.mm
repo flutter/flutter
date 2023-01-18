@@ -32,20 +32,52 @@
 }
 @end
 
-// Determines if the final `clipBounds` from a clipRect/clipRRect/clipPath mutator contains the
+// Determines if the `clip_rect` from a clipRect mutator contains the
 // `platformview_boundingrect`.
 //
-// `clip_bounds` is the bounding rect of the rect/rrect/path in the clipRect/clipRRect/clipPath
-// mutator. This rect is in its own coordinate space. The rect needs to be transformed by
+// `clip_rect` is in its own coordinate space. The rect needs to be transformed by
 // `transform_matrix` to be in the coordinate space where the PlatformView is displayed.
 //
 // `platformview_boundingrect` is the final bounding rect of the PlatformView in the coordinate
 // space where the PlatformView is displayed.
-static bool ClipBoundsContainsPlatformViewBoundingRect(const SkRect& clip_bounds,
-                                                       const SkRect& platformview_boundingrect,
-                                                       const SkMatrix& transform_matrix) {
-  SkRect transforme_clip_bounds = transform_matrix.mapRect(clip_bounds);
-  return transforme_clip_bounds.contains(platformview_boundingrect);
+static bool ClipRectContainsPlatformViewBoundingRect(const SkRect& clip_rect,
+                                                     const SkRect& platformview_boundingrect,
+                                                     const SkMatrix& transform_matrix) {
+  SkRect transformed_rect = transform_matrix.mapRect(clip_rect);
+  return transformed_rect.contains(platformview_boundingrect);
+}
+
+// Determines if the `clipRRect` from a clipRRect mutator contains the
+// `platformview_boundingrect`.
+//
+// `clip_rrect` is in its own coordinate space. The rrect needs to be transformed by
+// `transform_matrix` to be in the coordinate space where the PlatformView is displayed.
+//
+// `platformview_boundingrect` is the final bounding rect of the PlatformView in the coordinate
+// space where the PlatformView is displayed.
+static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
+                                                      const SkRect& platformview_boundingrect,
+                                                      const SkMatrix& transform_matrix) {
+  SkVector upper_left = clip_rrect.radii(SkRRect::Corner::kUpperLeft_Corner);
+  SkVector upper_right = clip_rrect.radii(SkRRect::Corner::kUpperRight_Corner);
+  SkVector lower_right = clip_rrect.radii(SkRRect::Corner::kLowerRight_Corner);
+  SkVector lower_left = clip_rrect.radii(SkRRect::Corner::kLowerLeft_Corner);
+  SkScalar transformed_upper_left_x = transform_matrix.mapRadius(upper_left.x());
+  SkScalar transformed_upper_left_y = transform_matrix.mapRadius(upper_left.y());
+  SkScalar transformed_upper_right_x = transform_matrix.mapRadius(upper_right.x());
+  SkScalar transformed_upper_right_y = transform_matrix.mapRadius(upper_right.y());
+  SkScalar transformed_lower_right_x = transform_matrix.mapRadius(lower_right.x());
+  SkScalar transformed_lower_right_y = transform_matrix.mapRadius(lower_right.y());
+  SkScalar transformed_lower_left_x = transform_matrix.mapRadius(lower_left.x());
+  SkScalar transformed_lower_left_y = transform_matrix.mapRadius(lower_left.y());
+  SkRect transformed_clip_rect = transform_matrix.mapRect(clip_rrect.rect());
+  SkRRect transformed_rrect;
+  SkVector corners[] = {{transformed_upper_left_x, transformed_upper_left_y},
+                        {transformed_upper_right_x, transformed_upper_right_y},
+                        {transformed_lower_right_x, transformed_lower_right_y},
+                        {transformed_lower_left_x, transformed_lower_left_y}};
+  transformed_rrect.setRectRadii(transformed_clip_rect, corners);
+  return transformed_rrect.contains(platformview_boundingrect);
 }
 
 namespace flutter {
@@ -450,8 +482,8 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
         break;
       }
       case kClipRect: {
-        if (ClipBoundsContainsPlatformViewBoundingRect((*iter)->GetRect(), bounding_rect,
-                                                       transformMatrix)) {
+        if (ClipRectContainsPlatformViewBoundingRect((*iter)->GetRect(), bounding_rect,
+                                                     transformMatrix)) {
           break;
         }
         [maskView clipRect:(*iter)->GetRect() matrix:transformMatrix];
@@ -459,8 +491,8 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
         break;
       }
       case kClipRRect: {
-        if (ClipBoundsContainsPlatformViewBoundingRect((*iter)->GetRRect().getBounds(),
-                                                       bounding_rect, transformMatrix)) {
+        if (ClipRRectContainsPlatformViewBoundingRect((*iter)->GetRRect(), bounding_rect,
+                                                      transformMatrix)) {
           break;
         }
         [maskView clipRRect:(*iter)->GetRRect() matrix:transformMatrix];
@@ -468,10 +500,9 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
         break;
       }
       case kClipPath: {
-        if (ClipBoundsContainsPlatformViewBoundingRect((*iter)->GetPath().getBounds(),
-                                                       bounding_rect, transformMatrix)) {
-          break;
-        }
+        // TODO(cyanglaz): Find a way to pre-determine if path contains the PlatformView boudning
+        // rect. See `ClipRRectContainsPlatformViewBoundingRect`.
+        // https://github.com/flutter/flutter/issues/118650
         [maskView clipPath:(*iter)->GetPath() matrix:transformMatrix];
         clipView.maskView = maskView;
         break;
