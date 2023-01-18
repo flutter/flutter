@@ -1877,6 +1877,7 @@ final String _kIntegrationTestsRelativePath = path.join('dev', 'integration_test
 final String _kTemplateRelativePath = path.join('packages', 'flutter_tools', 'templates', 'app_shared', 'windows.tmpl', 'runner');
 final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
+const String _kTmplExt = '.tmpl';
 
 String _fileContents(String path, {int linesToSkip = 0}) {
   return File(path).readAsLinesSync().sublist(linesToSkip).join('\n');
@@ -1898,8 +1899,8 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
         final String templateFilePath = path.join(templatePath, fileName);
         String templateFile = _fileContents(templateFilePath);
         String appFilePath = path.join(runnerPath, fileName);
-        if (fileName.endsWith('.tmpl')) {
-          appFilePath = appFilePath.substring(0, appFilePath.length - 4); // Remove '.tmpl' from app file path
+        if (fileName.endsWith(_kTmplExt)) {
+          appFilePath = appFilePath.substring(0, appFilePath.length - _kTmplExt.length); // Remove '.tmpl' from app file path
           templateFile = templateFile.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
         }
         final String appFile = _fileContents(appFilePath, linesToSkip: _kLicenseLines);
