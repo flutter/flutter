@@ -365,8 +365,15 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             activeColor: activeColor,
             trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
             thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-            // Opacity value was eyeballed by looking at a switch in the macOS settings.
-            focusColor: CupertinoDynamicColor.resolve(widget.focusColor ?? activeColor.withOpacity(0.7), context),
+            // Opacity, lightness, and saturation values were aproximated with
+            // color pickers on the switches in the macOS settings.
+            focusColor: CupertinoDynamicColor.resolve(
+              widget.focusColor ??
+              HSLColor
+                    .fromColor(activeColor.withOpacity(0.80))
+                    .withLightness(0.69).withSaturation(0.835)
+                    .toColor(),
+              context),
             onChanged: widget.onChanged,
             textDirection: Directionality.of(context),
             isFocused: isFocused,
@@ -633,12 +640,12 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
     if(_isFocused) {
       // Paints a border around the switch in the focus color.
-      final RRect borderTrackRRect = trackRRect.inflate(2.0);
+      final RRect borderTrackRRect = trackRRect.inflate(1.75);
 
       final Paint borderPaint = Paint()
         ..color = focusColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.0;
+        ..strokeWidth = 3.5;
 
       canvas.drawRRect(borderTrackRRect, borderPaint);
     }
