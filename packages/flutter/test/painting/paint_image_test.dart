@@ -102,7 +102,7 @@ void main() {
 
     expect(
       messages.single,
-      'Image TestImage has a display size of 300×150 but a decode size of 300×300, which uses an additional 234KB.\n\n'
+      'Image TestImage has a display size of 300×150 but a decode size of 300×300, which uses an additional 234KB (assuming a device pixel ratio of ${3.0}).\n\n'
       'Consider resizing the asset ahead of time, supplying a cacheWidth parameter of 300, a cacheHeight parameter of 150, or using a ResizeImage.',
     );
 
