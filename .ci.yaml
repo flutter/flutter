@@ -2609,6 +2609,20 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__start_up
 
+  - name: Mac complex_layout_scroll_perf_impeller_macos__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: complex_layout_scroll_perf_impeller_macos__timeline_summary
+
   - name: Mac customer_testing
     recipe: flutter/flutter
     timeout: 60
