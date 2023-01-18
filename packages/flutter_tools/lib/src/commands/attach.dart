@@ -314,18 +314,18 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           !isNetworkDevice;
 
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
-        final Status observatoryStatus = _logger.startSpinner(
+        final Status discoveryStatus = _logger.startSpinner(
           timeout: const Duration(seconds: 30),
           slowWarningCallback: () {
-            // If relying on mDNS to find observatory, remind the user to allow local network permissions.
+            // If relying on mDNS to find Dart VM Service, remind the user to allow local network permissions.
             if (!compatibleWithProtocolDiscovery) {
-              return 'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...\n\n'
+              return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
                 'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
                 'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
                 "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
             }
 
-            return 'iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...\n';
+            return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
           },
         );
 
@@ -338,7 +338,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           devicePort = deviceVmservicePort;
         }
 
-        final Future<Uri?> mDNSDiscoveryFuture = MDnsObservatoryDiscovery.instance!.getObservatoryUriForAttach(
+        final Future<Uri?> mDNSDiscoveryFuture = MDnsVmServiceDiscovery.instance!.getVMServiceUriForAttach(
           appId,
           device,
           usesIpv6: usesIpv6,
@@ -348,7 +348,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
         Future<Uri?>? protocolDiscoveryFuture;
         if (compatibleWithProtocolDiscovery) {
-          final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
+          final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.observatory(
             device.getLogReader(),
             portForwarder: device.portForwarder,
             ipv6: ipv6!,
@@ -356,7 +356,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             hostPort: hostVmservicePort,
             logger: _logger,
           );
-          protocolDiscoveryFuture = observatoryDiscovery.uri;
+          protocolDiscoveryFuture = vmServiceDiscovery.uri;
         }
 
         final Uri? foundUrl;
@@ -367,7 +367,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             <Future<Uri?>>[mDNSDiscoveryFuture, protocolDiscoveryFuture]
           );
         }
-        observatoryStatus.stop();
+        discoveryStatus.stop();
 
         observatoryUri = foundUrl == null
           ? null
@@ -394,7 +394,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     } else {
       observatoryUri = Stream<Uri>
         .fromFuture(
-          buildObservatoryUri(
+          buildVMServiceUri(
             device,
             debugUri?.host ?? hostname,
             debugPort ?? debugUri!.port,

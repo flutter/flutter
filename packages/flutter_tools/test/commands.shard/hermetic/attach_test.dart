@@ -158,7 +158,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
@@ -214,7 +214,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
@@ -281,7 +281,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
@@ -353,7 +353,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
@@ -429,7 +429,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-        MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           preliminaryMDnsClient: FakeMDnsClient(
             <PtrResourceRecord>[
@@ -1372,7 +1372,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
-    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsObservatoryDiscovery.dartObservatoryName) {
+    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartObservatoryName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
     }
     if (T == SrvResourceRecord) {

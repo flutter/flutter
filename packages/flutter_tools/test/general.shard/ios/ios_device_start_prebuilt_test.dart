@@ -232,7 +232,7 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
     expect(await device.stopApp(iosApp), false);
-    expect(logger.errorText, contains('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...'));
+    expect(logger.errorText, contains('The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...'));
     expect(utf8.decoder.convert(stdin.writes.first), contains('process interrupt'));
     completer.complete();
     expect(processManager, hasNoRemainingExpectations);
@@ -277,12 +277,12 @@ void main() {
     expect(launchResult.started, true);
     expect(launchResult.hasObservatory, true);
     expect(await device.stopApp(iosApp), false);
-    expect(logger.errorText, contains('iOS Observatory not discovered after 45 seconds. This is taking much longer than expected...'));
+    expect(logger.errorText, contains('The Dart VM Service was not discovered after 45 seconds. This is taking much longer than expected...'));
     expect(logger.errorText, contains('Click "Allow" to the prompt asking if you would like to find and connect devices on your local network.'));
     completer.complete();
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    MDnsObservatoryDiscovery: () => FakeMDnsObservatoryDiscovery(),
+    MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(),
   });
 
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
@@ -609,9 +609,9 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
   }
 }
 
-class FakeMDnsObservatoryDiscovery extends Fake implements MDnsObservatoryDiscovery {
+class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
   @override
-  Future<Uri?> getObservatoryUriForLaunch(
+  Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
     Device device, {
     bool usesIpv6 = false,

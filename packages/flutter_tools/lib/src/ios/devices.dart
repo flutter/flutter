@@ -412,11 +412,11 @@ class IOSDevice extends Device {
         return LaunchResult.succeeded();
       }
 
-      _logger.printTrace('Application launched on the device. Waiting for observatory url.');
+      _logger.printTrace('Application launched on the device. Waiting for Dart VM Service url.');
 
       final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 45 : 30;
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
-        _logger.printError('iOS Observatory not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
+        _logger.printError('The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
 
         // If debugging with a wireless device and the timeout is reached, remind the
         // user to allow local network permissions.
@@ -434,17 +434,17 @@ class IOSDevice extends Device {
 
       Uri? localUri;
       if (interfaceType == IOSDeviceConnectionInterface.network) {
-        // Wait for iOS Observatory to start up.
-        final Uri? deviceURL = await observatoryDiscovery?.uri;
-        if (deviceURL == null) {
+        // Wait for Dart VM Service to start up.
+        final Uri? serviceURL = await observatoryDiscovery?.uri;
+        if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
           return LaunchResult.failed();
         }
 
-        // If observatory url is not found within 5 seconds, change the status
-        // message to prompt users to click Allow. Wait 5 seconds because it
+        // If Dart VM Service URL with the device IP is not found within 5 seconds,
+        // change the status message to prompt users to click Allow. Wait 5 seconds because it
         // should only show this message if they have not already approved the permissions.
-        // MDnsObservatoryDiscovery usually takes less than 5 seconds to find it.
+        // MDnsVmServiceDiscovery usually takes less than 5 seconds to find it.
         final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
           startAppStatus.stop();
           startAppStatus = _logger.startProgress(
@@ -452,12 +452,12 @@ class IOSDevice extends Device {
           );
         });
 
-        // Get Observatory URL with the device IP.
-        localUri = await MDnsObservatoryDiscovery.instance!.getObservatoryUriForLaunch(
+        // Get Dart VM Service URL with the device IP as the host.
+        localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
           packageId,
           this,
           usesIpv6: ipv6,
-          deviceVmservicePort: deviceURL.port,
+          deviceVmservicePort: serviceURL.port,
           isNetworkDevice: true,
         );
 

@@ -13,15 +13,12 @@ import 'build_info.dart';
 import 'device.dart';
 import 'reporting/reporting.dart';
 
-/// A wrapper around [MDnsClient] to find a Dart observatory instance.
-class MDnsObservatoryDiscovery {
-  /// Creates a new [MDnsObservatoryDiscovery] object.
+/// A wrapper around [MDnsClient] to find a Dart VM Service instance.
+class MDnsVmServiceDiscovery {
+  /// Creates a new [MDnsVmServiceDiscovery] object.
   ///
   /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
-  /// The [applicationId] parameter may be null, and can be used to
-  /// automatically select which application to use if multiple are advertising
-  /// Dart observatory ports.
-  MDnsObservatoryDiscovery({
+  MDnsVmServiceDiscovery({
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
     required Logger logger,
@@ -33,7 +30,7 @@ class MDnsObservatoryDiscovery {
 
   final MDnsClient _client;
 
-  // Used when discovering observatories with `queryForAttach` to do a preliminary
+  // Used when discovering VM services with `queryForAttach` to do a preliminary
   // check for already running services so that results are not cached in _client.
   final MDnsClient? _preliminaryClient;
 
@@ -41,13 +38,13 @@ class MDnsObservatoryDiscovery {
   final Usage _flutterUsage;
 
   @visibleForTesting
-  static const String dartObservatoryName = '_dartobservatory._tcp.local';
+  static const String dartVmServiceName = '_dartobservatory._tcp.local';
 
-  static MDnsObservatoryDiscovery? get instance => context.get<MDnsObservatoryDiscovery>();
+  static MDnsVmServiceDiscovery? get instance => context.get<MDnsVmServiceDiscovery>();
 
-  /// Executes an mDNS query for a Dart Observatory.
-  /// Checks for observatories that have already been launched.
-  /// If none are found, it will listen for new observatories to become active
+  /// Executes an mDNS query for Dart VM Services.
+  /// Checks for services that have already been launched.
+  /// If none are found, it will listen for new services to become active
   /// and return the first it finds that match the parameters.
   ///
   /// The [applicationId] parameter may be used to specify which application
@@ -62,22 +59,21 @@ class MDnsObservatoryDiscovery {
   /// (otherwise it will get iPv4).
   ///
   /// The [timeout] parameter determines how long to continue to wait for
-  /// observatories to become active.
+  /// services to become active.
   ///
   /// If [applicationId] is not null, this method will find the port and authentication code
-  /// of the Dart Observatory for that application. If it cannot find a Dart
-  /// Observatory matching that application identifier after the [timeout], it will call
-  /// [throwToolExit].
+  /// of the Dart VM Service for that application. If it cannot find a service matching
+  /// that application identifier after the [timeout], it will call [throwToolExit].
   ///
-  /// If [applicationId] is null and there are multiple ports available, the user will be
-  /// prompted with a list of available observatory ports and asked to select
-  /// one.
+  /// If [applicationId] is null and there are multiple Dart VM Services available,
+  /// the user will be prompted with a list of available services with the respective
+  /// app-id and device-vmservice-port to use and asked to select one.
   ///
   /// If it is null and there is only one available or it's the first found instance
-  /// of Observatory, it will return that instance's information regardless of
-  /// what application the Observatory instance is for.
+  /// of Dart VM Service, it will return that instance's information regardless of
+  /// what application the service instance is for.
   @visibleForTesting
-  Future<MDnsObservatoryDiscoveryResult?> queryForAttach({
+  Future<MDnsVmServiceDiscoveryResult?> queryForAttach({
     String? applicationId,
     int? deviceVmservicePort,
     bool ipv6 = false,
@@ -89,7 +85,7 @@ class MDnsObservatoryDiscovery {
     // If no results are found, poll for a longer duration to wait for connections.
     // If more than 1 result is found, throw an error since it can't be determined which to pick.
     // If only one is found, return it.
-    final List<MDnsObservatoryDiscoveryResult> results = await _pollingObservatory(
+    final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
       _preliminaryClient ?? MDnsClient(),
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
@@ -98,7 +94,7 @@ class MDnsObservatoryDiscovery {
       timeout: const Duration(seconds: 5),
     );
     if (results.isEmpty) {
-      return firstMatchingObservatory(
+      return firstMatchingVmService(
         _client,
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
@@ -108,21 +104,21 @@ class MDnsObservatoryDiscovery {
       );
     } else if (results.length > 1) {
       final StringBuffer buffer = StringBuffer();
-      buffer.writeln('There are multiple observatory ports available.');
-      buffer.writeln('Rerun this command with one of the following passed in as the appId:');
+      buffer.writeln('There are multiple Dart VM Services available.');
+      buffer.writeln('Rerun this command with one of the following passed in as the app-id and device-vmservice-port:');
       buffer.writeln();
-      for (final MDnsObservatoryDiscoveryResult result in results) {
+      for (final MDnsVmServiceDiscoveryResult result in results) {
         buffer.writeln(
-            '  flutter attach --app-id "${result.domainName.replaceAll('.$dartObservatoryName', '')}" --device-vmservice-port ${result.port}');
+            '  flutter attach --app-id "${result.domainName.replaceAll('.$dartVmServiceName', '')}" --device-vmservice-port ${result.port}');
       }
       throwToolExit(buffer.toString());
     }
     return results.first;
   }
 
-  /// Executes an mDNS query for a Dart Observatory.
-  /// Listens for new observatories to become active
-  /// and returns the first it finds that match the parameters.
+  /// Executes an mDNS query for Dart VM Services.
+  /// Listens for new services to become active and returns the first it finds that
+  /// match the parameters.
   ///
   /// The [applicationId] parameter must be set to specify which application
   /// to find. For Android, it refers to the package name; on iOS, it refers to
@@ -140,12 +136,12 @@ class MDnsObservatoryDiscovery {
   /// (otherwise it will get iPv4).
   ///
   /// The [timeout] parameter determines how long to continue to wait for
-  /// observatories to become active.
+  /// services to become active.
   ///
-  /// If a Dart Observatory matching the [applicationId] and [deviceVmservicePort]
+  /// If a Dart VM Service matching the [applicationId] and [deviceVmservicePort]
   /// cannot be found after the [timeout], it will call [throwToolExit].
   @visibleForTesting
-  Future<MDnsObservatoryDiscoveryResult?> queryForLaunch({
+  Future<MDnsVmServiceDiscoveryResult?> queryForLaunch({
     required String applicationId,
     required int deviceVmservicePort,
     bool ipv6 = false,
@@ -153,7 +149,7 @@ class MDnsObservatoryDiscovery {
     Duration timeout = const Duration(minutes: 10),
   }) async {
     // Query for a specific application and device port.
-    return firstMatchingObservatory(
+    return firstMatchingVmService(
       _client,
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
@@ -163,11 +159,11 @@ class MDnsObservatoryDiscovery {
     );
   }
 
-  /// Polls for observatories and returns the first it finds that match
+  /// Polls for Dart VM Services and returns the first it finds that match
   /// the [applicationId]/[deviceVmservicePort] (if applicable).
   /// Returns null if no results are found.
   @visibleForTesting
-  Future<MDnsObservatoryDiscoveryResult?> firstMatchingObservatory(
+  Future<MDnsVmServiceDiscoveryResult?> firstMatchingVmService(
     MDnsClient client, {
     String? applicationId,
     int? deviceVmservicePort,
@@ -175,7 +171,7 @@ class MDnsObservatoryDiscovery {
     bool isNetworkDevice = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
-    final List<MDnsObservatoryDiscoveryResult> results = await _pollingObservatory(
+    final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
       client,
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
@@ -190,7 +186,7 @@ class MDnsObservatoryDiscovery {
     return results.first;
   }
 
-  Future<List<MDnsObservatoryDiscoveryResult>> _pollingObservatory(
+  Future<List<MDnsVmServiceDiscoveryResult>> _pollingVmService(
     MDnsClient client, {
     String? applicationId,
     int? deviceVmservicePort,
@@ -199,17 +195,17 @@ class MDnsObservatoryDiscovery {
     required Duration timeout,
     bool quitOnFind = false,
   }) async {
-    _logger.printTrace('Checking for advertised Dart observatories...');
+    _logger.printTrace('Checking for advertised Dart VM Services...');
     try {
       await client.start();
 
-      final List<MDnsObservatoryDiscoveryResult> results =
-          <MDnsObservatoryDiscoveryResult>[];
+      final List<MDnsVmServiceDiscoveryResult> results =
+          <MDnsVmServiceDiscoveryResult>[];
       final Set<String> uniqueDomainNames = <String>{};
 
       // Listen for mDNS connections until timeout.
       final Stream<PtrResourceRecord> ptrResourceStream = client.lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(dartObservatoryName),
+        ResourceRecordQuery.serverPointer(dartVmServiceName),
         timeout: timeout
       );
       await for (final PtrResourceRecord ptr in ptrResourceStream) {
@@ -241,7 +237,7 @@ class MDnsObservatoryDiscovery {
         final SrvResourceRecord srvRecord = srvRecords.first;
         if (srvRecords.length > 1) {
           _logger.printWarning(
-              'Unexpectedly found more than one observatory report for $domainName '
+              'Unexpectedly found more than one Dart VM Service report for $domainName '
               '- using first one (${srvRecord.port}).');
         }
 
@@ -272,7 +268,7 @@ class MDnsObservatoryDiscovery {
           ipAddress = ipAddresses.first.address;
           if (ipAddresses.length > 1) {
             _logger.printWarning(
-                'Unexpectedly found more than one IP for observatory for service ${srvRecord.target} '
+                'Unexpectedly found more than one IP for Dart VM Service ${srvRecord.target} '
                 '- using first one ($ipAddress).');
           }
         }
@@ -284,7 +280,7 @@ class MDnsObservatoryDiscovery {
           )
           .toList();
         if (txt == null || txt.isEmpty) {
-          results.add(MDnsObservatoryDiscoveryResult(domainName, srvRecord.port, ''));
+          results.add(MDnsVmServiceDiscoveryResult(domainName, srvRecord.port, ''));
           if (quitOnFind) {
             return results;
           }
@@ -299,20 +295,20 @@ class MDnsObservatoryDiscovery {
           }
         }
         if (raw == null) {
-          results.add(MDnsObservatoryDiscoveryResult(domainName, srvRecord.port, ''));
+          results.add(MDnsVmServiceDiscoveryResult(domainName, srvRecord.port, ''));
           if (quitOnFind) {
             return results;
           }
           continue;
         }
         String authCode = raw.substring(authCodePrefix.length);
-        // The Observatory currently expects a trailing '/' as part of the
+        // The Dart VM Service currently expects a trailing '/' as part of the
         // URI, otherwise an invalid authentication code response is given.
         if (!authCode.endsWith('/')) {
           authCode += '/';
         }
 
-        results.add(MDnsObservatoryDiscoveryResult(
+        results.add(MDnsVmServiceDiscoveryResult(
           domainName,
           srvRecord.port,
           authCode,
@@ -329,7 +325,7 @@ class MDnsObservatoryDiscovery {
           quitOnFind &&
           results.isEmpty &&
           uniqueDomainNames.isNotEmpty) {
-        String message = 'Did not find an observatory advertised for $applicationId';
+        String message = 'Did not find a Dart VM Service advertised for $applicationId';
         if (deviceVmservicePort != null) {
           message += ' on port $deviceVmservicePort';
         }
@@ -342,14 +338,14 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  /// Gets Observatory Uri for `flutter attach`.
-  /// Executes an mDNS query and waits until an observatory service is found.
+  /// Gets Dart VM Service Uri for `flutter attach`.
+  /// Executes an mDNS query and waits until a Dart VM Service is found.
   ///
-  /// Differs from `getObservatoryUriForLaunch` because it can search for any available observatory.
-  /// Since [applicationId] and [deviceVmservicePort] are optional, it can either look for any observatory
-  /// or a specific observatory matching [applicationId]/[deviceVmservicePort].
-  /// It may find more than one observatory, which will throw an error listing the found observatories.
-  Future<Uri?> getObservatoryUriForAttach(
+  /// Differs from `getVMServiceUriForLaunch` because it can search for any available Dart VM Service.
+  /// Since [applicationId] and [deviceVmservicePort] are optional, it can either look for any service
+  /// or a specific service matching [applicationId]/[deviceVmservicePort].
+  /// It may find more than one service, which will throw an error listing the found services.
+  Future<Uri?> getVMServiceUriForAttach(
     String? applicationId,
     Device device, {
     bool usesIpv6 = false,
@@ -358,7 +354,7 @@ class MDnsObservatoryDiscovery {
     bool isNetworkDevice = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
-    final MDnsObservatoryDiscoveryResult? result = await queryForAttach(
+    final MDnsVmServiceDiscoveryResult? result = await queryForAttach(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
@@ -376,12 +372,12 @@ class MDnsObservatoryDiscovery {
     );
   }
 
-  /// Gets Observatory Uri for `flutter run`.
-  /// Executes an mDNS query and waits until the observatory service is found.
+  /// Gets Dart VM Service Uri for `flutter run`.
+  /// Executes an mDNS query and waits until the Dart VM Service service is found.
   ///
-  /// Differs from `getObservatoryUriForAttach` because it only searches for a specific observatory.
+  /// Differs from `getVMServiceUriForAttach` because it only searches for a specific service.
   /// This is enforced by [applicationId] and [deviceVmservicePort] being required.
-  Future<Uri?> getObservatoryUriForLaunch(
+  Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
     Device device, {
     bool usesIpv6 = false,
@@ -390,7 +386,7 @@ class MDnsObservatoryDiscovery {
     bool isNetworkDevice = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
-    final MDnsObservatoryDiscoveryResult? result = await queryForLaunch(
+    final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
@@ -409,7 +405,7 @@ class MDnsObservatoryDiscovery {
   }
 
   Future<Uri?> _handleResult(
-    MDnsObservatoryDiscoveryResult? result,
+    MDnsVmServiceDiscoveryResult? result,
     Device device, {
     String? applicationId,
     int? deviceVmservicePort,
@@ -431,7 +427,7 @@ class MDnsObservatoryDiscovery {
       ? InternetAddress.loopbackIPv6.address
       : InternetAddress.loopbackIPv4.address;
     }
-    return buildObservatoryUri(
+    return buildVMServiceUri(
       device,
       host,
       result.port,
@@ -506,8 +502,8 @@ class MDnsObservatoryDiscovery {
   }
 }
 
-class MDnsObservatoryDiscoveryResult {
-  MDnsObservatoryDiscoveryResult(
+class MDnsVmServiceDiscoveryResult {
+  MDnsVmServiceDiscoveryResult(
     this.domainName,
     this.port,
     this.authCode, {
@@ -519,7 +515,7 @@ class MDnsObservatoryDiscoveryResult {
   final InternetAddress? ipAddress;
 }
 
-Future<Uri> buildObservatoryUri(
+Future<Uri> buildVMServiceUri(
   Device device,
   String host,
   int devicePort, [

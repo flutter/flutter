@@ -454,9 +454,9 @@ void main() {
       'drive',
     ]), throwsToolExit());
 
-    final Device networkDevice = FakeIosDevice()
+    final Device usbDevice = FakeIosDevice()
       ..interfaceType = IOSDeviceConnectionInterface.usb;
-    fakeDeviceManager.devices = <Device>[networkDevice];
+    fakeDeviceManager.devices = <Device>[usbDevice];
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
     expect(options.disablePortPublication, true);
