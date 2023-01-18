@@ -270,6 +270,29 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderWithContiguousClipRestores) {
+  Canvas canvas;
+
+  // Cover the whole canvas with red.
+  canvas.DrawPaint({.color = Color::Red()});
+
+  canvas.Save();
+
+  // Append two clips. First with empty coverage.
+  canvas.ClipPath(
+      PathBuilder{}.AddRect(Rect::MakeXYWH(100, 100, 100, 100)).TakePath());
+  canvas.ClipPath(
+      PathBuilder{}.AddRect(Rect::MakeXYWH(100, 100, 100, 100)).TakePath());
+
+  // Restore to no clips.
+  canvas.Restore();
+
+  // Replace the whole canvas with green.
+  canvas.DrawPaint({.color = Color::Green()});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, ClipsUseCurrentTransform) {
   std::array<Color, 5> colors = {Color::White(), Color::Black(),
                                  Color::SkyBlue(), Color::Red(),
