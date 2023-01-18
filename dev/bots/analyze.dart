@@ -208,6 +208,10 @@ Future<void> run(List<String> arguments) async {
   // Ensure gen_default links the correct files
   printProgress('Correct file names in gen_defaults.dart...');
   await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
+
+  // Ensure integration test files are up-to-date with the app template.
+  printProgress('Up to date integration test template files...');
+  await verifyIntegrationTestTemplateFiles(flutterRoot);
 }
 
 
@@ -1861,6 +1865,70 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
   }
 }
 
+const int _kLicenseLines = 4;
+const List<String> _kFilesToMatch = <String>[
+  'main.cpp.tmpl',
+  'utils.cpp',
+  'utils.h',
+  'win32_window.cpp',
+  'win32_window.h',
+];
+final String _kIntegrationTestsRelativePath = path.join('dev', 'integration_tests');
+final String _kTemplateRelativePath = path.join('packages', 'flutter_tools', 'templates', 'app_shared', 'windows.tmpl', 'runner');
+final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
+const String _kProjectNameKey = '{{projectName}}';
+
+String _fileContents(String path, {int linesToSkip = 0}) {
+  return File(path).readAsLinesSync().sublist(linesToSkip).join('\n');
+}
+
+Future<void> verifyIntegrationTestTemplateFiles(String workingDirectory) async {
+    final List<String> errors = <String>[];
+    final String integrationTestsPath = path.join(workingDirectory, _kIntegrationTestsRelativePath);
+    final String templatePath = path.join(workingDirectory, _kTemplateRelativePath);
+    final Iterable<Directory>subDirs = Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
+    for (final Directory testPath in subDirs) {
+      final String projectName = path.basename(testPath.path);
+      final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
+      final Directory runner = Directory(runnerPath);
+      if (!runner.existsSync()) {
+        continue;
+      }
+      for (final String fileName in _kFilesToMatch) {
+        final String templateFilePath = path.join(templatePath, fileName);
+        String templateFile = _fileContents(templateFilePath);
+        String appFilePath = path.join(runnerPath, fileName);
+        if (fileName.endsWith('.tmpl')) {
+          appFilePath = appFilePath.substring(0, appFilePath.length - 4); // Remove '.tmpl' from app file path
+          templateFile = templateFile.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
+        }
+        final String appFile = _fileContents(appFilePath, linesToSkip: _kLicenseLines);
+        if (appFile != templateFile) {
+          int indexOfDifference;
+          for (indexOfDifference = 0; indexOfDifference < appFile.length; indexOfDifference++) {
+            if (indexOfDifference >= templateFile.length || templateFile.codeUnitAt(indexOfDifference) != appFile.codeUnitAt(indexOfDifference)) {
+              break;
+            }
+          }
+          final String error = '''
+Error: file $fileName mismatched for integration test $testPath
+Verify the integration test has been migrated to the latest app template.
+=====$appFilePath======
+$appFile
+=====$templateFilePath======
+$templateFile
+==========
+Diff at character #$indexOfDifference
+          ''';
+          errors.add(error);
+        }
+      }
+    }
+    if (errors.isNotEmpty) {
+      foundError(errors);
+    }
+  }
+
 Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) async {
@@ -2002,3 +2070,5 @@ bool _isGeneratedPluginRegistrant(File file) {
           filename == 'generated_plugin_registrant.dart' ||
           filename == 'generated_plugin_registrant.h');
 }
+
+
