@@ -155,33 +155,33 @@ void main() {
 
     // The range includes the line terminator.
     expect(boundaryA.getLeadingTextBoundaryAt(position), 0);
-    expect(boundaryA.getTrailingTextBoundaryAt(position), 12);
+    expect(boundaryA.getTrailingTextBoundaryAt(position), 11);
 
     // This text includes a carriage return followed by a line feed.
     const String textB = 'abcd efg hi\r\njklmno\npqrstuv';
     const ParagraphBoundary boundaryB = ParagraphBoundary(textB);
     expect(boundaryB.getLeadingTextBoundaryAt(position), 0);
-    expect(boundaryB.getTrailingTextBoundaryAt(position), 13);
+    expect(boundaryB.getTrailingTextBoundaryAt(position), 12);
 
     const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
     const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
     const int positionC = 18;
     expect(boundaryC.getLeadingTextBoundaryAt(position), 0);
-    expect(boundaryC.getTrailingTextBoundaryAt(position), 13);
+    expect(boundaryC.getTrailingTextBoundaryAt(position), 12);
     expect(boundaryC.getLeadingTextBoundaryAt(positionC), 18);
-    expect(boundaryC.getTrailingTextBoundaryAt(positionC), 19);
+    expect(boundaryC.getTrailingTextBoundaryAt(positionC), 18);
 
     const String textD = 'abcd efg hi\r\n\n\n\n';
     const ParagraphBoundary boundaryD = ParagraphBoundary(textD);
     const int positionD = 14;
     expect(boundaryD.getLeadingTextBoundaryAt(positionD), 14);
-    expect(boundaryD.getTrailingTextBoundaryAt(positionD), 15);
+    expect(boundaryD.getTrailingTextBoundaryAt(positionD), 14);
 
     const String textE = 'abcd efg hi\r\nhello\r\n\n';
     const ParagraphBoundary boundaryE = ParagraphBoundary(textE);
     const int positionE = 16;
     expect(boundaryE.getLeadingTextBoundaryAt(positionE), 13);
-    expect(boundaryE.getTrailingTextBoundaryAt(positionE), 20);
+    expect(boundaryE.getTrailingTextBoundaryAt(positionE), 19);
   });
 
   test('document boundary works', () {
