@@ -1047,11 +1047,9 @@ class _AppBarState extends State<AppBar> {
           );
         }
 
-        leading = Center(
-          child: IconButtonTheme(
+        leading = IconButtonTheme(
             data: effectiveIconButtonTheme,
-            child: leading
-          )
+            child: leading is IconButton ? Center(child: leading) : leading,
         );
 
         // Based on the Material Design 3 specs, the leading IconButton should have
