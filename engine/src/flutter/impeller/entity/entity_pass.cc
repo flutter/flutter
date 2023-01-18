@@ -456,11 +456,14 @@ bool EntityPass::OnRender(
           return true;
         }
 
-        FML_DCHECK(stencil_stack.size() > 1);
+        auto restoration_depth =
+            element_entity.GetStencilDepth() - stencil_depth_floor;
+        FML_DCHECK(restoration_depth < stencil_stack.size());
 
-        stencil_stack.pop_back();
+        auto restored_coverage = stencil_stack.back().coverage;
+        stencil_stack.resize(restoration_depth + 1);
 
-        if (!stencil_stack.back().coverage.has_value()) {
+        if (!restored_coverage.has_value()) {
           // Running this restore op won't make anything renderable, so skip it.
           return true;
         }
