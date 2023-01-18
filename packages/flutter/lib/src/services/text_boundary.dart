@@ -146,33 +146,23 @@ class ParagraphBoundary extends TextBoundary {
     }
     assert(_text.isNotEmpty);
 
-    final List<int> codeUnits = _text.codeUnits;
-    // The given `position` is a caret position. When moving backwards to
-    // find the leading text boundary, the given `position` should be adjusted
-    // to correspond with the code unit that came before the caret.
-    int codeUnitPosition = position;
-    codeUnitPosition = position - 1;
-    int index = codeUnitPosition;
-    print('$index ${codeUnits[index] == 0xA} && ${codeUnits[index-1] == 0xD} && ${!TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])}');
+    final int codeUnitPosition = position - 1;
 
-    if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])) {
-      print('crlf $index ${String.fromCharCode(codeUnits[index])}');
+    final List<int> codeUnits = _text.codeUnits;
+    int index = codeUnitPosition;
+
+    if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
       index -= 2;
     } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
-      print('lol1');
       index--;
     }
     while (index > 0 && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      print('heh');
       index--;
     }
 
-    if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
-      print('lol2');
+    if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       index++;
     }
-
-    print('leading $index');
 
     return max(index, 0);
   }
@@ -208,7 +198,6 @@ class ParagraphBoundary extends TextBoundary {
         index++;
       }
     }
-    print('trailing $index');
 
     return min(index, _text.length);
   }

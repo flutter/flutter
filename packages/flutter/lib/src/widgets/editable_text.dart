@@ -3934,14 +3934,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return TextPosition(offset: newOffset);
   }
 
-  TextPosition _moveToParagraphBoundary(TextPosition extent, bool forward, TextBoundary textBoundary) {
-    assert(extent.offset >= 0);
-    final int newOffset = forward
-      ? textBoundary.getTrailingTextBoundaryAt(extent.offset) ?? _value.text.length
-      : textBoundary.getLeadingTextBoundaryAt(extent.offset) ?? 0;
-    return TextPosition(offset: newOffset);
-  }
-
   // Returns the closest boundary location to `extent`, including `extent`
   // itself, in the direction specified by `forward`.
   //
@@ -4227,7 +4219,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
-    ExtendSelectionToParagraphBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToParagraphBoundaryIntent>(this, _paragraphBoundary, _moveToParagraphBoundary, ignoreNonCollapsedSelection: true)),
+    ExtendSelectionToParagraphBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToParagraphBoundaryIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
