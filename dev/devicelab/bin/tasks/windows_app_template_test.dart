@@ -45,7 +45,9 @@ Future<void> main() async {
         final String appFile = await _fileContents(appFilePath, linesToSkip: _kLicenseLines);
         if (appFile != templateFile) {
           fileContentsMatch = false;
-          print('File $fileName mismatched for integration test $testPath');
+          print('Error: file $fileName mismatched for integration test $testPath');
+          print();
+          print('Verify the integration test has been migrated to the latest app template.');
           print('=====$appFilePath======');
           print(appFile);
           print('=====$templateFilePath======');
