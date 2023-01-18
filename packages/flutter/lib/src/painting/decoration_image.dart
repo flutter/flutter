@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:developer' as developer;
-import 'dart:ui' as ui show Image;
+import 'dart:math' as math;
+import 'dart:ui' as ui show FlutterView, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -558,13 +559,22 @@ void paintImage({
   bool invertedCanvas = false;
   // Output size and destination rect are fully calculated.
   if (!kReleaseMode) {
+    // We can use the devicePixelRatio of the views directly here (instead of
+    // going through a MediaQuery) because if it changes, whatever is aware of
+    // the MediaQuery will be repainting the image anyways.
+    // Furthermore, for the memory check below we just assume that all images
+    // are decoded for the view with the highest device pixel ratio and use that
+    // as an upper bound for the display size of the image.
+    final double maxDevicePixelRatio = PaintingBinding.instance.platformDispatcher.views.fold(
+      0.0,
+      (double previousValue, ui.FlutterView element) => math.max(previousValue, element.devicePixelRatio),
+    );
+
     final ImageSizeInfo sizeInfo = ImageSizeInfo(
       // Some ImageProvider implementations may not have given this.
       source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
-      // It's ok to use this instead of a MediaQuery because if this changes,
-      // whatever is aware of the MediaQuery will be repainting the image anyway.
-      displaySize: outputSize * PaintingBinding.instance.window.devicePixelRatio,
+      displaySize: outputSize * maxDevicePixelRatio,
     );
     assert(() {
       if (debugInvertOversizedImages &&
