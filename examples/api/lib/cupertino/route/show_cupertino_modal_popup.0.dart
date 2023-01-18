@@ -41,6 +41,7 @@ class ModalPopupExample extends StatelessWidget {
     );
   }
 
+  @pragma('vm:entry-point')
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {
