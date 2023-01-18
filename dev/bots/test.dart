@@ -465,6 +465,7 @@ Future<void> _runIntegrationToolTests() async {
     _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
   );
 }
 
@@ -1774,6 +1775,7 @@ Future<void> _runDartTest(String workingDirectory, {
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
+  bool collectMetrics = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1845,19 +1847,22 @@ Future<void> _runDartTest(String workingDirectory, {
     print('Failed to generate info file: $e');
   }
 
-  try {
-    final List<String> testList = <String>[];
-    final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
-    for (final TestSpecs testSpecs in allTestSpecs.values) {
-      testList.add(testSpecs.toJson());
+  if (collectMetrics) {
+    try {
+      final List<String> testList = <String>[];
+      final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
+      for (final TestSpecs testSpecs in allTestSpecs.values) {
+        testList.add(testSpecs.toJson());
+      }
+      if (testList.isNotEmpty) {
+        final String testJson = json.encode(testList);
+        final File testResults = fileSystem.file(
+            path.join(flutterRoot, 'test_results.json'));
+        testResults.writeAsStringSync(testJson);
+      }
+    } on fs.FileSystemException catch (e) {
+      print('Failed to generate metrics: $e');
     }
-    if (testList.isNotEmpty) {
-      final String testJson = json.encode(testList);
-      final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
-      testResults.writeAsStringSync(testJson);
-    }
-  } on fs.FileSystemException catch (e){
-    print('Failed to generate metrics: $e');
   }
 }
 

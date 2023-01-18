@@ -23,8 +23,8 @@ void main() {
       {"missing": "entry"}
       {"other": true}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = generateMetrics(file);
-      expect(result, isEmpty);
+      final TestFileReporterResults result = parseFileReporter(file);
+      expect(result.allTestSpecs, isEmpty);
     });
 
     test('have metrics', () async {
@@ -47,7 +47,7 @@ void main() {
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"ProjectValidatorTask","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}
       {"success":true,"type":"done","time":4870}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = generateMetrics(file);
+      final Map<int, TestSpecs> result = parseFileReporter(file).allTestSpecs;
       expect(result, contains(0));
       expect(result, contains(1));
       expect(result[0]!.path, 'test/general.shard/project_validator_result_test.dart');
@@ -62,8 +62,8 @@ void main() {
       {"suite":{"id":1,"platform":"vm","path":"other_path"},"type":"suite","time":1000}
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"name","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = generateMetrics(file);
-      expect(result, isEmpty);
+      final TestFileReporterResults result = parseFileReporter(file);
+      expect(result.allTestSpecs, isEmpty);
     });
   });
 }
