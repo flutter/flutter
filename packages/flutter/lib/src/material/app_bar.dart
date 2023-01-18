@@ -2436,7 +2436,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)
