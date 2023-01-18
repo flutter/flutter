@@ -2070,5 +2070,3 @@ bool _isGeneratedPluginRegistrant(File file) {
           filename == 'generated_plugin_registrant.dart' ||
           filename == 'generated_plugin_registrant.h');
 }
-
-
