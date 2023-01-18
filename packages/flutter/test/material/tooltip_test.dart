@@ -1964,6 +1964,8 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
 ///
 /// Copied from `psckage:leak_tracker/test/test_infra/flutter_helpers.dart`.
+/// It is not combined with [testWodgets], because the combining will
+/// impact VSCode's ability to recognize tests.
 Future<void> _withFlutterLeakTracking(
   DartAsyncCallback callback, {
   required WidgetTester? tester,
