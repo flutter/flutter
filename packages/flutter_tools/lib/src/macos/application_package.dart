@@ -164,8 +164,9 @@ class BuildableMacOSApp extends MacOSApp {
     }
 
     String bundleDirectory = sentenceCase(buildInfo.mode.name);
-    if(buildInfo.flavor != null) {
-      bundleDirectory += ' ${sentenceCase(buildInfo.flavor!)}';
+    final String? flavor = buildInfo.flavor;
+    if (flavor != null) {
+      bundleDirectory += ' ${sentenceCase(flavor)}';
     }
 
     return globals.fs.path.join(
