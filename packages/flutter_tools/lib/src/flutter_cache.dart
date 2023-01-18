@@ -37,7 +37,7 @@ class FlutterCache extends Cache {
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
     registerArtifact(AndroidInternalBuildArtifacts(this));
     registerArtifact(IOSEngineArtifacts(this, platform: platform));
-    registerArtifact(FlutterWebSdk(this, platform: platform));
+    registerArtifact(FlutterWebSdk(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
@@ -158,15 +158,12 @@ class MaterialFonts extends CachedArtifact {
 ///
 /// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
-  FlutterWebSdk(Cache cache, {required Platform platform})
-   : _platform = platform,
-     super(
+  FlutterWebSdk(Cache cache)
+   : super(
       'flutter_web_sdk',
       cache,
       DevelopmentArtifact.web,
     );
-
-  final Platform _platform;
 
   @override
   Directory get location => cache.getWebSdkDirectory();

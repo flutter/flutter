@@ -760,7 +760,7 @@ void main() {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
     final List<String> messages = <String>[];
     final List<String> downloads = <String>[];
@@ -820,7 +820,7 @@ void main() {
     );
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
     final List<String> downloads = <String>[];
     final List<String> locations = <String>[];
@@ -856,7 +856,7 @@ void main() {
 
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
     final List<String> messages = <String>[];
     final List<String> downloads = <String>[];
@@ -895,7 +895,7 @@ void main() {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache, platform: FakePlatform());
+    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
     artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
       location.createSync(recursive: true);
