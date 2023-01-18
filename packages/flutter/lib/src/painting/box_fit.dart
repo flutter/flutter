@@ -166,12 +166,26 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       destinationSize = outputSize;
       break;
     case BoxFit.fitWidth:
-      sourceSize = Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
-      destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
+        // Like "cover"
+        sourceSize = Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
+        destinationSize = outputSize;
+      } else {
+        // Like "contain"
+        sourceSize = inputSize;
+        destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
+      }
       break;
     case BoxFit.fitHeight:
-      sourceSize = Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
-      destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
+        // Like "contain"
+        sourceSize = inputSize;
+        destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
+      } else {
+        // Like "cover"
+        sourceSize = Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+        destinationSize = outputSize;
+      }
       break;
     case BoxFit.none:
       sourceSize = Size(math.min(inputSize.width, outputSize.width), math.min(inputSize.height, outputSize.height));
