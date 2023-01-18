@@ -61,7 +61,9 @@ class Tappable extends RoleManager {
 
     // Request focus so that the AT shifts a11y focus to this node.
     if (semanticsObject.isFlagsDirty && semanticsObject.hasFocus) {
-      element.focus();
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        element.focus();
+      });
     }
   }
 
