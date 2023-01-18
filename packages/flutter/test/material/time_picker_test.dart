@@ -1628,6 +1628,7 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
     },
   );
 
+  @pragma('vm:entry-point')
   static Route<TimeOfDay> _timePickerRoute(
     BuildContext context,
     Object? arguments,
