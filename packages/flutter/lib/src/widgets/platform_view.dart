@@ -216,6 +216,7 @@ class AndroidView extends StatefulWidget {
 /// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
 /// nothing while maintaining the same layout constraints.
 ///
+/// Clipping operations on a UiKitView can result slow performance.
 /// If a conic path clipping is applied to a UIKitView,
 /// a quad path is used to approximate the clip due to limitation of Quartz.
 class UiKitView extends StatefulWidget {

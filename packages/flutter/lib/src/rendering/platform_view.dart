@@ -279,11 +279,6 @@ class RenderAndroidView extends PlatformViewRenderBox {
 /// A render object for an iOS UIKit UIView.
 ///
 /// {@template flutter.rendering.RenderUiKitView}
-/// Embedding UIViews is still preview-quality. To enable the preview for an iOS app add a boolean
-/// field with the key 'io.flutter.embedded_views_preview' and the value set to 'YES' to the
-/// application's Info.plist file. A list of open issued with embedding UIViews is available on
-/// [Github](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+platform-views%22+label%3Aplatform-ios+sort%3Acreated-asc)
-/// {@endtemplate}
 ///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS
 /// [UIView](https://developer.apple.com/documentation/uikit/uiview).
