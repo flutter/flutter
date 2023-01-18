@@ -1590,6 +1590,7 @@ targets:
         ]
 
   - name: Linux_android complex_layout_scroll_perf__memory
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/118698
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
