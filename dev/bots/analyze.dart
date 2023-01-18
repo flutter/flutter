@@ -1882,10 +1882,10 @@ String _fileContents(String path, {int linesToSkip = 0}) {
   return File(path).readAsLinesSync().sublist(linesToSkip).join('\n');
 }
 
-Future<void> verifyIntegrationTestTemplateFiles(String workingDirectory) async {
+Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
     final List<String> errors = <String>[];
-    final String integrationTestsPath = path.join(workingDirectory, _kIntegrationTestsRelativePath);
-    final String templatePath = path.join(workingDirectory, _kTemplateRelativePath);
+    final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
+    final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
     final Iterable<Directory>subDirs = Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
     for (final Directory testPath in subDirs) {
       final String projectName = path.basename(testPath.path);
