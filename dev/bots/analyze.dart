@@ -1865,26 +1865,31 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
   }
 }
 
-const int _kLicenseLines = 4;
-const List<String> _kFilesToMatch = <String>[
-  'main.cpp.tmpl',
-  'utils.cpp',
-  'utils.h',
-  'win32_window.cpp',
-  'win32_window.h',
+const List<String> _kIgnoreList = <String>[
+  'Runner.rc.tmpl',
+  'flutter_window.cpp',
 ];
 final String _kIntegrationTestsRelativePath = path.join('dev', 'integration_tests');
 final String _kTemplateRelativePath = path.join('packages', 'flutter_tools', 'templates', 'app_shared', 'windows.tmpl', 'runner');
 final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
+final String _kLicensePath = path.join('dev', 'conductor', 'core', 'lib', 'src', 'proto', 'license_header.txt');
 
-String _fileContents(String path, {int linesToSkip = 0}) {
-  return File(path).readAsLinesSync().sublist(linesToSkip).join('\n');
+String _getFlutterLicense(String flutterRoot) {
+  return '${File(path.join(flutterRoot, _kLicensePath)).readAsLinesSync().join("\n")}\n\n';
+}
+
+String _removeLicenseIfPresent(String fileContents, String license) {
+  if (fileContents.startsWith(license)) {
+    return fileContents.substring(license.length);
+  }
+  return fileContents;
 }
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
     final List<String> errors = <String>[];
+    final String license = _getFlutterLicense(flutterRoot);
     final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
     final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
     final Iterable<Directory>subDirs = Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
@@ -1895,19 +1900,24 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
       if (!runner.existsSync()) {
         continue;
       }
-      for (final String fileName in _kFilesToMatch) {
-        final String templateFilePath = path.join(templatePath, fileName);
-        String templateFile = _fileContents(templateFilePath);
+      final Iterable<File> files = Directory(templatePath).listSync().toList().whereType<File>();
+      for (final File templateFile in files) {
+        final String fileName = path.basename(templateFile.path);
+        if (_kIgnoreList.contains(fileName)) {
+          continue;
+        }
+        String templateFileContents = templateFile.readAsLinesSync().join('\n');
         String appFilePath = path.join(runnerPath, fileName);
         if (fileName.endsWith(_kTmplExt)) {
           appFilePath = appFilePath.substring(0, appFilePath.length - _kTmplExt.length); // Remove '.tmpl' from app file path
-          templateFile = templateFile.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
+          templateFileContents = templateFileContents.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
         }
-        final String appFile = _fileContents(appFilePath, linesToSkip: _kLicenseLines);
-        if (appFile != templateFile) {
+        String appFileContents = File(appFilePath).readAsLinesSync().join('\n'); //_fileContents(appFilePath, linesToSkip: _kLicenseLines);
+        appFileContents = _removeLicenseIfPresent(appFileContents, license);
+        if (appFileContents != templateFileContents) {
           int indexOfDifference;
-          for (indexOfDifference = 0; indexOfDifference < appFile.length; indexOfDifference++) {
-            if (indexOfDifference >= templateFile.length || templateFile.codeUnitAt(indexOfDifference) != appFile.codeUnitAt(indexOfDifference)) {
+          for (indexOfDifference = 0; indexOfDifference < appFileContents.length; indexOfDifference++) {
+            if (indexOfDifference >= templateFileContents.length || templateFileContents.codeUnitAt(indexOfDifference) != appFileContents.codeUnitAt(indexOfDifference)) {
               break;
             }
           }
@@ -1915,13 +1925,14 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
 Error: file $fileName mismatched for integration test $testPath
 Verify the integration test has been migrated to the latest app template.
 =====$appFilePath======
-$appFile
-=====$templateFilePath======
-$templateFile
+$appFileContents
+=====${templateFile.path}======
+$templateFileContents
 ==========
 Diff at character #$indexOfDifference
           ''';
           errors.add(error);
+          break;
         }
       }
     }
