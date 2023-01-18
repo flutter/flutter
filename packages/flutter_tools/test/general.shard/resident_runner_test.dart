@@ -174,7 +174,10 @@ void main() {
           flutterDevice,
         ],
         stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          serveObservatory: false,
+        ),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
       );
@@ -223,7 +226,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -246,7 +252,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -267,7 +276,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.release,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -288,7 +300,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.release,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -315,7 +330,10 @@ void main() {
       ],
       applicationBinary: globals.fs.file('app-debug.apk'),
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -374,6 +392,7 @@ void main() {
         BuildInfo.debug,
         fastStart: true,
         startPaused: true,
+        serveObservatory: false,
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
@@ -495,11 +514,17 @@ void main() {
       ],
       stayResident: false,
       target: 'main.dart',
-      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-        BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
-        '--enable-experiment=non-nullable',
-        ],
-      )),
+      debuggingOptions: DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          extraFrontEndOptions: <String>[
+            '--enable-experiment=non-nullable',
+          ],
+        ),
+        serveObservatory: false,
+      ),
       devtoolsHandler: createNoOpHandler,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
@@ -554,7 +579,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -815,7 +843,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -906,7 +937,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1237,7 +1271,10 @@ void main() {
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
@@ -1353,7 +1390,10 @@ flutter:
           flutterDevice,
         ],
         stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          serveObservatory: false,
+        ),
         target: 'custom_main.dart',
         devtoolsHandler: createNoOpHandler,
       );
@@ -1412,7 +1452,10 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1640,7 +1683,11 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.profile,
+        vmserviceOutFile: 'foo',
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1684,7 +1731,11 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        vmserviceOutFile: 'foo',
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1711,7 +1762,8 @@ flutter:
           BuildMode.debug,
           null,
           treeShakeIcons: false,
-        )
+        ),
+        serveObservatory: false,
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
@@ -1740,7 +1792,8 @@ flutter:
           '',
           treeShakeIcons: false,
           dartDefines: <String>['a', 'b'],
-        )
+        ),
+        serveObservatory: false,
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
@@ -1770,7 +1823,8 @@ flutter:
           '',
           treeShakeIcons: false,
           extraFrontEndOptions: <String>['--enable-experiment=non-nullable']
-        )
+        ),
+        serveObservatory: false,
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
@@ -1794,7 +1848,10 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1818,7 +1875,10 @@ flutter:
       ],
       stayResident: false,
       dillOutputPath: 'test',
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1840,12 +1900,15 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        trackWidgetCreation: true,
-      )),
+      debuggingOptions: DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          trackWidgetCreation: true,
+        ),
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1867,7 +1930,10 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1887,7 +1953,11 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        vmserviceOutFile: 'foo',
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -1910,7 +1980,11 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.profile,
+        vmserviceOutFile: 'foo',
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -2269,7 +2343,11 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        vmserviceOutFile: 'foo',
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -2289,7 +2367,10 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -2313,7 +2394,10 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -2334,7 +2418,10 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );
@@ -2355,7 +2442,10 @@ flutter:
         flutterDevice,
       ],
       stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        serveObservatory: false,
+      ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
     );

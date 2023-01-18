@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/logger.dart';
 import 'build_info.dart';
