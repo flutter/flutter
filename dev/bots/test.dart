@@ -465,7 +465,6 @@ Future<void> _runIntegrationToolTests() async {
     _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
-    collectMetrics: true,
   );
 }
 
@@ -1775,7 +1774,6 @@ Future<void> _runDartTest(String workingDirectory, {
   bool includeLocalEngineEnv = false,
   bool ensurePrecompiledTool = true,
   bool shuffleTests = true,
-  bool collectMetrics = false,
 }) async {
   int? cpus;
   final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -1802,6 +1800,7 @@ Future<void> _runDartTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
+    '--file-reporter=json:${metricFile.path}',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     '-j$cpus',
     if (!hasColor)
@@ -1813,8 +1812,6 @@ Future<void> _runDartTest(String workingDirectory, {
     if (testPaths != null)
       for (final String testPath in testPaths)
         testPath,
-    if (collectMetrics)
-      '--file-reporter=json:${metricFile.path}',
   ];
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
@@ -1840,21 +1837,19 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
-  if (collectMetrics) {
-    try {
-      final List<String> testList = <String>[];
-      final Map<int, TestSpecs> allTestSpecs = generateMetrics(metricFile);
-      for (final TestSpecs testSpecs in allTestSpecs.values) {
-        testList.add(testSpecs.toJson());
-      }
-      if (testList.isNotEmpty) {
-        final String testJson = json.encode(testList);
-        final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
-        testResults.writeAsStringSync(testJson);
-      }
-    } on fs.FileSystemException catch (e){
-      print('Failed to generate metrics: $e');
+  try {
+    final List<String> testList = <String>[];
+    final Map<int, TestSpecs> allTestSpecs = generateMetrics(metricFile);
+    for (final TestSpecs testSpecs in allTestSpecs.values) {
+      testList.add(testSpecs.toJson());
     }
+    if (testList.isNotEmpty) {
+      final String testJson = json.encode(testList);
+      final File testResults = fileSystem.file(path.join(flutterRoot, 'test_results.json'));
+      testResults.writeAsStringSync(testJson);
+    }
+  } on fs.FileSystemException catch (e){
+    print('Failed to generate metrics: $e');
   }
 }
 
