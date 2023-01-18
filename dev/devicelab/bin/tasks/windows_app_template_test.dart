@@ -68,6 +68,6 @@ Future<void> main() async {
   });
 }
 
-Future<String> _fileContents(String path, {int linesToSkip: 0}) async {
+Future<String> _fileContents(String path, {int linesToSkip = 0}) async {
   return (await File(path).readAsLines()).sublist(linesToSkip).join('\n');
 }
