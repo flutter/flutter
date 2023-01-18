@@ -200,7 +200,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [previous], the function that is called to move the focus to the next node.
+  ///  * [previous], the function that is called to move the focus to the previous node.
   ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
   ///    function that finds the first focusable widget in a particular direction.
   FocusNode findLastFocus(FocusNode currentNode, {bool ignoreCurrentFocus = false}) {
@@ -1139,7 +1139,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     // It has to have at least topmost in it if the topmost is not degenerate.
     assert(topmost.rect.isEmpty || inBandOfTop.isNotEmpty);
 
-    // The topmost rect in is in a band by itself, so just return that one.
+    // The topmost rect is in a band by itself, so just return that one.
     if (inBandOfTop.length <= 1) {
       return topmost;
     }
