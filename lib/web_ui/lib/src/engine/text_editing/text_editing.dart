@@ -34,6 +34,9 @@ bool _debugPrintTextInputCommands = false;
 /// The `keyCode` of the "Enter" key.
 const int _kReturnKeyCode = 13;
 
+/// Offset in pixels to place an element outside of the screen.
+const int offScreenOffset = -9999;
+
 /// Blink and Webkit engines, bring an overlay on top of the text field when it
 /// is autofilled.
 bool browserHasAutofillOverlay() =>
@@ -119,8 +122,8 @@ void _hideAutofillElements(DomHTMLElement domElement,
 
   if (isOffScreen) {
     elementStyle
-      ..top = '-9999px'
-      ..left = '-9999px';
+      ..top = '${offScreenOffset}px'
+      ..left = '${offScreenOffset}px';
   }
 
   if (browserHasAutofillOverlay()) {
@@ -1509,7 +1512,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     /// Position the element outside of the page before focusing on it. This is
     /// useful for not triggering a scroll when iOS virtual keyboard is
     /// coming up.
-    activeDomElement.style.transform = 'translate(-9999px, -9999px)';
+    activeDomElement.style.transform = 'translate(${offScreenOffset}px, ${offScreenOffset}px)';
 
     _canPosition = false;
   }
