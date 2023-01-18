@@ -3235,6 +3235,39 @@ void main() {
       expect(actionIconButtonSize(), 30.0);
     });
 
+    testWidgets('AppBar.iconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.red,
+            iconSize: 32.0,
+          ),
+        ),
+        useMaterial3: true,
+      );
+
+      const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              iconTheme: overallIconTheme,
+              leading: BackButton(onPressed: () {}),
+              title: const Text('title'),
+            ),
+          ),
+        ),
+      );
+
+      Color? leadingIconButtonColor() => iconStyle(tester, Icons.arrow_back)?.color;
+      double? leadingIconButtonSize() => iconStyle(tester, Icons.arrow_back)?.fontSize;
+
+      expect(leadingIconButtonColor(), Colors.yellow);
+      expect(leadingIconButtonSize(), 30.0);
+
+    });
+
     testWidgets('AppBar.actionsIconTheme should override any IconButtonTheme present in the theme - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: IconButtonThemeData(
@@ -3271,6 +3304,40 @@ void main() {
       // The leading icon button uses the style in the IconButtonTheme because only actionsIconTheme is provided.
       expect(leadingIconButtonColor(), Colors.red);
       expect(leadingIconButtonSize(), 32.0);
+      expect(actionIconButtonColor(), Colors.yellow);
+      expect(actionIconButtonSize(), 30.0);
+    });
+
+    testWidgets('AppBar.actionsIconTheme should override any IconButtonTheme present in the theme for widgets containing an iconButton - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: Colors.red,
+            iconSize: 32.0,
+          ),
+        ),
+        useMaterial3: true,
+      );
+
+      const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            appBar: AppBar(
+              actionsIconTheme: actionsIconTheme,
+              title: const Text('title'),
+              actions: <Widget>[
+                BackButton(onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      Color? actionIconButtonColor() => iconStyle(tester, Icons.arrow_back)?.color;
+      double? actionIconButtonSize() => iconStyle(tester, Icons.arrow_back)?.fontSize;
+
       expect(actionIconButtonColor(), Colors.yellow);
       expect(actionIconButtonSize(), 30.0);
     });
