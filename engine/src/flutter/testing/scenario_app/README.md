@@ -30,7 +30,7 @@ Build the `ios_debug_sim_unopt` engine variant, and run
 in your shell.
 
 To run or debug in Xcode, open the xcodeproj file located in
-`<engine_out_dir>/ios_debug_sim_unopt/scenario_app/Scenarios/Scenaios.xcodeproj`.
+`<engine_out_dir>/ios_debug_sim_unopt/scenario_app/Scenarios/Scenarios.xcodeproj`.
 
 ### iOS Platform View Tests
 

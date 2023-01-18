@@ -370,7 +370,6 @@ targets:
       jazzy_version: "0.14.1"
       runtime_versions: >-
         [
-          "ios-13-0",
           "ios-16-0_14a5294e"
         ]
     timeout: 75
