@@ -1391,7 +1391,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
-      use_emulator: true
+      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
