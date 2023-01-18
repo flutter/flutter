@@ -7,7 +7,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -52,7 +51,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
       throwToolExit('No target device found');
     }
 
-    if (const LocalPlatform().operatingSystem.toLowerCase() == device?.name.toLowerCase()) {
+    if (!device!.supportsInstall) {
       throwToolExit('Host and target are the same. Nothing to install.');
     }
 
