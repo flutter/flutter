@@ -90,7 +90,6 @@ class KeySet<T extends KeyboardKey> {
         && setEquals<T>(other._keys, _keys);
   }
 
-
   // Cached hash code value. Improves [hashCode] performance by 27%-900%,
   // depending on key set size and read/write ratio.
   @override
@@ -334,8 +333,8 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable
   }
 }
 
-/// A [DiagnosticsProperty] which handles formatting a `Map<LogicalKeySet,
-/// Intent>` (the same type as the [Shortcuts.shortcuts] property) so that its
+/// A [DiagnosticsProperty] which handles formatting a `Map<LogicalKeySet, Intent>`
+/// (the same type as the [Shortcuts.shortcuts] property) so that its
 /// diagnostic output is human-readable.
 class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Intent>> {
   /// Create a diagnostics property for `Map<ShortcutActivator, Intent>` objects,
@@ -1183,7 +1182,7 @@ class ShortcutRegistryEntry {
 ///
 /// The registry may be listened to (with [addListener]/[removeListener]) for
 /// change notifications when the registered shortcuts change. Change
-/// notifications take place after the the current frame is drawn, so that
+/// notifications take place after the current frame is drawn, so that
 /// widgets that are not descendants of the registry can listen to it (e.g. in
 /// overlays).
 class ShortcutRegistry with ChangeNotifier {

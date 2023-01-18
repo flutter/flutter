@@ -195,7 +195,7 @@ class Focus extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// A non-null [focusNode] must be supplied if using the
-  /// [Focus.withExternalFocusNode] constructor is used.
+  /// [Focus.withExternalFocusNode] constructor.
   final FocusNode? focusNode;
 
   /// {@template flutter.widgets.Focus.autofocus}
