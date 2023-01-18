@@ -2720,11 +2720,12 @@ void main() {
 
     testWidgets('PlatformViewLink handles onPlatformViewCreated when disposed', (WidgetTester tester) async {
       late PlatformViewCreationParams creationParams;
+      late FakePlatformViewController controller;
       final PlatformViewLink platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
           creationParams = params;
-          return FakePlatformViewController(params.id);
+          return controller = FakePlatformViewController(params.id);
         },
         surfaceFactory: (BuildContext context, PlatformViewController controller) {
           return PlatformViewSurface(
@@ -2739,7 +2740,8 @@ void main() {
 
       await tester.pumpWidget(Container());
 
-      creationParams.onPlatformViewCreated(creationParams.id);
+      expect(controller.disposed, true);
+      expect(() => creationParams.onPlatformViewCreated(creationParams.id), returnsNormally);
     });
 
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
