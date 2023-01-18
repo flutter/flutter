@@ -736,7 +736,6 @@ class ThemeData with Diagnosticable {
       accentColorBrightness: accentColorBrightness,
       accentTextTheme: accentTextTheme,
       accentIconTheme: accentIconTheme,
-      buttonColor: buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator,
@@ -875,11 +874,6 @@ class ThemeData with Diagnosticable {
     )
     IconThemeData? accentIconTheme,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.3.0-0.2.pre.',
-    )
-    Color? buttonColor,
-    @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
@@ -928,7 +922,6 @@ class ThemeData with Diagnosticable {
        _accentColorBrightness = accentColorBrightness,
        _accentTextTheme = accentTextTheme,
        _accentIconTheme = accentIconTheme,
-       _buttonColor = buttonColor,
        _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
        _primaryColorBrightness = primaryColorBrightness,
        _toggleableActiveColor = toggleableActiveColor,
@@ -1022,7 +1015,6 @@ class ThemeData with Diagnosticable {
        assert(accentColorBrightness != null),
        assert(accentTextTheme != null),
        assert(accentIconTheme != null),
-       assert(buttonColor != null),
        assert(fixTextFieldOutlineLabel != null),
        assert(primaryColorBrightness != null),
        assert(errorColor != null),
@@ -1752,14 +1744,6 @@ class ThemeData with Diagnosticable {
   IconThemeData get accentIconTheme => _accentIconTheme!;
   final IconThemeData? _accentIconTheme;
 
-  /// The default fill color of the [Material].
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v2.3.0-0.2.pre.',
-  )
-  Color get buttonColor => _buttonColor!;
-  final Color? _buttonColor;
-
   /// An obsolete flag to allow apps to opt-out of a
   /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
   /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
@@ -2112,7 +2096,6 @@ class ThemeData with Diagnosticable {
       accentColorBrightness: accentColorBrightness ?? _accentColorBrightness,
       accentTextTheme: accentTextTheme ?? _accentTextTheme,
       accentIconTheme: accentIconTheme ?? _accentIconTheme,
-      buttonColor: buttonColor ?? _buttonColor,
       fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? _fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness ?? _primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
@@ -2312,7 +2295,6 @@ class ThemeData with Diagnosticable {
       accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
-      buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
       fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
@@ -2421,7 +2403,6 @@ class ThemeData with Diagnosticable {
         other.accentColorBrightness == accentColorBrightness &&
         other.accentTextTheme == accentTextTheme &&
         other.accentIconTheme == accentIconTheme &&
-        other.buttonColor == buttonColor &&
         other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
         other.primaryColorBrightness == primaryColorBrightness &&
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
@@ -2527,7 +2508,6 @@ class ThemeData with Diagnosticable {
       accentColorBrightness,
       accentTextTheme,
       accentIconTheme,
-      buttonColor,
       fixTextFieldOutlineLabel,
       primaryColorBrightness,
       androidOverscrollIndicator,
@@ -2635,7 +2615,6 @@ class ThemeData with Diagnosticable {
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme, level: DiagnosticLevel.debug));
-    properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
