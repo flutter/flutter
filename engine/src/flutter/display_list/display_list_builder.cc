@@ -23,8 +23,14 @@ static void CopyV(void* dst, const S* src, int n, Rest&&... rest) {
   FML_DCHECK(((uintptr_t)dst & (alignof(S) - 1)) == 0)
       << "Expected " << dst << " to be aligned for at least " << alignof(S)
       << " bytes.";
-  sk_careful_memcpy(dst, src, n * sizeof(S));
-  CopyV(SkTAddOffset<void>(dst, n * sizeof(S)), std::forward<Rest>(rest)...);
+  // If n is 0, there is nothing to copy into dst from src.
+  if (n > 0) {
+    memcpy(dst, src, n * sizeof(S));
+    dst = reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(dst) +
+                                  n * sizeof(S));
+  }
+  // Repeat for the next items, if any
+  CopyV(dst, std::forward<Rest>(rest)...);
 }
 
 static constexpr inline bool is_power_of_two(int value) {
