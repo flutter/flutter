@@ -345,6 +345,7 @@ Future<bool> compileUnitTestToWasm(FilePath input, {required Renderer renderer})
     environment.dart2wasmSnapshotPath,
 
     '--dart-sdk=${environment.dartSdkDir.path}',
+    '--enable-asserts',
 
     // We do not want to auto-select a renderer in tests. As of today, tests
     // are designed to run in one specific mode. So instead, we specify the

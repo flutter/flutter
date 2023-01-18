@@ -56,7 +56,7 @@ abstract class UrlStrategy {
   /// * `go(3)` moves forward 3 steps in hisotry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  Future<void> go(int count);
+  Future<void> go(double count);
 }
 
 /// This is an implementation of [UrlStrategy] that uses the browser URL's
@@ -128,7 +128,7 @@ class HashUrlStrategy extends UrlStrategy {
   }
 
   @override
-  Future<void> go(int count) {
+  Future<void> go(double count) {
     _platformLocation.go(count);
     return _waitForPopState();
   }
@@ -179,7 +179,7 @@ class CustomUrlStrategy extends UrlStrategy {
       delegate.replaceState(state, title, url);
 
   @override
-  Future<void> go(int count) => delegate.go(count);
+  Future<void> go(double count) => delegate.go(count);
 }
 
 /// Encapsulates all calls to DOM apis, which allows the [UrlStrategy] classes
@@ -244,7 +244,7 @@ abstract class PlatformLocation {
   /// * `go(3)` moves forward 3 steps in hisotry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  void go(int count);
+  void go(double count);
 
   /// The base href where the Flutter app is being served.
   ///
@@ -293,7 +293,7 @@ class BrowserPlatformLocation extends PlatformLocation {
   }
 
   @override
-  void go(int count) {
+  void go(double count) {
     _history.go(count);
   }
 

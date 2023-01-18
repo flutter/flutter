@@ -35,14 +35,15 @@ Matcher listEqual(List<int> source, {int tolerance = 0}) {
 // Each element of `rawPixels` represents a bytes in order 0xRRGGBBAA, with
 // pixel order Left to right, then top to bottom.
 Uint8List _pixelsToBytes(List<int> rawPixels) {
-  return Uint8List.fromList((() sync* {
-    for (final int pixel in rawPixels) {
-      yield (pixel >> 24) & 0xff; // r
-      yield (pixel >> 16) & 0xff; // g
-      yield (pixel >> 8)  & 0xff; // b
-      yield (pixel >> 0)  & 0xff; // a
-    }
-  })().toList());
+  return Uint8List.fromList(<int>[
+    for (final int pixel in rawPixels)
+      ...<int>[
+        (pixel >> 24) & 0xff, // r
+        (pixel >> 16) & 0xff, // g
+        (pixel >> 8)  & 0xff, // b
+        (pixel >> 0)  & 0xff, // a
+      ]
+  ]);
 }
 
 Future<Image> _encodeToHtmlThenDecode(

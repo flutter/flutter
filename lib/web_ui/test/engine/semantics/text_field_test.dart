@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
 
@@ -367,7 +366,6 @@ void testMain() {
         width: 13,
         globalTransform: Matrix4.translationValues(14, 15, 0).storage,
       );
-      const ui.Rect semanticsRect = ui.Rect.fromLTRB(0, 0, 100, 50);
 
       testTextEditing.acceptCommand(
         TextInputSetEditableSizeAndTransform(geometry: geometry),
@@ -383,8 +381,8 @@ void testMain() {
       // EditableTextGeometry.
       void checkPlacementIsSetBySemantics() {
         expect(strategy.activeDomElement.style.transform, '');
-        expect(strategy.activeDomElement.style.width, '${semanticsRect.width}px');
-        expect(strategy.activeDomElement.style.height, '${semanticsRect.height}px');
+        expect(strategy.activeDomElement.style.width, '100px');
+        expect(strategy.activeDomElement.style.height, '50px');
       }
 
       checkPlacementIsSetBySemantics();

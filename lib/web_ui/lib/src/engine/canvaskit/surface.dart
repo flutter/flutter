@@ -109,7 +109,7 @@ class Surface {
 
   void _syncCacheBytes() {
     if (_skiaCacheBytes != null) {
-      _grContext?.setResourceCacheLimitBytes(_skiaCacheBytes!);
+      _grContext?.setResourceCacheLimitBytes(_skiaCacheBytes!.toDouble());
     }
   }
 
@@ -343,7 +343,7 @@ class Surface {
       _glContext = glContext;
 
       if (_glContext != 0) {
-        _grContext = canvasKit.MakeGrContext(glContext);
+        _grContext = canvasKit.MakeGrContext(glContext.toDouble());
         if (_grContext == null) {
           throw CanvasKitError('Failed to initialize CanvasKit. '
               'CanvasKit.MakeGrContext returned null.');
@@ -377,8 +377,8 @@ class Surface {
     } else {
       final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
         _grContext!,
-        size.width.ceil(),
-        size.height.ceil(),
+        size.width.roundToDouble(),
+        size.height.roundToDouble(),
         SkColorSpaceSRGB,
         _sampleCount,
         _stencilBits
@@ -448,8 +448,8 @@ class CkSurface {
 
   int? get context => _glContext;
 
-  int width() => surface.width().toInt();
-  int height() => surface.height().toInt();
+  int width() => surface.width().round();
+  int height() => surface.height().round();
 
   void dispose() {
     if (_isDisposed) {

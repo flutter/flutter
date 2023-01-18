@@ -331,7 +331,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       case 'touchstart':
       case 'touchend':
         final DomTouchEvent touchEvent = event as DomTouchEvent;
-        activationPoint = touchEvent.changedTouches!.first.client;
+        activationPoint = touchEvent.changedTouches.first.client;
         break;
       case 'pointerdown':
       case 'pointerup':
