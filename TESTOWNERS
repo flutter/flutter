@@ -206,6 +206,7 @@
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
 
 ## Host only DeviceLab tests
+/dev/devicelab/bin/tasks/animated_complex_opacity_perf_impeller_macos__e2e_summary.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/basic_material_app_macos__compile.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/build_ios_framework_module_test.dart @jmagman @flutter/tool
