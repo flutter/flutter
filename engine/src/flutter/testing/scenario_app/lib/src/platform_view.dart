@@ -618,6 +618,41 @@ class PlatformViewClipRRectScenario extends PlatformViewScenario {
   }
 }
 
+
+/// Platform view with clip rrect.
+/// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
+class PlatformViewLargeClipRRectScenario extends PlatformViewScenario {
+  /// Constructs a platform view with large clip rrect scenario.
+  PlatformViewLargeClipRRectScenario(
+    PlatformDispatcher dispatcher, {
+    int id = 0,
+  }) : super(dispatcher, id: id);
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+    builder.pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        0,
+        0,
+        500,
+        500,
+        topLeft: const Radius.circular(15),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    );
+
+    addPlatformView(
+      id,
+      dispatcher: dispatcher,
+      sceneBuilder: builder,
+    );
+
+    finishBuilder(builder);
+  }
+}
+
 /// Platform view with clip path.
 class PlatformViewClipPathScenario extends PlatformViewScenario {
   /// Constructs a platform view with clip path scenario.
@@ -705,6 +740,54 @@ class PlatformViewClipRRectWithTransformScenario extends PlatformViewScenario {
         100,
         400,
         400,
+        topLeft: const Radius.circular(15),
+        topRight: const Radius.circular(50),
+        bottomLeft: const Radius.circular(50),
+      ),
+    );
+    addPlatformView(
+      id,
+      dispatcher: dispatcher,
+      sceneBuilder: builder,
+    );
+
+    // Add a translucent rect that has the same size of PlatformView.
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 500, 500),
+      Paint()..color = const Color(0x22FF0000),
+    );
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    finishBuilder(builder);
+  }
+}
+
+/// Platform view with clip rrect after transformed.
+/// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
+class PlatformViewLargeClipRRectWithTransformScenario extends PlatformViewScenario {
+  /// Constructs a platform view with large clip rrect with transform scenario.
+  PlatformViewLargeClipRRectWithTransformScenario(
+    PlatformDispatcher dispatcher, {
+    int id = 0,
+  }) : super(dispatcher, id: id);
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Matrix4 matrix4 = Matrix4.identity()
+      ..rotateZ(1)
+      ..scale(0.5, 0.5, 1.0)
+      ..translate(1000.0, 100.0);
+
+    final SceneBuilder builder = SceneBuilder()..pushTransform(matrix4.storage);
+    builder.pushClipRRect(
+      RRect.fromLTRBAndCorners(
+        0,
+        0,
+        500,
+        500,
         topLeft: const Radius.circular(15),
         topRight: const Radius.circular(50),
         bottomLeft: const Radius.circular(50),
