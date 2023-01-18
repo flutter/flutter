@@ -1837,9 +1837,17 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
+  final TestFileReporterResults test = parseFileReporter(metricFile); // --file_reporter name
+  try {
+    final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
+    info.writeAsStringSync(test.error);
+  } on fs.FileSystemException catch (e){
+    print('Failed to generate info file: $e');
+  }
+
   try {
     final List<String> testList = <String>[];
-    final Map<int, TestSpecs> allTestSpecs = generateMetrics(metricFile);
+    final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
     for (final TestSpecs testSpecs in allTestSpecs.values) {
       testList.add(testSpecs.toJson());
     }

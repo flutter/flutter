@@ -38,42 +38,50 @@ class TestSpecs {
   }
 }
 
-/// Intended to parse the output file of `dart test --file-reporter json:file_name
-Map<int, TestSpecs> generateMetrics(File metrics) {
+class TestFileReporterResults {
   final Map<int, TestSpecs> allTestSpecs = <int, TestSpecs>{};
-  if (!metrics.existsSync()) {
-    return allTestSpecs;
+  String error = '';
+
+  void addTestSpec(Map<dynamic, dynamic> suite, int time) {
+    allTestSpecs[suite['id'] as int] = TestSpecs(
+      path: suite['path'] as String,
+      startTime: time,
+    );
   }
 
-  bool success = false;
+  void addMetricDone(int suiteID, int time) {
+    final TestSpecs testSpec = allTestSpecs[suiteID]!;
+    testSpec.endTime = time;
+  }
+
+  bool isMetricDone(Map<String, dynamic> entry) {
+    if (entry.containsKey('group') && entry['type'] as String == 'group') {
+      final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
+      return allTestSpecs.containsKey(group['suiteID'] as int);
+    }
+    return false;
+  }
+}
+
+/// Intended to parse the output file of `dart test --file-reporter json:file_name
+TestFileReporterResults parseFileReporter(File metrics) {
+  final TestFileReporterResults results = TestFileReporterResults();
+  if (!metrics.existsSync()) {
+    return results;
+  }
+
   for(final String metric in metrics.readAsLinesSync()) {
     final Map<String, dynamic> entry = json.decode(metric) as Map<String, dynamic>;
     if (entry.containsKey('suite')) {
       final Map<dynamic, dynamic> suite = entry['suite'] as Map<dynamic, dynamic>;
-      allTestSpecs[suite['id'] as int] = TestSpecs(
-        path: suite['path'] as String,
-        startTime: entry['time'] as int,
-      );
-    } else if (_isMetricDone(entry, allTestSpecs)) {
+      results.addTestSpec(suite, entry['time'] as int);
+    } else if (results.isMetricDone(entry)) {
       final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
       final int suiteID = group['suiteID'] as int;
-      final TestSpecs testSpec = allTestSpecs[suiteID]!;
-      testSpec.endTime = entry['time'] as int;
-    } else if (entry.containsKey('success') && entry['success'] == true) {
-      success = true;
+      results.addMetricDone(suiteID, entry['time'] as int);
+    } else if (entry.containsKey('error') && entry.containsKey('stackTrace')) {
+      results.error = '${entry['error']}\n ${entry['stackTrace']}';
     }
   }
-
-  if (!success) { // means that not all tests succeeded therefore no metrics are stored
-    return <int, TestSpecs>{};
-  }
-  return allTestSpecs;
-}
-
-bool _isMetricDone(Map<String, dynamic> entry, Map<int, TestSpecs> allTestSpecs) {
-  if (entry.containsKey('group') && entry['type'] as String == 'group') {
-    final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
-    return allTestSpecs.containsKey(group['suiteID'] as int);
-  }
-  return false;
+  return results;
 }
