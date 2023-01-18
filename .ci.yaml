@@ -2436,7 +2436,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -2450,7 +2451,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
