@@ -46,7 +46,7 @@ Future<void> main() async {
         if (appFile != templateFile) {
           fileContentsMatch = false;
           print('Error: file $fileName mismatched for integration test $testPath');
-          print();
+          print('\n');
           print('Verify the integration test has been migrated to the latest app template.');
           print('=====$appFilePath======');
           print(appFile);
