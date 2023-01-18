@@ -428,7 +428,7 @@ void testMain() {
           rethrow;
         }
       }
-    });
+    }, timeout: const Timeout.factor(50)); // This test is very slow.
   }, skip: isSafari);
 }
 

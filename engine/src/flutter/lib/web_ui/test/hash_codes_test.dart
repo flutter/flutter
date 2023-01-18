@@ -17,63 +17,32 @@ void main() {
 }
 
 void testMain() {
-  test('hashValues can hash lots of huge values effectively', () {
-    expect(
-      hashValues(
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-      ),
-      496984395,
+  test('hashValues and hashList can hash lots of huge values effectively', () {
+    final int hashValueFromArgs = hashValues(
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
     );
-    // Hash a slightly smaller number to verify that the hash code is different.
-    expect(
-      hashValues(
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt,
-        _kBiggestExactJavaScriptInt - 1,
-      ),
-      455584273,
-    );
-  });
 
-  test('hashList can hash lots of huge values effectively', () {
-    expect(
-      hashList(<int>[
+    // Hash the same values via a list
+    final int hashValueFromList = hashList(<int>[
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt,
@@ -94,12 +63,33 @@ void testMain() {
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt,
-      ]),
-      496984395,
-    );
+    ]);
+
     // Hash a slightly smaller number to verify that the hash code is different.
-    expect(
-      hashList(<int>[
+    final int slightlyDifferentHashValueFromArgs = hashValues(
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt,
+      _kBiggestExactJavaScriptInt - 1,
+    );
+
+    final int slightlyDifferentHashValueFromList = hashList(<int>[
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt,
@@ -120,8 +110,10 @@ void testMain() {
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt,
         _kBiggestExactJavaScriptInt - 1,
-      ]),
-      455584273,
-    );
+    ]);
+
+    expect(hashValueFromArgs, equals(hashValueFromList));
+    expect(slightlyDifferentHashValueFromArgs, equals(slightlyDifferentHashValueFromList));
+    expect(hashValueFromArgs, isNot(equals(slightlyDifferentHashValueFromArgs)));
   });
 }

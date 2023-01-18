@@ -732,8 +732,8 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
 
     final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
     final List<SkRectWithDirection> skRects = paragraph.getRectsForRange(
-      start,
-      end,
+      start.toDouble(),
+      end.toDouble(),
       toSkRectHeightStyle(boxHeightStyle),
       toSkRectWidthStyle(boxWidthStyle),
     ).cast<SkRectWithDirection>();
@@ -783,7 +783,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         characterPosition = position.offset;
         break;
     }
-    final SkTextRange skRange = paragraph.getWordBoundary(characterPosition);
+    final SkTextRange skRange = paragraph.getWordBoundary(characterPosition.toDouble());
     return ui.TextRange(start: skRange.start.toInt(), end: skRange.end.toInt());
   }
 
@@ -1031,7 +1031,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
       SkPaint? foreground = skStyle.foreground?.skiaObject;
       if (foreground == null) {
         _defaultTextForeground.setColorInt(
-          skStyle.color?.value ?? 0xFF000000,
+          (skStyle.color?.value ?? 0xFF000000).toDouble(),
         );
         foreground = _defaultTextForeground;
       }

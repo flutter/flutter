@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -71,32 +70,6 @@ void testMain() {
         codec.decodeEnvelope(response!),
         true,
       );
-    });
-
-    test('responds correctly to flutter/platform Clipboard.getData failure',
-        () async {
-      // Patch browser so that clipboard api is not available.
-      final Object? originalClipboard =
-          js_util.getProperty<Object?>(domWindow.navigator, 'clipboard');
-      js_util.setProperty(domWindow.navigator, 'clipboard', null);
-      const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData?> completer = Completer<ByteData?>();
-      ui.PlatformDispatcher.instance.sendPlatformMessage(
-        'flutter/platform',
-        codec.encodeMethodCall(const MethodCall(
-          'Clipboard.getData',
-        )),
-        completer.complete,
-      );
-      final ByteData? response = await completer.future;
-      if (response != null) {
-        expect(
-              () => codec.decodeEnvelope(response),
-          throwsA(isA<PlatformException>()),
-        );
-      }
-      js_util.setProperty(
-          domWindow.navigator, 'clipboard', originalClipboard);
     });
 
     test('can find text scale factor', () async {

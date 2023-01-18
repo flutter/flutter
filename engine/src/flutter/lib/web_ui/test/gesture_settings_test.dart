@@ -13,10 +13,10 @@ void main() {
 void testMain() {
   test('GestureSettings has a reasonable toString', () {
     const GestureSettings gestureSettings =
-        GestureSettings(physicalDoubleTapSlop: 2.0, physicalTouchSlop: 1.0);
+        GestureSettings(physicalDoubleTapSlop: 2.5, physicalTouchSlop: 1.5);
 
     expect(gestureSettings.toString(),
-        'GestureSettings(physicalTouchSlop: 1, physicalDoubleTapSlop: 2)');
+        'GestureSettings(physicalTouchSlop: 1.5, physicalDoubleTapSlop: 2.5)');
   });
 
   test('GestureSettings has a correct equality', () {

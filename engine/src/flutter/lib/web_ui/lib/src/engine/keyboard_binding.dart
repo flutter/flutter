@@ -286,6 +286,9 @@ class KeyboardConverter {
   static const Duration _kKeydownCancelDurationMac = Duration(milliseconds: 2000);
 
   static int _getPhysicalCode(String code) {
+    if (code.isEmpty) {
+      return _kWebKeyIdPlane;
+    }
     return kWebToPhysicalKey[code] ?? (code.hashCode + _kWebKeyIdPlane);
   }
 

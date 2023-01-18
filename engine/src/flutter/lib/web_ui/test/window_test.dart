@@ -46,7 +46,7 @@ void testMain() {
     final JsUrlStrategy jsUrlStrategy = JsUrlStrategy(
         getPath: allowInterop(() => '/initial'),
         getState: allowInterop(() => state),
-        addPopStateListener: allowInterop((DomEventListener listener) => () {}),
+        addPopStateListener: allowInterop((DomEventListener listener) => allowInterop(() {})),
         prepareExternalUrl: allowInterop((String value) => ''),
         pushState: allowInterop((Object? newState, String title, String url) {
           expect(newState is Map, true);
@@ -55,7 +55,7 @@ void testMain() {
           expect(newState is Map, true);
           state = newState;
         }),
-        go: allowInterop(([int? delta]) async {
+        go: allowInterop(([double? delta]) async {
           expect(delta, -1);
         }));
     final CustomUrlStrategy strategy =

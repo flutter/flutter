@@ -15,6 +15,7 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/ui.dart' as ui;
 
 void main() {
@@ -273,7 +274,7 @@ void testMain() {
       'b: seven',
       '-9',
     ]);
-  });
+  }, skip: isWasm); // https://github.com/dart-lang/sdk/issues/50778
 
   test('ChannelBuffers.clearListener', () async {
     final List<String> log = <String>[];
@@ -320,7 +321,7 @@ void testMain() {
       'a2: four',
       '-7',
     ]);
-  });
+  }, skip: isWasm); // https://github.com/dart-lang/sdk/issues/50778
 
   test('ChannelBuffers.handleMessage for resize', () async {
     final List<String> log = <String>[];
@@ -367,7 +368,7 @@ void testMain() {
       'callback1: true',
       'callback2: true',
     ]);
-  });
+  }, skip: isWasm); // https://github.com/dart-lang/sdk/issues/50778
 }
 
 class _TestChannelBuffers extends ui.ChannelBuffers {

@@ -4,8 +4,6 @@
 
 @TestOn('browser')
 
-import 'package:js/js_util.dart';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/dom.dart';
@@ -22,7 +20,7 @@ void doTests() {
 
       expect(cache, isNotNull);
 
-      final List<DomElement?>? domCache = getDomCache();
+      final List<Object?>? domCache = hotRestartStore;
 
       expect(domCache, isNotNull);
       expect(domCache, isEmpty);
@@ -31,17 +29,16 @@ void doTests() {
 
   group('registerElement', () {
     HotRestartCacheHandler? cache;
-    List<DomElement?>? domCache;
 
     setUp(() {
       cache = HotRestartCacheHandler();
-      domCache = getDomCache();
     });
 
     test('Registers an element in the DOM cache', () async {
       final DomElement element = createDomElement('for-test');
       cache!.registerElement(element);
 
+      final List<Object?>? domCache = hotRestartStore;
       expect(domCache, hasLength(1));
       expect(domCache!.last, element);
     });
@@ -52,6 +49,7 @@ void doTests() {
 
       cache!.registerElement(element);
 
+      final List<Object?>? domCache = hotRestartStore;
       expect(domCache, hasLength(1));
       expect(domCache!.last, element);
     });
@@ -71,12 +69,10 @@ void doTests() {
       // Simulate a hot restart...
       cache = HotRestartCacheHandler();
 
+      final List<Object?>? domCache = hotRestartStore;
       expect(domCache, hasLength(0));
       expect(element.isConnected, isFalse); // Removed
       expect(element2.isConnected, isTrue);
     });
   });
 }
-
-List<DomElement?>? getDomCache() => getProperty<List<DomElement?>?>(
-    domWindow, HotRestartCacheHandler.defaultCacheName);

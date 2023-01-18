@@ -21,7 +21,7 @@ typedef _StringToString = String Function(String);
 typedef _StateOperation = void Function(
     Object? state, String title, String url);
 
-typedef _HistoryMove = Future<void> Function(int count);
+typedef _HistoryMove = Future<void> Function(double count);
 
 /// The JavaScript representation of a URL strategy.
 ///
@@ -82,5 +82,5 @@ extension JsUrlStrategyExtension on JsUrlStrategy {
   /// * `go(3)` moves forward 3 steps in hisotry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  external Future<void> go(int count);
+  external Future<void> go(double count);
 }

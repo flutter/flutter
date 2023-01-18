@@ -187,6 +187,6 @@ void drawSkShadow(
     devicePixelRatio * ckShadowLightRadius,
     tonalColors.ambient,
     tonalColors.spot,
-    flags,
+    flags.toDouble(),
   );
 }
