@@ -14,6 +14,7 @@ import '../svg.dart';
 import '../text/canvas_paragraph.dart';
 import '../util.dart';
 import '../vector_math.dart';
+import 'bitmap_canvas.dart';
 import 'painting.dart';
 import 'path/path.dart';
 import 'path/path_to_svg.dart';
@@ -333,14 +334,11 @@ String _borderStrokeToCssUnit(double value) {
   return '${value.toStringAsFixed(3)}px';
 }
 
-SVGSVGElement pathToSvgElement(
-    SurfacePath path, SurfacePaintData paint, String width, String height) {
+SVGSVGElement pathToSvgElement(SurfacePath path, SurfacePaintData paint) {
   // In Firefox some SVG typed attributes are returned as null without a
   // setter. So we use strings here.
   final SVGSVGElement root = createSVGSVGElement()
-    ..setAttribute('width', '${width}px')
-    ..setAttribute('height', '${height}px')
-    ..setAttribute('viewBox', '0 0 $width $height');
+    ..setAttribute('overflow', 'visible');
 
   final SVGPathElement svgPath = createSVGPathElement();
   root.append(svgPath);
@@ -350,6 +348,9 @@ SVGSVGElement pathToSvgElement(
           paint.strokeWidth != null)) {
     svgPath.setAttribute('stroke', colorValueToCssString(paint.color)!);
     svgPath.setAttribute('stroke-width', '${paint.strokeWidth ?? 1.0}');
+    if (paint.strokeCap != null) {
+      svgPath.setAttribute('stroke-linecap', '${stringForStrokeCap(paint.strokeCap)}');
+    }
     svgPath.setAttribute('fill', 'none');
   } else if (paint.color != null) {
     svgPath.setAttribute('fill', colorValueToCssString(paint.color)!);
