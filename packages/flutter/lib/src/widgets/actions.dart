@@ -954,7 +954,7 @@ class Actions extends StatefulWidget {
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result.isEnabled(intent)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
-        // Element we found.
+        // element we found.
         returnValue = _findDispatcher(element).invokeAction(result, intent, context);
       }
       return result != null;
@@ -1478,7 +1478,8 @@ class ActivateIntent extends Intent {
 ///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
 ///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ButtonActivateIntent extends Intent {
-  /// Creates an intent that the currently focused control, if it's a button.
+  /// Creates an intent that activates the currently focused control,
+  /// if it's a button.
   const ButtonActivateIntent();
 }
 
@@ -1581,7 +1582,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   bool debugAssertConsumeKeyMutuallyRecursive = false;
 
   // The default action to invoke if an enabled override Action can't be found
-  // using [lookupContext];
+  // using [lookupContext].
   Action<T> get defaultAction;
 
   // The [BuildContext] used to find the override of this [Action].
