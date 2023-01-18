@@ -29,7 +29,7 @@ abstract class MessageCodec<T> {
   T? decodeMessage(ByteData? message);
 }
 
-/// An command object representing the invocation of a named method.
+/// A command object representing the invocation of a named method.
 @immutable
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
