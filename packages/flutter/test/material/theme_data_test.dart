@@ -1283,7 +1283,6 @@ void main() {
       'accentColorBrightness',
       'accentTextTheme',
       'accentIconTheme',
-      'buttonColor',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',
