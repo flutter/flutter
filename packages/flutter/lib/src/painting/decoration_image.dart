@@ -567,7 +567,7 @@ void paintImage({
     // as an upper bound for the display size of the image.
     final double maxDevicePixelRatio = PaintingBinding.instance.platformDispatcher.views.fold(
       0.0,
-      (double previousValue, ui.FlutterView element) => math.max(previousValue, element.devicePixelRatio),
+      (double previousValue, ui.FlutterView view) => math.max(previousValue, view.devicePixelRatio),
     );
 
     final ImageSizeInfo sizeInfo = ImageSizeInfo(
@@ -586,7 +586,8 @@ void paintImage({
           exception: 'Image $debugImageLabel has a display size of '
             '$outputWidth×$outputHeight but a decode size of '
             '${image.width}×${image.height}, which uses an additional '
-            '${overheadInKilobytes}KB.\n\n'
+            '${overheadInKilobytes}KB (assuming a device pixel ratio of '
+            '$maxDevicePixelRatio).\n\n'
             'Consider resizing the asset ahead of time, supplying a cacheWidth '
             'parameter of $outputWidth, a cacheHeight parameter of '
             '$outputHeight, or using a ResizeImage.',
