@@ -50,7 +50,7 @@ void testMain() {
 
     // Random history state.
     strategy = TestUrlStrategy.fromEntry(
-      const TestHistoryEntry(<dynamic, dynamic>{'foo': 123}, null, '/'),
+      const TestHistoryEntry(<dynamic, dynamic>{'foo': 123.0}, null, '/'),
     );
     history = createHistoryForExistingState(strategy);
     expect(history, isA<MultiEntriesBrowserHistory>());
@@ -58,8 +58,8 @@ void testMain() {
 
     // Multi-entry history state.
     final Map<dynamic, dynamic> state = <dynamic, dynamic>{
-      'serialCount': 1,
-      'state': <dynamic, dynamic>{'foo': 123},
+      'serialCount': 1.0,
+      'state': <dynamic, dynamic>{'foo': 123.0},
     };
     strategy = TestUrlStrategy.fromEntry(TestHistoryEntry(state, null, '/'));
     history = createHistoryForExistingState(strategy);
@@ -720,7 +720,7 @@ class TestPlatformLocation extends PlatformLocation {
   }
 
   @override
-  void go(int count) {
+  void go(double count) {
     throw UnimplementedError();
   }
 

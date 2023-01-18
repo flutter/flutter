@@ -18,7 +18,7 @@ void testMain() {
       // fetch that, override one of its properties (under test), then delete it
       // from window (so our configuration asserts don't fire!)
       final JsFlutterConfiguration config = js_util.getProperty(domWindow, 'flutterConfiguration');
-      js_util.setProperty(config, 'canvasKitMaximumSurfaces', 32);
+      js_util.setProperty(config, 'canvasKitMaximumSurfaces', 32.0);
       js_util.setProperty(domWindow, 'flutterConfiguration', null);
 
       await initializeEngineServices(jsConfiguration: config);

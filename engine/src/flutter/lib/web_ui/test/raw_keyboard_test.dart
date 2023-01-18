@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:quiver/testing/async.dart';
@@ -748,29 +747,20 @@ DomKeyboardEvent dispatchKeyboardEvent(
 }) {
   target ??= domWindow;
 
-  final Function jsKeyboardEvent =
-      js_util.getProperty<Function>(domWindow, 'KeyboardEvent');
-  final List<dynamic> eventArgs = <dynamic>[
-    type,
-    <String, dynamic>{
-      'key': key,
-      'code': code,
-      'location': location,
-      'repeat': repeat,
-      'shiftKey': isShiftPressed,
-      'altKey': isAltPressed,
-      'ctrlKey': isControlPressed,
-      'metaKey': isMetaPressed,
-      'isComposing': isComposing,
-      'keyCode': keyCode,
-      'bubbles': true,
-      'cancelable': true,
-    }
-  ];
-  final DomKeyboardEvent event = js_util.callConstructor<DomKeyboardEvent>(
-    jsKeyboardEvent,
-    js_util.jsify(eventArgs) as List<Object?>,
-  );
+  final DomKeyboardEvent event = createDomKeyboardEvent(type, <String, Object> {
+    if (key != null) 'key': key,
+    if (code != null) 'code': code,
+    'location': location,
+    'repeat': repeat,
+    'shiftKey': isShiftPressed,
+    'altKey': isAltPressed,
+    'ctrlKey': isControlPressed,
+    'metaKey': isMetaPressed,
+    'isComposing': isComposing,
+    'keyCode': keyCode,
+    'bubbles': true,
+    'cancelable': true,
+  });
   target.dispatchEvent(event);
 
   return event;

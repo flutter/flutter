@@ -287,12 +287,12 @@ extension DomElementExtension on DomElement {
   external set className(String value);
   external String get className;
   external void blur();
-  List<DomNode> getElementsByTagName(String tag) =>
-      js_util.callMethod<List<Object?>>(
-          this, 'getElementsByTagName', <Object>[tag]).cast<DomNode>();
-  List<DomNode> getElementsByClassName(String className) =>
-      js_util.callMethod<List<Object?>>(
-          this, 'getElementsByClassName', <Object>[className]).cast<DomNode>();
+  Iterable<DomNode> getElementsByTagName(String tag) =>
+      createDomListWrapper(js_util.callMethod<_DomList>(
+          this, 'getElementsByTagName', <Object>[tag]));
+  Iterable<DomNode> getElementsByClassName(String className) =>
+      createDomListWrapper(js_util.callMethod<_DomList>(
+          this, 'getElementsByClassName', <Object>[className]));
   external void click();
   external bool hasAttribute(String name);
   Iterable<DomNode> get childNodes => createDomListWrapper<DomElement>(
@@ -973,15 +973,20 @@ extension DomKeyboardEventExtension on DomKeyboardEvent {
   external bool getModifierState(String keyArg);
 }
 
+DomKeyboardEvent createDomKeyboardEvent(String type,
+        [Map<dynamic, dynamic>? init]) =>
+    js_util.callConstructor(domGetConstructor('KeyboardEvent')!,
+        <Object?>[type, if (init != null) js_util.jsify(init)]);
+
 @JS()
 @staticInterop
 class DomHistory {}
 
 extension DomHistoryExtension on DomHistory {
   dynamic get state => js_util.dartify(js_util.getProperty(this, 'state'));
-  void go([int? delta]) =>
+  void go([double? delta]) =>
       js_util.callMethod(this, 'go',
-          <Object>[if (delta != null) delta.toDouble()]);
+          <Object>[if (delta != null) delta]);
   void pushState(dynamic data, String title, String? url) =>
       js_util.callMethod(this, 'pushState', <Object?>[
         if (data is Map || data is Iterable) js_util.jsify(data as Object) else data,
@@ -1170,6 +1175,11 @@ extension DomWheelEventExtension on DomWheelEvent {
   external double get deltaMode;
 }
 
+DomWheelEvent createDomWheelEvent(String type,
+        [Map<dynamic, dynamic>? init]) =>
+    js_util.callConstructor(domGetConstructor('WheelEvent')!,
+        <Object?>[type, if (init != null) js_util.jsify(init)]);
+
 @JS()
 @staticInterop
 class DomTouchEvent extends DomUIEvent {}
@@ -1179,9 +1189,9 @@ extension DomTouchEventExtension on DomTouchEvent {
   external bool get ctrlKey;
   external bool get metaKey;
   external bool get shiftKey;
-  List<DomTouch>? get changedTouches => js_util
-      .getProperty<List<Object?>?>(this, 'changedTouches')
-      ?.cast<DomTouch>();
+  Iterable<DomTouch> get changedTouches =>
+      createDomTouchListWrapper<DomTouch>(
+        js_util.getProperty<_DomTouchList>(this, 'changedTouches'));
 }
 
 @JS()
@@ -1734,6 +1744,52 @@ class _DomListWrapper<T> extends Iterable<T> {
 Iterable<T> createDomListWrapper<T>(_DomList list) =>
     _DomListWrapper<T>._(list).cast<T>();
 
+// https://developer.mozilla.org/en-US/docs/Web/API/TouchList
+@JS()
+@staticInterop
+class _DomTouchList {}
+
+extension DomTouchListExtension on _DomTouchList {
+  external double get length;
+  DomTouch item(int index) =>
+      js_util.callMethod<DomTouch>(this, 'item', <Object>[index.toDouble()]);
+}
+
+class _DomTouchListIterator<T> extends Iterator<T> {
+  _DomTouchListIterator(this.list);
+
+  final _DomTouchList list;
+  int index = -1;
+
+  @override
+  bool moveNext() {
+    index++;
+    if (index > list.length) {
+      throw StateError('Iterator out of bounds');
+    }
+    return index < list.length;
+  }
+
+  @override
+  T get current => list.item(index) as T;
+}
+
+class _DomTouchListWrapper<T> extends Iterable<T> {
+  _DomTouchListWrapper._(this.list);
+
+  final _DomTouchList list;
+
+  @override
+  Iterator<T> get iterator => _DomTouchListIterator<T>(list);
+
+  /// Override the length to avoid iterating through the whole collection.
+  @override
+  int get length => list.length.toInt();
+}
+
+Iterable<T> createDomTouchListWrapper<T>(_DomTouchList list) =>
+    _DomTouchListWrapper<T>._(list).cast<T>();
+
 @JS()
 @staticInterop
 class DomIntl {}
@@ -1767,7 +1823,7 @@ DomV8BreakIterator createV8BreakIterator() {
   return js_util.callConstructor<DomV8BreakIterator>(
     v8BreakIterator,
     <Object?>[
-      js_util.getProperty(domWindow, 'undefined'),
+      <String>[],
       js_util.jsify(const <String, String>{'type': 'line'}),
     ],
   );

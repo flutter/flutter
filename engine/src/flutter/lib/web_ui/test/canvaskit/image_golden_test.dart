@@ -241,7 +241,9 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         codec.dispose();
       }
       // TODO(hterkelsen): Firefox and Safari do not currently support ImageDecoder.
-    }, skip: isFirefox || isSafari);
+      // TODO(jacksongardner): enable on wasm
+      // see https://github.com/flutter/flutter/issues/118334
+    }, skip: isFirefox || isSafari || isWasm);
 
     test('CkImage.clone also clones the VideoFrame', () async {
       final CkBrowserImageDecoder image = await CkBrowserImageDecoder.create(
@@ -835,7 +837,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
           Uint8List.fromList(<int>[0xff, 0xd8, 0xff, 0xe2, 0x0c, 0x58, 0x49, 0x43, 0x43, 0x5f])),
         'image/jpeg');
     });
-  });
+  }, timeout: const Timeout.factor(10)); // These tests can take a while. Allow for a longer timeout.
 }
 
 /// Tests specific to WASM codecs bundled with CanvasKit.
@@ -905,7 +907,9 @@ void _testCkBrowserImageDecoder() {
       expect(rgba!.buffer.asUint8List(), expectedColors[i]);
     }
     testCollector.collectNow();
-  });
+    // TODO(jacksongardner): enable on wasm
+    // see https://github.com/flutter/flutter/issues/118334
+  }, skip: isWasm);
 
   test('ImageDecoder expires after inactivity', () async {
     const Duration testExpireDuration = Duration(milliseconds: 100);
@@ -950,7 +954,9 @@ void _testCkBrowserImageDecoder() {
 
     testCollector.collectNow();
     debugRestoreWebDecoderExpireDuration();
-  });
+    // TODO(jacksongardner): enable on wasm
+    // see https://github.com/flutter/flutter/issues/118334
+  }, skip: isWasm);
 }
 
 class TestHttpRequestMock {
@@ -978,10 +984,10 @@ class TestHttpRequest implements DomXMLHttpRequest {
   factory TestHttpRequest(TestHttpRequestMock mock) {
     return TestHttpRequest._(
         responseType: mock.responseType,
-        timeout: mock.timeout,
+        timeout: mock.timeout.toDouble(),
         withCredentials: mock.withCredentials,
         response: mock.response,
-        status: mock.status,
+        status: mock.status.toDouble(),
         open: allowInterop((String method, String url, [bool? async]) =>
             mock.open(method, url, async)),
         send: allowInterop(() => mock.send()),
@@ -992,10 +998,10 @@ class TestHttpRequest implements DomXMLHttpRequest {
 
   external factory TestHttpRequest._({
     String responseType,
-    int timeout,
+    double timeout,
     bool withCredentials,
     dynamic response,
-    int status,
+    double status,
     void Function(String method, String url, [bool? async]) open,
     void Function() send,
     void Function(String eventType, DomEventListener listener) addEventListener

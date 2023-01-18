@@ -132,7 +132,10 @@ class RunTestsStep implements PipelineStep {
   Future<SkiaGoldClient?> _createSkiaClient() async {
     final SkiaGoldClient skiaClient = SkiaGoldClient(
       environment.webUiSkiaGoldDirectory,
-      dimensions: <String, String> {'Browser': browserName},
+      dimensions: <String, String> {
+        'Browser': browserName,
+        if (isWasm) 'Wasm': 'true',
+      },
     );
 
     if (await _checkSkiaClient(skiaClient)) {

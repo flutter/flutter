@@ -1343,10 +1343,11 @@ Future<void> testMain() async {
       checkInputEditingState(domElement, 'abcd', 2, 3);
 
       // Check if the location and styling is correct.
-      expect(
-          domElement.getBoundingClientRect(),
-          createDomRectFromPoints(DomPoint(10.0, 20.0),
-              DomPoint(160.0, 70.0)));
+      final DomRect boundingRect = domElement.getBoundingClientRect();
+      expect(boundingRect.left, 10.0);
+      expect(boundingRect.top, 20.0);
+      expect(boundingRect.right, 160.0);
+      expect(boundingRect.bottom, 70.0);
       expect(domElement.style.transform,
           'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)');
       expect(textEditing!.strategy.domElement!.style.font,
@@ -1403,11 +1404,11 @@ Future<void> testMain() async {
       checkInputEditingState(domElement, 'abcd', 2, 3);
 
       // Check if the position is correct.
-      expect(
-        domElement.getBoundingClientRect(),
-        createDomRectFromPoints(
-            DomPoint(10.0, 20.0), DomPoint(160.0, 70.0)),
-      );
+      final DomRect boundingRect = domElement.getBoundingClientRect();
+      expect(boundingRect.left, 10.0);
+      expect(boundingRect.top, 20.0);
+      expect(boundingRect.right, 160.0);
+      expect(boundingRect.bottom, 70.0);
       expect(
         domElement.style.transform,
         'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)',
@@ -1464,10 +1465,11 @@ Future<void> testMain() async {
       checkInputEditingState(domElement, 'abcd', 2, 3);
 
       // Check if the location and styling is correct.
-      expect(
-          domElement.getBoundingClientRect(),
-          createDomRectFromPoints(DomPoint(10.0, 20.0),
-              DomPoint(160.0, 70.0)));
+      final DomRect boundingRect = domElement.getBoundingClientRect();
+      expect(boundingRect.left, 10.0);
+      expect(boundingRect.top, 20.0);
+      expect(boundingRect.right, 160.0);
+      expect(boundingRect.bottom, 70.0);
       expect(domElement.style.transform,
           'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)');
       expect(
@@ -2589,17 +2591,17 @@ DomKeyboardEvent dispatchKeyboardEvent(
   String type, {
   required int keyCode,
 }) {
-  final Function jsKeyboardEvent = js_util.getProperty<Function>(domWindow, 'KeyboardEvent');
+  final Object jsKeyboardEvent = js_util.getProperty<Object>(domWindow, 'KeyboardEvent');
   final List<dynamic> eventArgs = <dynamic>[
     type,
-    <String, dynamic>{
+    js_util.jsify(<String, dynamic>{
       'keyCode': keyCode,
       'cancelable': true,
-    }
+    }),
   ];
   final DomKeyboardEvent event = js_util.callConstructor<DomKeyboardEvent>(
     jsKeyboardEvent,
-    js_util.jsify(eventArgs) as List<Object?>?,
+    eventArgs,
   );
   target.dispatchEvent(event);
 

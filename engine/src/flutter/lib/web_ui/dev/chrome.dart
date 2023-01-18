@@ -101,6 +101,8 @@ class Chrome extends Browser {
           '--start-maximized',
         if (debug)
           '--auto-open-devtools-for-tabs',
+        // Always run unit tests at a 1x scale factor
+        '--force-device-scale-factor=1',
         '--disable-extensions',
         '--disable-popup-blocking',
         // Indicates that the browser is in "browse without sign-in" (Guest session) mode.

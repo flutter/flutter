@@ -57,14 +57,14 @@ void skiaDecodeImageFromPixels(
   Timer.run(() {
     final SkImage? skImage = canvasKit.MakeImage(
       SkImageInfo(
-        width: width,
-        height: height,
+        width: width.toDouble(),
+        height: height.toDouble(),
         colorType: format == ui.PixelFormat.rgba8888 ? canvasKit.ColorType.RGBA_8888 : canvasKit.ColorType.BGRA_8888,
         alphaType: canvasKit.AlphaType.Premul,
         colorSpace: SkColorSpaceSRGB,
       ),
       pixels,
-      rowBytes ?? 4 * width,
+      (rowBytes ?? 4 * width).toDouble(),
     );
 
     if (skImage == null) {
@@ -266,11 +266,11 @@ class CkImage implements ui.Image, StackTraceDebugger {
             alphaType: canvasKit.AlphaType.Premul,
             colorType: canvasKit.ColorType.RGBA_8888,
             colorSpace: SkColorSpaceSRGB,
-            width: originalWidth,
-            height: originalHeight,
+            width: originalWidth.toDouble(),
+            height: originalHeight.toDouble(),
           ),
           originalBytes.buffer.asUint8List(),
-          4 * originalWidth,
+          (4 * originalWidth).toDouble(),
         );
         if (skImage == null) {
           throw ImageCodecException(
@@ -415,8 +415,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
         alphaType: alphaType,
         colorType: colorType,
         colorSpace: colorSpace,
-        width: skImage.width().toInt(),
-        height: skImage.height().toInt(),
+        width: skImage.width(),
+        height: skImage.height(),
       );
       bytes = skImage.readPixels(0, 0, imageInfo);
     } else {

@@ -10,8 +10,7 @@ import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/custom_element_embedding_strategy.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/embedding_strategy.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/full_page_embedding_strategy.dart';
-
-import '../hot_restart_cache_handler_test.dart' show getDomCache;
+import 'package:ui/src/engine/view_embedder/hot_restart_cache_handler.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => doTests);
@@ -48,7 +47,7 @@ void doTests() {
       strategy.registerElementForCleanup(other);
       strategy.registerElementForCleanup(another);
 
-      final List<DomElement?> cache = getDomCache()!;
+      final List<Object?> cache = hotRestartStore!;
 
       expect(cache, hasLength(3));
       expect(cache.first, toBeCached);

@@ -110,13 +110,6 @@ void removeJsEventListener(Object target, String type, Function listener, Object
   );
 }
 
-/// The signature of the `parseFloat` JavaScript function.
-typedef _JsParseFloat = num? Function(String source);
-
-/// The JavaScript-side `parseFloat` function.
-@JS('parseFloat')
-external _JsParseFloat get _jsParseFloat;
-
 /// Parses a string [source] into a double.
 ///
 /// Uses the JavaScript `parseFloat` function instead of Dart's [double.parse]
@@ -126,7 +119,7 @@ external _JsParseFloat get _jsParseFloat;
 num? parseFloat(String source) {
   // Using JavaScript's `parseFloat` here because it can parse values
   // like "20px", while Dart's `double.tryParse` fails.
-  final num? result = _jsParseFloat(source);
+  final num? result = js_util.callMethod(domWindow, 'parseFloat', <Object>[source]);
 
   if (result == null || result.isNaN) {
     return null;
@@ -312,7 +305,7 @@ extension DecodeResultExtension on DecodeResult {
 @staticInterop
 class DecodeOptions {
   external factory DecodeOptions({
-    required int frameIndex,
+    required double frameIndex,
   });
 }
 
@@ -330,7 +323,7 @@ class VideoFrame implements DomCanvasImageSource {}
 
 extension VideoFrameExtension on VideoFrame {
   external double allocationSize();
-  external JsPromise copyTo(Uint8List destination);
+  external JsPromise copyTo(Object destination);
   external String? get format;
   external double get codedWidth;
   external double get codedHeight;
@@ -453,7 +446,7 @@ class GlContext {
   Object? _kRGBA;
   Object? _kLinear;
   Object? _kTextureMinFilter;
-  int? _kTexture0;
+  double? _kTexture0;
 
   Object? _canvas;
   int? _widthInPixels;
@@ -569,7 +562,7 @@ class GlContext {
     js_util.callMethod<void>(glContext, 'bindTexture', <dynamic>[target, buffer]);
   }
 
-  void activeTexture(int textureUnit) {
+  void activeTexture(double textureUnit) {
     js_util.callMethod<void>(glContext, 'activeTexture', <dynamic>[textureUnit]);
   }
 
@@ -710,8 +703,8 @@ class GlContext {
   Object? get kTexture2D =>
       _kTexture2D ??= js_util.getProperty(glContext, 'TEXTURE_2D');
 
-  int get kTexture0 =>
-      _kTexture0 ??= js_util.getProperty<int>(glContext, 'TEXTURE0');
+  double get kTexture0 =>
+      _kTexture0 ??= js_util.getProperty<double>(glContext, 'TEXTURE0');
 
   Object? get kTextureWrapS =>
       _kTextureWrapS ??= js_util.getProperty(glContext, 'TEXTURE_WRAP_S');

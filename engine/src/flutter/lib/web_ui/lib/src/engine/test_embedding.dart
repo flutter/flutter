@@ -132,12 +132,12 @@ class TestUrlStrategy extends UrlStrategy {
   }
 
   @override
-  Future<void> go(int count) {
+  Future<void> go(double count) {
     assert(withinAppHistory);
     // Browsers don't move in history immediately. They do it at the next
     // event loop. So let's simulate that.
     return _nextEventLoop(() {
-      _currentEntryIndex = _currentEntryIndex + count;
+      _currentEntryIndex = _currentEntryIndex + count.round();
       if (withinAppHistory) {
         _firePopStateEvent();
       }

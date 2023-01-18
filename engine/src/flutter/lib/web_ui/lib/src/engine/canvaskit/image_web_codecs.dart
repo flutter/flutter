@@ -217,7 +217,7 @@ class CkBrowserImageDecoder implements ui.Codec {
     _debugCheckNotDisposed();
     final ImageDecoder webDecoder = await _getOrCreateWebDecoder();
     final DecodeResult result = await promiseToFuture<DecodeResult>(
-      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)),
+      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex.toDouble())),
     );
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;
@@ -228,8 +228,8 @@ class CkBrowserImageDecoder implements ui.Codec {
         alphaType: canvasKit.AlphaType.Premul,
         colorType: canvasKit.ColorType.RGBA_8888,
         colorSpace: SkColorSpaceSRGB,
-        width: frame.displayWidth.toInt(),
-        height: frame.displayHeight.toInt(),
+        width: frame.displayWidth,
+        height: frame.displayHeight,
       ),
     );
 

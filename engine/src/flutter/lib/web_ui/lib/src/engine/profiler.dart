@@ -4,11 +4,15 @@
 
 import 'dart:async';
 
+import 'package:js/js.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'safe_browser_api.dart';
+
+@JS('window._flutter_internal_on_benchmark')
+external Object? get onBenchmark;
 
 /// A function that computes a value of type [R].
 ///
@@ -101,16 +105,10 @@ class Profiler {
   void benchmark(String name, double value) {
     _checkBenchmarkMode();
 
-    // First get the value as `Object?` then use `as` cast to check the type.
-    // This is because the type cast in `getJsProperty<Object?>` is optimized
-    // out at certain optimization levels in dart2js, leading to obscure errors
-    // later on.
-    final Object? onBenchmark = getJsProperty<Object?>(
-      domWindow,
-      '_flutter_internal_on_benchmark',
-    );
-    onBenchmark as OnBenchmark?;
-    onBenchmark?.call(name, value);
+    final OnBenchmark? callback = onBenchmark as OnBenchmark?;
+    if (callback != null) {
+      callback(name, value);
+    }
   }
 }
 

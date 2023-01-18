@@ -118,7 +118,7 @@ class CkCanvas {
 
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
     skCanvas.drawColorInt(
-      color.value,
+      color.value.toDouble(),
       toSkBlendMode(blendMode),
     );
   }
@@ -266,7 +266,7 @@ class CkCanvas {
   }
 
   void restoreToCount(int count) {
-    skCanvas.restoreToCount(count);
+    skCanvas.restoreToCount(count.toDouble());
   }
 
   void rotate(double radians) {
@@ -654,7 +654,7 @@ class CkRestoreToCountCommand extends CkPaintCommand {
 
   @override
   void apply(SkCanvas canvas) {
-    canvas.restoreToCount(count);
+    canvas.restoreToCount(count.toDouble());
   }
 }
 
@@ -821,7 +821,7 @@ class CkDrawColorCommand extends CkPaintCommand {
   @override
   void apply(SkCanvas canvas) {
     canvas.drawColorInt(
-      color.value,
+      color.value.toDouble(),
       toSkBlendMode(blendMode),
     );
   }

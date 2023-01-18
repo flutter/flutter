@@ -282,10 +282,10 @@ void testMain() {
 
     event = expectCorrectType(context.primaryDown(clientX: 100, clientY: 101));
     expect(event.type, equals('touchstart'));
-    expect(event.changedTouches!.length, equals(1));
-    expect(event.changedTouches![0].identifier, equals(1));
-    expect(event.changedTouches![0].client.x, equals(100));
-    expect(event.changedTouches![0].client.y, equals(101));
+    expect(event.changedTouches.length, equals(1));
+    expect(event.changedTouches.first.identifier, equals(1));
+    expect(event.changedTouches.first.client.x, equals(100));
+    expect(event.changedTouches.first.client.y, equals(101));
 
     events = expectCorrectTypes(context.multiTouchDown(const <_TouchDetails>[
       _TouchDetails(pointer: 100, clientX: 120, clientY: 121),
@@ -293,20 +293,20 @@ void testMain() {
     ]));
     expect(events.length, equals(1));
     expect(events[0].type, equals('touchstart'));
-    expect(events[0].changedTouches!.length, equals(2));
-    expect(events[0].changedTouches![0].identifier, equals(100));
-    expect(events[0].changedTouches![0].client.x, equals(120));
-    expect(events[0].changedTouches![0].client.y, equals(121));
-    expect(events[0].changedTouches![1].identifier, equals(101));
-    expect(events[0].changedTouches![1].client.x, equals(122));
-    expect(events[0].changedTouches![1].client.y, equals(123));
+    expect(events[0].changedTouches.length, equals(2));
+    expect(events[0].changedTouches.first.identifier, equals(100));
+    expect(events[0].changedTouches.first.client.x, equals(120));
+    expect(events[0].changedTouches.first.client.y, equals(121));
+    expect(events[0].changedTouches.elementAt(1).identifier, equals(101));
+    expect(events[0].changedTouches.elementAt(1).client.x, equals(122));
+    expect(events[0].changedTouches.elementAt(1).client.y, equals(123));
 
     event = expectCorrectType(context.primaryMove(clientX: 200, clientY: 201));
     expect(event.type, equals('touchmove'));
-    expect(event.changedTouches!.length, equals(1));
-    expect(event.changedTouches![0].identifier, equals(1));
-    expect(event.changedTouches![0].client.x, equals(200));
-    expect(event.changedTouches![0].client.y, equals(201));
+    expect(event.changedTouches.length, equals(1));
+    expect(event.changedTouches.first.identifier, equals(1));
+    expect(event.changedTouches.first.client.x, equals(200));
+    expect(event.changedTouches.first.client.y, equals(201));
 
     events = expectCorrectTypes(context.multiTouchMove(const <_TouchDetails>[
       _TouchDetails(pointer: 102, clientX: 220, clientY: 221),
@@ -314,20 +314,20 @@ void testMain() {
     ]));
     expect(events.length, equals(1));
     expect(events[0].type, equals('touchmove'));
-    expect(events[0].changedTouches!.length, equals(2));
-    expect(events[0].changedTouches![0].identifier, equals(102));
-    expect(events[0].changedTouches![0].client.x, equals(220));
-    expect(events[0].changedTouches![0].client.y, equals(221));
-    expect(events[0].changedTouches![1].identifier, equals(103));
-    expect(events[0].changedTouches![1].client.x, equals(222));
-    expect(events[0].changedTouches![1].client.y, equals(223));
+    expect(events[0].changedTouches.length, equals(2));
+    expect(events[0].changedTouches.first.identifier, equals(102));
+    expect(events[0].changedTouches.first.client.x, equals(220));
+    expect(events[0].changedTouches.first.client.y, equals(221));
+    expect(events[0].changedTouches.elementAt(1).identifier, equals(103));
+    expect(events[0].changedTouches.elementAt(1).client.x, equals(222));
+    expect(events[0].changedTouches.elementAt(1).client.y, equals(223));
 
     event = expectCorrectType(context.primaryUp(clientX: 300, clientY: 301));
     expect(event.type, equals('touchend'));
-    expect(event.changedTouches!.length, equals(1));
-    expect(event.changedTouches![0].identifier, equals(1));
-    expect(event.changedTouches![0].client.x, equals(300));
-    expect(event.changedTouches![0].client.y, equals(301));
+    expect(event.changedTouches.length, equals(1));
+    expect(event.changedTouches.first.identifier, equals(1));
+    expect(event.changedTouches.first.client.x, equals(300));
+    expect(event.changedTouches.first.client.y, equals(301));
 
     events = expectCorrectTypes(context.multiTouchUp(const <_TouchDetails>[
       _TouchDetails(pointer: 104, clientX: 320, clientY: 321),
@@ -335,13 +335,13 @@ void testMain() {
     ]));
     expect(events.length, equals(1));
     expect(events[0].type, equals('touchend'));
-    expect(events[0].changedTouches!.length, equals(2));
-    expect(events[0].changedTouches![0].identifier, equals(104));
-    expect(events[0].changedTouches![0].client.x, equals(320));
-    expect(events[0].changedTouches![0].client.y, equals(321));
-    expect(events[0].changedTouches![1].identifier, equals(105));
-    expect(events[0].changedTouches![1].client.x, equals(322));
-    expect(events[0].changedTouches![1].client.y, equals(323));
+    expect(events[0].changedTouches.length, equals(2));
+    expect(events[0].changedTouches.first.identifier, equals(104));
+    expect(events[0].changedTouches.first.client.x, equals(320));
+    expect(events[0].changedTouches.first.client.y, equals(321));
+    expect(events[0].changedTouches.elementAt(1).identifier, equals(105));
+    expect(events[0].changedTouches.elementAt(1).client.x, equals(322));
+    expect(events[0].changedTouches.elementAt(1).client.y, equals(323));
 
     events = expectCorrectTypes(context.multiTouchCancel(const <_TouchDetails>[
       _TouchDetails(pointer: 104, clientX: 320, clientY: 321),
@@ -349,13 +349,13 @@ void testMain() {
     ]));
     expect(events.length, equals(1));
     expect(events[0].type, equals('touchcancel'));
-    expect(events[0].changedTouches!.length, equals(2));
-    expect(events[0].changedTouches![0].identifier, equals(104));
-    expect(events[0].changedTouches![0].client.x, equals(320));
-    expect(events[0].changedTouches![0].client.y, equals(321));
-    expect(events[0].changedTouches![1].identifier, equals(105));
-    expect(events[0].changedTouches![1].client.x, equals(322));
-    expect(events[0].changedTouches![1].client.y, equals(323));
+    expect(events[0].changedTouches.length, equals(2));
+    expect(events[0].changedTouches.first.identifier, equals(104));
+    expect(events[0].changedTouches.first.client.x, equals(320));
+    expect(events[0].changedTouches.first.client.y, equals(321));
+    expect(events[0].changedTouches.elementAt(1).identifier, equals(105));
+    expect(events[0].changedTouches.elementAt(1).client.x, equals(322));
+    expect(events[0].changedTouches.elementAt(1).client.y, equals(323));
 
     context.pressAllModifiers();
     event = expectCorrectType(context.primaryDown(clientX: 100, clientY: 101));
@@ -3086,23 +3086,15 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     double? wheelDeltaY,
     int? timeStamp,
   }) {
-    final Function jsWheelEvent = js_util.getProperty<Function>(domWindow, 'WheelEvent');
-    final List<dynamic> eventArgs = <dynamic>[
-      'wheel',
-      <String, dynamic>{
-        'buttons': buttons,
-        'clientX': clientX,
-        'clientY': clientY,
-        'deltaX': deltaX,
-        'deltaY': deltaY,
-        'wheelDeltaX': wheelDeltaX,
-        'wheelDeltaY': wheelDeltaY,
-      }
-    ];
-    final DomEvent event = js_util.callConstructor<DomEvent>(
-      jsWheelEvent,
-      js_util.jsify(eventArgs) as List<Object?>,
-    );
+    final DomEvent event = createDomWheelEvent('wheel', <String, Object>{
+        if (buttons != null) 'buttons': buttons,
+        if (clientX != null) 'clientX': clientX,
+        if (clientY != null) 'clientY': clientY,
+        if (deltaX != null) 'deltaX': deltaX,
+        if (deltaY != null) 'deltaY': deltaY,
+        if (wheelDeltaX != null) 'wheelDeltaX': wheelDeltaX,
+        if (wheelDeltaY != null) 'wheelDeltaY': wheelDeltaY,
+    });
     // timeStamp can't be set in the constructor, need to override the getter.
     if (timeStamp != null) {
       js_util.callMethod(
@@ -3351,26 +3343,17 @@ class _MouseEventContext extends _BasicEventContext
     double? clientX,
     double? clientY,
   }) {
-    final Function jsMouseEvent =
-        js_util.getProperty<Function>(domWindow, 'MouseEvent');
-    final List<dynamic> eventArgs = <dynamic>[
-      type,
-      <String, dynamic>{
-        'bubbles': true,
-        'buttons': buttons,
-        'button': button,
-        'clientX': clientX,
-        'clientY': clientY,
-        'altKey': altPressed,
-        'ctrlKey': ctrlPressed,
-        'metaKey': metaPressed,
-        'shiftKey': shiftPressed,
-      }
-    ];
-    return js_util.callConstructor<DomMouseEvent>(
-      jsMouseEvent,
-      js_util.jsify(eventArgs) as List<Object?>,
-    );
+    return createDomMouseEvent(type, <String, Object>{
+      if (buttons != null) 'buttons': buttons,
+      if (button != null) 'button': button,
+      if (clientX != null) 'clientX': clientX,
+      if (clientY != null) 'clientY': clientY,
+      'bubbles': true,
+      'altKey': altPressed,
+      'ctrlKey': ctrlPressed,
+      'metaKey': metaPressed,
+      'shiftKey': shiftPressed,
+    });
   }
 }
 

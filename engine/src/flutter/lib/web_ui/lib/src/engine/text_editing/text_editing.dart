@@ -2358,7 +2358,9 @@ class EditableTextGeometry {
     assert(encodedGeometry.containsKey('transform'));
 
     final List<double> transformList =
-        List<double>.from(encodedGeometry.readList('transform'));
+        List<double>.from(encodedGeometry.readList('transform').map(
+          (final dynamic e) => (e as num).toDouble()
+        ));
     return EditableTextGeometry(
       width: encodedGeometry.readDouble('width'),
       height: encodedGeometry.readDouble('height'),
