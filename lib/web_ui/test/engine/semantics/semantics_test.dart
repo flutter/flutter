@@ -1628,6 +1628,27 @@ void _testTappable() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('focuses on tappable after element has been attached', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(semantics());
+    tester.updateNode(
+      id: 0,
+      hasTap: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isButton: true,
+      isFocused: true,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    expect(flutterViewEmbedder.glassPaneShadow!.activeElement, tester.getSemanticsObject(0).element);
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testImage() {
