@@ -1377,7 +1377,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
 
-  - name: Linux_android android_defines_test
+  - name: linux android_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1385,7 +1385,13 @@ targets:
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: android_defines_test
-      use_emulator: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_virtual_device", "version": "31"},
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      use_emulator: true
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
