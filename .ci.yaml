@@ -2896,6 +2896,7 @@ targets:
       task_name: platform_view_macos__start_up
 
   - name: Mac plugin_dependencies_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/118700
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
