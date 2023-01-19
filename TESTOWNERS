@@ -214,6 +214,8 @@
 /dev/devicelab/bin/tasks/channels_integration_test_macos.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_macos__compile.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_macos__start_up.dart @a-wallen @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller_macos__timeline_summary.dart @a-wallen @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_macos__timeline_summary.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/dart_plugin_registry_test.dart @stuartmorgan @flutter/plugin
