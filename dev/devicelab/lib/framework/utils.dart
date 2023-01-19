@@ -283,6 +283,7 @@ Future<Process> startProcess(
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
+
   final Process process = await _processManager.start(
     <String>[executable, ...?arguments],
     environment: newEnvironment,

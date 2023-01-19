@@ -30,6 +30,7 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
       builder: (BuildContext context) => const MyStatefulWidget(),

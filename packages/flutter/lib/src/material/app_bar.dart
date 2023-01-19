@@ -1023,38 +1023,34 @@ class _AppBarState extends State<AppBar> {
     }
     if (leading != null) {
       if (theme.useMaterial3) {
-        if (leading is IconButton) {
-          final IconButtonThemeData effectiveIconButtonTheme;
+        final IconButtonThemeData effectiveIconButtonTheme;
 
-          // This comparison is to check if there is a custom [overallIconTheme]. If true, it means that no
-          // custom [overallIconTheme] is provided, so [iconButtonTheme] is applied. Otherwise, we generate
-          // a new [IconButtonThemeData] based on the values from [overallIconTheme]. If [iconButtonTheme] only
-          // has null values, the default [overallIconTheme] will be applied below by [IconTheme.merge]
-          if (overallIconTheme == defaults.iconTheme) {
-            effectiveIconButtonTheme = iconButtonTheme;
-          } else {
-            // The [IconButton.styleFrom] method is used to generate a correct [overlayColor] based on the [foregroundColor].
-            final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
-              foregroundColor: overallIconTheme.color,
-              iconSize: overallIconTheme.size,
-            );
+        // This comparison is to check if there is a custom [overallIconTheme]. If true, it means that no
+        // custom [overallIconTheme] is provided, so [iconButtonTheme] is applied. Otherwise, we generate
+        // a new [IconButtonThemeData] based on the values from [overallIconTheme]. If [iconButtonTheme] only
+        // has null values, the default [overallIconTheme] will be applied below by [IconTheme.merge]
+        if (overallIconTheme == defaults.iconTheme) {
+          effectiveIconButtonTheme = iconButtonTheme;
+        } else {
+          // The [IconButton.styleFrom] method is used to generate a correct [overlayColor] based on the [foregroundColor].
+          final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
+            foregroundColor: overallIconTheme.color,
+            iconSize: overallIconTheme.size,
+          );
 
-            effectiveIconButtonTheme = IconButtonThemeData(
-              style: iconButtonTheme.style?.copyWith(
-                foregroundColor: leadingIconButtonStyle.foregroundColor,
-                overlayColor: leadingIconButtonStyle.overlayColor,
-                iconSize: leadingIconButtonStyle.iconSize,
-              )
-            );
-          }
-
-          leading = Center(
-            child: IconButtonTheme(
-              data: effectiveIconButtonTheme,
-              child: leading
+          effectiveIconButtonTheme = IconButtonThemeData(
+            style: iconButtonTheme.style?.copyWith(
+              foregroundColor: leadingIconButtonStyle.foregroundColor,
+              overlayColor: leadingIconButtonStyle.overlayColor,
+              iconSize: leadingIconButtonStyle.iconSize,
             )
           );
         }
+
+        leading = IconButtonTheme(
+            data: effectiveIconButtonTheme,
+            child: leading is IconButton ? Center(child: leading) : leading,
+        );
 
         // Based on the Material Design 3 specs, the leading IconButton should have
         // a size of 48x48, and a highlight size of 40x40. Users can also put other
@@ -2436,7 +2432,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)
