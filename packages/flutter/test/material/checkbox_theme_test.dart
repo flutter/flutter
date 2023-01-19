@@ -406,7 +406,7 @@ void main() {
     expect(lerped.side, null);
   });
 
-  test('CheckboxThemeData lerp with from populated to null parameters', () {
+  test('CheckboxThemeData lerp from populated to null parameters', () {
     final CheckboxThemeData theme = CheckboxThemeData(
       fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
       checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
@@ -430,7 +430,7 @@ void main() {
     expect(lerped.side, null);
   });
 
-  test('CheckboxThemeData lerp with from populated parameters', () {
+  test('CheckboxThemeData lerp from populated parameters', () {
     final CheckboxThemeData themeA = CheckboxThemeData(
       fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
       checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
