@@ -1424,7 +1424,7 @@ class Transform extends SingleChildRenderObjectWidget {
         assert(scale == null || (scaleX == null && scaleY == null), "If 'scale' is non-null then 'scaleX' and 'scaleY' must be left null"),
         transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0);
 
-  /// Creates a widget that flips/mirrors its child along the 2D plane.
+  /// Creates a widget that mirrors its child about the widget's center point.
   ///
   /// If `flipX` is true, the child widget will be flipped horizontally. Defaults to false.
   ///
