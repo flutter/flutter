@@ -86,29 +86,37 @@ static void parse_locale(const gchar* locale,
   // Locales are in the form "language[_territory][.codeset][@modifier]"
   gchar* match = strrchr(l, '@');
   if (match != nullptr) {
-    *modifier = g_strdup(match + 1);
+    if (modifier != nullptr) {
+      *modifier = g_strdup(match + 1);
+    }
     *match = '\0';
-  } else {
+  } else if (modifier != nullptr) {
     *modifier = nullptr;
   }
 
   match = strrchr(l, '.');
   if (match != nullptr) {
-    *codeset = g_strdup(match + 1);
+    if (codeset != nullptr) {
+      *codeset = g_strdup(match + 1);
+    }
     *match = '\0';
-  } else {
+  } else if (codeset != nullptr) {
     *codeset = nullptr;
   }
 
   match = strrchr(l, '_');
   if (match != nullptr) {
-    *territory = g_strdup(match + 1);
+    if (territory != nullptr) {
+      *territory = g_strdup(match + 1);
+    }
     *match = '\0';
-  } else {
+  } else if (territory != nullptr) {
     *territory = nullptr;
   }
 
-  *language = l;
+  if (language != nullptr) {
+    *language = l;
+  }
 }
 
 // Passes locale information to the Flutter engine.
@@ -118,19 +126,13 @@ static void setup_locales(FlEngine* self) {
   // Helper array to take ownership of the strings passed to Flutter.
   g_autoptr(GPtrArray) locale_strings = g_ptr_array_new_with_free_func(g_free);
   for (int i = 0; languages[i] != nullptr; i++) {
-    gchar *language, *territory, *codeset, *modifier;
-    parse_locale(languages[i], &language, &territory, &codeset, &modifier);
+    gchar *language, *territory;
+    parse_locale(languages[i], &language, &territory, nullptr, nullptr);
     if (language != nullptr) {
       g_ptr_array_add(locale_strings, language);
     }
     if (territory != nullptr) {
       g_ptr_array_add(locale_strings, territory);
-    }
-    if (codeset != nullptr) {
-      g_ptr_array_add(locale_strings, codeset);
-    }
-    if (modifier != nullptr) {
-      g_ptr_array_add(locale_strings, modifier);
     }
 
     FlutterLocale* locale =
@@ -139,8 +141,8 @@ static void setup_locales(FlEngine* self) {
     locale->struct_size = sizeof(FlutterLocale);
     locale->language_code = language;
     locale->country_code = territory;
-    locale->script_code = codeset;
-    locale->variant_code = modifier;
+    locale->script_code = nullptr;
+    locale->variant_code = nullptr;
   }
   FlutterLocale** locales =
       reinterpret_cast<FlutterLocale**>(locales_array->pdata);
