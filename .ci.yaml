@@ -1377,7 +1377,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
 
-  - name: Linux android_defines_test
+  - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
