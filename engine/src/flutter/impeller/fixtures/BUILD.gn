@@ -7,6 +7,10 @@ import("//flutter/testing/testing.gni")
 
 impeller_shaders("shader_fixtures") {
   name = "fixtures"
+
+  # Not analyzing because they are not performance critical, and mipmap uses
+  # textureLod, which uses an extension that malioc does not support.
+  analyze = false
   shaders = [
     "array.frag",
     "array.vert",
