@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WINDOW_BINDING_HANDLER_H_
 
 #include "flutter/shell/platform/windows/window_binding_handler.h"
+#include "flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h"
 #include "gmock/gmock.h"
 
 namespace flutter {
@@ -36,7 +37,8 @@ class MockWindowBindingHandler : public WindowBindingHandler {
                bool(const void* allocation, size_t row_bytes, size_t height));
   MOCK_METHOD0(GetPrimaryPointerLocation, PointerLocation());
   MOCK_METHOD0(SendInitialAccessibilityFeatures, void());
-  MOCK_METHOD0(GetAccessibilityRootNode, AccessibilityRootNode*());
+  MOCK_METHOD0(GetAlertDelegate, AlertPlatformNodeDelegate*());
+  MOCK_METHOD0(GetAlert, ui::AXPlatformNodeWin*());
 };
 
 }  // namespace testing

@@ -289,7 +289,7 @@ class AXFragmentRootMapWin {
 
 AXFragmentRootWin::AXFragmentRootWin(gfx::AcceleratedWidget widget,
                                      AXFragmentRootDelegateWin* delegate)
-    : widget_(widget), delegate_(delegate) {
+    : widget_(widget), delegate_(delegate), alert_node_(nullptr) {
   platform_node_ = ui::AXFragmentRootPlatformNodeWin::Create(this);
   AXFragmentRootMapWin::GetInstance().AddFragmentRoot(widget, this);
 }
@@ -331,6 +331,8 @@ int AXFragmentRootWin::GetChildCount() const {
 gfx::NativeViewAccessible AXFragmentRootWin::ChildAtIndex(int index) {
   if (index == 0) {
     return delegate_->GetChildOfAXFragmentRoot();
+  } else if (index == 1 && alert_node_) {
+    return alert_node_;
   }
 
   return nullptr;
@@ -423,6 +425,20 @@ int AXFragmentRootWin::GetIndexInParentOfChild() const {
     }
   }
   return 0;
+}
+
+void AXFragmentRootWin::SetAlertNode(AXPlatformNodeWin* alert_node) {
+  alert_node_ = alert_node;
+}
+
+gfx::Rect AXFragmentRootWin::GetBoundsRect(AXCoordinateSystem sys,
+                                           AXClippingBehavior clip,
+                                           AXOffscreenResult* result) const {
+  AXPlatformNodeDelegate* child = GetChildNodeDelegate();
+  if (!child) {
+    return gfx::Rect();
+  }
+  return child->GetBoundsRect(sys, clip, result);
 }
 
 }  // namespace ui
