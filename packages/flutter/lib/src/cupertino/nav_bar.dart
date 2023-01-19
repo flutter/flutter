@@ -1730,7 +1730,6 @@ class _NavigationBarTransition extends StatelessWidget {
       bottomNavBar: bottomNavBar,
       topNavBar: topNavBar,
       directionality: Directionality.of(context),
-      context: context,
     );
 
     final List<Widget> children = <Widget>[
@@ -1772,11 +1771,14 @@ class _NavigationBarTransition extends StatelessWidget {
     // navigation bars. It's not a direct Rect lerp because some components
     // can actually be outside the linearly lerp'ed Rect in the middle of
     // the animation, such as the topLargeTitle.
-    return SizedBox(
-      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
-      width: double.infinity,
-      child: Stack(
-        children: children,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+      child: SizedBox(
+        height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
+        width: double.infinity,
+        child: Stack(
+          children: children,
+        ),
       ),
     );
   }
@@ -1810,7 +1812,6 @@ class _NavigationBarComponentsTransition {
     required _TransitionableNavigationBar bottomNavBar,
     required _TransitionableNavigationBar topNavBar,
     required TextDirection directionality,
-    required BuildContext context,
   }) : bottomComponents = bottomNavBar.componentsKeys,
        topComponents = topNavBar.componentsKeys,
        bottomNavBarBox = bottomNavBar.renderBox,
@@ -2100,9 +2101,7 @@ class _NavigationBarComponentsTransition {
 
     if (bottomLargeTitle != null && topBackLabel != null) {
       // Move from current position to the top page's back label position.
-      return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
-      child: slideFromLeadingEdge(
+      return slideFromLeadingEdge(
         fromKey: bottomComponents.largeTitleKey,
         fromNavBarBox: bottomNavBarBox,
         toKey: topComponents.backLabelKey,
@@ -2123,8 +2122,8 @@ class _NavigationBarComponentsTransition {
               child: bottomLargeTitle.child,
             ),
           ),
-        ),
-      ));
+        )
+      );
     }
 
     if (bottomLargeTitle != null && topLeading != null) {
