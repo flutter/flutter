@@ -241,7 +241,7 @@ GeometryVertexType DLVerticesGeometry::GetVertexType() const {
 
 std::optional<Rect> DLVerticesGeometry::GetCoverage(
     const Matrix& transform) const {
-  return ToRect(vertices_->bounds());
+  return ToRect(vertices_->bounds()).TransformBounds(transform);
 }
 
 }  // namespace impeller

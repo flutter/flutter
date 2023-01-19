@@ -1056,9 +1056,11 @@ TEST_P(DisplayListTest, MaskBlursApplyCorrectlyToColorSources) {
 }
 
 TEST_P(DisplayListTest, DrawVerticesSolidColorTrianglesWithoutIndices) {
-  std::vector<SkPoint> positions = {SkPoint::Make(100, 300),
-                                    SkPoint::Make(200, 100),
-                                    SkPoint::Make(300, 300)};
+  // Use negative coordinates and then scale the transform by -1, -1 to make
+  // sure coverage is taking the transform into account.
+  std::vector<SkPoint> positions = {SkPoint::Make(-100, -300),
+                                    SkPoint::Make(-200, -100),
+                                    SkPoint::Make(-300, -300)};
   std::vector<flutter::DlColor> colors = {flutter::DlColor::kWhite(),
                                           flutter::DlColor::kGreen(),
                                           flutter::DlColor::kWhite()};
@@ -1071,6 +1073,7 @@ TEST_P(DisplayListTest, DrawVerticesSolidColorTrianglesWithoutIndices) {
   flutter::DlPaint paint;
 
   paint.setColor(flutter::DlColor::kRed().modulateOpacity(0.5));
+  builder.scale(-1, -1);
   builder.drawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
