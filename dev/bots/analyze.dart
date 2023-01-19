@@ -1888,40 +1888,40 @@ String _removeLicenseIfPresent(String fileContents, String license) {
 }
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
-    final List<String> errors = <String>[];
-    final String license = _getFlutterLicense(flutterRoot);
-    final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
-    final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
-    final Iterable<Directory>subDirs = Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
-    for (final Directory testPath in subDirs) {
-      final String projectName = path.basename(testPath.path);
-      final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
-      final Directory runner = Directory(runnerPath);
-      if (!runner.existsSync()) {
+  final List<String> errors = <String>[];
+  final String license = _getFlutterLicense(flutterRoot);
+  final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
+  final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
+  final Iterable<Directory>subDirs = Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
+  for (final Directory testPath in subDirs) {
+    final String projectName = path.basename(testPath.path);
+    final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
+    final Directory runner = Directory(runnerPath);
+    if (!runner.existsSync()) {
+      continue;
+    }
+    final Iterable<File> files = Directory(templatePath).listSync().toList().whereType<File>();
+    for (final File templateFile in files) {
+      final String fileName = path.basename(templateFile.path);
+      if (_kIgnoreList.contains(fileName)) {
         continue;
       }
-      final Iterable<File> files = Directory(templatePath).listSync().toList().whereType<File>();
-      for (final File templateFile in files) {
-        final String fileName = path.basename(templateFile.path);
-        if (_kIgnoreList.contains(fileName)) {
-          continue;
-        }
-        String templateFileContents = templateFile.readAsLinesSync().join('\n');
-        String appFilePath = path.join(runnerPath, fileName);
-        if (fileName.endsWith(_kTmplExt)) {
-          appFilePath = appFilePath.substring(0, appFilePath.length - _kTmplExt.length); // Remove '.tmpl' from app file path
-          templateFileContents = templateFileContents.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
-        }
-        String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
-        appFileContents = _removeLicenseIfPresent(appFileContents, license);
-        if (appFileContents != templateFileContents) {
-          int indexOfDifference;
-          for (indexOfDifference = 0; indexOfDifference < appFileContents.length; indexOfDifference++) {
-            if (indexOfDifference >= templateFileContents.length || templateFileContents.codeUnitAt(indexOfDifference) != appFileContents.codeUnitAt(indexOfDifference)) {
-              break;
-            }
+      String templateFileContents = templateFile.readAsLinesSync().join('\n');
+      String appFilePath = path.join(runnerPath, fileName);
+      if (fileName.endsWith(_kTmplExt)) {
+        appFilePath = appFilePath.substring(0, appFilePath.length - _kTmplExt.length); // Remove '.tmpl' from app file path
+        templateFileContents = templateFileContents.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
+      }
+      String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
+      appFileContents = _removeLicenseIfPresent(appFileContents, license);
+      if (appFileContents != templateFileContents) {
+        int indexOfDifference;
+        for (indexOfDifference = 0; indexOfDifference < appFileContents.length; indexOfDifference++) {
+          if (indexOfDifference >= templateFileContents.length || templateFileContents.codeUnitAt(indexOfDifference) != appFileContents.codeUnitAt(indexOfDifference)) {
+            break;
           }
-          final String error = '''
+        }
+        final String error = '''
 Error: file $fileName mismatched for integration test $testPath
 Verify the integration test has been migrated to the latest app template.
 =====$appFilePath======
@@ -1930,16 +1930,15 @@ $appFileContents
 $templateFileContents
 ==========
 Diff at character #$indexOfDifference
-          ''';
-          errors.add(error);
-          break;
-        }
+        ''';
+        errors.add(error);
       }
     }
-    if (errors.isNotEmpty) {
-      foundError(errors);
-    }
   }
+  if (errors.isNotEmpty) {
+    foundError(errors);
+  }
+}
 
 Future<CommandResult> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
