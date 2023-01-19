@@ -2,34 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/toolchain/ccache.gni")
-import("//build/toolchain/clang.gni")
-import("//build/toolchain/gcc_toolchain.gni")
-import("//build/toolchain/goma.gni")
 import("//build/toolchain/wasm.gni")
 
-if (use_goma) {
-  assert(!use_ccache, "Goma and ccache can't be used together.")
-  compiler_prefix = "$goma_dir/gomacc "
-} else if (use_ccache) {
-  compiler_prefix = "ccache "
-} else {
-  compiler_prefix = ""
-}
-
-gcc_toolchain("wasm") {
-  # emsdk_dir and em_config are defined in wasm.gni.
-  ar = "$compiler_prefix$emsdk_dir/upstream/emscripten/emar --em-config $em_config_path"
-  cc = "$compiler_prefix$emsdk_dir/upstream/emscripten/emcc --em-config $em_config_path"
-  cxx = "$compiler_prefix$emsdk_dir/upstream/emscripten/em++ --em-config $em_config_path"
-  ld = cxx
-  readelf = "readelf"
-  nm = "nm"
-
-  toolchain_cpu = "wasm"
-  toolchain_os = "wasm"
-
-  is_clang = true
-
-  link_outputs = [ "{{root_out_dir}}/{{target_output_name}}.wasm" ]
+wasm_toolchain("wasm") {
+  extra_toolchain_args = {}
 }
