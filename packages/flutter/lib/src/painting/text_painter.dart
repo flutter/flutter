@@ -328,12 +328,13 @@ class _TextLayout {
 }
 
 class _TextPainterLayoutCache {
-  _TextPainterLayoutCache(this.layout, this.offset, this.contentWidth)
+  _TextPainterLayoutCache(this.layout, this.offset, this.contentWidth, this.inputWidth)
     : assert(offset.dy == 0),
       assert(!offset.dx.isNaN);
 
   final _TextLayout layout;
   double contentWidth;
+  double inputWidth;
   Offset offset;
 
   ui.Paragraph get paragraph => layout._paragraph;
@@ -1013,8 +1014,6 @@ class TextPainter {
     if (textDirection == null) {
       throw StateError('TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     }
-    minWidth = minWidth.floorToDouble();
-    maxWidth = maxWidth.floorToDouble();
     final _TextPainterLayoutCache? cachedLayout = _layoutCache;
     final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection);
 
@@ -1035,10 +1034,11 @@ class TextPainter {
         // width are not finite: we won't be able to translate the paint offset
         // using addition/subtraction.
         && ((!cachedLayout.offset.dx.isFinite && !cachedLayout.paragraph.width.isFinite)
-          || cachedLayout.layout.width < cachedLayout.layout.maxIntrinsicLineExtent
-          || maxWidth < cachedLayout.layout.maxIntrinsicLineExtent));
+          || cachedLayout.layout.width < cachedLayout.paragraph.maxIntrinsicWidth
+          || maxWidth < cachedLayout.paragraph.maxIntrinsicWidth));
 
     final _TextLayout newLayout;
+    final double inputWidth;
     if (needsLayout) {
       // Try to avoid laying out the paragraph with maxWidth=double.infinity
       // when the text is not left-aligned. When maxIntrinsicWidth is still
@@ -1051,16 +1051,20 @@ class TextPainter {
         ? maxWidth
         : cachedLayout?.layout.maxIntrinsicLineExtent ?? largeWidth;
 
-      final ui.Paragraph paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth.ceilToDouble()));
+      final ui.Paragraph paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth));
 
       // If largeWidth is not large enough for the text, we'll have to at least
       // re-run the line breaking algorithm.
       if (adjustMaxWidth && paragraph.maxIntrinsicWidth > adjustedMaxWidth) {
-        paragraph.layout(ui.ParagraphConstraints(width: paragraph.maxIntrinsicWidth.ceilToDouble()));
+        inputWidth = paragraph.maxIntrinsicWidth.ceilToDouble();
+        paragraph.layout(ui.ParagraphConstraints(width: inputWidth));
+      } else {
+        inputWidth = adjustedMaxWidth;
       }
       newLayout = _TextLayout._(paragraph);
     } else {
       newLayout = cachedLayout.layout;
+      inputWidth = cachedLayout.inputWidth;
     }
 
     final double intrinsicWidth;
@@ -1073,6 +1077,8 @@ class TextPainter {
         break;
     }
 
+    minWidth = minWidth.floorToDouble();
+    maxWidth = maxWidth.floorToDouble();
     // The content width the text painter should report in TextPainter.width.
     final double contentWidth = clampDouble(intrinsicWidth, minWidth, maxWidth);
     final double originX = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * (contentWidth - newLayout._paragraph.width);
@@ -1080,11 +1086,12 @@ class TextPainter {
       // If needsLayout is false, we'll rebuild the paragraph in the paint method.
       _rebuildParagraphForPaint = false;
       _layoutCache?.paragraph.dispose();
-      _layoutCache = _TextPainterLayoutCache(newLayout, Offset(originX, 0), contentWidth);
+      _layoutCache = _TextPainterLayoutCache(newLayout, Offset(originX, 0), contentWidth, inputWidth);
     } else {
       assert(cachedLayout.layout == newLayout);
       cachedLayout.contentWidth = contentWidth;
       cachedLayout.offset = Offset(originX, 0);
+      assert(cachedLayout.inputWidth == inputWidth);
     }
   }
 
@@ -1125,8 +1132,8 @@ class TextPainter {
       // Unfortunately even if we know that there is only paint changes, there's
       // no API to only make those updates so the paragraph has to be recreated
       // and redo layout.
-      layoutCache.layout._paragraph = _createParagraph(text!)..layout(ui.ParagraphConstraints(width: layoutCache.layout.width));
-      assert(paragraph.width == layoutCache.layout.width);
+      layoutCache.layout._paragraph = _createParagraph(text!)..layout(ui.ParagraphConstraints(width: layoutCache.inputWidth));
+      assert(paragraph.width == layoutCache.layout._paragraph.width);
       paragraph.dispose();
       assert(debugSize == size);
     }
