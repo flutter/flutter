@@ -21,8 +21,12 @@ void main() {
 
     expect(find.text(heroTransitionText), findsOneWidget);
     expect(find.text(goBackText), findsNothing);
+
+    // Tap on the ListTile widget to trigger the Hero transition.
     await tester.tap(find.text(heroTransitionText));
     await tester.pumpAndSettle();
+
+    // The Hero transition is triggered and tap to go back text is displayed.
     expect(find.text(heroTransitionText), findsNothing);
     expect(find.text(goBackText), findsOneWidget);
 

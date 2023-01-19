@@ -2,25 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile].
+// Flutter code sample for custom list items.
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const CustomListItemApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class CustomListItemApp extends StatelessWidget {
+  const CustomListItemApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
-      ),
+    return const MaterialApp(
+      home: CustomListItemExample(),
     );
   }
 }
@@ -147,36 +141,39 @@ class CustomListItemTwo extends StatelessWidget {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class CustomListItemExample extends StatelessWidget {
+  const CustomListItemExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(10.0),
-      children: <Widget>[
-        CustomListItemTwo(
-          thumbnail: Container(
-            decoration: const BoxDecoration(color: Colors.pink),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Custom List Item Sample')),
+      body: ListView(
+        padding: const EdgeInsets.all(10.0),
+        children: <Widget>[
+          CustomListItemTwo(
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.pink),
+            ),
+            title: 'Flutter 1.0 Launch',
+            subtitle: 'Flutter continues to improve and expand its horizons. '
+                'This text should max out at two lines and clip',
+            author: 'Dash',
+            publishDate: 'Dec 28',
+            readDuration: '5 mins',
           ),
-          title: 'Flutter 1.0 Launch',
-          subtitle: 'Flutter continues to improve and expand its horizons. '
-              'This text should max out at two lines and clip',
-          author: 'Dash',
-          publishDate: 'Dec 28',
-          readDuration: '5 mins',
-        ),
-        CustomListItemTwo(
-          thumbnail: Container(
-            decoration: const BoxDecoration(color: Colors.blue),
+          CustomListItemTwo(
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.blue),
+            ),
+            title: 'Flutter 1.2 Release - Continual updates to the framework',
+            subtitle: 'Flutter once again improves and makes updates.',
+            author: 'Flutter',
+            publishDate: 'Feb 26',
+            readDuration: '12 mins',
           ),
-          title: 'Flutter 1.2 Release - Continual updates to the framework',
-          subtitle: 'Flutter once again improves and makes updates.',
-          author: 'Flutter',
-          publishDate: 'Feb 26',
-          readDuration: '12 mins',
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
