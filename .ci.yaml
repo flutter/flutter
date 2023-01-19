@@ -131,7 +131,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: x86
-      device_os: iOS-15
+      device_os: iOS-16
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
   mac_arm64_ios:
     properties:
@@ -143,7 +143,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: arm64
-      device_os: iOS-15
+      device_os: iOS-16
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
   windows:
     properties:
