@@ -298,15 +298,18 @@ void FlutterWindow::SendInitialAccessibilityFeatures() {
   OnThemeChange();
 }
 
-AccessibilityRootNode* FlutterWindow::GetAccessibilityRootNode() {
-  if (!accessibility_root_) {
-    CreateAccessibilityRootNode();
-  }
-  return accessibility_root_;
-}
-
 ui::AXFragmentRootDelegateWin* FlutterWindow::GetAxFragmentRootDelegate() {
   return binding_handler_delegate_->GetAxFragmentRootDelegate();
+}
+
+AlertPlatformNodeDelegate* FlutterWindow::GetAlertDelegate() {
+  CreateAxFragmentRoot();
+  return alert_delegate_.get();
+}
+
+ui::AXPlatformNodeWin* FlutterWindow::GetAlert() {
+  CreateAxFragmentRoot();
+  return alert_node_.get();
 }
 
 }  // namespace flutter

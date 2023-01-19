@@ -2405,6 +2405,8 @@ ORIGIN: ../../../flutter/shell/platform/android/vsync_waiter_android.cc + ../../
 ORIGIN: ../../../flutter/shell/platform/android/vsync_waiter_android.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/accessibility_bridge.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/accessibility_bridge.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/common/alert_platform_node_delegate.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/common/alert_platform_node_delegate.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/client_wrapper/byte_buffer_streams.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/client_wrapper/core_implementations.cc + ../../../flutter/LICENSE
@@ -3065,12 +3067,8 @@ ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_texture_re
 ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_value.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/accessibility_alert.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/accessibility_alert.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/accessibility_root_node.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/accessibility_root_node.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/angle_surface_manager.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/angle_surface_manager.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/client_wrapper/flutter_engine.cc + ../../../flutter/LICENSE
@@ -4894,6 +4892,8 @@ FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
 FILE: ../../../flutter/shell/platform/common/accessibility_bridge.cc
 FILE: ../../../flutter/shell/platform/common/accessibility_bridge.h
+FILE: ../../../flutter/shell/platform/common/alert_platform_node_delegate.cc
+FILE: ../../../flutter/shell/platform/common/alert_platform_node_delegate.h
 FILE: ../../../flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h
 FILE: ../../../flutter/shell/platform/common/client_wrapper/byte_buffer_streams.h
 FILE: ../../../flutter/shell/platform/common/client_wrapper/core_implementations.cc
@@ -5573,12 +5573,8 @@ FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_texture_regi
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_value.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
-FILE: ../../../flutter/shell/platform/windows/accessibility_alert.cc
-FILE: ../../../flutter/shell/platform/windows/accessibility_alert.h
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.cc
 FILE: ../../../flutter/shell/platform/windows/accessibility_bridge_windows.h
-FILE: ../../../flutter/shell/platform/windows/accessibility_root_node.cc
-FILE: ../../../flutter/shell/platform/windows/accessibility_root_node.h
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_engine.cc

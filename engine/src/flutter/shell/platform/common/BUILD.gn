@@ -80,11 +80,13 @@ source_set("common_cpp_switches") {
 source_set("common_cpp_accessibility") {
   public = [
     "accessibility_bridge.h",
+    "alert_platform_node_delegate.h",
     "flutter_platform_node_delegate.h",
   ]
 
   sources = [
     "accessibility_bridge.cc",
+    "alert_platform_node_delegate.cc",
     "flutter_platform_node_delegate.cc",
   ]
 

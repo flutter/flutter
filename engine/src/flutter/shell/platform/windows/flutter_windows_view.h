@@ -202,6 +202,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // |TextInputPluginDelegate|
   void OnResetImeComposing() override;
 
+  // Get a pointer to the alert node for this view.
+  ui::AXPlatformNodeWin* AlertNode() const;
+
   // |WindowBindingHandlerDelegate|
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() override;
 
@@ -221,10 +224,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   virtual std::unique_ptr<TextInputPlugin> CreateTextInputPlugin(
       BinaryMessenger* messenger);
 
-  virtual void NotifyWinEventWrapper(DWORD event,
-                                     HWND hwnd,
-                                     LONG idObject,
-                                     LONG idChild);
+  virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
+                                     ax::mojom::Event event);
 
  private:
   // Struct holding the state of an individual pointer. The engine doesn't keep

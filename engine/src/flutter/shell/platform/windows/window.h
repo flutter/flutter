@@ -12,8 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "flutter/shell/platform/common/alert_platform_node_delegate.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/windows/accessibility_root_node.h"
 #include "flutter/shell/platform/windows/direct_manipulation.h"
 #include "flutter/shell/platform/windows/keyboard_manager.h"
 #include "flutter/shell/platform/windows/sequential_id_generator.h"
@@ -22,6 +22,7 @@
 #include "flutter/shell/platform/windows/windowsx_shim.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_fragment_root_delegate_win.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_fragment_root_win.h"
+#include "flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h"
 #include "flutter/third_party/accessibility/gfx/native_widget_types.h"
 
 namespace flutter {
@@ -214,6 +215,11 @@ class Window : public KeyboardManager::WindowDelegate {
   // Check if the high contrast feature is enabled on the OS
   virtual bool GetHighContrastEnabled();
 
+  // Creates the ax_fragment_root_, alert_delegate_ and alert_node_ if they do
+  // not yet exist.
+  // Once set, they are not reset to nullptr.
+  void CreateAxFragmentRoot();
+
   // Called to obtain a pointer to the fragment root delegate.
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() = 0;
 
@@ -230,9 +236,6 @@ class Window : public KeyboardManager::WindowDelegate {
   // Returns the root view accessibility node, or nullptr if none.
   virtual gfx::NativeViewAccessible GetNativeViewAccessible() = 0;
 
-  // Create the wrapper node.
-  void CreateAccessibilityRootNode();
-
   // Handles running DirectManipulation on the window to receive trackpad
   // gestures.
   std::unique_ptr<DirectManipulationOwner> direct_manipulation_owner_;
@@ -240,8 +243,11 @@ class Window : public KeyboardManager::WindowDelegate {
   // Called when a theme change message is issued
   virtual void OnThemeChange() = 0;
 
-  // A parent node wrapping the window root, used for siblings.
-  AccessibilityRootNode* accessibility_root_;
+  // Delegate to a alert_node_ used to set the announcement text.
+  std::unique_ptr<AlertPlatformNodeDelegate> alert_delegate_;
+
+  // Accessibility node that represents an alert.
+  std::unique_ptr<ui::AXPlatformNodeWin> alert_node_;
 
  private:
   // Release OS resources associated with window.
