@@ -1065,7 +1065,17 @@ IFACEMETHODIMP AXPlatformNodeWin::get_accParent(IDispatch** disp_parent) {
     (*disp_parent)->AddRef();
     return S_OK;
   }
-
+  IRawElementProviderFragmentRoot* root;
+  if (SUCCEEDED(get_FragmentRoot(&root))) {
+    gfx::NativeViewAccessible parent;
+    if (SUCCEEDED(root->QueryInterface(IID_PPV_ARGS(&parent)))) {
+      if (parent && parent != GetNativeViewAccessible()) {
+        *disp_parent = parent;
+        parent->AddRef();
+        return S_OK;
+      }
+    }
+  }
   return S_FALSE;
 }
 
@@ -5408,7 +5418,7 @@ AXPlatformNodeWin* AXPlatformNodeWin::GetTargetFromChildID(
 
   AXPlatformNodeBase* base =
       FromNativeViewAccessible(node->GetNativeViewAccessible());
-  if (base && !IsDescendant(base))
+  if (base && !base->IsDescendantOf(this))
     base = nullptr;
 
   return static_cast<AXPlatformNodeWin*>(base);
@@ -5699,6 +5709,30 @@ AXPlatformNodeWin* AXPlatformNodeWin::GetFirstTextOnlyDescendant() {
       return descendant;
   }
   return nullptr;
+}
+
+bool AXPlatformNodeWin::IsDescendantOf(AXPlatformNode* ancestor) const {
+  if (!ancestor) {
+    return false;
+  }
+
+  if (AXPlatformNodeBase::IsDescendantOf(ancestor)) {
+    return true;
+  }
+
+  // Test if the ancestor is an IRawElementProviderFragmentRoot and if it
+  // matches this node's root fragment.
+  IRawElementProviderFragmentRoot* root;
+  if (SUCCEEDED(
+          const_cast<AXPlatformNodeWin*>(this)->get_FragmentRoot(&root))) {
+    AXPlatformNodeWin* root_win;
+    if (SUCCEEDED(root->QueryInterface(__uuidof(AXPlatformNodeWin),
+                                       reinterpret_cast<void**>(&root_win)))) {
+      return ancestor == static_cast<AXPlatformNode*>(root_win);
+    }
+  }
+
+  return false;
 }
 
 }  // namespace ui

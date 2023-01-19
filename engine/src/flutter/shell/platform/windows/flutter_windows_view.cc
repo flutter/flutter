@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
+#include "flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h"
 
 namespace flutter {
 
@@ -661,28 +662,28 @@ FlutterWindowsEngine* FlutterWindowsView::GetEngine() {
 }
 
 void FlutterWindowsView::AnnounceAlert(const std::wstring& text) {
-  AccessibilityRootNode* root_node =
-      binding_handler_->GetAccessibilityRootNode();
-  AccessibilityAlert* alert =
-      binding_handler_->GetAccessibilityRootNode()->GetOrCreateAlert();
-  alert->SetText(text);
-  HWND hwnd = GetPlatformWindow();
-  NotifyWinEventWrapper(EVENT_SYSTEM_ALERT, hwnd, OBJID_CLIENT,
-                        AccessibilityRootNode::kAlertChildId);
+  auto alert_delegate = binding_handler_->GetAlertDelegate();
+  if (!alert_delegate) {
+    return;
+  }
+  alert_delegate->SetText(base::WideToUTF16(text));
+  ui::AXPlatformNodeWin* alert_node = binding_handler_->GetAlert();
+  NotifyWinEventWrapper(alert_node, ax::mojom::Event::kAlert);
 }
 
-void FlutterWindowsView::NotifyWinEventWrapper(DWORD event,
-                                               HWND hwnd,
-                                               LONG idObject,
-                                               LONG idChild) {
-  if (hwnd) {
-    NotifyWinEvent(EVENT_SYSTEM_ALERT, hwnd, OBJID_CLIENT,
-                   AccessibilityRootNode::kAlertChildId);
+void FlutterWindowsView::NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
+                                               ax::mojom::Event event) {
+  if (node) {
+    node->NotifyAccessibilityEvent(event);
   }
 }
 
 ui::AXFragmentRootDelegateWin* FlutterWindowsView::GetAxFragmentRootDelegate() {
   return engine_->accessibility_bridge().lock().get();
+}
+
+ui::AXPlatformNodeWin* FlutterWindowsView::AlertNode() const {
+  return binding_handler_->GetAlert();
 }
 
 }  // namespace flutter
