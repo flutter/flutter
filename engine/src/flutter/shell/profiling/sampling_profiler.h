@@ -76,7 +76,7 @@ using Sampler = std::function<ProfileSample(void)>;
  * @brief a Sampling Profiler that runs peridically and calls the `Sampler`
  * which servers as a value function to gather various profiling metrics as
  * represented by `ProfileSample`. These profiling metrics are then posted to
- * the observatory timeline.
+ * the Dart VM Service timeline.
  *
  */
 class SamplingProfiler {
@@ -84,7 +84,7 @@ class SamplingProfiler {
   /**
    * @brief Construct a new Sampling Profiler object
    *
-   * @param thread_label observatory prefix to be set for the profiling task
+   * @param thread_label Dart VM Service prefix to be set for the profiling task
    * runner.
    * @param profiler_task_runner the task runner to service sampling requests.
    * @param sampler the value function to collect the profiling metrics.
@@ -121,10 +121,10 @@ class SamplingProfiler {
   /**
    * @brief This doesn't update the underlying OS thread name for the thread
    * backing `profiler_task_runner_`. Instead, this is just additional metadata
-   * for the Observatory to show the thread name of the isolate.
+   * for the VM Service to show the thread name of the isolate.
    *
    */
-  void UpdateObservatoryThreadName() const;
+  void UpdateDartVMServiceThreadName() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SamplingProfiler);
 };

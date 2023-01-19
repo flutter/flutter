@@ -18,7 +18,7 @@ void main() {
     try {
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       if (info.serverUri == null) {
-        fail('This test must not be run with --disable-observatory.');
+        fail('This test must not be run with --disable-vm-service.');
       }
 
       vmService = await vmServiceConnectUri(
@@ -47,7 +47,7 @@ void main() {
     try {
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       if (info.serverUri == null) {
-        fail('This test must not be run with --disable-observatory.');
+        fail('This test must not be run with --disable-vm-service.');
       }
 
       vmService = await vmServiceConnectUri(
@@ -71,7 +71,7 @@ void main() {
       final developer.ServiceProtocolInfo info =
           await developer.Service.getInfo();
       if (info.serverUri == null) {
-        fail('This test must not be run with --disable-observatory.');
+        fail('This test must not be run with --disable-vm-service.');
       }
 
       final Completer<PlatformResponse> completer = Completer<PlatformResponse>();

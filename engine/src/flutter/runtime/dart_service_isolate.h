@@ -27,11 +27,11 @@ class DartServiceIsolate {
   using CallbackHandle = ptrdiff_t;
 
   //----------------------------------------------------------------------------
-  /// A callback made by the Dart VM when the observatory is ready. The argument
-  /// indicates the observatory URI.
+  /// A callback made by the Dart VM when the VM Service is ready. The argument
+  /// indicates the VM Service URI.
   ///
-  using ObservatoryServerStateCallback =
-      std::function<void(const std::string& observatory_uri)>;
+  using DartVMServiceServerStateCallback =
+      std::function<void(const std::string& vm_service_uri)>;
 
   //----------------------------------------------------------------------------
   /// @brief      Start the service isolate. This call may only be made in the
@@ -68,19 +68,19 @@ class DartServiceIsolate {
                       char** error);
 
   //----------------------------------------------------------------------------
-  /// @brief      Add a callback that will get invoked when the observatory
-  ///             starts up. If the observatory has already started before this
+  /// @brief      Add a callback that will get invoked when the VM Service
+  ///             starts up. If the VM Service has already started before this
   ///             call is made, the callback is invoked immediately.
   ///
   ///             This method is thread safe.
   ///
-  /// @param[in]  callback  The callback with information about the observatory.
+  /// @param[in]  callback  The callback with information about the VM Service.
   ///
   /// @return     A handle for the callback that can be used later in
   ///             `RemoveServerStatusCallback`.
   ///
   [[nodiscard]] static CallbackHandle AddServerStatusCallback(
-      const ObservatoryServerStateCallback& callback);
+      const DartVMServiceServerStateCallback& callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Removed a callback previously registered via
@@ -101,7 +101,7 @@ class DartServiceIsolate {
   static void Shutdown(Dart_NativeArguments args);
 
   static std::mutex callbacks_mutex_;
-  static std::set<std::unique_ptr<ObservatoryServerStateCallback>> callbacks_;
+  static std::set<std::unique_ptr<DartVMServiceServerStateCallback>> callbacks_;
 };
 
 }  // namespace flutter

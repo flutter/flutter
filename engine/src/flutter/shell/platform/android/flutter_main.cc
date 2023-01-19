@@ -59,7 +59,7 @@ fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 }  // anonymous namespace
 
 FlutterMain::FlutterMain(const flutter::Settings& settings)
-    : settings_(settings), observatory_uri_callback_() {}
+    : settings_(settings), vm_service_uri_callback_() {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -100,8 +100,8 @@ void FlutterMain::Init(JNIEnv* env,
       __android_log_print(
           ANDROID_LOG_INFO, "Flutter",
           "ATrace was enabled at startup. Flutter and Dart "
-          "tracing will be forwarded to systrace and will not show up in the "
-          "Observatory timeline or Dart DevTools.");
+          "tracing will be forwarded to systrace and will not show up in "
+          "Dart DevTools.");
     }
   }
 
@@ -164,17 +164,17 @@ void FlutterMain::Init(JNIEnv* env,
   // longer be a singleton.
   g_flutter_main.reset(new FlutterMain(settings));
 
-  g_flutter_main->SetupObservatoryUriCallback(env);
+  g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 
-void FlutterMain::SetupObservatoryUriCallback(JNIEnv* env) {
+void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
   g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
   if (g_flutter_jni_class->is_null()) {
     return;
   }
   jfieldID uri_field = env->GetStaticFieldID(
-      g_flutter_jni_class->obj(), "observatoryUri", "Ljava/lang/String;");
+      g_flutter_jni_class->obj(), "vmServiceUri", "Ljava/lang/String;");
   if (uri_field == nullptr) {
     return;
   }
@@ -190,7 +190,7 @@ void FlutterMain::SetupObservatoryUriCallback(JNIEnv* env) {
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
 
-  observatory_uri_callback_ = DartServiceIsolate::AddServerStatusCallback(
+  vm_service_uri_callback_ = DartServiceIsolate::AddServerStatusCallback(
       [platform_runner, set_uri](const std::string& uri) {
         platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
       });
