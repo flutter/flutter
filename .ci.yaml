@@ -3658,6 +3658,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_app_with_extensions_test
