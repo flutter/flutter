@@ -41,7 +41,7 @@ void main() {
 // This is a stateless widget that is the root widget for this application.
 //
 // It is said to be "stateless" because its attributes are fixed at creation, so
-// it can't keep any modified application state itself, the state it uses all
+// it can't keep any modified application state itself. The state it uses all
 // comes from its inputs. The power of stateless widgets is that although they
 // are lightweight and immutable, they can have logic in their build methods to
 // modify what gets built based on their configuration.
@@ -89,8 +89,8 @@ class MyApp extends StatelessWidget {
 // (modifiable) fields that affect how it looks and behaves.
 //
 // Widgets configure State objects. This object holds the immutable (unchanging)
-// values, in this case the title, provided by the parent that the State object
-// will use to configure its widgets.
+// values, in this case the title that is provided by the parent, which the
+// State object will use to configure its widgets.
 //
 // Fields in a Widget subclass are always marked "final" because Widget
 // subclasses are meant to be lightweight configuration objects that are rebuilt
@@ -161,10 +161,10 @@ class _MyHomePageState extends State<MyHomePage> {
           shape: StarBorder(
             side: const BorderSide(),
             points: _counter.toDouble(),
-            // TRY THIS: Try changing the parameters here (values 0 to 1 are
-            // allowed). When you hot reload the application, the border will
-            // animate to the new values automatically, over the duration set in
-            // the AnimatedContainer, above.
+            // TRY THIS: Try changing the parameters here (values from 0 to 1
+            // are allowed). When you hot reload the application, the border
+            // will animate to the new values automatically, over the duration
+            // set in the AnimatedContainer, above.
             pointRounding: 0.4,
             valleyRounding: 0.4,
             innerRadiusRatio: .5,
