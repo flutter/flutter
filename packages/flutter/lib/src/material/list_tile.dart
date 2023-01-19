@@ -146,11 +146,11 @@ enum ListTileControlAffinity {
 /// ** See code in examples/api/lib/material/list_tile/list_tile.2.dart **
 /// {@end-tool}
 ///
+/// {@tool snippet}
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
 /// [Expanded] widget. [ListTile] requires fixed width constraints,
 /// whereas a [Row] does not constrain its children.
 ///
-/// {@tool snippet}
 /// ```dart
 /// Row(
 ///   children: const <Widget>[

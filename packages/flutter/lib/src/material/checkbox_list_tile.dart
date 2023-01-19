@@ -85,6 +85,13 @@ import 'theme_data.dart';
 /// ** See code in examples/api/lib/material/checkbox_list_tile/checkbox_list_tile.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of a [CheckboxListTile] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/lists/overview.
+///
+/// ** See code in examples/api/lib/material/checkbox_list_tile/checkbox_list_tile.1.dart **
+/// {@end-tool}
+///
 /// ## Semantics in CheckboxListTile
 ///
 /// Since the entirety of the CheckboxListTile is interactive, it should represent
@@ -109,7 +116,7 @@ import 'theme_data.dart';
 /// LinkedLabelCheckbox, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
-/// ** See code in examples/api/lib/material/checkbox_list_tile/checkbox_list_tile.1.dart **
+/// ** See code in examples/api/lib/material/checkbox_list_tile/custom_labeled_checkbox.0.dart **
 /// {@end-tool}
 ///
 /// ## CheckboxListTile isn't exactly what I want
@@ -125,7 +132,7 @@ import 'theme_data.dart';
 /// Here is an example of a custom LabeledCheckbox widget, but you can easily
 /// make your own configurable widget.
 ///
-/// ** See code in examples/api/lib/material/checkbox_list_tile/checkbox_list_tile.2.dart **
+/// ** See code in examples/api/lib/material/checkbox_list_tile/custom_labeled_checkbox.1.dart **
 /// {@end-tool}
 ///
 /// See also:
