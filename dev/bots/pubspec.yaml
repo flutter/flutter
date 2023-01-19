@@ -5,7 +5,7 @@ environment:
   sdk: '>=2.19.0-0 <4.0.0'
 
 dependencies:
-  args: 2.3.1
+  args: 2.3.2
   crypto: 3.0.2
   intl: 0.17.0
   flutter_devicelab:
@@ -71,4 +71,4 @@ dependencies:
 dev_dependencies:
   test_api: 0.4.18
 
-# PUBSPEC CHECKSUM: c085
+# PUBSPEC CHECKSUM: 2986

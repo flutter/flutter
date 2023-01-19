@@ -8,7 +8,7 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 3.3.2
-  args: 2.3.1
+  args: 2.3.2
   browser_launcher: 1.1.1
   dds: 2.7.2
   dwds: 16.0.2
@@ -28,7 +28,7 @@ dependencies:
   fake_async: 1.3.1
   stack_trace: 1.11.0
   usage: 4.1.0
-  webdriver: 3.0.1
+  webdriver: 3.0.2
   webkit_inspection_protocol: 1.2.0
   xml: 6.2.2
   yaml: 3.1.1
@@ -104,4 +104,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 27a4
+# PUBSPEC CHECKSUM: 5aa6
