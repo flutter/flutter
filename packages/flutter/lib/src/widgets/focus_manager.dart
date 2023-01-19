@@ -1396,6 +1396,15 @@ enum FocusHighlightStrategy {
   alwaysTraditional,
 }
 
+@immutable
+class _FocusState {
+  const _FocusState({this.primaryFocus, this.markedForFocus, this.pendingAutofocuses = const <_Autofocus>[]});
+
+  final FocusNode? primaryFocus;
+  final FocusNode? markedForFocus;
+  final List<_Autofocus> pendingAutofocuses;
+}
+
 /// Manages the focus tree.
 ///
 /// The focus tree is a separate, sparser, tree from the widget tree that
@@ -1467,23 +1476,19 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// When this focus manager is no longer needed, calling [dispose] on it will
   /// unregister these handlers.
-  void registerGlobalHandlers() {
-    assert(ServicesBinding.instance.keyEventManager.keyMessageHandler == null);
-    ServicesBinding.instance.keyEventManager.keyMessageHandler = _handleKeyMessage;
-    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
-  }
+  void registerGlobalHandlers() => _highlightManager.registerGlobalHandlers();
 
   @override
   void dispose() {
-    if (ServicesBinding.instance.keyEventManager.keyMessageHandler == _handleKeyMessage) {
-      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
-    }
+    _highlightManager.dispose();
     super.dispose();
   }
 
   /// Provides convenient access to the current [FocusManager] singleton from
   /// the [WidgetsBinding] instance.
   static FocusManager get instance => WidgetsBinding.instance.focusManager;
+
+  final _HighlightModeManager _highlightManager = _HighlightModeManager();
 
   /// Sets the strategy by which [highlightMode] is determined.
   ///
@@ -1508,33 +1513,12 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// most appropriate for the initial interaction mode.
   ///
   /// Defaults to [FocusHighlightStrategy.automatic].
-  FocusHighlightStrategy get highlightStrategy => _highlightStrategy;
-  FocusHighlightStrategy _highlightStrategy = FocusHighlightStrategy.automatic;
-  set highlightStrategy(FocusHighlightStrategy highlightStrategy) {
-    _highlightStrategy = highlightStrategy;
-    _updateHighlightMode();
-  }
-
-  static FocusHighlightMode get _defaultModeForPlatform {
-    // Assume that if we're on one of the mobile platforms, and there's no mouse
-    // connected, that the initial interaction will be touch-based, and that
-    // it's traditional mouse and keyboard on all other platforms.
-    //
-    // This only affects the initial value: the ongoing value is updated to a
-    // known correct value as soon as any pointer/keyboard events are received.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        if (WidgetsBinding.instance.mouseTracker.mouseIsConnected) {
-          return FocusHighlightMode.traditional;
-        }
-        return FocusHighlightMode.touch;
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return FocusHighlightMode.traditional;
+  FocusHighlightStrategy get highlightStrategy => _highlightManager.strategy;
+  set highlightStrategy(FocusHighlightStrategy value) {
+    if (_highlightManager.strategy == value) {
+      return;
     }
+    _highlightManager.strategy = value;
   }
 
   /// Indicates the current interaction mode for focus highlights.
@@ -1550,48 +1534,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// draw their focus highlight whenever they are focused.
   // Don't want to set _highlightMode here, since it's possible for the target
   // platform to change (especially in tests).
-  FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
-  FocusHighlightMode? _highlightMode;
-
-  // If set, indicates if the last interaction detected was touch or not.
-  // If null, no interactions have occurred yet.
-  bool? _lastInteractionWasTouch;
-
-  // Update function to be called whenever the state relating to highlightMode
-  // changes.
-  void _updateHighlightMode() {
-    final FocusHighlightMode newMode;
-    switch (highlightStrategy) {
-      case FocusHighlightStrategy.automatic:
-        if (_lastInteractionWasTouch == null) {
-          // If we don't have any information about the last interaction yet,
-          // then just rely on the default value for the platform, which will be
-          // determined based on the target platform if _highlightMode is not
-          // set.
-          return;
-        }
-        if (_lastInteractionWasTouch!) {
-          newMode = FocusHighlightMode.touch;
-        } else {
-          newMode = FocusHighlightMode.traditional;
-        }
-        break;
-      case FocusHighlightStrategy.alwaysTouch:
-        newMode = FocusHighlightMode.touch;
-        break;
-      case FocusHighlightStrategy.alwaysTraditional:
-        newMode = FocusHighlightMode.traditional;
-        break;
-    }
-    // We can't just compare newMode with _highlightMode here, since
-    // _highlightMode could be null, so we want to compare with the return value
-    // for the getter, since that's what clients will be looking at.
-    final FocusHighlightMode oldMode = highlightMode;
-    _highlightMode = newMode;
-    if (highlightMode != oldMode) {
-      _notifyHighlightModeListeners();
-    }
-  }
+  FocusHighlightMode get highlightMode => _highlightManager.highlightMode;
 
   // The list of listeners for [highlightMode] state changes.
   final HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
@@ -1604,120 +1547,42 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusManager] notifies.
   void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.remove(listener);
 
-  @pragma('vm:notify-debugger-on-exception')
-  void _notifyHighlightModeListeners() {
-    if (_listeners.isEmpty) {
-      return;
-    }
-    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.of(_listeners);
-    for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
-      try {
-        if (_listeners.contains(listener)) {
-          listener(highlightMode);
-        }
-      } catch (exception, stack) {
-        InformationCollector? collector;
-        assert(() {
-          collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<FocusManager>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ];
-          return true;
-        }());
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: collector,
-        ));
-      }
-    }
-  }
-
   /// The root [FocusScopeNode] in the focus tree.
   ///
   /// This field is rarely used directly. To find the nearest [FocusScopeNode]
   /// for a given [FocusNode], call [FocusNode.nearestScope].
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
-  void _handlePointerEvent(PointerEvent event) {
-    final FocusHighlightMode expectedMode;
-    switch (event.kind) {
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.stylus:
-      case PointerDeviceKind.invertedStylus:
-        _lastInteractionWasTouch = true;
-        expectedMode = FocusHighlightMode.touch;
-        break;
-      case PointerDeviceKind.mouse:
-      case PointerDeviceKind.trackpad:
-      case PointerDeviceKind.unknown:
-        _lastInteractionWasTouch = false;
-        expectedMode = FocusHighlightMode.traditional;
-        break;
-    }
-    if (expectedMode != highlightMode) {
-      _updateHighlightMode();
-    }
-  }
-
-  bool _handleKeyMessage(KeyMessage message) {
-    // Update highlightMode first, since things responding to the keys might
-    // look at the highlight mode, and it should be accurate.
-    _lastInteractionWasTouch = false;
-    _updateHighlightMode();
-
-    assert(_focusDebug('Received key event $message'));
-    if (_primaryFocus == null) {
-      assert(_focusDebug('No primary focus for key event, ignored: $message'));
-      return false;
-    }
-
-    // Walk the current focus from the leaf to the root, calling each one's
-    // onKey on the way up, and if one responds that they handled it or want to
-    // stop propagation, stop.
-    bool handled = false;
-    for (final FocusNode node in <FocusNode>[_primaryFocus!, ..._primaryFocus!.ancestors]) {
-      final List<KeyEventResult> results = <KeyEventResult>[];
-      if (node.onKeyEvent != null) {
-        for (final KeyEvent event in message.events) {
-          results.add(node.onKeyEvent!(node, event));
-        }
-      }
-      if (node.onKey != null && message.rawEvent != null) {
-        results.add(node.onKey!(node, message.rawEvent!));
-      }
-      final KeyEventResult result = combineKeyEventResults(results);
-      switch (result) {
-        case KeyEventResult.ignored:
-          continue;
-        case KeyEventResult.handled:
-          assert(_focusDebug('Node $node handled key event $message.'));
-          handled = true;
-          break;
-        case KeyEventResult.skipRemainingHandlers:
-          assert(_focusDebug('Node $node stopped key event propagation: $message.'));
-          handled = false;
-          break;
-      }
-      // Only KeyEventResult.ignored will continue the for loop. All other
-      // options will stop the event propagation.
-      assert(result != KeyEventResult.ignored);
-      break;
-    }
-    if (!handled) {
-      assert(_focusDebug('Key event not handled by anyone: $message.'));
-    }
-    return handled;
-  }
-
   /// The node that currently has the primary focus.
   FocusNode? get primaryFocus => _primaryFocus;
   FocusNode? _primaryFocus;
+
+  List<_FocusState> _focusStack = <_FocusState>[];
+  void pushFocus() {
+    _focusStack.add(
+      _FocusState(
+        primaryFocus: _primaryFocus,
+        markedForFocus: _markedForFocus,
+        pendingAutofocuses: _pendingAutofocuses,
+      ),
+    );
+    _pendingAutofocuses.clear();
+    _markedForFocus = null;
+    _primaryFocus?.unfocus();
+  }
+
+  void popFocus() {
+    if (_focusStack.isEmpty) {
+      return;
+    }
+    final _FocusState popped = _focusStack.removeAt(0);
+    if (popped.markedForFocus != null) {
+      popped.markedForFocus!.requestFocus();
+    } else {
+      popped.primaryFocus?.requestFocus();
+    }
+    _pendingAutofocuses..clear()..addAll(_pendingAutofocuses);
+  }
 
   // The set of nodes that need to notify their listeners of changes at the next
   // update.
@@ -1734,7 +1599,12 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (_primaryFocus == node) {
       _primaryFocus = null;
     }
+    if (_markedForFocus == node) {
+      _markedForFocus = null;
+    }
     _dirtyNodes.remove(node);
+    _pendingAutofocuses.removeWhere((_Autofocus autofocus) => autofocus.autofocusNode == node || autofocus.scope == node);
+    _focusStack.removeWhere((_FocusState state) => state.primaryFocus == node);
   }
 
   void _markPropertiesChanged(FocusNode node) {
@@ -1840,6 +1710,174 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     final Element? element = primaryFocus?.context as Element?;
     if (element != null) {
       properties.add(DiagnosticsProperty<String>('primaryFocusCreator', element.debugGetCreatorChain(20)));
+    }
+  }
+}
+
+class _HighlightModeManager with ChangeNotifier {
+  _HighlightModeManager();
+
+  // If set, indicates if the last interaction detected was touch or not.
+  // If null, no interactions have occurred yet.
+  bool? _lastInteractionWasTouch;
+
+  FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
+  FocusHighlightMode? _highlightMode;
+
+  FocusHighlightStrategy get strategy => _strategy;
+  FocusHighlightStrategy _strategy = FocusHighlightStrategy.automatic;
+  set strategy(FocusHighlightStrategy value) {
+    if (_strategy == value) {
+      return;
+    }
+    _strategy = value;
+    updateMode();
+  }
+
+  // The list of listeners for [highlightMode] state changes.
+  final HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
+
+  void registerGlobalHandlers() {
+    assert(ServicesBinding.instance.keyEventManager.keyMessageHandler == null);
+    ServicesBinding.instance.keyEventManager.keyMessageHandler = handleKeyMessage;
+    GestureBinding.instance.pointerRouter.addGlobalRoute(handlePointerEvent);
+  }
+
+  @override
+  void dispose() {
+    if (ServicesBinding.instance.keyEventManager.keyMessageHandler == handleKeyMessage) {
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(handlePointerEvent);
+      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
+    }
+    super.dispose();
+  }
+
+  void handlePointerEvent(PointerEvent event) {
+    final FocusHighlightMode expectedMode;
+    switch (event.kind) {
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+        _lastInteractionWasTouch = true;
+        expectedMode = FocusHighlightMode.touch;
+        break;
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.trackpad:
+      case PointerDeviceKind.unknown:
+        _lastInteractionWasTouch = false;
+        expectedMode = FocusHighlightMode.traditional;
+        break;
+    }
+    if (expectedMode != highlightMode) {
+      updateMode();
+    }
+  }
+
+  bool handleKeyMessage(KeyMessage message) {
+    // Update highlightMode first, since things responding to the keys might
+    // look at the highlight mode, and it should be accurate.
+    _lastInteractionWasTouch = false;
+    updateMode();
+
+    assert(_focusDebug('Received key event $message'));
+    if (FocusManager.instance.primaryFocus == null) {
+      assert(_focusDebug('No primary focus for key event, ignored: $message'));
+      return false;
+    }
+
+    // Walk the current focus from the leaf to the root, calling each one's
+    // onKey on the way up, and if one responds that they handled it or want to
+    // stop propagation, stop.
+    bool handled = false;
+    for (final FocusNode node in <FocusNode>[FocusManager.instance.primaryFocus!, ...FocusManager.instance.primaryFocus!.ancestors]) {
+      final List<KeyEventResult> results = <KeyEventResult>[];
+      if (node.onKeyEvent != null) {
+        for (final KeyEvent event in message.events) {
+          results.add(node.onKeyEvent!(node, event));
+        }
+      }
+      if (node.onKey != null && message.rawEvent != null) {
+        results.add(node.onKey!(node, message.rawEvent!));
+      }
+      final KeyEventResult result = combineKeyEventResults(results);
+      switch (result) {
+        case KeyEventResult.ignored:
+          continue;
+        case KeyEventResult.handled:
+          assert(_focusDebug('Node $node handled key event $message.'));
+          handled = true;
+          break;
+        case KeyEventResult.skipRemainingHandlers:
+          assert(_focusDebug('Node $node stopped key event propagation: $message.'));
+          handled = false;
+          break;
+      }
+      // Only KeyEventResult.ignored will continue the for loop. All other
+      // options will stop the event propagation.
+      assert(result != KeyEventResult.ignored);
+      break;
+    }
+    if (!handled) {
+      assert(_focusDebug('Key event not handled by anyone: $message.'));
+    }
+    return handled;
+  }
+
+  // Update function to be called whenever the state relating to highlightMode
+  // changes.
+  void updateMode() {
+    final FocusHighlightMode newMode;
+    switch (strategy) {
+      case FocusHighlightStrategy.automatic:
+        if (_lastInteractionWasTouch == null) {
+          // If we don't have any information about the last interaction yet,
+          // then just rely on the default value for the platform, which will be
+          // determined based on the target platform if _highlightMode is not
+          // set.
+          return;
+        }
+        if (_lastInteractionWasTouch!) {
+          newMode = FocusHighlightMode.touch;
+        } else {
+          newMode = FocusHighlightMode.traditional;
+        }
+        break;
+      case FocusHighlightStrategy.alwaysTouch:
+        newMode = FocusHighlightMode.touch;
+        break;
+      case FocusHighlightStrategy.alwaysTraditional:
+        newMode = FocusHighlightMode.traditional;
+        break;
+    }
+    // We can't just compare newMode with _highlightMode here, since
+    // _highlightMode could be null, so we want to compare with the return value
+    // for the getter, since that's what clients will be looking at.
+    final FocusHighlightMode oldMode = highlightMode;
+    _highlightMode = newMode;
+    if (highlightMode != oldMode) {
+      notifyListeners();
+    }
+  }
+
+  static FocusHighlightMode get _defaultModeForPlatform {
+    // Assume that if we're on one of the mobile platforms, and there's no mouse
+    // connected, that the initial interaction will be touch-based, and that
+    // it's traditional mouse and keyboard on all other platforms.
+    //
+    // This only affects the initial value: the ongoing value is updated to a
+    // known correct value as soon as any pointer/keyboard events are received.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        if (WidgetsBinding.instance.mouseTracker.mouseIsConnected) {
+          return FocusHighlightMode.traditional;
+        }
+        return FocusHighlightMode.touch;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return FocusHighlightMode.traditional;
     }
   }
 }

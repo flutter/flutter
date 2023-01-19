@@ -125,7 +125,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
-                Text(_lastSelection != null ? 'Last Selected: $_lastSelection' : ''),
+                const TextField(),
               ],
             ),
           ),
@@ -150,6 +150,18 @@ class _MyMenuBarState extends State<MyMenuBar> {
               setState(() {
                 _lastSelection = 'About';
               });
+            },
+          ),
+          MenuEntry(
+            label: 'Copy',
+            onPressed: () {
+              setState(() {
+                _lastSelection = 'About';
+              });
+              Actions.invoke<CopySelectionTextIntent>(
+                primaryFocus!.context!,
+                CopySelectionTextIntent.copy,
+              );
             },
           ),
           MenuEntry(
