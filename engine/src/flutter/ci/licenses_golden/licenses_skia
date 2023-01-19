@@ -1,4 +1,4 @@
-Signature: 9bfcb2b9b29243b0ae4331bef53a5ae7
+Signature: bf2cf6c881f0ab39e0463cae2469c51b
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8928,11 +8928,15 @@ ORIGIN: ../../../third_party/skia/include/core/SkMath.h + ../../../third_party/s
 ORIGIN: ../../../third_party/skia/include/private/SkMalloc.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkCPUTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFloatingPoint.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/core/SkMath.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/base/SkCPUTypes.h
 FILE: ../../../third_party/skia/src/core/SkFloatingPoint.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google LLC
 
