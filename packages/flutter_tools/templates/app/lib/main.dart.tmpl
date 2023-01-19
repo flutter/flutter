@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Counter Example',
       theme: ThemeData(
         // This is the theme of the application.
         //
@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
         // Design.
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Counter Example'),
     );
   }
 }
@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // This variable is the mutable state that is managed by this State object. If
   // the widget didn't need to maintain a counter, we wouldn't need to use a
   // stateful widget, and could use a StatelessWidget instead.
-  int _counter = 0;
+  int _counter = 3;
 
   void _incrementCounterBy(int amount) {
     setState(() {
