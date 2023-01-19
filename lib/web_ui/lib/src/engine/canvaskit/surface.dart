@@ -336,9 +336,6 @@ class Surface {
           majorVersion: webGLVersion.toDouble(),
         ),
       ).toInt();
-      if (_sampleCount == -1 || _stencilBits == -1) {
-        _initWebglParams();
-      }
 
       _glContext = glContext;
 
@@ -347,6 +344,9 @@ class Surface {
         if (_grContext == null) {
           throw CanvasKitError('Failed to initialize CanvasKit. '
               'CanvasKit.MakeGrContext returned null.');
+        }
+        if (_sampleCount == -1 || _stencilBits == -1) {
+          _initWebglParams();
         }
         // Set the cache byte limit for this grContext, if not specified it will
         // use CanvasKit's default.
