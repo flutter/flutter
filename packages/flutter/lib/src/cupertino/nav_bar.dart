@@ -2122,7 +2122,7 @@ class _NavigationBarComponentsTransition {
               child: bottomLargeTitle.child,
             ),
           ),
-        )
+        ),
       );
     }
 
