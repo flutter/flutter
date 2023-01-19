@@ -778,16 +778,13 @@ void main() {
 
     expect(messages, <String>[
       'Downloading Web SDK...',
-      'Downloading CanvasKit...',
     ]);
 
     expect(downloads, <String>[
-      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
-      'https://chrome-infra-packages.appspot.com/dl/flutter/web/canvaskit_bundle/+/abcdefg',
+      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
     ]);
 
     expect(locations, <String>[
-      'cache/bin/cache/flutter_web_sdk',
       'cache/bin/cache/flutter_web_sdk',
     ]);
 
@@ -835,57 +832,7 @@ void main() {
     await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
     expect(downloads, <String>[
-      'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
-      'https://flutter.storage.com/override/flutter_infra_release/cipd/flutter/web/canvaskit_bundle/+/abcdefg',
-    ]);
-  });
-
-  testWithoutContext('FlutterWebSdk does not download CanvasKit if it is already in flutter_web_sdk', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final Directory internalDir = fileSystem.currentDirectory
-      .childDirectory('cache')
-      .childDirectory('bin')
-      .childDirectory('internal');
-    final File canvasKitVersionFile = internalDir.childFile('canvaskit.version');
-    canvasKitVersionFile.createSync(recursive: true);
-    canvasKitVersionFile.writeAsStringSync('abcdefg');
-
-    final File engineVersionFile = internalDir.childFile('engine.version');
-    engineVersionFile.createSync(recursive: true);
-    engineVersionFile.writeAsStringSync('hijklmnop');
-
-    final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
-    final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
-    final FlutterWebSdk webSdk = FlutterWebSdk(cache);
-
-    final List<String> messages = <String>[];
-    final List<String> downloads = <String>[];
-    final List<String> locations = <String>[];
-    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
-      messages.add(message);
-      downloads.add(uri.toString());
-      locations.add(location.path);
-      location.createSync(recursive: true);
-      location.childDirectory('canvaskit').createSync();
-      location.childDirectory('canvaskit').childFile('canvaskit.js').createSync();
-      location.childDirectory('canvaskit').childFile('canvaskit.wasm').createSync();
-      location.childDirectory('canvaskit').childDirectory('profiling').createSync();
-      location.childDirectory('canvaskit').childDirectory('profiling').childFile('canvaskit.js').createSync();
-      location.childDirectory('canvaskit').childDirectory('profiling').childFile('canvaskit.wasm').createSync();
-    };
-
-    await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
-
-    expect(messages, <String>[
-      'Downloading Web SDK...',
-    ]);
-
-    expect(downloads, <String>[
-      'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk-linux-x64.zip',
-    ]);
-
-    expect(locations, <String>[
-      'cache/bin/cache/flutter_web_sdk',
+      'https://flutter.storage.com/override/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
     ]);
   });
 
