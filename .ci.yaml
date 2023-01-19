@@ -1393,9 +1393,9 @@ targets:
         ]
       use_emulator: "true"
       dimensions:
-        cores: 8
-        kvm: 1
-        machine_type: n1-standard-8
+        cores: "8"
+        kvm: "1"
+        machine_type: "n1-standard-8"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
