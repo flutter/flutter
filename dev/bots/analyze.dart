@@ -1912,7 +1912,7 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
           appFilePath = appFilePath.substring(0, appFilePath.length - _kTmplExt.length); // Remove '.tmpl' from app file path
           templateFileContents = templateFileContents.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
         }
-        String appFileContents = File(appFilePath).readAsLinesSync().join('\n'); //_fileContents(appFilePath, linesToSkip: _kLicenseLines);
+        String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
         appFileContents = _removeLicenseIfPresent(appFileContents, license);
         if (appFileContents != templateFileContents) {
           int indexOfDifference;
