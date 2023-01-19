@@ -412,7 +412,7 @@ void DartIsolate::SetMessageHandlingTaskRunner(
 }
 
 // Updating thread names here does not change the underlying OS thread names.
-// Instead, this is just additional metadata for the Observatory to show the
+// Instead, this is just additional metadata for the Dart VM Service to show the
 // thread name of the isolate.
 bool DartIsolate::UpdateThreadPoolNames() const {
   // TODO(chinmaygarde): This implementation does not account for multiple
@@ -766,7 +766,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   const auto& settings = vm_data->GetSettings();
 
-  if (!settings.enable_observatory) {
+  if (!settings.enable_vm_service) {
     return nullptr;
   }
 
@@ -802,8 +802,8 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   tonic::DartState::Scope scope(service_isolate);
   if (!DartServiceIsolate::Startup(
-          settings.observatory_host,           // server IP address
-          settings.observatory_port,           // server observatory port
+          settings.vm_service_host,            // server IP address
+          settings.vm_service_port,            // server VM service port
           tonic::DartState::HandleLibraryTag,  // embedder library tag handler
           false,  //  disable websocket origin check
           settings.disable_service_auth_codes,  // disable VM service auth codes
