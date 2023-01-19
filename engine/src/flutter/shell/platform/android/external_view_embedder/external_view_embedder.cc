@@ -3,13 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
-
-#include <utility>
-
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/surface/android_surface.h"
 
 namespace flutter {
 
@@ -108,7 +103,6 @@ void AndroidExternalViewEmbedder::SubmitFrame(
   }
 
   std::unordered_map<int64_t, SkRect> overlay_layers;
-  std::unordered_map<int64_t, sk_sp<SkPicture>> pictures;
   SkCanvas* background_canvas = frame->SkiaCanvas();
   DisplayListBuilder* background_builder = frame->GetDisplayListBuilder().get();
   auto current_frame_view_count = composition_order_.size();
