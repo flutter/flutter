@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This is a minimal dependency heart beat test for Observatory.
+// This is a minimal dependency heart beat test for the Dart VM Service.
 
 import 'dart:async';
 import 'dart:convert';
@@ -170,14 +170,14 @@ Future<bool> runTests(ShellLauncher launcher, List<TestFunction> tests) async {
   if (process == null) {
     return false;
   }
-  final Uri uri = await process.waitForObservatory();
+  final Uri uri = await process.waitForVMService();
   try {
     for (int i = 0; i < tests.length; i++) {
       print('Executing test ${i + 1}/${tests.length}');
       await tests[i](uri);
     }
   } catch (e, st) {
-    print('Observatory test failure: $e\n$st');
+    print('Dart VM Service test failure: $e\n$st');
     exitCode = -1;
   }
   await process.kill();

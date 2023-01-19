@@ -363,12 +363,12 @@ ComponentV1::ComponentV1(
   }
 
 #if defined(DART_PRODUCT)
-  settings_.enable_observatory = false;
+  settings_.enable_vm_service = false;
 #else
-  settings_.enable_observatory = true;
+  settings_.enable_vm_service = true;
 
   // TODO(cbracken): pass this in as a param to allow 0.0.0.0, ::1, etc.
-  settings_.observatory_host = "127.0.0.1";
+  settings_.vm_service_host = "127.0.0.1";
 #endif
 
   // Controls whether category "skia" trace events are enabled.
