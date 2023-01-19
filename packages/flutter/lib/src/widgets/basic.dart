@@ -1432,9 +1432,6 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// If both are true, the child widget will be flipped both vertically and horizontally, equivalent to a 180 degree rotation.
   ///
-  /// The [alignment] controls the origin of the flip; by default, this is
-  /// the center of the box.
-  ///
   /// {@tool snippet}
   ///
   /// This example flips the text horizontally.
@@ -1451,11 +1448,11 @@ class Transform extends SingleChildRenderObjectWidget {
       bool flipX = false,
       bool flipY = false,
       this.origin,
-      this.alignment = Alignment.center,
       this.transformHitTests = true,
       this.filterQuality,
       super.child,
-    }) : transform = Matrix4.diagonal3Values(flipX ? -1.0 : 1.0, flipY ? -1.0 : 1.0, 1.0);
+  })  : alignment = Alignment.center,
+        transform = Matrix4.diagonal3Values(flipX ? -1.0 : 1.0, flipY ? -1.0 : 1.0, 1.0);
 
   // Computes a rotation matrix for an angle in radians, attempting to keep rotations
   // at integral values for angles of 0, π/2, π, 3π/2.
