@@ -3437,6 +3437,61 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
+    // Test covering crashing found in Google internal issue b/192329942.
+    double value = 0.0;
+    final ValueNotifier<bool> shouldShowSliderListenable =
+        ValueNotifier<bool>(true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: shouldShowSliderListenable,
+                    builder: (BuildContext context, bool shouldShowSlider, _) {
+                      return shouldShowSlider
+                          ? Slider(
+                              value: value,
+                              onChanged: (double newValue) {
+                                setState(() {
+                                  value = newValue;
+                                });
+                              },
+                            )
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester
+        .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
+
+    // Intentioanlly not calling `await tester.pumpAndSettle()` to allow drag
+    // event performed on `Slider` before it is about to get unmounted.
+    shouldShowSliderListenable.value = false;
+
+    await tester.drag(find.byType(Slider), const Offset(1.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(value, equals(0.0));
+
+    // This is supposed to trigger animation on `Slider` if it is mounted.
+    await gesture.up();
+
+    expect(tester.takeException(), null);
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
