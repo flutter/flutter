@@ -1488,7 +1488,8 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
-  /// Toolbar is not used in Flutter Web. Skip this check.
+  /// Toolbar is not used in Flutter Web unless the browser context menu is
+  // explicitly disabled. Skip this check.
   ///
   /// Web is using native DOM elements (it is also used as platform input)
   /// to enable clipboard functionality of the toolbar: copy, paste, select,
@@ -1540,6 +1541,69 @@ void main() {
     expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
+  });
+
+  group('BrowserContextMenu', () {
+    setUp(() async {
+      SystemChannels.contextMenu.setMockMethodCallHandler((MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      });
+      await BrowserContextMenu.disableContextMenu();
+    });
+
+    tearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      SystemChannels.contextMenu.setMockMethodCallHandler(null);
+    });
+
+    testWidgets('web can show toolbar when the browser context menu is disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Can't show the toolbar when there's no focus.
+      expect(state.showToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.text('Paste'), findsNothing);
+
+      // Can show the toolbar when focused even though there's no text.
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pump();
+      expect(state.showToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('Paste'), findsOneWidget);
+
+      // Hide the menu again.
+      state.hideToolbar();
+      await tester.pump();
+      expect(find.text('Paste'), findsNothing);
+
+      // Can show the menu with text and a selection.
+      controller.text = 'blah';
+      await tester.pump();
+      expect(state.showToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('Paste'), findsOneWidget);
+    },
+      skip: !kIsWeb,
+    );
   });
 
   testWidgets('can hide toolbar with DismissIntent', (WidgetTester tester) async {
