@@ -39,7 +39,7 @@ Future<void> startTransitionBetween(
           )
         );
       },
-      home: Placeholder(),
+      home: const Placeholder(),
     ),
   );
 
