@@ -2428,6 +2428,34 @@ targets:
       - bin/
       - .ci.yaml
 
+  - name: Mac animated_complex_opacity_perf_impeller_macos__e2e_summary
+    bringup: true
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: animated_complex_opacity_perf_impeller_macos__e2e_summary
+
+  - name: Mac animated_complex_opacity_perf_macos__e2e_summary
+    bringup: true
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: animated_complex_opacity_perf_macos__e2e_summary
+
   - name: Mac basic_material_app_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
