@@ -9,7 +9,6 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -22,7 +21,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
-import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -192,6 +190,15 @@ class IOSDevice extends Device {
   }
 
   @override
+  bool get supportsHotReload => interfaceType == IOSDeviceConnectionInterface.usb;
+
+  @override
+  bool get supportsHotRestart => interfaceType == IOSDeviceConnectionInterface.usb;
+
+  @override
+  bool get supportsFlutterExit => interfaceType == IOSDeviceConnectionInterface.usb;
+
+  @override
   final String name;
 
   @override
@@ -311,11 +318,7 @@ class IOSDevice extends Device {
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
     String? packageId;
-    if (interfaceType == IOSDeviceConnectionInterface.network &&
-        debuggingOptions.debuggingEnabled &&
-        debuggingOptions.disablePortPublication) {
-      throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
-    }
+
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 
@@ -350,10 +353,8 @@ class IOSDevice extends Device {
       EnvironmentType.physical,
       route,
       platformArgs,
-      ipv6: ipv6,
-      interfaceType: interfaceType,
     );
-    Status startAppStatus = _logger.startProgress(
+    final Status installStatus = _logger.startProgress(
       'Installing and launching...',
     );
     try {
@@ -378,10 +379,9 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        // Don't port foward if debugging with a network device.
         observatoryDiscovery = ProtocolDiscovery.observatory(
           deviceLogReader,
-          portForwarder: interfaceType == IOSDeviceConnectionInterface.network ? null : portForwarder,
+          portForwarder: portForwarder,
           hostPort: debuggingOptions.hostVmServicePort,
           devicePort: debuggingOptions.deviceVmServicePort,
           ipv6: ipv6,
@@ -412,59 +412,12 @@ class IOSDevice extends Device {
         return LaunchResult.succeeded();
       }
 
-      _logger.printTrace('Application launched on the device. Waiting for Dart VM Service url.');
-
-      final int defaultTimeout = interfaceType == IOSDeviceConnectionInterface.network ? 45 : 30;
-      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
-        _logger.printError('The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
-
-        // If debugging with a wireless device and the timeout is reached, remind the
-        // user to allow local network permissions.
-        if (interfaceType == IOSDeviceConnectionInterface.network) {
-          _logger.printError(
-            '\nClick "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
-            'This is required for wireless debugging. If you selected "Don\'t Allow", '
-            'you can turn it on in Settings > Your App Name > Local Network. '
-            "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again."
-          );
-        } else {
-          iosDeployDebugger?.pauseDumpBacktraceResume();
-        }
+      _logger.printTrace('Application launched on the device. Waiting for observatory url.');
+      final Timer timer = Timer(discoveryTimeout ?? const Duration(seconds: 30), () {
+        _logger.printError('iOS Observatory not discovered after 30 seconds. This is taking much longer than expected...');
+        iosDeployDebugger?.pauseDumpBacktraceResume();
       });
-
-      Uri? localUri;
-      if (interfaceType == IOSDeviceConnectionInterface.network) {
-        // Wait for Dart VM Service to start up.
-        final Uri? serviceURL = await observatoryDiscovery?.uri;
-        if (serviceURL == null) {
-          await iosDeployDebugger?.stopAndDumpBacktrace();
-          return LaunchResult.failed();
-        }
-
-        // If Dart VM Service URL with the device IP is not found within 5 seconds,
-        // change the status message to prompt users to click Allow. Wait 5 seconds because it
-        // should only show this message if they have not already approved the permissions.
-        // MDnsVmServiceDiscovery usually takes less than 5 seconds to find it.
-        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
-          startAppStatus.stop();
-          startAppStatus = _logger.startProgress(
-            'Waiting for approval of local network permissions...',
-          );
-        });
-
-        // Get Dart VM Service URL with the device IP as the host.
-        localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
-          packageId,
-          this,
-          usesIpv6: ipv6,
-          deviceVmservicePort: serviceURL.port,
-          isNetworkDevice: true,
-        );
-
-        mDNSLookupTimer.cancel();
-      } else {
-        localUri = await observatoryDiscovery?.uri;
-      }
+      final Uri? localUri = await observatoryDiscovery?.uri;
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
@@ -476,7 +429,7 @@ class IOSDevice extends Device {
       _logger.printError(e.message);
       return LaunchResult.failed();
     } finally {
-      startAppStatus.stop();
+      installStatus.stop();
     }
   }
 
@@ -616,6 +569,7 @@ String decodeSyslog(String line) {
   }
 }
 
+@visibleForTesting
 class IOSDeviceLogReader extends DeviceLogReader {
   IOSDeviceLogReader._(
     this._iMobileDevice,

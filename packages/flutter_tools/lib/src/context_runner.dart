@@ -275,7 +275,7 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
       ),

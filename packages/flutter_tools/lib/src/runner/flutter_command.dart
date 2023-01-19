@@ -569,7 +569,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
+  bool get disablePortPublication => !boolArgDeprecated('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,

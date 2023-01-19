@@ -227,16 +227,8 @@ class XCDevice {
 
   /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableIOSDevices({ Duration? timeout }) async {
-    Status? loadDevicesStatus;
-    if (timeout != null && timeout.inSeconds > 2) {
-      loadDevicesStatus = _logger.startProgress(
-        'Loading devices...',
-      );
-    }
     final List<Object>? allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
-    if (loadDevicesStatus != null) {
-      loadDevicesStatus.stop();
-    }
+
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
     }
@@ -312,6 +304,12 @@ class XCDevice {
         }
 
         final IOSDeviceConnectionInterface interface = _interfaceType(device);
+
+        // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
+        // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
+        if (interface != IOSDeviceConnectionInterface.usb) {
+          continue;
+        }
 
         String? sdkVersion = _sdkVersion(device);
 

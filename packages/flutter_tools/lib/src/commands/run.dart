@@ -254,7 +254,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
-        disablePortPublication: await disablePortPublication,
+        disablePortPublication: disablePortPublication,
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArgDeprecated('verbose-system-logs'),
