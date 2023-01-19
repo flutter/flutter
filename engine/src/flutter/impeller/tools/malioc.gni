@@ -1,0 +1,124 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/compiled_action.gni")
+import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
+
+declare_args() {
+  # Path to the Mali offline compiler tool 'malioc'.
+  impeller_malioc_path = ""
+
+  impeller_malioc_cores = []
+}
+
+if (impeller_malioc_path != "" && impeller_malioc_cores == []) {
+  core_list_file = "$root_gen_dir/mali_core_list.json"
+  exec_script("//build/gn_run_binary.py",
+              [
+                rebase_path(impeller_malioc_path, root_build_dir),
+                "--list",
+                "--format",
+                "json",
+                "--output",
+                rebase_path(core_list_file),
+              ])
+  _mali_cores = read_file(core_list_file, "json")
+  foreach(mali_core, _mali_cores.cores) {
+    impeller_malioc_cores += [ mali_core.core ]
+  }
+}
+
+template("malioc_analyze_shaders") {
+  # TODO(zra): Check that gles_language_version is in the supported set. For now
+  # assume that if it is set, it is being set to 460, which malioc does not
+  # support.
+  if (impeller_malioc_path == "" || defined(invoker.gles_language_version)) {
+    if (defined(invoker.gles_language_version) &&
+        invoker.gles_language_version != "460") {
+      print("Disabling analysis for shaders in $target_name due to gles",
+            "version explicitly set to ${invoker.gles_language_version}.")
+    }
+    group(target_name) {
+      not_needed(invoker, "*")
+    }
+  } else {
+    target_deps = []
+    foreach(core, impeller_malioc_cores) {
+      foreach(source, invoker.shaders) {
+        shader_file_name = get_path_info(source, "name")
+        analysis_target = "${target_name}_${shader_file_name}_${core}_malioc"
+        target_deps += [ ":$analysis_target" ]
+        action(analysis_target) {
+          forward_variables_from(invoker,
+                                 "*",
+                                 [
+                                   "args",
+                                   "depfile",
+                                   "inputs",
+                                   "outputs",
+                                   "pool",
+                                   "script",
+                                 ])
+
+          script = "//build/gn_run_binary.py"
+          pool = "//flutter/impeller/tools:malioc_pool"
+
+          # Should be "gles" or "vkspv"
+          backend_ext = get_path_info(source, "extension")
+          assert(backend_ext == "gles",
+                 "Shader for unsupported backend passed to malioc: {{source}}")
+
+          # Nest all malioc output under its own subdirectory of root_gen_dir
+          # so that it's easier to diff it against the state before any changes.
+          subdir = rebase_path(target_gen_dir, root_gen_dir)
+          output_file =
+              "$root_gen_dir/malioc/$subdir/${shader_file_name}.$core.json"
+          outputs = [ output_file ]
+
+          # Determine the kind of the shader from the file name
+          name = get_path_info(source, "name")
+          shader_kind_ext = get_path_info(name, "extension")
+
+          if (shader_kind_ext == "comp") {
+            shader_kind_flag = "--compute"
+          } else if (shader_kind_ext == "frag") {
+            shader_kind_flag = "--fragment"
+          } else if (shader_kind_ext == "geom") {
+            shader_kind_flag = "--geometry"
+          } else if (shader_kind_ext == "tesc") {
+            shader_kind_flag = "--tessellation_control"
+          } else if (shader_kind_ext == "tese") {
+            shader_kind_flag = "--tessellation_evaluation"
+          } else if (shader_kind_ext == "vert") {
+            shader_kind_flag = "--vertex"
+          } else {
+            assert(false, "Unknown shader kind: {{source}}")
+          }
+
+          args = [
+            rebase_path(impeller_malioc_path, root_build_dir),
+            "--format",
+            "json",
+            shader_kind_flag,
+            "--core",
+            core,
+            "--output",
+            rebase_path(output_file),
+          ]
+
+          if (backend_ext == "vkspv") {
+            args += [ "--vulkan" ]
+          }
+
+          args += [ rebase_path(source) ]
+        }
+      }
+    }
+
+    group(target_name) {
+      deps = target_deps
+    }
+  }
+}

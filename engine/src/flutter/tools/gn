@@ -557,6 +557,9 @@ def to_gn_args(args):
   if args.prebuilt_impellerc is not None:
     gn_args['impeller_use_prebuilt_impellerc'] = args.prebuilt_impellerc
 
+  if args.malioc_path is not None:
+    gn_args['impeller_malioc_path'] = args.malioc_path
+
   # ANGLE is exclusively used for:
   #  - Windows at runtime
   #  - Non-fuchsia host unit tests (is_host_build evaluates to false).
@@ -978,6 +981,10 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Enables experimental 3d support.'
+  )
+
+  parser.add_argument(
+      '--malioc-path', type=str, help='The path to the malioc tool.'
   )
 
   # Sanitizers.

@@ -6,6 +6,10 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_shaders("imgui_shaders") {
   name = "imgui"
+
+  # Not analyzing because they are not performance critical, and mipmap uses
+  # textureLod, which uses an extension that malioc does not support.
+  analyze = false
   shaders = [
     "imgui_raster.vert",
     "imgui_raster.frag",
