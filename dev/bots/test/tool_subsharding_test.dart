@@ -63,7 +63,7 @@ void main() {
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"name","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}''';
       file.writeAsStringSync(output);
       final TestFileReporterResults result = parseFileReporter(file);
-      expect(result.allTestSpecs, isEmpty);
+      expect(result.hasFailedTests, true);
     });
   });
 }
