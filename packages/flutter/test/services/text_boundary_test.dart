@@ -192,6 +192,18 @@ void main() {
     const int positionF = 11;
     expect(boundaryF.getLeadingTextBoundaryAt(positionF), 0);
     expect(boundaryF.getTrailingTextBoundaryAt(positionF), 20);
+
+    const String textG = 'abcd efg hi\r\n\n\n\n\n\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
+    const ParagraphBoundary boundaryG = ParagraphBoundary(textG);
+    const int positionG = 18;
+    expect(boundaryG.getLeadingTextBoundaryAt(positionG), 18);
+    expect(boundaryG.getTrailingTextBoundaryAt(positionG), 20);
+
+    const String textH = 'abcd efg hi\r\n\r\n\r\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
+    const ParagraphBoundary boundaryH = ParagraphBoundary(textH);
+    const int positionH = 18;
+    expect(boundaryH.getLeadingTextBoundaryAt(positionH), 17);
+    expect(boundaryH.getTrailingTextBoundaryAt(positionH), 19);
   });
 
   test('document boundary works', () {
