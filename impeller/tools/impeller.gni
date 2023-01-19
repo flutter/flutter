@@ -4,6 +4,7 @@
 
 import("//build/compiled_action.gni")
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/malioc.gni")
 import("//flutter/testing/testing.gni")
 
 declare_args() {
@@ -467,6 +468,7 @@ template("blobcat_library") {
 template("impeller_shaders_gles") {
   assert(defined(invoker.shaders), "Impeller shaders must be specified.")
   assert(defined(invoker.name), "Name of the shader library must be specified.")
+  assert(defined(invoker.analyze), "Whether to analyze must be specified.")
 
   shaders_base_name = string_join("",
                                   [
@@ -494,10 +496,23 @@ template("impeller_shaders_gles") {
     defines = [ "IMPELLER_TARGET_OPENGLES" ]
   }
 
+  gles_shaders =
+      filter_include(get_target_outputs(":$impellerc_gles"), [ "*.gles" ])
+
+  if (invoker.analyze) {
+    analyze_lib = "analyze_$target_name"
+    malioc_analyze_shaders(analyze_lib) {
+      shaders = gles_shaders
+      if (defined(invoker.gles_language_version)) {
+        gles_language_version = invoker.gles_language_version
+      }
+      deps = [ ":$impellerc_gles" ]
+    }
+  }
+
   gles_lib = "genlib_$target_name"
   blobcat_library(gles_lib) {
-    shaders =
-        filter_include(get_target_outputs(":$impellerc_gles"), [ "*.gles" ])
+    shaders = gles_shaders
     deps = [ ":$impellerc_gles" ]
   }
 
@@ -518,6 +533,10 @@ template("impeller_shaders_gles") {
 
   group(target_name) {
     public_deps = [ ":$embed_gles_lib" ]
+
+    if (invoker.analyze) {
+      public_deps += [ ":$analyze_lib" ]
+    }
 
     if (!impeller_enable_metal && !impeller_enable_vulkan) {
       public_deps += [ ":$reflect_gles" ]
@@ -589,6 +608,10 @@ template("impeller_shaders") {
   }
 
   if (impeller_enable_opengles) {
+    analyze = true
+    if (defined(invoker.analyze) && !invoker.analyze) {
+      analyze = false
+    }
     gles_shaders = "gles_$target_name"
     impeller_shaders_gles(gles_shaders) {
       name = invoker.name
@@ -600,6 +623,7 @@ template("impeller_shaders") {
       } else {
         shaders = invoker.shaders
       }
+      analyze = analyze
     }
   }
 
