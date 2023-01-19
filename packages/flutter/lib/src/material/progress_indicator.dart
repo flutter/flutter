@@ -515,8 +515,8 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
   /// material theme/non-iOS.
   ///
-  /// The [value], [backgroundColor], [valueColor], [strokeWidth],
-  /// [semanticsLabel], and [semanticsValue] will be ignored in iOS.
+  /// The [value], [valueColor], [strokeWidth], [semanticsLabel], and
+  /// [semanticsValue] will be ignored in iOS.
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
