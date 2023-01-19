@@ -4037,6 +4037,7 @@ targets:
 
   - name: Mac_arm64_ios run_debug_test_macos
     recipe: devicelab/devicelab_drone
+    presubmit: false # https://github.com/flutter/flutter/issues/118827
     timeout: 60
     properties:
       tags: >
