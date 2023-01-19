@@ -127,12 +127,7 @@ List<String> getValuesFromEnvOrArgs(
     return env[envName]!.split(',');
   }
   final List<String> argValues = argResults[name] as List<String>;
-  if (argValues != null) {
-    return argValues;
-  }
-
-  throw ConductorException('Expected either the CLI arg --$name or the environment variable $envName '
-      'to be provided!');
+  return argValues;
 }
 
 /// Translate CLI arg names to env variable names.
