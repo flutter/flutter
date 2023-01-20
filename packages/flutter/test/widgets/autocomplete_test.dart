@@ -507,7 +507,7 @@ void main() {
         home: Scaffold(
           body: RawAutocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
-              if (textEditingValue.text == null || textEditingValue.text == '') {
+              if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
               }
               return kOptions.where((String option) {

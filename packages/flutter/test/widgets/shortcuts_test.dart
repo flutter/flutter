@@ -1908,7 +1908,7 @@ class _TestCallbackRegistrationState extends State<TestCallbackRegistration> {
 class TestAction extends CallbackAction<Intent> {
   TestAction({
     required super.onInvoke,
-  })  : assert(onInvoke != null);
+  });
 
   static const LocalKey key = ValueKey<Type>(TestAction);
 }

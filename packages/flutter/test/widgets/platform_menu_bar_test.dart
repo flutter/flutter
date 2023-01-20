@@ -390,7 +390,7 @@ List<PlatformMenuItem> createTestMenus({
 }
 
 class FakeMenuChannel implements MethodChannel {
-  FakeMenuChannel(this.outgoing) : assert(outgoing != null);
+  FakeMenuChannel(this.outgoing);
 
   Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall)? incoming;

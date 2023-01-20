@@ -13,8 +13,7 @@ bool _withinTolerance(double actual, double expected) {
 }
 
 bool _checkVelocity(Velocity actual, Offset expected) {
-  return (actual != null)
-      && _withinTolerance(actual.pixelsPerSecond.dx, expected.dx)
+  return _withinTolerance(actual.pixelsPerSecond.dx, expected.dx)
       && _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
 }
 

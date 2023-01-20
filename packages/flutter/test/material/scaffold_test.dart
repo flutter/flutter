@@ -2774,7 +2774,7 @@ class _CustomPageRoute<T> extends PageRoute<T> {
     RouteSettings super.settings = const RouteSettings(),
     this.maintainState = true,
     super.fullscreenDialog,
-  }) : assert(builder != null);
+  });
 
   final WidgetBuilder builder;
 

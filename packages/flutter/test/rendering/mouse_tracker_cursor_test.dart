@@ -448,8 +448,7 @@ ui.PointerData _pointerData(
 }
 
 class _CursorUpdateDetails extends MethodCall {
-  const _CursorUpdateDetails(super.method, Map<String, dynamic> super.arguments)
-    : assert(arguments != null);
+  const _CursorUpdateDetails(super.method, Map<String, dynamic> super.arguments);
 
   _CursorUpdateDetails.wrap(MethodCall call)
     : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));

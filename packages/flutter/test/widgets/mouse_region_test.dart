@@ -1930,7 +1930,7 @@ class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
 class _ColumnContainer extends StatelessWidget {
   const _ColumnContainer({
     required this.children,
-  }) : assert(children != null);
+  });
 
   final List<Widget> children;
 
