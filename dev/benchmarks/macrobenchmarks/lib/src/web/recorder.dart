@@ -841,8 +841,7 @@ class Profile {
   /// If [useCustomWarmUp] is true the benchmark will continue running until
   /// [stopBenchmark] is called. Otherwise, the benchmark collects the
   /// [kDefaultTotalSampleCount] samples and stops automatically.
-  Profile({required this.name, this.useCustomWarmUp = false})
-      : assert(name != null);
+  Profile({required this.name, this.useCustomWarmUp = false});
 
   /// The name of the benchmark that produced this profile.
   final String name;
@@ -1296,13 +1295,6 @@ final Map<String, EngineBenchmarkValueListener> _engineBenchmarkListeners = <Str
 ///
 /// If another listener is already registered, overrides it.
 void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListener listener) {
-  if (listener == null) {
-    throw ArgumentError(
-      'Listener must not be null. To stop listening to engine benchmark values '
-      'under label "$name", call stopListeningToEngineBenchmarkValues(\'$name\').',
-    );
-  }
-
   if (_engineBenchmarkListeners.containsKey(name)) {
     throw StateError(
       'A listener for "$name" is already registered.\n'
