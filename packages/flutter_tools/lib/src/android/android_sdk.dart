@@ -435,7 +435,7 @@ class AndroidSdk {
           throwOnError: true,
           hideStdout: true,
         ).stdout.trim();
-        if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
+        if (javaHomeOutput.isNotEmpty) {
           final String javaHome = javaHomeOutput.split('\n').last.trim();
           return fileSystem.path.join(javaHome, 'bin', 'java');
         }

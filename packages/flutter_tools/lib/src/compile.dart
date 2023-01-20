@@ -775,11 +775,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
-      if (fileSystemRoots != null)
-        for (final String root in fileSystemRoots) ...<String>[
-          '--filesystem-root',
-          root,
-        ],
+      for (final String root in fileSystemRoots) ...<String>[
+        '--filesystem-root',
+        root,
+      ],
       if (fileSystemScheme != null) ...<String>[
         '--filesystem-scheme',
         fileSystemScheme!,

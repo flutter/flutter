@@ -1344,16 +1344,12 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    if (commandPath == null) {
-      return;
-    }
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String?> labels = <String?>[
-      if (commandResult.exitStatus != null)
-        getEnumName(commandResult.exitStatus),
+      getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];

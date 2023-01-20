@@ -425,9 +425,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
-    if (keyMatcher == null) {
-      return null;
-    }
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 

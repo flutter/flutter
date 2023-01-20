@@ -110,9 +110,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   bool hasDart() => dartPluginClass != null;
 
   static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
     return (yaml['package'] is String && yaml[kPluginClass] is String) ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -261,9 +258,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   }
 
   static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -345,9 +339,6 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   }
 
   static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -442,10 +433,6 @@ class WindowsPlugin extends PluginPlatform
   }
 
   static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
-
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -517,9 +504,6 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   }
 
   static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||

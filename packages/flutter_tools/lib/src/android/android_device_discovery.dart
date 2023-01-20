@@ -147,10 +147,10 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
         final String deviceID = match[1]!;
         final String deviceState = match[2]!;
-        String rest = match[3]!;
+        String? rest = match[3];
 
         final Map<String, String> info = <String, String>{};
-        if (rest.isNotEmpty) {
+        if (rest != null && rest.isNotEmpty) {
           rest = rest.trim();
           for (final String data in rest.split(' ')) {
             if (data.contains(':')) {

@@ -187,12 +187,6 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     loadingUnitComparisonResults = <String, Object>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
     final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
-    if (cachedLoadingUnits == null) {
-      loadingUnitComparisonResults!['new'] = newLoadingUnits;
-      loadingUnitComparisonResults!['missing'] = unmatchedLoadingUnits;
-      loadingUnitComparisonResults!['match'] = false;
-      return false;
-    }
     unmatchedLoadingUnits.addAll(cachedLoadingUnits);
     final Set<int> addedNewIds = <int>{};
     for (final LoadingUnit genUnit in generatedLoadingUnits) {

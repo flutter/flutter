@@ -58,9 +58,6 @@ Future<void> generateLocalizationsSyntheticPackage({
     environment,
   );
 
-  if (result == null) {
-    throwToolExit('Generating synthetic localizations package failed: result is null.');
-  }
   if (result.hasException) {
     throwToolExit(
       'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'

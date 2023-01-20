@@ -42,7 +42,7 @@ class FlutterManifest {
   /// Returns null on missing or invalid manifest.
   @visibleForTesting
   static FlutterManifest? createFromString(String manifest, { required Logger logger }) {
-    return _createFromYaml(manifest != null ? loadYaml(manifest) : null, logger);
+    return _createFromYaml(loadYaml(manifest), logger);
   }
 
   static FlutterManifest? _createFromYaml(Object? yamlDocument, Logger logger) {
@@ -663,9 +663,6 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
 }
 
 void _validateFonts(YamlList fonts, List<String> errors) {
-  if (fonts == null) {
-    return;
-  }
   const Set<int> fontWeights = <int>{
     100, 200, 300, 400, 500, 600, 700, 800, 900,
   };

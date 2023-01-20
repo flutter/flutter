@@ -287,7 +287,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     if ((debugPort == null && debugUri == null) || isNetworkDevice) {
       if (device is FuchsiaDevice) {
-        final String module = stringArgDeprecated('module')!;
+        final String? module = stringArgDeprecated('module');
         if (module == null) {
           throwToolExit("'--module' is required for attaching to a Fuchsia device");
         }

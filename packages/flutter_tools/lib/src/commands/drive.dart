@@ -240,7 +240,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String testFile = _getTestFile()!;
+    final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
     }

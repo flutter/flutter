@@ -86,7 +86,7 @@ void main() {
     });
 
     tearDown(() async {
-      return daemon.shutdown();
+      await daemon.shutdown();
       notifyingLogger.dispose();
       await daemonConnection.dispose();
     });

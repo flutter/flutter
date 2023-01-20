@@ -395,10 +395,6 @@ class FlutterDevice {
       return;
     }
     final Stream<String> logStream = (await device!.getLogReader(app: package)).logLines;
-    if (logStream == null) {
-      globals.printError('Failed to read device log stream');
-      return;
-    }
     _loggingSubscription = logStream.listen((String line) {
       if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
@@ -513,18 +509,10 @@ class FlutterDevice {
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
-    if (coldRunner.mainPath == null) {
-      assert(prebuiltMode);
-      globals.printStatus(
-        'Launching ${applicationPackage.displayName} '
-        'on ${device!.name} in $modeName mode...',
-      );
-    } else {
-      globals.printStatus(
-        'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
-        'on ${device!.name} in $modeName mode...',
-      );
-    }
+    globals.printStatus(
+      'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
+      'on ${device!.name} in $modeName mode...',
+    );
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     platformArgs['trace-startup'] = coldRunner.traceStartup;
@@ -1907,9 +1895,6 @@ class DevToolsServerAddress {
   final int port;
 
   Uri? get uri {
-    if (port == null) {
-      return null;
-    }
     return Uri(scheme: 'http', host: host, port: port);
   }
 }

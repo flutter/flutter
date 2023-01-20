@@ -187,23 +187,27 @@ class Plugin {
     bool isDirectDependency,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
-    final String pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String;
-    final String androidPackage = pluginYaml['androidPackage'] as String;
-    platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
-      name: name,
-      package: pluginYaml['androidPackage'] as String,
-      pluginClass: pluginClass,
-      pluginPath: path,
-      fileSystem: fileSystem,
-    );
-
-    final String iosPrefix = pluginYaml['iosPrefix'] as String? ?? '';
-    platforms[IOSPlugin.kConfigKey] =
-        IOSPlugin(
+    final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
+    if (pluginClass != null) {
+      final String? androidPackage = pluginYaml['androidPackage'] as String?;
+      if (androidPackage != null) {
+        platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
           name: name,
-          classPrefix: iosPrefix,
+          package: pluginYaml['androidPackage'] as String,
           pluginClass: pluginClass,
+          pluginPath: path,
+          fileSystem: fileSystem,
         );
+      }
+
+      final String iosPrefix = pluginYaml['iosPrefix'] as String? ?? '';
+      platforms[IOSPlugin.kConfigKey] =
+          IOSPlugin(
+            name: name,
+            classPrefix: iosPrefix,
+            pluginClass: pluginClass,
+          );
+    }
     return Plugin(
       name: name,
       path: path,

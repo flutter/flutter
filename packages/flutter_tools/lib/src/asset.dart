@@ -200,9 +200,6 @@ class ManifestAssetBundle implements AssetBundle {
       }
       for (final File file in directory.listSync().whereType<File>()) {
         final DateTime dateTime = file.statSync().modified;
-        if (dateTime == null) {
-          continue;
-        }
         if (dateTime.isAfter(lastBuildTimestamp)) {
           return true;
         }

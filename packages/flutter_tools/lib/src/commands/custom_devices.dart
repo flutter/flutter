@@ -434,13 +434,13 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         // find a random port we can forward
         final int port = await _operatingSystemUtils.findFreePort();
 
-        final ForwardedPort forwardedPort = await (portForwarder.tryForward(port, port) as FutureOr<ForwardedPort>);
+        final ForwardedPort? forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {
           _printConfigCheckingError("Couldn't forward test port $port from device.",);
           result = false;
         }
 
-        await portForwarder.unforward(forwardedPort);
+        await portForwarder.unforward(forwardedPort!);
       } on Exception catch (e) {
         _printConfigCheckingError(
           'While forwarding/unforwarding device port: $e',

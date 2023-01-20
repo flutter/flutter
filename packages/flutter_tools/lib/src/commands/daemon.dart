@@ -1528,7 +1528,7 @@ class AppRunLogger extends DelegatingLogger {
         'id': eventId,
         'progressId': eventType,
         if (message != null) 'message': message,
-        if (finished != null) 'finished': finished,
+        'finished': finished,
       };
 
       domain!._sendAppEvent(app, 'progress', event);

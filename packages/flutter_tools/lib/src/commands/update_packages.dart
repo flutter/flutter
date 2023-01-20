@@ -598,12 +598,14 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    for (_DependencyLink path in paths) {
+    for (_DependencyLink? path in paths) {
       final StringBuffer buf = StringBuffer();
       while (path != null) {
         buf.write(path.to);
-        path = path.from!;
-        buf.write(' <- ');
+        path = path.from;
+        if (path != null) {
+          buf.write(' <- ');
+        }
       }
       globals.printStatus(buf.toString(), wrap: false);
     }
@@ -1574,9 +1576,6 @@ String _computeChecksum(Iterable<String> names, String Function(String name) get
   final List<String> sortedNames = names.toList()..sort();
   for (final String name in sortedNames) {
     final String version = getVersion(name);
-    if (version == null) {
-      continue;
-    }
     final String value = '$name: $version';
     // Each code unit is 16 bits.
     for (final int codeUnit in value.codeUnits) {
