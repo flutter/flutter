@@ -80,7 +80,7 @@ class _AssetManifestBin implements AssetManifest {
 /// Contains information about an asset that is a variant of another asset.
 class AssetVariant {
   /// Creates an object containing information about an asset variant.
-  AssetVariant({
+  const AssetVariant({
     required this.key,
     required this.targetDevicePixelRatio,
   });
