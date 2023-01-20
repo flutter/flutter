@@ -278,11 +278,11 @@ TEST_P(AiksTest, CanRenderWithContiguousClipRestores) {
 
   canvas.Save();
 
-  // Append two clips. First with empty coverage.
+  // Append two clips, the second resulting in empty coverage.
   canvas.ClipPath(
       PathBuilder{}.AddRect(Rect::MakeXYWH(100, 100, 100, 100)).TakePath());
   canvas.ClipPath(
-      PathBuilder{}.AddRect(Rect::MakeXYWH(100, 100, 100, 100)).TakePath());
+      PathBuilder{}.AddRect(Rect::MakeXYWH(300, 300, 100, 100)).TakePath());
 
   // Restore to no clips.
   canvas.Restore();
