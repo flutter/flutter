@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "KeyCodeMap_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 
@@ -13,7 +14,26 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
+#include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 #import "flutter/testing/testing.h"
+
+// A wrap to convert FlutterKeyEvent to a ObjC class.
+@interface KeyEventWrapper : NSObject
+@property(nonatomic) FlutterKeyEvent* data;
+- (nonnull instancetype)initWithEvent:(const FlutterKeyEvent*)event;
+@end
+
+@implementation KeyEventWrapper
+- (instancetype)initWithEvent:(const FlutterKeyEvent*)event {
+  self = [super init];
+  _data = new FlutterKeyEvent(*event);
+  return self;
+}
+
+- (void)dealloc {
+  delete _data;
+}
+@end
 
 @interface FlutterViewControllerTestObjC : NSObject
 - (bool)testKeyEventsAreSentToFramework;
@@ -22,6 +42,7 @@
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled;
 - (bool)testKeyboardIsRestartedOnEngineRestart;
 - (bool)testTrackpadGesturesAreSentToFramework;
+- (bool)testModifierKeysAreSynthesizedOnMouseMove;
 - (bool)testViewWillAppearCalledMultipleTimes;
 - (bool)testFlutterViewIsConfigured;
 
@@ -29,6 +50,8 @@
                         callback:(nullable FlutterKeyEventCallback)callback
                         userData:(nullable void*)userData;
 @end
+
+using namespace ::flutter::testing::keycodes;
 
 namespace flutter::testing {
 
@@ -69,6 +92,19 @@ NSResponder* mockResponder() {
   OCMStub([mock flagsChanged:[OCMArg any]]).andDo(nil);
   return mock;
 }
+
+NSEvent* CreateMouseEvent(NSEventModifierFlags modifierFlags) {
+  return [NSEvent mouseEventWithType:NSEventTypeMouseMoved
+                            location:NSZeroPoint
+                       modifierFlags:modifierFlags
+                           timestamp:0
+                        windowNumber:0
+                             context:nil
+                         eventNumber:0
+                          clickCount:1
+                            pressure:1.0];
+}
+
 }  // namespace
 
 TEST(FlutterViewController, HasViewThatHidesOtherViewsInAccessibility) {
@@ -159,6 +195,10 @@ TEST(FlutterViewControllerTest, TestKeyboardIsRestartedOnEngineRestart) {
 
 TEST(FlutterViewControllerTest, TestTrackpadGesturesAreSentToFramework) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testTrackpadGesturesAreSentToFramework]);
+}
+
+TEST(FlutterViewControllerTest, TestModifierKeysAreSynthesizedOnMouseMove) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testModifierKeysAreSynthesizedOnMouseMove]);
 }
 
 TEST(FlutterViewControllerTest, testViewWillAppearCalledMultipleTimes) {
@@ -760,6 +800,73 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
                                                                                  bundle:nil];
   [viewController viewWillAppear];
   [viewController viewWillAppear];
+  return true;
+}
+
+- (bool)testModifierKeysAreSynthesizedOnMouseMove {
+  id engineMock = OCMClassMock([FlutterEngine class]);
+  // Need to return a real renderer to allow view controller to load.
+  FlutterRenderer* renderer_ = [[FlutterRenderer alloc] initWithFlutterEngine:engineMock];
+  OCMStub([engineMock renderer]).andReturn(renderer_);
+
+  // Capture calls to sendKeyEvent
+  __block NSMutableArray<KeyEventWrapper*>* events =
+      [[NSMutableArray<KeyEventWrapper*> alloc] init];
+  OCMStub([[engineMock ignoringNonObjectArgs] sendKeyEvent:FlutterKeyEvent {}
+                                                  callback:nil
+                                                  userData:nil])
+      .andDo((^(NSInvocation* invocation) {
+        FlutterKeyEvent* event;
+        [invocation getArgument:&event atIndex:2];
+        [events addObject:[[KeyEventWrapper alloc] initWithEvent:event]];
+      }));
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  [viewController loadView];
+  [engineMock setViewController:viewController];
+  [viewController viewWillAppear];
+
+  // Zeroed modifier flag should not synthesize events.
+  NSEvent* mouseEvent = flutter::testing::CreateMouseEvent(0x00);
+  [viewController mouseMoved:mouseEvent];
+  EXPECT_EQ([events count], 0u);
+
+  // For each modifier key, check that key events are synthesized.
+  for (NSNumber* keyCode in flutter::keyCodeToModifierFlag) {
+    FlutterKeyEvent* event;
+    NSNumber* logicalKey;
+    NSNumber* physicalKey;
+    NSNumber* flag = flutter::keyCodeToModifierFlag[keyCode];
+
+    // Should synthesize down event.
+    NSEvent* mouseEvent = flutter::testing::CreateMouseEvent([flag unsignedLongValue]);
+    [viewController mouseMoved:mouseEvent];
+    EXPECT_EQ([events count], 1u);
+    event = events[0].data;
+    logicalKey = [flutter::keyCodeToLogicalKey objectForKey:keyCode];
+    physicalKey = [flutter::keyCodeToPhysicalKey objectForKey:keyCode];
+    EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+    EXPECT_EQ(event->logical, logicalKey.unsignedLongLongValue);
+    EXPECT_EQ(event->physical, physicalKey.unsignedLongLongValue);
+    EXPECT_EQ(event->synthesized, true);
+
+    // Should synthesize up event.
+    mouseEvent = flutter::testing::CreateMouseEvent(0x00);
+    [viewController mouseMoved:mouseEvent];
+    EXPECT_EQ([events count], 2u);
+    event = events[1].data;
+    logicalKey = [flutter::keyCodeToLogicalKey objectForKey:keyCode];
+    physicalKey = [flutter::keyCodeToPhysicalKey objectForKey:keyCode];
+    EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+    EXPECT_EQ(event->logical, logicalKey.unsignedLongLongValue);
+    EXPECT_EQ(event->physical, physicalKey.unsignedLongLongValue);
+    EXPECT_EQ(event->synthesized, true);
+
+    [events removeAllObjects];
+  };
+
   return true;
 }
 

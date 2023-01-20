@@ -661,6 +661,8 @@ static void CommonInit(FlutterViewController* controller) {
       flutterEvent.scroll_delta_y = scaledDeltaY;
     }
   }
+
+  [_keyboardManager syncModifiersIfNeeded:event.modifierFlags timestamp:event.timestamp];
   [_engine sendPointerEvent:flutterEvent];
 
   // Update tracking of state as reported to Flutter.
