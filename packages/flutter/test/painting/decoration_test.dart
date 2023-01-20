@@ -240,7 +240,6 @@ void main() {
   test('BoxDecoration backgroundImage clip', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
     void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
-      assert(shape != null);
       FakeAsync().run((FakeAsync async) async {
         final DelayedImageProvider imageProvider = DelayedImageProvider(image);
         final DecorationImage backgroundImage = DecorationImage(image: imageProvider);

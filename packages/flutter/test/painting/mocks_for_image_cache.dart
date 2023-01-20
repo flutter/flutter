@@ -42,8 +42,7 @@ class TestImageInfo extends ImageInfo {
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { required this.image })
-      : assert(image != null);
+  const TestImageProvider(this.key, this.imageValue, { required this.image });
 
   final int key;
   final int imageValue;
