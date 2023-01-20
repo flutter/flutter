@@ -1602,7 +1602,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), findsOneWidget);
     },
-      skip: !kIsWeb,
+      skip: !kIsWeb, // [intended]
     );
   });
 
