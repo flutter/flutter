@@ -27,7 +27,7 @@ class ListTileExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile Sample')),
-      body: Column(
+      body: ListView(
         children: const <Widget>[
           ListTile(
             leading: CircleAvatar(

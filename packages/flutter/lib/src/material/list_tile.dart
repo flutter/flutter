@@ -146,6 +146,14 @@ enum ListTileControlAffinity {
 /// ** See code in examples/api/lib/material/list_tile/list_tile.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows [ListTile]'s [textColor] and [iconColor] can use
+/// [MaterialStateColor] color to change the color of the text and icon
+/// when the [ListTile] is enabled, selected, or disabled.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
+/// {@end-tool}
+///
 /// {@tool snippet}
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
 /// [Expanded] widget. [ListTile] requires fixed width constraints,
