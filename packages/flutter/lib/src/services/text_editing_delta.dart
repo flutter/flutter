@@ -64,9 +64,7 @@ abstract class TextEditingDelta with Diagnosticable {
     required this.oldText,
     required this.selection,
     required this.composing,
-  }) : assert(oldText != null),
-       assert(selection != null),
-       assert(composing != null);
+  });
 
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
