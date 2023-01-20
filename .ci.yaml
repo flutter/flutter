@@ -3045,7 +3045,6 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_test_macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
