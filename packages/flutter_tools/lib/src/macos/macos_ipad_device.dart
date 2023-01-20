@@ -54,7 +54,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   }
 
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) => null;
+  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) => null;
 
   @override
   Future<LaunchResult> startApp(

@@ -105,9 +105,6 @@ abstract class DesktopDevice extends Device {
   void clearLogs() {}
 
   @override
-  bool get supportsInstall => false;
-
-  @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
     String? mainPath,
@@ -126,9 +123,9 @@ abstract class DesktopDevice extends Device {
     }
 
     // Ensure that the executable is locatable.
-    final BuildInfo buildInfo = debuggingOptions.buildInfo;
+    final BuildMode buildMode = debuggingOptions.buildInfo.mode;
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    final String? executable = executablePathForDevice(package, buildInfo);
+    final String? executable = executablePathForDevice(package, buildMode);
     if (executable == null) {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
@@ -164,7 +161,7 @@ abstract class DesktopDevice extends Device {
     try {
       final Uri? observatoryUri = await observatoryDiscovery.uri;
       if (observatoryUri != null) {
-        onAttached(package, buildInfo, process);
+        onAttached(package, buildMode, process);
         return LaunchResult.succeeded(observatoryUri: observatoryUri);
       }
       _logger.printError(
@@ -206,11 +203,11 @@ abstract class DesktopDevice extends Device {
 
   /// Returns the path to the executable to run for [package] on this device for
   /// the given [buildMode].
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
+  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode);
 
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
+  void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line

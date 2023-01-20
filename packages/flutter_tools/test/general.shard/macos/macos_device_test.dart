@@ -235,9 +235,9 @@ void main() {
     const String profilePath = 'profile/executable';
     const String releasePath = 'release/executable';
 
-    expect(device.executablePathForDevice(package, BuildInfo.debug), debugPath);
-    expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
-    expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
+    expect(device.executablePathForDevice(package, BuildMode.debug), debugPath);
+    expect(device.executablePathForDevice(package, BuildMode.profile), profilePath);
+    expect(device.executablePathForDevice(package, BuildMode.release), releasePath);
   });
 }
 
@@ -251,13 +251,13 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeMacOSApp extends Fake implements MacOSApp {
   @override
-  String executable(BuildInfo buildInfo) {
-    switch (buildInfo) {
-      case BuildInfo.debug:
+  String executable(BuildMode buildMode) {
+    switch (buildMode) {
+      case BuildMode.debug:
         return 'debug/executable';
-      case BuildInfo.profile:
+      case BuildMode.profile:
         return 'profile/executable';
-      case BuildInfo.release:
+      case BuildMode.release:
         return 'release/executable';
       default:
         throw StateError('');
