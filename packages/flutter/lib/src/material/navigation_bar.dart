@@ -462,26 +462,17 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
+    final GlobalKey labelKey = GlobalKey();
 
     final bool selected = info.selectedIndex == info.index;
-    final double labelPadding;
-    switch (info.labelBehavior) {
-      case NavigationDestinationLabelBehavior.alwaysShow:
-        labelPadding = 8;
-        break;
-      case NavigationDestinationLabelBehavior.onlyShowSelected:
-        labelPadding = selected ? 8 : 0;
-        break;
-      case NavigationDestinationLabelBehavior.alwaysHide:
-        labelPadding = 0;
-        break;
-    }
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
         message: tooltip ?? label,
         child: _IndicatorInkWell(
           key: UniqueKey(),
-          labelPadding: labelPadding,
+          labelKey: labelKey,
+          labelBehavior: info.labelBehavior,
+          selected: selected,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
           onTap: info.onTap,
           child: Row(
@@ -489,6 +480,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
               Expanded(
                 child: _NavigationBarDestinationLayout(
                   icon: buildIcon(context),
+                  labelKey: labelKey,
                   label: buildLabel(context),
                 ),
               ),
@@ -503,7 +495,9 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
     super.key,
-    required this.labelPadding,
+    required this.labelKey,
+    required this.labelBehavior,
+    required this.selected,
     super.customBorder,
     super.onTap,
     super.child,
@@ -512,10 +506,26 @@ class _IndicatorInkWell extends InkResponse {
     highlightColor: Colors.transparent,
   );
 
-  final double labelPadding;
+  final GlobalKey labelKey;
+  final NavigationDestinationLabelBehavior labelBehavior;
+  final bool selected;
 
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
+    final RenderBox labelBox = labelKey.currentContext!.findRenderObject()! as RenderBox;
+    final Rect labelRect = labelBox.localToGlobal(Offset.zero) & labelBox.size;
+    final double labelPadding;
+    switch (labelBehavior) {
+      case NavigationDestinationLabelBehavior.alwaysShow:
+        labelPadding = labelRect.height / 2;
+        break;
+      case NavigationDestinationLabelBehavior.onlyShowSelected:
+        labelPadding = selected ? labelRect.height / 2 : 0;
+        break;
+      case NavigationDestinationLabelBehavior.alwaysHide:
+        labelPadding = 0;
+        break;
+    }
     final double indicatorOffsetX = referenceBox.size.width / 2;
     final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
 
@@ -765,6 +775,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// 3 [NavigationBar].
   const _NavigationBarDestinationLayout({
     required this.icon,
+    required this.labelKey,
     required this.label,
   });
 
@@ -772,6 +783,11 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   ///
   /// See [NavigationDestination.icon].
   final Widget icon;
+
+  /// The global key for the label of this destination.
+  ///
+  /// This is used to determine the position of the label relative to the icon.
+  final GlobalKey labelKey;
 
   /// The label widget that sits below the icon.
   ///
@@ -782,7 +798,6 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   final Widget label;
 
   static final Key _iconKey = UniqueKey();
-  static final Key _labelKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -806,7 +821,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
                 alwaysIncludeSemantics: true,
                 opacity: animation,
                 child: RepaintBoundary(
-                  key: _labelKey,
+                  key: labelKey,
                   child: label,
                 ),
               ),
