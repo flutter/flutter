@@ -603,8 +603,7 @@ void paintImage({
       return true;
     }());
     // Avoid emitting events that are the same as those emitted in the last frame.
-    const bool shouldPostEvent = kDebugMode || kProfileMode;
-    if (shouldPostEvent && !_lastFrameImageSizeInfo.contains(sizeInfo)) {
+    if (!kReleaseMode && !_lastFrameImageSizeInfo.contains(sizeInfo)) {
       final ImageSizeInfo? existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
       if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
