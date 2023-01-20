@@ -1379,7 +1379,7 @@ targets:
 
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     bringup: true
     timeout: 60
     properties:
