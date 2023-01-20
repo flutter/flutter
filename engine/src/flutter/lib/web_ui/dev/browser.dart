@@ -54,11 +54,11 @@ abstract class BrowserEnvironment {
 /// Any errors starting or running the browser process are reported through
 /// [onExit].
 abstract class Browser {
-  /// The Dart VM Service URL for this browser.
+  /// The Observatory URL for this browser.
   ///
   /// Returns `null` for browsers that aren't running the Dart VM, or
-  /// if the Dart VM Service URL can't be found.
-  Future<Uri>? get vmServiceUrl => null;
+  /// if the Observatory URL can't be found.
+  Future<Uri>? get observatoryUrl => null;
 
   /// The remote debugger URL for this browser.
   ///

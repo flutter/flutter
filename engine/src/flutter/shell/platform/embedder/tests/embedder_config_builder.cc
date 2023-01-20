@@ -113,7 +113,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     SetSemanticsCallbackHooks();
     SetLogMessageCallbackHook();
     SetLocalizationCallbackHooks();
-    AddCommandLineArgument("--disable-vm-service");
+    AddCommandLineArgument("--disable-observatory");
 
     if (preference == InitializationPreference::kSnapshotsInitialize ||
         preference == InitializationPreference::kMultiAOTInitialize) {

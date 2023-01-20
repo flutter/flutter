@@ -410,13 +410,13 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, readonly) FlutterBasicMessageChannel* keyEventChannel;
 
 /**
- * The `NSURL` of the Dart VM Service for the service isolate.
+ * The `NSURL` of the observatory for the service isolate.
  *
  * This is only set in debug and profile runtime modes, and only after the
- * Dart VM Service is ready. In release mode or before the Dart VM Service has
+ * observatory service is ready. In release mode or before the observatory has
  * started, it returns `nil`.
  */
-@property(nonatomic, readonly, nullable) NSURL* vmServiceUrl;
+@property(nonatomic, readonly, nullable) NSURL* observatoryUrl;
 
 /**
  * The `FlutterBinaryMessenger` associated with this FlutterEngine (used for communicating with

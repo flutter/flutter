@@ -820,7 +820,7 @@ class BrowserManager {
 
   /// Loads [_BrowserEnvironment].
   Future<_BrowserEnvironment> _loadBrowserEnvironment() async {
-    return _BrowserEnvironment(this, await _browser.vmServiceUrl,
+    return _BrowserEnvironment(this, await _browser.observatoryUrl,
         await _browser.remoteDebuggerUrl, _onRestartController.stream);
   }
 
