@@ -581,8 +581,6 @@ Iterable<String> libraryRefs() sync* {
 }
 
 void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
-  assert(prefix != null);
-  assert(filter != null);
   stream
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
