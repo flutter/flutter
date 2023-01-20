@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
@@ -155,20 +154,6 @@ group('PrebuiltMacOSApp', () {
       expect(logger.errorText, isEmpty);
       expect(macosApp.id, 'com.example.placeholder');
       expect(macosApp.name, 'macOS');
-    }, overrides: overrides);
-
-    testUsingContext('Chooses the correct directory for application.', () {
-      final MacOSProject project = FlutterProject.fromDirectory(globals.fs.currentDirectory).macos;
-      final BuildableMacOSApp macosApp = MacOSApp.fromMacOSProject(project) as BuildableMacOSApp;
-
-      const BuildInfo vanillaApp = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
-      String? applicationBundle = macosApp.bundleDirectory(vanillaApp);
-      expect(applicationBundle, 'Debug');
-
-      const BuildInfo flavoredApp = BuildInfo(BuildMode.release, 'flavor', treeShakeIcons: false);
-      applicationBundle = macosApp.bundleDirectory(flavoredApp);
-      expect(applicationBundle, 'Release Flavor');
-
     }, overrides: overrides);
   });
 }
