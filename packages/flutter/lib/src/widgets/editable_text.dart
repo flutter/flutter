@@ -3935,7 +3935,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       adjustedCodeUnitPosition = caretPosition == 0 ? caretPosition : caretPosition - 1;
     }
 
-    int newOffset = forward
+    final int newOffset = forward
       ? textBoundary.getTrailingTextBoundaryAt(adjustedCodeUnitPosition) ?? _value.text.length
       : textBoundary.getLeadingTextBoundaryAt(adjustedCodeUnitPosition) ?? 0;
 
