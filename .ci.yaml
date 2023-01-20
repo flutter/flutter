@@ -4635,6 +4635,8 @@ targets:
       - bin/**
       - .ci.yaml
 
+# in line 4653 added "windows" in tags #kakashi - https://github.com/KaKashi1210
+# Issue 104104
   - name: Windows web_tool_tests_2_2
     recipe: flutter/flutter_drone
     timeout: 60
@@ -4649,7 +4651,7 @@ targets:
       shard: web_tool_tests
       subshard: "2_2"
       tags: >
-        ["framework", "hostonly", "shard"]
+        ["framework", "hostonly", "shard" ,"windows"]  
     runIf:
     - dev/**
     - packages/flutter_tools/**
