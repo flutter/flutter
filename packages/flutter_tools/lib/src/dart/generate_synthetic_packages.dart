@@ -14,8 +14,6 @@ Future<void> generateLocalizationsSyntheticPackage({
   required Environment environment,
   required BuildSystem buildSystem,
 }) async {
-  assert(environment != null);
-  assert(buildSystem != null);
 
   final FileSystem fileSystem = environment.fileSystem;
   final File l10nYamlFile = fileSystem.file(

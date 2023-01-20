@@ -53,8 +53,7 @@ class FlutterDevice {
     this.userIdentifier,
     required this.developmentShaderCompiler,
     this.developmentSceneImporter,
-  }) : assert(buildInfo.trackWidgetCreation != null),
-       generator = generator ?? ResidentCompiler(
+  }) : generator = generator ?? ResidentCompiler(
          globals.artifacts!.getArtifactPath(
            Artifact.flutterPatchedSdkPath,
            platform: targetPlatform,
@@ -528,9 +527,7 @@ class FlutterDevice {
     }
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
-    if (coldRunner.traceStartup != null) {
-      platformArgs['trace-startup'] = coldRunner.traceStartup;
-    }
+    platformArgs['trace-startup'] = coldRunner.traceStartup;
     platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
@@ -1433,7 +1430,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
-    assert(exitCode != null);
     await cleanupAtFinish();
     return exitCode;
   }
@@ -1911,7 +1907,7 @@ class DevToolsServerAddress {
   final int port;
 
   Uri? get uri {
-    if (host == null || port == null) {
+    if (port == null) {
       return null;
     }
     return Uri(scheme: 'http', host: host, port: port);

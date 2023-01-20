@@ -161,7 +161,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   late final Set<String> _supportedEmbeddings = _getSupportedEmbeddings();
 
   Set<String> _getSupportedEmbeddings() {
-    assert(pluginPath != null);
     final Set<String> supportedEmbeddings = <String>{};
     final String baseMainPath = _fileSystem.path.join(
       pluginPath,

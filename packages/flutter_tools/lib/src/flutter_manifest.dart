@@ -32,7 +32,7 @@ class FlutterManifest {
     required FileSystem fileSystem,
     required Logger logger,
   }) {
-    if (path == null || !fileSystem.isFileSync(path)) {
+    if (!fileSystem.isFileSync(path)) {
       return _createFromYaml(null, logger);
     }
     final String manifest = fileSystem.file(path).readAsStringSync();
@@ -237,7 +237,7 @@ class FlutterManifest {
         assetsUri = const <Uri>[];
       } else {
         for (final Object? asset in assets) {
-          if (asset is! String || asset == null || asset == '') {
+          if (asset is! String || asset == '') {
             _logger.printError('Deferred component asset manifest contains a null or empty uri.');
             continue;
           }
@@ -319,7 +319,7 @@ class FlutterManifest {
     }
     final List<Uri> results = <Uri>[];
     for (final Object? asset in assets) {
-      if (asset is! String || asset == null || asset == '') {
+      if (asset is! String || asset == '') {
         _logger.printError('Asset manifest contains a null or empty uri.');
         continue;
       }
@@ -387,7 +387,7 @@ class FlutterManifest {
     }
     final List<Uri> results = <Uri>[];
     for (final Object? item in items) {
-      if (item is! String || item == null || item == '') {
+      if (item is! String || item == '') {
         _logger.printError('$singularName manifest contains a null or empty uri.');
         continue;
       }
@@ -422,9 +422,7 @@ class FlutterManifest {
 
 class Font {
   Font(this.familyName, this.fontAssets)
-    : assert(familyName != null),
-      assert(fontAssets != null),
-      assert(fontAssets.isNotEmpty);
+    : assert(fontAssets.isNotEmpty);
 
   final String familyName;
   final List<FontAsset> fontAssets;
@@ -441,8 +439,7 @@ class Font {
 }
 
 class FontAsset {
-  FontAsset(this.assetUri, {this.weight, this.style})
-    : assert(assetUri != null);
+  FontAsset(this.assetUri, {this.weight, this.style});
 
   final Uri assetUri;
   final int? weight;
@@ -510,7 +507,7 @@ bool _validate(Object? manifest, Logger logger) {
 }
 
 void _validateFlutter(YamlMap? yaml, List<String> errors) {
-  if (yaml == null || yaml.entries == null) {
+  if (yaml == null) {
     return;
   }
   for (final MapEntry<Object?, Object?> kvp in yaml.entries) {
@@ -602,7 +599,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         }
         break;
       case 'plugin':
-        if (yamlValue is! YamlMap || yamlValue == null) {
+        if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
           break;
         }

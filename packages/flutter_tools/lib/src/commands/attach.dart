@@ -439,7 +439,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           throwToolExit(error.toString());
         }
         result = await app.runner!.waitForAppToFinish();
-        assert(result != null);
         return;
       }
       while (true) {
@@ -498,10 +497,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     required FlutterProject flutterProject,
     required bool usesIpv6,
   }) async {
-    assert(observatoryUris != null);
-    assert(device != null);
-    assert(flutterProject != null);
-    assert(usesIpv6 != null);
     final BuildInfo buildInfo = await getBuildInfo();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(

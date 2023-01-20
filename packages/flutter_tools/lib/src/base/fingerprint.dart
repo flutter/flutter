@@ -22,8 +22,7 @@ class Fingerprinter {
     required FileSystem fileSystem,
     required Logger logger,
   }) : _paths = paths.toList(),
-       assert(fingerprintPath != null),
-       assert(paths != null && paths.every((String path) => path != null)),
+       assert(paths.every((String path) => path != null)),
        _logger = logger,
        _fileSystem = fileSystem;
 

@@ -210,7 +210,6 @@ class Daemon {
 
     try {
       final String method = request.data['method']! as String;
-      assert(method != null);
       if (!method.contains('.')) {
         throw DaemonException('method not understood: $method');
       }

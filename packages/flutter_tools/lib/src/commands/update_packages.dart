@@ -603,9 +603,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       while (path != null) {
         buf.write(path.to);
         path = path.from!;
-        if (path != null) {
-          buf.write(' <- ');
-        }
+        buf.write(' <- ');
       }
       globals.printStatus(buf.toString(), wrap: false);
     }
@@ -878,7 +876,6 @@ class PubspecYaml {
   /// that depend on the Flutter or Dart SDK directly and are thus automatically
   /// pinned).
   void apply(PubDependencyTree versions, Set<String> specialDependencies) {
-    assert(versions != null);
     final List<String> output = <String>[]; // the string data to output to the file, line by line
     final Set<String> directDependencies = <String>{}; // packages this pubspec directly depends on (i.e. not transitive)
     final Set<String> devDependencies = <String>{};
@@ -1311,7 +1308,6 @@ class PubspecDependency extends PubspecLine {
   /// We return true if we parsed it and stored the line in lockLine.
   /// We return false if we parsed it and it's a git dependency that needs the next few lines.
   bool parseLock(String line, String pubspecPath, { required bool lockIsOverride }) {
-    assert(lockIsOverride != null);
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
@@ -1545,8 +1541,6 @@ class PubDependencyTree {
     required Set<String> exclude,
     List<String>? result,
   }) {
-    assert(seen != null);
-    assert(exclude != null);
     result ??= <String>[];
     final Set<String>? dependencies = _dependencyTree[package];
     if (dependencies == null) {

@@ -20,13 +20,7 @@ class Plugin {
     required this.dependencies,
     required this.isDirectDependency,
     this.implementsPackage,
-  }) : assert(name != null),
-       assert(path != null),
-       assert(platforms != null),
-       assert(defaultPackagePlatforms != null),
-       assert(pluginDartClassPlatforms != null),
-       assert(dependencies != null),
-       assert(isDirectDependency != null);
+  });
 
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
@@ -194,26 +188,22 @@ class Plugin {
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String;
-    if (pluginYaml != null && pluginClass != null) {
-      final String androidPackage = pluginYaml['androidPackage'] as String;
-      if (androidPackage != null) {
-        platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
-          name: name,
-          package: pluginYaml['androidPackage'] as String,
-          pluginClass: pluginClass,
-          pluginPath: path,
-          fileSystem: fileSystem,
-        );
-      }
+    final String androidPackage = pluginYaml['androidPackage'] as String;
+    platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
+      name: name,
+      package: pluginYaml['androidPackage'] as String,
+      pluginClass: pluginClass,
+      pluginPath: path,
+      fileSystem: fileSystem,
+    );
 
-      final String iosPrefix = pluginYaml['iosPrefix'] as String? ?? '';
-      platforms[IOSPlugin.kConfigKey] =
-          IOSPlugin(
-            name: name,
-            classPrefix: iosPrefix,
-            pluginClass: pluginClass,
-          );
-    }
+    final String iosPrefix = pluginYaml['iosPrefix'] as String? ?? '';
+    platforms[IOSPlugin.kConfigKey] =
+        IOSPlugin(
+          name: name,
+          classPrefix: iosPrefix,
+          pluginClass: pluginClass,
+        );
     return Plugin(
       name: name,
       path: path,
@@ -410,8 +400,7 @@ class PluginInterfaceResolution {
   PluginInterfaceResolution({
     required this.plugin,
     required this.platform,
-  }) : assert(plugin != null),
-       assert(platform != null);
+  });
 
   /// The plugin.
   final Plugin plugin;

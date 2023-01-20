@@ -590,8 +590,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<String>? dartDefines,
     this.librariesSpec,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  }) : assert(sdkRoot != null),
-       _logger = logger,
+  }) : _logger = logger,
        _processManager = processManager,
        _artifacts = artifacts,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
@@ -654,7 +653,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? projectRootPath,
     FileSystem? fs,
   }) async {
-    assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }

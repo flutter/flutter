@@ -1347,7 +1347,6 @@ abstract class FlutterCommand extends Command<void> {
     if (commandPath == null) {
       return;
     }
-    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
@@ -1752,4 +1751,4 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isBlank(String s) => s.trim().isEmpty;

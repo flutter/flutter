@@ -88,16 +88,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required Logger logger,
     required FeatureFlags featureFlags,
     PrintFn usagePrintFn = print,
-  }) : assert(customDevicesConfig != null),
-       assert(operatingSystemUtils != null),
-       assert(terminal != null),
-       assert(platform != null),
-       assert(processManager != null),
-       assert(fileSystem != null),
-       assert(logger != null),
-       assert(featureFlags != null),
-       assert(usagePrintFn != null),
-       _customDevicesConfig = customDevicesConfig,
+  }) : _customDevicesConfig = customDevicesConfig,
        _featureFlags = featureFlags,
        _usagePrintFn = usagePrintFn
   {
