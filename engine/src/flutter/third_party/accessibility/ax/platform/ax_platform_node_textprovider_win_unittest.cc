@@ -349,7 +349,7 @@ TEST_F(AXPlatformNodeTextProviderTest,
   base::win::ScopedBstr text_content;
   EXPECT_HRESULT_SUCCEEDED(
       text_range_provider->GetText(-1, text_content.Receive()));
-  EXPECT_EQ(fml::WideStringToUtf16(text_content.Get()),
+  EXPECT_EQ(base::WideToUTF16(text_content.Get()),
             u"Dialog label.Dialog description." + kEmbeddedCharacterAsString +
                 u"ok.Some more detail " + u"about dialog.");
 

@@ -13,7 +13,6 @@
 #include "ax/platform/ax_platform_node_win.h"
 #include "ax/platform/ax_platform_tree_manager.h"
 #include "base/win/variant_vector.h"
-#include "flutter/fml/platform/win/wstring_conversion.h"
 
 #define UIA_VALIDATE_TEXTRANGEPROVIDER_CALL()                  \
   if (!GetOwner() || !GetOwner()->GetDelegate() || !start() || \
@@ -484,7 +483,7 @@ HRESULT AXPlatformNodeTextRangeProviderWin::FindText(
   ScopedAXEmbeddedObjectBehaviorSetter ax_embedded_object_behavior(
       AXEmbeddedObjectBehavior::kSuppressCharacter);
 
-  std::u16string search_string = fml::WideStringToUtf16(string);
+  std::u16string search_string = base::WideToUTF16(string);
   if (search_string.length() <= 0)
     return E_INVALIDARG;
 
@@ -704,7 +703,7 @@ HRESULT AXPlatformNodeTextRangeProviderWin::GetText(int max_count, BSTR* text) {
   if (max_count < -1)
     return E_INVALIDARG;
 
-  std::wstring full_text = fml::Utf16ToWideString(GetString(max_count));
+  std::wstring full_text = base::UTF16ToWide(GetString(max_count));
   if (!full_text.empty()) {
     size_t length = full_text.length();
 
