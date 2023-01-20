@@ -235,55 +235,33 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
     settings.executable_name = command_line.argv0();
   }
 
-  // Enable the VM Service
-  settings.enable_vm_service =
-      !command_line.HasOption(FlagForSwitch(Switch::DisableVMService)) &&
-      // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-      // See https://github.com/dart-lang/sdk/issues/50233
+  // Enable Observatory
+  settings.enable_observatory =
       !command_line.HasOption(FlagForSwitch(Switch::DisableObservatory));
 
-  // Enable mDNS VM Service Publication
-  settings.enable_vm_service_publication =
-      !command_line.HasOption(
-          FlagForSwitch(Switch::DisableVMServicePublication)) &&
-      !command_line.HasOption(
-          FlagForSwitch(Switch::DisableObservatoryPublication));
+  // Enable mDNS Observatory Publication
+  settings.enable_observatory_publication = !command_line.HasOption(
+      FlagForSwitch(Switch::DisableObservatoryPublication));
 
-  // Set VM Service Host
-  if (command_line.HasOption(FlagForSwitch(Switch::DeviceVMServiceHost))) {
-    command_line.GetOptionValue(FlagForSwitch(Switch::DeviceVMServiceHost),
-                                &settings.vm_service_host);
-  } else if (command_line.HasOption(
-                 FlagForSwitch(Switch::DeviceObservatoryHost))) {
-    // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-    // See https://github.com/dart-lang/sdk/issues/50233
+  // Set Observatory Host
+  if (command_line.HasOption(FlagForSwitch(Switch::DeviceObservatoryHost))) {
     command_line.GetOptionValue(FlagForSwitch(Switch::DeviceObservatoryHost),
-                                &settings.vm_service_host);
+                                &settings.observatory_host);
   }
-  // Default the VM Service port based on --ipv6 if not set.
-  if (settings.vm_service_host.empty()) {
-    settings.vm_service_host =
+  // Default the observatory port based on --ipv6 if not set.
+  if (settings.observatory_host.empty()) {
+    settings.observatory_host =
         command_line.HasOption(FlagForSwitch(Switch::IPv6)) ? "::1"
                                                             : "127.0.0.1";
   }
 
-  // Set VM Service Port
-  if (command_line.HasOption(FlagForSwitch(Switch::DeviceVMServicePort))) {
-    if (!GetSwitchValue(command_line, Switch::DeviceVMServicePort,
-                        &settings.vm_service_port)) {
-      FML_LOG(INFO)
-          << "VM Service port specified was malformed. Will default to "
-          << settings.vm_service_port;
-    }
-  } else if (command_line.HasOption(
-                 FlagForSwitch(Switch::DeviceObservatoryPort))) {
-    // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-    // See https://github.com/dart-lang/sdk/issues/50233
+  // Set Observatory Port
+  if (command_line.HasOption(FlagForSwitch(Switch::DeviceObservatoryPort))) {
     if (!GetSwitchValue(command_line, Switch::DeviceObservatoryPort,
-                        &settings.vm_service_port)) {
+                        &settings.observatory_port)) {
       FML_LOG(INFO)
-          << "VM Service port specified was malformed. Will default to "
-          << settings.vm_service_port;
+          << "Observatory port specified was malformed. Will default to "
+          << settings.observatory_port;
     }
   }
 

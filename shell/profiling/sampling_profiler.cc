@@ -33,7 +33,7 @@ void SamplingProfiler::Start() {
       << num_samples_per_sec_;
   double delay_between_samples = 1.0 / num_samples_per_sec_;
   auto task_delay = fml::TimeDelta::FromSecondsF(delay_between_samples);
-  UpdateDartVMServiceThreadName();
+  UpdateObservatoryThreadName();
   is_running_ = true;
   SampleRepeatedly(task_delay);
 }
@@ -88,7 +88,7 @@ void SamplingProfiler::SampleRepeatedly(fml::TimeDelta task_delay) const {
       task_delay);
 }
 
-void SamplingProfiler::UpdateDartVMServiceThreadName() const {
+void SamplingProfiler::UpdateObservatoryThreadName() const {
   FML_CHECK(profiler_task_runner_);
 
   profiler_task_runner_->PostTask(

@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library observatory_sky_shell_launcher;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 class ShellProcess {
-  final Completer<Uri> _vmServiceUriCompleter = Completer<Uri>();
+  final Completer<Uri> _observatoryUriCompleter = Completer<Uri>();
   final Process _process;
 
   ShellProcess(this._process) {
-    // Scan stdout and scrape the VM Service Uri.
+    // Scan stdout and scrape the Observatory Uri.
     _process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
       final uri = _extractVMServiceUri(line);
       if (uri != null) {
-        _vmServiceUriCompleter.complete(uri);
+        _observatoryUriCompleter.complete(uri);
       }
     });
   }
@@ -27,13 +29,13 @@ class ShellProcess {
     return _process.kill();
   }
 
-  Future<Uri> waitForVMService() async {
-    return _vmServiceUriCompleter.future;
+  Future<Uri> waitForObservatory() async {
+    return _observatoryUriCompleter.future;
   }
 
   Uri? _extractVMServiceUri(String str) {
     final listeningMessageRegExp = RegExp(
-      r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+      r'(?:Observatory|The Dart VM service is) listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
     );
     final match = listeningMessageRegExp.firstMatch(str);
     if (match != null) {
@@ -45,7 +47,7 @@ class ShellProcess {
 
 class ShellLauncher {
   final List<String> args = <String>[
-    '--vm-service-port=0',
+    '--observatory-port=0',
     '--non-interactive',
     '--run-forever',
     '--disable-service-auth-codes',

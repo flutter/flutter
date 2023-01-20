@@ -15,7 +15,7 @@ void main() {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
     if (info.serverUri == null) {
-      fail('This test must not be run with --disable-vm-service.');
+      fail('This test must not be run with --disable-observatory.');
     }
 
     final vms.VmService vmService = await vmServiceConnectUri(
