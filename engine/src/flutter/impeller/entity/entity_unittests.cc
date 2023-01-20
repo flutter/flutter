@@ -856,7 +856,7 @@ TEST_P(EntityTest, Filters) {
 
     auto blend1 = ColorFilterContents::MakeBlend(
         BlendMode::kScreen,
-        {fi_bridge, FilterInput::Make(blend0), fi_bridge, fi_bridge});
+        {FilterInput::Make(blend0), fi_bridge, fi_bridge, fi_bridge});
 
     Entity entity;
     entity.SetTransformation(Matrix::MakeScale(GetContentScale()) *

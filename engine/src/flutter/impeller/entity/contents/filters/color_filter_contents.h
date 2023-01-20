@@ -10,6 +10,7 @@ namespace impeller {
 
 class ColorFilterContents : public FilterContents {
  public:
+  /// @brief the [inputs] are expected to be in the order of dst, src.
   static std::shared_ptr<ColorFilterContents> MakeBlend(
       BlendMode blend_mode,
       FilterInput::Vector inputs,

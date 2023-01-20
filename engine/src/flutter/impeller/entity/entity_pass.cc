@@ -531,9 +531,9 @@ bool EntityPass::OnRender(
       }
 
       FilterInput::Vector inputs = {
-          FilterInput::Make(result.entity.GetContents()),
           FilterInput::Make(texture,
-                            result.entity.GetTransformation().Invert())};
+                            result.entity.GetTransformation().Invert()),
+          FilterInput::Make(result.entity.GetContents())};
       auto contents =
           ColorFilterContents::MakeBlend(result.entity.GetBlendMode(), inputs);
       contents->SetCoverageCrop(result.entity.GetCoverage());
