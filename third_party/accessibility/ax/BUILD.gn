@@ -106,7 +106,6 @@ source_set("ax") {
       "oleacc.lib",
       "uiautomationcore.lib",
     ]
-    deps = [ "//flutter/fml:string_conversion" ]
   }
 
   public_deps = [
