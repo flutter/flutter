@@ -103,7 +103,7 @@ void main() {
     final Icon closeButtonIcon = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(Icon)));
     final Icon drawerButtonIcon = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(Icon)));
     final Icon endDrawerButtonIcon = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(Icon)));
-    
+
     expect(backButtonIcon.icon == icon, isTrue);
     expect(closeButtonIcon.icon == icon, isTrue);
     expect(drawerButtonIcon.icon == icon, isTrue);
@@ -113,7 +113,7 @@ void main() {
     final RichText closeButtonIconText = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(RichText)));
     final RichText drawerButtonIconText = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(RichText)));
     final RichText endDrawerButtonIconText = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(RichText)));
-  
+
     expect(backButtonIconText.text.style!.color, green);
     expect(closeButtonIconText.text.style!.color, green);
     expect(drawerButtonIconText.text.style!.color, green);
@@ -164,7 +164,7 @@ void main() {
     final Icon closeButtonIcon = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(Icon)));
     final Icon drawerButtonIcon = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(Icon)));
     final Icon endDrawerButtonIcon = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(Icon)));
-    
+
     expect(backButtonIcon.icon == icon, isTrue);
     expect(closeButtonIcon.icon == icon, isTrue);
     expect(drawerButtonIcon.icon == icon, isTrue);
@@ -174,7 +174,7 @@ void main() {
     final RichText closeButtonIconText = tester.widget(find.descendant(of: find.byType(CloseButton), matching: find.byType(RichText)));
     final RichText drawerButtonIconText = tester.widget(find.descendant(of: find.byType(DrawerButton), matching: find.byType(RichText)));
     final RichText endDrawerButtonIconText = tester.widget(find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(RichText)));
-  
+
     expect(backButtonIconText.text.style!.color, green);
     expect(closeButtonIconText.text.style!.color, green);
     expect(drawerButtonIconText.text.style!.color, green);

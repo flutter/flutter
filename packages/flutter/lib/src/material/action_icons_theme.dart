@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'action_buttons.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ActionIconThemeData] that overrides the default icons of
 /// [BackButton], [CloseButton], [DrawerButton], and [EndDrawerButton] with
 /// [ActionIconTheme.of] or the overall [Theme]'s [ThemeData.actionIconTheme].
@@ -137,7 +140,7 @@ class ActionIconTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// ActionIconThemeData theme = ActionIconTheme.of(context);
+  /// ActionIconThemeData? theme = ActionIconTheme.of(context);
   /// ```
   static ActionIconThemeData? of(BuildContext context) {
     final ActionIconTheme? actionIconTheme = context.dependOnInheritedWidgetOfExactType<ActionIconTheme>();
