@@ -174,7 +174,6 @@ class WebFlutterDriver extends FlutterDriver {
       driverLog('WebFlutterDriver', message);
     }
     if (_logCommunicationToFile) {
-      assert(_logFilePathName != null);
       final File file = fs.file(_logFilePathName);
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: FileMode.append, flush: true);
