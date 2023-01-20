@@ -104,30 +104,10 @@ class ActionIconThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<WidgetBuilder>(
-        'backButtonIconBuilder',
-        backButtonIconBuilder,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<WidgetBuilder>(
-        'closeButtonIconBuilder',
-        closeButtonIconBuilder,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<WidgetBuilder>(
-        'drawerButtonIconBuilder',
-        drawerButtonIconBuilder,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<WidgetBuilder>(
-        'endDrawerButtonIconBuilder',
-        endDrawerButtonIconBuilder,
-      ),
-    );
+    properties.add(DiagnosticsProperty<WidgetBuilder>('backButtonIconBuilder', backButtonIconBuilder, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetBuilder>('closeButtonIconBuilder', closeButtonIconBuilder, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetBuilder>('drawerButtonIconBuilder', drawerButtonIconBuilder, defaultValue: null));
+    properties.add(DiagnosticsProperty<WidgetBuilder>('endDrawerButtonIconBuilder', endDrawerButtonIconBuilder, defaultValue: null));
   }
 }
 

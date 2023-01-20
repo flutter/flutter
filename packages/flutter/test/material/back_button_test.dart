@@ -133,6 +133,27 @@ void main() {
     expect(iconText.text.style!.color, Colors.blue);
   });
 
+  testWidgets('BackButton color with ButtonStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: BackButton(
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.blue),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(BackButton),
+      matching: find.byType(RichText),
+    ));
+    expect(iconText.text.style!.color, Colors.blue);
+  });
+
   testWidgets('BackButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
@@ -227,6 +248,27 @@ void main() {
         home: Material(
           child: CloseButton(
             color: Colors.red,
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(CloseButton),
+      matching: find.byType(RichText),
+    ));
+    expect(iconText.text.style!.color, Colors.red);
+  });
+
+  testWidgets('CloseButton color with ButtonStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: CloseButton(
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
           ),
         ),
       ),
