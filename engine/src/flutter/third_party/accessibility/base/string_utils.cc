@@ -72,14 +72,6 @@ std::string UTF16ToUTF8(std::u16string src) {
   return fml::Utf16ToUtf8(src);
 }
 
-std::u16string WideToUTF16(const std::wstring& src) {
-  return std::u16string(src.begin(), src.end());
-}
-
-std::wstring UTF16ToWide(const std::u16string& src) {
-  return std::wstring(src.begin(), src.end());
-}
-
 std::u16string NumberToString16(float number) {
   return ASCIIToUTF16(NumberToString(number));
 }
