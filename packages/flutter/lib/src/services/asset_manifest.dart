@@ -78,6 +78,7 @@ class _AssetManifestBin implements AssetManifest {
 }
 
 /// Contains information about an asset that is a variant of another asset.
+@immutable
 class AssetVariant {
   /// Creates an object containing information about an asset variant.
   const AssetVariant({
