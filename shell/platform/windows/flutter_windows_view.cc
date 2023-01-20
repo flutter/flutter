@@ -6,6 +6,7 @@
 
 #include <chrono>
 
+#include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
@@ -666,7 +667,7 @@ void FlutterWindowsView::AnnounceAlert(const std::wstring& text) {
   if (!alert_delegate) {
     return;
   }
-  alert_delegate->SetText(base::WideToUTF16(text));
+  alert_delegate->SetText(fml::WideStringToUtf16(text));
   ui::AXPlatformNodeWin* alert_node = binding_handler_->GetAlert();
   NotifyWinEventWrapper(alert_node, ax::mojom::Event::kAlert);
 }
