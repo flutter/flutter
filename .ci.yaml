@@ -1382,12 +1382,10 @@ targets:
     presubmit: false
     bringup: true
     timeout: 60
-    dimensions: {
-      cores: "swarming.dimension('8')",
-      kvm: "swarming.dimension('1')",
-      machine_type: "swarming.dimension('n1-standard-8')"
-    }
     properties:
+      cores: "8"
+      kvm: "1"
+      machine_type: "n1-standard-8"
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: android_defines_test
