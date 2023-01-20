@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLUTTERDARTVMSERVICEPUBLISHER_H_
-#define FLUTTER_FLUTTERDARTVMSERVICEPUBLISHER_H_
+#ifndef FLUTTER_FLUTTEROBSERVATORYPUBLISHER_H_
+#define FLUTTER_FLUTTEROBSERVATORYPUBLISHER_H_
 
 #import <Foundation/Foundation.h>
 
-@interface FlutterDartVMServicePublisher : NSObject
+@interface FlutterObservatoryPublisher : NSObject
 
-- (instancetype)initWithEnableVMServicePublication:(BOOL)enableVMServicePublication
+- (instancetype)initWithEnableObservatoryPublication:(BOOL)enableObservatoryPublication
     NS_DESIGNATED_INITIALIZER;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -18,4 +18,4 @@
 
 @end
 
-#endif  // FLUTTER_FLUTTERDARTVMSERVICEPUBLISHER_H_
+#endif  // FLUTTER_FLUTTEROBSERVATORYPUBLISHER_H_

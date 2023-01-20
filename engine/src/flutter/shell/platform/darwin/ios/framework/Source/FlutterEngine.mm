@@ -21,8 +21,8 @@
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartVMServicePublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSpellCheckPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
@@ -108,7 +108,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory;
 
   fml::WeakPtr<FlutterViewController> _viewController;
-  fml::scoped_nsobject<FlutterDartVMServicePublisher> _publisher;
+  fml::scoped_nsobject<FlutterObservatoryPublisher> _publisher;
 
   std::shared_ptr<flutter::FlutterPlatformViewsController> _platformViewsController;
   flutter::IOSRenderingAPI _renderingApi;
@@ -498,7 +498,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return _keyEventChannel.get();
 }
 
-- (NSURL*)vmServiceUrl {
+- (NSURL*)observatoryUrl {
   return [_publisher.get() url];
 }
 
@@ -680,13 +680,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)setupShell:(std::unique_ptr<flutter::Shell>)shell
-    withVMServicePublication:(BOOL)doesVMServicePublication {
+    withObservatoryPublication:(BOOL)doesObservatoryPublication {
   _shell = std::move(shell);
   [self setupChannels];
   [self onLocaleUpdated:nil];
   [self initializeDisplays];
-  _publisher.reset([[FlutterDartVMServicePublisher alloc]
-      initWithEnableVMServicePublication:doesVMServicePublication]);
+  _publisher.reset([[FlutterObservatoryPublisher alloc]
+      initWithEnableObservatoryPublication:doesObservatoryPublication]);
   [self maybeSetupPlatformViewChannels];
   _shell->SetGpuAvailability(_isGpuDisabled ? flutter::GpuAvailability::kUnavailable
                                             : flutter::GpuAvailability::kAvailable);
@@ -816,7 +816,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                    << entrypoint.UTF8String;
   } else {
     [self setupShell:std::move(shell)
-        withVMServicePublication:settings.enable_vm_service_publication];
+        withObservatoryPublication:settings.enable_observatory_publication];
     if ([FlutterEngine isProfilerEnabled]) {
       [self startProfiler];
     }
@@ -1312,7 +1312,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   result->_profiler = _profiler;
   result->_profiler_metrics = _profiler_metrics;
   result->_isGpuDisabled = _isGpuDisabled;
-  [result setupShell:std::move(shell) withVMServicePublication:NO];
+  [result setupShell:std::move(shell) withObservatoryPublication:NO];
   return [result autorelease];
 }
 

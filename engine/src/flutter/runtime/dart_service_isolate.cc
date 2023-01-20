@@ -33,7 +33,7 @@ namespace {
 
 static Dart_LibraryTagHandler g_embedder_tag_handler;
 static tonic::DartLibraryNatives* g_natives;
-static std::string g_vm_service_uri;
+static std::string g_observatory_uri;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -51,7 +51,7 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 
 std::mutex DartServiceIsolate::callbacks_mutex_;
 
-std::set<std::unique_ptr<DartServiceIsolate::DartVMServiceServerStateCallback>>
+std::set<std::unique_ptr<DartServiceIsolate::ObservatoryServerStateCallback>>
     DartServiceIsolate::callbacks_;
 
 void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
@@ -63,11 +63,11 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
     return;
   }
 
-  g_vm_service_uri = uri;
+  g_observatory_uri = uri;
 
   // Collect callbacks to fire in a separate collection and invoke them outside
   // the lock.
-  std::vector<DartServiceIsolate::DartVMServiceServerStateCallback>
+  std::vector<DartServiceIsolate::ObservatoryServerStateCallback>
       callbacks_to_fire;
   {
     std::scoped_lock lock(callbacks_mutex_);
@@ -82,13 +82,13 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
 }
 
 DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
-    const DartServiceIsolate::DartVMServiceServerStateCallback& callback) {
+    const DartServiceIsolate::ObservatoryServerStateCallback& callback) {
   if (!callback) {
     return 0;
   }
 
   auto callback_pointer =
-      std::make_unique<DartServiceIsolate::DartVMServiceServerStateCallback>(
+      std::make_unique<DartServiceIsolate::ObservatoryServerStateCallback>(
           callback);
 
   auto handle = reinterpret_cast<CallbackHandle>(callback_pointer.get());
@@ -98,8 +98,8 @@ DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
     callbacks_.insert(std::move(callback_pointer));
   }
 
-  if (!g_vm_service_uri.empty()) {
-    callback(g_vm_service_uri);
+  if (!g_observatory_uri.empty()) {
+    callback(g_observatory_uri);
   }
 
   return handle;

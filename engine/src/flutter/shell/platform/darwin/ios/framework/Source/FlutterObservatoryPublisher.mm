@@ -4,12 +4,12 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#import "FlutterDartVMServicePublisher.h"
+#import "FlutterObservatoryPublisher.h"
 
 #if FLUTTER_RELEASE
 
-@implementation FlutterDartVMServicePublisher
-- (instancetype)initWithEnableVMServicePublication:(BOOL)enableVMServicePublication {
+@implementation FlutterObservatoryPublisher
+- (instancetype)initWithEnableObservatoryPublication:(BOOL)enableObservatoryPublication {
   return [super init];
 }
 @end
@@ -23,9 +23,9 @@
 //
 // When debugging issues with this implementation, the following is helpful:
 //
-// 1) Running `dns-sd -Z _dartVmService`. This is a built-in macOS tool that
+// 1) Running `dns-sd -Z _dartobservatory`. This is a built-in macOS tool that
 //    can find advertized observatories using this method. If dns-sd can't find
-//    it, then the VM service is not getting advertised over any network
+//    it, then the observatory is not getting advertized over any network
 //    interface that the host machine has access to.
 // 2) The Python zeroconf package. The dns-sd tool can sometimes see things
 //    that aren't advertizing over a network interface - for example, simulators
@@ -45,37 +45,32 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/runtime/dart_service_isolate.h"
 
-@protocol FlutterDartVMServicePublisherDelegate
+@protocol FlutterObservatoryPublisherDelegate
 - (void)publishServiceProtocolPort:(NSURL*)uri;
 - (void)stopService;
 @end
 
-@interface FlutterDartVMServicePublisher ()
+@interface FlutterObservatoryPublisher ()
 + (NSData*)createTxtData:(NSURL*)url;
 
 @property(readonly, class) NSString* serviceName;
-@property(readonly) fml::scoped_nsobject<NSObject<FlutterDartVMServicePublisherDelegate>> delegate;
+@property(readonly) fml::scoped_nsobject<NSObject<FlutterObservatoryPublisherDelegate>> delegate;
 @property(nonatomic, readwrite) NSURL* url;
-@property(readonly) BOOL enableVMServicePublication;
+@property(readonly) BOOL enableObservatoryPublication;
 
 @end
 
-@interface DartVMServiceDNSServiceDelegate : NSObject <FlutterDartVMServicePublisherDelegate>
+@interface ObservatoryDNSServiceDelegate : NSObject <FlutterObservatoryPublisherDelegate>
 @end
 
-@implementation DartVMServiceDNSServiceDelegate {
+@implementation ObservatoryDNSServiceDelegate {
   DNSServiceRef _dnsServiceRef;
-  DNSServiceRef _legacyDnsServiceRef;
 }
 
 - (void)stopService {
   if (_dnsServiceRef) {
     DNSServiceRefDeallocate(_dnsServiceRef);
     _dnsServiceRef = NULL;
-  }
-  if (_legacyDnsServiceRef) {
-    DNSServiceRefDeallocate(_legacyDnsServiceRef);
-    _legacyDnsServiceRef = NULL;
   }
 }
 
@@ -88,20 +83,18 @@
   // Physical devices need to request all interfaces.
   uint32_t interfaceIndex = 0;
 #endif  // TARGET_IPHONE_SIMULATOR
-  const char* registrationType = "_dartVmService._tcp";
-  const char* legacyRegistrationType = "_dartobservatory._tcp";
-
+  const char* registrationType = "_dartobservatory._tcp";
   const char* domain = "local.";  // default domain
   uint16_t port = [[url port] unsignedShortValue];
 
-  NSData* txtData = [FlutterDartVMServicePublisher createTxtData:url];
+  NSData* txtData = [FlutterObservatoryPublisher createTxtData:url];
   int err = DNSServiceRegister(&_dnsServiceRef, flags, interfaceIndex,
-                               FlutterDartVMServicePublisher.serviceName.UTF8String,
-                               registrationType, domain, NULL, htons(port), txtData.length,
-                               txtData.bytes, RegistrationCallback, NULL);
+                               FlutterObservatoryPublisher.serviceName.UTF8String, registrationType,
+                               domain, NULL, htons(port), txtData.length, txtData.bytes,
+                               RegistrationCallback, NULL);
 
   if (err != 0) {
-    FML_LOG(ERROR) << "Failed to register Dart VM Service port with mDNS with error " << err << ".";
+    FML_LOG(ERROR) << "Failed to register observatory port with mDNS with error " << err << ".";
     if (@available(iOS 14.0, *)) {
       FML_LOG(ERROR) << "On iOS 14+, local network broadcast in apps need to be declared in "
                      << "the app's Info.plist. Debug and profile Flutter apps and modules host "
@@ -117,31 +110,6 @@
   } else {
     DNSServiceSetDispatchQueue(_dnsServiceRef, dispatch_get_main_queue());
   }
-
-  // TODO(bkonyi): remove once flutter_tools no longer looks for the legacy registration type.
-  // See https://github.com/dart-lang/sdk/issues/50233
-  err = DNSServiceRegister(&_legacyDnsServiceRef, flags, interfaceIndex,
-                           FlutterDartVMServicePublisher.serviceName.UTF8String,
-                           legacyRegistrationType, domain, NULL, htons(port), txtData.length,
-                           txtData.bytes, RegistrationCallback, NULL);
-
-  if (err != 0) {
-    FML_LOG(ERROR) << "Failed to register Dart VM Service port with mDNS with error " << err << ".";
-    if (@available(iOS 14.0, *)) {
-      FML_LOG(ERROR) << "On iOS 14+, local network broadcast in apps need to be declared in "
-                     << "the app's Info.plist. Debug and profile Flutter apps and modules host "
-                     << "VM services on the local network to support debugging features such "
-                     << "as hot reload and DevTools. To make your Flutter app or module "
-                     << "attachable and debuggable, add a '" << legacyRegistrationType << "' value "
-                     << "to the 'NSBonjourServices' key in your Info.plist for the Debug/"
-                     << "Profile configurations. "
-                     << "For more information, see "
-                     << "https://flutter.dev/docs/development/add-to-app/ios/"
-                        "project-setup#local-network-privacy-permissions";
-    }
-  } else {
-    DNSServiceSetDispatchQueue(_legacyDnsServiceRef, dispatch_get_main_queue());
-  }
 }
 
 static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
@@ -152,32 +120,32 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
                                            const char* domain,
                                            void* context) {
   if (errorCode == kDNSServiceErr_NoError) {
-    FML_DLOG(INFO) << "FlutterDartVMServicePublisher is ready!";
+    FML_DLOG(INFO) << "FlutterObservatoryPublisher is ready!";
   } else if (errorCode == kDNSServiceErr_PolicyDenied) {
     FML_LOG(ERROR)
-        << "Could not register as server for FlutterDartVMServicePublisher, permission "
+        << "Could not register as server for FlutterObservatoryPublisher, permission "
         << "denied. Check your 'Local Network' permissions for this app in the Privacy section of "
         << "the system Settings.";
   } else {
-    FML_LOG(ERROR) << "Could not register as server for FlutterDartVMServicePublisher. Check your "
+    FML_LOG(ERROR) << "Could not register as server for FlutterObservatoryPublisher. Check your "
                       "network settings and relaunch the application.";
   }
 }
 
 @end
 
-@implementation FlutterDartVMServicePublisher {
+@implementation FlutterObservatoryPublisher {
   flutter::DartServiceIsolate::CallbackHandle _callbackHandle;
-  std::unique_ptr<fml::WeakPtrFactory<FlutterDartVMServicePublisher>> _weakFactory;
+  std::unique_ptr<fml::WeakPtrFactory<FlutterObservatoryPublisher>> _weakFactory;
 }
 
-- (instancetype)initWithEnableVMServicePublication:(BOOL)enableVMServicePublication {
+- (instancetype)initWithEnableObservatoryPublication:(BOOL)enableObservatoryPublication {
   self = [super init];
   NSAssert(self, @"Super must not return null on init.");
 
-  _delegate.reset([[DartVMServiceDNSServiceDelegate alloc] init]);
-  _enableVMServicePublication = enableVMServicePublication;
-  _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterDartVMServicePublisher>>(self);
+  _delegate.reset([[ObservatoryDNSServiceDelegate alloc] init]);
+  _enableObservatoryPublication = enableObservatoryPublication;
+  _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterObservatoryPublisher>>(self);
 
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
@@ -192,7 +160,7 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
               NSURL* url = [[[NSURL alloc]
                   initWithString:[NSString stringWithUTF8String:uri.c_str()]] autorelease];
               weak.get().url = url;
-              if (weak.get().enableVMServicePublication) {
+              if (weak.get().enableObservatoryPublication) {
                 [[weak.get() delegate] publishServiceProtocolPort:url];
               }
             }
