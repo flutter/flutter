@@ -2443,7 +2443,6 @@ targets:
       task_name: animated_complex_opacity_perf_impeller_macos__e2e_summary
 
   - name: Mac animated_complex_opacity_perf_macos__e2e_summary
-    bringup: true
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
