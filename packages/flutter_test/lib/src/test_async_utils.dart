@@ -187,10 +187,7 @@ class TestAsyncUtils {
         return;
       }
       candidateScope = _scopeStack[_scopeStack.length - skipCount - 1];
-      assert(candidateScope != null);
-      assert(candidateScope.zone != null);
     } while (candidateScope.zone != zone);
-    assert(scope != null);
     final List<DiagnosticsNode> information = <DiagnosticsNode>[
       ErrorSummary('Guarded function conflict.'),
       ErrorHint('You must use "await" with all Future-returning test APIs.'),

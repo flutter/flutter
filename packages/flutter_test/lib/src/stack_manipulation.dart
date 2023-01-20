@@ -26,7 +26,6 @@ int reportExpectCall(StackTrace stack, List<DiagnosticsNode> information) {
       line2.firstMatch(stackLines[2]) != null &&
       line3.firstMatch(stackLines[3]) != null) {
     final Match expectMatch = line4.firstMatch(stackLines[4])!;
-    assert(expectMatch != null);
     assert(expectMatch.groupCount == 2);
     information.add(DiagnosticsStackTrace.singleFrame(
       'This was caught by the test expectation on the following line',
