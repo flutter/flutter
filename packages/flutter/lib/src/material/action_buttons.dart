@@ -60,6 +60,7 @@ abstract class _ActionButton extends StatelessWidget {
   /// Null by default.
   final ButtonStyle? style;
 
+  /// This returns the appropriate tooltip text for this action button.
   String _getTooltip(BuildContext context);
 
   /// This is the default function that is called when [onPressed] is set
@@ -71,6 +72,7 @@ abstract class _ActionButton extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: icon,
+      style: style,
       color: color,
       iconSize: iconSize,
       tooltip: _getTooltip(context),
