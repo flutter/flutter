@@ -46,5 +46,4 @@ void main() {
   vec4 blended = vec4(Blend(dst.rgb, src.rgb), 1) * dst.a;
 
   frag_color = mix(dst_sample, blended, src.a);
-  // frag_color = dst_sample;
 }

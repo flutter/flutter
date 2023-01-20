@@ -37,7 +37,7 @@ std::shared_ptr<ColorFilterContents> ColorFilterContents::MakeBlend(
   std::shared_ptr<BlendFilterContents> new_blend;
   for (auto in_i = inputs.begin() + 1; in_i < inputs.end(); in_i++) {
     new_blend = std::make_shared<BlendFilterContents>();
-    new_blend->SetInputs({*in_i, blend_input});
+    new_blend->SetInputs({blend_input, *in_i});
     new_blend->SetBlendMode(blend_mode);
     if (in_i < inputs.end() - 1 || foreground_color.has_value()) {
       blend_input = FilterInput::Make(
