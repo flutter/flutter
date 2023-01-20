@@ -21,6 +21,8 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -699,6 +701,8 @@ void main() {
     group('findAllTargetDevices', () {
       final FakeDevice device1 = FakeDevice('device1', 'device1');
       final FakeDevice device2 = FakeDevice('device2', 'device2');
+      final FakeIOSDevice iOSNetworkDevice = FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network);
+
       group('when specified device id', () {
         testUsingContext('returns device when device is found', () async {
           testDeviceManager.specifiedDeviceId = 'device-id';
@@ -824,6 +828,37 @@ void main() {
           }, overrides: <Type, Generator>{
             AnsiTerminal: () => terminal,
           });
+        });
+      });
+
+      group('when includes a network device', () {
+        testUsingCommandContext('returns one device', () async {
+          testDeviceManager.addDevice(iOSNetworkDevice);
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+          expect(usage.events, <TestUsageEvent>[
+            const TestUsageEvent(
+              'device',
+              'ios-network-device',
+              label: 'dummy',
+            ),
+          ]);
+          expect(devices, <Device>[iOSNetworkDevice]);
+        });
+        testUsingCommandContext('can return multiple devices', () async {
+          testDeviceManager.specifiedDeviceId = 'all';
+          testDeviceManager.addDevice(device1);
+          testDeviceManager.addDevice(iOSNetworkDevice);
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+          expect(usage.events, <TestUsageEvent>[
+            const TestUsageEvent(
+              'device',
+              'ios-network-device',
+              label: 'dummy',
+            ),
+          ]);
+          expect(devices, <Device>[device1, iOSNetworkDevice]);
         });
       });
     });
@@ -1009,4 +1044,16 @@ class FakeTerminal extends Fake implements AnsiTerminal {
     expect(acceptedCharacters, _nextPrompt);
     return _nextResult;
   }
+}
+
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
+class FakeIOSDevice extends Fake implements IOSDevice {
+  FakeIOSDevice({
+    this.interfaceType = IOSDeviceConnectionInterface.none,
+  });
+
+  @override
+  final IOSDeviceConnectionInterface interfaceType;
 }

@@ -27,6 +27,8 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../web/compile.dart';
@@ -1533,6 +1535,13 @@ abstract class FlutterCommand extends Command<void> {
           return null;
         }
       }
+    }
+
+    final Iterable<Device> networkDevices = devices.where((Device device) {
+      return device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network;
+    });
+    if (networkDevices.isNotEmpty) {
+      UsageEvent('device', 'ios-network-device', label: name, flutterUsage: globals.flutterUsage).send();
     }
 
     return devices;
