@@ -1858,7 +1858,8 @@ class ThemeData with Diagnosticable {
   ///     over the contents of a scrollable when overscrolled.
   @Deprecated(
     'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-    'This feature was deprecated after v2.13.0-0.0.pre.')
+    'This feature was deprecated after v2.13.0-0.0.pre.'
+  )
   final AndroidOverscrollIndicator? androidOverscrollIndicator;
 
   /// Obsolete property that was used for input validation errors, e.g. in
