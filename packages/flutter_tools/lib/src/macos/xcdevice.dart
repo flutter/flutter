@@ -227,16 +227,8 @@ class XCDevice {
 
   /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableIOSDevices({ Duration? timeout }) async {
-    Status? loadDevicesStatus;
-    if (timeout != null && timeout.inSeconds > 2) {
-      loadDevicesStatus = _logger.startProgress(
-        'Loading devices...',
-      );
-    }
     final List<Object>? allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
-    if (loadDevicesStatus != null) {
-      loadDevicesStatus.stop();
-    }
+
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
     }
