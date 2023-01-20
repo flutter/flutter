@@ -152,14 +152,14 @@ class ParagraphBoundary extends TextBoundary {
     if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
       index -= 2;
     } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
-      index--;
+      index -= 1;
     }
     while (index > 0 && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      index--;
+      index -= 1;
     }
 
     if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
-      index++;
+      index += 1;
     }
 
     return max(index, 0);
@@ -183,15 +183,15 @@ class ParagraphBoundary extends TextBoundary {
     int index = position;
 
     while (index < codeUnits.length && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      index++;
+      index += 1;
     }
 
     if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
-      index++;
+      index += 1;
     }
 
     if (index < codeUnits.length && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      index++;
+      index += 1;
     }
 
     return min(index, _text.length);
