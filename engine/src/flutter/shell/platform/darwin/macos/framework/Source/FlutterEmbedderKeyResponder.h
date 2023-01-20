@@ -30,4 +30,13 @@ typedef void (^FlutterSendEmbedderKeyEvent)(const FlutterKeyEvent& /* event */,
  */
 - (nonnull instancetype)initWithSendEvent:(_Nonnull FlutterSendEmbedderKeyEvent)sendEvent;
 
+/**
+ * Synthesize modifier keys events.
+ *
+ * If needed, synthesize modifier keys up and down events by comparing their
+ * current pressing states with the given modifier flags.
+ */
+- (void)syncModifiersIfNeeded:(NSEventModifierFlags)modifierFlags
+                    timestamp:(NSTimeInterval)timestamp;
+
 @end
