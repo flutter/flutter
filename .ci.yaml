@@ -1383,8 +1383,8 @@ targets:
     bringup: true
     timeout: 60
     dimensions:
-      cores: 8
-      kvm: 1
+      cores: "8"
+      kvm: "1"
       machine_type: "n1-standard-8"
     properties:
       tags: >
