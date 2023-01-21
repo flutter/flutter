@@ -1384,7 +1384,7 @@ targets:
     timeout: 60
     dimensions: {
       "cores": "8",
-      "kvm": "1"
+      "kvm": "1",
       "machine_type": "n1-standard-8"
     }
     properties:
