@@ -18,6 +18,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
+static const NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
+
 @implementation UIView (FirstResponder)
 - (BOOL)flt_hasFirstResponderInViewHierarchySubtree {
   if (self.isFirstResponder) {
@@ -451,6 +453,17 @@ int FlutterPlatformViewsController::CountClips(const MutatorsStack& mutators_sta
   return clipCount;
 }
 
+void FlutterPlatformViewsController::ClipViewSetMaskView(UIView* clipView) {
+  if (clipView.maskView) {
+    return;
+  }
+  UIView* flutterView = flutter_view_.get();
+  CGRect frame =
+      CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
+                 CGRectGetWidth(flutterView.bounds), CGRectGetHeight(flutterView.bounds));
+  clipView.maskView = [mask_view_pool_.get() getMaskViewWithFrame:frame];
+}
+
 void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
                                                    UIView* embedded_view,
                                                    const SkRect& bounding_rect) {
@@ -461,18 +474,15 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   ResetAnchor(embedded_view.layer);
   ChildClippingView* clipView = (ChildClippingView*)embedded_view.superview;
 
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-
-  UIView* flutter_view = flutter_view_.get();
-  FlutterClippingMaskView* maskView = [[[FlutterClippingMaskView alloc]
-      initWithFrame:CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
-                               CGRectGetWidth(flutter_view.bounds),
-                               CGRectGetHeight(flutter_view.bounds))
-        screenScale:screenScale] autorelease];
-
   SkMatrix transformMatrix;
   NSMutableArray* blurFilters = [[[NSMutableArray alloc] init] autorelease];
-
+  FML_DCHECK(!clipView.maskView ||
+             [clipView.maskView isKindOfClass:[FlutterClippingMaskView class]]);
+  if (mask_view_pool_.get() == nil) {
+    mask_view_pool_.reset([[FlutterClippingMaskViewPool alloc]
+        initWithCapacity:kFlutterClippingMaskViewPoolCapacity]);
+  }
+  [mask_view_pool_.get() recycleMaskViews];
   clipView.maskView = nil;
   auto iter = mutators_stack.Begin();
   while (iter != mutators_stack.End()) {
@@ -486,8 +496,9 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
                                                      transformMatrix)) {
           break;
         }
-        [maskView clipRect:(*iter)->GetRect() matrix:transformMatrix];
-        clipView.maskView = maskView;
+        ClipViewSetMaskView(clipView);
+        [(FlutterClippingMaskView*)clipView.maskView clipRect:(*iter)->GetRect()
+                                                       matrix:transformMatrix];
         break;
       }
       case kClipRRect: {
@@ -495,16 +506,18 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
                                                       transformMatrix)) {
           break;
         }
-        [maskView clipRRect:(*iter)->GetRRect() matrix:transformMatrix];
-        clipView.maskView = maskView;
+        ClipViewSetMaskView(clipView);
+        [(FlutterClippingMaskView*)clipView.maskView clipRRect:(*iter)->GetRRect()
+                                                        matrix:transformMatrix];
         break;
       }
       case kClipPath: {
         // TODO(cyanglaz): Find a way to pre-determine if path contains the PlatformView boudning
         // rect. See `ClipRRectContainsPlatformViewBoundingRect`.
         // https://github.com/flutter/flutter/issues/118650
-        [maskView clipPath:(*iter)->GetPath() matrix:transformMatrix];
-        clipView.maskView = maskView;
+        ClipViewSetMaskView(clipView);
+        [(FlutterClippingMaskView*)clipView.maskView clipPath:(*iter)->GetPath()
+                                                       matrix:transformMatrix];
         break;
       }
       case kOpacity:
@@ -551,6 +564,7 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
     [clipView applyBlurBackdropFilters:blurFilters];
   }
 
+  CGFloat screenScale = [UIScreen mainScreen].scale;
   // The UIKit frame is set based on the logical resolution (points) instead of physical.
   // (https://developer.apple.com/library/archive/documentation/DeviceInformation/Reference/iOSDeviceCompatibility/Displays/Displays.html).
   // However, flow is based on the physical resolution. For example, 1000 pixels in flow equals
