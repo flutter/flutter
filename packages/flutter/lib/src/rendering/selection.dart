@@ -687,9 +687,7 @@ class SelectionPoint {
     required this.localPosition,
     required this.lineHeight,
     required this.handleType,
-  }) : assert(localPosition != null),
-       assert(lineHeight != null),
-       assert(handleType != null);
+  });
 
   /// The position of the selection point in the local coordinates of the
   /// containing [Selectable].

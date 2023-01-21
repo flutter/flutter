@@ -257,7 +257,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         child.layout(childConstraints);
       }
       trailingChildWithLayout = child;
-      assert(child != null);
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index!);
@@ -351,7 +350,6 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   double get itemExtent => _itemExtent;
   double _itemExtent;
   set itemExtent(double value) {
-    assert(value != null);
     if (_itemExtent == value) {
       return;
     }

@@ -32,8 +32,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   RenderSliverFillViewport({
     required super.childManager,
     double viewportFraction = 1.0,
-  }) : assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
+  }) : assert(viewportFraction > 0.0),
        _viewportFraction = viewportFraction;
 
   @override
@@ -47,7 +46,6 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
-    assert(value != null);
     if (_viewportFraction == value) {
       return;
     }
