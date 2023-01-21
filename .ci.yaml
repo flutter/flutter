@@ -1379,26 +1379,12 @@ targets:
 
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: true
-    bringup: true
+    presubmit: false
     timeout: 60
-    dimensions: {
-      cores: "swarming.dimension('8')",
-      kvm: "swarming.dimension('1')",
-      machine_type: "swarming.dimension('n1-standard-8')"
-    }
     properties:
-      device_type: "none"
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: android_defines_test
-      dependencies: >-
-        [
-          {"dependency": "android_virtual_device", "version": "31"},
-          {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "open_jdk", "version": "version:11"}
-        ]
-      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
