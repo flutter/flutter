@@ -195,7 +195,7 @@ class Focus extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// A non-null [focusNode] must be supplied if using the
-  /// [Focus.withExternalFocusNode] constructor is used.
+  /// [Focus.withExternalFocusNode] constructor.
   final FocusNode? focusNode;
 
   /// {@template flutter.widgets.Focus.autofocus}
@@ -388,7 +388,7 @@ class Focus extends StatefulWidget {
   static FocusNode of(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
     assert(scopeOk != null);
-    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    final _FocusInheritedScope? marker = context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>();
     final FocusNode? node = marker?.notifier;
     assert(() {
       if (node == null) {
@@ -440,7 +440,7 @@ class Focus extends StatefulWidget {
   static FocusNode? maybeOf(BuildContext context, { bool scopeOk = false }) {
     assert(context != null);
     assert(scopeOk != null);
-    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    final _FocusInheritedScope? marker = context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>();
     final FocusNode? node = marker?.notifier;
     if (node == null) {
       return null;
@@ -686,7 +686,7 @@ class _FocusState extends State<Focus> {
         child: widget.child,
       );
     }
-    return _FocusMarker(
+    return _FocusInheritedScope(
       node: focusNode,
       child: child,
     );
@@ -798,7 +798,7 @@ class FocusScope extends Focus {
   /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
     assert(context != null);
-    final _FocusMarker? marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
+    final _FocusInheritedScope? marker = context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>();
     return marker?.notifier?.nearestScope ?? context.owner!.focusManager.rootScope;
   }
 
@@ -853,7 +853,7 @@ class _FocusScopeState extends _FocusState {
     _focusAttachment!.reparent(parent: widget.parentNode);
     return Semantics(
       explicitChildNodes: true,
-      child: _FocusMarker(
+      child: _FocusInheritedScope(
         node: focusNode,
         child: widget.child,
       ),
@@ -861,9 +861,9 @@ class _FocusScopeState extends _FocusState {
   }
 }
 
-// The InheritedWidget marker for Focus and FocusScope.
-class _FocusMarker extends InheritedNotifier<FocusNode> {
-  const _FocusMarker({
+// The InheritedWidget for Focus and FocusScope.
+class _FocusInheritedScope extends InheritedNotifier<FocusNode> {
+  const _FocusInheritedScope({
     required FocusNode node,
     required super.child,
   })  : assert(node != null),

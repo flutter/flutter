@@ -592,7 +592,7 @@ void main() {
 
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, '0'),
-      containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
+      containsPair(HttpHeaders.contentTypeHeader, 'text/javascript'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));

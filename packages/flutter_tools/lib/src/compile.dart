@@ -21,8 +21,6 @@ import 'convert.dart';
 
 /// Opt-in changes to the dart compilers.
 const List<String> kDartCompilerExperiments = <String>[
-  // improve AOT code size.
-  '--compact-async',
 ];
 
 /// The target model describes the set of core libraries that are available within

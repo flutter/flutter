@@ -70,6 +70,39 @@ void main() {
       ]);
     });
 
+    testWithoutContext('logs to client when sendLogsToClient=true', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Launch the app and wait for it to print "topLevelFunction".
+      await Future.wait(<Future<void>>[
+        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['-d', 'flutter-tester'],
+            sendLogsToClient: true,
+          ),
+        ),
+      ], eagerError: true);
+
+      // Capture events while terminating.
+      final Future<List<Event>> logEventsFuture = dap.client.events('dart.log').toList();
+      await dap.client.terminate();
+
+      // Ensure logs contain both the app.stop request and the result.
+      final List<Event> logEvents = await logEventsFuture;
+      final List<String> logMessages = logEvents.map((Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
+      expect(
+        logMessages,
+        containsAll(<Matcher>[
+          startsWith('==> [Flutter] [{"id":1,"method":"app.stop"'),
+          startsWith('<== [Flutter] [{"id":1,"result":true}]'),
+        ]),
+      );
+    });
+
     testWithoutContext('can run and terminate a Flutter app in noDebug mode', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
