@@ -99,7 +99,7 @@ class TestUrlStrategy extends UrlStrategy {
   @override
   void replaceState(dynamic state, String title, String url) {
     assert(withinAppHistory);
-    if (url == null || url == '') {
+    if (url == '') {
       url = currentEntry.url;
     }
     currentEntry = TestHistoryEntry(state, title, url);
