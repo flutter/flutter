@@ -597,7 +597,6 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
 }
 
 String _generateLicense(String prefix) {
-  assert(prefix != null);
   return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
          '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
          '${prefix}found in the LICENSE file.';
@@ -1576,8 +1575,6 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
 // UTILITY FUNCTIONS
 
 bool _listEquals<T>(List<T> a, List<T> b) {
-  assert(a != null);
-  assert(b != null);
   if (a.length != b.length) {
     return false;
   }

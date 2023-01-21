@@ -1018,7 +1018,7 @@ Future<void> _runFrameworkTests() async {
       printOutput: false,
       outputChecker: (CommandResult result) {
         final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout!);
-        if (matches == null || matches.isEmpty || matches.length > 1) {
+        if (matches.isEmpty || matches.length > 1) {
           return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n\n'
                  'stdout:\n${result.flattenedStdout}\n\n'
                  'stderr:\n${result.flattenedStderr}';
