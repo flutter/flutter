@@ -93,8 +93,7 @@ class BoxDecoration extends Decoration {
     this.gradient,
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  }) : assert(shape != null),
-       assert(
+  }) : assert(
          backgroundBlendMode == null || color != null || gradient != null,
          "backgroundBlendMode applies to BoxDecoration's background color or "
          'gradient, but no color or gradient was provided.',
@@ -289,7 +288,6 @@ class BoxDecoration extends Decoration {
   ///    and which use [BoxDecoration.lerp] when interpolating two
   ///    [BoxDecoration]s or a [BoxDecoration] to or from null.
   static BoxDecoration? lerp(BoxDecoration? a, BoxDecoration? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -365,7 +363,6 @@ class BoxDecoration extends Decoration {
 
   @override
   bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
-    assert(shape != null);
     assert((Offset.zero & size).contains(position));
     switch (shape) {
       case BoxShape.rectangle:
@@ -391,15 +388,13 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, super.onChanged)
-    : assert(_decoration != null);
+  _BoxDecorationPainter(this._decoration, super.onChanged);
 
   final BoxDecoration _decoration;
 
   Paint? _cachedBackgroundPaint;
   Rect? _rectForCachedBackgroundPaint;
   Paint _getBackgroundPaint(Rect rect, TextDirection? textDirection) {
-    assert(rect != null);
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
     if (_cachedBackgroundPaint == null ||
@@ -489,7 +484,6 @@ class _BoxDecorationPainter extends BoxPainter {
   /// Paint the box decoration into the given location on the given canvas.
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;

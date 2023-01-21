@@ -30,8 +30,7 @@ class RoundedRectangleBorder extends OutlinedBorder {
   const RoundedRectangleBorder({
     super.side,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null);
+  });
 
   /// The radii for each corner.
   final BorderRadiusGeometry borderRadius;
@@ -46,7 +45,6 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is RoundedRectangleBorder) {
       return RoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -66,7 +64,6 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is RoundedRectangleBorder) {
       return RoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -165,9 +162,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     this.borderRadius = BorderRadius.zero,
     required this.circularity,
     required this.eccentricity,
-  }) : assert(side != null),
-       assert(borderRadius != null),
-       assert(circularity != null);
+  });
 
   final BorderRadiusGeometry borderRadius;
   final double circularity;
@@ -185,7 +180,6 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is RoundedRectangleBorder) {
       return _RoundedRectangleToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),

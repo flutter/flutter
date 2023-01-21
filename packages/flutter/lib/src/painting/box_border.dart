@@ -103,7 +103,6 @@ abstract class BoxBorder extends ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
-    assert(t != null);
     if ((a is Border?) && (b is Border?)) {
       return Border.lerp(a, b, t);
     }
@@ -322,17 +321,13 @@ class Border extends BoxBorder {
     this.right = BorderSide.none,
     this.bottom = BorderSide.none,
     this.left = BorderSide.none,
-  }) : assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       assert(left != null);
+  });
 
   /// Creates a border whose sides are all the same.
   ///
   /// The `side` argument must not be null.
   const Border.fromBorderSide(BorderSide side)
-      : assert(side != null),
-        top = side,
+      : top = side,
         right = side,
         bottom = side,
         left = side;
@@ -346,9 +341,7 @@ class Border extends BoxBorder {
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
-  }) : assert(vertical != null),
-       assert(horizontal != null),
-       left = vertical,
+  }) : left = vertical,
        top = horizontal,
        right = vertical,
        bottom = horizontal;
@@ -374,8 +367,6 @@ class Border extends BoxBorder {
   ///
   /// The arguments must not be null.
   static Border merge(Border a, Border b) {
-    assert(a != null);
-    assert(b != null);
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.right, b.right));
     assert(BorderSide.canMerge(a.bottom, b.bottom));
@@ -478,7 +469,6 @@ class Border extends BoxBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Border? lerp(Border? a, Border? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -650,10 +640,7 @@ class BorderDirectional extends BoxBorder {
     this.start = BorderSide.none,
     this.end = BorderSide.none,
     this.bottom = BorderSide.none,
-  }) : assert(top != null),
-       assert(start != null),
-       assert(end != null),
-       assert(bottom != null);
+  });
 
   /// Creates a [BorderDirectional] that represents the addition of the two
   /// given [BorderDirectional]s.
@@ -663,8 +650,6 @@ class BorderDirectional extends BoxBorder {
   ///
   /// The arguments must not be null.
   static BorderDirectional merge(BorderDirectional a, BorderDirectional b) {
-    assert(a != null);
-    assert(b != null);
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.start, b.start));
     assert(BorderSide.canMerge(a.end, b.end));
@@ -826,7 +811,6 @@ class BorderDirectional extends BoxBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderDirectional? lerp(BorderDirectional? a, BorderDirectional? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
