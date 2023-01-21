@@ -211,8 +211,7 @@ class CustomSemanticsAction {
   ///
   /// The [label] must not be null or the empty string.
   const CustomSemanticsAction({required String this.label})
-    : assert(label != null),
-      assert(label != ''),
+    : assert(label != ''),
       hint = null,
       action = null;
 
@@ -221,9 +220,7 @@ class CustomSemanticsAction {
   ///
   /// The [hint] must not be null or the empty string.
   const CustomSemanticsAction.overridingAction({required String this.hint, required SemanticsAction this.action})
-    : assert(hint != null),
-      assert(hint != ''),
-      assert(action != null),
+    : assert(hint != ''),
       label = null;
 
   /// The user readable name of this custom semantics action.
@@ -371,8 +368,7 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
     super.defaultValue,
     super.level,
     super.description,
-  }) : assert(showName != null),
-       assert(level != null);
+  });
 
   /// Whether to show the property when the [value] is an [AttributedString]
   /// whose [AttributedString.string] is the empty string.
@@ -441,20 +437,12 @@ class SemanticsData with Diagnosticable {
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
-  }) : assert(flags != null),
-       assert(actions != null),
-       assert(attributedLabel != null),
-       assert(attributedValue != null),
-       assert(attributedDecreasedValue != null),
-       assert(attributedIncreasedValue != null),
-       assert(attributedHint != null),
-       assert(tooltip == '' || textDirection != null, 'A SemanticsData object with tooltip "$tooltip" had a null textDirection.'),
+  }) : assert(tooltip == '' || textDirection != null, 'A SemanticsData object with tooltip "$tooltip" had a null textDirection.'),
        assert(attributedLabel.string == '' || textDirection != null, 'A SemanticsData object with label "${attributedLabel.string}" had a null textDirection.'),
        assert(attributedValue.string == '' || textDirection != null, 'A SemanticsData object with value "${attributedValue.string}" had a null textDirection.'),
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
-       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
-       assert(rect != null);
+       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
@@ -1721,7 +1709,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   Rect get rect => _rect;
   Rect _rect = Rect.zero;
   set rect(Rect value) {
-    assert(value != null);
     assert(value.isFinite, '$this (with $owner) tried to set a non-finite rect.');
     if (_rect != value) {
       _rect = value;
@@ -1806,7 +1793,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   bool get isMergedIntoParent => _isMergedIntoParent;
   bool _isMergedIntoParent = false;
   set isMergedIntoParent(bool value) {
-    assert(value != null);
     if (_isMergedIntoParent == value) {
       return;
     }
@@ -1929,7 +1915,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
     if (!sawChange && _children != null) {
-      assert(newChildren != null);
       assert(newChildren.length == _children!.length);
       // Did the order change?
       for (int i = 0; i < _children!.length; i++) {
@@ -2504,13 +2489,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
-        if (attributedValue == null || attributedValue.string == '') {
+        if (attributedValue.string == '') {
           attributedValue = node._attributedValue;
         }
-        if (attributedIncreasedValue == null || attributedIncreasedValue.string == '') {
+        if (attributedIncreasedValue.string == '') {
           attributedIncreasedValue = node._attributedIncreasedValue;
         }
-        if (attributedDecreasedValue == null || attributedDecreasedValue.string == '') {
+        if (attributedDecreasedValue.string == '') {
           attributedDecreasedValue = node._attributedDecreasedValue;
         }
         if (tooltip == '') {
@@ -2808,7 +2793,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
   }) {
-    assert(childOrder != null);
     return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
   }
 
@@ -2835,7 +2819,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Returns the list of direct children of this node in the specified order.
   List<SemanticsNode> debugListChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
-    assert(childOrder != null);
     if (_children == null) {
       return const <SemanticsNode>[];
     }
@@ -2862,10 +2845,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
     required this.isLeadingEdge,
     required this.offset,
     required this.node,
-  }) : assert(isLeadingEdge != null),
-       assert(offset != null),
-       assert(offset.isFinite),
-       assert(node != null);
+  }) : assert(offset.isFinite);
 
   /// True if the edge comes before the seconds edge along the traversal
   /// direction, and false otherwise.
@@ -2899,7 +2879,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   _SemanticsSortGroup({
     required this.startOffset,
     required this.textDirection,
-  }) : assert(startOffset != null);
+  });
 
   /// The offset from the start edge of the parent [SemanticsNode] in the
   /// direction of the traversal.
@@ -3122,9 +3102,7 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
     required this.node,
     this.sortKey,
     required this.position,
-  })
-    : assert(node != null),
-      assert(position != null);
+  });
 
   /// The node whose position this sort node determines.
   final SemanticsNode node;
@@ -3263,7 +3241,6 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [ Object? args ]) {
-    assert(action != null);
     final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
       handler(args);
@@ -3317,7 +3294,6 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performActionAt(Offset position, SemanticsAction action, [ Object? args ]) {
-    assert(action != null);
     final SemanticsNode? node = rootSemanticsNode;
     if (node == null) {
       return;
@@ -3419,7 +3395,6 @@ class SemanticsConfiguration {
   /// The provided `handler` is called to respond to the user triggered
   /// `action`.
   void _addAction(SemanticsAction action, SemanticsActionHandler handler) {
-    assert(handler != null);
     _actions[action] = handler;
     _actionsAsBits |= action.index;
     _hasBeenAnnotated = true;
@@ -3431,7 +3406,6 @@ class SemanticsConfiguration {
   /// The provided `handler` is called to respond to the user triggered
   /// `action`.
   void _addArgumentlessAction(SemanticsAction action, VoidCallback handler) {
-    assert(handler != null);
     _addAction(action, (Object? args) {
       assert(args == null);
       handler();
@@ -3746,7 +3720,7 @@ class SemanticsConfiguration {
     _addAction(SemanticsAction.setSelection, (Object? args) {
       assert(args != null && args is Map);
       final Map<String, int> selection = (args! as Map<dynamic, dynamic>).cast<String, int>();
-      assert(selection != null && selection['base'] != null && selection['extent'] != null);
+      assert(selection['base'] != null && selection['extent'] != null);
       value!(TextSelection(
         baseOffset: selection['base']!,
         extentOffset: selection['extent']!,
@@ -4004,7 +3978,6 @@ class SemanticsConfiguration {
   ///  * [attributedLabel], which is the [AttributedString] of this property.
   String get label => _attributedLabel.string;
   set label(String label) {
-    assert(label != null);
     _attributedLabel = AttributedString(label);
     _hasBeenAnnotated = true;
   }
@@ -4045,7 +4018,6 @@ class SemanticsConfiguration {
   ///    [value] will be after performing [SemanticsAction.decrease].
   String get value => _attributedValue.string;
   set value(String value) {
-    assert(value != null);
     _attributedValue = AttributedString(value);
     _hasBeenAnnotated = true;
   }
@@ -4091,7 +4063,6 @@ class SemanticsConfiguration {
   ///  * [attributedIncreasedValue], which is the [AttributedString] of this property.
   String get increasedValue => _attributedIncreasedValue.string;
   set increasedValue(String increasedValue) {
-    assert(increasedValue != null);
     _attributedIncreasedValue = AttributedString(increasedValue);
     _hasBeenAnnotated = true;
   }
@@ -4129,7 +4100,6 @@ class SemanticsConfiguration {
   ///  * [attributedDecreasedValue], which is the [AttributedString] of this property.
   String get decreasedValue => _attributedDecreasedValue.string;
   set decreasedValue(String decreasedValue) {
-    assert(decreasedValue != null);
     _attributedDecreasedValue = AttributedString(decreasedValue);
     _hasBeenAnnotated = true;
   }
@@ -4164,7 +4134,6 @@ class SemanticsConfiguration {
   ///  * [attributedHint], which is the [AttributedString] of this property.
   String get hint => _attributedHint.string;
   set hint(String hint) {
-    assert(hint != null);
     _attributedHint = AttributedString(hint);
     _hasBeenAnnotated = true;
   }
@@ -4217,7 +4186,7 @@ class SemanticsConfiguration {
   double get elevation => _elevation;
   double _elevation = 0.0;
   set elevation(double value) {
-    assert(value != null && value >= 0.0);
+    assert(value >= 0.0);
     if (value == _elevation) {
       return;
     }
@@ -4234,7 +4203,7 @@ class SemanticsConfiguration {
   double get thickness => _thickness;
   double _thickness = 0.0;
   set thickness(double value) {
-    assert(value != null && value >= 0.0);
+    assert(value >= 0.0);
     if (value == _thickness) {
       return;
     }
@@ -4632,7 +4601,7 @@ class SemanticsConfiguration {
     if (_currentValueLength != null && other._currentValueLength != null) {
       return false;
     }
-    if (_attributedValue != null && _attributedValue.string.isNotEmpty && other._attributedValue != null && other._attributedValue.string.isNotEmpty) {
+    if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
       return false;
     }
     return true;
@@ -4680,13 +4649,13 @@ class SemanticsConfiguration {
       otherAttributedString: child._attributedLabel,
       otherTextDirection: child.textDirection,
     );
-    if (_attributedValue == null || _attributedValue.string == '') {
+    if (_attributedValue.string == '') {
       _attributedValue = child._attributedValue;
     }
-    if (_attributedIncreasedValue == null || _attributedIncreasedValue.string == '') {
+    if (_attributedIncreasedValue.string == '') {
       _attributedIncreasedValue = child._attributedIncreasedValue;
     }
-    if (_attributedDecreasedValue == null || _attributedDecreasedValue.string == '') {
+    if (_attributedDecreasedValue.string == '') {
       _attributedDecreasedValue = child._attributedDecreasedValue;
     }
     _attributedHint = _concatAttributedString(
@@ -4880,8 +4849,7 @@ class OrdinalSortKey extends SemanticsSortKey {
   const OrdinalSortKey(
     this.order, {
     super.name,
-  }) : assert(order != null),
-       assert(order > double.negativeInfinity),
+  }) : assert(order > double.negativeInfinity),
        assert(order < double.infinity);
 
   /// Determines the placement of this key in a sequence of keys that defines
@@ -4894,7 +4862,7 @@ class OrdinalSortKey extends SemanticsSortKey {
 
   @override
   int doCompare(OrdinalSortKey other) {
-    if (other.order == null || order == null || other.order == order) {
+    if (other.order == order) {
       return 0;
     }
     return order.compareTo(other.order);
