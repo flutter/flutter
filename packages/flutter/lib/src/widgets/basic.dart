@@ -1424,6 +1424,36 @@ class Transform extends SingleChildRenderObjectWidget {
         assert(scale == null || (scaleX == null && scaleY == null), "If 'scale' is non-null then 'scaleX' and 'scaleY' must be left null"),
         transform = Matrix4.diagonal3Values(scale ?? scaleX ?? 1.0, scale ?? scaleY ?? 1.0, 1.0);
 
+  /// Creates a widget that mirrors its child about the widget's center point.
+  ///
+  /// If `flipX` is true, the child widget will be flipped horizontally. Defaults to false.
+  ///
+  /// If `flipY` is true, the child widget will be flipped vertically. Defaults to false.
+  ///
+  /// If both are true, the child widget will be flipped both vertically and horizontally, equivalent to a 180 degree rotation.
+  ///
+  /// {@tool snippet}
+  ///
+  /// This example flips the text horizontally.
+  ///
+  /// ```dart
+  /// Transform.flip(
+  ///   flipX: true,
+  ///   child: const Text('Horizontal Flip'),
+  /// )
+  /// ```
+  /// {@end-tool}
+  Transform.flip({
+      super.key,
+      bool flipX = false,
+      bool flipY = false,
+      this.origin,
+      this.transformHitTests = true,
+      this.filterQuality,
+      super.child,
+  })  : alignment = Alignment.center,
+        transform = Matrix4.diagonal3Values(flipX ? -1.0 : 1.0, flipY ? -1.0 : 1.0, 1.0);
+
   // Computes a rotation matrix for an angle in radians, attempting to keep rotations
   // at integral values for angles of 0, π/2, π, 3π/2.
   static Matrix4 _computeRotation(double radians) {
