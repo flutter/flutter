@@ -1382,8 +1382,9 @@ targets:
     presubmit: true
     bringup: true
     timeout: 60
-    dimensions:
-      kvm: "1"
+    swarming_dimensions: {
+      "kvm": "8"
+    }
     properties:
       device_type: "none"
       tags: >
