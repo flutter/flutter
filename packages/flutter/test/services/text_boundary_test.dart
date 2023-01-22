@@ -201,7 +201,7 @@ void main() {
       expect(boundaryE.getTrailingTextBoundaryAt(positionE), 20);
     });
 
-    test('works for multiple cosecutive line terminators', () {
+    test('works for multiple consecutive line terminators', () {
       // This text includes multiple consecutive line terminators.
       const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
       const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
