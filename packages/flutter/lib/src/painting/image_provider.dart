@@ -192,7 +192,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List buffer, {int? cach
 ///    `cacheHeight`, and `allowUpscaling` parameters.
 @Deprecated(
   'Use ImageDecoderCallback with ImageProvider.loadImage instead. '
-  'This feature was deprecated after v3.0.0.',
+  'This feature was deprecated after v3.7.0-1.4.pre.',
 )
 typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
 
@@ -647,7 +647,7 @@ abstract class ImageProvider<T extends Object> {
   @protected
   @Deprecated(
     'Implement loadImage for image loading. '
-    'This feature was deprecated after v3.7.0',
+    'This feature was deprecated after v3.7.0-1.4.pre.',
   )
   ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) {
     return _AbstractImageStreamCompleter();

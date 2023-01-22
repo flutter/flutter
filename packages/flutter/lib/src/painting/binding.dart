@@ -142,7 +142,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// drawn into.
   @Deprecated(
     'Use instantiateImageCodecWithSize instead. '
-    'This feature was deprecated after v3.7.0.',
+    'This feature was deprecated after v3.7.0-1.4.pre.',
   )
   Future<ui.Codec> instantiateImageCodecFromBuffer(
     ui.ImmutableBuffer buffer, {
