@@ -144,6 +144,21 @@ class CupertinoColors {
     darkHighContrastColor: Color.fromARGB(255, 48, 219, 91),
   );
 
+  /// A mint color that can adapt to the given [BuildContext].
+  ///
+  /// See also:
+  ///
+  ///  * [UIColor.systemMint](https://developer.apple.com/documentation/uikit/uicolor/3852741-systemmint),
+  ///    the `UIKit` equivalent.
+  static const CupertinoDynamicColor systemMint =
+      CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'systemMint',
+    color: Color.fromARGB(255, 0, 199, 190),
+    darkColor: Color.fromARGB(255, 99, 230, 226),
+    highContrastColor: Color.fromARGB(255, 12, 129, 123),
+    darkHighContrastColor: Color.fromARGB(255, 102, 212, 207),
+  );
+
   /// An indigo color that can adapt to the given [BuildContext].
   ///
   /// See also:
@@ -186,6 +201,21 @@ class CupertinoColors {
     darkHighContrastColor: Color.fromARGB(255, 255, 100, 130),
   );
 
+  /// A brown color that can adapt to the given [BuildContext].
+  ///
+  /// See also:
+  ///
+  ///  * [UIColor.systemBrown](https://developer.apple.com/documentation/uikit/uicolor/3173142-systembrown),
+  ///    the `UIKit` equivalent.
+  static const CupertinoDynamicColor systemBrown =
+      CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'systemBrown',
+    color: Color.fromARGB(255, 162, 132, 94),
+    darkColor: Color.fromARGB(255, 172, 142, 104),
+    highContrastColor: Color.fromARGB(255, 127, 101, 69),
+    darkHighContrastColor: Color.fromARGB(255, 181, 148, 105),
+  );
+
   /// A purple color that can adapt to the given [BuildContext].
   ///
   /// See also:
@@ -223,6 +253,21 @@ class CupertinoColors {
   static const CupertinoDynamicColor systemTeal = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemTeal',
     color: Color.fromARGB(255, 90, 200, 250),
+    darkColor: Color.fromARGB(255, 100, 210, 255),
+    highContrastColor: Color.fromARGB(255, 0, 113, 164),
+    darkHighContrastColor: Color.fromARGB(255, 112, 215, 255),
+  );
+
+  /// A cyan color that can adapt to the given [BuildContext].
+  ///
+  /// See also:
+  ///
+  ///  * [UIColor.systemCyan](https://developer.apple.com/documentation/uikit/uicolor/3852740-systemcyan),
+  ///    the `UIKit` equivalent.
+  static const CupertinoDynamicColor systemCyan =
+      CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'systemCyan',
+    color: Color.fromARGB(255, 50, 173, 230),
     darkColor: Color.fromARGB(255, 100, 210, 255),
     highContrastColor: Color.fromARGB(255, 0, 113, 164),
     darkHighContrastColor: Color.fromARGB(255, 112, 215, 255),
