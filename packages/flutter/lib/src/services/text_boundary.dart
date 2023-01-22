@@ -149,7 +149,7 @@ class ParagraphBoundary extends TextBoundary {
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
 
-    if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+    if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])) {
       index -= 2;
     } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
       index -= 1;
@@ -160,6 +160,10 @@ class ParagraphBoundary extends TextBoundary {
 
     if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
       index += 1;
+    }
+
+    if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+      index -= 1;
     }
 
     return max(index, 0);
