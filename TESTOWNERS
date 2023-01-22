@@ -249,6 +249,7 @@
 /dev/devicelab/bin/tasks/plugin_lint_mac.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/plugin_test_ios.dart @jmagman @flutter/ios
 /dev/devicelab/bin/tasks/plugin_test_macos.dart @jmagman @flutter/desktop
+/dev/devicelab/bin/tasks/plugin_test_windows.dart @stuartmorgan @flutter/desktop
 /dev/devicelab/bin/tasks/plugin_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/run_debug_test_android.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/run_debug_test_linux.dart @loic-sharma @flutter/tool
