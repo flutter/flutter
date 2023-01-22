@@ -160,9 +160,7 @@ class ParagraphBoundary extends TextBoundary {
 
     if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
       index += 1;
-    }
-
-    if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+    } else if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
       index -= 1;
     }
 
