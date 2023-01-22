@@ -2486,7 +2486,7 @@ void main() {
       'create',
       '--no-pub',
       '--template=plugin',
-      '--platforms=widows',
+      '--platforms=windows',
       projectDir.path]);
 
     expect(projectDir
