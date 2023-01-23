@@ -406,11 +406,6 @@ class ThemeData with Diagnosticable {
     )
     IconThemeData? accentIconTheme,
     @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.3.0-0.2.pre.',
-    )
-    Color? buttonColor,
-    @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
@@ -552,7 +547,7 @@ class ThemeData with Diagnosticable {
     // [disabledColor], [highlightColor], and [splashColor].
     buttonTheme ??= ButtonThemeData(
       colorScheme: colorScheme,
-      buttonColor: buttonColor ?? (isDark ? primarySwatch[600]! : Colors.grey[300]!),
+      buttonColor: isDark ? primarySwatch[600]! : Colors.grey[300]!,
       disabledColor: disabledColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
@@ -637,7 +632,6 @@ class ThemeData with Diagnosticable {
     // DEPRECATED (newest deprecations at the bottom)
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    buttonColor ??= isDark ? primarySwatch[600]! : Colors.grey[300]!;
     fixTextFieldOutlineLabel ??= true;
     primaryColorBrightness = estimatedPrimaryColorBrightness;
     errorColor ??= Colors.red[700]!;
@@ -1397,14 +1391,14 @@ class ThemeData with Diagnosticable {
   /// The color of [Material] when it is used as a [Card].
   final Color cardColor;
 
-  /// A set of twelve colors that can be used to configure the
-  /// color properties of most components.
+  /// A set of twelve colors that can be used to configure the color properties
+  /// of most components.
   ///
-  /// This property was added much later than the theme's set of highly
-  /// specific colors, like [cardColor], [buttonColor], [canvasColor] etc.
-  /// New components can be defined exclusively in terms of [colorScheme].
-  /// Existing components will gradually migrate to it, to the extent
-  /// that is possible without significant backwards compatibility breaks.
+  /// This property was added much later than the theme's set of highly specific
+  /// colors, like [cardColor], [canvasColor] etc. New components can be defined
+  /// exclusively in terms of [colorScheme]. Existing components will gradually
+  /// migrate to it, to the extent that is possible without significant
+  /// backwards compatibility breaks.
   final ColorScheme colorScheme;
 
   /// The background color of [Dialog] elements.
@@ -1955,11 +1949,6 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v2.3.0-0.1.pre.',
     )
     IconThemeData? accentIconTheme,
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.3.0-0.2.pre.',
-    )
-    Color? buttonColor,
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
