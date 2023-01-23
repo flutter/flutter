@@ -174,6 +174,20 @@ void main() {
       expect(boundaryF.getTrailingTextBoundaryAt(positionF), 20);
     });
 
+    test('works for consecutive line terminators', () {
+      const String textI = 'Now is the time for\n' // 20
+          'all good people\n\n'                         // 20 + 16 => 37
+          'to come to the aid\n'                      // 37 + 19 => 56
+          'of their country.';                        // 56 + 17 => 73
+      const ParagraphBoundary boundaryI = ParagraphBoundary(textI);
+      const int positionI = 55;
+      const int positionJ = 37;
+      expect(boundaryI.getLeadingTextBoundaryAt(positionI), 37);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionI), 56);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 36);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionJ), 37);
+    });
+
     test('leading boundary works for consecutive CRLF', () {
       // This text includes multiple consecutive carriage returns followed by line feeds (CRLF).
       const String textH = 'abcd efg hi\r\n\r\n\r\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
