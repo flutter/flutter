@@ -174,6 +174,23 @@ void main() {
       expect(boundaryF.getTrailingTextBoundaryAt(positionF), 20);
     });
 
+    test('works for consecutive line terminators involving CRLF', () {
+      const String textI = 'Now is the time for\n' // 20
+          'all good people\n\r\n'                         // 20 + 16 => 38
+          'to come to the aid\n'                      // 38 + 19 => 57
+          'of their country.';                        // 57 + 17 => 74
+      const ParagraphBoundary boundaryI = ParagraphBoundary(textI);
+      const int positionI = 56;// \n at the end of the third line.
+      const int positionJ = 38;// t at beginning of third line.
+      const int positionK = 37;// \n at end of second line.
+      expect(boundaryI.getLeadingTextBoundaryAt(positionI), 38);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionI), 57);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 38);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionJ), 57);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionK), 36);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionK), 38);
+    });
+
     test('works for consecutive line terminators', () {
       const String textI = 'Now is the time for\n' // 20
           'all good people\n\n'                         // 20 + 16 => 37

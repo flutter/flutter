@@ -141,6 +141,7 @@ class ParagraphBoundary extends TextBoundary {
     if (position < 0 || position > _text.length) {
       return null;
     }
+
     if (position == 0) {
       return 0;
     }
@@ -149,6 +150,7 @@ class ParagraphBoundary extends TextBoundary {
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
     bool skipped = false;
+    final bool initialIndexIsCharacter = !TextLayoutMetrics.isLineTerminator(codeUnits[index]);
 
     if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])) {
       index -= 2;
@@ -163,10 +165,14 @@ class ParagraphBoundary extends TextBoundary {
     }
 
     if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
-      if (TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])) {
-        index -= 1;
-      } else {
+      if (skipped) {
         index += 1;
+      } else {
+        if (initialIndexIsCharacter) {
+          index += 1;
+        } else {
+          index -= 1;
+        }
       }
     } else if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       if (!TextLayoutMetrics.isLineTerminator(codeUnits[index - 1]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
@@ -177,7 +183,7 @@ class ParagraphBoundary extends TextBoundary {
         index += 1;
       } else if (!TextLayoutMetrics.isLineTerminator(codeUnits[index + 1]) && skipped) {
         // There is a line terminator before the current codeunit but not after it.
-        index += 1;
+        index += 1
       }
     }
 
