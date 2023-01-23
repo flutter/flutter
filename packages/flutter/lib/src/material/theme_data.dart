@@ -1391,8 +1391,7 @@ class ThemeData with Diagnosticable {
   /// The color of [Material] when it is used as a [Card].
   final Color cardColor;
 
-  /// A set of twelve colors that can be used to configure the color properties
-  /// of most components.
+  /// {@macro flutter.material.color_scheme.ColorScheme}
   ///
   /// This property was added much later than the theme's set of highly specific
   /// colors, like [cardColor], [canvasColor] etc. New components can be defined
