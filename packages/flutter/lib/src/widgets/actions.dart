@@ -431,9 +431,7 @@ class ActionListener extends StatefulWidget {
     required this.listener,
     required this.action,
     required this.child,
-  })  : assert(listener != null),
-        assert(action != null),
-        assert(child != null);
+  });
 
   /// The [ActionListenerCallback] callback to register with the [action].
   ///
@@ -548,7 +546,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
   ///
   /// The `intentKey` and [onInvoke] parameters must not be null.
   /// The [onInvoke] parameter is required.
-  CallbackAction({required this.onInvoke}) : assert(onInvoke != null);
+  CallbackAction({required this.onInvoke});
 
   /// The callback to be called when invoked.
   ///
@@ -595,8 +593,6 @@ class ActionDispatcher with Diagnosticable {
     covariant Intent intent, [
     BuildContext? context,
   ]) {
-    assert(action != null);
-    assert(intent != null);
     assert(action.isEnabled(intent), 'Action must be enabled when calling invokeAction');
     if (action is ContextAction) {
       context ??= primaryFocus?.context;
@@ -651,8 +647,7 @@ class Actions extends StatefulWidget {
     this.dispatcher,
     required this.actions,
     required this.child,
-  })  : assert(actions != null),
-        assert(child != null);
+  });
 
   /// The [ActionDispatcher] object that invokes actions.
   ///
@@ -869,7 +864,6 @@ class Actions extends StatefulWidget {
   /// Will return a newly created [ActionDispatcher] if no ambient [Actions]
   /// widget is found.
   static ActionDispatcher of(BuildContext context) {
-    assert(context != null);
     final _ActionsScope? marker = context.dependOnInheritedWidgetOfExactType<_ActionsScope>();
     return marker?.dispatcher ?? _findDispatcher(context);
   }
@@ -892,8 +886,6 @@ class Actions extends StatefulWidget {
     BuildContext context,
     T intent,
   ) {
-    assert(intent != null);
-    assert(context != null);
     Object? returnValue;
 
     final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
@@ -945,8 +937,6 @@ class Actions extends StatefulWidget {
     BuildContext context,
     T intent,
   ) {
-    assert(intent != null);
-    assert(context != null);
     Object? returnValue;
 
     _visitActionsAncestors(context, (InheritedElement element) {
@@ -1041,8 +1031,7 @@ class _ActionsScope extends InheritedWidget {
     required this.actions,
     required this.rebuildKey,
     required super.child,
-  })  : assert(child != null),
-        assert(actions != null);
+  });
 
   final ActionDispatcher? dispatcher;
   final Map<Type, Action<Intent>> actions;
@@ -1106,10 +1095,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.mouseCursor = MouseCursor.defer,
     this.includeFocusSemantics = true,
     required this.child,
-  })  : assert(enabled != null),
-        assert(autofocus != null),
-        assert(mouseCursor != null),
-        assert(child != null);
+  });
 
   /// Is this widget enabled or not.
   ///
@@ -1530,7 +1516,7 @@ class PrioritizedIntents extends Intent {
   /// of intents, the first available of which will be used.
   const PrioritizedIntents({
     required this.orderedIntents,
-  })  : assert(orderedIntents != null);
+  });
 
   /// List of intents to be evaluated in order for execution. When an
   /// [Action.isEnabled] returns true, that action will be invoked and
@@ -1566,8 +1552,6 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
 
   @override
   void invoke(PrioritizedIntents intent) {
-    assert(_selectedAction != null);
-    assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);
   }
 }
