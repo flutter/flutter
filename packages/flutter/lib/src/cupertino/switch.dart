@@ -128,7 +128,7 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the focus highlight for keyboard interactions.
   ///
-  /// Defaults to a a slightly transparent [activeColor].
+  /// Defaults to a slightly transparent [activeColor].
   final Color? focusColor;
 
   /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}

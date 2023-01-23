@@ -44,11 +44,11 @@ const bool _kDebugMenus = false;
 // has a submenu.
 const double _kDefaultSubmenuIconSize = 24;
 
-// The default spacing between the the leading icon, label, trailing icon, and
+// The default spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemDefaultSpacing = 12;
 
-// The minimum spacing between the the leading icon, label, trailing icon, and
+// The minimum spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemMinSpacing = 4;
 

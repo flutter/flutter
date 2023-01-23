@@ -595,7 +595,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// when label behavior is [NavigationDestinationLabelBehavior.onlyShowSelected].
   final int selectedIndex;
 
-  /// How many total destinations are are in this navigation bar.
+  /// How many total destinations are in this navigation bar.
   ///
   /// This is required for semantics, so that each destination can have a label
   /// "Tab 1 of 4", for example.
