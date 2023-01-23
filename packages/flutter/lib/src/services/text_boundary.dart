@@ -188,10 +188,10 @@ class ParagraphBoundary extends TextBoundary {
   /// desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    if (position < 0 || position >= _text.length) {
+    if (position < 0 || position > _text.length) {
       return null;
     }
-    if (position == _text.length - 1 || _text.isEmpty) {
+    if (position == _text.length || _text.isEmpty) {
       return _text.length;
     }
 
