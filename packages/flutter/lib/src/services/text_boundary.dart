@@ -138,7 +138,7 @@ class ParagraphBoundary extends TextBoundary {
   /// that follows the line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    if (position < 0 || position > _text.length) {
+    if (position < 0 || position > _text.length - 1) {
       return null;
     }
 
@@ -188,10 +188,10 @@ class ParagraphBoundary extends TextBoundary {
   /// desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    if (position < 0 || position > _text.length) {
+    if (position < 0 || position > _text.length - 1) {
       return null;
     }
-    if (position == _text.length || _text.isEmpty) {
+    if (position == _text.length - 1 || _text.isEmpty) {
       return _text.length;
     }
 
