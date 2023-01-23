@@ -2606,7 +2606,10 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   MaterialBasedCupertinoThemeData._(
     this._materialTheme,
     this._cupertinoOverrideTheme,
-  ) : super.raw(
+  ) : // Pass all values to the superclass so Material-agnostic properties
+      // like barBackgroundColor can still behave like a normal
+      // CupertinoThemeData.
+      super.raw(
         _cupertinoOverrideTheme.brightness,
         _cupertinoOverrideTheme.primaryColor,
         _cupertinoOverrideTheme.primaryContrastingColor,

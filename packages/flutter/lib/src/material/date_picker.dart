@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -949,10 +948,6 @@ Future<DateTimeRange?> showDateRangePicker({
   TransitionBuilder? builder,
   Offset? anchorPoint,
 }) async {
-  assert(
-    initialDateRange == null || (initialDateRange.end != null),
-    'initialDateRange must be null or have non-null start and end dates.',
-  );
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
     "initialDateRange's start date must not be after it's end date.",
@@ -2168,25 +2163,6 @@ class _MonthItem extends StatefulWidget {
 
   /// The month whose days are displayed by this picker.
   final DateTime displayedMonth;
-
-  /// Determines the way that drag start behavior is handled.
-  ///
-  /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
-  /// date picker wheel will begin at the position where the drag gesture won
-  /// the arena. If set to [DragStartBehavior.down] it will begin at the position
-  /// where a down event is first detected.
-  ///
-  /// In general, setting this to [DragStartBehavior.start] will make drag
-  /// animation smoother and setting it to [DragStartBehavior.down] will make
-  /// drag behavior feel slightly more reactive.
-  ///
-  /// By default, the drag start behavior is [DragStartBehavior.start].
-  ///
-  /// See also:
-  ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for
-  ///    the different behaviors.
-  final DragStartBehavior dragStartBehavior;
 
   @override
   _MonthItemState createState() => _MonthItemState();

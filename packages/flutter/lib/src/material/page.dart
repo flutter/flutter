@@ -107,15 +107,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     final Widget result = buildContent(context);
-    assert(() {
-      if (result == null) {
-        throw FlutterError(
-          'The builder for route "${settings.name}" returned null.\n'
-          'Route builders must never return null.',
-        );
-      }
-      return true;
-    }());
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,

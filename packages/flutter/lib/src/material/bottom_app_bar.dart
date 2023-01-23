@@ -196,9 +196,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
           elevation: elevation,
           color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
-          child: child == null
-            ? null
-            : SafeArea(child: child),
+          child: SafeArea(child: child),
         ),
       ),
     );

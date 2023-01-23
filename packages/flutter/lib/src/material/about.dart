@@ -1038,7 +1038,9 @@ class _MasterDetailFlow extends StatefulWidget {
   const _MasterDetailFlow({
     required this.detailPageBuilder,
     required this.masterViewBuilder,
+    this.automaticallyImplyLeading = true, // ignore: unused_element
     this.detailPageFABlessGutterWidth,
+    this.displayMode = _LayoutMode.auto, // ignore: unused_element
     this.title,
   });
 

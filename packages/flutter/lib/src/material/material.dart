@@ -453,7 +453,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     final Color? backgroundColor = _getBackgroundColor(context);
     final Color modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
     // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
-    final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
+    final double modelElevation = widget.elevation;
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
       'If Material type is not MaterialType.transparency, a color must '

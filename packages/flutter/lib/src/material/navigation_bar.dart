@@ -943,9 +943,6 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message == null) {
-      return child;
-    }
     return Tooltip(
       message: message,
       // TODO(johnsonmh): Make this value configurable/themable.

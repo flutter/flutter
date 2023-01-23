@@ -1317,10 +1317,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.systemOverlayStyle,
     required this.forceMaterialTransparency,
   }) : assert(primary || topPadding == 0.0),
-       assert(
-         !floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
-         'vsync cannot be null when snapConfiguration or showOnScreenConfiguration is not null, and floating is true',
-       ),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
   final Widget? leading;
