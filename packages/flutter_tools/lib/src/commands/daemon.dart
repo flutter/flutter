@@ -210,7 +210,6 @@ class Daemon {
 
     try {
       final String method = request.data['method']! as String;
-      assert(method != null);
       if (!method.contains('.')) {
         throw DaemonException('method not understood: $method');
       }
@@ -1529,7 +1528,7 @@ class AppRunLogger extends DelegatingLogger {
         'id': eventId,
         'progressId': eventType,
         if (message != null) 'message': message,
-        if (finished != null) 'finished': finished,
+        'finished': finished,
       };
 
       domain!._sendAppEvent(app, 'progress', event);

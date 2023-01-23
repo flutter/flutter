@@ -64,7 +64,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
-  }) : assert(testWrapper != null) {
+  }) {
     requiresPubspecYaml();
     usesPubOption();
     addNullSafetyModeOptions(hide: !verboseHelp);

@@ -396,10 +396,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.ok('Caught exception: $ex');
       }
 
-      if (bytes == null) {
-        return shelf.Response.ok('Unknown error, bytes is null');
-      }
-
       final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
       return shelf.Response.ok(errorMessage ?? 'true');
     } else {

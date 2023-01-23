@@ -44,8 +44,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.compileExpression,
     required this.fontConfigManager,
     required this.uriConverter,
-  })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
-        assert(!debuggingOptions.startPaused || enableObservatory),
+  })  : assert(!debuggingOptions.startPaused || enableObservatory),
         _gotProcessObservatoryUri = enableObservatory
             ? Completer<Uri?>() : (Completer<Uri?>()..complete());
 
@@ -200,7 +199,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<Uri?> get observatoryUri {
-    assert(_gotProcessObservatoryUri != null);
     return _gotProcessObservatoryUri.future;
   }
 
@@ -303,15 +301,14 @@ class FlutterTesterTestDevice extends TestDevice {
           if (match != null) {
             try {
               final Uri uri = Uri.parse(match[1]!);
-              if (reportObservatoryUri != null) {
-                await reportObservatoryUri(uri);
-              }
+              await reportObservatoryUri(uri);
             } on Exception catch (error) {
               logger.printError('Could not parse shell observatory port message: $error');
             }
-          } else if (line != null) {
+          } else {
             logger.printStatus('Shell: $line');
           }
+
         },
         onError: (dynamic error) {
           logger.printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');

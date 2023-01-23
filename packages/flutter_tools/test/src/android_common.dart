@@ -40,7 +40,6 @@ class FakeAndroidBuilder implements AndroidBuilder {
 /// within [directoryOverride].
 class FakeFlutterProjectFactory extends FlutterProjectFactory {
   FakeFlutterProjectFactory(this.directoryOverride) :
-    assert(directoryOverride != null),
     super(
       fileSystem: globals.fs,
       logger: globals.logger,

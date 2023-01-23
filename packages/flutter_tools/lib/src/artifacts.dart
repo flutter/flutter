@@ -625,7 +625,6 @@ class CachedArtifacts implements Artifacts {
   }
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode? mode) {
-    assert(platform != null);
     switch (artifact) {
       case Artifact.genSnapshot:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
@@ -1227,7 +1226,7 @@ class OverrideArtifacts implements Artifacts {
     this.engineDartBinary,
     this.platformKernelDill,
     this.flutterPatchedSdk,
-  }) : assert(parent != null);
+  });
 
   final Artifacts parent;
   final File? frontendServer;

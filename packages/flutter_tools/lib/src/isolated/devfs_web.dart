@@ -105,7 +105,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
         await _generator.compileExpressionToJs(libraryUri, line, column,
             jsModules, jsFrameValues, moduleName, expression);
 
-    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+    if (compilerOutput != null) {
       final String content = utf8.decode(
           _fileSystem.file(compilerOutput.outputFilename).readAsBytesSync());
       return ExpressionCompilationResult(
@@ -827,8 +827,6 @@ class WebDevFS implements DevFS {
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
-    assert(trackWidgetCreation != null);
-    assert(generator != null);
     lastPackageConfig = packageConfig;
     final File mainFile = globals.fs.file(mainUri);
     final String outputDirectoryPath = mainFile.parent.path;
@@ -1031,8 +1029,7 @@ class ReleaseAssetServer {
     } else {
       for (final Uri uri in _searchPaths()) {
         final Uri potential = uri.resolve(requestPath);
-        if (potential == null ||
-            !_fileSystem.isFileSync(
+        if (!_fileSystem.isFileSync(
                 potential.toFilePath(windows: _platform.isWindows))) {
           continue;
         }

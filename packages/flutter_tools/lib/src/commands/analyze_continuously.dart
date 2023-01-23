@@ -113,9 +113,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       for (final AnalysisError error in sortedErrors) {
         logger.printStatus(error.toString());
-        if (error.code != null) {
-          logger.printTrace('error code: ${error.code}');
-        }
+        logger.printTrace('error code: ${error.code}');
       }
 
       dumpErrors(sortedErrors.map<String>((AnalysisError error) => error.toLegacyString()));

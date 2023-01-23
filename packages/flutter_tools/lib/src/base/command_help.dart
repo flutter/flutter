@@ -220,7 +220,7 @@ class CommandHelpOption {
   /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
-  bool get _hasTextInParenthesis => inParenthesis != null && inParenthesis.isNotEmpty;
+  bool get _hasTextInParenthesis => inParenthesis.isNotEmpty;
 
   int get _rawMessageLength => key.length + description.length;
 

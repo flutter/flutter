@@ -104,9 +104,6 @@ class CoverageCollector extends TestWatcher {
     _logMessage('collecting coverage data from $observatoryUri...');
     final Map<String, dynamic> data = await collect(
         observatoryUri, libraryNames, branchCoverage: branchCoverage);
-    if (data == null) {
-      throw Exception('Failed to collect coverage.');
-    }
 
     _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(await coverage.HitMap.parseJson(
@@ -146,9 +143,6 @@ class CoverageCollector extends TestWatcher {
             observatoryUri!, libraryNames, serviceOverride: serviceOverride,
             branchCoverage: branchCoverage)
           .then<void>((Map<String, dynamic> result) {
-            if (result == null) {
-              throw Exception('Failed to collect coverage.');
-            }
             _logMessage('Collected coverage data.');
             data = result;
           });

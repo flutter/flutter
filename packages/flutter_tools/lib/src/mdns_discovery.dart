@@ -279,7 +279,7 @@ class MDnsVmServiceDiscovery {
               ResourceRecordQuery.text(domainName),
           )
           .toList();
-        if (txt == null || txt.isEmpty) {
+        if (txt.isEmpty) {
           results.add(MDnsVmServiceDiscoveryResult(domainName, srvRecord.port, ''));
           if (quitOnFind) {
             return results;

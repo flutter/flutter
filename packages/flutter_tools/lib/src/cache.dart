@@ -575,7 +575,7 @@ class Cache {
     final List<String> paths = <String>[];
     for (final ArtifactSet artifact in _artifacts) {
       final Map<String, String> env = artifact.environment;
-      if (env == null || !env.containsKey('DYLD_LIBRARY_PATH')) {
+      if (!env.containsKey('DYLD_LIBRARY_PATH')) {
         continue;
       }
       final String path = env['DYLD_LIBRARY_PATH']!;
@@ -721,7 +721,7 @@ class Cache {
 
 /// Representation of a set of artifacts used by the tool.
 abstract class ArtifactSet {
-  ArtifactSet(this.developmentArtifact) : assert(developmentArtifact != null);
+  ArtifactSet(this.developmentArtifact);
 
   /// The development artifact.
   final DevelopmentArtifact developmentArtifact;

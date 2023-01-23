@@ -185,7 +185,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get hasTerminal => _hasTerminal;
   set hasTerminal(bool value) {
-    assert(value != null);
     _hasTerminal = value;
   }
   bool _hasTerminal = true;
@@ -196,7 +195,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get supportsAnsiEscapes => _supportsAnsiEscapes;
   set supportsAnsiEscapes(bool value) {
-    assert(value != null);
     _supportsAnsiEscapes = value;
   }
   bool _supportsAnsiEscapes = true;

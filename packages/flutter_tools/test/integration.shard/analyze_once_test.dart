@@ -389,10 +389,8 @@ analyzer:
 }
 
 void assertContains(String text, List<String> patterns) {
-  if (patterns != null) {
-    for (final String pattern in patterns) {
-      expect(text, contains(pattern));
-    }
+  for (final String pattern in patterns) {
+    expect(text, contains(pattern));
   }
 }
 

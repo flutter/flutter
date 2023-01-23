@@ -1344,17 +1344,12 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    if (commandPath == null) {
-      return;
-    }
-    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String?> labels = <String?>[
-      if (commandResult.exitStatus != null)
-        getEnumName(commandResult.exitStatus),
+      getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];
@@ -1752,4 +1747,4 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isBlank(String s) => s.trim().isEmpty;

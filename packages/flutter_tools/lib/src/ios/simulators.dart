@@ -865,9 +865,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     }
 
     final String filteredLine = _filterSystemLog(line);
-    if (filteredLine == null) {
-      return;
-    }
 
     _linesController.add(filteredLine);
   }

@@ -232,7 +232,7 @@ class CreateCommand extends CreateBase {
         'The "--platforms" argument is not supported in $template template.',
         exitCode: 2
       );
-    } else if (platforms == null || platforms.isEmpty) {
+    } else if (platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
         exitCode: 2);
     } else if (generateFfiPlugin && argResults!.wasParsed('platforms') && platforms.contains('web')) {
@@ -731,7 +731,7 @@ Your plugin code is in $relativePluginMain.
 Your example app code is in $relativeExampleMain.
 
 ''');
-  if (platformsString != null && platformsString.isNotEmpty) {
+  if (platformsString.isNotEmpty) {
     globals.printStatus('''
 Host platform code is in the $platformsString directories under $pluginPath.
 To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.

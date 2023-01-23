@@ -40,8 +40,6 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     required FileSystem delegate,
     required Platform platform,
   }) :
-      assert(delegate != null),
-      assert(platform != null),
       _platform = platform,
       super(delegate);
 
@@ -164,9 +162,6 @@ class ErrorHandlingFile
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -379,9 +374,6 @@ class ErrorHandlingDirectory
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -518,9 +510,6 @@ class ErrorHandlingLink
     required this.fileSystem,
     required this.delegate,
   }) :
-    assert(platform != null),
-    assert(fileSystem != null),
-    assert(delegate != null),
     _platform = platform;
 
   @override
@@ -563,7 +552,6 @@ Future<T> _run<T>(Future<T> Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) async {
-  assert(platform != null);
   try {
     return await op();
   } on ProcessPackageExecutableNotFoundException catch (e) {
@@ -595,7 +583,6 @@ T _runSync<T>(T Function() op, {
   String? failureMessage,
   String? posixPermissionSuggestion,
 }) {
-  assert(platform != null);
   try {
     return op();
   } on ProcessPackageExecutableNotFoundException catch (e) {

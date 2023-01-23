@@ -228,7 +228,7 @@ class Template {
         .replaceAll(testTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
-      if (android != null && android && androidIdentifier != null) {
+      if (android && androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }

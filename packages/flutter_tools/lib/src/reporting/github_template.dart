@@ -125,7 +125,7 @@ ${_projectMetadataInformation()}
     }
     try {
       final FlutterManifest manifest = project.manifest;
-      if (project == null || manifest == null || manifest.isEmpty) {
+      if (manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
       final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);

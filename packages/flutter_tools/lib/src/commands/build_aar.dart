@@ -79,9 +79,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = _getProject();
-    if (flutterProject == null) {
-      return const CustomDimensions();
-    }
 
     String projectType;
     if (flutterProject.manifest.isModule) {

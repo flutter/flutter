@@ -51,7 +51,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
       countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
     }
-    assert(codes[0] != null && codes[0].isNotEmpty);
+    assert(codes[0].isNotEmpty);
     assert(countryCode == null || countryCode.isNotEmpty);
     assert(scriptCode == null || scriptCode.isNotEmpty);
 
@@ -340,7 +340,7 @@ class LocalizationOptions {
     this.format = false,
     this.useEscaping = false,
     this.suppressWarnings = false,
-  }) : assert(useSyntheticPackage != null);
+  });
 
   /// The `--arb-dir` argument.
   ///

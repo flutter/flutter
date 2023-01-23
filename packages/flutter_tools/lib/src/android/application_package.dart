@@ -27,8 +27,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
-  }) : assert(applicationPackage != null),
-       assert(launchActivity != null);
+  });
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -294,7 +293,7 @@ class ApkManifestData {
   }
 
   static ApkManifestData? parseFromXmlDump(String data, Logger logger) {
-    if (data == null || data.trim().isEmpty) {
+    if (data.trim().isEmpty) {
       return null;
     }
 
