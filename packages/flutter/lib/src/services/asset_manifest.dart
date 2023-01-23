@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/widgets/framework.dart';
-
+import '../../foundation.dart';
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
@@ -24,12 +23,12 @@ abstract class AssetManifest {
   }
 
   /// Lists the keys of all known assets, not including asset variants.
-  Iterable<String> listAssets() {
+  List<String> listAssets() {
     throw UnimplementedError();
   }
 
   /// Gets available variants of an asset.
-  Iterable<AssetVariant> getAssetVariants(String key) {
+  List<AssetVariant> getAssetVariants(String key) {
     throw UnimplementedError();
   }
 }
@@ -54,27 +53,28 @@ class _AssetManifestBin implements AssetManifest {
   }
 
   final Map<Object?, Object?> _data;
-  final Map<String, Iterable<AssetVariant>> _typeCastedData = <String, Iterable<AssetVariant>>{};
+  final Map<String, List<AssetVariant>> _typeCastedData = <String, List<AssetVariant>>{};
 
   @override
-  Iterable<AssetVariant> getAssetVariants(String key) {
+  List<AssetVariant> getAssetVariants(String key) {
     // We lazily delay typecasting to prevent a performance hiccup when parsing
     // large asset manifests.
     if (!_typeCastedData.containsKey(key)) {
-      _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as List<Object?>)
+      _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
         .map((Map<Object?, Object?> data) => AssetVariant(
             key: data['asset']! as String,
             targetDevicePixelRatio: data['dpr']! as double,
-        ));
+        ))
+        .toList();
 
       _data.remove(key);
     }
-    return _typeCastedData[key]!;
+    return List<AssetVariant>.from(_typeCastedData[key]!);
   }
 
   @override
-  Iterable<String> listAssets() {
+  List<String> listAssets() {
     return <String>[..._data.keys.cast<String>(), ..._typeCastedData.keys];
   }
 }
