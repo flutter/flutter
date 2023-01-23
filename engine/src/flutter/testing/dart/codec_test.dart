@@ -86,6 +86,33 @@ void main() {
     ]));
   });
 
+  test('with size', () async {
+    final Uint8List data = await _getSkiaResource('baby_tux.png').readAsBytes();
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+      buffer,
+      getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+        return ui.TargetImageSize(
+          width: intrinsicWidth ~/ 2,
+          height: intrinsicHeight ~/ 2,
+        );
+      },
+    );
+    final List<List<int>> decodedFrameInfos = <List<int>>[];
+    for (int i = 0; i < 2; i++) {
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      decodedFrameInfos.add(<int>[
+        frameInfo.duration.inMilliseconds,
+        frameInfo.image.width,
+        frameInfo.image.height,
+      ]);
+    }
+    expect(decodedFrameInfos, equals(<List<int>>[
+      <int>[0, 120, 123],
+      <int>[0, 120, 123],
+    ]));
+  });
+
   test('disposed decoded image', () async {
     final Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);

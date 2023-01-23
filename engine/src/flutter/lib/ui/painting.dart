@@ -2124,6 +2124,10 @@ Future<Codec> instantiateImageCodec(
 /// The data can be for either static or animated images. The following image
 /// formats are supported: {@macro dart.ui.imageFormats}
 ///
+/// The [buffer] will be disposed by this method once the codec has been created,
+/// so the caller must relinquish ownership of the [buffer] when they call this
+/// method.
+///
 /// The [targetWidth] and [targetHeight] arguments specify the size of the
 /// output image, in image pixels. If they are not equal to the intrinsic
 /// dimensions of the image, then the image will be scaled after being decoded.
@@ -2141,26 +2145,145 @@ Future<Codec> instantiateImageCodec(
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
+///
+/// ## Compatibility note on the web
+///
+/// When running Flutter on the web, only the CanvasKit renderer supports image
+/// resizing capabilities (not the HTML renderer). So if image resizing is
+/// critical to your use case, and you're deploying to the web, you should
+/// build using the CanvasKit renderer.
 Future<Codec> instantiateImageCodecFromBuffer(
   ImmutableBuffer buffer, {
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) async {
-  final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
-  if (!allowUpscaling) {
-    if (targetWidth != null && targetWidth > descriptor.width) {
-      targetWidth = descriptor.width;
-    }
-    if (targetHeight != null && targetHeight > descriptor.height) {
-      targetHeight = descriptor.height;
-    }
-  }
-  buffer.dispose();
-  return descriptor.instantiateCodec(
-    targetWidth: targetWidth,
-    targetHeight: targetHeight,
+}) {
+  return instantiateImageCodecWithSize(
+    buffer,
+    getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+      if (!allowUpscaling) {
+        if (targetWidth != null && targetWidth! > intrinsicWidth) {
+          targetWidth = intrinsicWidth;
+        }
+        if (targetHeight != null && targetHeight! > intrinsicHeight) {
+          targetHeight = intrinsicHeight;
+        }
+      }
+      return TargetImageSize(width: targetWidth, height: targetHeight);
+    },
   );
+}
+
+/// Instantiates an image [Codec].
+///
+/// This method is a convenience wrapper around the [ImageDescriptor] API.
+///
+/// The [buffer] parameter is the binary image data (e.g a PNG or GIF binary
+/// data). The data can be for either static or animated images. The following
+/// image formats are supported: {@macro dart.ui.imageFormats}
+///
+/// The [buffer] will be disposed by this method once the codec has been
+/// created, so the caller must relinquish ownership of the [buffer] when they
+/// call this method.
+///
+/// The [getTargetSize] parameter, when specified, will be invoked and passed
+/// the image's intrinsic size to determine the size to decode the image to.
+/// The width and the height of the size it returns must be positive values
+/// greater than or equal to 1, or null. It is valid to return a
+/// [TargetImageSize] that specifies only one of `width` and `height` with the
+/// other remaining null, in which case the omitted dimension will be scaled to
+/// maintain the aspect ratio of the original dimensions. When both are null or
+/// omitted, the image will be decoded at its native resolution (as will be the
+/// case if the [getTargetSize] parameter is omitted).
+///
+/// Scaling the image to larger than its intrinsic size should usually be
+/// avoided, since it causes the image to use more memory than necessary.
+/// Instead, prefer scaling the [Canvas] transform.
+///
+/// The returned future can complete with an error if the image decoding has
+/// failed.
+///
+/// ## Compatibility note on the web
+///
+/// When running Flutter on the web, only the CanvasKit renderer supports image
+/// resizing capabilities (not the HTML renderer). So if image resizing is
+/// critical to your use case, and you're deploying to the web, you should
+/// build using the CanvasKit renderer.
+Future<Codec> instantiateImageCodecWithSize(
+  ImmutableBuffer buffer, {
+  TargetImageSizeCallback? getTargetSize,
+}) async {
+  getTargetSize ??= _getDefaultImageSize;
+  final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
+  try {
+    final TargetImageSize targetSize = getTargetSize(descriptor.width, descriptor.height);
+    assert(targetSize.width == null || targetSize.width! > 0);
+    assert(targetSize.height == null || targetSize.height! > 0);
+    return descriptor.instantiateCodec(
+      targetWidth: targetSize.width,
+      targetHeight: targetSize.height,
+    );
+  } finally {
+    buffer.dispose();
+  }
+}
+
+TargetImageSize _getDefaultImageSize(int intrinsicWidth, int intrinsicHeight) {
+  return const TargetImageSize();
+}
+
+/// Signature for a callback that determines the size to which an image should
+/// be decoded given its intrinsic size.
+///
+/// See also:
+///
+///  * [instantiateImageCodecWithSize], which used this signature for its
+///    `getTargetSize` argument.
+typedef TargetImageSizeCallback = TargetImageSize Function(
+  int intrinsicWidth,
+  int intrinsicHeight,
+);
+
+/// A specification of the size to which an image should be decoded.
+///
+/// See also:
+///
+///  * [TargetImageSizeCallback], a callback that returns instances of this
+///    class when consulted by image decoding methods such as
+///    [instantiateImageCodecWithSize].
+class TargetImageSize {
+  /// Creates a new instance of this class.
+  ///
+  /// The `width` and `height` may both be null, but if they're non-null, they
+  /// must be positive.
+  const TargetImageSize({this.width, this.height})
+      : assert(width == null || width > 0),
+        assert(height == null || height > 0);
+
+  /// The width into which to load the image.
+  ///
+  /// If this is non-null, the image will be decoded into the specified width.
+  /// If this is null and [height] is also null, the image will be decoded into
+  /// its intrinsic size. If this is null and [height] is non-null, the image
+  /// will be decoded into a width that maintains its intrinsic aspect ratio
+  /// while respecting the [height] value.
+  ///
+  /// If this value is non-null, it must be positive.
+  final int? width;
+
+  /// The height into which to load the image.
+  ///
+  /// If this is non-null, the image will be decoded into the specified height.
+  /// If this is null and [width] is also null, the image will be decoded into
+  /// its intrinsic size. If this is null and [width] is non-null, the image
+  /// will be decoded into a height that maintains its intrinsic aspect ratio
+  /// while respecting the [width] value.
+  ///
+  /// If this value is non-null, it must be positive.
+  final int? height;
+
+  @override
+  String toString() => 'TargetImageSize($width x $height)';
 }
 
 /// Loads a single image frame from a byte array into an [Image] object.
