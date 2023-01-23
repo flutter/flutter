@@ -198,9 +198,7 @@ class IconButton extends StatelessWidget {
     this.isSelected,
     this.selectedIcon,
     required this.icon,
-  }) : assert(splashRadius == null || splashRadius > 0),
-       assert(autofocus != null),
-       assert(icon != null);
+  }) : assert(splashRadius == null || splashRadius > 0);
 
   /// The size of the icon inside the button.
   ///

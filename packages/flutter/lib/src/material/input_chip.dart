@@ -114,12 +114,7 @@ class InputChip extends StatelessWidget
       'This feature was deprecated after v2.10.0-0.3.pre.'
     )
     this.useDeleteButtonTooltip = true,
-  }) : assert(selected != null),
-       assert(isEnabled != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override

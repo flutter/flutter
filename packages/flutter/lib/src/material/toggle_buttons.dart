@@ -208,10 +208,7 @@ class ToggleButtons extends StatelessWidget {
     this.direction = Axis.horizontal,
     this.verticalDirection = VerticalDirection.down,
   }) :
-    assert(children != null),
-    assert(isSelected != null),
     assert(children.length == isSelected.length),
-    assert(direction != null),
     assert(direction == Axis.horizontal || verticalDirection != null);
 
   static const double _defaultBorderWidth = 1.0;
