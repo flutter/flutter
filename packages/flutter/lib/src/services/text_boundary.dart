@@ -176,7 +176,6 @@ class ParagraphBoundary extends TextBoundary {
       }
     } else if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       if (skipped) {
-        // There is a line terminator before the current codeunit but not after it.
         index += 1;
       }
     }
