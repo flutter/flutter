@@ -23,14 +23,10 @@ abstract class AssetManifest {
   }
 
   /// Lists the keys of all known assets, not including asset variants.
-  List<String> listAssets() {
-    throw UnimplementedError();
-  }
+  List<String> listAssets();
 
   /// Gets available variants of an asset.
-  List<AssetVariant> getAssetVariants(String key) {
-    throw UnimplementedError();
-  }
+  List<AssetVariant> getAssetVariants(String key);
 }
 
 /// Parses the binary asset manifest into a data structure that's easier to work with.
