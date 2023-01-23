@@ -531,10 +531,7 @@ class _LocalizationsState extends State<Localizations> {
   @override
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
-    if (widget.locale != old.locale
-        || (widget.delegates == null)
-        || (old.delegates == null)
-        || (_anyDelegatesShouldReload(old))) {
+    if (widget.locale != old.locale || (_anyDelegatesShouldReload(old))) {
       load(widget.locale);
     }
   }

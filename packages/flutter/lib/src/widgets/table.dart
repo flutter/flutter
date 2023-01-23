@@ -137,15 +137,6 @@ class Table extends RenderObjectWidget {
          return true;
        }()),
        assert(() {
-         if (children.any((TableRow row) => row.children!.any((Widget cell) => cell == null))) {
-           throw FlutterError(
-             'One of the children of one of the rows of the table was null.\n'
-             'The children of a TableRow must not be null.',
-           );
-         }
-         return true;
-       }()),
-       assert(() {
          if (children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key))) {
            throw FlutterError(
              'Two or more TableRow children of this Table had the same key.\n'

@@ -80,7 +80,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
 
   @override
   Rect get semanticBounds {
-    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier.value;
+    final EdgeInsets clipDetails = _clipDetailsNotifier.value;
     final Rect originalRect = super.semanticBounds;
     final Rect clippedRect = Rect.fromLTRB(
       originalRect.left + clipDetails.left,
