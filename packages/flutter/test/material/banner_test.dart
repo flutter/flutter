@@ -1105,6 +1105,27 @@ void main() {
       ),
     );
   });
+
+   testWidgets('Custom Margin respected', (WidgetTester tester) async {
+    const EdgeInsets margin = EdgeInsets.all(30);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MaterialBanner(
+         margin: margin,
+          content: const Text('I am a banner'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    );
+
+  final Container materialContainer = tester.widget<Container>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first);
+   expect(materialContainer.margin, margin);
+  });
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {

@@ -106,6 +106,7 @@ class MaterialBanner extends StatefulWidget {
     this.shadowColor,
     this.dividerColor,
     this.padding,
+    this.margin,
     this.leadingPadding,
     this.forceActionsBelow = false,
     this.overflowAlignment = OverflowBarAlignment.end,
@@ -188,6 +189,9 @@ class MaterialBanner extends StatefulWidget {
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 2.0)`.
   final EdgeInsetsGeometry? padding;
 
+  /// Empty space to surround the [MaterialBanner].
+  final EdgeInsetsGeometry? margin;
+
   /// The amount of space by which to inset the [leading] widget.
   ///
   /// This defaults to `EdgeInsetsDirectional.only(end: 16.0)`.
@@ -240,6 +244,7 @@ class MaterialBanner extends StatefulWidget {
       leading: leading,
       backgroundColor: backgroundColor,
       padding: padding,
+      margin: margin,
       leadingPadding: leadingPadding,
       forceActionsBelow: forceActionsBelow,
       overflowAlignment: overflowAlignment,
@@ -321,6 +326,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
+    final EdgeInsetsGeometry margin = widget.margin ?? EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0);
     final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? defaults.backgroundColor!;
@@ -337,7 +343,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? defaults.contentTextStyle;
 
     Widget materialBanner = Container(
-      margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
+      margin: margin,
       child: Material(
         elevation: elevation,
         color: backgroundColor,
