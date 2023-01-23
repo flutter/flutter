@@ -69,7 +69,7 @@ class _AssetManifestBin implements AssetManifest {
 
       _data.remove(key);
     }
-    return List<AssetVariant>.from(_typeCastedData[key]!);
+    return List<AssetVariant>.of(_typeCastedData[key]!);
   }
 
   @override
