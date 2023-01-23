@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../foundation.dart';
+import 'package:flutter/foundation.dart';
+
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
