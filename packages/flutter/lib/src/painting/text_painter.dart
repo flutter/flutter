@@ -390,7 +390,7 @@ class _TextPainterLayoutCache {
       assert(paragraph.width == double.infinity);
       return false;
     }
-    final double maxIntrinsicWidth = paragraph.maxIntrinsicWidth;
+    final double maxIntrinsicWidth = layout.maxIntrinsicLineExtent;
     if (layout.width >= maxIntrinsicWidth && maxWidth >= maxIntrinsicWidth) {
       // Adjust the paintOfffset and contentWidth to the new input constraints.
       contentWidth = newContentWidth;
@@ -1057,6 +1057,11 @@ class TextPainter {
   void layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(!maxWidth.isNaN);
     assert(!minWidth.isNaN);
+    // TODO(LongCatIsLooong): remove this when _applyFloatingPointHack is
+    // removed.
+    minWidth = minWidth.floorToDouble();
+    maxWidth = maxWidth.floorToDouble();
+
     final InlineSpan? text = this.text;
     if (text == null) {
       throw StateError('TextPainter.text must be set to a non-null value before using the TextPainter.');
@@ -1071,7 +1076,7 @@ class TextPainter {
       _debugNeedsRelayout = false;
       return true;
     }());
-    if (cachedLayout != null && cachedLayout._resizeToFit(minWidth.floorToDouble(), maxWidth.floorToDouble(), textWidthBasis)) {
+    if (cachedLayout != null && cachedLayout._resizeToFit(minWidth, maxWidth, textWidthBasis)) {
       return;
     }
 
@@ -1087,11 +1092,11 @@ class TextPainter {
       ..layout(ui.ParagraphConstraints(width: inputWidth));
 
     final _TextPainterLayoutCache newLayoutCache = _TextPainterLayoutCache(
-      _TextLayout._(paragraph), inputWidth, paintOffsetAlignment, minWidth.floorToDouble(), maxWidth.floorToDouble(), textWidthBasis,
+      _TextLayout._(paragraph), inputWidth, paintOffsetAlignment, minWidth, maxWidth, textWidthBasis,
     );
     // Call layout again if newLayoutCache had an infinite paint offset.
-    // This is not as expensive as it seems, line breaking isn't particularly
-    // expensive.
+    // This is not as expensive as it seems, line breaking is relatively cheap
+    // as compared to shaping.
     if (adjustedMaxWidth == null && minWidth.isFinite) {
       assert(maxWidth.isInfinite);
       final double newInputWidth = newLayoutCache.layout.maxIntrinsicLineExtent;
