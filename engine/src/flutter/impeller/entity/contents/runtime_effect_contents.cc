@@ -152,6 +152,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   ///
 
   size_t buffer_index = 0;
+  size_t buffer_offset = 0;
   size_t sampler_index = 0;
   for (auto uniform : runtime_stage_->GetUniforms()) {
     // TODO(113715): Populate this metadata once GLES is able to handle
@@ -180,8 +181,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         size_t alignment =
             std::max(uniform.bit_width / 8, DefaultUniformAlignment());
         auto buffer_view = pass.GetTransientsBuffer().Emplace(
-            uniform_data_->data() + uniform.location * sizeof(float),
-            uniform.GetSize(), alignment);
+            uniform_data_->data() + buffer_offset, uniform.GetSize(),
+            alignment);
 
         ShaderUniformSlot uniform_slot;
         uniform_slot.name = uniform.name.c_str();
@@ -189,6 +190,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
         cmd.BindResource(ShaderStage::kFragment, uniform_slot, metadata,
                          buffer_view);
         buffer_index++;
+        buffer_offset += uniform.GetSize();
         break;
       }
       case kBoolean:
