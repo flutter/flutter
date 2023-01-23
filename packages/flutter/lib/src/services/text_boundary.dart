@@ -175,15 +175,9 @@ class ParagraphBoundary extends TextBoundary {
         }
       }
     } else if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      if (!TextLayoutMetrics.isLineTerminator(codeUnits[index - 1]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
-        // There are no line terminators on either side of the current codeunit.
-        index += 1;
-      } else if (!TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
-        // There is a line terminator after the current codeunit but not before it.
-        index += 1;
-      } else if (!TextLayoutMetrics.isLineTerminator(codeUnits[index + 1]) && skipped) {
+      if (!TextLayoutMetrics.isLineTerminator(codeUnits[index + 1]) && skipped) {
         // There is a line terminator before the current codeunit but not after it.
-        index += 1
+        index += 1;
       }
     }
 
