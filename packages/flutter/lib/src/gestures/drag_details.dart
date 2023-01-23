@@ -25,8 +25,7 @@ class DragDownDetails {
   DragDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -73,8 +72,7 @@ class DragStartDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -142,8 +140,7 @@ class DragUpdateDetails {
     this.primaryDelta,
     required this.globalPosition,
     Offset? localPosition,
-  }) : assert(delta != null),
-       assert(
+  }) : assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
            || (primaryDelta == delta.dy && delta.dx == 0.0),
@@ -223,8 +220,7 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-  }) : assert(velocity != null),
-       assert(
+  }) : assert(
          primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
            || primaryVelocity == velocity.pixelsPerSecond.dy,
