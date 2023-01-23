@@ -569,7 +569,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  bool get disablePortPublication => !boolArgDeprecated('publish-port');
+  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
@@ -1093,7 +1093,11 @@ abstract class FlutterCommand extends Command<void> {
             (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
           nullSafetyMode = NullSafetyMode.sound;
         } else {
-          nullSafetyMode = NullSafetyMode.unsound;
+          throwToolExit(
+            'This application does not support sound null-safety (its language version is $languageVersion).\n'
+            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
+            'support sound null safety, see https://dart.dev/null-safety.',
+          );
         }
       } else if (!wasNullSafetyFlagParsed) {
         // This mode is only used for commands which do not build a single target like

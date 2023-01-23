@@ -1314,7 +1314,7 @@ void main() {
     painter.layout(minWidth: double.infinity);
     expect(painter.width, double.infinity);
     expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
-    expect(mockCanvas.centerX, isNull);
+    expect(mockCanvas.centerX, 0);
 
     painter.layout();
     expect(painter.width, 10);

@@ -55,8 +55,9 @@ typedef RouteListFactory = List<Route<dynamic>> Function(NavigatorState navigato
 ///
 /// Used by the restorable methods of the [Navigator] that add anonymous routes
 /// (e.g. [NavigatorState.restorablePush]). For this use case, the
-/// [RestorableRouteBuilder] must be static function as the [Navigator] will
-/// call it again during state restoration to re-create the route.
+/// [RestorableRouteBuilder] must be static function annotated with
+/// `@pragma('vm:entry-point')`. The [Navigator] will call it again during
+/// state restoration to re-create the route.
 typedef RestorableRouteBuilder<T> = Route<T> Function(BuildContext context, Object? arguments);
 
 /// Signature for the [Navigator.popUntil] predicate argument.
@@ -1093,6 +1094,13 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
   }
 }
 
+/// The default value of [Navigator.routeTraversalEdgeBehavior].
+///
+/// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
+const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
+  ? TraversalEdgeBehavior.leaveFlutterView
+  : TraversalEdgeBehavior.closedLoop;
+
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
 /// Many apps have a navigator near the top of their widget hierarchy in order
@@ -1402,10 +1410,12 @@ class Navigator extends StatefulWidget {
     this.observers = const <NavigatorObserver>[],
     this.requestFocus = true,
     this.restorationScopeId,
+    this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
   }) : assert(pages != null),
        assert(onGenerateInitialRoutes != null),
        assert(transitionDelegate != null),
        assert(observers != null),
+       assert(routeTraversalEdgeBehavior != null),
        assert(reportsRouteUpdateToEngine != null);
 
   /// The list of pages with which to populate the history.
@@ -1512,6 +1522,21 @@ class Navigator extends StatefulWidget {
   ///    to push a restorable route unto the navigator.
   /// {@endtemplate}
   final String? restorationScopeId;
+
+  /// Controls the transfer of focus beyond the first and the last items of a
+  /// focus scope that defines focus traversal of widgets within a route.
+  ///
+  /// {@template flutter.widgets.navigator.routeTraversalEdgeBehavior}
+  /// The focus inside routes installed in the top of the app affects how
+  /// the app behaves with respect to the platform content surrounding it.
+  /// For example, on the web, an app is at a minimum surrounded by browser UI,
+  /// such as the address bar, browser tabs, and more. The user should be able
+  /// to reach browser UI using normal focus shortcuts. Similarly, if the app
+  /// is embedded within an `<iframe>` or inside a custom element, it should
+  /// be able to participate in the overall focus traversal, including elements
+  /// not rendered by Flutter.
+  /// {@endtemplate}
+  final TraversalEdgeBehavior routeTraversalEdgeBehavior;
 
   /// The name for the default route of the application.
   ///
@@ -2084,9 +2109,10 @@ class Navigator extends StatefulWidget {
   /// {@macro flutter.widgets.navigator.push}
   ///
   /// {@template flutter.widgets.Navigator.restorablePush}
-  /// The method takes a _static_ [RestorableRouteBuilder] as argument, which
-  /// must instantiate and return a new [Route] object that will be added to
-  /// the navigator. The provided `arguments` object is passed to the
+  /// The method takes a [RestorableRouteBuilder] as argument, which must be a
+  /// _static_ function annotated with `@pragma('vm:entry-point')`. It must
+  /// instantiate and return a new [Route] object that will be added to the
+  /// navigator. The provided `arguments` object is passed to the
   /// `routeBuilder`. The navigator calls the static `routeBuilder` function
   /// again during state restoration to re-create the route object.
   ///

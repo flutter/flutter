@@ -244,7 +244,7 @@ class AssetImage extends AssetBundleImageProvider {
     this.assetName, {
     this.bundle,
     this.package,
-  }) : assert(assetName != null);
+  });
 
   /// The name of the main asset from the set of images to choose from. See the
   /// documentation for the [AssetImage] class itself for details.

@@ -110,7 +110,7 @@ class _Autofocus {
   // The widget tree is responsible for calling reparent/detach on attached
   // nodes to keep their parent/manager information up-to-date, so here we can
   // safely check if the scope/node involved in each autofocus request is
-  // still attached, and discard the ones are no longer attached to the
+  // still attached, and discard the ones which are no longer attached to the
   // original manager.
   void applyIfValid(FocusManager manager) {
     final bool shouldApply  = (scope.parent != null || identical(scope, manager.rootScope))
@@ -128,8 +128,8 @@ class _Autofocus {
 
 /// An attachment point for a [FocusNode].
 ///
-/// Using a [FocusAttachment] is rarely needed, unless you are building
-/// something akin to the [Focus] or [FocusScope] widgets from scratch.
+/// Using a [FocusAttachment] is rarely needed, unless building something
+/// akin to the [Focus] or [FocusScope] widgets from scratch.
 ///
 /// Once created, a [FocusNode] must be attached to the widget tree by its
 /// _host_ [StatefulWidget] via a [FocusAttachment] object. [FocusAttachment]s
@@ -261,8 +261,8 @@ enum UnfocusDisposition {
 ///
 /// _Please see the [Focus] and [FocusScope] widgets, which are utility widgets
 /// that manage their own [FocusNode]s and [FocusScopeNode]s, respectively. If
-/// they aren't appropriate, [FocusNode]s can be managed directly, but doing
-/// this yourself is rare._
+/// they aren't appropriate, [FocusNode]s can be managed directly, but doing this
+/// is rare._
 ///
 /// [FocusNode]s are persistent objects that form a _focus tree_ that is a
 /// representation of the widgets in the hierarchy that are interested in focus.
@@ -1213,6 +1213,7 @@ class FocusScopeNode extends FocusNode {
     super.onKey,
     super.skipTraversal,
     super.canRequestFocus,
+    this.traversalEdgeBehavior = TraversalEdgeBehavior.closedLoop,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
         super(
@@ -1221,6 +1222,14 @@ class FocusScopeNode extends FocusNode {
 
   @override
   FocusScopeNode get nearestScope => this;
+
+  /// Controls the transfer of focus beyond the first and the last items of a
+  /// [FocusScopeNode].
+  ///
+  /// Changing this field value has no immediate effect on the UI. Instead, next time
+  /// focus traversal takes place [FocusTraversalPolicy] will read this value
+  /// and apply the new behavior.
+  TraversalEdgeBehavior traversalEdgeBehavior;
 
   /// Returns true if this scope is the focused child of its parent scope.
   bool get isFirstFocus => enclosingScope!.focusedChild == this;
@@ -1349,6 +1358,7 @@ class FocusScopeNode extends FocusNode {
       return child.toStringShort();
     }).toList();
     properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: const Iterable<String>.empty()));
+    properties.add(DiagnosticsProperty<TraversalEdgeBehavior>('traversalEdgeBehavior', traversalEdgeBehavior, defaultValue: TraversalEdgeBehavior.closedLoop));
   }
 }
 
@@ -1395,8 +1405,8 @@ enum FocusHighlightStrategy {
 /// The focus manager is responsible for tracking which [FocusNode] has the
 /// primary input focus (the [primaryFocus]), holding the [FocusScopeNode] that
 /// is the root of the focus tree (the [rootScope]), and what the current
-/// [highlightMode] is. It also distributes key events from [RawKeyboard] to the
-/// nodes in the focus tree.
+/// [highlightMode] is. It also distributes key events from [KeyEventManager]
+/// to the nodes in the focus tree.
 ///
 /// The singleton [FocusManager] instance is held by the [WidgetsBinding] as
 /// [WidgetsBinding.focusManager], and can be conveniently accessed using the

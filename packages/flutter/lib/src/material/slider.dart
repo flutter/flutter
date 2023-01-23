@@ -1528,6 +1528,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (!_state.mounted) {
+      return;
+    }
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive) {
       // We need to add the drag first so that it has priority.
@@ -1888,7 +1891,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)

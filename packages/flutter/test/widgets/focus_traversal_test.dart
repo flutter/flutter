@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2152,6 +2153,7 @@ void main() {
       expect(events.length, 2);
     }, variant: KeySimulatorTransitModeVariant.all());
   });
+
   group(FocusTraversalGroup, () {
     testWidgets("Focus traversal group doesn't introduce a Semantics node", (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -2380,11 +2382,11 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
-          RawKeyboardListener(
-              focusNode: focusNode,
-              includeSemantics: false,
-              child: Container(),
-          ),
+        RawKeyboardListener(
+          focusNode: focusNode,
+          includeSemantics: false,
+          child: Container(),
+        ),
       );
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
@@ -2446,6 +2448,204 @@ void main() {
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
     });
+  });
+
+  // Tests that Flutter allows the focus to escape the app. This is the default
+  // behavior on the web, since on the web the app is always embedded into some
+  // surrounding UI. There's at least the browser UI for the address bar and
+  // tabs. If Flutter Web is embedded into a custom element, there could be
+  // other focusable HTML elements surrounding Flutter.
+  //
+  // See also: https://github.com/flutter/flutter/issues/114463
+  testWidgets('Default route edge traversal behavior', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode();
+    final FocusNode nodeB = FocusNode();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: <Widget>[
+            TextButton(
+              focusNode: nodeA,
+              child: const Text('A'),
+              onPressed: () {},
+            ),
+            TextButton(
+              focusNode: nodeB,
+              child: const Text('B'),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    nodeA.requestFocus();
+    await tester.pump();
+
+    expect(nodeA.hasFocus, true);
+    expect(nodeB.hasFocus, false);
+
+    // A -> B
+    expect(await nextFocus(), isTrue);
+    expect(nodeA.hasFocus, false);
+    expect(nodeB.hasFocus, true);
+
+    // A <- B
+    expect(await previousFocus(), isTrue);
+    expect(nodeA.hasFocus, true);
+    expect(nodeB.hasFocus, false);
+
+    // A -> B
+    expect(await nextFocus(), isTrue);
+    expect(nodeA.hasFocus, false);
+    expect(nodeB.hasFocus, true);
+
+    // B ->
+    //   * on mobile: cycle back to A
+    //   * on web: let the focus escape the app
+    expect(await nextFocus(), !kIsWeb);
+    expect(nodeA.hasFocus, !kIsWeb);
+    expect(nodeB.hasFocus, false);
+
+    // Start with A again, but wrap around in the opposite direction
+    nodeA.requestFocus();
+    await tester.pump();
+    expect(await previousFocus(), !kIsWeb);
+    expect(nodeA.hasFocus, false);
+    expect(nodeB.hasFocus, !kIsWeb);
+  });
+
+  // This test creates a FocusScopeNode configured to traverse focus in a closed
+  // loop. After traversing one loop, it changes the behavior to leave the
+  // FlutterView, then verifies that the new behavior did indeed take effect.
+  testWidgets('FocusScopeNode.traversalEdgeBehavior takes effect after update', (WidgetTester tester) async {
+    final FocusScopeNode scope = FocusScopeNode();
+    expect(scope.traversalEdgeBehavior, TraversalEdgeBehavior.closedLoop);
+
+    final FocusNode nodeA = FocusNode();
+    final FocusNode nodeB = FocusNode();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Focus(
+          focusNode: scope,
+          child: Column(
+            children: <Widget>[
+              TextButton(
+                focusNode: nodeA,
+                child: const Text('A'),
+                onPressed: () {},
+              ),
+              TextButton(
+                focusNode: nodeB,
+                child: const Text('B'),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    nodeA.requestFocus();
+    await tester.pump();
+
+    expect(nodeA.hasFocus, true);
+    expect(nodeB.hasFocus, false);
+
+    // A -> B
+    expect(await nextFocus(), isTrue);
+    expect(nodeA.hasFocus, false);
+    expect(nodeB.hasFocus, true);
+
+    // A <- B (wrap around)
+    expect(await nextFocus(), isTrue);
+    expect(nodeA.hasFocus, true);
+    expect(nodeB.hasFocus, false);
+
+    // Change the behavior and verify that the new behavior is in effect.
+    scope.traversalEdgeBehavior = TraversalEdgeBehavior.leaveFlutterView;
+    expect(scope.traversalEdgeBehavior, TraversalEdgeBehavior.leaveFlutterView);
+
+    // A -> B
+    expect(await nextFocus(), isTrue);
+    expect(nodeA.hasFocus, false);
+    expect(nodeB.hasFocus, true);
+
+    // B -> escape the view
+    expect(await nextFocus(), false);
+    expect(nodeA.hasFocus, false);
+    expect(nodeB.hasFocus, false);
+
+    // Change the behavior back to closedLoop and verify it's in effect. Also,
+    // this time traverse in the opposite direction.
+    nodeA.requestFocus();
+    await tester.pump();
+    expect(nodeA.hasFocus, true);
+    scope.traversalEdgeBehavior = TraversalEdgeBehavior.closedLoop;
+    expect(scope.traversalEdgeBehavior, TraversalEdgeBehavior.closedLoop);
+    expect(await previousFocus(), true);
+    expect(nodeA.hasFocus, false);
+    expect(nodeB.hasFocus, true);
+  });
+
+  testWidgets('NextFocusAction converts invoke result to KeyEventResult', (WidgetTester tester) async {
+    expect(
+      NextFocusAction().toKeyEventResult(const NextFocusIntent(), true),
+      KeyEventResult.handled,
+    );
+    expect(
+      NextFocusAction().toKeyEventResult(const NextFocusIntent(), false),
+      KeyEventResult.skipRemainingHandlers,
+    );
+  });
+
+  testWidgets('PreviousFocusAction converts invoke result to KeyEventResult', (WidgetTester tester) async {
+    expect(
+      PreviousFocusAction().toKeyEventResult(const PreviousFocusIntent(), true),
+      KeyEventResult.handled,
+    );
+    expect(
+      PreviousFocusAction().toKeyEventResult(const PreviousFocusIntent(), false),
+      KeyEventResult.skipRemainingHandlers,
+    );
   });
 }
 

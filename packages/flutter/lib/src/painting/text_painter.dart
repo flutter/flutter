@@ -74,8 +74,7 @@ class PlaceholderDimensions {
     required this.alignment,
     this.baseline,
     this.baselineOffset,
-  }) : assert(size != null),
-       assert(alignment != null);
+  });
 
   /// A constant representing an empty placeholder.
   static const PlaceholderDimensions empty = PlaceholderDimensions(size: Size.zero, alignment: ui.PlaceholderAlignment.bottom);
@@ -279,13 +278,8 @@ class _TextLayout {
   // color of the text is changed).
   ui.Paragraph _paragraph;
 
-  // Unfortunately, using full precision floating point here causes bad layouts
-  // because floating point math isn't associative. If we add and subtract
-  // padding, for example, we'll get different values when we estimate sizes and
-  // when we actually compute layout because the operations will end up associated
-  // differently. To work around this problem for now, we round fractional pixel
-  // values up to the nearest whole pixel value. The right long-term fix is to do
-  // layout using fixed precision arithmetic.
+  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/31707
+  // remove this hack as well as the flooring in `layout`.
   static double _applyFloatingPointHack(double layoutValue) => layoutValue.ceilToDouble();
 
   /// Whether this layout has been invalidated and disposed.
@@ -480,10 +474,7 @@ class TextPainter {
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
-       assert(textAlign != null),
-       assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
@@ -677,7 +668,6 @@ class TextPainter {
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
   set textAlign(TextAlign value) {
-    assert(value != null);
     if (_textAlign == value) {
       return;
     }
@@ -747,7 +737,6 @@ class TextPainter {
   double get textScaleFactor => _textScaleFactor;
   double _textScaleFactor;
   set textScaleFactor(double value) {
-    assert(value != null);
     if (_textScaleFactor == value) {
       return;
     }
@@ -842,7 +831,6 @@ class TextPainter {
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
-    assert(value != null);
     if (_textWidthBasis == value) {
       return;
     }
@@ -924,7 +912,6 @@ class TextPainter {
   ui.ParagraphStyle _createParagraphStyle([ TextDirection? defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
-    assert(textAlign != null);
     assert(textDirection != null || defaultTextDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     return _text!.style?.getParagraphStyle(
       textAlign: textAlign,
@@ -1026,7 +1013,6 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugAssertTextLayoutIsValid);
-    assert(baseline != null);
     return _layoutCache!.layout.getDistanceToBaseline(baseline);
   }
 
@@ -1358,7 +1344,6 @@ class TextPainter {
       return _caretMetrics;
     }
     final int offset = position.offset;
-    assert(position.affinity != null);
     final _CaretMetrics? metrics;
     switch (position.affinity) {
       case TextAffinity.upstream:
@@ -1397,8 +1382,6 @@ class TextPainter {
   }) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
-    assert(boxHeightStyle != null);
-    assert(boxWidthStyle != null);
     final _TextPainterLayoutCache cachedLayout = _layoutCache!;
     final List<TextBox> boxes = cachedLayout.paragraph.getBoxesForRange(
       selection.start,

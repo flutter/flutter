@@ -17,6 +17,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'ios/iproxy.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -917,7 +918,13 @@ class DebuggingOptions {
   ///   * https://github.com/dart-lang/sdk/blob/main/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
   final bool nativeNullAssertions;
 
-  List<String> getIOSLaunchArguments(EnvironmentType environmentType, String? route,  Map<String, Object?> platformArgs) {
+  List<String> getIOSLaunchArguments(
+    EnvironmentType environmentType,
+    String? route,
+    Map<String, Object?> platformArgs, {
+    bool ipv6 = false,
+    IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none
+  }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
@@ -954,6 +961,9 @@ class DebuggingOptions {
       // Use the suggested host port.
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
         '--observatory-port=$hostVmServicePort',
+      // Tell the observatory to listen on all interfaces, don't restrict to the loopback.
+      if (interfaceType == IOSDeviceConnectionInterface.network)
+        '--observatory-host=${ipv6 ? '::0' : '0.0.0.0'}',
     ];
   }
 

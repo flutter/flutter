@@ -18,7 +18,6 @@ class TimePickerTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-// Generated version ${tokens["version"]}
 class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   _${blockName}DefaultsM3(this.context);
 
