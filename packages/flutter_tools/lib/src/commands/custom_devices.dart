@@ -438,9 +438,9 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         if (forwardedPort == null) {
           _printConfigCheckingError("Couldn't forward test port $port from device.",);
           result = false;
+        } else {
+          await portForwarder.unforward(forwardedPort);
         }
-
-        await portForwarder.unforward(forwardedPort!);
       } on Exception catch (e) {
         _printConfigCheckingError(
           'While forwarding/unforwarding device port: $e',
