@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter/services.dart';
 
 const MethodChannel _kMethodChannel =
@@ -35,4 +37,14 @@ Future<bool> isSystemDarkModeEnabled() async {
   }
 
   return enabled;
+}
+
+/// Test conversion of a UTF16 string to UTF8 using the app template utils.
+Future<String> testStringConversion(Int32List twoByteCodes) async {
+  final String? converted = await _kMethodChannel.invokeMethod<String?>('convertString', twoByteCodes);
+  if (converted == null) {
+    throw 'Method channel unavailable.';
+  }
+
+  return converted;
 }
