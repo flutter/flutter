@@ -9,6 +9,8 @@ import 'message_codecs.dart';
 const String _kAssetManifestFilename = 'AssetManifest.bin';
 
 /// Contains details about available assets and their variants.
+/// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
+/// to learn about asset variants and how to declare them.
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
@@ -85,7 +87,16 @@ class AssetVariant {
     required this.targetDevicePixelRatio,
   });
 
-  /// The device pixel ratio that the asset is most ideal for, if any.
+  /// The device pixel ratio that this asset is most ideal for. This is determined
+  /// by the name of the parent folder of the asset file. For example, if the
+  /// parent folder is named "3.0x", the target device pixel ratio of that
+  /// asset will be interpreted as 3.
+  ///
+  /// This will be null if the parent folder name is not a ratio value followed
+  /// by an "x".
+  ///
+  /// See [Declaring resolution-aware image assets](https://docs.flutter.dev/development/ui/assets-and-images#resolution-aware)
+  /// for more information.
   final double? targetDevicePixelRatio;
 
   /// The asset's key, which typically resembles a file location.
