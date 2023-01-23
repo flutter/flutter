@@ -491,6 +491,42 @@ Future<Codec> instantiateImageCodecFromBuffer(
   targetHeight: targetHeight,
   allowUpscaling: allowUpscaling);
 
+Future<Codec> instantiateImageCodecWithSize(
+  ImmutableBuffer buffer, {
+  TargetImageSizeCallback? getTargetSize,
+}) async {
+  if (getTargetSize == null) {
+    return engine.renderer.instantiateImageCodec(buffer._list!);
+  } else {
+    final Codec codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+    try {
+      final FrameInfo info = await codec.getNextFrame();
+      try {
+        final int width = info.image.width;
+        final int height = info.image.height;
+        final TargetImageSize targetSize = getTargetSize(width, height);
+        return engine.renderer.instantiateImageCodec(buffer._list!,
+            targetWidth: targetSize.width, targetHeight: targetSize.height, allowUpscaling: false);
+      } finally {
+        info.image.dispose();
+      }
+    } finally {
+      codec.dispose();
+    }
+  }
+}
+
+typedef TargetImageSizeCallback = TargetImageSize Function(int intrinsicWidth, int intrinsicHeight);
+
+class TargetImageSize {
+  const TargetImageSize({this.width, this.height})
+      : assert(width == null || width > 0),
+        assert(height == null || height > 0);
+
+  final int? width;
+  final int? height;
+}
+
 Future<Codec> webOnlyInstantiateImageCodecFromUrl(Uri uri,
   {engine.WebOnlyImageCodecChunkCallback? chunkCallback}) =>
   engine.renderer.instantiateImageCodecFromUrl(uri, chunkCallback: chunkCallback);
