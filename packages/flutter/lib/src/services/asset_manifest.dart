@@ -8,7 +8,7 @@ import 'message_codecs.dart';
 
 const String _kAssetManifestFilename = 'AssetManifest.bin';
 
-/// Contains details about available assets.
+/// Contains details about available assets and their variants.
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
@@ -29,10 +29,11 @@ abstract class AssetManifest {
   List<AssetVariant> getAssetVariants(String key);
 }
 
-/// Parses the binary asset manifest into a data structure that's easier to work with.
+/// Parses the binary asset manifest into a data structure that's easier to work
+/// with.
 ///
-/// The asset manifest is a map of asset files to a list of objects containing
-/// information about variants of that asset.
+/// The binary asset manifest is a map of asset keys to a list of objects
+/// representing the asset's variants.
 ///
 /// The entries with each variant object are:
 ///  - "asset": the location of this variant to load it from.
