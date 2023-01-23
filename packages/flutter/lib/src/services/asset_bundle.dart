@@ -151,8 +151,6 @@ class NetworkAssetBundle extends AssetBundle {
   /// fetched.
   @override
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
-    assert(key != null);
-    assert(parser != null);
     return parser(await loadString(key));
   }
 
@@ -196,8 +194,6 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// callback synchronously.
   @override
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
-    assert(key != null);
-    assert(parser != null);
     if (_structuredDataCache.containsKey(key)) {
       return _structuredDataCache[key]! as Future<T>;
     }

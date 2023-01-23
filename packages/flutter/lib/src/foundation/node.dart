@@ -92,7 +92,6 @@ class AbstractNode {
   /// method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(covariant Object owner) {
-    assert(owner != null);
     assert(_owner == null);
     _owner = owner;
   }
@@ -124,7 +123,6 @@ class AbstractNode {
   @protected
   @mustCallSuper
   void adoptChild(covariant AbstractNode child) {
-    assert(child != null);
     assert(child._parent == null);
     assert(() {
       AbstractNode node = this;
@@ -147,7 +145,6 @@ class AbstractNode {
   @protected
   @mustCallSuper
   void dropChild(covariant AbstractNode child) {
-    assert(child != null);
     assert(child._parent == this);
     assert(child.attached == attached);
     child._parent = null;

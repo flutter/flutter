@@ -54,9 +54,7 @@ class PartialStackFrame {
     required this.package,
     required this.className,
     required this.method,
-  }) : assert(className != null),
-       assert(method != null),
-       assert(package != null);
+  });
 
   /// An `<asynchronous suspension>` line in a stack trace.
   static const PartialStackFrame asynchronousSuspension = PartialStackFrame(
@@ -128,8 +126,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
   const RepetitiveStackFrameFilter({
     required this.frames,
     required this.replacement,
-  }) : assert(frames != null),
-       assert(replacement != null);
+  });
 
   /// The shape of this repetitive stack pattern.
   final List<PartialStackFrame> frames;
@@ -177,8 +174,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
     String message, {
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(message != null),
-       super(
+  }) : super(
          null,
          <Object>[message],
          showName: false,
@@ -217,8 +213,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
     List<Object> messageParts, {
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(messageParts != null),
-       super(
+  }) : super(
          null,
          messageParts,
          showName: false,
@@ -406,7 +401,7 @@ class FlutterErrorDetails with Diagnosticable {
     this.stackFilter,
     this.informationCollector,
     this.silent = false,
-  }) : assert(exception != null);
+  });
 
   /// Creates a copy of the error details but with the given fields replaced
   /// with new values.
@@ -1001,8 +996,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// The default behavior for the [onError] handler is to call this function.
   static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport = false }) {
-    assert(details != null);
-    assert(details.exception != null);
     bool isInDebugMode = false;
     assert(() {
       // In debug mode, we ignore the "silent" flag.
@@ -1182,8 +1175,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// ```
   /// {@end-tool}
   static void reportError(FlutterErrorDetails details) {
-    assert(details != null);
-    assert(details.exception != null);
     onError?.call(details);
   }
 }
