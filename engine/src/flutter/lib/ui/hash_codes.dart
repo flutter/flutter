@@ -8,6 +8,7 @@ part of dart.ui;
 // int foo = 0;
 // int bar = 0;
 // List<int> quux = <int>[];
+// List<int>? thud;
 // int baz = 0;
 
 class _HashEnd { const _HashEnd(); }
@@ -59,11 +60,11 @@ class _Jenkins {
 /// int get hashCode => Object.hash(foo, bar, Object.hashAll(quux), baz);
 /// ```
 ///
-/// If `quux` in this example was nullable, then it would need special handling,
+/// If a parameter is nullable, then it needs special handling,
 /// because [Object.hashAll]'s argument is not nullable:
 ///
 /// ```dart
-/// int get hashCode => Object.hash(foo, bar, quux == null ? null : Object.hashAll(quux), baz);
+/// int get hashCode => Object.hash(foo, bar, thud == null ? null : Object.hashAll(thud), baz);
 /// ```
 @Deprecated(
   'Use Object.hash() instead. '
