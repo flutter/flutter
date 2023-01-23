@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -143,6 +144,13 @@ class FakeAndroidApk extends Fake implements AndroidApk { }
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
+  FakeIOSDevice({
+    this.interfaceType = IOSDeviceConnectionInterface.none,
+  });
+
+  @override
+  final IOSDeviceConnectionInterface interfaceType;
+
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 

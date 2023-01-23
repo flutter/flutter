@@ -1537,11 +1537,16 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final Iterable<Device> networkDevices = devices.where((Device device) {
-      return device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network;
-    });
-    if (networkDevices.isNotEmpty) {
-      UsageEvent('device', 'ios-network-device', label: name, flutterUsage: globals.flutterUsage).send();
+    final Iterable<IOSDevice> iosDevices = devices.whereType<IOSDevice>();
+    if (iosDevices.isNotEmpty) {
+      final bool includesNetworkDevices =
+          iosDevices.any((IOSDevice device) => device.interfaceType == IOSDeviceConnectionInterface.network);
+      UsageEvent(
+        'device',
+        'ios-interface-type',
+        label: includesNetworkDevices ? 'wireless' : 'usb',
+        flutterUsage: globals.flutterUsage,
+      ).send();
     }
 
     return devices;

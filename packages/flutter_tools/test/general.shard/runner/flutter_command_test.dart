@@ -701,7 +701,6 @@ void main() {
     group('findAllTargetDevices', () {
       final FakeDevice device1 = FakeDevice('device1', 'device1');
       final FakeDevice device2 = FakeDevice('device2', 'device2');
-      final FakeIOSDevice iOSNetworkDevice = FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network);
 
       group('when specified device id', () {
         testUsingContext('returns device when device is found', () async {
@@ -830,35 +829,61 @@ void main() {
           });
         });
       });
+      group('when an iOS', () {
+        final FakeIOSDevice iOSNetworkDevice = FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network);
+        final FakeIOSDevice iOSUSBDevice = FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb);
 
-      group('when includes a network device', () {
-        testUsingCommandContext('returns one device', () async {
+        testUsingCommandContext('network device is the only device', () async {
           testDeviceManager.addDevice(iOSNetworkDevice);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(usage.events, <TestUsageEvent>[
             const TestUsageEvent(
               'device',
-              'ios-network-device',
-              label: 'dummy',
+              'ios-interface-type',
+              label: 'wireless',
             ),
           ]);
           expect(devices, <Device>[iOSNetworkDevice]);
         });
-        testUsingCommandContext('can return multiple devices', () async {
+
+        testUsingCommandContext('usb device is the only device', () async {
+          testDeviceManager.addDevice(iOSUSBDevice);
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+          expect(usage.events, <TestUsageEvent>[
+            const TestUsageEvent(
+              'device',
+              'ios-interface-type',
+              label: 'usb',
+            ),
+          ]);
+          expect(devices, <Device>[iOSUSBDevice]);
+        });
+
+        testUsingCommandContext('network device and an iOS usb device is returned', () async {
           testDeviceManager.specifiedDeviceId = 'all';
-          testDeviceManager.addDevice(device1);
+          testDeviceManager.addDevice(iOSUSBDevice);
           testDeviceManager.addDevice(iOSNetworkDevice);
           final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
           final List<Device>? devices = await flutterCommand.findAllTargetDevices();
           expect(usage.events, <TestUsageEvent>[
             const TestUsageEvent(
               'device',
-              'ios-network-device',
-              label: 'dummy',
+              'ios-interface-type',
+              label: 'wireless',
             ),
           ]);
-          expect(devices, <Device>[device1, iOSNetworkDevice]);
+          expect(devices, <Device>[iOSUSBDevice, iOSNetworkDevice]);
+        });
+
+        testUsingCommandContext('device is not found', () async {
+          testDeviceManager.specifiedDeviceId = 'all';
+          testDeviceManager.addDevice(device1);
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+          expect(usage.events, <TestUsageEvent>[]);
+          expect(devices, <Device>[device1]);
         });
       });
     });
