@@ -284,9 +284,7 @@ abstract class CachingAssetBundle extends AssetBundle {
           // was given the future of the completer.
           completer.complete(value);
         }
-      }, onError: (Object err, StackTrace? stack) {
-        completer!.completeError(err, stack);
-      });
+      }, onError: completer!.completeError);
 
     if (result != null) {
       // The above code ran synchronously. We can synchronously return the result.
