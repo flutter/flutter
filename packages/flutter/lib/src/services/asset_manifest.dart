@@ -32,18 +32,18 @@ abstract class AssetManifest {
   List<AssetVariant> getAssetVariants(String key);
 }
 
-/// Parses the binary asset manifest into a data structure that's easier to work
-/// with.
-///
-/// The binary asset manifest is a map of asset keys to a list of objects
-/// representing the asset's variants.
-///
-/// The entries with each variant object are:
-///  - "asset": the location of this variant to load it from.
-///  - "dpr": The device-pixel-ratio that the asset is best-suited for.
-///
-/// New fields could be added to this object schema to support new asset variation
-/// features, such as themes, locale/region support, reading directions, and so on.
+// Parses the binary asset manifest into a data structure that's easier to work
+// with.
+//
+// The binary asset manifest is a map of asset keys to a list of objects
+// representing the asset's variants.
+//
+// The entries with each variant object are:
+//  - "asset": the location of this variant to load it from.
+//  - "dpr": The device-pixel-ratio that the asset is best-suited for.
+//
+// New fields could be added to this object schema to support new asset variation
+// features, such as themes, locale/region support, reading directions, and so on.
 class _AssetManifestBin implements AssetManifest {
   _AssetManifestBin(Map<Object?, Object?> standardMessageData): _data = standardMessageData;
 
