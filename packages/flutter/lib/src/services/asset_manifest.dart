@@ -87,7 +87,6 @@ class AssetVariant {
   /// The device pixel ratio that the asset is most ideal for, if any.
   final double? targetDevicePixelRatio;
 
-  /// The asset's key. This can also be thought of as the logical name of an asset,
-  /// and it typically resembles a file location.
+  /// The asset's key, which typically resembles a file location.
   final String key;
 }
