@@ -180,12 +180,15 @@ void main() {
           'to come to the aid\n'                      // 37 + 19 => 56
           'of their country.';                        // 56 + 17 => 73
       const ParagraphBoundary boundaryI = ParagraphBoundary(textI);
-      const int positionI = 55;
-      const int positionJ = 37;
+      const int positionI = 55;// \n at the end of the third line.
+      const int positionJ = 37;// t at beginning of third line.
+      const int positionK = 36;// \n at end of second line.
       expect(boundaryI.getLeadingTextBoundaryAt(positionI), 37);
       expect(boundaryI.getTrailingTextBoundaryAt(positionI), 56);
       expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 36);
-      expect(boundaryI.getTrailingTextBoundaryAt(positionJ), 37);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionJ), 56);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionK), 36);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionK), 37);
     });
 
     test('leading boundary works for consecutive CRLF', () {
