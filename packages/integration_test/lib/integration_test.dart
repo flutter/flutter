@@ -252,7 +252,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     @visibleForTesting vm.VmService? vmService,
     @visibleForTesting HttpClient? httpClient,
   }) async {
-    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
