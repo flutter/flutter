@@ -138,6 +138,7 @@ class ParagraphBoundary extends TextBoundary {
   /// that follows the line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
+    print('get leading at $position');
     if (position < 0 || position > _text.length) {
       return null;
     }
@@ -150,19 +151,31 @@ class ParagraphBoundary extends TextBoundary {
     int index = position;
 
     if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])) {
+      print('case1');
       index -= 2;
     } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
-      index -= 1;
-    }
-    while (index > 0 && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      print('case2');
       index -= 1;
     }
 
-    if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1])) {
-      index += 1;
-    } else if (index > 0 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+    while (index > 0 && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       index -= 1;
+      print('sub $index');
     }
+
+    if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+      print('case4');
+      if (TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])) {
+        index -= 1;
+      } else {
+        index += 1;
+      }
+    } else if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index + 1]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
+      print('shouldnt be here');//on + 1
+      index += 1;
+    }
+
+    print(max(index, 0));
 
     return max(index, 0);
   }
@@ -195,6 +208,8 @@ class ParagraphBoundary extends TextBoundary {
     if (index < codeUnits.length && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       index += 1;
     }
+
+    print('extent ${min(index, _text.length)}');
 
     return min(index, _text.length);
   }
