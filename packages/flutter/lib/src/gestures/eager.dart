@@ -24,6 +24,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override

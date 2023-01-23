@@ -59,9 +59,8 @@ typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent ev
 /// consider using one of its subclasses to recognize specific types for drag
 /// gestures.
 ///
-/// [DragGestureRecognizer] competes on pointer events of [kPrimaryButton]
-/// only when it has at least one non-null callback. If it has no callbacks, it
-/// is a no-op.
+/// [DragGestureRecognizer] competes on pointer events only when it has at
+/// least one non-null callback. If it has no callbacks, it is a no-op.
 ///
 /// See also:
 ///
@@ -84,9 +83,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
     super.supportedDevices,
-  }) : assert(dragStartBehavior != null);
+    super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
+  });
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
+
+  // Accept the input if, and only if, [kPrimaryButton] is pressed.
+  static bool _defaultButtonAcceptBehavior(int buttons) => buttons == kPrimaryButton;
 
   /// Configure the behavior of offsets passed to [onStart].
   ///
@@ -122,7 +125,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragDownDetails], which is passed as an argument to this callback.
   GestureDragDownCallback? onDown;
 
@@ -137,7 +140,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragStartDetails], which is passed as an argument to this callback.
   GestureDragStartCallback? onStart;
 
@@ -151,7 +154,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
   GestureDragUpdateCallback? onUpdate;
 
@@ -166,7 +169,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   ///  * [DragEndDetails], which is passed as an argument to this callback.
   GestureDragEndCallback? onEnd;
 
@@ -174,7 +177,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [allowedButtonsFilter], which decides which button will be allowed.
   GestureDragCancelCallback? onCancel;
 
   /// The minimum distance an input pointer drag must have moved to
@@ -251,18 +254,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   bool isPointerAllowed(PointerEvent event) {
     if (_initialButtons == null) {
-      switch (event.buttons) {
-        case kPrimaryButton:
-          if (onDown == null &&
-              onStart == null &&
-              onUpdate == null &&
-              onEnd == null &&
-              onCancel == null) {
-            return false;
-          }
-          break;
-        default:
-          return false;
+      if (onDown == null &&
+          onStart == null &&
+          onUpdate == null &&
+          onEnd == null &&
+          onCancel == null) {
+        return false;
       }
     } else {
       // There can be multiple drags simultaneously. Their effects are combined.
@@ -316,7 +313,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
          event is PointerPanZoomStartEvent ||
          event is PointerPanZoomUpdateEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
-      assert(tracker != null);
       if (event is PointerPanZoomStartEvent) {
         tracker.addPosition(event.timeStamp, Offset.zero);
       } else if (event is PointerPanZoomUpdateEvent) {
@@ -449,7 +445,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkDown() {
-    assert(_initialButtons == kPrimaryButton);
     if (onDown != null) {
       final DragDownDetails details = DragDownDetails(
         globalPosition: _initialPosition.global,
@@ -460,7 +455,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkStart(Duration timestamp, int pointer) {
-    assert(_initialButtons == kPrimaryButton);
     if (onStart != null) {
       final DragStartDetails details = DragStartDetails(
         sourceTimeStamp: timestamp,
@@ -479,7 +473,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     required Offset globalPosition,
     Offset? localPosition,
   }) {
-    assert(_initialButtons == kPrimaryButton);
     if (onUpdate != null) {
       final DragUpdateDetails details = DragUpdateDetails(
         sourceTimeStamp: sourceTimeStamp,
@@ -493,13 +486,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkEnd(int pointer) {
-    assert(_initialButtons == kPrimaryButton);
     if (onEnd == null) {
       return;
     }
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
-    assert(tracker != null);
 
     final DragEndDetails details;
     final String Function() debugReport;
@@ -530,7 +521,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkCancel() {
-    assert(_initialButtons == kPrimaryButton);
     if (onCancel != null) {
       invokeCallback<void>('onCancel', onCancel!);
     }
@@ -570,6 +560,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -616,6 +607,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     )
     super.kind,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override
@@ -654,6 +646,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   PanGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
+    super.allowedButtonsFilter,
   });
 
   @override

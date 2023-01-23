@@ -257,10 +257,7 @@ class FakeCommandRunner extends FlutterCommandRunner {
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
-       _userMessages = userMessages ?? UserMessages(),
-       assert(platform != null),
-       assert(fileSystem != null),
-       assert(logger != null);
+       _userMessages = userMessages ?? UserMessages();
 
   final Platform _platform;
   final FileSystem _fileSystem;

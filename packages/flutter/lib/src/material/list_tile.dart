@@ -139,12 +139,18 @@ enum ListTileControlAffinity {
 /// ** See code in examples/api/lib/material/list_tile/list_tile.1.dart **
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
+/// This sample shows the creation of a [ListTile] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/lists/overview.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.2.dart **
+/// {@end-tool}
 ///
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
 /// [Expanded] widget. [ListTile] requires fixed width constraints,
 /// whereas a [Row] does not constrain its children.
 ///
+/// {@tool snippet}
 /// ```dart
 /// Row(
 ///   children: const <Widget>[
@@ -231,7 +237,7 @@ enum ListTileControlAffinity {
 ///
 /// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
 ///
-/// ** See code in examples/api/lib/material/list_tile/list_tile.4.dart **
+/// ** See code in examples/api/lib/material/list_tile/custom_list_item.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
@@ -241,7 +247,7 @@ enum ListTileControlAffinity {
 ///
 /// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
 ///
-/// ** See code in examples/api/lib/material/list_tile/list_tile.5.dart **
+/// ** See code in examples/api/lib/material/list_tile/custom_list_item.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -409,7 +415,16 @@ class ListTile extends StatelessWidget {
 
   /// Defines the default color for [leading] and [trailing] icons.
   ///
-  /// If this property is null then [ListTileThemeData.iconColor] is used.
+  /// If this property is null and [selected] is false then [ListTileThemeData.iconColor]
+  /// is used. If that is also null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurface]
+  /// is used, otherwise if [ThemeData.brightness] is [Brightness.light], [Colors.black54] is used,
+  /// and if [ThemeData.brightness] is [Brightness.dark], the value is null.
+  ///
+  /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
+  /// is used. If that is also null then [ColorScheme.primary] is used.
+  ///
+  /// If this color is a [MaterialStateColor] it will be resolved against
+  /// [MaterialState.selected] and [MaterialState.disabled] states.
   ///
   /// See also:
   ///
@@ -417,10 +432,18 @@ class ListTile extends StatelessWidget {
   ///   [ListTileThemeData].
   final Color? iconColor;
 
-  /// Defines the default color for the [title] and [subtitle].
+  /// Defines the text color for the [title], [subtitle], [leading], and [trailing].
   ///
-  /// If this property is null then [ListTileThemeData.textColor] is used. If that
-  /// is also null then [ColorScheme.primary] is used.
+  /// If this property is null and [selected] is false then [ListTileThemeData.textColor]
+  /// is used. If that is also null then default text color is used for the [title], [subtitle]
+  /// [leading], and [trailing]. Except for [subtitle], if [ThemeData.useMaterial3] is false,
+  /// [TextTheme.bodySmall] is used.
+  ///
+  /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
+  /// is used. If that is also null then [ColorScheme.primary] is used.
+  ///
+  /// If this color is a [MaterialStateColor] it will be resolved against
+  /// [MaterialState.selected] and [MaterialState.disabled] states.
   ///
   /// See also:
   ///
@@ -541,8 +564,11 @@ class ListTile extends StatelessWidget {
   /// {@template flutter.material.ListTile.tileColor}
   /// Defines the background color of `ListTile` when [selected] is false.
   ///
-  /// When the value is null, the [tileColor] is set to [ListTileTheme.tileColor]
-  /// if it's not null and to [Colors.transparent] if it's null.
+  /// If this property is null and [selected] is false then [ListTileThemeData.tileColor]
+  /// is used. If that is also null and [selected] is true, [selectedTileColor] is used.
+  /// When that is also null, the [ListTileTheme.selectedTileColor] is used, otherwise
+  /// [Colors.transparent] is used.
+  ///
   /// {@endtemplate}
   final Color? tileColor;
 
@@ -1458,7 +1484,7 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _LisTileDefaultsM3 extends ListTileThemeData {
   _LisTileDefaultsM3(this.context)

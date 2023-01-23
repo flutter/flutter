@@ -153,7 +153,7 @@ class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
     super.key,
     required super.child,
-  }) : assert(child != null);
+  });
 
   @override
   void applyParentData(RenderObject renderObject) {}
