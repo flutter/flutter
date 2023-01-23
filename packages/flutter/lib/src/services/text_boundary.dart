@@ -142,10 +142,9 @@ class ParagraphBoundary extends TextBoundary {
       return null;
     }
 
-    if (position == 0) {
+    if (position == 0 || _text.isEmpty) {
       return 0;
     }
-    assert(_text.isNotEmpty);
 
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
@@ -192,10 +191,9 @@ class ParagraphBoundary extends TextBoundary {
     if (position < 0 || position >= _text.length) {
       return null;
     }
-    if (position == _text.length - 1) {
+    if (position == _text.length - 1 || _text.isEmpty) {
       return _text.length;
     }
-    assert(_text.isNotEmpty);
 
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
