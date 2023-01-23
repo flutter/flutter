@@ -328,14 +328,28 @@ class _TextLayout {
 }
 
 class _TextPainterLayoutCache {
-  _TextPainterLayoutCache(this.layout, this.offset, this.contentWidth, this.inputWidth)
-    : assert(offset.dy == 0),
-      assert(!offset.dx.isNaN);
+  _TextPainterLayoutCache(this.layout, this.inputWidth, this.textAlignment, double minWidth, double maxWidth, TextWidthBasis widthBasis)
+    : contentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout),
+      assert(textAlignment >= 0.0 && textAlignment <= 1.0);
 
   final _TextLayout layout;
-  double contentWidth;
   double inputWidth;
-  Offset offset;
+
+  // The content width the text painter should report in TextPainter.width.
+  double contentWidth;
+  final double textAlignment;
+  // It's guaranteed that the Offset does not contain NaN.
+  Offset get offset {
+    if (textAlignment == 0) {
+      return Offset.zero;
+    }
+    if (!paragraph.width.isFinite) {
+      return const Offset(double.infinity, 0.0);
+    }
+    final double dx = textAlignment * (contentWidth - paragraph.width);
+    assert(!dx.isNaN);
+    return Offset(dx, 0);
+  }
 
   ui.Paragraph get paragraph => layout._paragraph;
 
@@ -344,6 +358,52 @@ class _TextPainterLayoutCache {
   // Holds the TextPosition the last caret metrics were computed with. When new
   // values are passed in, we recompute the caret metrics. only as necessary.
   TextPosition? _previousCaretPosition;
+
+  static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
+    switch (widthBasis) {
+      case TextWidthBasis.longestLine:
+        return clampDouble(layout.longestLine, minWidth, maxWidth);
+      case TextWidthBasis.parent:
+        return clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth);
+    }
+  }
+  // Try to resize the contentWidth to fit the new input constriants, by just
+  // adjusting the paint offset (so no line-breaking changes needed).
+  //
+  // Returns false if the new constriants require re-computing the line breaks,
+  // in which case no side effects will occur.
+  bool _resizeToFit(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
+    assert(layout.maxIntrinsicLineExtent.isFinite);
+    // The assumption here is that if a Paragraph's width is already >= its
+    // maxIntrinsicWidth, further increasing the input width does not change its
+    // layout (but may change the paint offset if it's not left-aligned). This is
+    // true even for TextAlign.justify: when width >= maxIntrinsicWidth
+    // TextAlign.justify will behave exactly the same as TextAlign.start.
+    //
+    // An exception to this is when the text is not left-aligned, and the input
+    // width is double.infinity. Since the resulting Paragraph will have a width
+    // of double.infinity, and to make the text visible the paintOffset.dx is
+    // bound to be double.negativeInfinity, which invalidates all arithmetic
+    // operations.
+    final double newContentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
+    if (newContentWidth == contentWidth) {
+      return true;
+    }
+    assert(minWidth <= maxWidth);
+    // Always needsLayout when the current paintOffset and the paragraph width are not finite.
+    if (!offset.dx.isFinite && !paragraph.width.isFinite && minWidth.isFinite) {
+      assert(offset.dx == double.infinity);
+      assert(paragraph.width == double.infinity);
+      return false;
+    }
+    final double maxIntrinsicWidth = paragraph.maxIntrinsicWidth;
+    if (layout.width >= maxIntrinsicWidth && maxWidth >= maxIntrinsicWidth) {
+      // Adjust the paintOfffset and contentWidth to the new input constraints.
+      contentWidth = newContentWidth;
+      return true;
+    }
+    return false;
+  }
 }
 
 /// This is used to cache and pass the computed metrics regarding the
@@ -519,6 +579,8 @@ class TextPainter {
     }
   }
 
+  // Whehter textWidthBasis has changed after the most recent `layout` call.
+  bool _debugNeedsRelayout = true;
   // _paragraph being null means the text needs layout because of style changes.
   // Setting _paragraph to null invalidates all the layout cache.
   //
@@ -784,8 +846,8 @@ class TextPainter {
     if (_textWidthBasis == value) {
       return;
     }
+    assert(() { return _debugNeedsRelayout = true; }());
     _textWidthBasis = value;
-    markNeedsLayout();
   }
 
   /// {@macro dart.ui.textHeightBehavior}
@@ -937,7 +999,8 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double get width {
     assert(_debugAssertTextLayoutIsValid);
-    return _layoutCache!.contentWidth.ceilToDouble();
+    assert(!_debugNeedsRelayout);
+    return _layoutCache!.contentWidth;
   }
 
   /// The vertical space required to paint this text.
@@ -953,6 +1016,7 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   Size get size {
     assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
     return Size(width, height);
   }
 
@@ -998,8 +1062,9 @@ class TextPainter {
   /// Computes the visual position of the glyphs for painting the text.
   ///
   /// The text will layout with a width that's as close to its max intrinsic
-  /// width as possible while still being greater than or equal to `minWidth` and
-  /// less than or equal to `maxWidth`.
+  /// width (or its longest line, if [textWidthBasis] is set to
+  /// [TextWidthBasis.parent]) as possible while still being greater than or
+  /// equal to `minWidth` and less than or equal to `maxWidth`.
   ///
   /// The [text] and [textDirection] properties must be non-null before this is
   /// called.
@@ -1015,84 +1080,43 @@ class TextPainter {
       throw StateError('TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     }
     final _TextPainterLayoutCache? cachedLayout = _layoutCache;
+
+    assert(() {
+      _debugNeedsRelayout = false;
+      return true;
+    }());
+    if (cachedLayout != null && cachedLayout._resizeToFit(minWidth.floorToDouble(), maxWidth.floorToDouble(), textWidthBasis)) {
+      return;
+    }
+
     final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection);
+    // Try to avoid laying out the paragraph with maxWidth=double.infinity
+    // when the text is not left-aligned, so we don't have to deal with an
+    // infinite paint offset.
+    final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
+    final double? adjustedMaxWidth = !adjustMaxWidth ? maxWidth : cachedLayout?.layout.maxIntrinsicLineExtent;
+    final double inputWidth = adjustedMaxWidth ?? maxWidth;
 
-    // The assumption here is that if a Paragraph's width is already >= its
-    // maxIntrinsicWidth, further increasing the input width does not change its
-    // layout (but may change the paint offset if it's not left-aligned). This is
-    // true even for TextAlign.justify, since when width >= maxIntrinsicWidth
-    // TextAlign.justify will behave exactly the same as TextAlign.start.
-    //
-    // An exception to this is when the text is not left-aligned, and the input
-    // width is double.infinity. Since the resulting Paragraph will have a width
-    // of double.infinity, and to make the text visible the paintOffset.dx is
-    // bound to be double.negativeInfinity, which invalidates all arithmetic
-    // operations.
-    final bool needsLayout = cachedLayout == null
-      || (maxWidth != cachedLayout.layout.width
-        // Always needsLayout when the current paintOffset and the paragraph
-        // width are not finite: we won't be able to translate the paint offset
-        // using addition/subtraction.
-        && ((!cachedLayout.offset.dx.isFinite && !cachedLayout.paragraph.width.isFinite)
-          || cachedLayout.layout.width < cachedLayout.paragraph.maxIntrinsicWidth
-          || maxWidth < cachedLayout.paragraph.maxIntrinsicWidth));
+    final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
+      ..layout(ui.ParagraphConstraints(width: inputWidth));
 
-    final _TextLayout newLayout;
-    final double inputWidth;
-    if (needsLayout) {
-      // Try to avoid laying out the paragraph with maxWidth=double.infinity
-      // when the text is not left-aligned. When maxIntrinsicWidth is still
-      // unknown, use a relatively large number with decent precision instead of
-      // double.infinity. If that width is still not large enough, a second
-      // layout call is needed now that maxIntrinsicWidth is avaiable.
-      const double largeWidth = 32768; // 2^15, mantissa precision: 2^15/2^52 ≅ 7.2759576e-12.
-      final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
-      final double adjustedMaxWidth = !adjustMaxWidth
-        ? maxWidth
-        : cachedLayout?.layout.maxIntrinsicLineExtent ?? largeWidth;
-
-      final ui.Paragraph paragraph = _createParagraph(text)..layout(ui.ParagraphConstraints(width: adjustedMaxWidth));
-
-      // If largeWidth is not large enough for the text, we'll have to at least
-      // re-run the line breaking algorithm.
-      if (adjustMaxWidth && paragraph.maxIntrinsicWidth > adjustedMaxWidth) {
-        inputWidth = paragraph.maxIntrinsicWidth.ceilToDouble();
-        paragraph.layout(ui.ParagraphConstraints(width: inputWidth));
-      } else {
-        inputWidth = adjustedMaxWidth;
-      }
-      newLayout = _TextLayout._(paragraph);
-    } else {
-      newLayout = cachedLayout.layout;
-      inputWidth = cachedLayout.inputWidth;
+    final _TextPainterLayoutCache newLayoutCache = _TextPainterLayoutCache(
+      _TextLayout._(paragraph), inputWidth, paintOffsetAlignment, minWidth.floorToDouble(), maxWidth.floorToDouble(), textWidthBasis,
+    );
+    // Call layout again if newLayoutCache had an infinite paint offset.
+    // This is not as expensive as it seems, line breaking isn't particularly
+    // expensive.
+    if (adjustedMaxWidth == null && minWidth.isFinite) {
+      assert(maxWidth.isInfinite);
+      final double newInputWidth = newLayoutCache.layout.maxIntrinsicLineExtent;
+      paragraph.layout(ui.ParagraphConstraints(width: newInputWidth));
+      newLayoutCache.inputWidth = newInputWidth;
     }
-
-    final double intrinsicWidth;
-    switch (textWidthBasis) {
-      case TextWidthBasis.longestLine:
-        intrinsicWidth = newLayout.longestLine;
-        break;
-      case TextWidthBasis.parent:
-        intrinsicWidth = newLayout.maxIntrinsicLineExtent;
-        break;
-    }
-
-    minWidth = minWidth.floorToDouble();
-    maxWidth = maxWidth.floorToDouble();
-    // The content width the text painter should report in TextPainter.width.
-    final double contentWidth = clampDouble(intrinsicWidth, minWidth, maxWidth);
-    final double originX = paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * (contentWidth - newLayout._paragraph.width);
-    if (needsLayout) {
-      // If needsLayout is false, we'll rebuild the paragraph in the paint method.
+    if (paragraph != cachedLayout?.paragraph) {
       _rebuildParagraphForPaint = false;
-      _layoutCache?.paragraph.dispose();
-      _layoutCache = _TextPainterLayoutCache(newLayout, Offset(originX, 0), contentWidth, inputWidth);
-    } else {
-      assert(cachedLayout.layout == newLayout);
-      cachedLayout.contentWidth = contentWidth;
-      cachedLayout.offset = Offset(originX, 0);
-      assert(cachedLayout.inputWidth == inputWidth);
+      cachedLayout?.paragraph.dispose();
     }
+    _layoutCache = newLayoutCache;
   }
 
   /// Paints the text onto the given canvas at the given offset.
@@ -1328,6 +1352,7 @@ class TextPainter {
   // version and recomputes the metrics required to position the caret.
   _CaretMetrics _computeCaretMetrics(TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCache cachedLayout = _layoutCache!;
     if (position == cachedLayout._previousCaretPosition) {
       return _caretMetrics;
@@ -1336,14 +1361,12 @@ class TextPainter {
     assert(position.affinity != null);
     final _CaretMetrics? metrics;
     switch (position.affinity) {
-      case TextAffinity.upstream: {
+      case TextAffinity.upstream:
         metrics = _getMetricsFromUpstream(offset) ?? _getMetricsFromDownstream(offset);
         break;
-      }
-      case TextAffinity.downstream: {
+      case TextAffinity.downstream:
         metrics = _getMetricsFromDownstream(offset) ?? _getMetricsFromUpstream(offset);
         break;
-      }
     }
     // Cache the input parameters to prevent repeat work later.
     cachedLayout._previousCaretPosition = position;
@@ -1373,6 +1396,7 @@ class TextPainter {
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
     final _TextPainterLayoutCache cachedLayout = _layoutCache!;
@@ -1394,6 +1418,7 @@ class TextPainter {
   /// Returns the position within the text for the given pixel offset.
   TextPosition getPositionForOffset(Offset offset) {
     assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCache cachedLayout = _layoutCache!;
     return cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.offset);
   }
@@ -1473,14 +1498,16 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   List<ui.LineMetrics> computeLineMetrics() {
     assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCache layout = _layoutCache!;
     final List<ui.LineMetrics> rawMetrics = layout._lineMetricsCache ??= layout.paragraph.computeLineMetrics();
-    if (!layout.offset.dx.isFinite || !layout.offset.dy.isFinite) {
+    final Offset offset = layout.offset;
+    if (!offset.dx.isFinite || !offset.dy.isFinite) {
       return const <ui.LineMetrics>[];
     }
-    return layout.offset == Offset.zero
+    return offset == Offset.zero
       ? rawMetrics
-      : rawMetrics.map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, layout.offset)).toList(growable: false);
+      : rawMetrics.map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, offset)).toList(growable: false);
   }
 
   bool _disposed = false;
