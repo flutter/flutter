@@ -1842,7 +1842,7 @@ Future<void> _runDartTest(String workingDirectory, {
   final TestFileReporterResults test = parseFileReporter(metricFile); // --file_reporter name
   try {
     final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
-    info.writeAsStringSync(test.error);
+    info.writeAsStringSync(json.encode(test.errors));
   } on fs.FileSystemException catch (e){
     print('Failed to generate info file: $e');
   }

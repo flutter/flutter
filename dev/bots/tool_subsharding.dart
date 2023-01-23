@@ -41,7 +41,7 @@ class TestSpecs {
 class TestFileReporterResults {
   final Map<int, TestSpecs> allTestSpecs = <int, TestSpecs>{};
   bool hasFailedTests = true;
-  String error = '';
+  final List<String> errors = <String>[];
 
   void addTestSpec(Map<dynamic, dynamic> suite, int time) {
     allTestSpecs[suite['id'] as int] = TestSpecs(
@@ -81,7 +81,7 @@ TestFileReporterResults parseFileReporter(File metrics) {
       final int suiteID = group['suiteID'] as int;
       results.addMetricDone(suiteID, entry['time'] as int);
     } else if (entry.containsKey('error') && entry.containsKey('stackTrace')) {
-      results.error = '${entry['error']}\n ${entry['stackTrace']}';
+      results.errors.add('${entry['error']}\n ${entry['stackTrace']}');
     } else if (entry.containsKey('success') && entry['success'] == true) {
       results.hasFailedTests = false;
     }
