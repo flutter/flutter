@@ -2191,8 +2191,21 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+              final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
+              final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
+              final bool wordAtCursorIndexIsMisspelled = editableText.findSuggestionSpanAtCursorIndex(textPosition.offset) != null;
+
+              if (wordAtCursorIndexIsMisspelled) {
+                renderEditable.selectWord(cause: SelectionChangedCause.tap);
+                if (previousSelection != editableText.textEditingValue.selection) {
+                  editableText.showSpellCheckSuggestionsToolbar();
+                } else {
+                  editableText.toggleToolbar(false);
+                }
+              } else {
+                // Precise devices should place the cursor at a precise position if the word at the position is not misspelled.
+                renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+              }
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
@@ -2210,7 +2223,17 @@ class TextSelectionGestureDetectorBuilder {
               final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
               final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
               final bool isAffinityTheSame = textPosition.affinity == previousSelection.affinity;
-              if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
+              final bool wordAtCursorIndexIsMisspelled = editableText.findSuggestionSpanAtCursorIndex(textPosition.offset) != null;
+              print('CHECK FOR RESULTS');
+              if (wordAtCursorIndexIsMisspelled) {
+                renderEditable.selectWord(cause: SelectionChangedCause.tap);
+                if (previousSelection != editableText.textEditingValue.selection) {
+                  editableText.showSpellCheckSuggestionsToolbar();
+                } else {
+                  editableText.toggleToolbar(false);
+                }
+              }
+              else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
                   || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame))
                   && renderEditable.hasFocus) {
                 editableText.toggleToolbar(false);

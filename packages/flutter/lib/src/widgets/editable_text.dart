@@ -2182,11 +2182,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Replace composing region with specified text.
-  void replaceComposingRegion(SelectionChangedCause cause, String text) {
+  void replaceComposingRegion({required SelectionChangedCause cause, required String text, TextRange? composingRegionRange}) {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!widget.readOnly && !widget.obscureText);
 
-    _replaceText(ReplaceTextIntent(textEditingValue, text, textEditingValue.composing, cause));
+    composingRegionRange = textEditingValue.isComposingRangeValid ? textEditingValue.composing : composingRegionRange;
+
+    assert(
+      composingRegionRange != null,
+      'TextRange that represents composing region must be passed as a parameter if the current TextEditingValue does not have a valid composing region.'
+    );
+
+    _replaceText(ReplaceTextIntent(textEditingValue, text, composingRegionRange!, cause));
 
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
@@ -2196,6 +2203,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
       });
       hideToolbar();
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // On iOS, we select word boundary after making the replacement.
+      renderEditable.selectWordEdge(cause: cause);
     }
   }
 
