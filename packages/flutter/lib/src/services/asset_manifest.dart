@@ -26,6 +26,13 @@ abstract class AssetManifest {
   }
 
   /// Lists the keys of all known assets, not including asset variants.
+  ///
+  /// The logical key maps to the path of an asset specified in the pubspec.yaml
+  /// file at build time.
+  ///
+  /// See [Specifying assets](https://docs.flutter.dev/development/ui/assets-and-images#specifying-assets)
+  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets) for more
+  /// information.
   List<String> listAssets();
 
   /// Gets available variants of an asset.
@@ -100,6 +107,7 @@ class AssetVariant {
   /// for more information.
   final double? targetDevicePixelRatio;
 
-  /// The asset's key, which typically resembles a file location.
+  /// The asset's key, which is the path to the asset specified in the pubspec.yaml
+  /// file at build time.
   final String key;
 }
