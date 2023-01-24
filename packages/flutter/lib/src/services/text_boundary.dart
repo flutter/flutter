@@ -168,14 +168,10 @@ class ParagraphBoundary extends TextBoundary {
     }
 
     if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
-      if (skipped) {
+      if (skipped || initialIndexIsCharacter) {
         index += 1;
       } else {
-        if (initialIndexIsCharacter) {
-          index += 1;
-        } else {
-          index -= 1;
-        }
+        index -= 1;
       }
     } else if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       if (skipped || initialIndexIsCharacter) {
