@@ -1,4 +1,4 @@
-Signature: ccfc234db097369039e0d9ea4184bd47
+Signature: 709e7daeeca1fe103fc0cc0ec380429f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8875,6 +8875,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../third_party/skia/gm/imagefiltersunpremul.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegGainmap.cpp + ../../../third_party/skia/LICENSE
@@ -8887,6 +8888,7 @@ ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h + ../../
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/gm/imagefiltersunpremul.cpp
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
 FILE: ../../../third_party/skia/include/private/SkGainmapShader.h
 FILE: ../../../third_party/skia/src/codec/SkJpegGainmap.cpp
