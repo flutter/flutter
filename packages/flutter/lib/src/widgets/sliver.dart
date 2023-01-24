@@ -228,7 +228,7 @@ abstract class SliverChildDelegate {
 }
 
 class _SaltedValueKey extends ValueKey<Key> {
-  const _SaltedValueKey(super.key): assert(key != null);
+  const _SaltedValueKey(super.key);
 }
 
 /// Called to find the new index of a child based on its `key` in case of
@@ -364,11 +364,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     this.addSemanticIndexes = true,
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
-  }) : assert(builder != null),
-       assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null),
-       assert(addSemanticIndexes != null),
-       assert(semanticIndexCallback != null);
+  });
 
   /// Called to build children for the sliver.
   ///
@@ -465,7 +461,6 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     if (findChildIndexCallback == null) {
       return null;
     }
-    assert(key != null);
     final Key childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
@@ -479,7 +474,6 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   @override
   @pragma('vm:notify-debugger-on-exception')
   Widget? build(BuildContext context, int index) {
-    assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount!)) {
       return null;
     }
@@ -583,12 +577,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     this.addSemanticIndexes = true,
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
-  }) : assert(children != null),
-       assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null),
-       assert(addSemanticIndexes != null),
-       assert(semanticIndexCallback != null),
-       _keyToIndex = <Key?, int>{null: 0};
+  }) : _keyToIndex = <Key?, int>{null: 0};
 
   /// Creates a constant version of the delegate that supplies children for
   /// slivers using the given list.
@@ -606,12 +595,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     this.addSemanticIndexes = true,
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
-  }) : assert(children != null),
-       assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null),
-       assert(addSemanticIndexes != null),
-       assert(semanticIndexCallback != null),
-       _keyToIndex = null;
+  }) : _keyToIndex = null;
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
@@ -735,7 +719,6 @@ class SliverChildListDelegate extends SliverChildDelegate {
 
   @override
   int? findIndexByKey(Key key) {
-    assert(key != null);
     final Key childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
@@ -748,16 +731,11 @@ class SliverChildListDelegate extends SliverChildDelegate {
 
   @override
   Widget? build(BuildContext context, int index) {
-    assert(children != null);
     if (index < 0 || index >= children.length) {
       return null;
     }
     Widget child = children[index];
     final Key? key = child.key != null? _SaltedValueKey(child.key!) : null;
-    assert(
-      child != null,
-      "The sliver's children must not contain null values, but a null value was found at index $index",
-    );
     if (addRepaintBoundaries) {
       child = RepaintBoundary(child: child);
     }
@@ -931,7 +909,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   const SliverMultiBoxAdaptorWidget({
     super.key,
     required this.delegate,
-  }) : assert(delegate != null);
+  });
 
   /// {@template flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   /// The delegate that provides the children for this widget.
@@ -1147,9 +1125,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : assert(itemBuilder != null),
-       assert(separatorBuilder != null),
-       super(delegate: SliverChildBuilderDelegate(
+  }) : super(delegate: SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
            final Widget? widget;
@@ -1492,8 +1468,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : assert(gridDelegate != null),
-       super(delegate: SliverChildBuilderDelegate(
+  }) : super(delegate: SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
@@ -1749,7 +1724,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void forgetChild(Element child) {
-    assert(child != null);
     assert(child.slot != null);
     assert(_childElements.containsKey(child.slot));
     _childElements.remove(child.slot);
@@ -1910,7 +1884,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void insertRenderObjectChild(covariant RenderObject child, int slot) {
-    assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
     assert(renderObject.debugValidateChild(child));
     renderObject.insert(child as RenderBox, after: _currentBeforeChild);
@@ -1923,7 +1896,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void moveRenderObjectChild(covariant RenderObject child, int oldSlot, int newSlot) {
-    assert(newSlot != null);
     assert(_currentlyUpdatingChildIndex == newSlot);
     renderObject.move(child as RenderBox, after: _currentBeforeChild);
   }
@@ -2007,8 +1979,7 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
     required this.opacity,
     this.alwaysIncludeSemantics = false,
     Widget? sliver,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       assert(alwaysIncludeSemantics != null),
+  }) : assert(opacity >= 0.0 && opacity <= 1.0),
        super(child: sliver);
 
   /// The fraction to scale the sliver child's alpha value.
@@ -2080,8 +2051,7 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
     this.ignoring = true,
     this.ignoringSemantics,
     Widget? sliver,
-  }) : assert(ignoring != null),
-       super(child: sliver);
+  }) : super(child: sliver);
 
   /// Whether this sliver is ignored during hit testing.
   ///
@@ -2137,8 +2107,7 @@ class SliverOffstage extends SingleChildRenderObjectWidget {
     super.key,
     this.offstage = true,
     Widget? sliver,
-  }) : assert(offstage != null),
-       super(child: sliver);
+  }) : super(child: sliver);
 
   /// Whether the sliver child is hidden from the rest of the tree.
   ///
@@ -2206,8 +2175,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     super.key,
     required this.keepAlive,
     required super.child,
-  }) : assert(child != null),
-       assert(keepAlive != null);
+  });
 
   /// Whether to keep the child alive.
   ///

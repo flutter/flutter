@@ -126,24 +126,12 @@ class Table extends RenderObjectWidget {
     this.border,
     this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
-  }) : assert(children != null),
-       assert(defaultColumnWidth != null),
-       assert(defaultVerticalAlignment != null),
-       assert(defaultVerticalAlignment != TableCellVerticalAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the defaultVerticalAlignment with TableCellVerticalAlignment.baseline'),
+  }) : assert(defaultVerticalAlignment != TableCellVerticalAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the defaultVerticalAlignment with TableCellVerticalAlignment.baseline'),
        assert(() {
          if (children.any((TableRow row) => row.children == null)) {
            throw FlutterError(
              'One of the rows of the table had null children.\n'
              'The children property of TableRow must not be null.',
-           );
-         }
-         return true;
-       }()),
-       assert(() {
-         if (children.any((TableRow row) => row.children!.any((Widget cell) => cell == null))) {
-           throw FlutterError(
-             'One of the children of one of the rows of the table was null.\n'
-             'The children of a TableRow must not be null.',
            );
          }
          return true;
@@ -302,7 +290,6 @@ class _TableElement extends RenderObjectElement {
       return _TableElementRow(
         key: row.key,
         children: row.children!.map<Element>((Widget child) {
-          assert(child != null);
           return inflateWidget(child, _TableSlot(columnIndex++, rowIndex));
         }).toList(growable: false),
       );
@@ -385,7 +372,6 @@ class _TableElement extends RenderObjectElement {
   }
 
   void _updateRenderObjectChildren() {
-    assert(renderObject != null);
     renderObject.setFlatChildren(
       _children.isNotEmpty ? _children[0].children.length : 0,
       _children.expand<RenderBox>((_TableElementRow row) {

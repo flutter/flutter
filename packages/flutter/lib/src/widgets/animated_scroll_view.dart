@@ -52,8 +52,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.shrinkWrap = false,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
-  }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0);
+  }) : assert(initialItemCount >= 0);
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -74,7 +73,6 @@ class AnimatedList extends _AnimatedScrollView {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [AnimatedList] ancestor is found.
   static AnimatedListState of(BuildContext context) {
-    assert(context != null);
     final AnimatedListState? result = AnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -116,7 +114,6 @@ class AnimatedList extends _AnimatedScrollView {
   ///  * [of], a similar function that will throw if no [AnimatedList] ancestor
   ///    is found.
   static AnimatedListState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<AnimatedListState>();
   }
 
@@ -217,8 +214,7 @@ class AnimatedGrid extends _AnimatedScrollView {
     super.physics,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedGrid.gridDelegate}
   /// A delegate that controls the layout of the children within the
@@ -252,7 +248,6 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [AnimatedGrid] ancestor is found.
   static AnimatedGridState of(BuildContext context) {
-    assert(context != null);
     final AnimatedGridState? result = AnimatedGrid.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -294,7 +289,6 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///  * [of], a similar function that will throw if no [AnimatedGrid] ancestor
   ///    is found.
   static AnimatedGridState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<AnimatedGridState>();
   }
 
@@ -373,8 +367,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
     this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
   /// Called, as needed, to build children widgets.
@@ -630,8 +623,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
     required super.itemBuilder,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
-  }) : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  }) : assert(initialItemCount >= 0);
 
   @override
   SliverAnimatedListState createState() => SliverAnimatedListState();
@@ -655,7 +647,6 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedList] ancestor is found.
   static SliverAnimatedListState of(BuildContext context) {
-    assert(context != null);
     final SliverAnimatedListState? result = SliverAnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -695,7 +686,6 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [of], a similar function that will throw if no [SliverAnimatedList]
   ///    ancestor is found.
   static SliverAnimatedListState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<SliverAnimatedListState>();
   }
 }
@@ -782,8 +772,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
     required this.gridDelegate,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(initialItemCount >= 0);
 
   @override
   SliverAnimatedGridState createState() => SliverAnimatedGridState();
@@ -807,7 +796,6 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedGrid] ancestor is found.
   static SliverAnimatedGridState of(BuildContext context) {
-    assert(context != null);
     final SliverAnimatedGridState? result = context.findAncestorStateOfType<SliverAnimatedGridState>();
     assert(() {
       if (result == null) {
@@ -844,7 +832,6 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [of], a similar function that will throw if no [SliverAnimatedGrid]
   ///    ancestor is found.
   static SliverAnimatedGridState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<SliverAnimatedGridState>();
   }
 }
@@ -908,8 +895,7 @@ abstract class _SliverAnimatedMultiBoxAdaptor extends StatefulWidget {
     required this.itemBuilder,
     this.findChildIndexCallback,
     this.initialItemCount = 0,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(initialItemCount >= 0);
 
   /// {@macro flutter.widgets.AnimatedScrollView.itemBuilder}
   final AnimatedItemBuilder itemBuilder;
@@ -1022,8 +1008,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
   void insertItem(int index, { Duration duration = _kDuration }) {
-    assert(index != null && index >= 0);
-    assert(duration != null);
+    assert(index >= 0);
 
     final int itemIndex = _indexToItemIndex(index);
     assert(itemIndex >= 0 && itemIndex <= _itemsCount);
@@ -1074,9 +1059,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// decreases the length of items by one and shifts
   /// all items at or before [index] towards the beginning of the list of items.
   void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    assert(index != null && index >= 0);
-    assert(builder != null);
-    assert(duration != null);
+    assert(index >= 0);
 
     final int itemIndex = _indexToItemIndex(index);
     assert(itemIndex >= 0 && itemIndex < _itemsCount);

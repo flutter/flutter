@@ -36,12 +36,7 @@ class BouncingScrollSimulation extends Simulation {
     required this.spring,
     double constantDeceleration = 0,
     super.tolerance,
-  }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null) {
+  }) : assert(leadingExtent <= trailingExtent) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -71,7 +66,6 @@ class BouncingScrollSimulation extends Simulation {
         _springTime = double.infinity;
       }
     }
-    assert(_springTime != null);
   }
 
   /// The maximum velocity that can be transferred from the inertia of a ballistic

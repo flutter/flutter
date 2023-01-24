@@ -249,9 +249,6 @@ class ScrollPhysics {
   /// is great enough that expensive operations impacting the UI should be
   /// deferred.
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
-    assert(velocity != null);
-    assert(metrics != null);
-    assert(context != null);
     if (parent == null) {
       final double maxPhysicalPixels = View.of(context).physicalSize.longestSide;
       return velocity.abs() > maxPhysicalPixels;

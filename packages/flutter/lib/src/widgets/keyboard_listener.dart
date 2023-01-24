@@ -50,10 +50,7 @@ class KeyboardListener extends StatelessWidget {
     this.includeSemantics = true,
     this.onKeyEvent,
     required this.child,
-  }) : assert(focusNode != null),
-       assert(autofocus != null),
-       assert(includeSemantics != null),
-       assert(child != null);
+  });
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;

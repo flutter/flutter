@@ -200,8 +200,7 @@ class AsyncSnapshot<T> {
   /// and optionally either [data] or [error] with an optional [stackTrace]
   /// (but not both data and error).
   const AsyncSnapshot._(this.connectionState, this.data, this.error, this.stackTrace)
-    : assert(connectionState != null),
-      assert(!(data != null && error != null)),
+    : assert(!(data != null && error != null)),
       assert(stackTrace == null || error != null);
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
@@ -394,7 +393,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
     this.initialData,
     super.stream,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   /// The build strategy currently used by this builder.
   ///
@@ -526,7 +525,7 @@ class FutureBuilder<T> extends StatefulWidget {
     this.future,
     this.initialData,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.

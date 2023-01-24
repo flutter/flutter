@@ -38,7 +38,7 @@ class AnimatedSize extends StatefulWidget {
     )
     TickerProvider? vsync,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(clipBehavior != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -114,7 +114,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
     this.reverseDuration,
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(clipBehavior != null);
+  });
 
   final AlignmentGeometry alignment;
   final Curve curve;

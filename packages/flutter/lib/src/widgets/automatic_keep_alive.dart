@@ -294,7 +294,7 @@ class KeepAliveNotification extends Notification {
   /// Creates a notification to indicate that a subtree must be kept alive.
   ///
   /// The [handle] must not be null.
-  const KeepAliveNotification(this.handle) : assert(handle != null);
+  const KeepAliveNotification(this.handle);
 
   /// A [Listenable] that will inform its clients when the widget that fired the
   /// notification no longer needs to be kept alive.

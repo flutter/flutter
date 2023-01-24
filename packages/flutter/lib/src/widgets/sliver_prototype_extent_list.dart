@@ -38,7 +38,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     super.key,
     required super.delegate,
     required this.prototypeItem,
-  }) : assert(prototypeItem != null);
+  });
 
   /// A sliver that places its box children in a linear array and constrains them
   /// to have the same extent as a prototype item along the main axis.

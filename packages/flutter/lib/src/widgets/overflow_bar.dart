@@ -69,11 +69,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.clipBehavior = Clip.none,
     super.children,
-  }) : assert(spacing != null),
-       assert(overflowSpacing != null),
-       assert(overflowAlignment != null),
-       assert(overflowDirection != null),
-       assert(clipBehavior != null);
+  });
 
   /// The width of the gap between [children] for the default
   /// horizontal layout.
@@ -257,12 +253,7 @@ class _RenderOverflowBar extends RenderBox
     VerticalDirection overflowDirection = VerticalDirection.down,
     required TextDirection textDirection,
     Clip clipBehavior = Clip.none,
-  }) : assert(spacing != null),
-       assert(overflowSpacing != null),
-       assert(overflowAlignment != null),
-       assert(textDirection != null),
-       assert(clipBehavior != null),
-       _spacing = spacing,
+  }) : _spacing = spacing,
        _alignment = alignment,
        _overflowSpacing = overflowSpacing,
        _overflowAlignment = overflowAlignment,
@@ -275,7 +266,6 @@ class _RenderOverflowBar extends RenderBox
   double get spacing => _spacing;
   double _spacing;
   set spacing (double value) {
-    assert(value != null);
     if (_spacing == value) {
       return;
     }
@@ -296,7 +286,6 @@ class _RenderOverflowBar extends RenderBox
   double get overflowSpacing => _overflowSpacing;
   double _overflowSpacing;
   set overflowSpacing (double value) {
-    assert(value != null);
     if (_overflowSpacing == value) {
       return;
     }
@@ -307,7 +296,6 @@ class _RenderOverflowBar extends RenderBox
   OverflowBarAlignment get overflowAlignment => _overflowAlignment;
   OverflowBarAlignment _overflowAlignment;
   set overflowAlignment (OverflowBarAlignment value) {
-    assert(value != null);
     if (_overflowAlignment == value) {
       return;
     }
@@ -318,7 +306,6 @@ class _RenderOverflowBar extends RenderBox
   VerticalDirection get overflowDirection => _overflowDirection;
   VerticalDirection _overflowDirection;
   set overflowDirection (VerticalDirection value) {
-    assert(value != null);
     if (_overflowDirection == value) {
       return;
     }
@@ -339,7 +326,6 @@ class _RenderOverflowBar extends RenderBox
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value == _clipBehavior) {
       return;
     }
@@ -519,7 +505,6 @@ class _RenderOverflowBar extends RenderBox
             x = rtl ? 0 : constraints.maxWidth - child.size.width;
             break;
         }
-        assert(x != null);
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;
         child = nextChild();

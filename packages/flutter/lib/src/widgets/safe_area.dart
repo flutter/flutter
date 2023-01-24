@@ -47,10 +47,7 @@ class SafeArea extends StatelessWidget {
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
     required this.child,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null);
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -159,10 +156,7 @@ class SliverSafeArea extends StatelessWidget {
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     required this.sliver,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null);
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;

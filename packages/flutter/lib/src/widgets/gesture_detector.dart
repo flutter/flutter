@@ -93,9 +93,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
   /// Creates a gesture recognizer factory with the given callbacks.
   ///
   /// The arguments must not be null.
-  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
-    : assert(_constructor != null),
-      assert(_initializer != null);
+  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer);
 
   final GestureRecognizerFactoryConstructor<T> _constructor;
 
@@ -291,9 +289,7 @@ class GestureDetector extends StatelessWidget {
     this.trackpadScrollCausesScale = false,
     this.trackpadScrollToScaleFactor = kDefaultTrackpadScrollToScaleFactor,
     this.supportedDevices,
-  }) : assert(excludeFromSemantics != null),
-       assert(dragStartBehavior != null),
-       assert(() {
+  }) : assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
          final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
          final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
@@ -1286,8 +1282,7 @@ class RawGestureDetector extends StatefulWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.semantics,
-  }) : assert(gestures != null),
-       assert(excludeFromSemantics != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1569,7 +1564,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     super.child,
     required this.behavior,
     required this.assignSemantics,
-  }) : assert(assignSemantics != null);
+  });
 
   final HitTestBehavior behavior;
   final _AssignSemantics assignSemantics;
@@ -1642,7 +1637,6 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     }
 
     return () {
-      assert(tap != null);
       tap.onTapDown?.call(TapDownDetails());
       tap.onTapUp?.call(TapUpDetails(kind: PointerDeviceKind.unknown));
       tap.onTap?.call();

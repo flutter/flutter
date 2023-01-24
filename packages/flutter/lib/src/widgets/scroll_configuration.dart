@@ -376,7 +376,6 @@ class ScrollConfiguration extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ScrollConfiguration oldWidget) {
-    assert(behavior != null);
     return behavior.runtimeType != oldWidget.behavior.runtimeType
         || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
