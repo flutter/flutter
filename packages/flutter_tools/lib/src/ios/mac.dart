@@ -298,13 +298,11 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   if (activeArch != null) {
     final String activeArchName = getNameForDarwinArch(activeArch);
-    if (activeArchName != null) {
-      buildCommands.add('ONLY_ACTIVE_ARCH=YES');
-      // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
-      // as it cannot be build for the architecture of the Flutter app.
-      if (!hasWatchCompanion) {
-        buildCommands.add('ARCHS=$activeArchName');
-      }
+    buildCommands.add('ONLY_ACTIVE_ARCH=YES');
+    // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
+    // as it cannot be build for the architecture of the Flutter app.
+    if (!hasWatchCompanion) {
+      buildCommands.add('ARCHS=$activeArchName');
     }
   }
 
@@ -550,7 +548,6 @@ Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOS
 
 bool _isXcodeConcurrentBuildFailure(RunResult result) {
 return result.exitCode != 0 &&
-    result.stdout != null &&
     result.stdout.contains('database is locked') &&
     result.stdout.contains('there are two concurrent builds running');
 }

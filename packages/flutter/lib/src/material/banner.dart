@@ -112,10 +112,7 @@ class MaterialBanner extends StatefulWidget {
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
     this.onVisible,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
-       assert(actions != null),
-       assert(forceActionsBelow != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The content of the [MaterialBanner].
   ///

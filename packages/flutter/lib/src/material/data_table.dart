@@ -44,7 +44,7 @@ class DataColumn {
     this.tooltip,
     this.numeric = false,
     this.onSort,
-  }) : assert(label != null);
+  });
 
   /// The column heading.
   ///
@@ -107,7 +107,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
-  }) : assert(cells != null);
+  });
 
   /// Creates the configuration for a row of a [DataTable], deriving
   /// the key from a row index.
@@ -120,8 +120,7 @@ class DataRow {
     this.onLongPress,
     this.color,
     required this.cells,
-  }) : assert(cells != null),
-       key = ValueKey<int?>(index);
+  }) : key = ValueKey<int?>(index);
 
   /// A [Key] that uniquely identifies this row. This is used to
   /// ensure that if a row is added or removed, any stateful widgets
@@ -234,7 +233,7 @@ class DataCell {
     this.onTapDown,
     this.onDoubleTap,
     this.onTapCancel,
-  }) : assert(child != null);
+  });
 
   /// A cell that has no content and has zero width and height.
   static const DataCell empty = DataCell(SizedBox.shrink());
@@ -407,15 +406,10 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
-  }) : assert(columns != null),
-       assert(columns.isNotEmpty),
+  }) : assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(sortAscending != null),
-       assert(showCheckboxColumn != null),
-       assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
-       assert(clipBehavior != null),
        _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
