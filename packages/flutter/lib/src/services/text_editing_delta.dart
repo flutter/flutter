@@ -93,7 +93,7 @@ abstract class TextEditingDelta with Diagnosticable {
     // 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd}
     // can be considered an insertion. In this case we inserted 'd'.
     //
-    // Similarly for a a deletion, say we are currently composing the word: 'worl'.
+    // Similarly for a deletion, say we are currently composing the word: 'worl'.
     // Our current state is 'world|' with the cursor at the end of 'd'. If we
     // press backspace to delete the character 'd', the platform will tell us 'world'
     // was replaced with 'worl' at range (0,5). Here we can check if the text found

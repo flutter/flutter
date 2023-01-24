@@ -870,7 +870,7 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger, 
 
     // The Android Gradle plugin 3.5.0 adds the flavor name to file name.
     // For example: In release mode, if the flavor name is `foo_bar`, then
-    // the file name name is `app-foo_bar-release.aab`.
+    // the file name is `app-foo_bar-release.aab`.
     fileCandidates.add(
       getBundleDirectory(project)
         .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_${buildInfo.modeName}')}')

@@ -17,7 +17,7 @@ KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
 
 /// Profile and print statistics on Platform Channel usage.
 ///
-/// When this is is true statistics about the usage of Platform Channels will be
+/// When this is true statistics about the usage of Platform Channels will be
 /// printed out periodically to the console and Timeline events will show the
 /// time between sending and receiving a message (encoding and decoding time
 /// excluded).
