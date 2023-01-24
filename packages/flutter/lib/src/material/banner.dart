@@ -190,6 +190,9 @@ class MaterialBanner extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
 
   /// Empty space to surround the [MaterialBanner].
+  ///
+  /// If the [margin] is null then this defaults to
+  /// `EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0)`.
   final EdgeInsetsGeometry? margin;
 
   /// The amount of space by which to inset the [leading] widget.

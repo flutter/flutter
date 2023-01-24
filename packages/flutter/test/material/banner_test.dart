@@ -1123,8 +1123,8 @@ void main() {
       ),
     );
 
-  final Container materialContainer = tester.widget<Container>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first);
-   expect(materialContainer.margin, margin);
+    final Offset topLeft = tester.getTopLeft(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first);
+    expect(topLeft.dx, margin.left);
   });
 }
 
