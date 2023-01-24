@@ -41,6 +41,12 @@ class AtlasContents final : public Contents {
 
   const SamplerDescriptor& GetSamplerDescriptor() const;
 
+  const std::vector<Matrix>& GetTransforms() const;
+
+  const std::vector<Rect>& GetTextureCoordinates() const;
+
+  const std::vector<Color>& GetColors() const;
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
@@ -50,6 +56,8 @@ class AtlasContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
+  Rect ComputeBoundingBox() const;
+
   std::shared_ptr<Texture> texture_;
   std::vector<Rect> texture_coords_;
   std::vector<Color> colors_;
@@ -60,6 +68,58 @@ class AtlasContents final : public Contents {
   SamplerDescriptor sampler_descriptor_ = {};
 
   FML_DISALLOW_COPY_AND_ASSIGN(AtlasContents);
+};
+
+class AtlasTextureContents final : public Contents {
+ public:
+  explicit AtlasTextureContents(const AtlasContents& parent);
+
+  ~AtlasTextureContents() override;
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
+  bool Render(const ContentContext& renderer,
+              const Entity& entity,
+              RenderPass& pass) const override;
+
+  void SetAlpha(Scalar alpha);
+
+  void SetCoverage(Rect coverage);
+
+ private:
+  const AtlasContents& parent_;
+  Scalar alpha_ = 1.0;
+  Rect coverage_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AtlasTextureContents);
+};
+
+class AtlasColorContents final : public Contents {
+ public:
+  explicit AtlasColorContents(const AtlasContents& parent);
+
+  ~AtlasColorContents() override;
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
+  bool Render(const ContentContext& renderer,
+              const Entity& entity,
+              RenderPass& pass) const override;
+
+  void SetAlpha(Scalar alpha);
+
+  void SetCoverage(Rect coverage);
+
+ private:
+  const AtlasContents& parent_;
+  Scalar alpha_ = 1.0;
+  Rect coverage_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AtlasColorContents);
 };
 
 }  // namespace impeller
