@@ -138,7 +138,7 @@ class ParagraphBoundary extends TextBoundary {
   /// that follows the line terminator that encloses the desired paragraph.
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    if (position < 0) {
+    if (position < 0 || _text.isEmpty) {
       return null;
     }
 
@@ -146,37 +146,24 @@ class ParagraphBoundary extends TextBoundary {
       return _text.length;
     }
 
-    if (position == 0 || _text.isEmpty) {
+    if (position == 0) {
       return 0;
     }
 
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
-    bool skipped = false;
-    final bool initialIndexIsCharacter = !TextLayoutMetrics.isLineTerminator(codeUnits[index]);
-
-    if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 2])) {
-      index -= 2;
-      skipped = true;
-    } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index]) && !TextLayoutMetrics.isLineTerminator(codeUnits[index - 1])) {
-      index -= 1;
-      skipped = true;
-    }
-
-    while (index > 0 && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      index -= 1;
-    }
 
     if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
-      if (skipped || initialIndexIsCharacter) {
-        index += 1;
-      } else {
-        index -= 1;
+      index -= 2;
+    } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      index -= 1;
+    }
+
+    while (index > 0) {
+      if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+        return index + 1;
       }
-    } else if (index > 0 && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      if (skipped || initialIndexIsCharacter) {
-        index += 1;
-      }
+      index -= 1;
     }
 
     return max(index, 0);
@@ -188,7 +175,7 @@ class ParagraphBoundary extends TextBoundary {
   /// desired paragraph.
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    if (position >= _text.length) {
+    if (position >= _text.length || _text.isEmpty) {
       return null;
     }
 
@@ -196,7 +183,7 @@ class ParagraphBoundary extends TextBoundary {
       return 0;
     }
 
-    if (position == _text.length - 1 || _text.isEmpty) {
+    if (position == _text.length - 1) {
       return _text.length;
     }
 
