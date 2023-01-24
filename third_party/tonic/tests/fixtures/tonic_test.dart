@@ -32,7 +32,7 @@ void testClearLater() {
 
 // Test helpers for simple void calls through Tonic.
 
-@FfiNative<Void Function()>('Nop', isLeaf: true)
+@Native<Void Function()>(symbol: 'Nop', isLeaf: true)
 external void nop();
 
 @pragma('vm:entry-point')
@@ -43,7 +43,7 @@ void callNop() {
 
 // Test helpers for calls with bool through Tonic.
 
-@FfiNative<Bool Function(Bool)>('EchoBool')
+@Native<Bool Function(Bool)>(symbol: 'EchoBool')
 external bool echoBool(bool arg);
 
 @pragma('vm:entry-point')
@@ -55,7 +55,7 @@ void callEchoBool() {
 
 // Test helpers for calls with int through Tonic.
 
-@FfiNative<IntPtr Function(IntPtr)>('EchoIntPtr')
+@Native<IntPtr Function(IntPtr)>(symbol: 'EchoIntPtr')
 external int echoIntPtr(int arg);
 
 @pragma('vm:entry-point')
@@ -67,7 +67,7 @@ void callEchoIntPtr() {
 
 // Test helpers for calls with float through Tonic.
 
-@FfiNative<Float Function(Float)>('EchoFloat')
+@Native<Float Function(Float)>(symbol: 'EchoFloat')
 external double echoFloat(double arg);
 
 @pragma('vm:entry-point')
@@ -79,7 +79,7 @@ void callEchoFloat() {
 
 // Test helpers for calls with double through Tonic.
 
-@FfiNative<Double Function(Double)>('EchoDouble')
+@Native<Double Function(Double)>(symbol: 'EchoDouble')
 external double echoDouble(double arg);
 
 @pragma('vm:entry-point')
@@ -91,7 +91,7 @@ void callEchoDouble() {
 
 // Test helpers for calls with Dart_Handle through Tonic.
 
-@FfiNative<Handle Function(Handle)>('EchoHandle')
+@Native<Handle Function(Handle)>(symbol: 'EchoHandle')
 external Object echoHandle(Object arg);
 
 @pragma('vm:entry-point')
@@ -103,7 +103,7 @@ void callEchoHandle() {
 
 // Test helpers for calls with std::string through Tonic.
 
-@FfiNative<Handle Function(Handle)>('EchoString')
+@Native<Handle Function(Handle)>(symbol: 'EchoString')
 external String echoString(String arg);
 
 @pragma('vm:entry-point')
@@ -115,7 +115,7 @@ void callEchoString() {
 
 // Test helpers for calls with std::u16string through Tonic.
 
-@FfiNative<Handle Function(Handle)>('EchoU16String')
+@Native<Handle Function(Handle)>(symbol: 'EchoU16String')
 external String echoU16String(String arg);
 
 @pragma('vm:entry-point')
@@ -127,7 +127,7 @@ void callEchoU16String() {
 
 // Test helpers for calls with std::vector through Tonic.
 
-@FfiNative<Handle Function(Handle)>('EchoVector')
+@Native<Handle Function(Handle)>(symbol: 'EchoVector')
 external List<String> echoVector(List<String> arg);
 
 @pragma('vm:entry-point')
@@ -144,19 +144,17 @@ class MyNativeClass extends NativeFieldWrapperClass1 {
     _Create(this, value);
   }
 
-  @FfiNative<Void Function(Handle, IntPtr)>('CreateNative')
+  @Native<Void Function(Handle, IntPtr)>(symbol: 'CreateNative')
   external static void _Create(MyNativeClass self, int value);
 
-  @FfiNative<Int32 Function(Pointer<Void>, Int32, Handle)>(
-      'MyNativeClass::MyTestFunction')
+  @Native<Int32 Function(Pointer<Void>, Int32, Handle)>(symbol: 'MyNativeClass::MyTestFunction')
   external static int myTestFunction(MyNativeClass self, int x, Object handle);
 
-  @FfiNative<Handle Function(Pointer<Void>, Int64)>(
-      'MyNativeClass::MyTestMethod')
+  @Native<Handle Function(Pointer<Void>, Int64)>(symbol: 'MyNativeClass::MyTestMethod')
   external Object myTestMethod(int a);
 }
 
-@FfiNative<IntPtr Function(Pointer<Void>)>('EchoWrappable')
+@Native<IntPtr Function(Pointer<Void>)>(symbol: 'EchoWrappable')
 external int echoWrappable(MyNativeClass arg);
 
 @pragma('vm:entry-point')
@@ -169,7 +167,7 @@ void callEchoWrappable() {
 
 // Test helpers for calls with TypedList<..> through Tonic.
 
-@FfiNative<Handle Function(Handle)>('EchoTypedList')
+@Native<Handle Function(Handle)>(symbol: 'EchoTypedList')
 external Float32List echoTypedList(Float32List arg);
 
 @pragma('vm:entry-point')
