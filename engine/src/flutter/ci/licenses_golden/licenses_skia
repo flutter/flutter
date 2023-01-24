@@ -1,4 +1,4 @@
-Signature: b56b0ab87d49992124c52f8d96ad6c0a
+Signature: efd4597a0b8e7ec0edf8a734fb79cb03
 
 ====================================================================================================
 LIBRARY: etc1
@@ -691,8 +691,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkRect.cpp + ../../../third_party/ski
 ORIGIN: ../../../third_party/skia/src/core/SkRegion.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRegionPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRegion_path.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkScalerCache.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkScalerCache.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkScalerContext.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkScalerContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkScan.cpp + ../../../third_party/skia/LICENSE
@@ -703,6 +701,8 @@ ORIGIN: ../../../third_party/skia/src/core/SkScan_Path.cpp + ../../../third_part
 ORIGIN: ../../../third_party/skia/src/core/SkSpriteBlitter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkSpriteBlitter_ARGB32.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkStream.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkStrike.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkStrike.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkString.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkStroke.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkStrokerPriv.cpp + ../../../third_party/skia/LICENSE
@@ -840,8 +840,6 @@ FILE: ../../../third_party/skia/src/core/SkRect.cpp
 FILE: ../../../third_party/skia/src/core/SkRegion.cpp
 FILE: ../../../third_party/skia/src/core/SkRegionPriv.h
 FILE: ../../../third_party/skia/src/core/SkRegion_path.cpp
-FILE: ../../../third_party/skia/src/core/SkScalerCache.cpp
-FILE: ../../../third_party/skia/src/core/SkScalerCache.h
 FILE: ../../../third_party/skia/src/core/SkScalerContext.cpp
 FILE: ../../../third_party/skia/src/core/SkScalerContext.h
 FILE: ../../../third_party/skia/src/core/SkScan.cpp
@@ -852,6 +850,8 @@ FILE: ../../../third_party/skia/src/core/SkScan_Path.cpp
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter.h
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter_ARGB32.cpp
 FILE: ../../../third_party/skia/src/core/SkStream.cpp
+FILE: ../../../third_party/skia/src/core/SkStrike.cpp
+FILE: ../../../third_party/skia/src/core/SkStrike.h
 FILE: ../../../third_party/skia/src/core/SkString.cpp
 FILE: ../../../third_party/skia/src/core/SkStroke.h
 FILE: ../../../third_party/skia/src/core/SkStrokerPriv.cpp
@@ -1393,6 +1393,7 @@ ORIGIN: ../../../third_party/skia/gm/linepaths.cpp + ../../../third_party/skia/L
 ORIGIN: ../../../third_party/skia/gm/ninepatchstretch.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/pathfill.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/pathreverse.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/persptext.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/points.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/poly2poly.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/quadpaths.cpp + ../../../third_party/skia/LICENSE
@@ -1576,6 +1577,7 @@ FILE: ../../../third_party/skia/gm/linepaths.cpp
 FILE: ../../../third_party/skia/gm/ninepatchstretch.cpp
 FILE: ../../../third_party/skia/gm/pathfill.cpp
 FILE: ../../../third_party/skia/gm/pathreverse.cpp
+FILE: ../../../third_party/skia/gm/persptext.cpp
 FILE: ../../../third_party/skia/gm/points.cpp
 FILE: ../../../third_party/skia/gm/poly2poly.cpp
 FILE: ../../../third_party/skia/gm/quadpaths.cpp
@@ -8933,18 +8935,28 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/include/private/SkMalloc.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkTemplates.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkCPUTypes.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/base/SkCubics.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/base/SkCubics.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkFloatingPoint.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/base/SkQuads.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/base/SkQuads.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkSafeMath.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLGetReturnComplexity.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkTemplates.h
 FILE: ../../../third_party/skia/include/private/base/SkCPUTypes.h
+FILE: ../../../third_party/skia/src/base/SkCubics.cpp
+FILE: ../../../third_party/skia/src/base/SkCubics.h
 FILE: ../../../third_party/skia/src/base/SkFloatingPoint.cpp
+FILE: ../../../third_party/skia/src/base/SkQuads.cpp
+FILE: ../../../third_party/skia/src/base/SkQuads.h
 FILE: ../../../third_party/skia/src/base/SkSafeMath.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h
+FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetReturnComplexity.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google LLC
 
