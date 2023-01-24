@@ -2413,6 +2413,25 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
+  /// Handler for [TextSelectionGestureDetector.onTripleTapDown].
+  ///
+  /// By default, it selects a word through [EditableTextState.selectParagraph] if
+  /// selectionEnabled and shows toolbar if necessary.
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onTripleTapDown], which triggers this
+  ///    callback.
+  @protected
+  void onTripleTapDown(TapDragDownDetails details) {
+    if (delegate.selectionEnabled) {
+      editableText.selectParagraph(position: details.globalPosition, cause: SelectionChangedCause.tap);
+      if (shouldShowSelectionToolbar) {
+        editableText.showToolbar();
+      }
+    }
+  }
+
   /// Handler for [TextSelectionGestureDetector.onDragSelectionStart].
   ///
   /// By default, it selects a text position specified in [details].
@@ -2518,14 +2537,37 @@ class TextSelectionGestureDetectorBuilder {
         _scrollPosition - _dragStartScrollOffset,
       );
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
+      final bool alternateBetweenEvenOdd = defaultTargetPlatform == TargetPlatform.windows;
 
       // Select word by word.
-      if (details.consecutiveTapCount == 2) {
+      if (alternateBetweenEvenOdd ? details.consecutiveTapCount.isEven : details.consecutiveTapCount == 2) {
         return renderEditable.selectWordsInRange(
           from: dragStartGlobalPosition - editableOffset - scrollableOffset,
           to: details.globalPosition,
           cause: SelectionChangedCause.drag,
         );
+      }
+
+      // Select paragraph by paragraph.
+      if (alternateBetweenEvenOdd ?
+          (details.consecutiveTapCount > 1 && details.consecutiveTapCount.isOdd)
+          : details.consecutiveTapCount >= 3) {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            // Triple tap to drag is not present on these platforms at the moment.
+            // The gesture is less intuitive on mobile devices.
+            return;
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+          case TargetPlatform.macOS:
+            return editableText.selectParagraphsInRange(
+              from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+              to: details.globalPosition,
+              cause: SelectionChangedCause.drag,
+            );
+        }
       }
 
       switch (defaultTargetPlatform) {
@@ -2684,6 +2726,7 @@ class TextSelectionGestureDetectorBuilder {
       onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
       onSingleLongTapEnd: onSingleLongTapEnd,
       onDoubleTapDown: onDoubleTapDown,
+      onTripleTapDown: onTripleTapDown,
       onDragSelectionStart: onDragSelectionStart,
       onDragSelectionUpdate: onDragSelectionUpdate,
       onDragSelectionEnd: onDragSelectionEnd,
@@ -2723,6 +2766,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleLongTapMoveUpdate,
     this.onSingleLongTapEnd,
     this.onDoubleTapDown,
+    this.onTripleTapDown,
     this.onDragSelectionStart,
     this.onDragSelectionUpdate,
     this.onDragSelectionEnd,
@@ -2777,6 +2821,10 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDragDownCallback? onDoubleTapDown;
 
+  /// Called after a momentary hold or a short tap that is close in space and
+  /// time (within [kDoubleTapTimeout]) to a previous double-tap.
+  final GestureTapDragDownCallback? onTripleTapDown;
+
   /// Called when a mouse starts dragging to select text.
   final GestureTapDragStartCallback? onDragSelectionStart;
 
@@ -2803,7 +2851,18 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  static int? _getDefaultMaxConsecutiveTap() => 2;
+  static int? _getDefaultMaxConsecutiveTap() {
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+        return 3;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return null;
+    }
+  }
 
   @override
   void dispose() {
@@ -2818,9 +2877,16 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
+    final bool alternateBetweenEvenOdd = defaultTargetPlatform == TargetPlatform.windows;
+    if (alternateBetweenEvenOdd ? details.consecutiveTapCount.isEven : details.consecutiveTapCount == 2) {
+      return widget.onDoubleTapDown?.call(details);
+    }
 
-    if (details.consecutiveTapCount == 2) {
-      widget.onDoubleTapDown?.call(details);
+    if (alternateBetweenEvenOdd ?
+          (details.consecutiveTapCount > 1 && details.consecutiveTapCount.isOdd)
+          : details.consecutiveTapCount >= 3)
+    {
+      return widget.onTripleTapDown?.call(details);
     }
   }
 
