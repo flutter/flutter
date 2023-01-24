@@ -64,7 +64,7 @@ class _Jenkins {
 /// because [Object.hashAll]'s argument is not nullable:
 ///
 /// ```dart
-/// int get hashCode => Object.hash(foo, bar, thud == null ? null : Object.hashAll(thud), baz);
+/// int get hashCode => Object.hash(foo, bar, thud == null ? null : Object.hashAll(thud!), baz);
 /// ```
 @Deprecated(
   'Use Object.hash() instead. '
