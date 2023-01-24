@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker/leak_tracker.dart';
 
+import '../foundation/_with_flutter_leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -652,10 +652,8 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
-
-
   testWidgets('Custom tooltip message textAlign', (WidgetTester tester) async {
-    await _withFlutterLeakTracking(
+    await withFlutterLeakTracking(
       () async {
         Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
           final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
@@ -1954,43 +1952,4 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
     return object.debugSemantics!;
   }
   return _findDebugSemantics(object.parent! as RenderObject);
-}
-
-/// Wrapper for [withLeakTracking] with Flutter specific functionality.
-///
-/// 1. Listens to [MemoryAllocations] events.
-/// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
-///
-/// Copied from `psckage:leak_tracker/test/test_infra/flutter_helpers.dart`.
-/// It is not combined with [testWodgets], because the combining will
-/// impact VSCode's ability to recognize tests.
-Future<void> _withFlutterLeakTracking(
-  DartAsyncCallback callback, {
-  required WidgetTester? tester,
-  StackTraceCollectionConfig stackTraceCollectionConfig =
-      const StackTraceCollectionConfig(),
-  Duration? timeoutForFinalGarbageCollection,
-  void Function(Leaks foundLeaks)? leaksObtainer,
-}) async {
-  void flutterEventToLeakTracker(ObjectEvent event) =>
-      dispatchObjectEvent(event.toMap());
-  MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
-  final AsyncCodeRunner asyncCodeRunner = tester == null
-      ? (DartAsyncCallback action) async => action()
-      : (DartAsyncCallback action) async => tester.runAsync(action);
-  try {
-    final Leaks leaks = await withLeakTracking(
-      () async => callback(),
-      asyncCodeRunner: asyncCodeRunner,
-      stackTraceCollectionConfig: stackTraceCollectionConfig,
-      shouldThrowOnLeaks: false,
-      timeoutForFinalGarbageCollection: timeoutForFinalGarbageCollection,
-    );
-    if (leaksObtainer != null) {
-      leaksObtainer(leaks);
-    }
-    expect(leaks, isLeakFree);
-  } finally {
-    MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
-  }
 }
