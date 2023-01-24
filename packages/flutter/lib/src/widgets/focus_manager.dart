@@ -1560,11 +1560,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (_primaryFocus == node) {
       _primaryFocus = null;
     }
-    if (_markedForFocus == node) {
-      _markedForFocus = null;
-    }
     _dirtyNodes.remove(node);
-    _pendingAutofocuses.removeWhere((_Autofocus autofocus) => autofocus.autofocusNode == node || autofocus.scope == node);
   }
 
   void _markPropertiesChanged(FocusNode node) {
@@ -1674,13 +1670,14 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   }
 }
 
-// A class to detect and manage the highlight mode transitions.
-// An instance of this is owned by the FocusManager.
+// A class to detect and manage the highlight mode transitions. An instance of
+// this is owned by the FocusManager.
+//
+// This doesn't extend ChangeNotifier because the callback passes the updated
+// value, and ChangeNotifier requires using VoidCallback.
 class _HighlightModeManager {
-  _HighlightModeManager();
-
-  // If set, indicates if the last interaction detected was touch or not.
-  // If null, no interactions have occurred yet.
+  // If set, indicates if the last interaction detected was touch or not. If
+  // null, no interactions have occurred yet.
   bool? _lastInteractionWasTouch;
 
   FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
@@ -1696,8 +1693,8 @@ class _HighlightModeManager {
     updateMode();
   }
 
-  /// Register a closure to be called when the [FocusManager] notifies its listeners
-  /// that the value of [highlightMode] has changed.
+  /// Register a closure to be called when the [FocusManager] notifies its
+  /// listeners that the value of [highlightMode] has changed.
   void addListener(ValueChanged<FocusHighlightMode> listener) => _listeners.add(listener);
 
   /// Remove a previously registered closure from the list of closures that the
@@ -1705,8 +1702,7 @@ class _HighlightModeManager {
   void removeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.remove(listener);
 
   // The list of listeners for [highlightMode] state changes.
-  HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = _emptyListeners;
-  static final HashedObserverList<ValueChanged<FocusHighlightMode>> _emptyListeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
+  HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
 
   void registerGlobalHandlers() {
     assert(ServicesBinding.instance.keyEventManager.keyMessageHandler == null);
@@ -1720,7 +1716,7 @@ class _HighlightModeManager {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(handlePointerEvent);
       ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     }
-    _listeners = _emptyListeners;
+    _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -1794,7 +1790,10 @@ class _HighlightModeManager {
     // onKey on the way up, and if one responds that they handled it or want to
     // stop propagation, stop.
     bool handled = false;
-    for (final FocusNode node in <FocusNode>[FocusManager.instance.primaryFocus!, ...FocusManager.instance.primaryFocus!.ancestors]) {
+    for (final FocusNode node in <FocusNode>[
+      FocusManager.instance.primaryFocus!,
+      ...FocusManager.instance.primaryFocus!.ancestors,
+    ]) {
       final List<KeyEventResult> results = <KeyEventResult>[];
       if (node.onKeyEvent != null) {
         for (final KeyEvent event in message.events) {
@@ -1887,8 +1886,8 @@ class _HighlightModeManager {
   }
 }
 
-/// Provides convenient access to the current [FocusManager.primaryFocus] from the
-/// [WidgetsBinding] instance.
+/// Provides convenient access to the current [FocusManager.primaryFocus] from
+/// the [WidgetsBinding] instance.
 FocusNode? get primaryFocus => WidgetsBinding.instance.focusManager.primaryFocus;
 
 /// Returns a text representation of the current focus tree, along with the
