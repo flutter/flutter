@@ -1313,8 +1313,6 @@ ORIGIN: ../../../flutter/impeller/entity/geometry.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/inline_pass_context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/inline_pass_context.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/atlas_fill.frag + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/atlas_fill.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_color.frag + ../../../flutter/LICENSE
@@ -3791,8 +3789,6 @@ FILE: ../../../flutter/impeller/entity/geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry.h
 FILE: ../../../flutter/impeller/entity/inline_pass_context.cc
 FILE: ../../../flutter/impeller/entity/inline_pass_context.h
-FILE: ../../../flutter/impeller/entity/shaders/atlas_fill.frag
-FILE: ../../../flutter/impeller/entity/shaders/atlas_fill.vert
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.glsl
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.vert
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_color.frag

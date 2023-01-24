@@ -36,7 +36,8 @@ static std::optional<Snapshot> AdvancedBlend(
     const Rect& coverage,
     std::optional<Color> foreground_color,
     bool absorb_opacity,
-    PipelineProc pipeline_proc) {
+    PipelineProc pipeline_proc,
+    std::optional<Scalar> alpha) {
   using VS = typename TPipeline::VertexShader;
   using FS = typename TPipeline::FragmentShader;
 
@@ -109,7 +110,7 @@ static std::optional<Snapshot> AdvancedBlend(
     auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
     FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, sampler);
     blend_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
-    blend_info.dst_input_alpha = absorb_opacity ? dst_snapshot->opacity : 1.0f;
+    blend_info.dst_input_alpha = absorb_opacity ? dst_snapshot->opacity : 1.0;
 
     if (foreground_color.has_value()) {
       blend_info.color_factor = 1;
@@ -145,7 +146,8 @@ static std::optional<Snapshot> AdvancedBlend(
   return Snapshot{.texture = out_texture,
                   .transform = Matrix::MakeTranslation(coverage.origin),
                   .sampler_descriptor = dst_snapshot->sampler_descriptor,
-                  .opacity = absorb_opacity ? 1.0f : dst_snapshot->opacity};
+                  .opacity = (absorb_opacity ? 1.0f : dst_snapshot->opacity) *
+                             alpha.value_or(1.0)};
 }
 
 static std::optional<Snapshot> PipelineBlend(
@@ -155,7 +157,8 @@ static std::optional<Snapshot> PipelineBlend(
     const Rect& coverage,
     BlendMode pipeline_blend,
     std::optional<Color> foreground_color,
-    bool absorb_opacity) {
+    bool absorb_opacity,
+    std::optional<Scalar> alpha) {
   using VS = BlendPipeline::VertexShader;
   using FS = BlendPipeline::FragmentShader;
 
@@ -264,20 +267,22 @@ static std::optional<Snapshot> PipelineBlend(
       .transform = Matrix::MakeTranslation(coverage.origin),
       .sampler_descriptor =
           inputs[0]->GetSnapshot(renderer, entity)->sampler_descriptor,
-      .opacity = absorb_opacity ? 1.0f : dst_snapshot->opacity};
+      .opacity = (absorb_opacity ? 1.0f : dst_snapshot->opacity) *
+                 alpha.value_or(1.0)};
 }
 
-#define BLEND_CASE(mode)                                                    \
-  case BlendMode::k##mode:                                                  \
-    advanced_blend_proc_ = [](const FilterInput::Vector& inputs,            \
-                              const ContentContext& renderer,               \
-                              const Entity& entity, const Rect& coverage,   \
-                              std::optional<Color> fg_color,                \
-                              bool absorb_opacity) {                        \
-      PipelineProc p = &ContentContext::GetBlend##mode##Pipeline;           \
-      return AdvancedBlend<BlendScreenPipeline>(                            \
-          inputs, renderer, entity, coverage, fg_color, absorb_opacity, p); \
-    };                                                                      \
+#define BLEND_CASE(mode)                                                       \
+  case BlendMode::k##mode:                                                     \
+    advanced_blend_proc_ =                                                     \
+        [](const FilterInput::Vector& inputs, const ContentContext& renderer,  \
+           const Entity& entity, const Rect& coverage,                         \
+           std::optional<Color> fg_color, bool absorb_opacity,                 \
+           std::optional<Scalar> alpha) {                                      \
+          PipelineProc p = &ContentContext::GetBlend##mode##Pipeline;          \
+          return AdvancedBlend<BlendScreenPipeline>(inputs, renderer, entity,  \
+                                                    coverage, fg_color,        \
+                                                    absorb_opacity, p, alpha); \
+        };                                                                     \
     break;
 
 void BlendFilterContents::SetBlendMode(BlendMode blend_mode) {
@@ -328,17 +333,18 @@ std::optional<Snapshot> BlendFilterContents::RenderFilter(
   if (inputs.size() == 1 && !foreground_color_.has_value()) {
     // Nothing to blend.
     return PipelineBlend(inputs, renderer, entity, coverage, BlendMode::kSource,
-                         std::nullopt, GetAbsorbOpacity());
+                         std::nullopt, GetAbsorbOpacity(), GetAlpha());
   }
 
   if (blend_mode_ <= Entity::kLastPipelineBlendMode) {
     return PipelineBlend(inputs, renderer, entity, coverage, blend_mode_,
-                         foreground_color_, GetAbsorbOpacity());
+                         foreground_color_, GetAbsorbOpacity(), GetAlpha());
   }
 
   if (blend_mode_ <= Entity::kLastAdvancedBlendMode) {
     return advanced_blend_proc_(inputs, renderer, entity, coverage,
-                                foreground_color_, GetAbsorbOpacity());
+                                foreground_color_, GetAbsorbOpacity(),
+                                GetAlpha());
   }
   FML_UNREACHABLE();
 }

@@ -34,8 +34,14 @@ class ColorFilterContents : public FilterContents {
 
   bool GetAbsorbOpacity() const;
 
+  /// @brief Sets an alpha that is applied to the final blended result.
+  void SetAlpha(Scalar alpha);
+
+  std::optional<Scalar> GetAlpha() const;
+
  private:
   bool absorb_opacity_ = false;
+  std::optional<Scalar> alpha_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ColorFilterContents);
 };
