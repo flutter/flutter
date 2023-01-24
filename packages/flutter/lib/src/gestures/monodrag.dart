@@ -180,7 +180,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [allowedButtonsFilter], which decides which button will be allowed.
   GestureDragCancelCallback? onCancel;
 
-  /// The minimum distance an input pointer drag must have moved to
+  /// The minimum distance an input pointer drag must have moved
   /// to be considered a fling gesture.
   ///
   /// This value is typically compared with the distance traveled along the
