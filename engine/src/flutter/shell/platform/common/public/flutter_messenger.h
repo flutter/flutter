@@ -58,6 +58,8 @@ FLUTTER_EXPORT bool FlutterDesktopMessengerSend(
     const uint8_t* message,
     const size_t message_size);
 
+// Sends a binary message to the Flutter side on the specified channel.
+// The |reply| callback will be executed when a response is received.
 FLUTTER_EXPORT bool FlutterDesktopMessengerSendWithReply(
     FlutterDesktopMessengerRef messenger,
     const char* channel,
