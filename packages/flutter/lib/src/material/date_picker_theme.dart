@@ -103,8 +103,8 @@ class DatePickerThemeData with Diagnosticable {
   ///
   /// The dialog's header displays the currently selected date.
   ///
-  /// This is used instead of any colors provided by [headerHeadlineStyle]
-  /// or [headerHelpStyle].
+  /// This is used instead of the [TextStyle.color] property of [headerHeadlineStyle]
+  /// and [headerHelpStyle].
   final Color? headerForegroundColor;
 
   /// Overrides the header's default headline text style.
@@ -157,7 +157,7 @@ class DatePickerThemeData with Diagnosticable {
   /// [DatePickerDialog.currentDate] label in the grid of the date
   /// picker.
   ///
-  /// This will be used instead of the color provided in [dayStyle].
+  /// This will be used instead of the [TextStyle.color] provided in [dayStyle].
   final MaterialStateProperty<Color?>? todayForegroundColor;
 
   /// Overrides the default color used to paint the background of the
@@ -316,6 +316,7 @@ class DatePickerThemeData with Diagnosticable {
       dayBackgroundColor: dayBackgroundColor ?? this.dayBackgroundColor,
       dayOverlayColor: dayOverlayColor ?? this.dayOverlayColor,
       todayForegroundColor: todayForegroundColor ?? this.todayForegroundColor,
+      todayBackgroundColor: todayBackgroundColor ?? this.todayBackgroundColor,
       todayBorder: todayBorder ?? this.todayBorder,
       yearStyle: yearStyle ?? this.yearStyle,
       yearForegroundColor: yearForegroundColor ?? this.yearForegroundColor,
