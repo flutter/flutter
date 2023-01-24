@@ -19,12 +19,6 @@ abstract class AssetManifest {
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
 
-  /// Loads asset manifest data from the root bundle and creates an
-  /// [AssetManifest] from that data.
-  static Future<AssetManifest> loadFromRootBundle() {
-    return loadFromAssetBundle(rootBundle);
-  }
-
   /// Lists the keys of all known assets, not including asset variants.
   ///
   /// The logical key maps to the path of an asset specified in the pubspec.yaml
