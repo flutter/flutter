@@ -769,6 +769,7 @@ void main() {
       textTheme: ThemeData.dark().textTheme,
       typography: Typography.material2018(),
       // COMPONENT THEMES
+      actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
@@ -811,7 +812,6 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
-      actionIconTheme: null,
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.black,
       accentColorBrightness: Brightness.dark,
@@ -890,6 +890,7 @@ void main() {
       typography: Typography.material2018(platform: TargetPlatform.iOS),
 
       // COMPONENT THEMES
+      actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
@@ -932,7 +933,6 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
-      actionIconTheme: null,
 
       // DEPRECATED (newest deprecations at the bottom)
       accentColor: Colors.white,
@@ -997,6 +997,7 @@ void main() {
       typography: otherTheme.typography,
 
       // COMPONENT THEMES
+      actionIconTheme: otherTheme.actionIconTheme,
       appBarTheme: otherTheme.appBarTheme,
       badgeTheme: otherTheme.badgeTheme,
       bannerTheme: otherTheme.bannerTheme,
@@ -1100,6 +1101,7 @@ void main() {
     expect(themeDataCopy.typography, equals(otherTheme.typography));
 
     // COMPONENT THEMES
+    expect(themeDataCopy.actionIconTheme, equals(otherTheme.actionIconTheme));
     expect(themeDataCopy.appBarTheme, equals(otherTheme.appBarTheme));
     expect(themeDataCopy.badgeTheme, equals(otherTheme.badgeTheme));
     expect(themeDataCopy.bannerTheme, equals(otherTheme.bannerTheme));
@@ -1238,6 +1240,7 @@ void main() {
       'iconTheme',
       'primaryIconTheme',
       // COMPONENT THEMES
+      'actionIconTheme',
       'appBarTheme',
       'badgeTheme',
       'bannerTheme',
