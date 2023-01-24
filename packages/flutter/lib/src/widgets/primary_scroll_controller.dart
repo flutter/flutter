@@ -51,7 +51,7 @@ class PrimaryScrollController extends InheritedWidget {
     this.automaticallyInheritForPlatforms = _kMobilePlatforms,
     this.scrollDirection = Axis.vertical,
     required super.child,
-  }) : assert(controller != null);
+  });
 
   /// Creates a subtree without an associated [ScrollController].
   const PrimaryScrollController.none({

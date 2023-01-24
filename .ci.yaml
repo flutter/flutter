@@ -1377,28 +1377,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
 
+  # TODO (ricardoamador) https://github.com/flutter/flutter/issues/119026
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: true
     bringup: true
+    presubmit: false
     timeout: 60
-    dimensions: {
-      cores: "swarming.dimension('8')",
-      kvm: "swarming.dimension('1')",
-      machine_type: "swarming.dimension('n1-standard-8')"
-    }
     properties:
-      device_type: "none"
       tags: >
         ["devicelab" ,"android", "linux"]
       task_name: android_defines_test
-      dependencies: >-
-        [
-          {"dependency": "android_virtual_device", "version": "31"},
-          {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "open_jdk", "version": "version:11"}
-        ]
-      use_emulator: "true"
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -2441,23 +2429,7 @@ targets:
       - bin/
       - .ci.yaml
 
-  - name: Mac animated_complex_opacity_perf_impeller_macos__e2e_summary
-    bringup: true
-    presubmit: false
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: animated_complex_opacity_perf_impeller_macos__e2e_summary
-
   - name: Mac animated_complex_opacity_perf_macos__e2e_summary
-    bringup: true
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2623,21 +2595,6 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__start_up
-
-  - name: Mac complex_layout_scroll_perf_impeller_macos__timeline_summary
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: complex_layout_scroll_perf_impeller_macos__timeline_summary
 
   - name: Mac complex_layout_scroll_perf_macos__timeline_summary
     bringup: true
@@ -2854,7 +2811,6 @@ targets:
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4402,6 +4358,24 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: plugin_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows plugin_test_windows
+    bringup: true # New task
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_windows
     runIf:
       - dev/**
       - packages/flutter_tools/**

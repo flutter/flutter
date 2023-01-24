@@ -84,7 +84,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.velocityTrackerBuilder = _defaultBuilder,
     super.supportedDevices,
     super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
-  }) : assert(dragStartBehavior != null);
+  });
 
   static VelocityTracker _defaultBuilder(PointerEvent event) => VelocityTracker.withKind(event.kind);
 
@@ -313,7 +313,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
          event is PointerPanZoomStartEvent ||
          event is PointerPanZoomUpdateEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer]!;
-      assert(tracker != null);
       if (event is PointerPanZoomStartEvent) {
         tracker.addPosition(event.timeStamp, Offset.zero);
       } else if (event is PointerPanZoomUpdateEvent) {
@@ -492,7 +491,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
-    assert(tracker != null);
 
     final DragEndDetails details;
     final String Function() debugReport;
