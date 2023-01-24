@@ -74,6 +74,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
         _restorableDateRangePickerRouteFuture, 'date_picker_route_future');
   }
 
+  @pragma('vm:entry-point')
   static Route<DateTimeRange?> _dateRangePickerRoute(
     BuildContext context,
     Object? arguments,

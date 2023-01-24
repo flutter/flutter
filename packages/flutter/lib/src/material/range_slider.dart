@@ -148,10 +148,7 @@ class RangeSlider extends StatefulWidget {
     this.overlayColor,
     this.mouseCursor,
     this.semanticFormatterCallback,
-  }) : assert(values != null),
-       assert(min != null),
-       assert(max != null),
-       assert(min <= max),
+  }) : assert(min <= max),
        assert(values.start <= values.end),
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
@@ -810,11 +807,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     required TextDirection textDirection,
     required bool hovering,
     required DeviceGestureSettings gestureSettings,
-  })  : assert(values != null),
-        assert(values.start >= 0.0 && values.start <= 1.0),
+  })  : assert(values.start >= 0.0 && values.start <= 1.0),
         assert(values.end >= 0.0 && values.end <= 1.0),
-        assert(state != null),
-        assert(textDirection != null),
         _platform = platform,
         _semanticFormatterCallback = semanticFormatterCallback,
         _labels = labels,
@@ -918,9 +912,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   RangeValues get values => _values;
   RangeValues _values;
   set values(RangeValues newValues) {
-    assert(newValues != null);
-    assert(newValues.start != null && newValues.start >= 0.0 && newValues.start <= 1.0);
-    assert(newValues.end != null && newValues.end >= 0.0 && newValues.end <= 1.0);
+    assert(newValues.start >= 0.0 && newValues.start <= 1.0);
+    assert(newValues.end >= 0.0 && newValues.end <= 1.0);
     assert(newValues.start <= newValues.end);
     final RangeValues convertedValues = isDiscrete ? _discretizeRangeValues(newValues) : newValues;
     if (convertedValues == _values) {
@@ -1051,7 +1044,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (value == _textDirection) {
       return;
     }
@@ -1063,7 +1055,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   bool get hovering => _hovering;
   bool _hovering;
   set hovering(bool value) {
-    assert(value != null);
     if (value == _hovering) {
       return;
     }
@@ -1076,7 +1067,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   bool _hoveringStartThumb = false;
   bool get hoveringStartThumb => _hoveringStartThumb;
   set hoveringStartThumb(bool value) {
-    assert(value != null);
     if (value == _hoveringStartThumb) {
       return;
     }
@@ -1089,7 +1079,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   bool _hoveringEndThumb = false;
   bool get hoveringEndThumb => _hoveringEndThumb;
   set hoveringEndThumb(bool value) {
-    assert(value != null);
     if (value == _hoveringEndThumb) {
       return;
     }

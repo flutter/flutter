@@ -90,8 +90,7 @@ class SnackBarAction extends StatefulWidget {
     this.disabledTextColor,
     required this.label,
     required this.onPressed,
-  }) : assert(label != null),
-       assert(onPressed != null);
+  });
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
@@ -243,13 +242,10 @@ class SnackBar extends StatefulWidget {
     this.dismissDirection = DismissDirection.down,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
        assert(
          width == null || margin == null,
          'Width and margin can not be used together',
-       ),
-       assert(duration != null),
-       assert(clipBehavior != null);
+       );
 
   /// The primary content of the snack bar.
   ///
@@ -828,7 +824,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);

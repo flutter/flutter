@@ -111,10 +111,7 @@ class MaterialBanner extends StatefulWidget {
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
     this.onVisible,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
-       assert(actions != null),
-       assert(forceActionsBelow != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The content of the [MaterialBanner].
   ///
@@ -453,7 +450,7 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
   const _BannerDefaultsM3(this.context)

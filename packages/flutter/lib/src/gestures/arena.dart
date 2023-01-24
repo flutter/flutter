@@ -266,7 +266,6 @@ class GestureArenaManager {
 
   void _resolveInFavorOf(int pointer, _GestureArena state, GestureArenaMember member) {
     assert(state == _arenas[pointer]);
-    assert(state != null);
     assert(state.eagerWinner == null || state.eagerWinner == member);
     assert(!state.isOpen);
     _arenas.remove(pointer);

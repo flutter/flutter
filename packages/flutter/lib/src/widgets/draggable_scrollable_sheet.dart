@@ -308,16 +308,11 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.snapAnimationDuration,
     this.controller,
     required this.builder,
-  })  : assert(initialChildSize != null),
-        assert(minChildSize != null),
-        assert(maxChildSize != null),
-        assert(minChildSize >= 0.0),
+  })  : assert(minChildSize >= 0.0),
         assert(maxChildSize <= 1.0),
         assert(minChildSize <= initialChildSize),
         assert(initialChildSize <= maxChildSize),
-        assert(snapAnimationDuration == null || snapAnimationDuration > Duration.zero),
-        assert(expand != null),
-        assert(builder != null);
+        assert(snapAnimationDuration == null || snapAnimationDuration > Duration.zero);
 
   /// The initial fractional value of the parent container's height to use when
   /// displaying the widget.
@@ -436,17 +431,12 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
     required this.maxExtent,
     required this.initialExtent,
     required this.context,
-  }) : assert(extent != null),
-       assert(initialExtent != null),
-       assert(minExtent != null),
-       assert(maxExtent != null),
-       assert(0.0 <= minExtent),
+  }) : assert(0.0 <= minExtent),
        assert(maxExtent <= 1.0),
        assert(minExtent <= extent),
        assert(minExtent <= initialExtent),
        assert(extent <= maxExtent),
-       assert(initialExtent <= maxExtent),
-       assert(context != null);
+       assert(initialExtent <= maxExtent);
 
   /// The current value of the extent, between [minExtent] and [maxExtent].
   final double extent;
@@ -496,10 +486,7 @@ class _DraggableSheetExtent {
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
     bool? hasChanged,
-  })  : assert(minSize != null),
-        assert(maxSize != null),
-        assert(initialSize != null),
-        assert(minSize >= 0),
+  })  : assert(minSize >= 0),
         assert(maxSize <= 1),
         assert(minSize <= initialSize),
         assert(initialSize <= maxSize),
@@ -577,7 +564,6 @@ class _DraggableSheetExtent {
   /// This can be triggered by a programmatic (e.g. controller triggered) change
   /// or a user drag.
   void updateSize(double newSize, BuildContext context) {
-    assert(newSize != null);
     final double clampedSize = clampDouble(newSize, minSize, maxSize);
     if (_currentSize.value == clampedSize) {
       return;
@@ -783,7 +769,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 class _DraggableScrollableSheetScrollController extends ScrollController {
   _DraggableScrollableSheetScrollController({
     required this.extent,
-  }) : assert(extent != null);
+  });
 
   _DraggableSheetExtent extent;
   VoidCallback? onPositionDetached;
