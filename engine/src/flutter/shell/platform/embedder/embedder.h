@@ -830,7 +830,7 @@ typedef enum {
   /// any other buttons are still pressed when one button is released, that
   /// should be sent as a kMove rather than a kUp.
   kUp,
-  /// The pointer, which must have been been up, is now down.
+  /// The pointer, which must have been up, is now down.
   ///
   /// For touch, this means that the pointer has come into contact with the
   /// screen. For a mouse, it means a button is now pressed. Note that if any

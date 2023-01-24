@@ -43,7 +43,7 @@ namespace flutter {
 class KeyboardManager {
  public:
   // Define how the keyboard manager accesses Win32 system calls (to allow
-  // mocking) and sends key calls and and text calls.
+  // mocking) and sends key calls and text calls.
   //
   // Typically implemented by |Window|.
   class WindowDelegate {

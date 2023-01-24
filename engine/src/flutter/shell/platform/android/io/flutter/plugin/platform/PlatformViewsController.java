@@ -525,7 +525,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         private long configureForVirtualDisplay(
             @NonNull PlatformView platformView,
             @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
-          // This mode adds the view to a virtual display, which is is wired up to a GL texture that
+          // This mode adds the view to a virtual display, which is wired up to a GL texture that
           // is composed by the Flutter engine.
 
           // API level 20 is required to use VirtualDisplay#setSurface.

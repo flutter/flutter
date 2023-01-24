@@ -679,7 +679,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
   std::vector<BlendMode> blend_mode_values;
   {
     // Force an exhausiveness check with a switch. When adding blend modes,
-    // update this switch with a new name/value to to make it selectable in the
+    // update this switch with a new name/value to make it selectable in the
     // test GUI.
 
     const BlendMode b{};

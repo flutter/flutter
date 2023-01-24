@@ -66,7 +66,7 @@ struct traits {
     has_trivial_ctor = is_pointer || trait_trivial_ctor<TYPE>::value,
     // whether this type's destructor is a no-op
     has_trivial_dtor = is_pointer || trait_trivial_dtor<TYPE>::value,
-    // whether this type type can be copy-constructed with memcpy
+    // whether this type can be copy-constructed with memcpy
     has_trivial_copy = is_pointer || trait_trivial_copy<TYPE>::value,
     // whether this type can be moved with memmove
     has_trivial_move = is_pointer || trait_trivial_move<TYPE>::value

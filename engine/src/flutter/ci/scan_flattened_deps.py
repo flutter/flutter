@@ -27,7 +27,7 @@ OSV_VULN_DB_URL = 'https://osv.dev/vulnerability/'
 SECONDS_PER_YEAR = 31556952
 UPSTREAM_PREFIX = 'upstream_'
 
-failed_deps = []  # deps which fail to be be cloned or git-merge based
+failed_deps = []  # deps which fail to be cloned or git-merge based
 
 sarif_log = {
     '$schema':

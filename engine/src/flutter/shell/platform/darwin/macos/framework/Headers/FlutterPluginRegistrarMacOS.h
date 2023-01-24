@@ -16,7 +16,7 @@
 
 /**
  * The protocol for an object managing registration for a plugin. It provides access to application
- * context, as as allowing registering for callbacks for handling various conditions.
+ * context, as allowing registering for callbacks for handling various conditions.
  *
  * Currently the macOS PluginRegistrar has very limited functionality, but is expected to expand
  * over time to more closely match the functionality of FlutterPluginRegistrar.

@@ -863,7 +863,7 @@ void HandleResponse(bool handled, void* user_data);
     // The caps lock modifier needs to be unset only if it was already on
     // and this is a key up. This is because it indicates the lock state, and
     // not the key press state. The caps lock state should be on between the
-    // first down, and the second up (i.e. while the lock in in effect), and
+    // first down, and the second up (i.e. while the lock in effect), and
     // this code turns it off at the second up event. The OS leaves it on still
     // because of iOS's weird late processing of modifier states. Synthesis of
     // the appropriate synthesized key events happens in synchronizeModifiers.

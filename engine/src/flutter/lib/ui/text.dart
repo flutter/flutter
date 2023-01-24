@@ -1194,7 +1194,7 @@ class TextHeightBehavior {
   /// Whether to apply the [TextStyle.height] modifier to the ascent of the first
   /// line in the paragraph.
   ///
-  /// When true, the [TextStyle.height] modifier will be applied to to the ascent
+  /// When true, the [TextStyle.height] modifier will be applied to the ascent
   /// of the first line. When false, the font's default ascent will be used and
   /// the [TextStyle.height] will have no effect on the ascent of the first line.
   ///
@@ -1206,7 +1206,7 @@ class TextHeightBehavior {
   /// Whether to apply the [TextStyle.height] modifier to the descent of the last
   /// line in the paragraph.
   ///
-  /// When true, the [TextStyle.height] modifier will be applied to to the descent
+  /// When true, the [TextStyle.height] modifier will be applied to the descent
   /// of the last line. When false, the font's default descent will be used and
   /// the [TextStyle.height] will have no effect on the descent of the last line.
   ///

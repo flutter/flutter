@@ -132,7 +132,7 @@ class FontManager {
   ///
   /// Safari 12 and Firefox crash if you create a [DomFontFace] with a font
   /// family that is not correct CSS syntax. Font family names with invalid
-  /// characters are accepted accepted on these browsers, when wrapped it in
+  /// characters are accepted on these browsers, when wrapped it in
   /// quotes.
   ///
   /// Additionally, for Safari 12 to work [DomFontFace] name should be
