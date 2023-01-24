@@ -27,8 +27,6 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../ios/devices.dart';
-import '../ios/iproxy.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../web/compile.dart';
@@ -1535,18 +1533,6 @@ abstract class FlutterCommand extends Command<void> {
           return null;
         }
       }
-    }
-
-    final Iterable<IOSDevice> iosDevices = devices.whereType<IOSDevice>();
-    if (iosDevices.isNotEmpty) {
-      final bool includesNetworkDevices =
-          iosDevices.any((IOSDevice device) => device.interfaceType == IOSDeviceConnectionInterface.network);
-      UsageEvent(
-        'device',
-        'ios-interface-type',
-        label: includesNetworkDevices ? 'wireless' : 'usb',
-        flutterUsage: globals.flutterUsage,
-      ).send();
     }
 
     return devices;
