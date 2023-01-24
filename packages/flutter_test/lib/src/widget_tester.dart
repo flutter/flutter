@@ -1100,7 +1100,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// To enter text into other widgets (e.g. a custom widget that maintains a
   /// TextInputConnection the way that a [EditableText] does), first ensure that
-  /// that widget has an open connection (e.g. by using [tap] to to focus it),
+  /// that widget has an open connection (e.g. by using [tap] to focus it),
   /// then call `testTextInput.enterText` directly (see
   /// [TestTextInput.enterText]).
   Future<void> enterText(Finder finder, String text) async {

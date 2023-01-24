@@ -30,7 +30,6 @@ const int iOSHorizontalOffset = -2;
 
 class _TextSpanEditingController extends TextEditingController {
   _TextSpanEditingController({required TextSpan textSpan}):
-    assert(textSpan != null),
     _textSpan = textSpan,
     super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
@@ -215,20 +214,11 @@ class SelectableText extends StatefulWidget {
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
-  }) :  assert(showCursor != null),
-        assert(autofocus != null),
-        assert(dragStartBehavior != null),
-        assert(selectionHeightStyle != null),
-        assert(selectionWidthStyle != null),
-        assert(maxLines == null || maxLines > 0),
+  }) :  assert(maxLines == null || maxLines > 0),
         assert(minLines == null || minLines > 0),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
-        ),
-        assert(
-          data != null,
-          'A non-null String must be provided to a SelectableText widget.',
         ),
         textSpan = null;
 
@@ -273,18 +263,11 @@ class SelectableText extends StatefulWidget {
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
-  }) :  assert(showCursor != null),
-    assert(autofocus != null),
-    assert(dragStartBehavior != null),
-    assert(maxLines == null || maxLines > 0),
+  }) :  assert(maxLines == null || maxLines > 0),
     assert(minLines == null || minLines > 0),
     assert(
       (maxLines == null) || (minLines == null) || (maxLines >= minLines),
       "minLines can't be greater than maxLines",
-    ),
-    assert(
-      textSpan != null,
-      'A non-null TextSpan must be provided to a SelectableText.rich widget.',
     ),
     data = null;
 

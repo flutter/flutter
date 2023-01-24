@@ -100,7 +100,7 @@ class PubDependencies extends ArtifactSet {
       logger: _logger,
       throwOnError: false,
     );
-    if (packageConfig == null || packageConfig == PackageConfig.empty) {
+    if (packageConfig == PackageConfig.empty) {
       return false;
     }
     for (final Package package in packageConfig.packages) {

@@ -35,8 +35,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     this.location = 0,
     this.metaState = modifierNone,
     this.keyCode = 0,
-  })  : assert(code != null),
-        assert(metaState != null);
+  });
 
   /// The `KeyboardEvent.code` corresponding to this event.
   ///

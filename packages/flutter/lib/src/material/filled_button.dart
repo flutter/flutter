@@ -436,9 +436,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
+  }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _FilledButtonWithIconChild(icon: icon, label: label)
@@ -457,9 +455,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super.tonal(
+  }) : super.tonal(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _FilledButtonWithIconChild(icon: icon, label: label)
