@@ -477,5 +477,6 @@ class SystemChannels {
   ///  * `ContextMenu.disableContextMenu`: disables the browser's context menu.
   static const MethodChannel contextMenu = OptionalMethodChannel(
     'flutter/contextmenu',
+    JSONMethodCodec(),
   );
 }
