@@ -254,7 +254,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
-        disablePortPublication: disablePortPublication,
+        disablePortPublication: await disablePortPublication,
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArgDeprecated('verbose-system-logs'),
@@ -437,14 +437,14 @@ class RunCommand extends RunCommandBase {
     final List<String> hostLanguage = <String>[];
     if (anyAndroidDevices) {
       final AndroidProject androidProject = FlutterProject.current().android;
-      if (androidProject != null && androidProject.existsSync()) {
+      if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
       final IosProject iosProject = FlutterProject.current().ios;
-      if (iosProject != null && iosProject.exists) {
+      if (iosProject.exists) {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()

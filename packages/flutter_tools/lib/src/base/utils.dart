@@ -207,7 +207,7 @@ String wrapText(String text, {
   int? indent,
 }) {
   assert(columnWidth >= 0);
-  if (text == null || text.isEmpty) {
+  if (text.isEmpty) {
     return '';
   }
   indent ??= 0;
@@ -295,7 +295,7 @@ List<String> _wrapTextAsLines(String text, {
   required int columnWidth,
   required bool shouldWrap,
 }) {
-  if (text == null || text.isEmpty) {
+  if (text.isEmpty) {
     return <String>[''];
   }
   assert(start >= 0);

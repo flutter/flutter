@@ -1018,7 +1018,7 @@ Future<void> _runFrameworkTests() async {
       printOutput: false,
       outputChecker: (CommandResult result) {
         final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout!);
-        if (matches == null || matches.isEmpty || matches.length > 1) {
+        if (matches.isEmpty || matches.length > 1) {
           return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n\n'
                  'stdout:\n${result.flattenedStdout}\n\n'
                  'stderr:\n${result.flattenedStderr}';
@@ -1236,7 +1236,6 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
     () => _runWebDebugTest('test/test.dart'),
-    () => _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true),
     () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
     () => _runWebDebugTest('lib/web_define_loading.dart',
       additionalArguments: <String>[

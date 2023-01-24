@@ -852,6 +852,18 @@ void main() {
       contains('"main.dart.js"'));
   }));
 
+  test('flutter.js sanity checks', () {
+    final String flutterJsContents = flutter_js.generateFlutterJsFile();
+    expect(flutterJsContents, contains('"use strict";'));
+    expect(flutterJsContents, contains('main.dart.js'));
+    expect(flutterJsContents, contains('flutter_service_worker.js?v='));
+    expect(flutterJsContents, contains('document.createElement("script")'));
+    expect(flutterJsContents, contains('"application/javascript"'));
+    expect(flutterJsContents, contains('const baseUri = '));
+    expect(flutterJsContents, contains('document.querySelector("base")'));
+    expect(flutterJsContents, contains('.getAttribute("href")'));
+  });
+
   test('flutter.js is not dynamically generated', () => testbed.run(() async {
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/foo')
       ..createSync(recursive: true)
@@ -865,14 +877,11 @@ void main() {
   }));
 
   test('wasm build copies and generates specific files', () => testbed.run(() async {
-    globals.fs.file('bin/cache/dart-sdk/bin/dart2wasm_runtime.mjs')
-      .createSync(recursive: true);
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
       .createSync(recursive: true);
 
     await WebBuiltInAssets(globals.fs, globals.cache, true).build(environment);
 
-    expect(environment.outputDir.childFile('dart2wasm_runtime.mjs').existsSync(), true);
     expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
     expect(environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm')
