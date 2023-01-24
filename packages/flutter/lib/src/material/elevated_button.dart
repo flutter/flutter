@@ -486,9 +486,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
+  }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _ElevatedButtonWithIconChild(icon: icon, label: label),

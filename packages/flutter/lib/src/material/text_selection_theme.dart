@@ -76,7 +76,6 @@ class TextSelectionThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    assert(t != null);
     return TextSelectionThemeData(
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),
       selectionColor: Color.lerp(a?.selectionColor, b?.selectionColor, t),
@@ -147,8 +146,7 @@ class TextSelectionTheme extends InheritedTheme {
     super.key,
     required this.data,
     required Widget child,
-  }) : assert(data != null),
-       _child = child,
+  }) : _child = child,
        // See `get child` override below.
        super(child: const _NullWidget());
 

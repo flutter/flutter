@@ -107,7 +107,7 @@ class SegmentedButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the visual properties used by descendant [SegmentedButton]
   /// widgets.
@@ -158,7 +158,6 @@ class SegmentedButtonTheme extends InheritedTheme {
   ///  * [of], which will return [ThemeData.segmentedButtonTheme] if it doesn't
   ///    find a [SegmentedButtonTheme] ancestor, instead of returning null.
   static SegmentedButtonThemeData? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.dependOnInheritedWidgetOfExactType<SegmentedButtonTheme>()?.data;
   }
 

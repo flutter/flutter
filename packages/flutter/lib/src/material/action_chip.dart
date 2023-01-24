@@ -86,10 +86,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
-  }) : assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override

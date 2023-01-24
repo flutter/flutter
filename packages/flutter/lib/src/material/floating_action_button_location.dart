@@ -652,7 +652,6 @@ mixin FabStartOffsetX on StandardFabLocation {
   /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
@@ -676,7 +675,6 @@ mixin FabEndOffsetX on StandardFabLocation {
   /// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);

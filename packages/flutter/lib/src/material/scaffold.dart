@@ -100,7 +100,7 @@ class ScaffoldMessenger extends StatefulWidget {
   const ScaffoldMessenger({
     super.key,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -144,7 +144,6 @@ class ScaffoldMessenger extends StatefulWidget {
   ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
   ///    has a [ScaffoldMessenger] ancestor.
   static ScaffoldMessengerState of(BuildContext context) {
-    assert(context != null);
     assert(debugCheckHasScaffoldMessenger(context));
 
     final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>()!;
@@ -161,7 +160,6 @@ class ScaffoldMessenger extends StatefulWidget {
   ///  * [of], which is a similar function, except that it will throw an
   ///    exception if a [ScaffoldMessenger] is not found in the given context.
   static ScaffoldMessengerState? maybeOf(BuildContext context) {
-    assert(context != null);
 
     final _ScaffoldMessengerScope? scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
@@ -383,7 +381,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
-    assert(reason != null);
     if (_snackBars.isEmpty) {
       return;
     }
@@ -401,7 +398,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///
   /// The closed completer is called after the animation is complete.
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
-    assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed) {
       return;
     }
@@ -518,7 +514,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// The removed material banner does not run its normal exit animation. If there are
   /// any queued material banners, they begin their entrance animation immediately.
   void removeCurrentMaterialBanner({ MaterialBannerClosedReason reason = MaterialBannerClosedReason.remove }) {
-    assert(reason != null);
     if (_materialBanners.isEmpty) {
       return;
     }
@@ -535,7 +530,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///
   /// The closed completer is called after the animation is complete.
   void hideCurrentMaterialBanner({ MaterialBannerClosedReason reason = MaterialBannerClosedReason.hide }) {
-    assert(reason != null);
     if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed) {
       return;
     }
@@ -827,8 +821,7 @@ class ScaffoldGeometry {
 }
 
 class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenable<ScaffoldGeometry> {
-  _ScaffoldGeometryNotifier(this.geometry, this.context)
-    : assert (context != null);
+  _ScaffoldGeometryNotifier(this.geometry, this.context);
 
   final BuildContext context;
   double? floatingActionButtonScale;
@@ -880,11 +873,8 @@ class _BodyBoxConstraints extends BoxConstraints {
     required this.bottomWidgetsHeight,
     required this.appBarHeight,
     required this.materialBannerHeight,
-  }) : assert(bottomWidgetsHeight != null),
-       assert(bottomWidgetsHeight >= 0),
-       assert(appBarHeight != null),
+  }) : assert(bottomWidgetsHeight >= 0),
        assert(appBarHeight >= 0),
-       assert(materialBannerHeight != null),
        assert(materialBannerHeight >= 0);
 
   final double bottomWidgetsHeight;
@@ -921,9 +911,7 @@ class _BodyBuilder extends StatelessWidget {
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.body,
-  }) : assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null),
-       assert(body != null);
+  });
 
   final Widget body;
   final bool extendBody;
@@ -979,13 +967,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
-  }) : assert(minInsets != null),
-       assert(textDirection != null),
-       assert(geometryNotifier != null),
-       assert(previousFloatingActionButtonLocation != null),
-       assert(currentFloatingActionButtonLocation != null),
-       assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null);
+  });
 
   final bool extendBody;
   final bool extendBodyBehindAppBar;
@@ -1251,9 +1233,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
     required this.fabMotionAnimator,
     required this.geometryNotifier,
     required this.currentController,
-  }) : assert(fabMoveAnimation != null),
-       assert(fabMotionAnimator != null),
-       assert(currentController != null);
+  });
 
   final Widget? child;
   final Animation<double> fabMoveAnimation;
@@ -1600,10 +1580,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
-  }) : assert(primary != null),
-       assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null),
-       assert(drawerDragStartBehavior != null);
+  });
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
   /// is specified, then the [body] extends to the bottom of the Scaffold,
@@ -1898,7 +1875,6 @@ class Scaffold extends StatefulWidget {
   /// If there is no [Scaffold] in scope, then this will throw an exception.
   /// To return null if there is no [Scaffold], use [maybeOf] instead.
   static ScaffoldState of(BuildContext context) {
-    assert(context != null);
     final ScaffoldState? result = context.findAncestorStateOfType<ScaffoldState>();
     if (result != null) {
       return result;
@@ -1945,7 +1921,6 @@ class Scaffold extends StatefulWidget {
   ///    encloses the given context. Also includes some sample code in its
   ///    documentation.
   static ScaffoldState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<ScaffoldState>();
   }
 
@@ -2014,8 +1989,6 @@ class Scaffold extends StatefulWidget {
   ///  * [Scaffold.of], which provides access to the [ScaffoldState] object as a
   ///    whole, from which you can show bottom sheets, and so forth.
   static bool hasDrawer(BuildContext context, { bool registerForUpdates = true }) {
-    assert(registerForUpdates != null);
-    assert(context != null);
     if (registerForUpdates) {
       final _ScaffoldScope? scaffold = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
       return scaffold?.hasDrawer ?? false;
@@ -2509,7 +2482,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// Sets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton]. This value must not be null.
   set _floatingActionButtonVisibilityValue(double newValue) {
-    assert(newValue != null);
     _floatingActionButtonVisibilityController.value = clampDouble(newValue,
       _floatingActionButtonVisibilityController.lowerBound,
       _floatingActionButtonVisibilityController.upperBound,
@@ -2747,7 +2719,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// The `value` parameter must not be null.
   void showBodyScrim(bool value, double opacity) {
-    assert(value != null);
     if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
       return;
     }
@@ -3081,8 +3052,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   const _BottomSheetSuspendedCurve(
       this.startingPoint, {
         this.curve = Curves.easeOutCubic,
-      }) : assert(startingPoint != null),
-        assert(curve != null);
+      });
 
   /// The progress value at which [curve] should begin.
   ///
@@ -3156,7 +3126,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   @override
   void initState() {
     super.initState();
-    assert(widget.animationController != null);
     assert(
       widget.animationController.status == AnimationStatus.forward
         || widget.animationController.status == AnimationStatus.completed,
@@ -3177,7 +3146,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   void close() {
-    assert(widget.animationController != null);
     widget.animationController.reverse();
     widget.onClosing?.call();
   }
@@ -3281,7 +3249,7 @@ class _ScaffoldScope extends InheritedWidget {
     required this.hasDrawer,
     required this.geometryNotifier,
     required super.child,
-  }) : assert(hasDrawer != null);
+  });
 
   final bool hasDrawer;
   final _ScaffoldGeometryNotifier geometryNotifier;

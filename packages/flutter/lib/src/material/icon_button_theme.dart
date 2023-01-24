@@ -49,7 +49,6 @@ class IconButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two icon button themes.
   static IconButtonThemeData? lerp(IconButtonThemeData? a, IconButtonThemeData? b, double t) {
-    assert (t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -96,7 +95,7 @@ class IconButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The configuration of this theme.
   final IconButtonThemeData data;

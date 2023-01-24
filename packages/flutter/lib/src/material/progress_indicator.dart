@@ -145,7 +145,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     this.value,
     required this.animationValue,
     required this.textDirection,
-  }) : assert(textDirection != null);
+  });
 
   final Color backgroundColor;
   final Color valueColor;
@@ -654,7 +654,6 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
         return _buildAnimation();
       case _ActivityIndicatorType.adaptive:
         final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:

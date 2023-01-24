@@ -67,7 +67,7 @@ class SnackBarThemeData with Diagnosticable {
   })  : assert(elevation == null || elevation >= 0.0),
         assert(
             width == null ||
-                (width != null && identical(behavior, SnackBarBehavior.floating)),
+                (identical(behavior, SnackBarBehavior.floating)),
             'Width can only be set if behaviour is SnackBarBehavior.floating');
   /// Overrides the default value for [SnackBar.backgroundColor].
   ///
@@ -169,7 +169,6 @@ class SnackBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static SnackBarThemeData lerp(SnackBarThemeData? a, SnackBarThemeData? b, double t) {
-    assert(t != null);
     return SnackBarThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       actionTextColor: Color.lerp(a?.actionTextColor, b?.actionTextColor, t),

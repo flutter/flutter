@@ -71,8 +71,7 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The card's background color.
   ///

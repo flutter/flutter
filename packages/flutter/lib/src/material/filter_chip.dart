@@ -88,11 +88,7 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override

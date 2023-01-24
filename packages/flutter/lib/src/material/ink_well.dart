@@ -42,9 +42,7 @@ abstract class InteractiveInkFeature extends InkFeature {
     required super.referenceBox,
     required Color color,
     super.onRemoved,
-  }) : assert(controller != null),
-       assert(referenceBox != null),
-       _color = color;
+  }) : _color = color;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
@@ -111,12 +109,6 @@ abstract class InteractiveInkFeature extends InkFeature {
     BorderRadius borderRadius = BorderRadius.zero,
     RectCallback? clipCallback,
   }) {
-    assert(canvas != null);
-    assert(transform != null);
-    assert(paint != null);
-    assert(center != null);
-    assert(radius != null);
-    assert(borderRadius != null);
 
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     canvas.save();
@@ -323,12 +315,7 @@ class InkResponse extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -688,12 +675,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.getRectCallback,
     required this.debugCheckContext,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+  });
 
   final Widget? child;
   final GestureTapCallback? onTap;
@@ -781,7 +763,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
-    assert(childState != null);
     final bool lastAnyPressed = _anyChildInkResponsePressed;
     if (value) {
       _activeChildren.add(childState);

@@ -481,9 +481,7 @@ class _TextButtonWithIcon extends TextButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-  }) : assert(icon != null),
-       assert(label != null),
-       super(
+  }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
          child: _TextButtonWithIconChild(icon: icon, label: label),

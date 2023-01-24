@@ -58,10 +58,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.autofocus = false,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       assert(autofocus != null),
-       initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
+  }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate) {
     assert(

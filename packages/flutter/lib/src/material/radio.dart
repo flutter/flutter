@@ -93,8 +93,7 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-  }) : assert(autofocus != null),
-       assert(toggleable != null);
+  });
 
   /// The value represented by this radio button.
   final T value;

@@ -923,87 +923,7 @@ class ThemeData with Diagnosticable {
        _errorColor = errorColor,
        _backgroundColor = backgroundColor,
        _bottomAppBarColor = bottomAppBarColor,
-       // GENERAL CONFIGURATION
-       assert(applyElevationOverlayColor != null),
-       assert(extensions != null),
-       assert(inputDecorationTheme != null),
-       assert(materialTapTargetSize != null),
-       assert(pageTransitionsTheme != null),
-       assert(platform != null),
-       assert(scrollbarTheme != null),
-       assert(splashFactory != null),
-       assert(useMaterial3 != null),
-       assert(visualDensity != null),
-        // COLOR
-       assert(canvasColor != null),
-       assert(cardColor != null),
-       assert(colorScheme != null),
-       assert(dialogBackgroundColor != null),
-       assert(disabledColor != null),
-       assert(dividerColor != null),
-       assert(focusColor != null),
-       assert(highlightColor != null),
-       assert(hintColor != null),
-       assert(hoverColor != null),
-       assert(indicatorColor != null),
-       assert(primaryColor != null),
-       assert(primaryColorDark != null),
-       assert(primaryColorLight != null),
-       assert(scaffoldBackgroundColor != null),
-       assert(secondaryHeaderColor != null),
-       assert(shadowColor != null),
-       assert(splashColor != null),
        assert(toggleableActiveColor != null),
-       assert(unselectedWidgetColor != null),
-        // TYPOGRAPHY & ICONOGRAPHY
-       assert(iconTheme != null),
-       assert(primaryIconTheme != null),
-       assert(primaryTextTheme != null),
-       assert(textTheme != null),
-       assert(typography != null),
-        // COMPONENT THEMES
-       assert(appBarTheme != null),
-       assert(badgeTheme != null),
-       assert(bannerTheme != null),
-       assert(bottomAppBarTheme != null),
-       assert(bottomNavigationBarTheme != null),
-       assert(bottomSheetTheme != null),
-       assert(buttonBarTheme != null),
-       assert(buttonTheme != null),
-       assert(cardTheme != null),
-       assert(checkboxTheme != null),
-       assert(chipTheme != null),
-       assert(dataTableTheme != null),
-       assert(dialogTheme != null),
-       assert(dividerTheme != null),
-       assert(drawerTheme != null),
-       assert(dropdownMenuTheme != null),
-       assert(elevatedButtonTheme != null),
-       assert(expansionTileTheme != null),
-       assert(filledButtonTheme != null),
-       assert(floatingActionButtonTheme != null),
-       assert(iconButtonTheme != null),
-       assert(listTileTheme != null),
-       assert(menuBarTheme != null),
-       assert(menuButtonTheme != null),
-       assert(menuTheme != null),
-       assert(navigationBarTheme != null),
-       assert(navigationDrawerTheme != null),
-       assert(navigationRailTheme != null),
-       assert(outlinedButtonTheme != null),
-       assert(popupMenuTheme != null),
-       assert(progressIndicatorTheme != null),
-       assert(radioTheme != null),
-       assert(segmentedButtonTheme != null),
-       assert(sliderTheme != null),
-       assert(snackBarTheme != null),
-       assert(switchTheme != null),
-       assert(tabBarTheme != null),
-       assert(textButtonTheme != null),
-       assert(textSelectionTheme != null),
-       assert(timePickerTheme != null),
-       assert(toggleButtonsTheme != null),
-       assert(tooltipTheme != null),
         // DEPRECATED (newest deprecations at the bottom)
        assert(accentColor != null),
        assert(accentColorBrightness != null),
@@ -2118,8 +2038,6 @@ class ThemeData with Diagnosticable {
     //
     // There are only two hard things in Computer Science: cache invalidation
     // and naming things. -- Phil Karlton
-    assert(baseTheme != null);
-    assert(localTextGeometry != null);
 
     return _localizedThemeDataCache.putIfAbsent(
       _IdentityThemeDataCacheKey(baseTheme, localTextGeometry),
@@ -2188,9 +2106,6 @@ class ThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ThemeData lerp(ThemeData a, ThemeData b, double t) {
-    assert(a != null);
-    assert(b != null);
-    assert(t != null);
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -2658,9 +2573,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   MaterialBasedCupertinoThemeData._(
     this._materialTheme,
     this._cupertinoOverrideTheme,
-  ) : assert(_materialTheme != null),
-      assert(_cupertinoOverrideTheme != null),
-      // Pass all values to the superclass so Material-agnostic properties
+  ) : // Pass all values to the superclass so Material-agnostic properties
       // like barBackgroundColor can still behave like a normal
       // CupertinoThemeData.
       super.raw(
@@ -2761,7 +2674,7 @@ class _IdentityThemeDataCacheKey {
 /// The key that was inserted before all other keys is evicted first, i.e. the
 /// one inserted least recently.
 class _FifoCache<K, V> {
-  _FifoCache(this._maximumSize) : assert(_maximumSize != null && _maximumSize > 0);
+  _FifoCache(this._maximumSize) : assert(_maximumSize > 0);
 
   /// In Dart the map literal uses a linked hash-map implementation, whose keys
   /// are stored such that [Map.keys] returns them in the order they were
@@ -2780,7 +2693,6 @@ class _FifoCache<K, V> {
   /// The arguments must not be null.
   V putIfAbsent(K key, V Function() loader) {
     assert(key != null);
-    assert(loader != null);
     final V? result = _cache[key];
     if (result != null) {
       return result;
@@ -2837,9 +2749,7 @@ class VisualDensity with Diagnosticable {
   const VisualDensity({
     this.horizontal = 0.0,
     this.vertical = 0.0,
-  }) : assert(horizontal != null),
-       assert(vertical != null),
-       assert(vertical <= maximumDensity),
+  }) : assert(vertical <= maximumDensity),
        assert(vertical <= maximumDensity),
        assert(vertical >= minimumDensity),
        assert(horizontal <= maximumDensity),
@@ -2970,7 +2880,7 @@ class VisualDensity with Diagnosticable {
   /// The resulting minWidth and minHeight values are clamped to not exceed the
   /// maxWidth and maxHeight values, respectively.
   BoxConstraints effectiveConstraints(BoxConstraints constraints) {
-    assert(constraints != null && constraints.debugAssertIsValid());
+    assert(constraints.debugAssertIsValid());
     return constraints.copyWith(
       minWidth: clampDouble(constraints.minWidth + baseSizeAdjustment.dx, 0.0, constraints.maxWidth),
       minHeight: clampDouble(constraints.minHeight + baseSizeAdjustment.dy, 0.0, constraints.maxHeight),

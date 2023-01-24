@@ -306,7 +306,6 @@ class AppBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
-    assert(t != null);
     return AppBarTheme(
       brightness: t < 0.5 ? a?.brightness : b?.brightness,
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),

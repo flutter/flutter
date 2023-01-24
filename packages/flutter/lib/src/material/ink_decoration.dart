@@ -193,10 +193,6 @@ class Ink extends StatefulWidget {
     this.height,
     this.child,
   }) : assert(padding == null || padding.isNonNegative),
-       assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
        decoration = BoxDecoration(
          image: DecorationImage(
            image: image,
@@ -337,8 +333,7 @@ class InkDecoration extends InkFeature {
     required super.controller,
     required super.referenceBox,
     super.onRemoved,
-  }) : assert(configuration != null),
-       _configuration = configuration {
+  }) : _configuration = configuration {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }
@@ -369,7 +364,6 @@ class InkDecoration extends InkFeature {
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
-    assert(value != null);
     if (value == _configuration) {
       return;
     }

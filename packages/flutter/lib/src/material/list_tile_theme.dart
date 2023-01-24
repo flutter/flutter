@@ -166,7 +166,6 @@ class ListTileThemeData with Diagnosticable {
 
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
-    assert (t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -480,7 +479,6 @@ class ListTileTheme extends InheritedTheme {
     double? minLeadingWidth,
     required Widget child,
   }) {
-    assert(child != null);
     return Builder(
       builder: (BuildContext context) {
         final ListTileThemeData parent = ListTileTheme.of(context);

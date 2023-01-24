@@ -173,12 +173,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-  }) : assert(toggleable != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(controlAffinity != null),
-       assert(autofocus != null);
+  }) : assert(!isThreeLine || subtitle != null);
 
   /// The value represented by this radio button.
   final T value;
