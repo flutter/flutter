@@ -88,63 +88,63 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  //printProgress('No Double.clamp');
-  //await verifyNoDoubleClamp(flutterRoot);
+  printProgress('No Double.clamp');
+  await verifyNoDoubleClamp(flutterRoot);
 
-  //printProgress('All tool test files end in _test.dart...');
-  //await verifyToolTestsEndInTestDart(flutterRoot);
+  printProgress('All tool test files end in _test.dart...');
+  await verifyToolTestsEndInTestDart(flutterRoot);
 
-  //printProgress('No sync*/async*');
-  //await verifyNoSyncAsyncStar(flutterPackages);
-  //await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+  printProgress('No sync*/async*');
+  await verifyNoSyncAsyncStar(flutterPackages);
+  await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
 
-  //printProgress('No runtimeType in toString...');
-  //await verifyNoRuntimeTypeInToString(flutterRoot);
+  printProgress('No runtimeType in toString...');
+  await verifyNoRuntimeTypeInToString(flutterRoot);
 
-  //printProgress('Debug mode instead of checked mode...');
-  //await verifyNoCheckedMode(flutterRoot);
+  printProgress('Debug mode instead of checked mode...');
+  await verifyNoCheckedMode(flutterRoot);
 
-  //printProgress('Links for creating GitHub issues');
-  //await verifyIssueLinks(flutterRoot);
+  printProgress('Links for creating GitHub issues');
+  await verifyIssueLinks(flutterRoot);
 
-  //printProgress('Unexpected binaries...');
-  //await verifyNoBinaries(flutterRoot);
+  printProgress('Unexpected binaries...');
+  await verifyNoBinaries(flutterRoot);
 
-  //printProgress('Trailing spaces...');
-  //await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
+  printProgress('Trailing spaces...');
+  await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
 
-  //printProgress('Deprecations...');
-  //await verifyDeprecations(flutterRoot);
+  printProgress('Deprecations...');
+  await verifyDeprecations(flutterRoot);
 
-  //printProgress('Goldens...');
-  //await verifyGoldenTags(flutterPackages);
+  printProgress('Goldens...');
+  await verifyGoldenTags(flutterPackages);
 
-  //printProgress('Skip test comments...');
-  //await verifySkipTestComments(flutterRoot);
+  printProgress('Skip test comments...');
+  await verifySkipTestComments(flutterRoot);
 
-  //printProgress('Licenses...');
-  //await verifyNoMissingLicense(flutterRoot);
+  printProgress('Licenses...');
+  await verifyNoMissingLicense(flutterRoot);
 
-  //printProgress('Test imports...');
-  //await verifyNoTestImports(flutterRoot);
+  printProgress('Test imports...');
+  await verifyNoTestImports(flutterRoot);
 
-  //printProgress('Bad imports (framework)...');
-  //await verifyNoBadImportsInFlutter(flutterRoot);
+  printProgress('Bad imports (framework)...');
+  await verifyNoBadImportsInFlutter(flutterRoot);
 
-  //printProgress('Bad imports (tools)...');
-  //await verifyNoBadImportsInFlutterTools(flutterRoot);
+  printProgress('Bad imports (tools)...');
+  await verifyNoBadImportsInFlutterTools(flutterRoot);
 
-  //printProgress('Internationalization...');
-  //await verifyInternationalizations(flutterRoot, dart);
+  printProgress('Internationalization...');
+  await verifyInternationalizations(flutterRoot, dart);
 
-  //printProgress('Integration test timeouts...');
-  //await verifyIntegrationTestTimeouts(flutterRoot);
+  printProgress('Integration test timeouts...');
+  await verifyIntegrationTestTimeouts(flutterRoot);
 
-  //printProgress('null initialized debug fields...');
-  //await verifyNullInitializedDebugExpensiveFields(flutterRoot);
+  printProgress('null initialized debug fields...');
+  await verifyNullInitializedDebugExpensiveFields(flutterRoot);
 
-  //printProgress('Taboo words...');
-  //await verifyTabooDocumentation(flutterRoot);
+  printProgress('Taboo words...');
+  await verifyTabooDocumentation(flutterRoot);
 
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
@@ -157,57 +157,57 @@ Future<void> run(List<String> arguments) async {
   printProgress('Package Allowlist...');
   await _checkConsumerDependencies();
 
-  //// Analyze all the Dart code in the repo.
-  //printProgress('Dart analysis...');
-  //await _runFlutterAnalyze(flutterRoot, options: <String>[
-  //  '--flutter-repo',
-  //  ...arguments,
-  //]);
+  // Analyze all the Dart code in the repo.
+  printProgress('Dart analysis...');
+  await _runFlutterAnalyze(flutterRoot, options: <String>[
+    '--flutter-repo',
+    ...arguments,
+  ]);
 
-  //printProgress('Executable allowlist...');
-  //await _checkForNewExecutables();
+  printProgress('Executable allowlist...');
+  await _checkForNewExecutables();
 
-  //// Try with the --watch analyzer, to make sure it returns success also.
-  //// The --benchmark argument exits after one run.
-  //printProgress('Dart analysis (with --watch)...');
-  //await _runFlutterAnalyze(flutterRoot, options: <String>[
-  //  '--flutter-repo',
-  //  '--watch',
-  //  '--benchmark',
-  //  ...arguments,
-  //]);
+  // Try with the --watch analyzer, to make sure it returns success also.
+  // The --benchmark argument exits after one run.
+  printProgress('Dart analysis (with --watch)...');
+  await _runFlutterAnalyze(flutterRoot, options: <String>[
+    '--flutter-repo',
+    '--watch',
+    '--benchmark',
+    ...arguments,
+  ]);
 
-  //// Analyze the code in `{@tool snippet}` sections in the repo.
-  //printProgress('Snippet code...');
-  //await runCommand(dart,
-  //  <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
-  //  workingDirectory: flutterRoot,
-  //);
+  // Analyze the code in `{@tool snippet}` sections in the repo.
+  printProgress('Snippet code...');
+  await runCommand(dart,
+    <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'), '--verbose'],
+    workingDirectory: flutterRoot,
+  );
 
-  //// Try analysis against a big version of the gallery; generate into a temporary directory.
-  //printProgress('Dart analysis (mega gallery)...');
-  //final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
-  //try {
-  //  await runCommand(dart,
-  //    <String>[
-  //      path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
-  //      '--out',
-  //      outDir.path,
-  //    ],
-  //    workingDirectory: flutterRoot,
-  //  );
-  //  await _runFlutterAnalyze(outDir.path, options: <String>[
-  //    '--watch',
-  //    '--benchmark',
-  //    ...arguments,
-  //  ]);
-  //} finally {
-  //  outDir.deleteSync(recursive: true);
-  //}
+  // Try analysis against a big version of the gallery; generate into a temporary directory.
+  printProgress('Dart analysis (mega gallery)...');
+  final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
+  try {
+    await runCommand(dart,
+      <String>[
+        path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
+        '--out',
+        outDir.path,
+      ],
+      workingDirectory: flutterRoot,
+    );
+    await _runFlutterAnalyze(outDir.path, options: <String>[
+      '--watch',
+      '--benchmark',
+      ...arguments,
+    ]);
+  } finally {
+    outDir.deleteSync(recursive: true);
+  }
 
-  //// Ensure gen_default links the correct files
-  //printProgress('Correct file names in gen_defaults.dart...');
-  //await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
+  // Ensure gen_default links the correct files
+  printProgress('Correct file names in gen_defaults.dart...');
+  await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
 }
 
 
