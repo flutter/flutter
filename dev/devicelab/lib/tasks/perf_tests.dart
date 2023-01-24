@@ -790,11 +790,25 @@ class StartupTest {
           }
         }
 
-        await flutter('install', options: <String>[
-          '--uninstall-only',
-          '-d',
-          device.deviceId,
-        ]);
+        switch (deviceOperatingSystem) {
+          case DeviceOperatingSystem.linux:
+          case DeviceOperatingSystem.macos:
+          case DeviceOperatingSystem.windows:
+            // On desktop OSes, the host/target machine are the same, and no install is supported.
+            break;
+          case DeviceOperatingSystem.android:
+          case DeviceOperatingSystem.androidArm64:
+          case DeviceOperatingSystem.androidArm:
+          case DeviceOperatingSystem.fake:
+          case DeviceOperatingSystem.fuchsia:
+          case DeviceOperatingSystem.ios:
+            await flutter('install', options: <String>[
+              '--uninstall-only',
+              '-d',
+              device.deviceId,
+            ]);
+            break;
+        }
       }
 
       final Map<String, dynamic> averageResults = _average(results, iterations);

@@ -2637,6 +2637,20 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac flavors_test_macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: flavors_test_macos
+
   - name: Mac flutter_gallery_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
