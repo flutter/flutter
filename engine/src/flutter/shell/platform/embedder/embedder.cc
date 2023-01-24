@@ -562,7 +562,7 @@ InferVulkanPlatformViewCreationCallback(
 
   auto vk_instance = static_cast<VkInstance>(config->vulkan.instance);
   auto proc_addr =
-      vulkan_get_instance_proc_address(vk_instance, "GetInstanceProcAddr");
+      vulkan_get_instance_proc_address(vk_instance, "vkGetInstanceProcAddr");
 
   flutter::EmbedderSurfaceVulkan::VulkanDispatchTable vulkan_dispatch_table = {
       .get_instance_proc_address =
