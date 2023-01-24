@@ -73,23 +73,25 @@ class DatePickerThemeData with Diagnosticable {
 
   /// The elevation of a date picker dialog.
   ///
-  /// {@macro flutter.material.material.elevation}
+  /// See also:
+  ///   [Material.elevation], which explains how elevation is related to a component's shadow.
   final double? elevation;
 
   /// The color of the shadow painted below a date picker dialog.
   ///
-  /// {@macro flutter.material.material.shadowColor}
+  /// See also:
+  ///   [Material.shadowColor], which explains how the shadow is rendered.
   final Color? shadowColor;
 
   /// The color of the surface tint overlay applied to the [backgroundColor]
   /// to indicate elevation.
   ///
-  /// {@macro flutter.material.material.surfaceTintColor}
+  /// See also:
+  ///   [Material.surfaceTintColor], which explains how this color is related to
+  ///   [elevation].
   final Color? surfaceTintColor;
 
   /// The overall shape of a date picker dialog.
-  ///
-  /// {@macro flutter.material.material.shape}
   final ShapeBorder? shape;
 
   /// The header's background fill color.
@@ -123,7 +125,7 @@ class DatePickerThemeData with Diagnosticable {
   ///   [DatePickerDialog.helpText], which specifies the help text.
   final TextStyle? headerHelpStyle;
 
-  /// The text style used for the row of week day labels at the top
+  /// The text style used for the row of weekday labels at the top
   /// of the date picker grid.
   final TextStyle? weekdayStyle;
 
@@ -184,24 +186,26 @@ class DatePickerThemeData with Diagnosticable {
 
   /// The elevation of the full screen [DateRangePickerDialog].
   ///
-  /// {@macro flutter.material.material.elevation}
+  /// See also:
+  ///   [Material.elevation], which explains how elevation is related to a component's shadow.
   final double? rangePickerElevation;
 
   /// The color of the shadow painted below a full screen
   /// [DateRangePickerDialog].
   ///
-  /// {@macro flutter.material.material.shadowColor}
+  /// See also:
+  ///   [Material.shadow], which explains how the shadow is rendered.
   final Color? rangePickerShadowColor;
 
   /// The color of the surface tint overlay applied to the [backgroundColor]
   /// of a full screen [DateRangePickerDialog]'s to indicate elevation.
   ///
-  /// {@macro flutter.material.material.surfaceTintColor}
+  /// See also:
+  ///   [Material.surfaceTintColor], which explains how this color is related to
+  ///   [elevation].
   final Color? rangePickerSurfaceTintColor;
 
   /// The overall shape of a full screen [DateRangePickerDialog].
-  ///
-  /// {@macro flutter.material.material.shape}
   final ShapeBorder? rangePickerShape;
 
   /// The full screen [DateRangePickerDialog] header's background fill color.
