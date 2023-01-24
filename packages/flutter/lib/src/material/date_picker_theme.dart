@@ -95,9 +95,13 @@ class DatePickerThemeData with Diagnosticable {
   final ShapeBorder? shape;
 
   /// Overrides the header's default background fill color.
+  ///
+  /// The dialog's header displays the currently selected date.
   final Color? headerBackgroundColor;
 
   /// Overrides the header's default color used for text labels and icons.
+  ///
+  /// The dialog's header displays the currently selected date.
   ///
   /// This is used instead of any colors provided by [headerHeadlineStyle]
   /// or [headerHelpStyle].
@@ -105,7 +109,7 @@ class DatePickerThemeData with Diagnosticable {
 
   /// Overrides the header's default headline text style.
   ///
-  /// The headline text is usually the currently selected date in the header.
+  /// The dialog's header displays the currently selected date.
   ///
   /// The color of the [headerHeadlineStyle] is not used directly, as
   /// [headerForegroundColor] is used instead.
@@ -215,10 +219,14 @@ class DatePickerThemeData with Diagnosticable {
   final ShapeBorder? rangePickerShape;
 
   /// Overrides the default background fill color for [DateRangePickerDialog].
+  ///
+  /// The dialog's header displays the currently selected date range.
   final Color? rangePickerHeaderBackgroundColor;
 
   /// Overrides the default color used for text labels and icons in
   /// the header of a full screen [DateRangePickerDialog]
+  ///
+  /// The dialog's header displays the currently selected date range.
   ///
   /// This is used instead of any colors provided by
   /// [rangePickerHeaderHeadlineStyle] or [rangePickerHeaderHelpStyle].
@@ -227,7 +235,7 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default text style used for the headline text in
   /// the header of a full screen [DateRangePickerDialog].
   ///
-  /// The headline text is usually the currently selected dates in the header.
+  /// The dialog's header displays the currently selected date range.
   ///
   /// The color of [rangePickerHeaderHeadlineStyle] is not used directly, as
   /// [rangePickerHeaderForegroundColor] is used instead.
