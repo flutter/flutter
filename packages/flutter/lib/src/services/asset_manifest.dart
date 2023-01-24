@@ -29,7 +29,7 @@ abstract class AssetManifest {
   /// information.
   List<String> listAssets();
 
-  /// Gets available variants of an asset.
+  /// Gets available variants of an asset. This does not include the asset itself.
   List<AssetVariant> getAssetVariants(String key);
 }
 
