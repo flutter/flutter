@@ -90,4 +90,12 @@ bool ColorFilterContents::GetAbsorbOpacity() const {
   return absorb_opacity_;
 }
 
+void ColorFilterContents::SetAlpha(Scalar alpha) {
+  alpha_ = alpha;
+}
+
+std::optional<Scalar> ColorFilterContents::GetAlpha() const {
+  return alpha_;
+}
+
 }  // namespace impeller

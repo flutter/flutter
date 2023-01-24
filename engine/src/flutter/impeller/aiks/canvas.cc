@@ -379,7 +379,7 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
 
 void Canvas::DrawVertices(std::unique_ptr<VerticesGeometry> vertices,
                           BlendMode blend_mode,
-                          Paint paint) {
+                          const Paint& paint) {
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());

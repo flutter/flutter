@@ -83,6 +83,11 @@ bool VerticesContents::Render(const ContentContext& renderer,
       break;
     }
   }
+  using FS = GeometryColorPipeline::FragmentShader;
+  FS::FragInfo frag_info;
+  frag_info.alpha = 1.0;
+  FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
+
   pass.AddCommand(std::move(cmd));
 
   return true;
