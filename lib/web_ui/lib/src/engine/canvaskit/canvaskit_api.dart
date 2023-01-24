@@ -19,7 +19,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../configuration.dart';
 import '../dom.dart';
-import '../initialization.dart';
 import '../profiler.dart';
 
 /// Entrypoint into the CanvasKit API.
@@ -2662,8 +2661,7 @@ void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
   domDocument.head!.appendChild(canvasKitScript);
 }
 
-String get canvasKitBuildUrl =>
-  configuration.canvasKitBaseUrl + (kProfileMode ? 'profiling/' : '');
+String get canvasKitBuildUrl => configuration.canvasKitBaseUrl;
 String get canvasKitJavaScriptBindingsUrl =>
     '${canvasKitBuildUrl}canvaskit.js';
 String canvasKitWasmModuleUrl(String canvasKitBase, String file) =>
