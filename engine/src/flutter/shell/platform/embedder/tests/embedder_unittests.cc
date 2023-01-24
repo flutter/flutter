@@ -117,7 +117,7 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
   auto native_entry1 = CREATE_NATIVE_ENTRY(entry1);
   context.AddNativeCallback("SayHiFromCustomEntrypoint1", native_entry1);
 
-  // Can be wrapped in in the args.
+  // Can be wrapped in the args.
   auto entry2 = [&latch2](Dart_NativeArguments args) {
     FML_LOG(INFO) << "In Callback 2";
     latch2.Signal();

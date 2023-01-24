@@ -1364,7 +1364,7 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
         editingDeltaState.deltaStart = lastEditingState!.extentOffset!;
         editingDeltaState.deltaEnd = lastEditingState!.extentOffset!;
       } else if (eventData != null) {
-        // When event.data is not null we we will begin by considering this delta as an insertion
+        // When event.data is not null we will begin by considering this delta as an insertion
         // at the selection extentOffset. This may change due to logic in handleChange to handle
         // composition and other IME behaviors.
         editingDeltaState.deltaText = eventData;

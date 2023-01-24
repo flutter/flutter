@@ -78,7 +78,7 @@ class Animator final {
 
   // Enqueue |trace_flow_id| into |trace_flow_ids_|.  The flow event will be
   // ended at either the next frame, or the next vsync interval with no active
-  // active rendering.
+  // rendering.
   void EnqueueTraceFlowId(uint64_t trace_flow_id);
 
  private:

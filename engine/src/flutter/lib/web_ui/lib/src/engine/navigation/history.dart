@@ -32,7 +32,7 @@ BrowserHistory createHistoryForExistingState(UrlStrategy? urlStrategy) {
 /// interact with the html browser history and should come up with their own
 /// ways to manage the states in the browser history.
 ///
-/// There should only be one global instance among all all subclasses.
+/// There should only be one global instance among all subclasses.
 ///
 /// See also:
 ///

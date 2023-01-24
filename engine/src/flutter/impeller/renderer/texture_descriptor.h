@@ -14,7 +14,7 @@ namespace impeller {
 
 //------------------------------------------------------------------------------
 /// @brief      A lightweight object that describes the attributes of a texture
-///             that can then used used an allocator to create that texture.
+///             that can then used an allocator to create that texture.
 ///
 struct TextureDescriptor {
   StorageMode storage_mode = StorageMode::kDeviceTransient;

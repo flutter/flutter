@@ -14,7 +14,7 @@
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
-// Called when when the method call response is received in the InvokeMethod
+// Called when the method call response is received in the InvokeMethod
 // test.
 static void method_response_cb(GObject* object,
                                GAsyncResult* result,
@@ -53,7 +53,7 @@ TEST(FlMethodChannelTest, InvokeMethod) {
   g_main_loop_run(loop);
 }
 
-// Called when when the method call response is received in the
+// Called when the method call response is received in the
 // InvokeMethodNullptrArgsMessage test.
 static void nullptr_args_response_cb(GObject* object,
                                      GAsyncResult* result,
@@ -89,7 +89,7 @@ TEST(FlMethodChannelTest, InvokeMethodNullptrArgsMessage) {
   g_main_loop_run(loop);
 }
 
-// Called when when the method call response is received in the
+// Called when the method call response is received in the
 // InvokeMethodError test.
 static void error_response_cb(GObject* object,
                               GAsyncResult* result,
@@ -137,7 +137,7 @@ TEST(FlMethodChannelTest, InvokeMethodError) {
   g_main_loop_run(loop);
 }
 
-// Called when when the method call response is received in the
+// Called when the method call response is received in the
 // InvokeMethodNotImplemented test.
 static void not_implemented_response_cb(GObject* object,
                                         GAsyncResult* result,
@@ -170,7 +170,7 @@ TEST(FlMethodChannelTest, InvokeMethodNotImplemented) {
   g_main_loop_run(loop);
 }
 
-// Called when when the method call response is received in the
+// Called when the method call response is received in the
 // InvokeMethodFailure test.
 static void failure_response_cb(GObject* object,
                                 GAsyncResult* result,

@@ -35,7 +35,7 @@ class RunConfiguration {
   ///             will attempt to look for the VM and isolate snapshots in the
   ///             assets directory (must be specified in settings). In AOT mode,
   ///             it will attempt to look for known snapshot symbols in the
-  ///             currently currently loaded process. The entrypoint defaults to
+  ///             currently loaded process. The entrypoint defaults to
   ///             the "main" method in the root library.
   ///
   /// @param[in]  settings   The settings object used to look for the various

@@ -662,7 +662,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 @end
 
 // A FlutterTextInputView that masquerades as a UITextField, and forwards
-// selectors it can't respond to to a shared UITextField instance.
+// selectors it can't respond to a shared UITextField instance.
 //
 // Relevant API docs claim that password autofill supports any custom view
 // that adopts the UITextInput protocol, automatic strong password seems to

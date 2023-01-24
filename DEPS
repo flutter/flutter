@@ -242,7 +242,7 @@ deps = {
    #
    # The dependencies in this section should match the layout in the Fuchsia gn
    # build. Eventually, we'll manage these dependencies together with Fuchsia
-   # and not have to specific specific hashes.
+   # and not have to specific hashes.
 
   'src/third_party/rapidjson':
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',

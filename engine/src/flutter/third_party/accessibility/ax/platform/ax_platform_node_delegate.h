@@ -311,7 +311,7 @@ class AX_EXPORT AXPlatformNodeDelegate {
   // produce appropriate results. It may optionally return no value, indicating
   // that the delegate does not have all the information required to calculate
   // this value and it is the responsibility of the AXPlatformNode itself to
-  // to calculate it.
+  // calculate it.
   virtual std::optional<int> FindTextBoundary(
       ax::mojom::TextBoundary boundary,
       int offset,

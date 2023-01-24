@@ -658,7 +658,7 @@ class SurfacePath implements ui.Path {
   /// `clockwise` and `largeArc` in such a way that the sweep angle
   /// is always less than 360 degrees.
   ///
-  /// A simple line is appended if either either radii are zero or the last
+  /// A simple line is appended if either radii are zero or the last
   /// point in the path is `arcEnd`. The radii are scaled to fit the last path
   /// point if both are greater than zero but too small to describe an arc.
   ///
@@ -851,7 +851,7 @@ class SurfacePath implements ui.Path {
   /// path in a direction determined by `clockwise` and `largeArc`
   /// in such a way that the sweep angle is always less than 360 degrees.
   ///
-  /// A simple line is appended if either either radii are zero, or, both
+  /// A simple line is appended if either radii are zero, or, both
   /// `arcEndDelta.dx` and `arcEndDelta.dy` are zero. The radii are scaled to
   /// fit the last path point if both are greater than zero but too small to
   /// describe an arc.

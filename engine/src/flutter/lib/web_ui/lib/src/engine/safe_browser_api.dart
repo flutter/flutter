@@ -1040,7 +1040,7 @@ class OffScreenCanvas {
     }
   }
 
-  /// Draws an image to canvas for both offscreen canvas canvas context2d.
+  /// Draws an image to canvas for both offscreen canvas context2d.
   void drawImage(Object image, int x, int y, int width, int height) {
     js_util.callMethod<void>(
         getContext2d()!, 'drawImage', <dynamic>[image, x, y, width, height]);

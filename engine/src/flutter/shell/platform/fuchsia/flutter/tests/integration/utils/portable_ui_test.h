@@ -114,10 +114,10 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   virtual void ExtendRealm() = 0;
 
   // Returns the test-specific test-ui-stack component url to use.
-  // Usually overriden to return a value from gtest GetParam()
+  // Usually overridden to return a value from gtest GetParam()
   virtual std::string GetTestUIStackUrl() = 0;
 
-  // Helper method to watch watch for view geometry updates.
+  // Helper method to watch for view geometry updates.
   void WatchViewGeometry();
 
   // Helper method to process a view geometry update.

@@ -254,7 +254,7 @@ void FontCollection::SortSkTypefaces(
           // of multiple widths (e.g. condensed, expanded), opt to be
           // conservative and select the most standard width.
           //
-          // If a specific width is desired, it should be be narrowed down via
+          // If a specific width is desired, it should be narrowed down via
           // the family name.
           //
           // The font weights are also sorted lightest to heaviest but Flutter

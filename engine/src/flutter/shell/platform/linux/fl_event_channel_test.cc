@@ -66,7 +66,7 @@ static void cancel_channel(FlBinaryMessenger* messenger, FlValue* args) {
                                   nullptr, nullptr);
 }
 
-// Called when when the remote end starts listening on the channel.
+// Called when the remote end starts listening on the channel.
 static FlMethodErrorResponse* listen_listen_cb(FlEventChannel* channel,
                                                FlValue* args,
                                                gpointer user_data) {
@@ -98,7 +98,7 @@ TEST(FlEventChannelTest, Listen) {
   g_object_unref(channel);
 }
 
-// Called when when the remote end starts listening on the channel.
+// Called when the remote end starts listening on the channel.
 static FlMethodErrorResponse* listen_exception_listen_cb(
     FlEventChannel* channel,
     FlValue* args,
@@ -161,7 +161,7 @@ TEST(FlEventChannelTest, ListenException) {
   g_object_unref(channel);
 }
 
-// Called when when the remote end cancels their subscription.
+// Called when the remote end cancels their subscription.
 static FlMethodErrorResponse* cancel_cancel_cb(FlEventChannel* channel,
                                                FlValue* args,
                                                gpointer user_data) {
@@ -194,7 +194,7 @@ TEST(FlEventChannelTest, Cancel) {
   g_object_unref(channel);
 }
 
-// Called when when the remote end cancels their subscription.
+// Called when the remote end cancels their subscription.
 static FlMethodErrorResponse* cancel_exception_cancel_cb(
     FlEventChannel* channel,
     FlValue* args,
@@ -267,7 +267,7 @@ TEST(FlEventChannelTest, CancelException) {
   g_object_unref(channel);
 }
 
-// Called when when the remote end starts listening on the channel.
+// Called when the remote end starts listening on the channel.
 static FlMethodErrorResponse* args_listen_cb(FlEventChannel* channel,
                                              FlValue* args,
                                              gpointer user_data) {
@@ -277,7 +277,7 @@ static FlMethodErrorResponse* args_listen_cb(FlEventChannel* channel,
   return nullptr;
 }
 
-// Called when when the remote end cancels their subscription.
+// Called when the remote end cancels their subscription.
 static FlMethodErrorResponse* args_cancel_cb(FlEventChannel* channel,
                                              FlValue* args,
                                              gpointer user_data) {
@@ -313,7 +313,7 @@ TEST(FlEventChannelTest, Args) {
   g_object_unref(channel);
 }
 
-// Called when when the remote end starts listening on the channel.
+// Called when the remote end starts listening on the channel.
 static FlMethodErrorResponse* send_events_listen_cb(FlEventChannel* channel,
                                                     FlValue* args,
                                                     gpointer user_data) {

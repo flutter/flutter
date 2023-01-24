@@ -30,7 +30,7 @@ class IncomingMessageDispatcher {
   IncomingMessageDispatcher& operator=(IncomingMessageDispatcher const&) =
       delete;
 
-  // Routes |message| to to the registered handler for its channel, if any.
+  // Routes |message| to the registered handler for its channel, if any.
   //
   // If input blocking has been enabled on that channel, wraps the call to the
   // handler with calls to the given callbacks to block and then unblock input.

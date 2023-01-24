@@ -1227,7 +1227,7 @@ class RRect {
          brRadiusY: bottomRight.y,
        );
 
-  /// Construct a rounded rectangle from its bounding box and and topLeft,
+  /// Construct a rounded rectangle from its bounding box and topLeft,
   /// topRight, bottomRight, and bottomLeft radii.
   ///
   /// The corner radii default to [Radius.zero], i.e. right-angled corners. Will

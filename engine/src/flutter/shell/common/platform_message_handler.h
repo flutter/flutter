@@ -24,10 +24,10 @@ class PlatformMessageHandler {
   virtual void HandlePlatformMessage(
       std::unique_ptr<PlatformMessage> message) = 0;
 
-  /// Returns true if the platform message will ALWAYS be be dispatched to the
+  /// Returns true if the platform message will ALWAYS be dispatched to the
   /// platform thread.
   ///
-  /// Platforms thats support Background Platform Channels will return
+  /// Platforms that support Background Platform Channels will return
   /// false.
   virtual bool DoesHandlePlatformMessageOnPlatformThread() const = 0;
 

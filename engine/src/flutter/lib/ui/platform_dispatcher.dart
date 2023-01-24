@@ -1928,7 +1928,7 @@ class Locale {
   /// [language](https://github.com/unicode-org/cldr/blob/master/common/validity/language.xml),
   /// [region](https://github.com/unicode-org/cldr/blob/master/common/validity/region.xml). The
   /// primary language subtag must be at least two and at most eight lowercase
-  /// letters, but not four letters. The region region subtag must be two
+  /// letters, but not four letters. The region subtag must be two
   /// uppercase letters or three digits. See the [Unicode Language
   /// Identifier](https://www.unicode.org/reports/tr35/#Unicode_language_identifier)
   /// specification.

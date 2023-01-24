@@ -1709,7 +1709,7 @@ bool Shell::OnServiceProtocolFlushUIThreadTasks(
   // It can potentially starve the service isolate if the main isolate pauses
   // at a breakpoint or is in an infinite loop.
   //
-  // It should be invoked from the VM Service and and blocks it until UI thread
+  // It should be invoked from the VM Service and blocks it until UI thread
   // tasks are processed.
   response->SetObject();
   response->AddMember("type", "Success", response->GetAllocator());

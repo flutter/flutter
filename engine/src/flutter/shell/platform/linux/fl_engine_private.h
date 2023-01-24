@@ -100,7 +100,7 @@ FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* engine);
  * Registers the function called when a platform message is received. Call
  * fl_engine_send_platform_message_response() with the response to this message.
  * Ownership of #FlutterPlatformMessageResponseHandle is
- * transferred to the caller, and the message must be responded to to avoid
+ * transferred to the caller, and the message must be responded to avoid
  * memory leaks.
  */
 void fl_engine_set_platform_message_handler(
