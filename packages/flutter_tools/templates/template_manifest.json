@@ -278,6 +278,7 @@
         "templates/plugin/test/projectName_method_channel_test.dart.tmpl",
         "templates/plugin/windows.tmpl/CMakeLists.txt.tmpl",
         "templates/plugin/windows.tmpl/include/projectName.tmpl/pluginClassSnakeCase_c_api.h.tmpl",
+        "templates/plugin/windows.tmpl/test/pluginClassSnakeCase_test.cpp.tmpl",
         "templates/plugin/windows.tmpl/pluginClassSnakeCase.cpp.tmpl",
         "templates/plugin/windows.tmpl/pluginClassSnakeCase.h.tmpl",
         "templates/plugin/windows.tmpl/pluginClassSnakeCase_c_api.cpp.tmpl",
