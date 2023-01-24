@@ -71,7 +71,7 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
   // Windows requires a synchronous response of whether a key event should be
   // handled, while the query to Flutter is always asynchronous. This is
   // resolved by the "redispatching" algorithm: by default, the response to a
-  // fresh event is always always true. The event is then sent to the framework.
+  // fresh event is always true. The event is then sent to the framework.
   // If the framework later decides not to handle the event, this class will
   // create an identical event and dispatch it to the system, and remember all
   // synthesized events. The fist time an exact event (by |ComputeEventHash|) is

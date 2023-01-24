@@ -391,8 +391,7 @@ def to_gn_args(args):
   # Desktop embeddings can have more dependencies than the engine library,
   # which can be problematic in some build environments (e.g., building on
   # Linux will bring in pkg-config dependencies at generation time). These
-  # flags allow preventing those those targets from being part of the build
-  # tree.
+  # flags allow preventing those targets from being part of the build tree.
   gn_args['enable_desktop_embeddings'] = not args.disable_desktop_embeddings
 
   # Overrides whether Boring SSL is compiled with system as. Only meaningful

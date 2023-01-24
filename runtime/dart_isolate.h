@@ -103,7 +103,7 @@ class DartIsolate : public UIDartState {
     ///
     Uninitialized,
     //--------------------------------------------------------------------------
-    /// The Dart isolate has been been fully initialized but none of the
+    /// The Dart isolate has been fully initialized but none of the
     /// libraries referenced by that isolate have been loaded yet. This is an
     /// internal phase and callers can never get a reference to a Dart isolate
     /// in this phase.

@@ -369,7 +369,7 @@ class KeyboardConverter {
     _keyGuards.remove(physicalKey)?.call();
     _keyGuards[physicalKey] = cancelingCallback;
   }
-  // Call this method on an up event event of a non-modifier key.
+  // Call this method on an up event of a non-modifier key.
   void _stopGuardingKey(int physicalKey) {
     _keyGuards.remove(physicalKey)?.call();
   }

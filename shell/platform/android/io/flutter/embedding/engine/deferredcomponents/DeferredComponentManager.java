@@ -114,12 +114,12 @@ public interface DeferredComponentManager {
    *     negative loadingUnitId is passed, then componentName must not be null. Passing a
    *     loadingUnitId larger than the highest valid loading unit's id will cause the Dart
    *     loadLibrary() to complete with a failure.
-   * @param componentName The deferred component component name as defined in bundle_config.yaml.
-   *     This may be null if the deferred component to be loaded is associated with a loading
-   *     unit/deferred dart library. In this case, it is this method's responsibility to map the
-   *     loadingUnitId to its corresponding componentName. When loading asset-only or other deferred
-   *     components without an associated Dart deferred library, loading unit id should a negative
-   *     value and componentName must be non-null.
+   * @param componentName The deferred component name as defined in bundle_config.yaml. This may be
+   *     null if the deferred component to be loaded is associated with a loading unit/deferred dart
+   *     library. In this case, it is this method's responsibility to map the loadingUnitId to its
+   *     corresponding componentName. When loading asset-only or other deferred components without
+   *     an associated Dart deferred library, loading unit id should a negative value and
+   *     componentName must be non-null.
    */
   public abstract void installDeferredComponent(int loadingUnitId, String componentName);
 

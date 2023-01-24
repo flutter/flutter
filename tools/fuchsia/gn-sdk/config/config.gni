@@ -14,7 +14,7 @@ declare_args() {
   # requires the Fuchsia _Core_ SDK (for dart libraries, in the core SDK, but
   # excluded from the GN SDK), the Fuchsia SDK assumption that the build files
   # are in the same SDK directory path as the APIs does not hold true. (And
-  # there are are a couple of other minor tweaks that appear to be needed, at
+  # there are a couple of other minor tweaks that appear to be needed, at
   # this time.) This use case will be discussed with the SDK team, to see if we
   # can come up with a cleaner solution.
 

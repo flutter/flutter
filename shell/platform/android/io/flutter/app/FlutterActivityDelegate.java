@@ -329,7 +329,7 @@ public final class FlutterActivityDelegate
       args.add("--endless-trace-buffer");
     }
     // NOTE: all flags provided with this argument are subject to filtering
-    // based on a a list of allowed flags in shell/common/switches.cc. If any
+    // based on a list of allowed flags in shell/common/switches.cc. If any
     // flag provided is not allowed, the process will immediately terminate.
     if (intent.hasExtra("dart-flags")) {
       args.add("--dart-flags=" + intent.getStringExtra("dart-flags"));

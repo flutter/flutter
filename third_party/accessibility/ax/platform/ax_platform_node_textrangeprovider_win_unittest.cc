@@ -4398,7 +4398,7 @@ TEST_F(AXPlatformNodeTextRangeProviderTest,
   }
 
   {
-    // |heading_text_node| has a a spelling error for one word, and no
+    // |heading_text_node| has a spelling error for one word, and no
     // annotations for the remaining text, so the range has mixed annotations.
     EXPECT_UIA_TEXTATTRIBUTE_MIXED(heading_text_range_provider,
                                    UIA_AnnotationTypesAttributeId);

@@ -2646,7 +2646,7 @@ class Path extends NativeFieldWrapperClass1 {
   /// `clockwise` and `largeArc` in such a way that the sweep angle
   /// is always less than 360 degrees.
   ///
-  /// A simple line is appended if either either radii are zero or the last
+  /// A simple line is appended if either radii are zero or the last
   /// point in the path is `arcEnd`. The radii are scaled to fit the last path
   /// point if both are greater than zero but too small to describe an arc.
   ///
@@ -2674,7 +2674,7 @@ class Path extends NativeFieldWrapperClass1 {
   /// path in a direction determined by `clockwise` and `largeArc`
   /// in such a way that the sweep angle is always less than 360 degrees.
   ///
-  /// A simple line is appended if either either radii are zero, or, both
+  /// A simple line is appended if either radii are zero, or, both
   /// `arcEndDelta.dx` and `arcEndDelta.dy` are zero. The radii are scaled to
   /// fit the last path point if both are greater than zero but too small to
   /// describe an arc.
@@ -4972,7 +4972,7 @@ class Canvas extends NativeFieldWrapperClass1 {
   ///
   /// Use [save] and [saveLayer] to push state onto the stack.
   ///
-  /// If the state was pushed with with [saveLayer], then this call will also
+  /// If the state was pushed with [saveLayer], then this call will also
   /// cause the new layer to be composited into the previous layer.
   @Native<Void Function(Pointer<Void>)>(symbol: 'Canvas::restore', isLeaf: true)
   external void restore();
@@ -6259,7 +6259,7 @@ class Shadow {
 
   /// Linearly interpolate between two shadows.
   ///
-  /// If either shadow is null, this function linearly interpolates from a
+  /// If either shadow is null, this function linearly interpolates from
   /// a shadow that matches the other shadow in color but has a zero
   /// offset and a zero blurRadius.
   ///

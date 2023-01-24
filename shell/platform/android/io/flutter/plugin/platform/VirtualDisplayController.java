@@ -161,7 +161,7 @@ class VirtualDisplayController {
                   @Override
                   public void run() {
                     // We need some delay here until the frame propagates through the vd surface to
-                    // to the texture,
+                    // the texture,
                     // 128ms was picked pretty arbitrarily based on trial and error.
                     // As long as we invoke the runnable after a new frame is available we avoid the
                     // scaling jank

@@ -170,7 +170,7 @@ class UIDartState : public tonic::DartState {
     return unhandled_exception_callback_;
   }
 
-  /// Returns a enumeration that that uniquely represents this root isolate.
+  /// Returns a enumeration that uniquely represents this root isolate.
   /// Returns `0` if called from a non-root isolate.
   int64_t GetRootIsolateToken() const;
 
