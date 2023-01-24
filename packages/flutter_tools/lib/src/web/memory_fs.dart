@@ -37,9 +37,6 @@ class WebMemoryFS {
     final Map<String, dynamic> manifest =
         castStringKeyedMap(json.decode(manifestFile.readAsStringSync()))!;
     for (final String filePath in manifest.keys) {
-      if (filePath == null) {
-        continue;
-      }
       final Map<String, dynamic> offsets =
           castStringKeyedMap(manifest[filePath])!;
       final List<int> codeOffsets =

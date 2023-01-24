@@ -28,7 +28,6 @@ class Remote {
     required RemoteName name,
     required this.url,
   })  : _name = name,
-        assert(url != null),
         assert(url != '');
 
   factory Remote.mirror(String url) {
@@ -241,7 +240,6 @@ abstract class Repository {
 
   /// The URL of the remote named [remoteName].
   Future<String> remoteUrl(String remoteName) async {
-    assert(remoteName != null);
     return git.getOutput(
       <String>['remote', 'get-url', remoteName],
       'verify the URL of the $remoteName remote',

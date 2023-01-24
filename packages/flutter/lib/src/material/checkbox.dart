@@ -88,9 +88,7 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
-  }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(autofocus != null);
+  }) : assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
   ///
@@ -766,7 +764,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)
