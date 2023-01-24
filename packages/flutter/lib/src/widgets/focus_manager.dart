@@ -1396,15 +1396,6 @@ enum FocusHighlightStrategy {
   alwaysTraditional,
 }
 
-@immutable
-class _FocusState {
-  const _FocusState({this.primaryFocus, this.markedForFocus, this.pendingAutofocuses = const <_Autofocus>[]});
-
-  final FocusNode? primaryFocus;
-  final FocusNode? markedForFocus;
-  final List<_Autofocus> pendingAutofocuses;
-}
-
 /// Manages the focus tree.
 ///
 /// The focus tree is a separate, sparser, tree from the widget tree that
@@ -1536,16 +1527,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   // platform to change (especially in tests).
   FocusHighlightMode get highlightMode => _highlightManager.highlightMode;
 
-  // The list of listeners for [highlightMode] state changes.
-  final HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
-
   /// Register a closure to be called when the [FocusManager] notifies its listeners
   /// that the value of [highlightMode] has changed.
-  void addHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.add(listener);
+  void addHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _highlightManager.addListener(listener);
 
   /// Remove a previously registered closure from the list of closures that the
   /// [FocusManager] notifies.
-  void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.remove(listener);
+  void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _highlightManager.removeListener(listener);
 
   /// The root [FocusScopeNode] in the focus tree.
   ///
@@ -1556,33 +1544,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// The node that currently has the primary focus.
   FocusNode? get primaryFocus => _primaryFocus;
   FocusNode? _primaryFocus;
-
-  List<_FocusState> _focusStack = <_FocusState>[];
-  void pushFocus() {
-    _focusStack.add(
-      _FocusState(
-        primaryFocus: _primaryFocus,
-        markedForFocus: _markedForFocus,
-        pendingAutofocuses: _pendingAutofocuses,
-      ),
-    );
-    _pendingAutofocuses.clear();
-    _markedForFocus = null;
-    _primaryFocus?.unfocus();
-  }
-
-  void popFocus() {
-    if (_focusStack.isEmpty) {
-      return;
-    }
-    final _FocusState popped = _focusStack.removeAt(0);
-    if (popped.markedForFocus != null) {
-      popped.markedForFocus!.requestFocus();
-    } else {
-      popped.primaryFocus?.requestFocus();
-    }
-    _pendingAutofocuses..clear()..addAll(_pendingAutofocuses);
-  }
 
   // The set of nodes that need to notify their listeners of changes at the next
   // update.
@@ -1604,7 +1565,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
     _dirtyNodes.remove(node);
     _pendingAutofocuses.removeWhere((_Autofocus autofocus) => autofocus.autofocusNode == node || autofocus.scope == node);
-    _focusStack.removeWhere((_FocusState state) => state.primaryFocus == node);
   }
 
   void _markPropertiesChanged(FocusNode node) {
@@ -1714,7 +1674,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   }
 }
 
-class _HighlightModeManager with ChangeNotifier {
+// A class to detect and manage the highlight mode transitions.
+// An instance of this is owned by the FocusManager.
+class _HighlightModeManager {
   _HighlightModeManager();
 
   // If set, indicates if the last interaction detected was touch or not.
@@ -1734,8 +1696,17 @@ class _HighlightModeManager with ChangeNotifier {
     updateMode();
   }
 
+  /// Register a closure to be called when the [FocusManager] notifies its listeners
+  /// that the value of [highlightMode] has changed.
+  void addListener(ValueChanged<FocusHighlightMode> listener) => _listeners.add(listener);
+
+  /// Remove a previously registered closure from the list of closures that the
+  /// [FocusManager] notifies.
+  void removeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.remove(listener);
+
   // The list of listeners for [highlightMode] state changes.
-  final HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
+  HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = _emptyListeners;
+  static final HashedObserverList<ValueChanged<FocusHighlightMode>> _emptyListeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
 
   void registerGlobalHandlers() {
     assert(ServicesBinding.instance.keyEventManager.keyMessageHandler == null);
@@ -1743,13 +1714,47 @@ class _HighlightModeManager with ChangeNotifier {
     GestureBinding.instance.pointerRouter.addGlobalRoute(handlePointerEvent);
   }
 
-  @override
+  @mustCallSuper
   void dispose() {
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == handleKeyMessage) {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(handlePointerEvent);
       ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     }
-    super.dispose();
+    _listeners = _emptyListeners;
+  }
+
+  @pragma('vm:notify-debugger-on-exception')
+  void notifyListeners() {
+    if (_listeners.isEmpty) {
+      return;
+    }
+    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.of(_listeners);
+    for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
+      try {
+        if (_listeners.contains(listener)) {
+          listener(highlightMode);
+        }
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<_HighlightModeManager>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: collector,
+        ));
+      }
+    }
   }
 
   void handlePointerEvent(PointerEvent event) {
