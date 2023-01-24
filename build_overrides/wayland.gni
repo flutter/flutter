@@ -3,3 +3,6 @@
 # found in the LICENSE file.
 
 # ANGLE expects this to be here.
+
+# Flutter has no wayland third-party dir
+wayland_gn_dir = ""

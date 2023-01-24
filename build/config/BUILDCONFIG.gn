@@ -297,8 +297,15 @@ is_castos = false
 is_chromecast = false
 is_chromeos_lacros = false
 ozone_platform_headless = false
-ozone_platform_x11 = false
-ozone_platform_wayland = false
+
+# Needed for //third_party/swiftshader and //third_party/angle.
+if (is_linux) {
+  ozone_platform_x11 = true
+  ozone_platform_wayland = true
+} else {
+  ozone_platform_x11 = false
+  ozone_platform_wayland = false
+}
 
 default_library_type = "static_library"
 
