@@ -12,7 +12,8 @@ import 'package:leak_tracker/leak_tracker.dart';
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
 ///
 /// Copied from `psckage:leak_tracker/test/test_infra/flutter_helpers.dart`.
-/// It is not combined with [testWodgets], because the combining will
+///
+/// The method is not combined with [testWodgets], because the combining will
 /// impact VSCode's ability to recognize tests.
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
