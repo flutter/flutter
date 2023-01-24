@@ -268,8 +268,7 @@ class _TextThemeDefaultsBuilder {
   const _TextThemeDefaultsBuilder(
     this.labelColor,
     this.inactiveGrayColor,
-  ) : assert(labelColor != null),
-      assert(inactiveGrayColor != null);
+  );
 
   final Color labelColor;
   final Color inactiveGrayColor;

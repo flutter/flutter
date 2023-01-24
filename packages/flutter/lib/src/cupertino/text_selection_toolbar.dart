@@ -426,8 +426,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     required this.isAbove,
     required this.toolbarBuilder,
     required this.children,
-  }) : assert(children != null),
-       assert(children.length > 0);
+  }) : assert(children.length > 0);
 
   final Offset anchor;
   final List<Widget> children;
@@ -533,13 +532,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
     required this.dividerWidth,
     required this.nextButton,
     required this.nextButtonDisabled,
-  }) : assert(children != null),
-       assert(children.isNotEmpty),
-       assert(backButton != null),
-       assert(dividerWidth != null),
-       assert(nextButton != null),
-       assert(nextButtonDisabled != null),
-       assert(page != null);
+  }) : assert(children.isNotEmpty);
 
   final Widget backButton;
   final List<Widget> children;
@@ -732,9 +725,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   _RenderCupertinoTextSelectionToolbarItems({
     required double dividerWidth,
     required int page,
-  }) : assert(dividerWidth != null),
-       assert(page != null),
-       _dividerWidth = dividerWidth,
+  }) : _dividerWidth = dividerWidth,
        _page = page,
        super();
 

@@ -87,12 +87,8 @@ class CupertinoScrollbar extends RawScrollbar {
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     bool? isAlwaysShown,
-  }) : assert(thickness != null),
-       assert(thickness < double.infinity),
-       assert(thicknessWhileDragging != null),
+  }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
-       assert(radius != null),
-       assert(radiusWhileDragging != null),
        assert(
          isAlwaysShown == null || thumbVisibility == null,
          'Scrollbar thumb appearance should only be controlled with thumbVisibility, '

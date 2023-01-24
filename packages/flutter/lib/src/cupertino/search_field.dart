@@ -126,14 +126,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onTap,
     this.autocorrect = true,
     this.enabled,
-  })  : assert(padding != null),
-        assert(itemColor != null),
-        assert(itemSize != null),
-        assert(prefixInsets != null),
-        assert(suffixInsets != null),
-        assert(suffixIcon != null),
-        assert(suffixMode != null),
-        assert(
+  })  : assert(
           !((decoration != null) && (backgroundColor != null)),
           'Cannot provide both a background color and a decoration\n'
           'To provide both, use "decoration: BoxDecoration(color: '

@@ -780,16 +780,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     this.darkHighContrastElevatedColor,
     this._debugResolveContext,
     this._debugLabel,
-  ) : assert(color != null),
-      assert(darkColor != null),
-      assert(highContrastColor != null),
-      assert(darkHighContrastColor != null),
-      assert(elevatedColor != null),
-      assert(darkElevatedColor != null),
-      assert(highContrastElevatedColor != null),
-      assert(darkHighContrastElevatedColor != null),
-      assert(_effectiveColor != null),
-      // The super constructor has to be called with a dummy value in order to mark
+  ) : // The super constructor has to be called with a dummy value in order to mark
       // this constructor const.
       // The field `value` is overridden in the class implementation.
       super(0);
@@ -908,7 +899,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///  * [maybeResolve], which is similar to this function, but will allow a
   ///    null `resolvable` color.
   static Color resolve(Color resolvable, BuildContext context) {
-    assert(context != null);
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
       : resolvable;
@@ -931,7 +921,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     if (resolvable == null) {
       return null;
     }
-    assert(context != null);
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
       : resolvable;
