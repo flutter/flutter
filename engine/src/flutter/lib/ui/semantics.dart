@@ -712,7 +712,7 @@ class SpellOutStringAttribute extends StringAttribute {
     _initSpellOutStringAttribute(this, range.start, range.end);
   }
 
-  @FfiNative<Void Function(Handle, Int32, Int32)>('NativeStringAttribute::initSpellOutStringAttribute')
+  @Native<Void Function(Handle, Int32, Int32)>(symbol: 'NativeStringAttribute::initSpellOutStringAttribute')
   external static void _initSpellOutStringAttribute(SpellOutStringAttribute instance, int start, int end);
 
   @override
@@ -748,7 +748,7 @@ class LocaleStringAttribute extends StringAttribute {
   /// The lanuage of this attribute.
   final Locale locale;
 
-  @FfiNative<Void Function(Handle, Int32, Int32, Handle)>('NativeStringAttribute::initLocaleStringAttribute')
+  @Native<Void Function(Handle, Int32, Int32, Handle)>(symbol: 'NativeStringAttribute::initLocaleStringAttribute')
   external static void _initLocaleStringAttribute(LocaleStringAttribute instance, int start, int end, String locale);
 
   @override
@@ -773,7 +773,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   SemanticsUpdateBuilder() { _constructor(); }
 
-  @FfiNative<Void Function(Handle)>('SemanticsUpdateBuilder::Create')
+  @Native<Void Function(Handle)>(symbol: 'SemanticsUpdateBuilder::Create')
   external void _constructor();
 
   /// Update the information associated with the node with the given `id`.
@@ -934,7 +934,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
       additionalActions,
     );
   }
-  @FfiNative<
+  @Native<
       Void Function(
           Pointer<Void>,
           Int32,
@@ -971,7 +971,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
           Handle,
           Handle,
           Handle,
-          Handle)>('SemanticsUpdateBuilder::updateNode')
+          Handle)>(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
       int id,
       int flags,
@@ -1029,7 +1029,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
     assert(overrideId != null);
     _updateCustomAction(id, label ?? '', hint ?? '', overrideId);
   }
-  @FfiNative<Void Function(Pointer<Void>, Int32, Handle, Handle, Int32)>('SemanticsUpdateBuilder::updateCustomAction')
+  @Native<Void Function(Pointer<Void>, Int32, Handle, Handle, Int32)>(symbol: 'SemanticsUpdateBuilder::updateCustomAction')
   external void _updateCustomAction(int id, String label, String hint, int overrideId);
 
   /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
@@ -1044,7 +1044,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
     _build(semanticsUpdate);
     return semanticsUpdate;
   }
-  @FfiNative<Void Function(Pointer<Void>, Handle)>('SemanticsUpdateBuilder::build')
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'SemanticsUpdateBuilder::build')
   external void _build(SemanticsUpdate outSemanticsUpdate);
 }
 
@@ -1070,6 +1070,6 @@ class SemanticsUpdate extends NativeFieldWrapperClass1 {
   ///
   /// This can't be a leaf call because the native function calls Dart API
   /// (Dart_SetNativeInstanceField).
-  @FfiNative<Void Function(Pointer<Void>)>('SemanticsUpdate::dispose')
+  @Native<Void Function(Pointer<Void>)>(symbol: 'SemanticsUpdate::dispose')
   external void dispose();
 }
