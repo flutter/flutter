@@ -160,10 +160,8 @@ class FlutterConfiguration {
   ///
   /// The expected directory structure nested under this URL is as follows:
   ///
-  ///     /canvaskit.js              - the release build of CanvasKit JS API bindings
-  ///     /canvaskit.wasm            - the release build of CanvasKit WASM module
-  ///     /profiling/canvaskit.js    - the profile build of CanvasKit JS API bindings
-  ///     /profiling/canvaskit.wasm  - the profile build of CanvasKit WASM module
+  ///     /canvaskit.js              - the build of CanvasKit JS API bindings
+  ///     /canvaskit.wasm            - the build of CanvasKit WASM module
   ///
   /// The base URL can be overridden using the `FLUTTER_WEB_CANVASKIT_URL`
   /// environment variable or using the configuration API for JavaScript.

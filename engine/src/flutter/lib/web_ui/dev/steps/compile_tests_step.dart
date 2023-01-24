@@ -173,15 +173,8 @@ Future<void> copyCanvasKitFiles({bool useLocalCanvasKit = false}) async {
         targetDir.path,
         pathlib.basename(file.path),
       ));
-      final io.File profileTargetFile = io.File(pathlib.join(
-        targetDir.path,
-        'profiling',
-        pathlib.basename(file.path),
-      ));
       await normalTargetFile.create(recursive: true);
-      await profileTargetFile.create(recursive: true);
       await file.copy(normalTargetFile.path);
-      await file.copy(profileTargetFile.path);
     }
   } else {
     final io.Directory canvasKitDir = io.Directory(pathlib.join(
