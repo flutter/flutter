@@ -1035,10 +1035,7 @@ class _Dial extends StatefulWidget {
     required this.hourDialType,
     required this.onChanged,
     required this.onHourSelected,
-  }) : assert(selectedTime != null),
-       assert(hourMinuteMode != null),
-       assert(hourMinuteMode != null),
-       assert(hourDialType != null);
+  });
 
   final TimeOfDay selectedTime;
   final _HourMinuteMode hourMinuteMode;
@@ -2158,7 +2155,7 @@ class TimePickerDialog extends StatefulWidget {
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
-  }) : assert(initialTime != null);
+  });
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
@@ -3035,10 +3032,6 @@ Future<TimeOfDay?> showTimePicker({
   Offset? anchorPoint,
   Orientation? orientation,
 }) async {
-  assert(context != null);
-  assert(initialTime != null);
-  assert(useRootNavigator != null);
-  assert(initialEntryMode != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = TimePickerDialog(
@@ -3392,9 +3385,8 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
-// Generated version v0_150
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);
 

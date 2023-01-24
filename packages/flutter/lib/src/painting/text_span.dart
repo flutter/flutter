@@ -291,7 +291,6 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        assert(child != null);
         child.build(
           builder,
           textScaleFactor: textScaleFactor,
@@ -452,18 +451,6 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     assert(() {
       if (children != null) {
         for (final InlineSpan child in children!) {
-          if (child == null) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary('TextSpan contains a null child.'),
-              ErrorDescription(
-                'A TextSpan object with a non-null child list should not have any nulls in its child list.',
-              ),
-              toDiagnosticsNode(
-                name: 'The full text in question was',
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ]);
-          }
           assert(child.debugAssertIsValid());
         }
       }
@@ -590,14 +577,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
       return const <DiagnosticsNode>[];
     }
     return children!.map<DiagnosticsNode>((InlineSpan child) {
-      // `child` has a non-nullable return type, but might be null when running
-      // with weak checking, so we need to null check it anyway (and ignore the
-      // warning that the null-handling logic is dead code).
-      if (child != null) {
-        return child.toDiagnosticsNode();
-      } else {
-        return DiagnosticsNode.message('<null child>');
-      }
+      return child.toDiagnosticsNode();
     }).toList();
   }
 }

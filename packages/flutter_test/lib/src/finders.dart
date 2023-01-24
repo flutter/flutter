@@ -567,7 +567,7 @@ abstract class Finder {
 /// Applies additional filtering against a [parent] [Finder].
 abstract class ChainedFinder extends Finder {
   /// Create a Finder chained against the candidates of another [Finder].
-  ChainedFinder(this.parent) : assert(parent != null);
+  ChainedFinder(this.parent);
 
   /// Another [Finder] that will run first.
   final Finder parent;

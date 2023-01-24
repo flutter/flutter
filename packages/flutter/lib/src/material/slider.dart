@@ -159,9 +159,6 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : _sliderType = _SliderType.material,
-       assert(value != null),
-       assert(min != null),
-       assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
@@ -202,9 +199,6 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : _sliderType = _SliderType.adaptive,
-       assert(value != null),
-       assert(min != null),
-       assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
@@ -735,7 +729,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
       case _SliderType.adaptive: {
         final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -1043,10 +1036,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required bool hasFocus,
     required bool hovering,
     required DeviceGestureSettings gestureSettings,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
+  }) : assert(value >= 0.0 && value <= 1.0),
         assert(secondaryTrackValue == null || (secondaryTrackValue >= 0.0 && secondaryTrackValue <= 1.0)),
-        assert(state != null),
-        assert(textDirection != null),
         _platform = platform,
         _semanticFormatterCallback = semanticFormatterCallback,
         _label = label,
@@ -1138,7 +1129,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double get value => _value;
   double _value;
   set value(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
+    assert(newValue >= 0.0 && newValue <= 1.0);
     final double convertedValue = isDiscrete ? _discretize(newValue) : newValue;
     if (convertedValue == _value) {
       return;
@@ -1272,7 +1263,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (value == _textDirection) {
       return;
     }
@@ -1284,7 +1274,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
   set hasFocus(bool value) {
-    assert(value != null);
     if (value == _hasFocus) {
       return;
     }
@@ -1297,7 +1286,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool get hovering => _hovering;
   bool _hovering;
   set hovering(bool value) {
-    assert(value != null);
     if (value == _hovering) {
       return;
     }
@@ -1310,7 +1298,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hoveringThumb = false;
   bool get hoveringThumb => _hoveringThumb;
   set hoveringThumb(bool value) {
-    assert(value != null);
     if (value == _hoveringThumb) {
       return;
     }
@@ -1528,6 +1515,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (!_state.mounted) {
+      return;
+    }
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive) {
       // We need to add the drag first so that it has priority.
@@ -1888,7 +1878,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)
