@@ -17,6 +17,8 @@ void main() {
 }
 
 void testMain() {
+  ensureFlutterViewEmbedderInitialized();
+
   group('PlatformDispatcher', () {
     test('high contrast in accessibilityFeatures has the correct value', () {
       final MockHighContrastSupport mockHighContrast =
@@ -60,6 +62,44 @@ void testMain() {
         'flutter/platform',
         codec.encodeMethodCall(const MethodCall(
           'HapticFeedback.vibrate',
+        )),
+        completer.complete,
+      );
+
+      final ByteData? response = await completer.future;
+      expect(response, isNotNull);
+      expect(
+        codec.decodeEnvelope(response!),
+        true,
+      );
+    });
+
+    test('responds to flutter/contextmenu enable', () async {
+      const MethodCodec codec = JSONMethodCodec();
+      final Completer<ByteData?> completer = Completer<ByteData?>();
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/contextmenu',
+        codec.encodeMethodCall(const MethodCall(
+          'enableContextMenu',
+        )),
+        completer.complete,
+      );
+
+      final ByteData? response = await completer.future;
+      expect(response, isNotNull);
+      expect(
+        codec.decodeEnvelope(response!),
+        true,
+      );
+    });
+
+    test('responds to flutter/contextmenu disable', () async {
+      const MethodCodec codec = JSONMethodCodec();
+      final Completer<ByteData?> completer = Completer<ByteData?>();
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/contextmenu',
+        codec.encodeMethodCall(const MethodCall(
+          'disableContextMenu',
         )),
         completer.complete,
       );
