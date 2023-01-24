@@ -382,8 +382,8 @@ class _DefaultPub implements Pub {
       flutterRootOverride: flutterRootOverride,
       outputMode: outputMode,
     );
-    // TODO: probably don't remove this
-    await updateVersionAndPackageConfig(project);
+    // TODO: dart pub should take care of this when it calls the post get hook? probably?
+    // await updateVersionAndPackageConfig(project);
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
@@ -589,12 +589,10 @@ class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
 
-    // TODO: moved to hook
-    // use touchesPackageConfig for flag --update-version-and-package-config
-
-    // if (touchesPackageConfig && project != null) {
-    //   await _updateVersionAndPackageConfig(project);
-    // }
+    // TODO: probably can't remove this since non-get commands depend on it?
+    if (touchesPackageConfig && project != null) {
+      await updateVersionAndPackageConfig(project);
+    }
   }
 
   /// The command used for running pub.

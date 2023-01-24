@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:args/args.dart';
 
 import '../base/common.dart';
@@ -316,19 +318,6 @@ class PackagesGetCommand extends FlutterCommand {
       globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'failure');
       rethrow;
     }
-    
-    // TODO: moved to hook
-    // if (rootProject != null) {
-      // We need to regenerate the platform specific tooling for both the project
-      // itself and example(if present).
-      // await rootProject.regeneratePlatformSpecificTooling();
-      // if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
-      //   final FlutterProject exampleProject = rootProject.example;
-      //   await exampleProject.regeneratePlatformSpecificTooling();
-      // }
-    // }
-
-    // TODO: invoke hook
 
     return FlutterCommandResult.success();
   }
@@ -388,7 +377,7 @@ class PackagesPostGetHook extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // TODO: think about this part that actually happens before _runStdio
+    // TODO: think about this part that actually happens before _runStdio (pre-get-hook?)
     // - generateLocalizationsSyntheticPackage
 
     final String directoryOption = argResults!['directory'] as String;
