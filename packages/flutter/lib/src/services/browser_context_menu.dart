@@ -18,12 +18,6 @@ import 'system_channels.dart';
 class BrowserContextMenu {
   BrowserContextMenu._();
 
-  /// Ensure that a [BrowserContextMenu] instance has been set up so that the platform
-  /// can handle messages on the scribble method channel.
-  static void ensureInitialized() {
-    _instance; // ignore: unnecessary_statements
-  }
-
   static final BrowserContextMenu _instance = BrowserContextMenu._();
 
   /// Whether showing the browser's context menu is enabled.
