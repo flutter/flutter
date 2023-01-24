@@ -611,7 +611,7 @@ void main() {
         textStyle: TextStyle(fontSize: 100),
       );
 
-      // Both ThemeDatas include both extensions
+      // Both ThemeData arguments include both extensions.
       ThemeData lerped = ThemeData.lerp(
         ThemeData(
           extensions: const <ThemeExtension<dynamic>>[
@@ -816,7 +816,6 @@ void main() {
       accentColorBrightness: Brightness.dark,
       accentTextTheme: ThemeData.dark().textTheme,
       accentIconTheme: ThemeData.dark().iconTheme,
-      buttonColor: Colors.black,
       fixTextFieldOutlineLabel: false,
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
@@ -938,7 +937,6 @@ void main() {
       accentColorBrightness: Brightness.light,
       accentIconTheme: ThemeData.light().iconTheme,
       accentTextTheme: ThemeData.light().textTheme,
-      buttonColor: Colors.white,
       fixTextFieldOutlineLabel: true,
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
@@ -1043,7 +1041,6 @@ void main() {
       accentColorBrightness: otherTheme.accentColorBrightness,
       accentIconTheme: otherTheme.accentIconTheme,
       accentTextTheme: otherTheme.accentTextTheme,
-      buttonColor: otherTheme.buttonColor,
       fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
@@ -1149,7 +1146,6 @@ void main() {
     expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
     expect(themeDataCopy.accentIconTheme, equals(otherTheme.accentIconTheme));
     expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
-    expect(themeDataCopy.buttonColor, equals(otherTheme.buttonColor));
     expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
@@ -1287,7 +1283,6 @@ void main() {
       'accentColorBrightness',
       'accentTextTheme',
       'accentIconTheme',
-      'buttonColor',
       'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',

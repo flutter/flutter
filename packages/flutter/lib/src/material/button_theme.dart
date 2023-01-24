@@ -382,13 +382,12 @@ class ButtonThemeData with Diagnosticable {
   /// A set of thirteen colors that can be used to derive the button theme's
   /// colors.
   ///
-  /// This property was added much later than the theme's set of highly
-  /// specific colors, like [ThemeData.buttonColor], [ThemeData.highlightColor],
-  /// [ThemeData.splashColor] etc.
+  /// This property was added much later than the theme's set of highly specific
+  /// colors, like [ThemeData.highlightColor] and [ThemeData.splashColor] etc.
   ///
-  /// The colors for new button classes can be defined exclusively in terms
-  /// of [colorScheme]. When it's possible, the existing buttons will
-  /// (continue to) gradually migrate to it.
+  /// The colors for new button classes can be defined exclusively in terms of
+  /// [colorScheme]. When it's possible, the existing buttons will (continue to)
+  /// gradually migrate to it.
   final ColorScheme? colorScheme;
 
   // The minimum size of a button's tap target.

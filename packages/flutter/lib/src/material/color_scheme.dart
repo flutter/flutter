@@ -9,9 +9,11 @@ import 'package:material_color_utilities/material_color_utilities.dart';
 import 'colors.dart';
 import 'theme_data.dart';
 
+/// {@template flutter.material.color_scheme.ColorScheme}
 /// A set of 30 colors based on the
 /// [Material spec](https://m3.material.io/styles/color/the-color-system/color-roles)
 /// that can be used to configure the color properties of most components.
+/// {@endtemplate}
 ///
 /// The main accent color groups in the scheme are [primary], [secondary],
 /// and [tertiary].
