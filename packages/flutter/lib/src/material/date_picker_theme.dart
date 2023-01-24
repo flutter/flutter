@@ -68,43 +68,42 @@ class DatePickerThemeData with Diagnosticable {
     this.rangeSelectionOverlayColor,
   });
 
-  /// The background color of a date picker dialog.
+  /// Overrides the default value of [Dialog.backgroundColor].
+  ///
   final Color? backgroundColor;
 
-  /// The elevation of a date picker dialog.
+  /// Overrides the default value of [Dialog.elevation].
   ///
   /// See also:
   ///   [Material.elevation], which explains how elevation is related to a component's shadow.
   final double? elevation;
 
-  /// The color of the shadow painted below a date picker dialog.
+  /// Overrides the default value of [Dialog.shadowColor].
   ///
   /// See also:
   ///   [Material.shadowColor], which explains how the shadow is rendered.
   final Color? shadowColor;
 
-  /// The color of the surface tint overlay applied to the [backgroundColor]
-  /// to indicate elevation.
+  /// Overrides the default value of [Dialog.surfaceTintColor].
   ///
   /// See also:
   ///   [Material.surfaceTintColor], which explains how this color is related to
-  ///   [elevation].
+  ///   [elevation] and [backgroundColor].
   final Color? surfaceTintColor;
 
-  /// The overall shape of a date picker dialog.
+  /// Overrides the default value of [Dialog.shape].
   final ShapeBorder? shape;
 
-  /// The header's background fill color.
+  /// Overrides the header's default background fill color.
   final Color? headerBackgroundColor;
 
-  /// The color used for text labels and icons in the header of a date
-  /// picker dialog.
+  /// Overrides the header's default color used for text labels and icons.
   ///
   /// This is used instead of any colors provided by [headerHeadlineStyle]
   /// or [headerHelpStyle].
   final Color? headerForegroundColor;
 
-  /// The text style used for the headline text of the header.
+  /// Overrides the header's default headline text style.
   ///
   /// The headline text is usually the currently selected date in the header.
   ///
@@ -112,7 +111,7 @@ class DatePickerThemeData with Diagnosticable {
   /// [headerForegroundColor] is used instead.
   final TextStyle? headerHeadlineStyle;
 
-  /// The text style used for the help text of the header.
+  /// Overrides the header's default help text style.
   ///
   /// The help text (also referred to as "supporting text" in the Material
   /// spec) is usually a prompt to the user at the top of the header
@@ -125,101 +124,108 @@ class DatePickerThemeData with Diagnosticable {
   ///   [DatePickerDialog.helpText], which specifies the help text.
   final TextStyle? headerHelpStyle;
 
-  /// The text style used for the row of weekday labels at the top
-  /// of the date picker grid.
+  /// Overrides the default text style used for the row of weekday
+  /// labels at the top of the date picker grid.
   final TextStyle? weekdayStyle;
 
-  /// The text style used for each individual day label in the grid of the
-  /// date picker.
+  /// Overrides the default text style used for each individual day
+  /// label in the grid of the date picker.
   ///
   /// The color of the [dayStyle] is not used directly, as
   /// [dayForegroundColor] is used instead.
   final TextStyle? dayStyle;
 
-  /// The color used to paint the day labels in the grid of the date picker.
+  /// Overrides the default color used to paint the day labels in the
+  /// grid of the date picker.
   ///
   /// This will be used instead of the color provided in [dayStyle].
   final MaterialStateProperty<Color?>? dayForegroundColor;
 
-  /// The color used to paint the background of the day labels in the grid
-  /// of the date picker.
+  /// Overrides the default color used to paint the background of the
+  /// day labels in the grid of the date picker.
   final MaterialStateProperty<Color?>? dayBackgroundColor;
 
-  /// The highlight color that's typically used to indicate that
-  /// a day in the grid is focused, hovered, or pressed.
+  /// Overriddes the default highlight color that's typically used to
+  /// indicate that a day in the grid is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? dayOverlayColor;
 
-  /// The color used to paint the [DatePickerDialog.currentDate] label in
-  /// the grid of the date picker.
+  /// Overrides the default color used to paint the
+  /// [DatePickerDialog.currentDate] label in the grid of the date
+  /// picker.
   ///
   /// This will be used instead of the color provided in [dayStyle].
   final MaterialStateProperty<Color?>? todayForegroundColor;
 
-  /// The color used to paint the background of the
+  /// Overrides the default color used to paint the background of the
   /// [DatePickerDialog.currentDate] label in the grid of the date picker.
   final MaterialStateProperty<Color?>? todayBackgroundColor;
 
-  /// The border used to paint the [DatePickerDialog.currentDate] label in
-  /// the grid of the date picker.
+  /// Overrides the border used to paint the
+  /// [DatePickerDialog.currentDate] label in the grid of the date
+  /// picker.
   final BorderSide? todayBorder;
 
-  /// The text style used to paint each of the year entries in the year
-  /// selector of the date picker.
+  /// Overrides the default text style used to paint each of the year
+  /// entries in the year selector of the date picker.
   ///
   /// The color of the [yearStyle] is not used directly, as
   /// [yearForegroundColor] is used instead.
   final TextStyle? yearStyle;
 
-  /// The color used to paint the year labels in the year selector of
-  /// the date picker.
+  /// Overrides the default color used to paint the year labels in the year
+  /// selector of the date picker.
   ///
   /// This will be used instead of the color provided in [yearStyle].
   final MaterialStateProperty<Color?>? yearForegroundColor;
 
-  /// The color used to paint the background of the year labels in the
-  /// year selector of the of the date picker.
+  /// Overrides the default color used to paint the background of the
+  /// year labels in the year selector of the of the date picker.
   final MaterialStateProperty<Color?>? yearBackgroundColor;
 
-  /// The highlight color that's typically used to indicate that
-  /// a year in the year selector is focused, hovered, or pressed.
+  /// Overrides the default highlight color that's typically used to
+  /// indicate that a year in the year selector is focused, hovered,
+  /// or pressed.
   final MaterialStateProperty<Color?>? yearOverlayColor;
 
-  /// The elevation of the full screen [DateRangePickerDialog].
+  /// Overrides the default elevation of the full screen
+  /// [DateRangePickerDialog].
   ///
   /// See also:
   ///   [Material.elevation], which explains how elevation is related to a component's shadow.
   final double? rangePickerElevation;
 
-  /// The color of the shadow painted below a full screen
+  /// Overrides the color of the shadow painted below a full screen
   /// [DateRangePickerDialog].
   ///
   /// See also:
-  ///   [Material.shadow], which explains how the shadow is rendered.
+  ///   [Material.shadowColor], which explains how the shadow is rendered.
   final Color? rangePickerShadowColor;
 
-  /// The color of the surface tint overlay applied to the [backgroundColor]
-  /// of a full screen [DateRangePickerDialog]'s to indicate elevation.
+  /// Overrides the default color of the surface tint overlay applied
+  /// to the [backgroundColor] of a full screen
+  /// [DateRangePickerDialog]'s to indicate elevation.
   ///
   /// See also:
   ///   [Material.surfaceTintColor], which explains how this color is related to
   ///   [elevation].
   final Color? rangePickerSurfaceTintColor;
 
-  /// The overall shape of a full screen [DateRangePickerDialog].
+  /// Overrides the default overall shape of a full screen
+  /// [DateRangePickerDialog].
   final ShapeBorder? rangePickerShape;
 
-  /// The full screen [DateRangePickerDialog] header's background fill color.
+  /// Overrides the default background fill color for [DateRangePickerDialog].
   final Color? rangePickerHeaderBackgroundColor;
 
-  /// The color used for text labels and icons in the header of a full
-  /// screen [DateRangePickerDialog]
+  /// Overrides the default color used for text labels and icons in
+  /// the header of a full screen [DateRangePickerDialog]
   ///
   /// This is used instead of any colors provided by
   /// [rangePickerHeaderHeadlineStyle] or [rangePickerHeaderHelpStyle].
   final Color? rangePickerHeaderForegroundColor;
 
-  /// The text style used for the headline text in the header of a
-  /// full screen [DateRangePickerDialog].
+  /// Overrides the default text style used for the headline text in
+  /// the header of a full screen [DateRangePickerDialog].
   ///
   /// The headline text is usually the currently selected dates in the header.
   ///
@@ -227,8 +233,8 @@ class DatePickerThemeData with Diagnosticable {
   /// [rangePickerHeaderForegroundColor] is used instead.
   final TextStyle? rangePickerHeaderHeadlineStyle;
 
-  /// The text style used for the help text of the header of a full
-  /// screen [DateRangePickerDialog].
+  /// Overrides the default text style used for the help text of the
+  /// header of a full screen [DateRangePickerDialog].
   ///
   /// The help text (also referred to as "supporting text" in the Material
   /// spec) is usually a prompt to the user at the top of the header
@@ -241,13 +247,14 @@ class DatePickerThemeData with Diagnosticable {
   ///   [DateRangePickerDialog.helpText], which specifies the help text.
   final TextStyle? rangePickerHeaderHelpStyle;
 
-  /// The background color used to paint days selected between the
-  /// start and end dates in a [DateRangePickerDialog].
+  /// Overrides the default background color used to paint days
+  /// selected between the start and end dates in a
+  /// [DateRangePickerDialog].
   final Color? rangeSelectionBackgroundColor;
 
-  /// The highlight color that's typically used to indicate that
-  /// a date in the selected range of a [DateRangePickerDialog] is focused,
-  /// hovered, or pressed.
+  /// Overrides the default highlight color that's typically used to
+  /// indicate that a date in the selected range of a
+  /// [DateRangePickerDialog] is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? rangeSelectionOverlayColor;
 
   /// Creates a copy of this object with the given fields replaced with the
