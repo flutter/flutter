@@ -111,7 +111,7 @@ class DatePickerThemeData with Diagnosticable {
   ///
   /// The dialog's header displays the currently selected date.
   ///
-  /// The color of the [headerHeadlineStyle] is not used directly, as
+  /// The [TextStyle.color] of the [headerHeadlineStyle] is not used directly,
   /// [headerForegroundColor] is used instead.
   final TextStyle? headerHeadlineStyle;
 
@@ -121,7 +121,7 @@ class DatePickerThemeData with Diagnosticable {
   /// spec) is usually a prompt to the user at the top of the header
   /// (i.e. 'Select date').
   ///
-  /// The color of the [headerHelpStyle] is not used directly, as
+  /// The [TextStyle.color] of the [headerHelpStyle] is not used directly,
   /// [headerForegroundColor] is used instead.
   ///
   /// See also:
@@ -135,7 +135,7 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default text style used for each individual day
   /// label in the grid of the date picker.
   ///
-  /// The color of the [dayStyle] is not used directly, as
+  /// The [TextStyle.color] of the [dayStyle] is not used directly, as
   /// [dayForegroundColor] is used instead.
   final TextStyle? dayStyle;
 
@@ -172,7 +172,7 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default text style used to paint each of the year
   /// entries in the year selector of the date picker.
   ///
-  /// The color of the [yearStyle] is not used directly, as
+  /// The [TextStyle.color] of the [yearStyle] is not used directly,
   /// [yearForegroundColor] is used instead.
   final TextStyle? yearStyle;
 
@@ -237,7 +237,7 @@ class DatePickerThemeData with Diagnosticable {
   ///
   /// The dialog's header displays the currently selected date range.
   ///
-  /// The color of [rangePickerHeaderHeadlineStyle] is not used directly, as
+  /// The [TextStyle.color] of [rangePickerHeaderHeadlineStyle] is not used directly,
   /// [rangePickerHeaderForegroundColor] is used instead.
   final TextStyle? rangePickerHeaderHeadlineStyle;
 
@@ -248,7 +248,7 @@ class DatePickerThemeData with Diagnosticable {
   /// spec) is usually a prompt to the user at the top of the header
   /// (i.e. 'Select date').
   ///
-  /// The color of the [rangePickerHeaderHelpStyle] is not used directly, as
+  /// The [TextStyle.color] of the [rangePickerHeaderHelpStyle] is not used directly,
   /// [rangePickerHeaderForegroundColor] is used instead.
   ///
   /// See also:
