@@ -46,7 +46,7 @@ class ThrowingPub implements Pub {
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
-  
+
   @override
   Future<void> updateVersionAndPackageConfig(FlutterProject project) {
     // TODO: reconsider where this method should go
