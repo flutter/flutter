@@ -2494,7 +2494,7 @@ void main() {
         .childDirectory('test')
         .childFile('flutter_project_plugin_test.cpp'), exists);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     Logger: () => logger,
   });
 
