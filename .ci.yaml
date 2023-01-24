@@ -2430,7 +2430,6 @@ targets:
       - .ci.yaml
 
   - name: Mac animated_complex_opacity_perf_macos__e2e_summary
-    bringup: true
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
