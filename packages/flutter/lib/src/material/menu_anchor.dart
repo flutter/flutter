@@ -1088,8 +1088,8 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
-    _MenuAnchorState._maybeOf(context)?._root._close();
     widget.onPressed?.call();
+    _MenuAnchorState._maybeOf(context)?._root._close();
   }
 
   void _createInternalFocusNodeIfNeeded() {
