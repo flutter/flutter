@@ -222,6 +222,8 @@ class ChromiumLauncher {
     if (process != null && cacheDir != null) {
       unawaited(process.exitCode.whenComplete(() {
         _cacheUserSessionInformation(userDataDir, cacheDir);
+        // cleanup temp dir
+        userDataDir.deleteSync(recursive: true);
       }));
     }
     return connect(Chromium(
