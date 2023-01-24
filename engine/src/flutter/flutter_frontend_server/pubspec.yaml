@@ -77,6 +77,8 @@ dependency_overrides:
     path: ../testing/litetest
   meta:
     path: ../../third_party/dart/pkg/meta
+  mmap:
+    path: ../../third_party/dart/pkg/mmap
   package_config:
     path: ../../third_party/dart/third_party/pkg/package_config
   path:
