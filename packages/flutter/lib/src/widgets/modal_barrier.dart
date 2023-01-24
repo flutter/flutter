@@ -80,7 +80,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
 
   @override
   Rect get semanticBounds {
-    final EdgeInsets clipDetails = _clipDetailsNotifier == null ? EdgeInsets.zero :_clipDetailsNotifier.value;
+    final EdgeInsets clipDetails = _clipDetailsNotifier.value;
     final Rect originalRect = super.semanticBounds;
     final Rect clippedRect = Rect.fromLTRB(
       originalRect.left + clipDetails.left,
@@ -219,7 +219,6 @@ class ModalBarrier extends StatelessWidget {
         platformSupportsDismissingBarrier = true;
         break;
     }
-    assert(platformSupportsDismissingBarrier != null);
     final bool semanticsDismissible = dismissible && platformSupportsDismissingBarrier;
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
 
@@ -430,8 +429,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   const _ModalBarrierGestureDetector({
     required this.child,
     required this.onDismiss,
-  }) : assert(child != null),
-       assert(onDismiss != null);
+  });
 
   /// The widget below this widget in the tree.
   /// See [RawGestureDetector.child].

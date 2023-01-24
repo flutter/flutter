@@ -24,8 +24,7 @@ class AnnotatedRegion<T extends Object> extends SingleChildRenderObjectWidget {
     required Widget super.child,
     required this.value,
     this.sized = true,
-  }) : assert(value != null),
-       assert(child != null);
+  });
 
   /// A value which can be retrieved using [Layer.find].
   final T value;

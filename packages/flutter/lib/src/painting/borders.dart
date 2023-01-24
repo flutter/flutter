@@ -130,7 +130,7 @@ class BorderSide with Diagnosticable {
   ///
   /// Values typically range from -1.0 ([strokeAlignInside], inside border,
   /// default) to 1.0 ([strokeAlignOutside], outside border), without any
-  /// bound constraints (e.g., a value of -2.0 is is not typical, but allowed).
+  /// bound constraints (e.g., a value of -2.0 is not typical, but allowed).
   /// A value of 0 ([strokeAlignCenter]) will center the border on the edge
   /// of the widget.
   ///
