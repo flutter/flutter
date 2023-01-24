@@ -202,7 +202,7 @@ void main() {
       const int positionK = 36;// \n at end of second line.
       expect(boundaryI.getLeadingTextBoundaryAt(positionI), 37);
       expect(boundaryI.getTrailingTextBoundaryAt(positionI), 56);
-      expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 36);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 37);
       expect(boundaryI.getTrailingTextBoundaryAt(positionJ), 56);
       expect(boundaryI.getLeadingTextBoundaryAt(positionK), 36);
       expect(boundaryI.getTrailingTextBoundaryAt(positionK), 37);
