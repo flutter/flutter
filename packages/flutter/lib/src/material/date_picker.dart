@@ -420,8 +420,8 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   Size _dialogSize(BuildContext context) {
-    final Orientation orientation = MediaQuery.orientationOf(context);
     final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final Orientation orientation = MediaQuery.orientationOf(context);
 
     switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
@@ -450,12 +450,13 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.orientationOf(context);
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final TextTheme textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = theme.textTheme;
 
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
@@ -579,7 +580,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     final Widget header = _DatePickerHeader(
       helpText: widget.helpText ?? (
-        Theme.of(context).useMaterial3
+        useMaterial3
           ? localizations.datePickerHelpText
           : localizations.datePickerHelpText.toUpperCase()
       ),
@@ -591,7 +592,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
-    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
+    final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
       backgroundColor: datePickerTheme.backgroundColor ?? defaults.backgroundColor,
       elevation: useMaterial3
@@ -1315,7 +1316,8 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
 
   @override
   Widget build(BuildContext context) {
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final ThemeData theme = Theme.of(context);
+    final bool useMaterial3 = theme.useMaterial3;
     final Orientation orientation = MediaQuery.orientationOf(context);
     final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -1355,12 +1357,12 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
               )
             : null,
           confirmText: widget.saveText ?? (
-            Theme.of(context).useMaterial3
+            useMaterial3
               ? localizations.saveButtonLabel
               : localizations.saveButtonLabel.toUpperCase()
           ),
           helpText: widget.helpText ?? (
-            Theme.of(context).useMaterial3
+            useMaterial3
               ? localizations.dateRangePickerHelpText
               : localizations.dateRangePickerHelpText.toUpperCase()
             ),
@@ -1422,17 +1424,17 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
             : null,
           confirmText: widget.confirmText ?? localizations.okButtonLabel,
           cancelText: widget.cancelText ?? (
-            Theme.of(context).useMaterial3
+            useMaterial3
               ? localizations.cancelButtonLabel
               : localizations.cancelButtonLabel.toUpperCase()
           ),
           helpText: widget.helpText ?? (
-            Theme.of(context).useMaterial3
+            useMaterial3
               ? localizations.dateRangePickerHelpText
               : localizations.dateRangePickerHelpText.toUpperCase()
           ),
         );
-        final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
+        final DialogTheme dialogTheme = theme.dialogTheme;
         size = orientation == Orientation.portrait
           ? (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2)
           : _inputRangeLandscapeDialogSize;
@@ -1508,6 +1510,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.orientationOf(context);
     final DatePickerThemeData themeData = DatePickerTheme.of(context);
@@ -1538,9 +1541,9 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         appBar: AppBar(
           iconTheme: iconTheme,
           actionsIconTheme: iconTheme,
-          elevation: theme.useMaterial3 ? 0 : null,
-          scrolledUnderElevation: theme.useMaterial3 ? 0 : null,
-          backgroundColor: theme.useMaterial3 ? Colors.transparent : null,
+          elevation: useMaterial3 ? 0 : null,
+          scrolledUnderElevation: useMaterial3 ? 0 : null,
+          backgroundColor: useMaterial3 ? Colors.transparent : null,
           leading: CloseButton(
             onPressed: onCancel,
           ),
@@ -2424,8 +2427,7 @@ class _MonthItemState extends State<_MonthItem> {
     final int daysInMonth = DateUtils.getDaysInMonth(year, month);
     final int dayOffset = DateUtils.firstDayOffset(year, month, localizations);
     final int weeks = ((daysInMonth + dayOffset) / DateTime.daysPerWeek).ceil();
-    final double gridHeight =
-        weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;
+    final double gridHeight = weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;
     final List<Widget> dayItems = <Widget>[];
 
     for (int i = 0; true; i += 1) {
@@ -2640,11 +2642,11 @@ class _InputDateRangePickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.orientationOf(context);
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
 
     final Color? headerForegroundColor = datePickerTheme.headerForegroundColor ?? defaults.headerForegroundColor;
     final TextStyle? headlineStyle = (datePickerTheme.headerHeadlineStyle ?? defaults.headerHeadlineStyle)?.copyWith(
@@ -2929,11 +2931,13 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
     final InputBorder inputBorder = inputTheme.border
       ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
