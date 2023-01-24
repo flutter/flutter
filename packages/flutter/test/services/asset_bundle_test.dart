@@ -152,7 +152,7 @@ void main() {
     expect(secondLoadStructuredBinaryDataResult, 'two');
   });
 
-    test('CachingAssetBundle.evict evicts a particular key from the cache', () async {
+  test('CachingAssetBundle.evict evicts a particular key from the cache', () async {
     final TestAssetBundle bundle = TestAssetBundle();
 
     await bundle.loadString('counter');
@@ -169,5 +169,13 @@ void main() {
     bundle.evict('AssetManifest.bin');
     final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('two'));
     expect(secondLoadStructuredBinaryDataResult, 'two');
+  });
+
+  test('loadStructuredBinaryData correctly loads ByteData', () async {
+    final TestAssetBundle bundle = TestAssetBundle();
+    final Map<Object?, Object?> assetManifest =
+      await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData data) => const StandardMessageCodec().decodeMessage(data) as Map<Object?, Object?>);
+    expect(assetManifest.keys.toList(), equals(<String>['one']));
+    expect(assetManifest['one'], <Object>[]);
   });
 }
