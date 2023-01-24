@@ -34,7 +34,7 @@ class Scene extends NativeFieldWrapperClass1 {
     return Image._(image, image.width, image.height);
   }
 
-  @FfiNative<Handle Function(Pointer<Void>, Uint32, Uint32, Handle)>('Scene::toImageSync')
+  @Native<Handle Function(Pointer<Void>, Uint32, Uint32, Handle)>(symbol: 'Scene::toImageSync')
   external String? _toImageSync(int width, int height, _Image outImage);
 
   /// Creates a raster image representation of the current state of the scene.
@@ -58,7 +58,7 @@ class Scene extends NativeFieldWrapperClass1 {
     );
   }
 
-  @FfiNative<Handle Function(Pointer<Void>, Uint32, Uint32, Handle)>('Scene::toImage')
+  @Native<Handle Function(Pointer<Void>, Uint32, Uint32, Handle)>(symbol: 'Scene::toImage')
   external String? _toImage(int width, int height, _Callback<_Image?> callback);
 
   /// Releases the resources used by this scene.
@@ -67,7 +67,7 @@ class Scene extends NativeFieldWrapperClass1 {
   ///
   /// This can't be a leaf call because the native function calls Dart API
   /// (Dart_SetNativeInstanceField).
-  @FfiNative<Void Function(Pointer<Void>)>('Scene::dispose')
+  @Native<Void Function(Pointer<Void>)>(symbol: 'Scene::dispose')
   external void dispose();
 }
 
@@ -235,7 +235,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     _constructor();
   }
 
-  @FfiNative<Void Function(Handle)>('SceneBuilder::Create')
+  @Native<Void Function(Handle)>(symbol: 'SceneBuilder::Create')
   external void _constructor();
 
   // Layers used in this scene.
@@ -332,7 +332,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Handle, Handle)>('SceneBuilder::pushTransformHandle')
+  @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'SceneBuilder::pushTransformHandle')
   external void _pushTransform(EngineLayer layer, Float64List matrix4, EngineLayer? oldLayer);
 
   /// Pushes an offset operation onto the operation stack.
@@ -357,7 +357,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Double, Double, Handle)>('SceneBuilder::pushOffset')
+  @Native<Void Function(Pointer<Void>, Handle, Double, Double, Handle)>(symbol: 'SceneBuilder::pushOffset')
   external void _pushOffset(EngineLayer layer, double dx, double dy, EngineLayer? oldLayer);
 
   /// Pushes a rectangular clip operation onto the operation stack.
@@ -386,7 +386,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Double, Double, Double, Double, Int32, Handle)>('SceneBuilder::pushClipRect')
+  @Native<Void Function(Pointer<Void>, Handle, Double, Double, Double, Double, Int32, Handle)>(symbol: 'SceneBuilder::pushClipRect')
   external void _pushClipRect(
       EngineLayer outEngineLayer,
       double left,
@@ -421,7 +421,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Handle, Int32, Handle)>('SceneBuilder::pushClipRRect')
+  @Native<Void Function(Pointer<Void>, Handle, Handle, Int32, Handle)>(symbol: 'SceneBuilder::pushClipRRect')
   external void _pushClipRRect(EngineLayer layer, Float32List rrect, int clipBehavior, EngineLayer? oldLayer);
 
   /// Pushes a path clip operation onto the operation stack.
@@ -449,7 +449,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Pointer<Void>, Int32, Handle)>('SceneBuilder::pushClipPath')
+  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Int32, Handle)>(symbol: 'SceneBuilder::pushClipPath')
   external void _pushClipPath(EngineLayer layer, Path path, int clipBehavior, EngineLayer? oldLayer);
 
   /// Pushes an opacity operation onto the operation stack.
@@ -477,7 +477,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Int32, Double, Double, Handle)>('SceneBuilder::pushOpacity')
+  @Native<Void Function(Pointer<Void>, Handle, Int32, Double, Double, Handle)>(symbol: 'SceneBuilder::pushOpacity')
   external void _pushOpacity(EngineLayer layer, int alpha, double dx, double dy, EngineLayer? oldLayer);
 
   /// Pushes a color filter operation onto the operation stack.
@@ -505,7 +505,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Pointer<Void>, Handle)>('SceneBuilder::pushColorFilter')
+  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Handle)>(symbol: 'SceneBuilder::pushColorFilter')
   external void _pushColorFilter(EngineLayer layer, _ColorFilter filter, EngineLayer? oldLayer);
 
   /// Pushes an image filter operation onto the operation stack.
@@ -534,7 +534,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Double, Handle)>('SceneBuilder::pushImageFilter')
+  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Double, Handle)>(symbol: 'SceneBuilder::pushImageFilter')
   external void _pushImageFilter(EngineLayer outEngineLayer, _ImageFilter filter, double dx, double dy, EngineLayer? oldLayer);
 
   /// Pushes a backdrop filter operation onto the operation stack.
@@ -561,7 +561,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Pointer<Void>, Int32, Handle)>('SceneBuilder::pushBackdropFilter')
+  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Int32, Handle)>(symbol: 'SceneBuilder::pushBackdropFilter')
   external void _pushBackdropFilter(EngineLayer outEngineLayer, _ImageFilter filter, int blendMode, EngineLayer? oldLayer);
 
   /// Pushes a shader mask operation onto the operation stack.
@@ -599,8 +599,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Double, Double, Double, Int32, Int32, Handle)>(
-      'SceneBuilder::pushShaderMask')
+  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Double, Double, Double, Int32, Int32, Handle)>(symbol: 'SceneBuilder::pushShaderMask')
   external void _pushShaderMask(
       EngineLayer engineLayer,
       Shader shader,
@@ -649,7 +648,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return layer;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Int32, Int32, Int32, Handle)>('SceneBuilder::pushPhysicalShape')
+  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Int32, Int32, Int32, Handle)>(symbol: 'SceneBuilder::pushPhysicalShape')
   external void _pushPhysicalShape(
       EngineLayer outEngineLayer,
       Path path,
@@ -672,7 +671,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     _pop();
   }
 
-  @FfiNative<Void Function(Pointer<Void>)>('SceneBuilder::pop', isLeaf: true)
+  @Native<Void Function(Pointer<Void>)>(symbol: 'SceneBuilder::pop', isLeaf: true)
   external void _pop();
 
   /// Add a retained engine layer subtree from previous frames.
@@ -712,7 +711,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     _addRetained(wrapper._nativeLayer!);
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle)>('SceneBuilder::addRetained')
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'SceneBuilder::addRetained')
   external void _addRetained(EngineLayer retainedLayer);
 
   /// Adds an object to the scene that displays performance statistics.
@@ -743,7 +742,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     _addPerformanceOverlay(enabledOptions, bounds.left, bounds.right, bounds.top, bounds.bottom);
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Uint64, Double, Double, Double, Double)>('SceneBuilder::addPerformanceOverlay', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Uint64, Double, Double, Double, Double)>(symbol: 'SceneBuilder::addPerformanceOverlay', isLeaf: true)
   external void _addPerformanceOverlay(int enabledOptions, double left, double right, double top, double bottom);
 
   /// Adds a [Picture] to the scene.
@@ -778,7 +777,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     _addPicture(offset.dx, offset.dy, picture, hints);
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Double, Double, Pointer<Void>, Int32)>('SceneBuilder::addPicture')
+  @Native<Void Function(Pointer<Void>, Double, Double, Pointer<Void>, Int32)>(symbol: 'SceneBuilder::addPicture')
   external void _addPicture(double dx, double dy, Picture picture, int hints);
 
   /// Adds a backend texture to the scene.
@@ -804,7 +803,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     _addTexture(offset.dx, offset.dy, width, height, textureId, freeze, filterQuality.index);
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Double, Double, Double, Double, Int64, Bool, Int32)>('SceneBuilder::addTexture', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Int64, Bool, Int32)>(symbol: 'SceneBuilder::addTexture', isLeaf: true)
   external void _addTexture(double dx, double dy, double width, double height, int textureId, bool freeze, int filterQuality);
 
   /// Adds a platform view (e.g an iOS UIView) to the scene.
@@ -833,7 +832,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     _addPlatformView(offset.dx, offset.dy, width, height, viewId);
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Double, Double, Double, Double, Int64)>('SceneBuilder::addPlatformView', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Int64)>(symbol: 'SceneBuilder::addPlatformView', isLeaf: true)
   external void _addPlatformView(double dx, double dy, double width, double height, int viewId);
 
   /// Sets a threshold after which additional debugging information should be recorded.
@@ -842,7 +841,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
   /// We'll hopefully be able to figure out how to make this feature more useful
   /// to you.
-  @FfiNative<Void Function(Pointer<Void>, Uint32)>('SceneBuilder::setRasterizerTracingThreshold', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Uint32)>(symbol: 'SceneBuilder::setRasterizerTracingThreshold', isLeaf: true)
   external void setRasterizerTracingThreshold(int frameInterval);
 
   /// Sets whether the raster cache should checkerboard cached entries. This is
@@ -860,14 +859,14 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   ///
   /// Currently this interface is difficult to use by end-developers. If you're
   /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
-  @FfiNative<Void Function(Pointer<Void>, Bool)>('SceneBuilder::setCheckerboardRasterCacheImages', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Bool)>(symbol: 'SceneBuilder::setCheckerboardRasterCacheImages', isLeaf: true)
   external void setCheckerboardRasterCacheImages(bool checkerboard);
 
   /// Sets whether the compositor should checkerboard layers that are rendered
   /// to offscreen bitmaps.
   ///
   /// This is only useful for debugging purposes.
-  @FfiNative<Void Function(Pointer<Void>, Bool)>('SceneBuilder::setCheckerboardOffscreenLayers', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Bool)>(symbol: 'SceneBuilder::setCheckerboardOffscreenLayers', isLeaf: true)
   external void setCheckerboardOffscreenLayers(bool checkerboard);
 
   /// Finishes building the scene.
@@ -884,6 +883,6 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return scene;
   }
 
-  @FfiNative<Void Function(Pointer<Void>, Handle)>('SceneBuilder::build')
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'SceneBuilder::build')
   external void _build(Scene outScene);
 }

@@ -267,7 +267,7 @@ class FlutterView {
   ///   painting.
   void render(Scene scene) => _render(scene);
 
-  @FfiNative<Void Function(Pointer<Void>)>('PlatformConfigurationNativeApi::Render')
+  @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::Render')
   external static void _render(Scene scene);
 
   /// Change the retained semantics data about this [FlutterView].
@@ -280,7 +280,7 @@ class FlutterView {
   /// cannot be used further.
   void updateSemantics(SemanticsUpdate update) => _updateSemantics(update);
 
-  @FfiNative<Void Function(Pointer<Void>)>('PlatformConfigurationNativeApi::UpdateSemantics')
+  @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::UpdateSemantics')
   external static void _updateSemantics(SemanticsUpdate update);
 }
 

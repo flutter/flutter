@@ -55,7 +55,7 @@ typedef CanvasPathMeasure PathMeasure;
 typedef CanvasGradient Gradient;
 typedef CanvasPath Path;
 
-// List of native static functions used as @FfiNative functions.
+// List of native static functions used as @Native functions.
 // Items are tuples of ('function_name', 'parameter_count'), where:
 //   'function_name' is the fully qualified name of the native function.
 //   'parameter_count' is the number of parameters the function has.
@@ -65,8 +65,8 @@ typedef CanvasPath Path;
 //   bindings.
 //   If the name does not match a native function, the template will fail to
 //   instatiate, resulting in a compile time error.
-// - Resolve the native function pointer associated with an @FfiNative function.
-//   If there is a mismatch between name or parameter count an @FfiNative is
+// - Resolve the native function pointer associated with an @Native function.
+//   If there is a mismatch between name or parameter count an @Native is
 //   trying to resolve, an exception will be thrown.
 #define FFI_FUNCTION_LIST(V)                                          \
   /* Constructors */                                                  \
@@ -117,7 +117,7 @@ typedef CanvasPath Path;
   V(DartPluginRegistrant_EnsureInitialized, 0)                        \
   V(Vertices::init, 6)
 
-// List of native instance methods used as @FfiNative functions.
+// List of native instance methods used as @Native functions.
 // Items are tuples of ('class_name', 'method_name', 'parameter_count'), where:
 //   'class_name' is the name of the class containing the method.
 //   'method_name' is the name of the method.
@@ -129,8 +129,8 @@ typedef CanvasPath Path;
 //   bindings.
 //   If the name does not match a native function, the template will fail to
 //   instatiate, resulting in a compile time error.
-// - Resolve the native function pointer associated with an @FfiNative function.
-//   If there is a mismatch between names or parameter count an @FfiNative is
+// - Resolve the native function pointer associated with an @Native function.
+//   If there is a mismatch between names or parameter count an @Native is
 //   trying to resolve, an exception will be thrown.
 #define FFI_METHOD_LIST(V)                             \
   V(Canvas, clipPath, 3)                               \
