@@ -17,6 +17,8 @@ const Set<TargetPlatform> _kMobilePlatforms = <TargetPlatform>{
 
 /// Associates a [ScrollController] with a subtree.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=33_0ABjFJUU}
+///
 /// When a [ScrollView] has [ScrollView.primary] set to true, the [ScrollView]
 /// uses [of] to inherit the [PrimaryScrollController] associated with its
 /// subtree.
