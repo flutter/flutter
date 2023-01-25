@@ -77,7 +77,7 @@ void main() {
         ' │ decoration: BoxDecoration:\n'
         ' │   color: Color(0xff0000ff)\n'
         ' │ configuration: ImageConfiguration(bundle:\n'
-        ' │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
+        ' │   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
         ' │   android)\n'
         ' │\n'
         ' └─child: RenderLimitedBox#00000\n'

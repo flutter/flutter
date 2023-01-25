@@ -1730,8 +1730,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       child: title,
     );
 
-    final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (!widget.useInheritedMediaQuery || data == null) {
+    if (!widget.useInheritedMediaQuery || MediaQuery.maybeOf(context) == null) {
       child = MediaQuery.fromWindow(
         child: child,
       );
