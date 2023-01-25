@@ -1807,4 +1807,23 @@ void _paragraphTests() {
 
     expect(skSurface, isNotNull);
   }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
+
+  test('MakeRenderTarget test', () {
+    final DomCanvasElement canvas = createDomCanvasElement(
+      width: 100,
+      height: 100,
+    );
+
+    final int glContext = canvasKit.GetWebGLContext(
+      canvas,
+      SkWebGLContextOptions(
+        antialias: 0,
+        majorVersion: webGLVersion.toDouble(),
+      ),
+    ).toInt();
+    final SkGrContext grContext =  canvasKit.MakeGrContext(glContext.toDouble());
+    final SkSurface? surface = canvasKit.MakeRenderTarget(grContext, 1, 1);
+
+    expect(surface, isNotNull);
+  }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 }

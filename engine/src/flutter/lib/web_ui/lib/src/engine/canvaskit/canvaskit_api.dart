@@ -119,6 +119,11 @@ extension CanvasKitExtension on CanvasKit {
     int sampleCount,
     int stencil,
   );
+  external SkSurface? MakeRenderTarget(
+    SkGrContext grContext,
+    int width,
+    int height,
+  );
   external SkSurface MakeSWCanvasSurface(DomCanvasElement canvas);
 
   /// Creates an image from decoded pixels represented as a list of bytes.

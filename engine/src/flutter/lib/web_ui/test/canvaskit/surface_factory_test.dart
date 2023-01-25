@@ -26,10 +26,6 @@ void testMain() {
       expect(SurfaceFactory(2).maximumSurfaces, 2);
     });
 
-    test('has a Surface dedicated to Picture.toImage', () {
-      expect(SurfaceFactory(1).pictureToImageSurface, isNotNull);
-    });
-
     test('getSurface', () {
       final SurfaceFactory factory = SurfaceFactory(3);
       expect(factory.baseSurface, isNotNull);

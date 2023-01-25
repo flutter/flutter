@@ -141,6 +141,41 @@ class Surface {
   ui.Size? _currentSurfaceSize;
   double _currentDevicePixelRatio = -1;
 
+  /// This is only valid after the first frame or if [ensureSurface] has been
+  /// called
+  bool get usingSoftwareBackend => _glContext == null ||
+      _grContext == null || webGLVersion == -1 || configuration.canvasKitForceCpuOnly;
+
+  /// Ensure that the initial surface exists and has a size of at least [size].
+  ///
+  /// If not provided, [size] defaults to 1x1.
+  ///
+  /// This also ensures that the gl/grcontext have been populated so
+  /// that software rendering can be detected.
+  void ensureSurface([ui.Size size = const ui.Size(1, 1)]) {
+    // If the GrContext hasn't been setup yet then we need to force initialization
+    // of the canvas and initial surface.
+    if (_surface != null) {
+      return;
+    }
+    // TODO(jonahwilliams): this is somewhat wasteful. We should probably
+    // eagerly setup this surface instead of delaying until the first frame?
+    // Or at least cache the estimated window size.
+    createOrUpdateSurface(size);
+  }
+
+  /// This method is not supported if software rendering is used.
+  CkSurface createRenderTargetSurface(ui.Size size) {
+    assert(!usingSoftwareBackend);
+
+    final SkSurface skSurface = canvasKit.MakeRenderTarget(
+      _grContext!,
+      size.width.ceil(),
+      size.height.ceil(),
+    )!;
+    return CkSurface(skSurface, _glContext);
+  }
+
   /// Creates a <canvas> and SkSurface for the given [size].
   CkSurface createOrUpdateSurface(ui.Size size) {
     if (size.isEmpty) {
