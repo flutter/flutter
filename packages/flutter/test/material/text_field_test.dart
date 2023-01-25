@@ -11039,7 +11039,7 @@ void main() {
       expect(
         tester.getSize(find.byType(TextField)),
         // When the strut fontSize is larger than a provided TextStyle, the
-        // the strut's height takes precedence.
+        // strut's height takes precedence.
         const Size(800, 78),
       );
     },

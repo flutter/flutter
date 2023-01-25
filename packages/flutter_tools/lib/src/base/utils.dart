@@ -339,7 +339,7 @@ List<String> _wrapTextAsLines(String text, {
   final int effectiveLength = math.max(columnWidth - start, kMinColumnWidth);
   for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
-    // add it and move on.
+    // it and move on.
     if (line.length <= effectiveLength || !shouldWrap) {
       result.add(line);
       continue;

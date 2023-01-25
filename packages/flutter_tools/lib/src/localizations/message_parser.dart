@@ -335,7 +335,7 @@ class Parser {
       parsingStack.addAll(grammarRule.reversed);
 
       // For tree construction, add nodes to the parent until the parent has all
-      // all the children it is expecting.
+      // the children it is expecting.
       parent.children.add(node);
       if (parent.isFull) {
         treeTraversalStack.removeLast();

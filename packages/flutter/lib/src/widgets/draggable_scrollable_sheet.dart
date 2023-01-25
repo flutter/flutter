@@ -317,7 +317,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// The initial fractional value of the parent container's height to use when
   /// displaying the widget.
   ///
-  /// Rebuilding the sheet with a new [initialChildSize] will only move the
+  /// Rebuilding the sheet with a new [initialChildSize] will only move
   /// the sheet to the new value if the sheet has not yet been dragged since it
   /// was first built or since the last call to [DraggableScrollableActuator.reset].
   ///

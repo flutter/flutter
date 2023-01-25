@@ -431,7 +431,7 @@ class Slider extends StatefulWidget {
   /// the slider thumb is focused, hovered, or dragged.
   ///
   /// If this property is null, [Slider] will use [activeColor] with
-  /// with an opacity of 0.12, If null, [SliderThemeData.overlayColor]
+  /// an opacity of 0.12, If null, [SliderThemeData.overlayColor]
   /// will be used.
   ///
   /// If that is also null, If [ThemeData.useMaterial3] is true,

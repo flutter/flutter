@@ -34,7 +34,7 @@ import 'toggleable.dart';
 ///
 /// {@tool dartpad}
 /// This example shows how you can override the default theme of
-/// of a [Checkbox] with a [MaterialStateProperty].
+/// a [Checkbox] with a [MaterialStateProperty].
 /// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
 /// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
 /// be `Colors.red`.
