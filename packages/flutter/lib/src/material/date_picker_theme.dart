@@ -514,7 +514,7 @@ class DatePickerTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the visual properties used by descendant [DatePickerDialog]
   /// widgets.
@@ -569,7 +569,6 @@ class DatePickerTheme extends InheritedTheme {
   ///  * [defaults], which will return the default properties used when no
   ///    other [DatePickerTheme] has been provided.
   static DatePickerThemeData? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.dependOnInheritedWidgetOfExactType<DatePickerTheme>()?.data;
   }
 
