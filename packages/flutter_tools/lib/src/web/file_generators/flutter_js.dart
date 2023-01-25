@@ -89,7 +89,7 @@ _flutter.loader = null;
       if (window.trustedTypes) {
         this.policy = trustedTypes.createPolicy(policyName, {
           createScriptURL: function(url) {
-            const parsed = new URL(url, window.location);
+            const parsed = new URL(url, document.baseURI);
             const file = parsed.pathname.split("/").pop();
             const matches = patterns.some((pattern) => pattern.test(file));
             if (matches) {
