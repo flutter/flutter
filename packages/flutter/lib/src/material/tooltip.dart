@@ -383,9 +383,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool _preferBelow;
   late bool _excludeFromSemantics;
   OverlayEntry? _entry;
+
   late Duration _showDuration;
-  late Duration _waitDuration;
   late Duration _hoverShowDuration;
+  late Duration _waitDuration;
   late TooltipTriggerMode _triggerMode;
   late bool _enableFeedback;
   late bool _visible;
@@ -417,7 +418,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _handleStatusChanged(AnimationStatus status) {
     assert(mounted);
     final bool entryNeedsUpdating;
-    //print('${widget.message} status changed: $_animationStatus => $status');
     switch (status) {
       case AnimationStatus.dismissed:
         entryNeedsUpdating = _animationStatus != AnimationStatus.dismissed;
@@ -432,8 +432,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         entryNeedsUpdating = _animationStatus == AnimationStatus.dismissed;
         if (entryNeedsUpdating) {
           _createNewEntry();
-          SemanticsService.tooltip(_tooltipMessage);
           Tooltip._openedTooltips.add(this);
+          SemanticsService.tooltip(_tooltipMessage);
         }
         break;
     }
@@ -458,7 +458,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
       'timer must not be active when the tooltip is fading out',
     );
-    //print('>>>>> ${widget.message} scheduled for showing${showDuration != null ? " for $showDuration" : ""} after $withDelay. Status: ${_controller.status}');
     switch (_controller.status) {
       case AnimationStatus.dismissed:
         if (withDelay.inMicroseconds > 0) {
@@ -486,12 +485,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     _timer?.cancel();
     _timer = null;
-    //print('<<<<< ${widget.message} scheduled for dismissal, withDelay = $withDelay, currentStatus = ${_controller.status}');
     switch (_controller.status) {
       case AnimationStatus.reverse:
       case AnimationStatus.dismissed:
       case AnimationStatus.forward:
-        // Fade out immediately regardless of pending timers.
+        // Fade out immediately and ignore pending timers.
         _controller.reverse();
         break;
       case AnimationStatus.completed:
@@ -508,7 +506,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _handlePointerDown(PointerDownEvent event) {
     assert(mounted);
     _activePointers.add(event.pointer);
-    // PointerDevices that don't support hovering.
+    // PointerDeviceKinds that don't support hovering.
     const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind> {
       PointerDeviceKind.invertedStylus,
       PointerDeviceKind.stylus,
@@ -807,6 +805,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   void _removeEntry() {
     _entry?.remove();
+    _entry?.dispose();
     _entry = null;
   }
 
