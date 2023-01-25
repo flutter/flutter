@@ -444,6 +444,32 @@ TEST(GeometryTest, MatrixIsAligned) {
   }
 }
 
+TEST(GeometryTest, MatrixTranslationScaleOnly) {
+  {
+    auto m = Matrix();
+    bool result = m.IsTranslationScaleOnly();
+    ASSERT_TRUE(result);
+  }
+
+  {
+    auto m = Matrix::MakeScale(Vector3(2, 3, 4));
+    bool result = m.IsTranslationScaleOnly();
+    ASSERT_TRUE(result);
+  }
+
+  {
+    auto m = Matrix::MakeTranslation(Vector3(2, 3, 4));
+    bool result = m.IsTranslationScaleOnly();
+    ASSERT_TRUE(result);
+  }
+
+  {
+    auto m = Matrix::MakeRotationZ(Degrees(10));
+    bool result = m.IsTranslationScaleOnly();
+    ASSERT_FALSE(result);
+  }
+}
+
 TEST(GeometryTest, MatrixLookAt) {
   {
     auto m = Matrix::MakeLookAt(Vector3(0, 0, -1), Vector3(0, 0, 1),

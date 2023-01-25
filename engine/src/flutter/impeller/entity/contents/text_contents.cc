@@ -78,8 +78,18 @@ static bool CommonRender(
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   SamplerDescriptor sampler_desc;
-  sampler_desc.min_filter = MinMagFilter::kNearest;
-  sampler_desc.mag_filter = MinMagFilter::kNearest;
+  if (entity.GetTransformation().IsTranslationScaleOnly()) {
+    sampler_desc.min_filter = MinMagFilter::kNearest;
+    sampler_desc.mag_filter = MinMagFilter::kNearest;
+  } else {
+    // Currently, we only propagate the scale of the transform to the atlas
+    // renderer, so if the transform has more than just a translation, we turn
+    // on linear sampling to prevent crunchiness caused by the pixel grid not
+    // being perfectly aligned.
+    // The downside is that this slightly over-blurs rotated/skewed text.
+    sampler_desc.min_filter = MinMagFilter::kLinear;
+    sampler_desc.mag_filter = MinMagFilter::kLinear;
+  }
   sampler_desc.mip_filter = MipFilter::kNone;
 
   typename FS::FragInfo frag_info;
