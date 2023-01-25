@@ -3966,7 +3966,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // `x ∉ getTextBoundaryAt(x)`. In case `caretOffset` points to one such
     // control character, we define that these control characters themselves are
     // still part of the previous line, but also exclude them from the
-    // the line boundary range since they're non-printing. IOW, no additional
+    // line boundary range since they're non-printing. IOW, no additional
     // processing needed since the LineBoundary class does exactly that.
     return forward
       ? TextPosition(offset: textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? _value.text.length, affinity: TextAffinity.upstream)
