@@ -49,7 +49,8 @@ void main() {
 
     Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {ui.TargetImageSizeCallback? getTargetSize}) {
       return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
-        ui.TargetImageSize targetSize = getTargetSize(intrinsicWidth, intrinsicHeight);
+        expect(getTargetSize, isNotNull);
+        final ui.TargetImageSize targetSize = getTargetSize!(intrinsicWidth, intrinsicHeight);
         expect(targetSize.width, expectedCacheWidth);
         expect(targetSize.height, expectedCacheHeight);
         called = true;
