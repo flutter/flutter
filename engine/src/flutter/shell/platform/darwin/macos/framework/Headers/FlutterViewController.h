@@ -25,6 +25,25 @@ typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
 
 /**
  * Controls a view that displays Flutter content and manages input.
+ *
+ * A FlutterViewController works with a FlutterEngine. Upon creation, the view
+ * controller is always added to an engine, either a given engine, or it implicitly
+ * creates an engine and add itself to that engine.
+ *
+ * The FlutterEngine assigns each view controller attached to it a unique ID.
+ * Each view controller corresponds to a view, and the ID is used by the framework
+ * to specify which view to operate.
+ *
+ * A FlutterViewController can also be unattached to an engine after it is manually
+ * unset from the engine, or transiently during the initialization process.
+ * An unattached view controller is invalid. Whether the view controller is attached
+ * can be queried using FlutterViewController#attached.
+ *
+ * The FlutterViewController strongly references the FlutterEngine, while
+ * the engine weakly the view controller. When a FlutterViewController is deallocated,
+ * it automatically removes itself from its attached engine. When a FlutterEngine
+ * has no FlutterViewControllers attached, it might shut down itself or not depending
+ * on its configuration.
  */
 FLUTTER_DARWIN_EXPORT
 @interface FlutterViewController : NSViewController <FlutterPluginRegistry>
@@ -35,6 +54,16 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, nonnull, readonly) FlutterEngine* engine;
 
 /**
+ * The identifier for this view controller.
+ *
+ * The ID is assigned by FlutterEngine when the view controller is attached.
+ *
+ * If the view controller is unattached (see FlutterViewController#attached),
+ * reading this property throws an assertion.
+ */
+@property(nonatomic, readonly) uint64_t id;
+
+/**
  * The style of mouse tracking to use for the view. Defaults to
  * FlutterMouseTrackingModeInKeyWindow.
  */
@@ -42,6 +71,12 @@ FLUTTER_DARWIN_EXPORT
 
 /**
  * Initializes a controller that will run the given project.
+ *
+ * In this initializer, this controller creates an engine, and is attached to
+ * that engine as the default controller. In this way, this controller can not
+ * be set to other engines. This initializer is suitable for the first Flutter
+ * view controller of the app. To use the controller with an existing engine,
+ * use initWithEngine:nibName:bundle: instead.
  *
  * @param project The project to run in this view controller. If nil, a default `FlutterDartProject`
  *                will be used.
@@ -56,7 +91,8 @@ FLUTTER_DARWIN_EXPORT
 /**
  * Initializes this FlutterViewController with the specified `FlutterEngine`.
  *
- * The initialized viewcontroller will attach itself to the engine as part of this process.
+ * This initializer is suitable for both the first Flutter view controller and
+ * the following ones of the app.
  *
  * @param engine The `FlutterEngine` instance to attach to. Cannot be nil.
  * @param nibName The NIB name to initialize this controller with.
@@ -65,6 +101,12 @@ FLUTTER_DARWIN_EXPORT
 - (nonnull instancetype)initWithEngine:(nonnull FlutterEngine*)engine
                                nibName:(nullable NSString*)nibName
                                 bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Return YES if the view controller is attached to an engine.
+ */
+- (BOOL)attached;
+
 /**
  * Invoked by the engine right before the engine is restarted.
  *
