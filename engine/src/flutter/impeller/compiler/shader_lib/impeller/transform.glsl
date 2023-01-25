@@ -15,14 +15,15 @@ vec2 IPVec2TransformPosition(mat4 matrix, vec2 point) {
 // atlas.
 vec4 IPPositionForGlyphPosition(mat4 mvp,
                                 vec2 unit_position,
-                                vec2 glyph_position,
-                                vec2 glyph_size) {
-  vec4 translate =
-      mvp[0] * glyph_position.x + mvp[1] * glyph_position.y + mvp[3];
-  mat4 translated_mvp =
-      mat4(mvp[0], mvp[1], mvp[2], vec4(translate.xyz, mvp[3].w));
-  return translated_mvp * vec4(unit_position.x * glyph_size.x,
-                               unit_position.y * glyph_size.y, 0.0, 1.0);
+                                vec2 destination_position,
+                                vec2 destination_size) {
+  mat4 translation = mat4(1, 0, 0, 0,  //
+                          0, 1, 0, 0,  //
+                          0, 0, 1, 0,  //
+                          destination_position.xy, 0, 1);
+  return mvp * translation *
+         vec4(unit_position.x * destination_size.x,
+              unit_position.y * destination_size.y, 0.0, 1.0);
 }
 
 #endif
