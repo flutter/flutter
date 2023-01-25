@@ -34,7 +34,7 @@ abstract class AssetManifest {
   ///
   /// Throws an [ArgumentError] if [key] cannot be found within the manifest. To
   /// avoid this, use a key obtained from the [listAssets] method.
-  List<AssetMetadata> describeAssetAndVariants(String key);
+  List<AssetMetadata> describeAssetVariants(String key);
 }
 
 // Lazily parses the binary asset manifest into a data structure that's easier to work
@@ -61,7 +61,7 @@ class _AssetManifestBin implements AssetManifest {
   final Map<String, List<AssetMetadata>> _typeCastedData = <String, List<AssetMetadata>>{};
 
   @override
-  List<AssetMetadata> describeAssetAndVariants(String key) {
+  List<AssetMetadata> describeAssetVariants(String key) {
     // We lazily delay typecasting to prevent a performance hiccup when parsing
     // large asset manifests. This is important to keep an app's first asset
     // load fast.
