@@ -128,7 +128,7 @@ class AssetMetadata {
   /// Whether or not this is a main asset. In other words, this is true if
   /// this asset is not a variant of another asset.
   ///
-  /// [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
+  /// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
   /// for more about asset variants.
   final bool main;
 }
