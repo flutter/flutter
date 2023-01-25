@@ -1856,6 +1856,91 @@ void main() {
     expect(onTriggeredCalled, false);
   });
 
+  testWidgets('dismissAllToolTips dismisses hovered tooltips', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    expect(Tooltip.dismissAllToolTips(), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Hovered tooltips do not dismiss after showDuration', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            triggerMode: TooltipTriggerMode.longPress,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await tester.longPressAt(tester.getCenter(tooltip));
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    // Still visible.
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Still visible.
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+
+    // The tooltip is no longer hovered and becomes invisible.
+    await gesture.moveTo(Offset.zero);
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
   testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
