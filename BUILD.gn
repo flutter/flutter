@@ -82,9 +82,6 @@ group("flutter") {
         # gen_snapshot for the host and not the target.
         "//third_party/dart/runtime/bin:gen_snapshot",
 
-        # Built alongside gen_snapshot for 64 bit targets
-        "//third_party/dart/runtime/bin:analyze_snapshot",
-
         # Impeller artifacts - compiler and libtessellator
         "//flutter/impeller/compiler:impellerc",
         "//flutter/impeller/tessellator:tessellator_shared",
@@ -92,6 +89,13 @@ group("flutter") {
         # path_ops
         "//flutter/tools/path_ops",
       ]
+
+      if (host_os == "linux") {
+        public_deps += [
+          # Built alongside gen_snapshot for 64 bit targets
+          "//third_party/dart/runtime/bin:analyze_snapshot",
+        ]
+      }
 
       if (full_dart_sdk) {
         public_deps += [ "//flutter/web_sdk" ]
