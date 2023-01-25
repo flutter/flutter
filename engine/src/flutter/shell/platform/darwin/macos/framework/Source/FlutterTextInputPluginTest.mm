@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
@@ -38,16 +37,6 @@
 - (BOOL)isActive;
 @end
 
-@interface TextInputTestViewController : FlutterViewController
-@end
-
-@implementation TextInputTestViewController
-- (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
-                                          commandQueue:(id<MTLCommandQueue>)commandQueue {
-  return OCMClassMock([NSView class]);
-}
-@end
-
 @interface FlutterInputPluginTestObjc : NSObject
 - (bool)testEmptyCompositionRange;
 - (bool)testClearClientDuringComposing;
@@ -56,7 +45,7 @@
 @implementation FlutterInputPluginTestObjc
 
 - (bool)testEmptyCompositionRange {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -121,7 +110,7 @@
 }
 
 - (bool)testSetMarkedTextWithSelectionChange {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -189,7 +178,7 @@
 }
 
 - (bool)testSetMarkedTextWithReplacementRange {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -257,7 +246,7 @@
 }
 
 - (bool)testComposingRegionRemovedByFramework {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -335,7 +324,7 @@
 
 - (bool)testClearClientDuringComposing {
   // Set up FlutterTextInputPlugin.
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -388,18 +377,26 @@
 }
 
 - (bool)testFirstRectForCharacterRange {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
-  FlutterViewController* controllerMock =
-      [[TextInputTestViewController alloc] initWithEngine:engineMock nibName:nil bundle:nil];
-  [controllerMock loadView];
-  id viewMock = controllerMock.flutterView;
+  FlutterViewController* controllerMock = OCMClassMock([FlutterViewController class]);
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [controllerMock engine])
+      .andReturn(engineMock);
+
+  id viewMock = OCMClassMock([NSView class]);
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [viewMock bounds])
       .andReturn(NSMakeRect(0, 0, 200, 200));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      controllerMock.viewLoaded)
+      .andReturn(YES);
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [controllerMock flutterView])
+      .andReturn(viewMock);
 
   id windowMock = OCMClassMock([NSWindow class]);
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
@@ -456,18 +453,26 @@
 }
 
 - (bool)testFirstRectForCharacterRangeAtInfinity {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
-  FlutterViewController* controllerMock =
-      [[TextInputTestViewController alloc] initWithEngine:engineMock nibName:nil bundle:nil];
-  [controllerMock loadView];
-  id viewMock = controllerMock.flutterView;
+  FlutterViewController* controllerMock = OCMClassMock([FlutterViewController class]);
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [controllerMock engine])
+      .andReturn(engineMock);
+
+  id viewMock = OCMClassMock([NSView class]);
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [viewMock bounds])
       .andReturn(NSMakeRect(0, 0, 200, 200));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      controllerMock.viewLoaded)
+      .andReturn(YES);
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [controllerMock flutterView])
+      .andReturn(viewMock);
 
   id windowMock = OCMClassMock([NSWindow class]);
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
@@ -510,18 +515,26 @@
 }
 
 - (bool)testFirstRectForCharacterRangeWithEsotericAffineTransform {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
       .andReturn(binaryMessengerMock);
-  FlutterViewController* controllerMock =
-      [[TextInputTestViewController alloc] initWithEngine:engineMock nibName:nil bundle:nil];
-  [controllerMock loadView];
-  id viewMock = controllerMock.flutterView;
+  FlutterViewController* controllerMock = OCMClassMock([FlutterViewController class]);
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [controllerMock engine])
+      .andReturn(engineMock);
+
+  id viewMock = OCMClassMock([NSView class]);
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [viewMock bounds])
       .andReturn(NSMakeRect(0, 0, 200, 200));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      controllerMock.viewLoaded)
+      .andReturn(YES);
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [controllerMock flutterView])
+      .andReturn(viewMock);
 
   id windowMock = OCMClassMock([NSWindow class]);
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
@@ -582,7 +595,7 @@
 }
 
 - (bool)testSetEditingStateWithTextEditingDelta {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -638,7 +651,7 @@
 }
 
 - (bool)testOperationsThatTriggerDelta {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -755,7 +768,7 @@
 }
 
 - (bool)testComposingWithDelta {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -992,7 +1005,7 @@
 }
 
 - (bool)testComposingWithDeltasWhenSelectionIsActive {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -1121,7 +1134,7 @@
 }
 
 - (bool)unhandledKeyEquivalent {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -1197,7 +1210,7 @@
 }
 
 - (bool)testLocalTextAndSelectionUpdateAfterDelta {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -1258,7 +1271,7 @@
 }
 
 - (bool)testSelectorsAreForwardedToFramework {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -1401,10 +1414,13 @@ TEST(FlutterTextInputPluginTest, TestSelectorsAreForwardedToFramework) {
 
 TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
   FlutterEngine* engine = CreateTestEngine();
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
   [viewController loadView];
+  [engine setViewController:viewController];
   // Create a NSWindow so that the native text field can become first responder.
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                  styleMask:NSBorderlessWindowMask
@@ -1467,10 +1483,13 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
 
 TEST(FlutterTextInputPluginTest, CanNotBecomeResponderIfNoViewController) {
   FlutterEngine* engine = CreateTestEngine();
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
   [viewController loadView];
+  [engine setViewController:viewController];
   // Creates a NSWindow so that the native text field can become first responder.
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                  styleMask:NSBorderlessWindowMask
@@ -1501,10 +1520,13 @@ TEST(FlutterTextInputPluginTest, CanNotBecomeResponderIfNoViewController) {
 
 TEST(FlutterTextInputPluginTest, IsAddedAndRemovedFromViewHierarchy) {
   FlutterEngine* engine = CreateTestEngine();
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
   [viewController loadView];
+  [engine setViewController:viewController];
 
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                  styleMask:NSBorderlessWindowMask

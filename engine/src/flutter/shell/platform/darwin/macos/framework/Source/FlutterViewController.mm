@@ -286,34 +286,21 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
 @implementation FlutterViewController {
   // The project to run in this controller's engine.
   FlutterDartProject* _project;
-
-  uint64_t _id;
 }
 
-@dynamic id;
 @dynamic view;
 
 /**
  * Performs initialization that's common between the different init paths.
  */
-static void CommonInit(FlutterViewController* controller, FlutterEngine* engine) {
-  if (!engine) {
-    engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
-                                         project:controller->_project
-                          allowHeadlessExecution:NO];
+static void CommonInit(FlutterViewController* controller) {
+  if (!controller->_engine) {
+    controller->_engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
+                                                      project:controller->_project
+                                       allowHeadlessExecution:NO];
   }
-  NSCAssert(controller.engine == nil,
-            @"The FlutterViewController is unexpectedly attached to "
-            @"engine %@ before initialization.",
-            controller.engine);
-  engine.viewController = controller;
-  NSCAssert(controller.engine != nil,
-            @"The FlutterViewController unexpectedly stays unattached after initialization. "
-            @"In unit tests, this is likely because either the FlutterViewController or "
-            @"the FlutterEngine is mocked. Please subclass these classes instead.");
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
   controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
-  [controller initializeKeyboard];
   // macOS fires this message when changing IMEs.
   CFNotificationCenterRef cfCenter = CFNotificationCenterGetDistributedCenter();
   __weak FlutterViewController* weakSelf = controller;
@@ -326,7 +313,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   self = [super initWithCoder:coder];
   NSAssert(self, @"Super init cannot be nil");
 
-  CommonInit(self, nil);
+  CommonInit(self);
   return self;
 }
 
@@ -334,7 +321,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   NSAssert(self, @"Super init cannot be nil");
 
-  CommonInit(self, nil);
+  CommonInit(self);
   return self;
 }
 
@@ -343,7 +330,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   NSAssert(self, @"Super init cannot be nil");
 
   _project = project;
-  CommonInit(self, nil);
+  CommonInit(self);
   return self;
 }
 
@@ -359,7 +346,13 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
-    CommonInit(self, engine);
+    _engine = engine;
+    CommonInit(self);
+    if (engine.running) {
+      [self loadView];
+      engine.viewController = self;
+      [self initializeKeyboard];
+    }
   }
 
   return self;
@@ -377,7 +370,9 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     NSLog(@"Unable to create FlutterView; no MTLDevice or MTLCommandQueue available.");
     return;
   }
-  flutterView = [self createFlutterViewWithMTLDevice:device commandQueue:commandQueue];
+  flutterView = [[FlutterView alloc] initWithMTLDevice:device
+                                          commandQueue:commandQueue
+                                       reshapeListener:self];
   if (_backgroundColor != nil) {
     [flutterView setBackgroundColor:_backgroundColor];
   }
@@ -428,33 +423,16 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   [_flutterView setBackgroundColor:_backgroundColor];
 }
 
-- (uint64_t)id {
-  NSAssert([self attached], @"This view controller is not attched.");
-  return _id;
-}
-
 - (void)onPreEngineRestart {
   [self initializeKeyboard];
-}
-
-- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(uint64_t)viewId {
-  NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
-  _engine = engine;
-  _id = viewId;
-}
-
-- (void)detachFromEngine {
-  NSAssert(_engine != nil, @"Not attached to any engine.");
-  _engine = nil;
-}
-
-- (BOOL)attached {
-  return _engine != nil;
 }
 
 #pragma mark - Private methods
 
 - (BOOL)launchEngine {
+  [self initializeKeyboard];
+
+  _engine.viewController = self;
   if (![_engine runWithEntrypoint:nil]) {
     return NO;
   }
@@ -711,13 +689,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     // back.
     [self.view addSubview:_textInputPlugin];
   }
-}
-
-- (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
-                                          commandQueue:(id<MTLCommandQueue>)commandQueue {
-  return [[FlutterView alloc] initWithMTLDevice:device
-                                   commandQueue:commandQueue
-                                reshapeListener:self];
 }
 
 - (void)onKeyboardLayoutChanged {

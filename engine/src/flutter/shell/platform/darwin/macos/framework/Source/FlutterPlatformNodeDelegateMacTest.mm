@@ -19,19 +19,18 @@
 namespace flutter::testing {
 
 namespace {
-// Returns a view controller configured for the text fixture resource configuration.
-FlutterViewController* CreateTestViewController() {
+// Returns an engine configured for the text fixture resource configuration.
+FlutterEngine* CreateTestEngine() {
   NSString* fixtures = @(testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
       initWithAssetsPath:fixtures
              ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
-  return [[FlutterViewController alloc] initWithProject:project];
+  return [[FlutterEngine alloc] initWithName:@"test" project:project allowHeadlessExecution:true];
 }
 }  // namespace
 
 TEST(FlutterPlatformNodeDelegateMac, Basics) {
-  FlutterViewController* viewController = CreateTestViewController();
-  FlutterEngine* engine = viewController.engine;
+  FlutterEngine* engine = CreateTestEngine();
   engine.semanticsEnabled = YES;
   auto bridge = engine.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -66,8 +65,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
 }
 
 TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
-  FlutterViewController* viewController = CreateTestViewController();
-  FlutterEngine* engine = viewController.engine;
+  FlutterEngine* engine = CreateTestEngine();
   engine.semanticsEnabled = YES;
   auto bridge = engine.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -108,8 +106,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
 }
 
 TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRange) {
-  FlutterViewController* viewController = CreateTestViewController();
-  FlutterEngine* engine = viewController.engine;
+  FlutterEngine* engine = CreateTestEngine();
   engine.semanticsEnabled = YES;
   auto bridge = engine.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -147,8 +144,15 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
-  FlutterViewController* viewController = CreateTestViewController();
-  FlutterEngine* engine = viewController.engine;
+  FlutterEngine* engine = CreateTestEngine();
+
+  // Set up view controller.
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
+  [engine setViewController:viewController];
 
   // Attach the view to a NSWindow.
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
@@ -218,9 +222,14 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
 TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
-  FlutterViewController* viewController = CreateTestViewController();
-  FlutterEngine* engine = viewController.engine;
+  FlutterEngine* engine = CreateTestEngine();
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
   [viewController loadView];
+  [engine setViewController:viewController];
 
   // Unit test localization is unnecessary.
   // NOLINTNEXTLINE(clang-analyzer-optin.osx.cocoa.localizability.NonLocalizedStringChecker)

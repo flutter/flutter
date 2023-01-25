@@ -11,7 +11,6 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
@@ -137,9 +136,11 @@ TEST(FlutterViewController, FlutterViewAcceptsFirstMouse) {
 
 TEST(FlutterViewController, ReparentsPluginWhenAccessibilityDisabled) {
   FlutterEngine* engine = CreateTestEngine();
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  NSString* fixtures = @(testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
   [viewController loadView];
   [engine setViewController:viewController];
   // Creates a NSWindow so that sub view can be first responder.
@@ -213,7 +214,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 @implementation FlutterViewControllerTestObjC
 
 - (bool)testKeyEventsAreSentToFramework {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -251,7 +252,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 - (bool)testKeyEventsArePropagatedIfNotHandled {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -306,7 +307,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 - (bool)testFlutterViewIsConfigured {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
 
   FlutterRenderer* renderer_ = [[FlutterRenderer alloc] initWithFlutterEngine:engineMock];
   OCMStub([engineMock renderer]).andReturn(renderer_);
@@ -327,7 +328,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -380,7 +381,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 - (bool)testKeyEventsAreNotPropagatedIfHandled {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -435,7 +436,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 - (bool)testKeyboardIsRestartedOnEngineRestart {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
       [engineMock binaryMessenger])
@@ -497,7 +498,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 - (bool)testTrackpadGesturesAreSentToFramework {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   // Need to return a real renderer to allow view controller to load.
   FlutterRenderer* renderer_ = [[FlutterRenderer alloc] initWithFlutterEngine:engineMock];
   OCMStub([engineMock renderer]).andReturn(renderer_);
@@ -793,7 +794,7 @@ TEST(FlutterViewControllerTest, testFlutterViewIsConfigured) {
 }
 
 - (bool)testViewWillAppearCalledMultipleTimes {
-  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id engineMock = OCMClassMock([FlutterEngine class]);
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
                                                                                 nibName:@""
                                                                                  bundle:nil];
