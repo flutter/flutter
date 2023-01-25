@@ -117,7 +117,9 @@ abstract class WidgetsBindingObserver {
   ///   @override
   ///   void initState() {
   ///     super.initState();
-  ///     _lastSize = WidgetsBinding.instance.window.physicalSize;
+  ///     // [View.of] exposes the view from `WidgetsBinding.instance.platformDispatcher.views`
+  ///     // into which this widget is drawn.
+  ///     _lastSize = View.of(context).physicalSize;
   ///     WidgetsBinding.instance.addObserver(this);
   ///   }
   ///
@@ -129,7 +131,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = WidgetsBinding.instance.window.physicalSize; });
+  ///     setState(() { _lastSize = View.of(context).physicalSize; });
   ///   }
   ///
   ///   @override
@@ -186,7 +188,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.window.textScaleFactor; });
+  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.platformDispatcher.textScaleFactor; });
   ///   }
   ///
   ///   @override
