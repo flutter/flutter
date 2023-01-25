@@ -97,6 +97,10 @@ class _GestureArena {
   }
 }
 
+/// Used for disambiguating the meaning of sequences of pointer events.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Q85LBtBdi0U}
+///
 /// The first member to accept or the last member to not reject wins.
 ///
 /// See <https://flutter.dev/gestures/#gesture-disambiguation> for more

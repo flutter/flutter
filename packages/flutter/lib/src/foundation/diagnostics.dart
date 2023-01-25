@@ -3088,6 +3088,8 @@ mixin Diagnosticable {
 
   /// Add additional properties associated with the node.
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=DnC7eT-vh1k}
+  ///
   /// Use the most specific [DiagnosticsProperty] existing subclass to describe
   /// each property instead of the [DiagnosticsProperty] base class. There are
   /// only a small number of [DiagnosticsProperty] subclasses each covering a

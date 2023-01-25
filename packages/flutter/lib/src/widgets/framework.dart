@@ -1581,6 +1581,8 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 
 /// Base class for widgets that efficiently propagate information down the tree.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=og-vJqLzg2c}
+///
 /// To obtain the nearest instance of a particular type of inherited widget from
 /// a build context, use [BuildContext.dependOnInheritedWidgetOfExactType].
 ///

@@ -180,6 +180,12 @@ abstract class ScrollView extends StatelessWidget {
   /// [TargetPlatformVariant.mobile] for ScrollViews in the [Axis.vertical]
   /// scroll direction. Adding another to your app will override the
   /// PrimaryScrollController above it.
+  ///
+  /// The following video contains more information about scroll controllers,
+  /// the PrimaryScrollController widget, and their impact on your apps:
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=33_0ABjFJUU}
+  ///
   /// {@endtemplate}
   final bool? primary;
 

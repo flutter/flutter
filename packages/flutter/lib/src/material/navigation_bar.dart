@@ -26,6 +26,8 @@ const double _kIndicatorWidth = 64;
 
 /// Material 3 Navigation Bar component.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DVGYddFaLv0}
+///
 /// Navigation bars offer a persistent and convenient way to switch between
 /// primary destinations in an app.
 ///

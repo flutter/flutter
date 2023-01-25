@@ -70,6 +70,8 @@ export 'package:flutter/services.dart' show Brightness;
 
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=8-szcYzFVao}
+///
 /// Typically used for custom colors. To use, subclass [ThemeExtension],
 /// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
 /// [lerp] methods. The latter will ensure smooth transitions of properties when
