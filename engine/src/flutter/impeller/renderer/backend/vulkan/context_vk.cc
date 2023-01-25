@@ -40,6 +40,12 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(
   const auto prefix = impeller::vk::to_string(
       impeller::vk::DebugUtilsMessageSeverityFlagBitsEXT{severity});
 
+  // There isn't stable messageIdNumber for this validation failure.
+  if (strstr(pCallbackData->pMessageIdName,
+             "CoreValidation-Shader-OutputNotConsumed") != nullptr) {
+    return VK_FALSE;
+  }
+
   FML_DCHECK(false) << prefix << "[" << pCallbackData->messageIdNumber << "]["
                     << pCallbackData->pMessageIdName
                     << "] : " << pCallbackData->pMessage;
@@ -596,7 +602,7 @@ PixelFormat ContextVK::GetColorAttachmentPixelFormat() const {
 }
 
 const BackendFeatures& ContextVK::GetBackendFeatures() const {
-  return kModernBackendFeatures;
+  return kLegacyBackendFeatures;
 }
 
 vk::Queue ContextVK::GetGraphicsQueue() const {
