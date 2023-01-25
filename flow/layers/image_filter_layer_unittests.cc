@@ -404,7 +404,8 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
   const SkPath child_path2 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2);
-  auto layer = std::make_shared<ImageFilterLayer>(dl_image_filter);
+  auto offset = SkPoint::Make(54, 24);
+  auto layer = std::make_shared<ImageFilterLayer>(dl_image_filter, offset);
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
 
@@ -438,6 +439,35 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
                                    cache_canvas, &paint));
   EXPECT_FALSE(raster_cache()->Draw(
       cacheable_image_filter_item->GetId().value(), other_canvas, &paint));
+
+  mock_canvas().reset_draw_calls();
+  layer->Preroll(preroll_context());
+  layer->Paint(paint_context());
+  EXPECT_EQ(mock_canvas().draw_calls().size(), 8UL);
+  auto call0 = MockCanvas::DrawCall{0, MockCanvas::SaveData{1}};
+  EXPECT_EQ(mock_canvas().draw_calls()[0], call0);
+  auto call1 = MockCanvas::DrawCall{
+      1, MockCanvas::ConcatMatrixData{SkM44(SkMatrix::Translate(offset))}};
+  EXPECT_EQ(mock_canvas().draw_calls()[1], call1);
+  auto call2 = MockCanvas::DrawCall{
+      1, MockCanvas::SetMatrixData{SkM44(SkMatrix::Translate(offset))}};
+  EXPECT_EQ(mock_canvas().draw_calls()[2], call2);
+  auto call3 = MockCanvas::DrawCall{1, MockCanvas::SaveData{2}};
+  EXPECT_EQ(mock_canvas().draw_calls()[3], call3);
+  auto call4 = MockCanvas::DrawCall{
+      2, MockCanvas::SetMatrixData{SkM44(SkMatrix::Translate(0.0, 0.0))}};
+  EXPECT_EQ(mock_canvas().draw_calls()[4], call4);
+  EXPECT_EQ(mock_canvas().draw_calls()[5].layer, 2);
+  EXPECT_TRUE(std::holds_alternative<MockCanvas::DrawImageData>(
+      mock_canvas().draw_calls()[5].data));
+  auto call5_data =
+      std::get<MockCanvas::DrawImageData>(mock_canvas().draw_calls()[5].data);
+  EXPECT_EQ(call5_data.x, offset.fX);
+  EXPECT_EQ(call5_data.y, offset.fY);
+  auto call6 = MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}};
+  EXPECT_EQ(mock_canvas().draw_calls()[6], call6);
+  auto call7 = MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}};
+  EXPECT_EQ(mock_canvas().draw_calls()[7], call7);
 }
 
 TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
@@ -446,9 +476,15 @@ TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
 
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
   auto other_transform = SkMatrix::Scale(1.0, 2.0);
-  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto child_rect = SkRect::MakeWH(5.0f, 5.0f);
+  const SkPath child_path = SkPath().addRect(child_rect);
   auto mock_layer = std::make_shared<MockLayer>(child_path);
-  auto layer = std::make_shared<ImageFilterLayer>(dl_image_filter);
+  auto offset = SkPoint::Make(53.8, 24.4);
+  auto offset_rounded =
+      SkPoint::Make(std::round(offset.x()), std::round(offset.y()));
+  auto offset_rounded_out =
+      SkPoint::Make(std::floor(offset.x()), std::floor(offset.y()));
+  auto layer = std::make_shared<ImageFilterLayer>(dl_image_filter, offset);
   layer->Add(mock_layer);
 
   SkMatrix cache_ctm = initial_transform;
@@ -464,6 +500,27 @@ TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
   // frame 1.
   layer->Preroll(preroll_context());
   layer->Paint(paint_context());
+  EXPECT_EQ(mock_canvas().draw_calls().size(), 7UL);
+  auto uncached_call0 = MockCanvas::DrawCall{0, MockCanvas::SaveData{1}};
+  EXPECT_EQ(mock_canvas().draw_calls()[0], uncached_call0);
+  auto uncached_call1 = MockCanvas::DrawCall{
+      1, MockCanvas::ConcatMatrixData{SkM44(SkMatrix::Translate(offset))}};
+  EXPECT_EQ(mock_canvas().draw_calls()[1], uncached_call1);
+  auto uncached_call2 = MockCanvas::DrawCall{
+      1, MockCanvas::SetMatrixData{SkM44(SkMatrix::Translate(offset_rounded))}};
+  EXPECT_EQ(mock_canvas().draw_calls()[2], uncached_call2);
+  EXPECT_EQ(mock_canvas().draw_calls()[3].layer, 1);
+  auto uncached_call3_data =
+      std::get<MockCanvas::SaveLayerData>(mock_canvas().draw_calls()[3].data);
+  EXPECT_EQ(uncached_call3_data.save_bounds, child_rect);
+  EXPECT_EQ(uncached_call3_data.save_to_layer, 2);
+  auto uncached_call4 =
+      MockCanvas::DrawCall{2, MockCanvas::DrawPathData{child_path, SkPaint()}};
+  EXPECT_EQ(mock_canvas().draw_calls()[4], uncached_call4);
+  auto uncached_call5 = MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}};
+  EXPECT_EQ(mock_canvas().draw_calls()[5], uncached_call5);
+  auto uncached_call6 = MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}};
+  EXPECT_EQ(mock_canvas().draw_calls()[6], uncached_call6);
   // frame 2.
   layer->Preroll(preroll_context());
   layer->Paint(paint_context());
@@ -485,6 +542,25 @@ TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
                                    cache_canvas, &paint));
   EXPECT_FALSE(raster_cache()->Draw(
       cacheable_image_filter_item->GetId().value(), other_canvas, &paint));
+
+  mock_canvas().reset_draw_calls();
+  layer->Preroll(preroll_context());
+  layer->Paint(paint_context());
+  EXPECT_EQ(mock_canvas().draw_calls().size(), 4UL);
+  auto cached_call0 = MockCanvas::DrawCall{0, MockCanvas::SaveData{1}};
+  EXPECT_EQ(mock_canvas().draw_calls()[0], cached_call0);
+  auto cached_call1 = MockCanvas::DrawCall{
+      1, MockCanvas::SetMatrixData{SkM44(SkMatrix::Translate(0.0, 0.0))}};
+  EXPECT_EQ(mock_canvas().draw_calls()[1], cached_call1);
+  EXPECT_EQ(mock_canvas().draw_calls()[2].layer, 1);
+  EXPECT_TRUE(std::holds_alternative<MockCanvas::DrawImageDataNoPaint>(
+      mock_canvas().draw_calls()[2].data));
+  auto cached_call2_data = std::get<MockCanvas::DrawImageDataNoPaint>(
+      mock_canvas().draw_calls()[2].data);
+  EXPECT_EQ(cached_call2_data.x, offset_rounded_out.fX);
+  EXPECT_EQ(cached_call2_data.y, offset_rounded_out.fY);
+  auto cached_call3 = MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}};
+  EXPECT_EQ(mock_canvas().draw_calls()[3], cached_call3);
 }
 
 TEST_F(ImageFilterLayerTest, OpacityInheritance) {

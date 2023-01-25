@@ -99,13 +99,8 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   auto mutator = context.state_stack.save();
-  mutator.translate(offset_);
 
   if (context.raster_cache) {
-    // Always apply the integral transform in the presence of a raster cache
-    // whether or not we will draw from the cache
-    mutator.integralTransform();
-
     // Try drawing the layer cache item from the cache before applying the
     // image filter if it was cached with the filter applied.
     if (!layer_raster_cache_item_->IsCacheChildren()) {
@@ -115,6 +110,13 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
         return;
       }
     }
+  }
+
+  // Only apply the offset if not being raster-cached to avoid the offset being
+  // applied twice.
+  mutator.translate(offset_);
+  if (context.raster_cache) {
+    mutator.integralTransform();
   }
 
   if (context.raster_cache && layer_raster_cache_item_->IsCacheChildren()) {
