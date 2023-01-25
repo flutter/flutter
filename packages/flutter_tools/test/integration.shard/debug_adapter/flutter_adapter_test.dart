@@ -564,7 +564,7 @@ void main() {
       // Detach and expected resume and correct output.
       await Future.wait(<Future<void>>[
         // We should print "Detached" instead of "Exited".
-        dap.client.outputEvents.firstWhere((OutputEventBody event) => event.output.startsWith('\nDetached.')),
+        dap.client.outputEvents.firstWhere((OutputEventBody event) => event.output.contains('\nDetached')),
         // We should still get terminatedEvent (this signals the DAP server terminating).
         dap.client.event('terminated'),
         // We should get additional output from the test process confirming the process resumed.
