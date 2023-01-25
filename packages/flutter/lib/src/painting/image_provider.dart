@@ -803,7 +803,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     DecoderCallback? decodeDeprecated,
   ) async {
     if (decode != null) {
-      ui.ImmutableBuffer? buffer;
+      ui.ImmutableBuffer buffer;
       // Hot reload/restart could change whether an asset bundle or key in a
       // bundle are available, or if it is a network backed bundle.
       try {
@@ -815,18 +815,14 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       return decode(buffer);
     }
     if (decodeBufferDeprecated != null) {
-      ui.ImmutableBuffer? buffer;
-      // Hot reload/restart could chnage whether an asset bundle or key in a
+      ui.ImmutableBuffer buffer;
+      // Hot reload/restart could change whether an asset bundle or key in a
       // bundle are available, or if it is a network backed bundle.
       try {
         buffer = await key.bundle.loadBuffer(key.name);
       } on FlutterError {
         PaintingBinding.instance.imageCache.evict(key);
         rethrow;
-      }
-      if (buffer == null) {
-        PaintingBinding.instance.imageCache.evict(key);
-        throw StateError('Unable to read data');
       }
       return decodeBufferDeprecated(buffer);
     }
