@@ -75,7 +75,7 @@ class _AssetManifestBin implements AssetManifest {
         .map((Map<Object?, Object?> data) => AssetMetadata(
             key: data['asset']! as String,
             targetDevicePixelRatio: data['dpr']! as double,
-            isMainAsset: false,
+            main: false,
         ))
         .toList();
 
@@ -84,7 +84,7 @@ class _AssetManifestBin implements AssetManifest {
 
     final AssetMetadata mainAsset = AssetMetadata(key: key,
       targetDevicePixelRatio: null,
-      isMainAsset: true
+      main: true
     );
 
     return <AssetMetadata>[mainAsset, ..._typeCastedData[key]!];
@@ -103,7 +103,7 @@ class AssetMetadata {
   const AssetMetadata({
     required this.key,
     required this.targetDevicePixelRatio,
-    required this.isMainAsset,
+    required this.main,
   });
 
   /// The device pixel ratio that this asset is most ideal for. This is determined
@@ -123,9 +123,9 @@ class AssetMetadata {
   final String key;
 
   /// Whether or not this is a main asset. In other words, this is true if
-  /// this asset is not a variant of another.
+  /// this asset is not a variant of another asset.
   ///
   /// [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
   /// for more about asset variants.
-  final bool isMainAsset;
+  final bool main;
 }
