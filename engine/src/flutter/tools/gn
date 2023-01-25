@@ -578,6 +578,11 @@ def to_gn_args(args):
     if get_host_os() == 'win':
       gn_args['angle_force_context_check_every_call'] = True
 
+    # ANGLE and SwiftShader share build flags to enable X11 and Wayland,
+    # but we only need these enabled for SwiftShader.
+    gn_args['angle_use_x11'] = False
+    gn_args['angle_use_wayland'] = False
+
     # Requires RTTI. We may want to build this in debug modes, punting on that
     # for now.
     gn_args['angle_enable_vulkan_validation_layers'] = False
