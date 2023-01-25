@@ -158,7 +158,14 @@ class MaterialFonts extends CachedArtifact {
 ///
 /// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
-  FlutterWebSdk(Cache cache, {@Deprecated('The platform argument is deprecated') Platform? platform})
+  FlutterWebSdk(Cache cache, {
+    @Deprecated(
+      'The platform argument is no longer used. '
+      'The Web SDK is platform-agnostic, since it runs on the web. '
+      'This feature was deprecated after v3.7.0-24.0.pre'
+    )
+    Platform? platform
+  })
    : super(
       'flutter_web_sdk',
       cache,
