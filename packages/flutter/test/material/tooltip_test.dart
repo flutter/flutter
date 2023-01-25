@@ -506,6 +506,7 @@ void main() {
 
     // Simulate Keyboard opening (MediaQuery.viewInsets.bottom = 300))
     await tester.pumpWidget(materialAppWithViewInsets(300));
+    // Wait for the tooltip to dismiss.
     await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
 
@@ -974,11 +975,9 @@ void main() {
   testWidgets('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96890
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1025,7 +1024,6 @@ void main() {
 
     // Go without crashes.
     await gesture.removePointer();
-    gesture = null;
   });
 
   testWidgets('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
@@ -1061,11 +1059,9 @@ void main() {
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1108,15 +1104,14 @@ void main() {
     // Wait for it to disappear.
     await tester.pumpAndSettle();
     await gesture.removePointer();
-    gesture = null;
     expect(find.text(tooltipText), findsNothing);
   });
 
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      gesture?.removePointer();
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1162,7 +1157,6 @@ void main() {
     // Wait for it to disappear.
     await tester.pumpAndSettle();
     await gesture.removePointer();
-    gesture = null;
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1890,8 +1884,8 @@ void main() {
 
   testWidgets('Tooltip trigger mode ignores mouse events', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Tooltip(
+      const MaterialApp(
+        home: Tooltip(
           message: tooltipText,
           triggerMode: TooltipTriggerMode.longPress,
           child: SizedBox.expand(),
