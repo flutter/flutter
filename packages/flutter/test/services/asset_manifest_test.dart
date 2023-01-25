@@ -30,9 +30,6 @@ class TestAssetBundle extends AssetBundle {
   Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
     return parser(await loadString(key));
   }
-
-  @override
-  String toString() => '$runtimeType@$hashCode()';
 }
 
 
@@ -43,6 +40,7 @@ void main() {
     final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(TestAssetBundle());
 
     expect(manifest.listAssets(), unorderedEquals(<String>['assets/foo.png', 'assets/bar.png']));
+
     final List<AssetMetadata> fooVariants = manifest.getAssetVariants('assets/foo.png');
     expect(fooVariants.length, 2);
     final AssetMetadata firstFooVariant = fooVariants[0];
