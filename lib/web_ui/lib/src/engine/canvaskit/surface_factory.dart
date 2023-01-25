@@ -46,12 +46,12 @@ class SurfaceFactory {
   /// all painting commands.
   final Surface baseSurface = Surface();
 
-  /// A surface used specifically for `Picture.toImage` calls, which can be
-  /// reused in order to avoid creating too many WebGL contexts.
-  late final Surface pictureToImageSurface = Surface();
-
   /// The maximum number of surfaces which can be live at once.
   final int maximumSurfaces;
+
+  /// A surface used specifically for `Picture.toImage` when software rendering
+  /// is supported.
+  late final Surface pictureToImageSurface = Surface();
 
   /// The maximum number of assignable overlays.
   ///
