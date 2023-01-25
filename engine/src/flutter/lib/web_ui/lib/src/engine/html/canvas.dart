@@ -36,7 +36,6 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void saveLayer(ui.Rect? bounds, ui.Paint paint) {
-    assert(paint != null);
     if (bounds == null) {
       _saveLayerWithoutBounds(paint);
     } else {
@@ -90,7 +89,6 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void transform(Float64List matrix4) {
-    assert(matrix4 != null);
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
@@ -110,8 +108,6 @@ class SurfaceCanvas implements ui.Canvas {
   void clipRect(ui.Rect rect,
       {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
     assert(rectIsValid(rect));
-    assert(clipOp != null);
-    assert(doAntiAlias != null);
     _clipRect(rect, clipOp, doAntiAlias);
   }
 
@@ -122,7 +118,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void clipRRect(ui.RRect rrect, {bool doAntiAlias = true}) {
     assert(rrectIsValid(rrect));
-    assert(doAntiAlias != null);
     _clipRRect(rrect, doAntiAlias);
   }
 
@@ -132,8 +127,6 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    assert(path != null); // path is checked on the engine side
-    assert(doAntiAlias != null);
     _clipPath(path, doAntiAlias);
   }
 
@@ -171,8 +164,6 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
-    assert(color != null);
-    assert(blendMode != null);
     _drawColor(color, blendMode);
   }
 
@@ -184,7 +175,6 @@ class SurfaceCanvas implements ui.Canvas {
   void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
     assert(offsetIsValid(p1));
     assert(offsetIsValid(p2));
-    assert(paint != null);
     _drawLine(p1, p2, paint);
   }
 
@@ -194,7 +184,6 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void drawPaint(ui.Paint paint) {
-    assert(paint != null);
     _drawPaint(paint);
   }
 
@@ -205,7 +194,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawRect(ui.Rect rect, ui.Paint paint) {
     assert(rectIsValid(rect));
-    assert(paint != null);
     _drawRect(rect, paint);
   }
 
@@ -216,7 +204,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawRRect(ui.RRect rrect, ui.Paint paint) {
     assert(rrectIsValid(rrect));
-    assert(paint != null);
     _drawRRect(rrect, paint);
   }
 
@@ -228,7 +215,6 @@ class SurfaceCanvas implements ui.Canvas {
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
     assert(rrectIsValid(outer));
     assert(rrectIsValid(inner));
-    assert(paint != null);
     _drawDRRect(outer, inner, paint);
   }
 
@@ -239,7 +225,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawOval(ui.Rect rect, ui.Paint paint) {
     assert(rectIsValid(rect));
-    assert(paint != null);
     _drawOval(rect, paint);
   }
 
@@ -250,7 +235,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawCircle(ui.Offset c, double radius, ui.Paint paint) {
     assert(offsetIsValid(c));
-    assert(paint != null);
     _drawCircle(c, radius, paint);
   }
 
@@ -262,7 +246,6 @@ class SurfaceCanvas implements ui.Canvas {
   void drawArc(ui.Rect rect, double startAngle, double sweepAngle,
       bool useCenter, ui.Paint paint) {
     assert(rectIsValid(rect));
-    assert(paint != null);
     const double pi = math.pi;
     const double pi2 = 2.0 * pi;
 
@@ -297,8 +280,6 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
-    assert(path != null); // path is checked on the engine side
-    assert(paint != null);
     _drawPath(path, paint);
   }
 
@@ -308,9 +289,7 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
-    assert(image != null); // image is checked on the engine side
     assert(offsetIsValid(offset));
-    assert(paint != null);
     _drawImage(image, offset, paint);
   }
 
@@ -320,10 +299,8 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    assert(image != null); // image is checked on the engine side
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
-    assert(paint != null);
     _drawImageRect(image, src, dst, paint);
   }
 
@@ -376,10 +353,8 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawImageNine(
       ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
-    assert(image != null); // image is checked on the engine side
     assert(rectIsValid(center));
     assert(rectIsValid(dst));
-    assert(paint != null);
 
     if (dst.isEmpty) {
       return;
@@ -424,13 +399,11 @@ class SurfaceCanvas implements ui.Canvas {
 
   @override
   void drawPicture(ui.Picture picture) {
-    assert(picture != null); // picture is checked on the engine side
     _canvas.drawPicture(picture);
   }
 
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    assert(paragraph != null);
     assert(offsetIsValid(offset));
     _drawParagraph(paragraph, offset);
   }
@@ -442,9 +415,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawPoints(
       ui.PointMode pointMode, List<ui.Offset> points, ui.Paint paint) {
-    assert(pointMode != null);
-    assert(points != null);
-    assert(paint != null);
     final Float32List pointList = offsetListToFloat32List(points);
     drawRawPoints(pointMode, pointList, paint);
   }
@@ -452,9 +422,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawRawPoints(
       ui.PointMode pointMode, Float32List points, ui.Paint paint) {
-    assert(pointMode != null);
-    assert(points != null);
-    assert(paint != null);
     if (points.length % 2 != 0) {
       throw ArgumentError('"points" must have an even number of values.');
     }
@@ -464,9 +431,6 @@ class SurfaceCanvas implements ui.Canvas {
   @override
   void drawVertices(
       ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    //assert(vertices != null); // vertices is checked on the engine side
-    assert(paint != null);
-    assert(blendMode != null);
     _canvas.drawVertices(
         vertices as SurfaceVertices, blendMode, paint as SurfacePaint);
   }
@@ -481,11 +445,7 @@ class SurfaceCanvas implements ui.Canvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
-    assert(atlas != null); // atlas is checked on the engine side
-    assert(transforms != null);
-    assert(rects != null);
     assert(colors == null || colors.isEmpty || blendMode != null);
-    assert(paint != null);
 
     final int rectCount = rects.length;
     if (transforms.length != rectCount) {
@@ -510,11 +470,7 @@ class SurfaceCanvas implements ui.Canvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
-    assert(atlas != null); // atlas is checked on the engine side
-    assert(rstTransforms != null);
-    assert(rects != null);
     assert(colors == null || blendMode != null);
-    assert(paint != null);
 
     final int rectCount = rects.length;
     if (rstTransforms.length != rectCount) {
@@ -540,9 +496,6 @@ class SurfaceCanvas implements ui.Canvas {
     double elevation,
     bool transparentOccluder,
   ) {
-    assert(path != null); // path is checked on the engine side
-    assert(color != null);
-    assert(transparentOccluder != null);
     _canvas.drawShadow(path, color, elevation, transparentOccluder);
   }
 }

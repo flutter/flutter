@@ -13,8 +13,7 @@ import 'scenario.dart';
 class LocaleInitialization extends Scenario {
   /// Constructor
   LocaleInitialization(PlatformDispatcher dispatcher)
-      : assert(dispatcher != null),
-        super(dispatcher);
+      : super(dispatcher);
 
   int _tapCount = 0;
 

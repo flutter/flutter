@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 bool rectIsValid(ui.Rect rect) {
-  assert(rect != null, 'Rect argument was null.');
   assert(
       !(rect.left.isNaN ||
           rect.right.isNaN ||
@@ -18,7 +17,6 @@ bool rectIsValid(ui.Rect rect) {
 }
 
 bool rrectIsValid(ui.RRect rrect) {
-  assert(rrect != null, 'RRect argument was null.');
   assert(
       !(rrect.left.isNaN ||
           rrect.right.isNaN ||
@@ -29,20 +27,17 @@ bool rrectIsValid(ui.RRect rrect) {
 }
 
 bool offsetIsValid(ui.Offset offset) {
-  assert(offset != null, 'Offset argument was null.');
   assert(!offset.dx.isNaN && !offset.dy.isNaN,
       'Offset argument contained a NaN value.');
   return true;
 }
 
 bool matrix4IsValid(Float32List matrix4) {
-  assert(matrix4 != null, 'Matrix4 argument was null.');
   assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
   return true;
 }
 
 bool radiusIsValid(ui.Radius radius) {
-  assert(radius != null, 'Radius argument was null.');
   assert(!radius.x.isNaN && !radius.y.isNaN,
       'Radius argument contained a NaN value.');
   return true;

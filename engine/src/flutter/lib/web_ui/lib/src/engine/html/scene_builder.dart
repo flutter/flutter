@@ -136,7 +136,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.ClipRectEngineLayer? oldLayer,
   }) {
-    assert(clipBehavior != null);
     return _pushSurface<PersistedClipRect>(
         PersistedClipRect(oldLayer as PersistedClipRect?, rect, clipBehavior));
   }
@@ -167,7 +166,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.ClipPathEngineLayer? oldLayer,
   }) {
-    assert(clipBehavior != null);
     return _pushSurface<PersistedClipPath>(
         PersistedClipPath(oldLayer as PersistedClipPath?, path, clipBehavior));
   }
@@ -205,7 +203,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.ColorFilter filter, {
     ui.ColorFilterEngineLayer? oldLayer,
   }) {
-    assert(filter != null);
     return _pushSurface<PersistedColorFilter>(
         PersistedColorFilter(oldLayer as PersistedColorFilter?, filter));
   }
@@ -226,7 +223,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.Offset offset = ui.Offset.zero,
     ui.ImageFilterEngineLayer? oldLayer,
   }) {
-    assert(filter != null);
     return _pushSurface<PersistedImageFilter>(
         PersistedImageFilter(oldLayer as PersistedImageFilter?, filter, offset));
   }
@@ -264,7 +260,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.ShaderMaskEngineLayer? oldLayer,
     ui.FilterQuality filterQuality = ui.FilterQuality.low,
   }) {
-    assert(blendMode != null);
     return _pushSurface<PersistedShaderMask>(PersistedShaderMask(
         oldLayer as PersistedShaderMask?,
         shader, maskRect, blendMode, filterQuality));

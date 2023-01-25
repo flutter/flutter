@@ -7,9 +7,7 @@
 part of ui;
 
 abstract class OffsetBase {
-  const OffsetBase(this._dx, this._dy)
-      : assert(_dx != null),
-        assert(_dy != null);
+  const OffsetBase(this._dx, this._dy);
 
   final double _dx;
   final double _dy;
@@ -57,7 +55,6 @@ class Offset extends OffsetBase {
   Offset operator %(double operand) => Offset(dx % operand, dy % operand);
   Rect operator &(Size other) => Rect.fromLTWH(dx, dy, other.width, other.height);
   static Offset? lerp(Offset? a, Offset? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -148,7 +145,6 @@ class Size extends OffsetBase {
 
   Size get flipped => Size(height, width);
   static Size? lerp(Size? a, Size? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -180,11 +176,7 @@ class Size extends OffsetBase {
 }
 
 class Rect {
-  const Rect.fromLTRB(this.left, this.top, this.right, this.bottom)
-      : assert(left != null),
-        assert(top != null),
-        assert(right != null),
-        assert(bottom != null);
+  const Rect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   const Rect.fromLTWH(double left, double top, double width, double height)
       : this.fromLTRB(left, top, left + width, top + height);
@@ -291,7 +283,6 @@ class Rect {
   }
 
   static Rect? lerp(Rect? a, Rect? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -368,7 +359,6 @@ class Radius {
   Radius operator ~/(double operand) => Radius.elliptical((x ~/ operand).toDouble(), (y ~/ operand).toDouble());
   Radius operator %(double operand) => Radius.elliptical(x % operand, y % operand);
   static Radius? lerp(Radius? a, Radius? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -566,19 +556,7 @@ class RRect {
     this.blRadiusX = 0.0,
     this.blRadiusY = 0.0,
     bool uniformRadii = false,
-  })  : assert(left != null),
-        assert(top != null),
-        assert(right != null),
-        assert(bottom != null),
-        assert(tlRadiusX != null),
-        assert(tlRadiusY != null),
-        assert(trRadiusX != null),
-        assert(trRadiusY != null),
-        assert(brRadiusX != null),
-        assert(brRadiusY != null),
-        assert(blRadiusX != null),
-        assert(blRadiusY != null),
-        assert(tlRadiusX >= 0),
+  })  : assert(tlRadiusX >= 0),
         assert(tlRadiusY >= 0),
         assert(trRadiusX >= 0),
         assert(trRadiusY >= 0),
@@ -832,7 +810,6 @@ class RRect {
   }
 
   static RRect? lerp(RRect? a, RRect? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;

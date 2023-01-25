@@ -15,8 +15,7 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
   ///
   /// The [dispatcher] parameter must not be null.
   PoppableScreenScenario(PlatformDispatcher dispatcher)
-      : assert(dispatcher != null),
-        super(dispatcher);
+      : super(dispatcher);
 
   // Rect for the pop button. Only defined once onMetricsChanged is called.
   Rect? _buttonRect;

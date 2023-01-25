@@ -359,7 +359,6 @@ class SingleEntryBrowserHistory extends BrowserHistory {
   /// replaces the state of the entry so that we can recognize it later using
   /// [_isOriginEntry] inside [_popStateListener].
   void _setupOriginEntry(UrlStrategy strategy) {
-    assert(strategy != null);
     strategy.replaceState(_wrapOriginState(currentState), 'origin', '');
   }
 
@@ -370,7 +369,6 @@ class SingleEntryBrowserHistory extends BrowserHistory {
     bool replace = false,
     String? path,
   }) {
-    assert(strategy != null);
     path ??= currentPath;
     if (replace) {
       strategy.replaceState(_flutterState, 'flutter', path);
