@@ -23,7 +23,7 @@ void main() {
       {"missing": "entry"}
       {"other": true}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = parseFileReporter(file);
+      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
       expect(result.allTestSpecs, isEmpty);
     });
 
@@ -47,7 +47,7 @@ void main() {
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"ProjectValidatorTask","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}
       {"success":true,"type":"done","time":4870}''';
       file.writeAsStringSync(output);
-      final Map<int, TestSpecs> result = parseFileReporter(file).allTestSpecs;
+      final Map<int, TestSpecs> result = TestFileReporterResults.fromFile(file).allTestSpecs;
       expect(result, contains(0));
       expect(result, contains(1));
       expect(result[0]!.path, 'test/general.shard/project_validator_result_test.dart');
@@ -62,7 +62,7 @@ void main() {
       {"suite":{"id":1,"platform":"vm","path":"other_path"},"type":"suite","time":1000}
       {"group":{"id":7,"suiteID":1,"parentID":2,"name":"name","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":82,"column":3,"url":"file:///file"},"type":"group","time":5000}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = parseFileReporter(file);
+      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
       expect(result.hasFailedTests, true);
     });
 
@@ -86,7 +86,7 @@ void main() {
       {"testID":6,"result":"failure","skipped":false,"hidden":false,"type":"testDone","time":1107}
       {"success":false,"type":"done","time":1120}''';
       file.writeAsStringSync(output);
-      final TestFileReporterResults result = parseFileReporter(file);
+      final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
       expect(result.hasFailedTests, true);
       expect(result.errors.length == 2, true);
       expect(result.errors[0].contains('Expected: <true>  Actual: <false>'), true);

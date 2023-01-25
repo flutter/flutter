@@ -1839,7 +1839,7 @@ Future<void> _runDartTest(String workingDirectory, {
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
-  final TestFileReporterResults test = parseFileReporter(metricFile); // --file_reporter name
+  final TestFileReporterResults test = TestFileReporterResults.fromFile(metricFile); // --file_reporter name
   try {
     final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
     info.writeAsStringSync(json.encode(test.errors));
