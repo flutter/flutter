@@ -21,13 +21,14 @@ out vec4 frag_color;
 
 void main() {
   vec2 uv_size = v_source_glyph_size / frag_info.atlas_size;
-  vec2 offset = v_source_position / frag_info.atlas_size;
+  vec2 uv_position = v_source_position / frag_info.atlas_size;
   if (v_has_color == 1.0) {
     frag_color =
-        texture(glyph_atlas_sampler, v_unit_position * uv_size + offset);
+        texture(glyph_atlas_sampler, v_unit_position * uv_size + uv_position);
   } else {
     frag_color =
-        texture(glyph_atlas_sampler, v_unit_position * uv_size + offset).aaaa *
+        texture(glyph_atlas_sampler, v_unit_position * uv_size + uv_position)
+            .aaaa *
         frag_info.text_color;
   }
 }
