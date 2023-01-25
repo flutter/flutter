@@ -46,6 +46,7 @@ class CompilerSkSL : public spirv_cross::CompilerGLSL {
   bool emit_uniform_resources();
   bool emit_output_resources();
   bool emit_global_variable_resources();
+  bool emit_undefined_values();
   void emit_resources();
 
   void emit_interface_block(const spirv_cross::SPIRVariable& var);

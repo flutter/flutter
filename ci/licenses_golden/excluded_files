@@ -961,14 +961,18 @@
 ../../../third_party/angle/samples
 ../../../third_party/angle/scripts
 ../../../third_party/angle/src/commit_id.py
+../../../third_party/angle/src/common/BinaryStream_unittest.cpp
 ../../../third_party/angle/src/common/CircularBuffer_unittest.cpp
 ../../../third_party/angle/src/common/FastVector_unittest.cpp
 ../../../third_party/angle/src/common/FixedVector_unittest.cpp
 ../../../third_party/angle/src/common/Float16ToFloat32.py
 ../../../third_party/angle/src/common/Optional_unittest.cpp
 ../../../third_party/angle/src/common/PoolAlloc_unittest.cpp
+../../../third_party/angle/src/common/WorkerThread_unittest.cpp
 ../../../third_party/angle/src/common/aligned_memory_unittest.cpp
 ../../../third_party/angle/src/common/angleutils_unittest.cpp
+../../../third_party/angle/src/common/base/README.angle
+../../../third_party/angle/src/common/base/anglebase/numerics/OWNERS
 ../../../third_party/angle/src/common/bitset_utils_unittest.cpp
 ../../../third_party/angle/src/common/fuchsia_egl/OWNERS
 ../../../third_party/angle/src/common/gen_packed_gl_enums.py
@@ -980,9 +984,6 @@
 ../../../third_party/angle/src/common/spirv/gen_spirv_builder_and_parser.py
 ../../../third_party/angle/src/common/string_utils_unittest.cpp
 ../../../third_party/angle/src/common/system_utils_unittest.cpp
-../../../third_party/angle/src/common/third_party/base/README.angle
-../../../third_party/angle/src/common/third_party/base/anglebase/numerics/OWNERS
-../../../third_party/angle/src/common/third_party/smhasher/README.angle
 ../../../third_party/angle/src/common/third_party/xxhash/README.chromium
 ../../../third_party/angle/src/common/third_party/xxhash/README.md
 ../../../third_party/angle/src/common/utilities_unittest.cpp
@@ -996,7 +997,7 @@
 ../../../third_party/angle/src/feature_support_util/OWNERS
 ../../../third_party/angle/src/feature_support_util/feature_support_util_unittest.cpp
 ../../../third_party/angle/src/gpu_info_util/SystemInfo_unittest.cpp
-../../../third_party/angle/src/libANGLE/BinaryStream_unittest.cpp
+../../../third_party/angle/src/image_util/AstcDecompressor_unittest.cpp
 ../../../third_party/angle/src/libANGLE/BlobCache_unittest.cpp
 ../../../third_party/angle/src/libANGLE/Config_unittest.cpp
 ../../../third_party/angle/src/libANGLE/Fence_unittest.cpp
@@ -1012,7 +1013,6 @@
 ../../../third_party/angle/src/libANGLE/TransformFeedback_unittest.cpp
 ../../../third_party/angle/src/libANGLE/VaryingPacking_unittest.cpp
 ../../../third_party/angle/src/libANGLE/VertexArray_unittest.cpp
-../../../third_party/angle/src/libANGLE/WorkerThread_unittest.cpp
 ../../../third_party/angle/src/libANGLE/angletypes_unittest.cpp
 ../../../third_party/angle/src/libANGLE/capture/OWNERS
 ../../../third_party/angle/src/libANGLE/gen_copy_conversion_table.py
@@ -1051,7 +1051,9 @@
 ../../../third_party/angle/src/libANGLE/renderer/vulkan/gen_vk_mandatory_format_support_table.py
 ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/README.md
 ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/src/third_party/.clang-format
+../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/src/third_party/etc_decoder/README.chromium
 ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/src/third_party/ffx_spd/README.chromium
+../../../third_party/angle/src/program_serialize_data_version.py
 ../../../third_party/angle/src/tests
 ../../../third_party/angle/src/third_party/ceval/.clang-format
 ../../../third_party/angle/src/third_party/ceval/README.chromium
@@ -2789,7 +2791,6 @@
 ../../../third_party/vulkan-deps/update-commit-message.py
 ../../../third_party/vulkan-deps/vulkan-headers/DIR_METADATA
 ../../../third_party/vulkan-deps/vulkan-headers/README.chromium
-../../../third_party/vulkan-deps/vulkan-headers/src/.cmake-format.py
 ../../../third_party/vulkan-deps/vulkan-headers/src/.git
 ../../../third_party/vulkan-deps/vulkan-headers/src/.gitattributes
 ../../../third_party/vulkan-deps/vulkan-headers/src/.github
@@ -2797,9 +2798,11 @@
 ../../../third_party/vulkan-deps/vulkan-headers/src/BUILD.md
 ../../../third_party/vulkan-deps/vulkan-headers/src/CMakeLists.txt
 ../../../third_party/vulkan-deps/vulkan-headers/src/CODE_OF_CONDUCT.md
+../../../third_party/vulkan-deps/vulkan-headers/src/CONTRIBUTING.md
 ../../../third_party/vulkan-deps/vulkan-headers/src/README.md
 ../../../third_party/vulkan-deps/vulkan-headers/src/cmake
 ../../../third_party/vulkan-deps/vulkan-headers/src/registry
+../../../third_party/vulkan-deps/vulkan-headers/src/tests
 ../../../third_party/vulkan-deps/vulkan-loader
 ../../../third_party/vulkan-deps/vulkan-tools
 ../../../third_party/vulkan-deps/vulkan-validation-layers/README.chromium
