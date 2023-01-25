@@ -255,6 +255,8 @@ class MediaQueryData {
   /// level MediaQuery created by [WidgetsApp] are the same as the window
   /// (often the mobile device screen) that contains the app.
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+  ///
   /// See also:
   ///
   ///  * [ui.window], which provides some additional detail about this property
