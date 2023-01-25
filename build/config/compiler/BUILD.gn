@@ -353,7 +353,7 @@ config("compiler") {
 
   # TODO(crbug.com/1374347): Cleanup undefined symbol errors caught by
   # --no-undefined-version.
-  if (is_clang && !is_win && !is_mac && !is_ios) {
+  if (is_clang && !is_win && !is_mac && !is_ios && !is_wasm) {
     ldflags += [ "-Wl,--undefined-version" ]
   }
 
