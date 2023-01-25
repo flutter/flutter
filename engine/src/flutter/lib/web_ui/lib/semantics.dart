@@ -5,7 +5,7 @@
 part of ui;
 
 class SemanticsAction {
-  const SemanticsAction._(this.index) : assert(index != null);
+  const SemanticsAction._(this.index);
 
   static const int _kTapIndex = 1 << 0;
   static const int _kLongPressIndex = 1 << 1;
@@ -134,7 +134,7 @@ class SemanticsAction {
 }
 
 class SemanticsFlag {
-  const SemanticsFlag._(this.index) : assert(index != null);
+  const SemanticsFlag._(this.index);
 
   final int index;
 

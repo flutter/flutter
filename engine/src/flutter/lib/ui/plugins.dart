@@ -12,8 +12,7 @@ class CallbackHandle {
   ///
   /// Only values produced by a call to [CallbackHandle.toRawHandle] should be
   /// used, otherwise this object will be an invalid handle.
-  CallbackHandle.fromRawHandle(this._handle)
-      : assert(_handle != null, "'_handle' must not be null.");
+  CallbackHandle.fromRawHandle(this._handle);
 
   final int _handle;
 
@@ -60,7 +59,6 @@ class PluginUtilities {
   /// original callback. If `callback` is not a top-level or static function,
   /// null is returned.
   static CallbackHandle? getCallbackHandle(Function callback) {
-    assert(callback != null, "'callback' must not be null.");
     return _forwardCache.putIfAbsent(callback, () {
       final int? handle = _getCallbackHandle(callback);
       return handle != null ? CallbackHandle.fromRawHandle(handle) : null;
@@ -76,7 +74,6 @@ class PluginUtilities {
   /// [PluginUtilities.getCallbackHandle], null is returned. Otherwise, a
   /// tear-off of the callback associated with `handle` is returned.
   static Function? getCallbackFromHandle(CallbackHandle handle) {
-    assert(handle != null, "'handle' must not be null.");
     return _backwardCache.putIfAbsent(
         handle, () => _getCallbackFromHandle(handle.toRawHandle()));
   }

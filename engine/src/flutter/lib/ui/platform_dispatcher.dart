@@ -1943,8 +1943,7 @@ class Locale {
   const Locale(
     this._languageCode, [
     this._countryCode,
-  ]) : assert(_languageCode != null),
-       assert(_languageCode != ''),
+  ]) : assert(_languageCode != ''),
        scriptCode = null;
 
   /// Creates a new Locale object.
@@ -1971,8 +1970,7 @@ class Locale {
     String languageCode = 'und',
     this.scriptCode,
     String? countryCode,
-  }) : assert(languageCode != null),
-       assert(languageCode != ''),
+  }) : assert(languageCode != ''),
        _languageCode = languageCode,
        assert(scriptCode != ''),
        assert(countryCode != ''),

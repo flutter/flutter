@@ -111,7 +111,7 @@ void main(List<String> arguments) {
   if (results['ui'] as bool) {
     replacementPatterns = uiPatterns;
   } else {
-    libraryName = results['library-name'] as String;
+    libraryName = results['library-name'] as String?;
     if (libraryName == null) {
       throw Exception('library-name must be specified if not rewriting ui');
     }

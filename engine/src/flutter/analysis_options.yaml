@@ -12,8 +12,6 @@ analyzer:
     # allow self-reference to deprecated members (we do this because otherwise we have
     # to annotate every member in every test, assert, etc, when we deprecate something)
     deprecated_member_use_from_same_package: ignore
-    # Turned off until null-safe rollout is complete.
-    unnecessary_null_comparison: ignore
   exclude: # DIFFERENT FROM FLUTTER/FLUTTER
     # Fixture depends on dart:ui and raises false positives.
     - flutter_frontend_server/test/fixtures/lib/main.dart

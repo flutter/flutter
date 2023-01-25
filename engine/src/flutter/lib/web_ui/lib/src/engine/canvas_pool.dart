@@ -1011,13 +1011,10 @@ class ContextStateHandle {
           context.translate(shaderBounds!.left, shaderBounds.top);
         }
       }
-    } else if (paint.color != null) {
+    } else {
       final String? colorString = colorValueToCssString(paint.color);
       fillStyle = colorString;
       strokeStyle = colorString;
-    } else {
-      fillStyle = '#000000';
-      strokeStyle = '#000000';
     }
 
     final ui.MaskFilter? maskFilter = paint.maskFilter;

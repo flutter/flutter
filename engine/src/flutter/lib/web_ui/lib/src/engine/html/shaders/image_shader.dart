@@ -187,7 +187,6 @@ class EngineImageShader implements ui.ImageShader {
     ///
     /// Create buffer for vertex coordinates.
     final Object positionsBuffer = gl.createBuffer()!;
-    assert(positionsBuffer != null);
 
     Object? vao;
     if (isWebGl2) {

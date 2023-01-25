@@ -138,9 +138,6 @@ void _invoke(void Function()? callback, Zone zone) {
   if (callback == null) {
     return;
   }
-
-  assert(zone != null);
-
   if (identical(zone, Zone.current)) {
     callback();
   } else {
@@ -157,9 +154,6 @@ void _invoke1<A>(void Function(A a)? callback, Zone zone, A arg) {
   if (callback == null) {
     return;
   }
-
-  assert(zone != null);
-
   if (identical(zone, Zone.current)) {
     callback(arg);
   } else {
@@ -176,9 +170,6 @@ void _invoke2<A1, A2>(void Function(A1 a1, A2 a2)? callback, Zone zone, A1 arg1,
   if (callback == null) {
     return;
   }
-
-  assert(zone != null);
-
   if (identical(zone, Zone.current)) {
     callback(arg1, arg2);
   } else {
@@ -197,9 +188,6 @@ void _invoke3<A1, A2, A3>(void Function(A1 a1, A2 a2, A3 a3)? callback, Zone zon
   if (callback == null) {
     return;
   }
-
-  assert(zone != null);
-
   if (identical(zone, Zone.current)) {
     callback(arg1, arg2, arg3);
   } else {

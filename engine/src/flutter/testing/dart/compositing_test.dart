@@ -83,7 +83,6 @@ void main() {
     }
 
     final Scene scene = builder.build();
-    expect(scene != null, true);
     scene.dispose();
   });
 

@@ -13,7 +13,7 @@ part of dart.ui;
 /// See also:
 ///   - file://./../../lib/ui/semantics/semantics_node.h
 class SemanticsAction {
-  const SemanticsAction._(this.index) : assert(index != null);
+  const SemanticsAction._(this.index);
 
   static const int _kTapIndex = 1 << 0;
   static const int _kLongPressIndex = 1 << 1;
@@ -289,7 +289,7 @@ class SemanticsAction {
 // accessibility services, `flutter_test/controller.dart#SemanticsController._importantFlags`
 // must be updated as well.
 class SemanticsFlag {
-  const SemanticsFlag._(this.index) : assert(index != null);
+  const SemanticsFlag._(this.index);
 
   /// The numerical value for this flag.
   ///
@@ -892,10 +892,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
     required Int32List additionalActions,
   }) {
     assert(_matrix4IsValid(transform));
-    assert(
-      scrollChildren == 0 || scrollChildren == null || (scrollChildren > 0 && childrenInHitTestOrder != null),
-      'If a node has scrollChildren, it must have childrenInHitTestOrder',
-    );
     _updateNode(
       id,
       flags,
@@ -1025,8 +1021,6 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
   /// [SemanticsAction.index] value. For custom actions this argument should not be
   /// provided.
   void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) {
-    assert(id != null);
-    assert(overrideId != null);
     _updateCustomAction(id, label ?? '', hint ?? '', overrideId);
   }
   @Native<Void Function(Pointer<Void>, Int32, Handle, Handle, Int32)>(symbol: 'SemanticsUpdateBuilder::updateCustomAction')

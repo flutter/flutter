@@ -252,7 +252,6 @@ AssetManager get assetManager => _assetManager!;
 AssetManager? _assetManager;
 
 void _setAssetManager(AssetManager assetManager) {
-  assert(assetManager != null, 'Cannot set assetManager to null');
   if (assetManager == _assetManager) {
     return;
   }

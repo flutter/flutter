@@ -45,7 +45,6 @@ class FontWeight {
     w900
   ];
   static FontWeight? lerp(FontWeight? a, FontWeight? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -75,10 +74,8 @@ class FontWeight {
 
 class FontFeature {
   const FontFeature(this.feature, [this.value = 1])
-      : assert(feature != null),
-        assert(feature.length == 4,
+      : assert(feature.length == 4,
             'Feature tag must be exactly four characters long.'),
-        assert(value != null),
         assert(value >= 0, 'Feature value must be zero or a positive integer.');
   const FontFeature.enable(String feature) : this(feature, 1);
   const FontFeature.disable(String feature) : this(feature, 0);
@@ -184,9 +181,7 @@ class FontVariation {
   const FontVariation(
     this.axis,
     this.value,
-  ) : assert(axis != null),
-      assert(axis.length == 4, 'Axis tag must be exactly four characters long.'),
-      assert(value != null);
+  ) : assert(axis.length == 4, 'Axis tag must be exactly four characters long.');
 
   final String axis;
   final double value;
@@ -519,8 +514,7 @@ class TextPosition {
   const TextPosition({
     required this.offset,
     this.affinity = TextAffinity.downstream,
-  })  : assert(offset != null),
-        assert(affinity != null);
+  });
   final int offset;
   final TextAffinity affinity;
 
@@ -595,7 +589,7 @@ class TextRange {
 class ParagraphConstraints {
   const ParagraphConstraints({
     required this.width,
-  }) : assert(width != null);
+  });
   final double width;
 
   @override

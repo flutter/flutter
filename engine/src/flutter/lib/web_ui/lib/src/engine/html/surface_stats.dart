@@ -237,7 +237,6 @@ void debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
 
   void countReusesRecursively(PersistedSurface surface) {
     final DebugSurfaceStats stats = surfaceStatsFor(surface);
-    assert(stats != null);
 
     surfaceRetainCount += stats.retainSurfaceCount;
     elementReuseCount += stats.reuseElementCount;

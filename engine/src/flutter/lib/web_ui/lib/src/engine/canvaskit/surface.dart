@@ -26,9 +26,7 @@ typedef SubmitCallback = bool Function(SurfaceFrame, CkCanvas);
 /// A frame which contains a canvas to be drawn into.
 class SurfaceFrame {
   SurfaceFrame(this.skiaSurface, this.submitCallback)
-      : _submitted = false,
-        assert(skiaSurface != null),
-        assert(submitCallback != null);
+      : _submitted = false;
 
   final CkSurface skiaSurface;
   final SubmitCallback submitCallback;

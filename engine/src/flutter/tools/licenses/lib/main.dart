@@ -98,7 +98,7 @@ class _RepositorySourceFile extends _RepositoryLicensedFile {
   @override
   Iterable<Assignment> assignLicenses() {
     _internalLicenses ??= determineLicensesFor(_contents, name, parent, origin: io.fullName);
-    final List<License> licenses = _internalLicenses!;
+    final List<License>? licenses = _internalLicenses;
     if (licenses != null && licenses.isNotEmpty) {
       return licenses.map((License license) => license.assignLicenses(io.fullName, parent!));
     }
@@ -964,7 +964,6 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
         } else if (entry is fs.File) {
           try {
             final _RepositoryFile child = createFile(entry);
-            assert(child != null);
             if (child is _RepositoryLicensedFile) {
               _files.add(child);
             } else {
@@ -1080,11 +1079,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
       return const <License>[];
     }
     return _licenses.expand((_RepositoryLicenseFile license) {
-      final List<License> licenses = license.licensesFor(name);
-      if (licenses != null) {
-        return licenses;
-      }
-      return const <License>[];
+      return license.licensesFor(name);
     }).toList();
   }
 
@@ -1841,7 +1836,6 @@ class _Progress {
   }
 
   void advance({required bool success}) {
-    assert(success != null);
     if (success) {
       _withLicense += 1;
     } else {
@@ -1904,9 +1898,7 @@ String? _readSignature(String goldenPath) {
 
 /// Writes a signature to an [system.IOSink] in the expected format.
 void _writeSignature(String signature, system.IOSink sink) {
-  if (signature != null) {
-    sink.writeln('Signature: $signature\n');
-  }
+  sink.writeln('Signature: $signature\n');
 }
 
 // Checks for changes to the license tool itself.

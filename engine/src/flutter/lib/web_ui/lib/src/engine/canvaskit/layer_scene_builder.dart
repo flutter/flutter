@@ -147,7 +147,6 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.ColorFilter filter, {
     ui.ColorFilterEngineLayer? oldLayer,
   }) {
-    assert(filter != null);
     return pushLayer<ColorFilterEngineLayer>(ColorFilterEngineLayer(filter));
   }
 
@@ -157,7 +156,6 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer? oldLayer,
     ui.Offset offset = ui.Offset.zero,
   }) {
-    assert(filter != null);
     return pushLayer<ImageFilterEngineLayer>(ImageFilterEngineLayer(filter, offset));
   }
 

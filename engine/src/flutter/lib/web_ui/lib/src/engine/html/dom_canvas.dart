@@ -257,8 +257,7 @@ DomHTMLElement buildDrawRectElement(
     ..transformOrigin = '0 0 0'
     ..transform = effectiveTransform;
 
-  String cssColor =
-      paint.color == null ? '#000000' : colorValueToCssString(paint.color)!;
+  String cssColor = colorValueToCssString(paint.color)!;
 
   if (paint.maskFilter != null) {
     final double sigma = paint.maskFilter!.webOnlySigma;
@@ -352,10 +351,8 @@ SVGSVGElement pathToSvgElement(SurfacePath path, SurfacePaintData paint) {
       svgPath.setAttribute('stroke-linecap', '${stringForStrokeCap(paint.strokeCap)}');
     }
     svgPath.setAttribute('fill', 'none');
-  } else if (paint.color != null) {
-    svgPath.setAttribute('fill', colorValueToCssString(paint.color)!);
   } else {
-    svgPath.setAttribute('fill', '#000000');
+    svgPath.setAttribute('fill', colorValueToCssString(paint.color)!);
   }
   if (path.fillType == ui.PathFillType.evenOdd) {
     svgPath.setAttribute('fill-rule', 'evenodd');

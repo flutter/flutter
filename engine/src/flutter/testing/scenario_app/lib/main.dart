@@ -12,7 +12,6 @@ import 'dart:ui';
 import 'src/scenarios.dart';
 
 void main() {
-  assert(window.locale != null);
   window
     ..onPlatformMessage = _handlePlatformMessage
     ..onBeginFrame = _onBeginFrame

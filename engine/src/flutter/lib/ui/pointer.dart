@@ -421,7 +421,7 @@ class PointerData {
 /// A sequence of reports about the state of pointers.
 class PointerDataPacket {
   /// Creates a packet of pointer data reports.
-  const PointerDataPacket({ this.data = const <PointerData>[] }) : assert(data != null);
+  const PointerDataPacket({ this.data = const <PointerData>[] });
 
   /// Data about the individual pointers in this packet.
   ///

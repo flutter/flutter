@@ -340,7 +340,6 @@ abstract class License {
       body = reformat(body);
     }
     final License result;
-    assert(type != null);
     switch (type) {
       case LicenseType.bsd:
       case LicenseType.mit:
@@ -1036,7 +1035,6 @@ Iterable<_LicenseMatch> _tryInline(String body, RegExp pattern, {
   required bool needsCopyright,
   required String origin,
 }) sync* {
-  assert(needsCopyright != null);
   for (final _PartialLicenseMatch match in _findLicenseBlocks(body, pattern, 1, 2, needsCopyright: needsCopyright)) {
     yield _LicenseMatch(License.fromBody(match.getEntireLicense(), origin: origin), match.start, match.end, debug: '_tryInline', missingCopyrights: needsCopyright && !match.hasCopyrights);
   }
@@ -1181,7 +1179,7 @@ License? interpretAsRedirectLicense(String fileContents, LicenseSource parentDir
     final Match? match = pattern.pattern!.matchAsPrefix(body);
     if (match != null && match.start == 0 && match.end == body.length) {
       final License candidate = _dereferenceLicense(3, match.group as String? Function(int?), pattern, parentDirectory, origin: origin);
-      if (result != null && candidate != null) {
+      if (result != null) {
         throw 'Multiple potential matches in interpretAsRedirectLicense in $parentDirectory; body was:\n------8<------\n$fileContents\n------8<------';
       }
       result = candidate;

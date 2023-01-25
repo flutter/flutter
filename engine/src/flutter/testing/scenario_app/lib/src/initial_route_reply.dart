@@ -14,8 +14,7 @@ class InitialRouteReply extends Scenario {
   ///
   /// The [window] parameter must not be null.
   InitialRouteReply(PlatformDispatcher dispatcher)
-      : assert(dispatcher != null),
-        super(dispatcher);
+      : super(dispatcher);
 
   @override
   void onBeginFrame(Duration duration) {

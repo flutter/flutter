@@ -44,8 +44,7 @@ class PlatformViewScenario extends Scenario
   PlatformViewScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -71,8 +70,7 @@ class NonFullScreenFlutterViewPlatformViewScenario extends Scenario
   NonFullScreenFlutterViewPlatformViewScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -98,8 +96,7 @@ class PlatformViewNoOverlayIntersectionScenario extends Scenario
   PlatformViewNoOverlayIntersectionScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -133,8 +130,7 @@ class PlatformViewLargerThanDisplaySize extends Scenario
   PlatformViewLargerThanDisplaySize(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -166,8 +162,7 @@ class PlatformViewPartialIntersectionScenario extends Scenario
   PlatformViewPartialIntersectionScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier .
   final int id;
@@ -198,8 +193,7 @@ class PlatformViewTwoIntersectingOverlaysScenario extends Scenario
   PlatformViewTwoIntersectingOverlaysScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -242,8 +236,7 @@ class PlatformViewOneOverlayTwoIntersectingOverlaysScenario extends Scenario
   PlatformViewOneOverlayTwoIntersectingOverlaysScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -293,8 +286,7 @@ class MultiPlatformViewWithoutOverlaysScenario extends Scenario
     PlatformDispatcher dispatcher, {
     required this.firstId,
     required this.secondId,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier to use for the first platform view.
   final int firstId;
@@ -349,8 +341,7 @@ class PlatformViewMaxOverlaysScenario extends Scenario
   PlatformViewMaxOverlaysScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -404,8 +395,7 @@ class MultiPlatformViewScenario extends Scenario
     PlatformDispatcher dispatcher, {
     required this.firstId,
     required this.secondId,
-  })  : assert(dispatcher != null),
-        super(dispatcher);
+  })  : super(dispatcher);
 
   /// The platform view identifier to use for the first platform view.
   final int firstId;
@@ -453,8 +443,7 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     PlatformDispatcher dispatcher, {
     required this.firstId,
     required this.secondId,
-  })  : assert(dispatcher != null),
-        super(dispatcher) {
+  })  : super(dispatcher) {
     _nextFrame = _firstFrame;
   }
 
@@ -564,8 +553,7 @@ class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenar
   PlatformViewClipRectScenario(
     PlatformDispatcher dispatcher, {
     required this.id,
-  }) : assert(dispatcher != null),
-       super(dispatcher);
+  }) : super(dispatcher);
 
   /// The platform view identifier.
   final int id;
@@ -913,8 +901,7 @@ class PlatformViewForTouchIOSScenario extends Scenario
     this.id = 0,
     this.rejectUntilTouchesEnded = false,
     required this.accept,
-  }) : assert(dispatcher != null),
-       super(dispatcher) {
+  }) : super(dispatcher) {
     _nextFrame = _firstFrame;
   }
 
@@ -1222,7 +1209,6 @@ class PlatformViewScrollingUnderWidget extends Scenario
     required int lastPlatformViewId,
   }) : _firstPlatformViewId = firstPlatformViewId,
        _lastPlatformViewId = lastPlatformViewId,
-       assert(dispatcher != null),
        super(dispatcher);
 
   final int _firstPlatformViewId;

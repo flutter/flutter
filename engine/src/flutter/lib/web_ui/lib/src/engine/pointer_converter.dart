@@ -240,7 +240,6 @@ class PointerDataConverter {
       print('>> device=$device change=$change buttons=$buttons');
     }
     final bool isDown = buttons != 0;
-    assert(change != null);
     if (signalKind == null ||
       signalKind == ui.PointerSignalKind.none) {
       switch (change) {

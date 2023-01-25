@@ -375,7 +375,6 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     Clip clipBehavior = Clip.antiAlias,
     ClipRectEngineLayer? oldLayer,
   }) {
-    assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipRect'));
     final EngineLayer engineLayer = EngineLayer._();
@@ -411,7 +410,6 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     Clip clipBehavior = Clip.antiAlias,
     ClipRRectEngineLayer? oldLayer,
   }) {
-    assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipRRect'));
     final EngineLayer engineLayer = EngineLayer._();
@@ -439,7 +437,6 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     Clip clipBehavior = Clip.antiAlias,
     ClipPathEngineLayer? oldLayer,
   }) {
-    assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipPath'));
     final EngineLayer engineLayer = EngineLayer._();
@@ -494,10 +491,8 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     ColorFilter filter, {
     ColorFilterEngineLayer? oldLayer,
   }) {
-    assert(filter != null);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushColorFilter'));
     final _ColorFilter nativeFilter = filter._toNativeColorFilter()!;
-    assert(nativeFilter != null);
     final EngineLayer engineLayer = EngineLayer._();
     _pushColorFilter(engineLayer, nativeFilter, oldLayer?._nativeLayer);
     final ColorFilterEngineLayer layer = ColorFilterEngineLayer._(engineLayer);
@@ -523,10 +518,8 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     Offset offset = Offset.zero,
     ImageFilterEngineLayer? oldLayer,
   }) {
-    assert(filter != null);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushImageFilter'));
     final _ImageFilter nativeFilter = filter._toNativeImageFilter();
-    assert(nativeFilter != null);
     final EngineLayer engineLayer = EngineLayer._();
     _pushImageFilter(engineLayer, nativeFilter, offset.dx, offset.dy, oldLayer?._nativeLayer);
     final ImageFilterEngineLayer layer = ImageFilterEngineLayer._(engineLayer);
@@ -799,7 +792,6 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     bool freeze = false,
     FilterQuality filterQuality = FilterQuality.low,
   }) {
-    assert(offset != null, 'Offset argument was null');
     _addTexture(offset.dx, offset.dy, width, height, textureId, freeze, filterQuality.index);
   }
 
@@ -828,7 +820,6 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     double width = 0.0,
     double height = 0.0,
   }) {
-    assert(offset != null, 'Offset argument was null');
     _addPlatformView(offset.dx, offset.dy, width, height, viewId);
   }
 
