@@ -76,7 +76,6 @@ void main() {
     builder.addPicture(Offset.zero, picture);
 
     final Scene scene = builder.build();
-    expect(scene != null, true);
     await scene.toImage(100, 100);
   });
 
@@ -108,7 +107,6 @@ void main() {
     builder.addPicture(Offset.zero, picture);
 
     final Scene scene = builder.build();
-    expect(scene != null, true);
     await scene.toImage(100, 100);
   });
 

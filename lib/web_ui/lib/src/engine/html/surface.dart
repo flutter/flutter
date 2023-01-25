@@ -223,7 +223,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// surface.
   PersistedSurfaceState get state => _state;
   set state(PersistedSurfaceState newState) {
-    assert(newState != null);
     assert(newState != _state,
         'Attempted to set state that the surface is already in. This likely indicates a bug in the compositor.');
     assert(_debugValidateStateTransition(newState));
@@ -414,7 +413,6 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// creates a new element by calling [build].
   @mustCallSuper
   void update(covariant PersistedSurface oldSurface) {
-    assert(oldSurface != null);
     assert(!identical(oldSurface, this));
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
     assert(debugAssertSurfaceState(oldSurface, PersistedSurfaceState.active,
@@ -1049,7 +1047,6 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       final PersistedSurface child = _children[i];
       final DomHTMLElement childElement =
           child.rootElement! as DomHTMLElement;
-      assert(childElement != null);
       if (!isStationary) {
         if (refNode == null) {
           containerElement!.append(childElement);

@@ -14,8 +14,7 @@ class BogusFontText extends Scenario {
   ///
   /// The [dispatcher] parameter must not be null.
   BogusFontText(PlatformDispatcher dispatcher)
-      : assert(dispatcher != null),
-        super(dispatcher);
+      : super(dispatcher);
 
   // Semi-arbitrary.
   final double _screenWidth = 700;

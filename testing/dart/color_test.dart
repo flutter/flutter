@@ -27,23 +27,15 @@ void main() {
   });
 
   test('color created with out of bounds value', () {
-    try {
-      const Color c = Color(0x100 << 24);
-      final Paint p = Paint();
-      p.color = c;
-    } catch (e) {
-      expect(e != null, equals(true));
-    }
+    const Color c = Color(0x100 << 24);
+    final Paint p = Paint();
+    p.color = c;
   });
 
   test('color created with wildly out of bounds value', () {
-    try {
-      const Color c = Color(1 << 1000000);
-      final Paint p = Paint();
-      p.color = c;
-    } catch (e) {
-      expect(e != null, equals(true));
-    }
+    const Color c = Color(1 << 1000000);
+    final Paint p = Paint();
+    p.color = c;
   });
 
   test('two colors are only == if they have the same runtime type', () {

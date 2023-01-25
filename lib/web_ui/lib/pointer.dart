@@ -151,7 +151,6 @@ class PointerData {
 }
 
 class PointerDataPacket {
-  const PointerDataPacket({this.data = const <PointerData>[]})
-      : assert(data != null);
+  const PointerDataPacket({this.data = const <PointerData>[]});
   final List<PointerData> data;
 }

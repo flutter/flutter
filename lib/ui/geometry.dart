@@ -12,9 +12,7 @@ abstract class OffsetBase {
   ///
   /// The first argument sets the horizontal component, and the second the
   /// vertical component.
-  const OffsetBase(this._dx, this._dy)
-      : assert(_dx != null),
-        assert(_dy != null);
+  const OffsetBase(this._dx, this._dy);
 
   final double _dx;
   final double _dy;
@@ -314,7 +312,6 @@ class Offset extends OffsetBase {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static Offset? lerp(Offset? a, Offset? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -590,7 +587,6 @@ class Size extends OffsetBase {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static Size? lerp(Size? a, Size? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -637,11 +633,7 @@ class Rect {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltrb.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltrb_dark.png#gh-dark-mode-only)
   @pragma('vm:entry-point')
-  const Rect.fromLTRB(this.left, this.top, this.right, this.bottom)
-      : assert(left != null),
-        assert(top != null),
-        assert(right != null),
-        assert(bottom != null);
+  const Rect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Construct a rectangle from its left and top edges, its width, and its
   /// height.
@@ -891,7 +883,6 @@ class Rect {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static Rect? lerp(Rect? a, Rect? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -1059,7 +1050,6 @@ class Radius {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static Radius? lerp(Radius? a, Radius? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;
@@ -1268,19 +1258,7 @@ class RRect {
     this.brRadiusY = 0.0,
     this.blRadiusX = 0.0,
     this.blRadiusY = 0.0,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       assert(tlRadiusX != null),
-       assert(tlRadiusY != null),
-       assert(trRadiusX != null),
-       assert(trRadiusY != null),
-       assert(brRadiusX != null),
-       assert(brRadiusY != null),
-       assert(blRadiusX != null),
-       assert(blRadiusY != null),
-       assert(tlRadiusX >= 0),
+  }) : assert(tlRadiusX >= 0),
        assert(tlRadiusY >= 0),
        assert(trRadiusX >= 0),
        assert(trRadiusY >= 0),
@@ -1661,7 +1639,6 @@ class RRect {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static RRect? lerp(RRect? a, RRect? b, double t) {
-    assert(t != null);
     if (b == null) {
       if (a == null) {
         return null;

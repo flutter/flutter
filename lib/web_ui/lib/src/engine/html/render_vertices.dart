@@ -26,9 +26,7 @@ class SurfaceVertices implements ui.Vertices {
     List<ui.Offset> positions, {
     List<ui.Color>? colors,
     List<int>? indices,
-  })  : assert(mode != null),
-        assert(positions != null),
-        colors = colors != null ? _int32ListFromColors(colors) : null,
+  })  : colors = colors != null ? _int32ListFromColors(colors) : null,
         indices = indices != null ? Uint16List.fromList(indices) : null,
         positions = offsetListToFloat32List(positions) {
     initWebGl();
@@ -39,8 +37,7 @@ class SurfaceVertices implements ui.Vertices {
     this.positions, {
     this.colors,
     this.indices,
-  })  : assert(mode != null),
-        assert(positions != null) {
+  }) {
     initWebGl();
   }
 
@@ -192,7 +189,6 @@ class _WebGlRenderer implements GlRenderer {
     //
     // Create buffer for vertex coordinates.
     final Object positionsBuffer = gl.createBuffer()!;
-    assert(positionsBuffer != null);
 
     Object? vao;
     if (imageShader != null) {
@@ -383,7 +379,6 @@ class _WebGlRenderer implements GlRenderer {
 
     // Setup geometry.
     final Object positionsBuffer = gl.createBuffer()!;
-    assert(positionsBuffer != null);
     gl.bindArrayBuffer(positionsBuffer);
     gl.bufferData(vertices, gl.kStaticDraw);
     // Point an attribute to the currently bound vertex buffer object.
@@ -458,7 +453,6 @@ class _WebGlRenderer implements GlRenderer {
   @override
   void drawHairline(
       DomCanvasRenderingContext2D? ctx, Float32List positions) {
-    assert(positions != null);
     final int pointCount = positions.length ~/ 2;
     ctx!.lineWidth = 1.0;
     ctx.beginPath();

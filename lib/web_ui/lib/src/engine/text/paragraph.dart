@@ -778,8 +778,6 @@ void applyTextStyleToElement({
   required DomElement element,
   required EngineTextStyle style,
 }) {
-  assert(element != null);
-  assert(style != null);
   bool updateDecoration = false;
   final DomCSSStyleDeclaration cssStyle = element.style;
 

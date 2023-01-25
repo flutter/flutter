@@ -158,8 +158,7 @@ enum Brightness {
 // Unimplemented classes.
 // TODO(dit): see https://github.com/flutter/flutter/issues/33614.
 class CallbackHandle {
-  CallbackHandle.fromRawHandle(this._handle)
-    : assert(_handle != null, "'_handle' must not be null.");
+  CallbackHandle.fromRawHandle(this._handle);
 
   final int _handle;
 

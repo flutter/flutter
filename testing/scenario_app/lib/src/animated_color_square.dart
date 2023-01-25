@@ -17,8 +17,7 @@ class AnimatedColorSquareScenario extends Scenario {
   ///
   /// The [dispatcher] parameter must not be null.
   AnimatedColorSquareScenario(PlatformDispatcher dispatcher)
-      : assert(dispatcher != null),
-        super(dispatcher);
+      : super(dispatcher);
 
   static const double _squareSize = 200;
   /// Used to animate the red value in the color of the square.
@@ -77,9 +76,7 @@ class AnimatedColorSquareScenario extends Scenario {
 
 class _NumberSwinger<T extends num> {
   _NumberSwinger(this._begin, this._end, [T? current])
-      : assert(_begin != null),
-        assert(_end != null),
-        _up = _begin < _end {
+      : _up = _begin < _end {
     _current = current ?? _begin;
   }
 

@@ -47,10 +47,6 @@ class CkGradientSweep extends CkShader implements ui.Gradient {
   CkGradientSweep(this.center, this.colors, this.colorStops, this.tileMode,
       this.startAngle, this.endAngle, this.matrix4)
       : assert(offsetIsValid(center)),
-        assert(colors != null),
-        assert(tileMode != null),
-        assert(startAngle != null),
-        assert(endAngle != null),
         assert(startAngle < endAngle),
         assert(matrix4 == null || matrix4IsValid(matrix4)) {
     validateColorStops(colors, colorStops);
@@ -96,8 +92,6 @@ class CkGradientLinear extends CkShader implements ui.Gradient {
     Float32List? matrix,
   )   : assert(offsetIsValid(from)),
         assert(offsetIsValid(to)),
-        assert(colors != null),
-        assert(tileMode != null),
         matrix4 = matrix {
     if (assertionsEnabled) {
       assert(matrix4 == null || matrix4IsValid(matrix4!));
