@@ -26,7 +26,8 @@ void main() {
   gl_Position = IPPositionForGlyphPosition(
       frame_info.mvp, unit_position, destination_position, destination_size);
   v_unit_position = unit_position;
-  v_source_position = source_position;
+  // Pixel snap the source (sampling) start position.
+  v_source_position = round(source_position);
   v_source_glyph_size = source_glyph_size;
   v_has_color = has_color;
 }
