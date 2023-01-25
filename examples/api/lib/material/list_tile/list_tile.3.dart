@@ -35,54 +35,51 @@ class _ListTileExampleState extends State<ListTileExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile Sample')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          ListTile(
-            enabled: _enabled,
-            selected: _selected,
-            onTap: () {
+      body: Center(
+        child: ListTile(
+          enabled: _enabled,
+          selected: _selected,
+          onTap: () {
+            setState(() {
+              // This is called when the user toggles the switch.
+              _selected = !_selected;
+            });
+          },
+          // This sets text color and icon color to red when list tile is disabled and
+          // green when list tile is selected, otherwise sets it to black.
+          iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled)) {
+              return Colors.red;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return Colors.green;
+            }
+            return Colors.black;
+          }),
+          // This sets text color and icon color to red when list tile is disabled and
+          // green when list tile is selected, otherwise sets it to black.
+          textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled)) {
+              return Colors.red;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return Colors.green;
+            }
+            return Colors.black;
+          }),
+          leading: const Icon(Icons.person),
+          title: const Text('Headline'),
+          subtitle: Text('Enabled: $_enabled, Selected: $_selected'),
+          trailing: Switch(
+            onChanged: (bool? value) {
+              // This is called when the user toggles the switch.
               setState(() {
-                // This is called when the user toggles the switch.
-                _selected = !_selected;
+                _enabled = value!;
               });
             },
-            // This sets text color and icon color to red when list tile is disabled and
-            // green when list tile is selected, otherwise sets it to black.
-            iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return Colors.red;
-              }
-              if (states.contains(MaterialState.selected)) {
-                return Colors.green;
-              }
-              return Colors.black;
-            }),
-            // This sets text color and icon color to red when list tile is disabled and
-            // green when list tile is selected, otherwise sets it to black.
-            textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return Colors.red;
-              }
-              if (states.contains(MaterialState.selected)) {
-                return Colors.green;
-              }
-              return Colors.black;
-            }),
-            leading: const Icon(Icons.person),
-            title: const Text('Headline'),
-            subtitle: Text('Enabled: $_enabled, Selected: $_selected'),
-            trailing: Switch(
-              onChanged: (bool? value) {
-                // This is called when the user toggles the switch.
-                setState(() {
-                  _enabled = value!;
-                });
-              },
-              value: _enabled,
-            ),
+            value: _enabled,
           ),
-        ],
+        ),
       ),
     );
   }
