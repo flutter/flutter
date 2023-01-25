@@ -1,4 +1,4 @@
-Signature: fdba0e7b767e0dd32daaf68cc6161442
+Signature: a9da8a6e3643f28c49bcc2571400f56b
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1360,6 +1360,7 @@ ORIGIN: ../../../third_party/skia/gm/bitmapfilters.cpp + ../../../third_party/sk
 ORIGIN: ../../../third_party/skia/gm/bitmaprect.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/blurs.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/clip_strokerect.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/clipshader.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/color4f.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/colormatrix.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/complexclip.cpp + ../../../third_party/skia/LICENSE
@@ -1544,6 +1545,7 @@ FILE: ../../../third_party/skia/gm/bitmapfilters.cpp
 FILE: ../../../third_party/skia/gm/bitmaprect.cpp
 FILE: ../../../third_party/skia/gm/blurs.cpp
 FILE: ../../../third_party/skia/gm/clip_strokerect.cpp
+FILE: ../../../third_party/skia/gm/clipshader.cpp
 FILE: ../../../third_party/skia/gm/color4f.cpp
 FILE: ../../../third_party/skia/gm/colormatrix.cpp
 FILE: ../../../third_party/skia/gm/complexclip.cpp
@@ -8878,7 +8880,6 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/imagefiltersunpremul.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapShader.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegGainmap.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegGainmap.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../third_party/skia/LICENSE
@@ -8887,13 +8888,11 @@ ORIGIN: ../../../third_party/skia/src/codec/SkJpegSegmentScan.cpp + ../../../thi
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegSegmentScan.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/images/SkJpegGainmapEncoder.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/imagefiltersunpremul.cpp
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
 FILE: ../../../third_party/skia/include/private/SkGainmapShader.h
-FILE: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h
 FILE: ../../../third_party/skia/src/codec/SkJpegGainmap.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegGainmap.h
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp
@@ -8902,7 +8901,6 @@ FILE: ../../../third_party/skia/src/codec/SkJpegSegmentScan.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegSegmentScan.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h
-FILE: ../../../third_party/skia/src/images/SkJpegGainmapEncoder.cpp
 FILE: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google Inc.
@@ -8938,6 +8936,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../third_party/skia/fuzz/FuzzCubicQuadRoots.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicQuadRoots.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkMalloc.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkTemplates.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkCPUTypes.h + ../../../third_party/skia/LICENSE
@@ -8951,6 +8951,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp + ../
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLGetReturnComplexity.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/fuzz/FuzzCubicQuadRoots.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicQuadRoots.cpp
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkTemplates.h
 FILE: ../../../third_party/skia/include/private/base/SkCPUTypes.h
