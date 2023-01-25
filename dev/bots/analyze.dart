@@ -208,6 +208,10 @@ Future<void> run(List<String> arguments) async {
   // Ensure gen_default links the correct files
   printProgress('Correct file names in gen_defaults.dart...');
   await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
+
+  // Ensure integration test files are up-to-date with the app template.
+  printProgress('Up to date integration test template files...');
+  await verifyIntegrationTestTemplateFiles(flutterRoot);
 }
 
 
@@ -597,7 +601,6 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
 }
 
 String _generateLicense(String prefix) {
-  assert(prefix != null);
   return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
          '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
          '${prefix}found in the LICENSE file.';
@@ -1576,8 +1579,6 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
 // UTILITY FUNCTIONS
 
 bool _listEquals<T>(List<T> a, List<T> b) {
-  assert(a != null);
-  assert(b != null);
   if (a.length != b.length) {
     return false;
   }
@@ -1861,6 +1862,81 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
       '${bold}In many cases the word can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
       ...errors,
     ]);
+  }
+}
+
+const List<String> _kIgnoreList = <String>[
+  'Runner.rc.tmpl',
+  'flutter_window.cpp',
+];
+final String _kIntegrationTestsRelativePath = path.join('dev', 'integration_tests');
+final String _kTemplateRelativePath = path.join('packages', 'flutter_tools', 'templates', 'app_shared', 'windows.tmpl', 'runner');
+final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
+const String _kProjectNameKey = '{{projectName}}';
+const String _kTmplExt = '.tmpl';
+final String _kLicensePath = path.join('dev', 'conductor', 'core', 'lib', 'src', 'proto', 'license_header.txt');
+
+String _getFlutterLicense(String flutterRoot) {
+  return '${File(path.join(flutterRoot, _kLicensePath)).readAsLinesSync().join("\n")}\n\n';
+}
+
+String _removeLicenseIfPresent(String fileContents, String license) {
+  if (fileContents.startsWith(license)) {
+    return fileContents.substring(license.length);
+  }
+  return fileContents;
+}
+
+Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
+  final List<String> errors = <String>[];
+  final String license = _getFlutterLicense(flutterRoot);
+  final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
+  final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
+  final Iterable<Directory>subDirs = Directory(integrationTestsPath).listSync().toList().whereType<Directory>();
+  for (final Directory testPath in subDirs) {
+    final String projectName = path.basename(testPath.path);
+    final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);
+    final Directory runner = Directory(runnerPath);
+    if (!runner.existsSync()) {
+      continue;
+    }
+    final Iterable<File> files = Directory(templatePath).listSync().toList().whereType<File>();
+    for (final File templateFile in files) {
+      final String fileName = path.basename(templateFile.path);
+      if (_kIgnoreList.contains(fileName)) {
+        continue;
+      }
+      String templateFileContents = templateFile.readAsLinesSync().join('\n');
+      String appFilePath = path.join(runnerPath, fileName);
+      if (fileName.endsWith(_kTmplExt)) {
+        appFilePath = appFilePath.substring(0, appFilePath.length - _kTmplExt.length); // Remove '.tmpl' from app file path
+        templateFileContents = templateFileContents.replaceAll(_kProjectNameKey, projectName); // Substitute template project name
+      }
+      String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
+      appFileContents = _removeLicenseIfPresent(appFileContents, license);
+      if (appFileContents != templateFileContents) {
+        int indexOfDifference;
+        for (indexOfDifference = 0; indexOfDifference < appFileContents.length; indexOfDifference++) {
+          if (indexOfDifference >= templateFileContents.length || templateFileContents.codeUnitAt(indexOfDifference) != appFileContents.codeUnitAt(indexOfDifference)) {
+            break;
+          }
+        }
+        final String error = '''
+Error: file $fileName mismatched for integration test $testPath
+Verify the integration test has been migrated to the latest app template.
+=====$appFilePath======
+$appFileContents
+=====${templateFile.path}======
+$templateFileContents
+==========
+Diff at character #$indexOfDifference
+        ''';
+        errors.add(error);
+      }
+    }
+  }
+  if (errors.isNotEmpty) {
+    foundError(errors);
   }
 }
 

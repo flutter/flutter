@@ -2443,7 +2443,7 @@ void main() {
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.body>]\n'
       '     CustomMultiChildLayout\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
@@ -2774,7 +2774,7 @@ class _CustomPageRoute<T> extends PageRoute<T> {
     RouteSettings super.settings = const RouteSettings(),
     this.maintainState = true,
     super.fullscreenDialog,
-  }) : assert(builder != null);
+  });
 
   final WidgetBuilder builder;
 

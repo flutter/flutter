@@ -19,6 +19,8 @@ import '../daemon.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
+import '../ios/iproxy.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -255,7 +257,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
-        disablePortPublication: disablePortPublication,
+        disablePortPublication: await disablePortPublication,
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArgDeprecated('verbose-system-logs'),
@@ -409,18 +411,23 @@ class RunCommand extends RunCommandBase {
     bool isEmulator;
     bool anyAndroidDevices = false;
     bool anyIOSDevices = false;
+    bool anyIOSNetworkDevices = false;
 
     if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
       deviceOsVersion = 'none';
       isEmulator = false;
     } else if (devices!.length == 1) {
-      final TargetPlatform platform = await devices![0].targetPlatform;
+      final Device device = devices![0];
+      final TargetPlatform platform = await device.targetPlatform;
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
+      if (device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network) {
+        anyIOSNetworkDevices = true;
+      }
       deviceType = getNameForTargetPlatform(platform);
-      deviceOsVersion = await devices![0].sdkNameAndVersion;
-      isEmulator = await devices![0].isLocalEmulator;
+      deviceOsVersion = await device.sdkNameAndVersion;
+      isEmulator = await device.isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
@@ -429,24 +436,32 @@ class RunCommand extends RunCommandBase {
         final TargetPlatform platform = await device.targetPlatform;
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        if (device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network) {
+          anyIOSNetworkDevices = true;
+        }
         if (anyAndroidDevices && anyIOSDevices) {
           break;
         }
       }
     }
 
+    String? iOSInterfaceType;
+    if (anyIOSDevices) {
+      iOSInterfaceType = anyIOSNetworkDevices ? 'wireless' : 'usb';
+    }
+
     String? androidEmbeddingVersion;
     final List<String> hostLanguage = <String>[];
     if (anyAndroidDevices) {
       final AndroidProject androidProject = FlutterProject.current().android;
-      if (androidProject != null && androidProject.existsSync()) {
+      if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
       final IosProject iosProject = FlutterProject.current().ios;
-      if (iosProject != null && iosProject.exists) {
+      if (iosProject.exists) {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
@@ -466,6 +481,7 @@ class RunCommand extends RunCommandBase {
       commandRunProjectHostLanguage: hostLanguage.join(','),
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
       commandRunEnableImpeller: enableImpeller,
+      commandRunIOSInterfaceType: iOSInterfaceType,
     );
   }
 

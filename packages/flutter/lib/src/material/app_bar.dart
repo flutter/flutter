@@ -223,12 +223,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
-  }) : assert(automaticallyImplyLeading != null),
-       assert(elevation == null || elevation >= 0.0),
-       assert(notificationPredicate != null),
-       assert(primary != null),
-       assert(toolbarOpacity != null),
-       assert(bottomOpacity != null),
+  }) : assert(elevation == null || elevation >= 0.0),
        preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
   /// Used by [Scaffold] to compute its [AppBar]'s overall height. The returned value is
@@ -809,7 +804,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
-      assert(theme.platform != null);
       switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -1023,38 +1017,34 @@ class _AppBarState extends State<AppBar> {
     }
     if (leading != null) {
       if (theme.useMaterial3) {
-        if (leading is IconButton) {
-          final IconButtonThemeData effectiveIconButtonTheme;
+        final IconButtonThemeData effectiveIconButtonTheme;
 
-          // This comparison is to check if there is a custom [overallIconTheme]. If true, it means that no
-          // custom [overallIconTheme] is provided, so [iconButtonTheme] is applied. Otherwise, we generate
-          // a new [IconButtonThemeData] based on the values from [overallIconTheme]. If [iconButtonTheme] only
-          // has null values, the default [overallIconTheme] will be applied below by [IconTheme.merge]
-          if (overallIconTheme == defaults.iconTheme) {
-            effectiveIconButtonTheme = iconButtonTheme;
-          } else {
-            // The [IconButton.styleFrom] method is used to generate a correct [overlayColor] based on the [foregroundColor].
-            final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
-              foregroundColor: overallIconTheme.color,
-              iconSize: overallIconTheme.size,
-            );
+        // This comparison is to check if there is a custom [overallIconTheme]. If true, it means that no
+        // custom [overallIconTheme] is provided, so [iconButtonTheme] is applied. Otherwise, we generate
+        // a new [IconButtonThemeData] based on the values from [overallIconTheme]. If [iconButtonTheme] only
+        // has null values, the default [overallIconTheme] will be applied below by [IconTheme.merge]
+        if (overallIconTheme == defaults.iconTheme) {
+          effectiveIconButtonTheme = iconButtonTheme;
+        } else {
+          // The [IconButton.styleFrom] method is used to generate a correct [overlayColor] based on the [foregroundColor].
+          final ButtonStyle leadingIconButtonStyle = IconButton.styleFrom(
+            foregroundColor: overallIconTheme.color,
+            iconSize: overallIconTheme.size,
+          );
 
-            effectiveIconButtonTheme = IconButtonThemeData(
-              style: iconButtonTheme.style?.copyWith(
-                foregroundColor: leadingIconButtonStyle.foregroundColor,
-                overlayColor: leadingIconButtonStyle.overlayColor,
-                iconSize: leadingIconButtonStyle.iconSize,
-              )
-            );
-          }
-
-          leading = Center(
-            child: IconButtonTheme(
-              data: effectiveIconButtonTheme,
-              child: leading
+          effectiveIconButtonTheme = IconButtonThemeData(
+            style: iconButtonTheme.style?.copyWith(
+              foregroundColor: leadingIconButtonStyle.foregroundColor,
+              overlayColor: leadingIconButtonStyle.overlayColor,
+              iconSize: leadingIconButtonStyle.iconSize,
             )
           );
         }
+
+        leading = IconButtonTheme(
+            data: effectiveIconButtonTheme,
+            child: leading is IconButton ? Center(child: leading) : leading,
+        );
 
         // Based on the Material Design 3 specs, the leading IconButton should have
         // a size of 48x48, and a highlight size of 40x40. Users can also put other
@@ -1327,10 +1317,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.systemOverlayStyle,
     required this.forceMaterialTransparency,
   }) : assert(primary || topPadding == 0.0),
-       assert(
-         !floating || (snapConfiguration == null && showOnScreenConfiguration == null) || vsync != null,
-         'vsync cannot be null when snapConfiguration or showOnScreenConfiguration is not null, and floating is true',
-       ),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
   final Widget? leading;
@@ -1631,15 +1617,7 @@ class SliverAppBar extends StatefulWidget {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
-  }) : assert(automaticallyImplyLeading != null),
-       assert(forceElevated != null),
-       assert(primary != null),
-       assert(floating != null),
-       assert(pinned != null),
-       assert(snap != null),
-       assert(stretch != null),
-       assert(toolbarHeight != null),
-       assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
+  }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].');
 
@@ -2245,7 +2223,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
 // center it within its (NavigationToolbar) parent, and allow the
 // parent to constrain the title's actual height.
 class _AppBarTitleBox extends SingleChildRenderObjectWidget {
-  const _AppBarTitleBox({ required Widget super.child }) : assert(child != null);
+  const _AppBarTitleBox({ required Widget super.child });
 
   @override
   _RenderAppBarTitleBox createRenderObject(BuildContext context) {
@@ -2336,7 +2314,6 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     late final bool centerTitle;
     {
       bool platformCenter() {
-        assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -2436,7 +2413,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)

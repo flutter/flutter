@@ -158,23 +158,7 @@ class MediaQueryData {
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
-  }) : assert(size != null),
-       assert(devicePixelRatio != null),
-       assert(textScaleFactor != null),
-       assert(platformBrightness != null),
-       assert(padding != null),
-       assert(viewInsets != null),
-       assert(systemGestureInsets != null),
-       assert(viewPadding != null),
-       assert(alwaysUse24HourFormat != null),
-       assert(accessibleNavigation != null),
-       assert(invertColors != null),
-       assert(highContrast != null),
-       assert(disableAnimations != null),
-       assert(boldText != null),
-       assert(navigationMode != null),
-       assert(gestureSettings != null),
-       assert(displayFeatures != null);
+  });
 
   /// Creates data for a media query based on the given window.
   ///
@@ -271,6 +255,8 @@ class MediaQueryData {
   /// level MediaQuery created by [WidgetsApp] are the same as the window
   /// (often the mobile device screen) that contains the app.
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+  ///
   /// See also:
   ///
   ///  * [ui.window], which provides some additional detail about this property
@@ -287,6 +273,8 @@ class MediaQueryData {
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
   /// Padding is derived from the values of [viewInsets] and [viewPadding].
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
   ///
   /// See also:
   ///
@@ -309,6 +297,8 @@ class MediaQueryData {
   /// bounds of the top level MediaQuery created by [WidgetsApp] are the
   /// same as the window that contains the app. On mobile devices, this will
   /// typically be the full screen.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
   ///
   /// See also:
   ///
@@ -754,8 +744,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
@@ -949,7 +938,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///    [MediaQuery] ancestor, it returns null instead.
   static MediaQueryData of(BuildContext context) {
-    assert(context != null);
     return _of(context);
   }
 
@@ -991,7 +979,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///  * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
   ///    instead of returning null.
   static MediaQueryData? maybeOf(BuildContext context) {
-    assert(context != null);
     return _maybeOf(context);
   }
 

@@ -1384,7 +1384,6 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
     message.write('$pausedIsolatesFound isolates are ');
     plural = true;
   }
-  assert(serviceEventKind != null);
   switch (serviceEventKind) {
     case vm_service.EventKind.kPauseStart:
       message.write('paused (probably due to --start-paused)');
@@ -1457,8 +1456,6 @@ class ProjectFileInvalidator {
     required PackageConfig packageConfig,
     bool asyncScanning = false,
   }) async {
-    assert(urisToMonitor != null);
-    assert(packagesPath != null);
 
     if (lastCompiled == null) {
       // Initial load.
@@ -1488,7 +1485,7 @@ class ProjectFileInvalidator {
             :  _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
-              if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+              if (updatedAt.isAfter(lastCompiled)) {
                 invalidatedFiles.add(uri);
               }
             })
@@ -1502,7 +1499,7 @@ class ProjectFileInvalidator {
         final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
           ? _fileSystem.file(uri).statSync().modified
           : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
-        if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+        if (updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }
       }
@@ -1511,7 +1508,7 @@ class ProjectFileInvalidator {
     final File packageFile = _fileSystem.file(packagesPath);
     final Uri packageUri = packageFile.uri;
     final DateTime updatedAt = packageFile.statSync().modified;
-    if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+    if (updatedAt.isAfter(lastCompiled)) {
       invalidatedFiles.add(packageUri);
       packageConfig = await _createPackageConfig(packagesPath);
       // The frontend_server might be monitoring the package_config.json file,
