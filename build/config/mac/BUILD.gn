@@ -5,10 +5,7 @@
 import("//build/config/sysroot.gni")
 
 config("sdk") {
-  common_flags = [ "-stdlib=libc++" ]
-
-  cflags = common_flags
-  ldflags = common_flags
+  cflags_cc = [ "-stdlib=libc++" ]
 }
 
 # On Mac, this is used for everything except static libraries.

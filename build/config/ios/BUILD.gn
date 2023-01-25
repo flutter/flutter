@@ -3,8 +3,5 @@
 # found in the LICENSE file.
 
 config("sdk") {
-  common_flags = [ "-stdlib=libc++" ]
-
-  cflags = common_flags
-  ldflags = common_flags
+  cflags_cc = [ "-stdlib=libc++" ]
 }
