@@ -17,7 +17,7 @@ import 'system_channels.dart';
 /// SuggestionSpan suggestionSpan =
 ///   SuggestionSpan(
 ///     const TextRange(start: 7, end: 12),
-///     List<String>.of(<String>['word', 'world', 'old']),
+///     <String>['word', 'world', 'old'],
 /// );
 /// ```
 @immutable

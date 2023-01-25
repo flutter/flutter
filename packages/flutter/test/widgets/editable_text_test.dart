@@ -14291,6 +14291,12 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       await tester.pumpAndSettle();
       expect(state.currentTextEditingValue.text, equals(' test test'));
     });
+
+    // TODO(camsim99): Add test for replaceComposingRegion when composing region valid.
+    // TODO(camsim99): Add test for replaceComposingRegion when composing region is not valid.
+    // TODO(camsim99): Add test for replaceComposingRegion when toolbar is cause.
+    // TODO(camsim99): Add test for replaceComposingRegion when toolbar is not cause.
+
   });
 
   group('magnifier', () {

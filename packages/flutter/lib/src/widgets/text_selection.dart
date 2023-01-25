@@ -2224,7 +2224,7 @@ class TextSelectionGestureDetectorBuilder {
               final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
               final bool isAffinityTheSame = textPosition.affinity == previousSelection.affinity;
               final bool wordAtCursorIndexIsMisspelled = editableText.findSuggestionSpanAtCursorIndex(textPosition.offset) != null;
-              print('CHECK FOR RESULTS');
+
               if (wordAtCursorIndexIsMisspelled) {
                 renderEditable.selectWord(cause: SelectionChangedCause.tap);
                 if (previousSelection != editableText.textEditingValue.selection) {

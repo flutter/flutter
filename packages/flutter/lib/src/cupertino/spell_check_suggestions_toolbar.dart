@@ -70,6 +70,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
                 cause: SelectionChangedCause.toolbar,
                 text: suggestion,
                 composingRegionRange: spanAtCursorIndex.range,
+                shouldSelectWordEdgeAfterReplacement: true,
             );
           },
           label: suggestion,

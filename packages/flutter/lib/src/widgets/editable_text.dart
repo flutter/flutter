@@ -2182,7 +2182,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Replace composing region with specified text.
-  void replaceComposingRegion({required SelectionChangedCause cause, required String text, TextRange? composingRegionRange}) {
+  void replaceComposingRegion({required SelectionChangedCause cause, required String text, TextRange? composingRegionRange, bool shouldSelectWordEdgeAfterReplacement = false}) {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!widget.readOnly && !widget.obscureText);
 
@@ -2203,11 +2203,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
       });
       hideToolbar();
-    }
-
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // On iOS, we select word boundary after making the replacement.
-      renderEditable.selectWordEdge(cause: cause);
+      if (shouldSelectWordEdgeAfterReplacement) {
+        renderEditable.selectWordEdge(cause: cause);
+      }
     }
   }
 

@@ -653,6 +653,40 @@ void main() {
 
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+
+    // Mark word being tapped as misspelled.
+    state.markCurrentSelectionAsMisspelled = true;
+
+    // Test non-touch gesture.
+    final TestGesture mouseGesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+      kind: PointerDeviceKind.mouse,
+    );
+    await mouseGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
+
+    // Test touch gesture.
+    final TestGesture touchGesture = await tester.startGesture(
+      const Offset(25.0, 200.0),
+      pointer: 0,
+      kind: PointerDeviceKind.touch,
+    );
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
+
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
@@ -1610,6 +1644,7 @@ class FakeEditableTextState extends EditableTextState {
   bool showToolbarCalled = false;
   bool toggleToolbarCalled = false;
   bool showSpellCheckSuggestionsToolbarCalled = false;
+  bool markCurrentSelectionAsMisspelled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -1630,6 +1665,15 @@ class FakeEditableTextState extends EditableTextState {
   bool showSpellCheckSuggestionsToolbar() {
     showSpellCheckSuggestionsToolbarCalled = true;
     return true;
+  }
+
+  @override
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    return markCurrentSelectionAsMisspelled
+      ? SuggestionSpan(
+        const TextRange(start: 7, end: 12),
+        <String>['word', 'world', 'old'],
+      ) : null;
   }
 
   @override
