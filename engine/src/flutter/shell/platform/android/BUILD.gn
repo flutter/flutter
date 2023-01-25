@@ -667,7 +667,7 @@ if (target_cpu != "x86") {
   }
 }
 
-if (target_cpu == "x64" || target_cpu == "arm64") {
+if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) {
   zip_bundle("analyze_snapshot") {
     deps =
         [ "//third_party/dart/runtime/bin:analyze_snapshot($host_toolchain)" ]
