@@ -215,6 +215,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'or as the string "none" to disable the timeout entirely.',
       );
     addDdsOptions(verboseHelp: verboseHelp);
+    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
@@ -404,6 +405,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArgDeprecated('disable-service-auth-codes'),
+      serveObservatory: boolArgDeprecated('serve-observatory'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
