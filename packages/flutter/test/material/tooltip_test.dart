@@ -502,10 +502,11 @@ void main() {
     RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
     Offset fabTopRight = tester.getTopRight(fabFinder);
     Offset tooltipTopRight = tip.localToGlobal(tip.size.topRight(Offset.zero));
-    expect(tooltipTopRight.dy < fabTopRight.dy, true);
+    expect(tooltipTopRight.dy, lessThan(fabTopRight.dy));
 
     // Simulate Keyboard opening (MediaQuery.viewInsets.bottom = 300))
     await tester.pumpWidget(materialAppWithViewInsets(300));
+    await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
 
     // Show FAB tooltip
@@ -517,7 +518,7 @@ void main() {
     tip = tester.renderObject(_findTooltipContainer(tooltipText));
     fabTopRight = tester.getTopRight(fabFinder);
     tooltipTopRight = tip.localToGlobal(tip.size.topRight(Offset.zero));
-    expect(tooltipTopRight.dy < fabTopRight.dy, true);
+    expect(tooltipTopRight.dy, lessThan(fabTopRight.dy));
   });
 
   testWidgets('Custom tooltip margin', (WidgetTester tester) async {
@@ -711,6 +712,10 @@ void main() {
     RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
     expect(tooltipRenderParagraph.textDirection, TextDirection.rtl);
 
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    await tester.pump();
+
     await tester.pumpWidget(buildApp(tooltipText, TextDirection.ltr));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
@@ -856,6 +861,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Tooltip(
+            triggerMode: TooltipTriggerMode.longPress,
             message: tooltipText,
             child: Container(
               width: 100.0,
@@ -879,7 +885,8 @@ void main() {
     // tap (down, up) gesture hides tooltip, since its not
     // a long press
     await tester.tap(tooltip);
-    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
 
     // long press once more
@@ -1209,7 +1216,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(outer));
     await tester.pump();
     // Wait for it to switch.
-    await tester.pump(waitDuration);
+    await tester.pumpAndSettle();
     expect(find.text('Outer'), findsOneWidget);
     expect(find.text('Inner'), findsNothing);
 
@@ -1270,17 +1277,6 @@ void main() {
 
   testWidgets('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
-    });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
-    await tester.pump();
-    await gesture.moveTo(Offset.zero);
-
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -1305,18 +1301,8 @@ void main() {
       ),
     );
 
-    final Finder tooltip = find.text('tooltip1');
-    await gesture.moveTo(Offset.zero);
-    await tester.pump();
-    await gesture.moveTo(tester.getCenter(tooltip));
-    await tester.pump();
-    await tester.pump(waitDuration);
-    expect(find.text('message1'), findsOneWidget);
-
-    final Finder secondTooltip = find.text('tooltip2');
-    await gesture.moveTo(Offset.zero);
-    await tester.pump();
-    await gesture.moveTo(tester.getCenter(secondTooltip));
+    tester.state<TooltipState>(find.byTooltip('message1')).ensureTooltipVisible();
+    tester.state<TooltipState>(find.byTooltip('message2')).ensureTooltipVisible();
     await tester.pump();
     await tester.pump(waitDuration);
     // Make sure both messages are on the screen.
@@ -1328,11 +1314,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('message1'), findsNothing);
     expect(find.text('message2'), findsNothing);
-
-    await gesture.moveTo(Offset.zero);
-    await tester.pumpAndSettle();
-    await gesture.removePointer();
-    gesture = null;
   });
 
   testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
