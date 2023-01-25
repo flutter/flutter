@@ -19,7 +19,8 @@ abstract class AssetManifest {
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
 
-  /// Lists the keys of all known assets, not including asset variants.
+  /// Lists the keys of all main assets. This does not include assets
+  /// that are variants of other assets.
   ///
   /// The logical key maps to the path of an asset specified in the pubspec.yaml
   /// file at build time.
@@ -29,11 +30,14 @@ abstract class AssetManifest {
   /// information.
   List<String> listAssets();
 
-  /// Gets available variants of an asset. This does not include the asset itself.
-  List<AssetVariant> getAssetVariants(String key);
+  /// Retrieves metadata about an asset and its variants.
+  ///
+  /// Throws an [ArgumentError] if [key] cannot be found within the manifest. To
+  /// avoid this, use a key obtained from the [listAssets] method.
+  List<AssetMetadata> describeAssetAndVariants(String key);
 }
 
-// Parses the binary asset manifest into a data structure that's easier to work
+// Lazily parses the binary asset manifest into a data structure that's easier to work
 // with.
 //
 // The binary asset manifest is a map of asset keys to a list of objects
@@ -54,24 +58,36 @@ class _AssetManifestBin implements AssetManifest {
   }
 
   final Map<Object?, Object?> _data;
-  final Map<String, List<AssetVariant>> _typeCastedData = <String, List<AssetVariant>>{};
+  final Map<String, List<AssetMetadata>> _typeCastedData = <String, List<AssetMetadata>>{};
 
   @override
-  List<AssetVariant> getAssetVariants(String key) {
+  List<AssetMetadata> describeAssetAndVariants(String key) {
     // We lazily delay typecasting to prevent a performance hiccup when parsing
-    // large asset manifests.
+    // large asset manifests. This is important to keep an app's first asset
+    // load fast.
     if (!_typeCastedData.containsKey(key)) {
+      final Object? variantData = _data[key];
+      if (variantData == null) {
+        throw ArgumentError('Asset key $key was not found within the asset manifest.');
+      }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> data) => AssetVariant(
+        .map((Map<Object?, Object?> data) => AssetMetadata(
             key: data['asset']! as String,
             targetDevicePixelRatio: data['dpr']! as double,
+            isMainAsset: false,
         ))
         .toList();
 
       _data.remove(key);
     }
-    return List<AssetVariant>.of(_typeCastedData[key]!);
+
+    final AssetMetadata mainAsset = AssetMetadata(key: key,
+      targetDevicePixelRatio: null,
+      isMainAsset: true
+    );
+
+    return <AssetMetadata>[mainAsset, ..._typeCastedData[key]!];
   }
 
   @override
@@ -80,13 +96,14 @@ class _AssetManifestBin implements AssetManifest {
   }
 }
 
-/// Contains information about an asset that is a variant of another asset.
+/// Contains information about an asset.
 @immutable
-class AssetVariant {
-  /// Creates an object containing information about an asset variant.
-  const AssetVariant({
+class AssetMetadata {
+  /// Creates an object containing information about an asset.
+  const AssetMetadata({
     required this.key,
     required this.targetDevicePixelRatio,
+    required this.isMainAsset,
   });
 
   /// The device pixel ratio that this asset is most ideal for. This is determined
@@ -104,4 +121,11 @@ class AssetVariant {
   /// The asset's key, which is the path to the asset specified in the pubspec.yaml
   /// file at build time.
   final String key;
+
+  /// Whether or not this is a main asset. In other words, this is true if
+  /// this asset is not a variant of another.
+  ///
+  /// [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
+  /// for more about asset variants.
+  final bool isMainAsset;
 }
