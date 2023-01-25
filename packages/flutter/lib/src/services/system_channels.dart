@@ -471,10 +471,9 @@ class SystemChannels {
   /// The following outgoing methods are defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `ContextMenu.enableContextMenu`: enables the browser's context menu.
-  ///    When a Flutter app starts, the browser's context menu is already
-  ///    enabled.
-  ///  * `ContextMenu.disableContextMenu`: disables the browser's context menu.
+  ///  * `enableContextMenu`: enables the browser's context menu. When a Flutter
+  ///    app starts, the browser's context menu is already enabled.
+  ///  * `disableContextMenu`: disables the browser's context menu.
   static const MethodChannel contextMenu = OptionalMethodChannel(
     'flutter/contextmenu',
     JSONMethodCodec(),

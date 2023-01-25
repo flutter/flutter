@@ -1488,14 +1488,14 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
-  /// Toolbar is not used in Flutter Web unless the browser context menu is
+  // Toolbar is not used in Flutter Web unless the browser context menu is
   // explicitly disabled. Skip this check.
-  ///
-  /// Web is using native DOM elements (it is also used as platform input)
-  /// to enable clipboard functionality of the toolbar: copy, paste, select,
-  /// cut. It might also provide additional functionality depending on the
-  /// browser (such as translation). Due to this, in browsers, we should not
-  /// show a Flutter toolbar for the editable text elements.
+  //
+  // Web is using native DOM elements (it is also used as platform input)
+  // to enable clipboard functionality of the toolbar: copy, paste, select,
+  // cut. It might also provide additional functionality depending on the
+  // browser (such as translation). Due to this, in browsers, we should not
+  // show a Flutter toolbar for the editable text elements.
   testWidgets('can show toolbar when there is text and a selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
