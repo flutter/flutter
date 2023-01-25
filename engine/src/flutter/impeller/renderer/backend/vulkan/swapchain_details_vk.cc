@@ -74,7 +74,7 @@ vk::PresentModeKHR SwapchainDetailsVK::PickPresentationMode() const {
     }
   }
 
-  VALIDATION_LOG << "Picking a sub-optimal presentation mode.";
+  FML_LOG(ERROR) << "Picking a sub-optimal presentation mode.";
   // Vulkan spec dictates that FIFO is always available.
   return vk::PresentModeKHR::eFifo;
 }
