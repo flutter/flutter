@@ -19,9 +19,20 @@ import 'tooltip_visibility.dart';
 /// Signature for when a tooltip is triggered.
 typedef TooltipTriggeredCallback = void Function();
 
-// A special [MouseRegion] that when nested, only the innermost
-// [_ExclusiveMouseRegion] will be added to the BoxHitTestResult (this doesn't
-// affect [MouseRegion]s that aren't [_ExclusiveMouseRegion]s).
+// A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
+// to be hit in the hit-testing order will be added to the BoxHitTestResult (i.e.,
+// child over parent, last sibling over first sibling).
+//
+// The [onEnter] method will be called when a mouse pointer enters this
+// [MouseRegion], and there is no other [_ExclusiveMouseRegion]s obstructing
+// this [_ExclusiveMouseRegion] from receiving the events.
+//
+// Likewise, [onExit] is called when the a mouse pointer moves out of the paint
+// bounds of this widget, or moves into another [_ExclusiveMouseRegion] that
+// overlaps this widget in hit-testing order.
+//
+// This widget doesn't affect [MouseRegion]s that aren't [_ExclusiveMouseRegion]s,
+// or other [HitTestTarget]s in the tree.
 class _ExclusiveMouseRegion extends MouseRegion {
   const _ExclusiveMouseRegion({
     super.onEnter,
@@ -33,7 +44,6 @@ class _ExclusiveMouseRegion extends MouseRegion {
   _RenderExclusiveMouseRegion createRenderObject(BuildContext context) {
     return _RenderExclusiveMouseRegion(
       onEnter: onEnter,
-      onHover: onHover,
       onExit: onExit,
     );
   }
@@ -42,7 +52,6 @@ class _ExclusiveMouseRegion extends MouseRegion {
 class _RenderExclusiveMouseRegion extends RenderMouseRegion {
   _RenderExclusiveMouseRegion({
     super.onEnter,
-    super.onHover,
     super.onExit,
   });
 
@@ -407,13 +416,13 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   TapGestureRecognizer? _tapRecognizer;
 
   // The ids of mouse devices that are keeping the tooltip from being dismissed.
-  // The last id in the collection will not be removed until the tooltip is
-  // completely dismissed, even if it's no longer hovering over this tooltip.
   final Set<int> _activeHoveringPointerDevices = <int>{};
+  // The point ids of ongoing pointers whose down events were picked up by
+  // _longPressRecognizer or _tapRecognizer. This is used to dismiss the tooltip
+  // on touch events that happened outside of the tooltip or is not a "trigger"
+  // for showing the tooltip.
   final Set<int> _activePointers = <int>{};
 
-  // Whether the tooltip's fadeout animation should start, if it's not already
-  // started.
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
     assert(mounted);
@@ -487,13 +496,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _timer = null;
     switch (_controller.status) {
       case AnimationStatus.reverse:
+        break;
       case AnimationStatus.dismissed:
       case AnimationStatus.forward:
         // Fade out immediately and ignore pending timers.
         _controller.reverse();
         break;
       case AnimationStatus.completed:
-        // Reset the fade out timer if needed.
+        // Reset the fade out timer, if any.
         if (withDelay.inMicroseconds > 0) {
           _timer = Timer(withDelay, _controller.reverse);
         } else {
@@ -505,7 +515,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(mounted);
-    _activePointers.add(event.pointer);
     // PointerDeviceKinds that don't support hovering.
     const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind> {
       PointerDeviceKind.invertedStylus,
@@ -541,10 +550,17 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         _longPressRecognizer?.onLongPress = null;
         break;
     }
+
+    // Put the down event's pointer id to _activePointers so they can be
+    // distinguished the
+    if (event.pointer == _tapRecognizer?.primaryPointer || event.pointer == _longPressRecognizer?.primaryPointer) {
+      assert(_triggerMode != TooltipTriggerMode.manual);
+      _activePointers.add(event.pointer);
+    }
   }
 
   void _handlePointerRemoved(PointerEvent event) {
-    _activePointers.remove(event.pointer);
+    assert(!_activePointers.contains(event.pointer));
   }
 
   // For PointerDownEvents, this method will be called after _handlePointerDown.
@@ -553,32 +569,24 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if ((_timer == null && _controller.status == AnimationStatus.dismissed) || event is! PointerDownEvent) {
       return;
     }
-    if (!_activePointers.contains(event.pointer)) {
-      _handleTapToDismiss();
+    if (_activePointers.remove(event.pointer)) {
+      // This a pointer of interest specified by the trigger mode, since it's
+      // picked up by the recognizer. The recognizer will later determine if
+      // this is indeed a "trigger" gesture and dismiss the tooltip if it's not.
       return;
     }
-    final bool shouldDismiss;
-    switch (_triggerMode) {
-      case TooltipTriggerMode.tap:
-        shouldDismiss = event.pointer != _tapRecognizer?.primaryPointer;
-        break;
-      case TooltipTriggerMode.longPress:
-        shouldDismiss = event.pointer != _longPressRecognizer?.primaryPointer;
-        break;
-      case TooltipTriggerMode.manual:
-        shouldDismiss = true;
-        break;
-    }
-    if (shouldDismiss) {
-      _activePointers.remove(event.pointer);
-      _handleTapToDismiss();
-    }
+    _handleTapToDismiss();
   }
+
+  // The pointer is not part of a "trigger" gesture and the tooltip should be
+  // dismissed.
   void _handleTapToDismiss() {
     _scheduleDismissTooltip(withDelay: Duration.zero);
     _activeHoveringPointerDevices.clear();
   }
 
+  // When a "trigger" gesture is recognized and the pointer down even is a part
+  // of it.
   void _handlePress() {
     final bool tooltipCreated = _visible && _controller.status == AnimationStatus.dismissed;
     final bool enableFeedback = tooltipCreated && _enableFeedback;
@@ -602,16 +610,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
   }
 
-  // If a PointerEvent a local gesture recognizer was tracking is cancelled,
-  // remove it from _activePointers so it will be handled by the global pointer
-  // event listener to dismiss the tooltip.
-  //void _handlePressCancel(PrimaryPointerGestureRecognizer recognizer) {
-  //  final int? cancelledPointer = recognizer.primaryPointer;
-  //  assert(cancelledPointer != null);
-  //  _activePointers.remove(cancelledPointer);
-  //}
-
-  // # Handling Mouse Hovering, Expected Behaviors:
+  // # Current Mouse Hovering Behaviors:
   // 1. Hovered tooltips shouldn't show more than one at once, for each mouse
   //    device. For example, a chip with a delete icon typically shouldn't show
   //    both the delete icon tooltip and the chip tooltip at the same time.
@@ -620,6 +619,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    within the application), even these tooltips are still hovered, or when
   //    the last hovering device leaves.
   void _handleMouseEnter(PointerEnterEvent event) {
+    // The callback is also used in an OverlayEntry there's a chance that this
+    // widget is already unmounted.
     if (!mounted) {
       return;
     }
@@ -715,11 +716,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _visible = TooltipVisibility.of(context);
   }
 
-  @override
-  void didUpdateWidget(Tooltip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
-
   // https://material.io/components/tooltips#specs
   double _getDefaultTooltipHeight() {
     final ThemeData theme = Theme.of(context);
@@ -807,15 +803,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry?.remove();
     _entry?.dispose();
     _entry = null;
-  }
-
-  @override
-  void deactivate() {
-    Tooltip._openedTooltips.remove(this);
-    _timer?.cancel();
-    _timer = null;
-    _controller.stop(canceled: false);
-    super.deactivate();
   }
 
   @override

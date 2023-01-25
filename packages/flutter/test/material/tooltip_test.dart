@@ -1887,6 +1887,84 @@ void main() {
       expect(find.byType(SizedBox), findsOneWidget);
     }
   });
+
+  testWidgets('Tooltip trigger mode ignores mouse events', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const Tooltip(
+          message: tooltipText,
+          triggerMode: TooltipTriggerMode.longPress,
+          child: SizedBox.expand(),
+        ),
+      ),
+    );
+
+    final TestGesture mouseGesture = await tester.startGesture(tester.getCenter(find.byTooltip(tooltipText)), kind: PointerDeviceKind.mouse);
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await mouseGesture.up();
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+
+    final TestGesture touchGesture = await tester.startGesture(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await touchGesture.up();
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+  });
+
+  testWidgets('Tooltip does not block other mouse regions', (WidgetTester tester) async {
+    bool entered = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MouseRegion(
+          onEnter: (PointerEnterEvent event) { entered = true; },
+          child: const Tooltip(
+            message: tooltipText,
+            child: SizedBox.expand(),
+          ),
+        ),
+      ),
+    );
+
+    expect(entered, isFalse);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Tooltip)));
+    await gesture.removePointer();
+
+    expect(entered, isTrue);
+  });
+
+  testWidgets('Does not rebuild on mouse connect/disconnect', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/117627
+    int buildCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+          child: Builder(builder: (BuildContext context) {
+            buildCount += 1;
+            return const SizedBox.expand();
+          }),
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await tester.pump();
+    await gesture.removePointer();
+    await tester.pump();
+
+    expect(buildCount, 1);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
