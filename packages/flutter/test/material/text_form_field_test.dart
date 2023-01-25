@@ -1148,4 +1148,25 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
+
+  testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
+    final TextMagnifierConfiguration myTextMagnifierConfiguration = TextMagnifierConfiguration(
+      magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo> notifier) {
+        return const Placeholder();
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TextField(
+          magnifierConfiguration: myTextMagnifierConfiguration,
+        ),
+      ),
+    ));
+
+    expect(find.byType(EditableText), findsOneWidget);
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
+  });
 }
