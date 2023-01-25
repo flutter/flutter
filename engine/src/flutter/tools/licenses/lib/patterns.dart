@@ -118,6 +118,7 @@ final List<RegExp> copyrightStatementPatterns = <RegExp>[
   RegExp(r'^(?:[^ ]+ )?Modifications:$', caseSensitive: false),
   RegExp(r'^ *Modifications for', caseSensitive: false),
   RegExp(r'^ *Modifications of', caseSensitive: false),
+  RegExp(r'^Modifications Copyright \(C\) .+', caseSensitive: false),
   RegExp(r'^\(Royal Institute of Technology, Stockholm, Sweden\)\.$'),
   RegExp(r'^FT_Raccess_Get_HeaderInfo\(\) and raccess_guess_darwin_hfsplus\(\) are$'),
   RegExp(r'^derived from ftobjs\.c\.$'),
@@ -868,7 +869,7 @@ final List<RegExp> csTemplateLicenses = <RegExp>[
     kIndent +
 
     // Some files in ANGLE prefix the license with a description of the license.
-    r'(?:BSD 2-Clause License \(http://www.opensource.org/licenses/bsd-license.php\))?' +
+    r'(?:BSD 2-Clause License \(https?://www.opensource.org/licenses/bsd-license.php\))?' +
     _linebreak +
 
     (
