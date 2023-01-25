@@ -92,6 +92,9 @@ class DatePickerThemeData with Diagnosticable {
   final Color? surfaceTintColor;
 
   /// Overrides the default value of [Dialog.shape].
+  ///
+  /// If [elevation] is greater than zero then a shadow is shown and the shadow's
+  /// shape mirrors the shape of the dialog.
   final ShapeBorder? shape;
 
   /// Overrides the header's default background fill color.
@@ -111,7 +114,7 @@ class DatePickerThemeData with Diagnosticable {
   ///
   /// The dialog's header displays the currently selected date.
   ///
-  /// The [TextStyle.color] of the [headerHeadlineStyle] is not used directly,
+  /// The [TextStyle.color] of the [headerHeadlineStyle] is not used,
   /// [headerForegroundColor] is used instead.
   final TextStyle? headerHeadlineStyle;
 
@@ -121,7 +124,7 @@ class DatePickerThemeData with Diagnosticable {
   /// spec) is usually a prompt to the user at the top of the header
   /// (i.e. 'Select date').
   ///
-  /// The [TextStyle.color] of the [headerHelpStyle] is not used directly,
+  /// The [TextStyle.color] of the [headerHelpStyle] is not used,
   /// [headerForegroundColor] is used instead.
   ///
   /// See also:
@@ -135,7 +138,7 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default text style used for each individual day
   /// label in the grid of the date picker.
   ///
-  /// The [TextStyle.color] of the [dayStyle] is not used directly, as
+  /// The [TextStyle.color] of the [dayStyle] is not used,
   /// [dayForegroundColor] is used instead.
   final TextStyle? dayStyle;
 
@@ -172,7 +175,7 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default text style used to paint each of the year
   /// entries in the year selector of the date picker.
   ///
-  /// The [TextStyle.color] of the [yearStyle] is not used directly,
+  /// The [TextStyle.color] of the [yearStyle] is not used,
   /// [yearForegroundColor] is used instead.
   final TextStyle? yearStyle;
 
@@ -216,6 +219,12 @@ class DatePickerThemeData with Diagnosticable {
 
   /// Overrides the default overall shape of a full screen
   /// [DateRangePickerDialog].
+  ///
+  /// If [elevation] is greater than zero then a shadow is shown and the shadow's
+  /// shape mirrors the shape of the dialog.
+  ///
+  ///   [Material.surfaceTintColor], which explains how this color is related to
+  ///   [elevation].
   final ShapeBorder? rangePickerShape;
 
   /// Overrides the default background fill color for [DateRangePickerDialog].
@@ -237,7 +246,7 @@ class DatePickerThemeData with Diagnosticable {
   ///
   /// The dialog's header displays the currently selected date range.
   ///
-  /// The [TextStyle.color] of [rangePickerHeaderHeadlineStyle] is not used directly,
+  /// The [TextStyle.color] of [rangePickerHeaderHeadlineStyle] is not used,
   /// [rangePickerHeaderForegroundColor] is used instead.
   final TextStyle? rangePickerHeaderHeadlineStyle;
 
@@ -248,7 +257,7 @@ class DatePickerThemeData with Diagnosticable {
   /// spec) is usually a prompt to the user at the top of the header
   /// (i.e. 'Select date').
   ///
-  /// The [TextStyle.color] of the [rangePickerHeaderHelpStyle] is not used directly,
+  /// The [TextStyle.color] of the [rangePickerHeaderHelpStyle] is not used,
   /// [rangePickerHeaderForegroundColor] is used instead.
   ///
   /// See also:
@@ -488,8 +497,8 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(ColorProperty('rangePickerHeaderForegroundColor', rangePickerHeaderForegroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('rangePickerHeaderHeadlineStyle', rangePickerHeaderHeadlineStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('rangePickerHeaderHelpStyle', rangePickerHeaderHelpStyle, defaultValue: null));
-    properties.add(ColorProperty('inRangeSelectedBackgroundColor', rangeSelectionBackgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('inRangeSelectedOverlayColor', rangeSelectionOverlayColor, defaultValue: null));
+    properties.add(ColorProperty('rangeSelectionBackgroundColor', rangeSelectionBackgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('rangeSelectionOverlayColor', rangeSelectionOverlayColor, defaultValue: null));
   }
 }
 
