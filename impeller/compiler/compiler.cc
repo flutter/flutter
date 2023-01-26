@@ -36,44 +36,6 @@ static CompilerBackend CreateMSLCompiler(const spirv_cross::ParsedIR& ir,
       spirv_cross::CompilerMSL::Options::make_msl_version(1, 2);
   sl_compiler->set_msl_options(sl_options);
 
-  // Set metal resource mappings to be consistent with location based mapping
-  // used on other backends when creating fragment shaders. This doesn't seem
-  // to work with the generated bindings for compute shaders, nor for certain
-  // shaders in the flutter/engine tree.
-  if (source_options.remap_samplers) {
-    std::vector<uint32_t> sampler_offsets;
-    ir.for_each_typed_id<spirv_cross::SPIRVariable>(
-        [&](uint32_t, const spirv_cross::SPIRVariable& var) {
-          if (var.storage != spv::StorageClassUniformConstant) {
-            return;
-          }
-          const auto spir_type = sl_compiler->get_type(var.basetype);
-          auto location = sl_compiler->get_decoration(
-              var.self, spv::Decoration::DecorationLocation);
-          if (spir_type.basetype ==
-              spirv_cross::SPIRType::BaseType::SampledImage) {
-            sampler_offsets.push_back(location);
-          }
-        });
-    if (sampler_offsets.size() > 0) {
-      auto start_offset =
-          *std::min_element(sampler_offsets.begin(), sampler_offsets.end());
-      for (auto offset : sampler_offsets) {
-        sl_compiler->add_msl_resource_binding({
-            .stage = spv::ExecutionModel::ExecutionModelFragment,
-            .basetype = spirv_cross::SPIRType::BaseType::SampledImage,
-            .binding = offset,
-            .count = 1u,
-            // A sampled image is both an image and a sampler, so both
-            // offsets need to be set or depending on the partiular shader
-            // the bindings may be incorrect.
-            .msl_texture = offset - start_offset,
-            .msl_sampler = offset - start_offset,
-        });
-      }
-    }
-  }
-
   return CompilerBackend(sl_compiler);
 }
 
