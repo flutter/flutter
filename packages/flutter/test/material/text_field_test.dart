@@ -13367,7 +13367,7 @@ void main() {
   testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    // default test. The canRequestFocus is true by default and the text field can be focused
+    // Default test. The canRequestFocus is true by default and the text field can be focused
     await tester.pumpWidget(
       boilerplate(
         child: TextField(
@@ -13380,7 +13380,7 @@ void main() {
     await tester.pump();
     expect(focusNode.hasFocus, isTrue);
 
-    // Set canRequestFocus to false by default and the text field can be focused
+    // Set canRequestFocus to false: the text field cannot be focused when it is tapped/long pressed.
     await tester.pumpWidget(
       boilerplate(
         child: TextField(
@@ -13389,8 +13389,19 @@ void main() {
         ),
       ),
     );
+
     expect(focusNode.hasFocus, isFalse);
     focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    // The text field cannot be focused if it is tapped.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    // The text field cannot be focused if it is long pressed.
+    await tester.longPress(find.byType(TextField));
     await tester.pump();
     expect(focusNode.hasFocus, isFalse);
   });
@@ -13549,6 +13560,34 @@ void main() {
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+    testWidgets('Right clicking cannot request focus if canRequestFocus is false', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  key: key,
+                  focusNode: focusNode,
+                  canRequestFocus: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode.hasFocus, isFalse);
+    });
   });
 
   group('context menu', () {

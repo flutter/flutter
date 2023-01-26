@@ -765,8 +765,9 @@ class TextField extends StatefulWidget {
 
   /// Determine whether this text field can request the primary focus.
   ///
-  /// Defaults to true. Set to false if you want the [TextField] manages to do
-  /// nothing when it request focus.
+  /// Defaults to true. If false, the text field will not request focus
+  /// when tapped, or when its context menu is displayed. If false it will not
+  /// be possible to move the focus to the text field with tab key.
   final bool canRequestFocus;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {

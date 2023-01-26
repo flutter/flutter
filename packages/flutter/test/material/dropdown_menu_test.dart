@@ -832,7 +832,19 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    final bool isMobile = themeData.platform == TargetPlatform.android || themeData.platform == TargetPlatform.iOS || themeData.platform == TargetPlatform.fuchsia;
+    late final bool isMobile;
+    switch (themeData.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        isMobile = true;
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        isMobile = false;
+        break;
+    }
     int expectedCount = isMobile ? 0 : 1;
 
     // Test onSelected on key press
@@ -841,7 +853,7 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(selectionCount, expectedCount);
-    // The desktop platform close menu by entering 'done' button. So we need to reopen it.
+    // The desktop platform closed the menu when a completion action is pressed. So we need to reopen it.
     if (!isMobile) {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pump();
@@ -923,13 +935,12 @@ void main() {
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
 
-    Widget buildDropdownMenu({bool? requestFocusOnTap}) => MaterialApp(
+    Widget buildDropdownMenu() => MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: Column(
           children: <Widget>[
             DropdownMenu<TestMenu>(
-              requestFocusOnTap: requestFocusOnTap,
               dropdownMenuEntries: menuChildren,
             ),
           ],
@@ -942,7 +953,7 @@ void main() {
     await tester.pump();
 
     final Finder textFieldFinder = find.byType(TextField);
-    final TextField result = tester.firstWidget<TextField>(textFieldFinder);
+    final TextField result = tester.widget<TextField>(textFieldFinder);
     expect(result.canRequestFocus, false);
   }, variant: TargetPlatformVariant.mobile());
 
@@ -950,13 +961,12 @@ void main() {
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
 
-    Widget buildDropdownMenu({bool? requestFocusOnTap}) => MaterialApp(
+    Widget buildDropdownMenu() => MaterialApp(
       theme: themeData,
       home: Scaffold(
         body: Column(
           children: <Widget>[
             DropdownMenu<TestMenu>(
-              requestFocusOnTap: requestFocusOnTap,
               dropdownMenuEntries: menuChildren,
             ),
           ],
@@ -968,11 +978,11 @@ void main() {
     await tester.pump();
 
     final Finder textFieldFinder = find.byType(TextField);
-    final TextField result = tester.firstWidget<TextField>(textFieldFinder);
+    final TextField result = tester.widget<TextField>(textFieldFinder);
     expect(result.canRequestFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('If the requestFocusOnTap is true, the text input field can request focus, '
+  testWidgets('If requestFocusOnTap is true, the text input field can request focus, '
     'otherwise it cannot request focus', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
 
@@ -995,16 +1005,31 @@ void main() {
     await tester.pump();
 
     final Finder textFieldFinder = find.byType(TextField);
-    final TextField result = tester.firstWidget<TextField>(textFieldFinder);
-    expect(result.canRequestFocus, true);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, true);
+    // Open the dropdown menu.
+    await tester.tap(textFieldFinder);
+    await tester.pump();
+    // Make a selection.
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 0').last);
+    await tester.pump();
+    expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
 
     // Set requestFocusOnTap to false.
+    await tester.pumpWidget(Container());
     await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     final Finder textFieldFinder1 = find.byType(TextField);
-    final TextField result1 = tester.firstWidget<TextField>(textFieldFinder1);
-    expect(result1.canRequestFocus, false);
+    final TextField textField1 = tester.widget<TextField>(textFieldFinder1);
+    expect(textField1.canRequestFocus, false);
+    // Open the dropdown menu.
+    await tester.tap(textFieldFinder1);
+    await tester.pump();
+    // Make a selection.
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 0').last);
+    await tester.pump();
+    expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
 }
 
