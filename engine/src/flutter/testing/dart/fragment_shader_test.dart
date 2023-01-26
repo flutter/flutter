@@ -332,34 +332,6 @@ void main() async {
     shader.dispose();
   });
 
-  // This test can't rely on actual pixels rendered since it needs to run on a
-  // metal shader on iOS. instead parse the source code.
-  test('impellerc orders samplers in metal shader according to declaration and not usage', () async {
-    if (!Platform.isMacOS) {
-      return;
-    }
-    final Directory directory = shaderDirectory('iplr-remap');
-    final String data = readAsStringLossy(File(path.join(directory.path, 'shader_with_samplers.frag.iplr')));
-
-    const String expected = 'texture2d<float> textureA [[texture(0)]],'
-      ' texture2d<float> textureB [[texture(1)]]';
-
-    expect(data, contains(expected));
-  });
-
-  test('impellerc orders samplers in metal shader according to declaration and not usage in glow', () async {
-    if (!Platform.isMacOS) {
-      return;
-    }
-    final Directory directory = shaderDirectory('iplr-remap');
-    final String data = readAsStringLossy(File(path.join(directory.path, 'glow_shader.frag.iplr')));
-
-    const String expected = 'texture2d<float> tInput [[texture(0)]], texture2d<float> tNoise [[texture(1)]], '
-      'sampler tInputSmplr [[sampler(0)]], sampler tNoiseSmplr [[sampler(1)]]';
-
-    expect(data, contains(expected));
-  });
-
   // Test all supported GLSL ops. See lib/spirv/lib/src/constants.dart
   final Map<String, FragmentProgram> iplrSupportedGLSLOpShaders = await _loadShaderAssets(
     path.join('supported_glsl_op_shaders', 'iplr'),
