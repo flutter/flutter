@@ -1,4 +1,4 @@
-Signature: 649516db81c9de640c9c778a9b426cd9
+Signature: 350f3a4a7da57dc89323c996947f27c9
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -4018,10 +4018,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing/tracing.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing/tracing.fidl
