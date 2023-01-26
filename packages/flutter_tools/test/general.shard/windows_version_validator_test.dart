@@ -373,7 +373,7 @@ Versione SO:               10.0.22621 N/D build 22621
     expect(
       matches.length,
       4,
-      reason: 'There should be only two matches for the pattern provided',
+      reason: 'There should be only four matches for the pattern provided',
     );
   });
 }
