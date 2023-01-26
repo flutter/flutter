@@ -1124,6 +1124,7 @@ void main() {
     );
 
     final Offset topLeft = tester.getTopLeft(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first);
+    /// Compare the offset of banner from top left
     expect(topLeft.dx, margin.left);
   });
 }
