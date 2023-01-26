@@ -112,5 +112,8 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
 
   @override
+  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
+
+  @override
   Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 }

@@ -43,7 +43,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as NetworkImage, chunkEvents, null, decode),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decodeDeprecated: decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -62,7 +62,26 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as NetworkImage, chunkEvents, decode, null),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decodeBufferDeprecated: decode),
+      chunkEvents: chunkEvents.stream,
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<image_provider.NetworkImage>('Image key', key),
+      ],
+    );
+  }
+
+  @override
+  ImageStreamCompleter loadImage(image_provider.NetworkImage key, image_provider.ImageDecoderCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decode: decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -92,10 +111,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    StreamController<ImageChunkEvent> chunkEvents,
-    image_provider.DecoderBufferCallback? decode,
-    image_provider.DecoderCallback? decodeDepreacted,
-  ) async {
+    StreamController<ImageChunkEvent> chunkEvents, {
+    image_provider.ImageDecoderCallback? decode,
+    image_provider.DecoderBufferCallback? decodeBufferDeprecated,
+    image_provider.DecoderCallback? decodeDeprecated,
+  }) async {
     try {
       assert(key == this);
 
@@ -131,9 +151,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       if (decode != null) {
         final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
         return decode(buffer);
+      } else if (decodeBufferDeprecated != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decodeBufferDeprecated(buffer);
       } else {
-        assert(decodeDepreacted != null);
-        return decodeDepreacted!(bytes);
+        assert(decodeDeprecated != null);
+        return decodeDeprecated!(bytes);
       }
     } catch (e) {
       // Depending on where the exception was thrown, the image cache may not
