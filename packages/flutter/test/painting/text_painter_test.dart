@@ -1314,17 +1314,17 @@ void main() {
     painter.layout(minWidth: double.infinity);
     expect(painter.width, double.infinity);
     expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
-    expect(mockCanvas.centerX, 0);
+    expect(mockCanvas.offsetX, 0);
 
     painter.layout();
     expect(painter.width, 10);
     expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
-    expect(mockCanvas.centerX, 5);
+    expect(mockCanvas.offsetX, 0);
 
     painter.layout(minWidth: 100);
     expect(painter.width, 100);
     expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
-    expect(mockCanvas.centerX, 50);
+    expect(mockCanvas.offsetX, 0);
 
     painter.dispose();
   });
@@ -1335,8 +1335,10 @@ class MockCanvas extends Fake implements Canvas {
 
 class MockCanvasWithDrawParagraph extends Fake implements Canvas {
   double? centerX;
+  double? offsetX;
   @override
   void drawParagraph(ui.Paragraph paragraph, Offset offset) {
+    offsetX = offset.dx;
     centerX = offset.dx + paragraph.width / 2;
   }
 }
