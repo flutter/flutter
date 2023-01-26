@@ -332,10 +332,6 @@ void main() {
       fontSize: 20,
       color: Colors.indigo,
     );
-    const TextStyle subtitleTextStyle = TextStyle(
-      fontSize: 15,
-      color: Colors.indigo,
-    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -352,10 +348,7 @@ void main() {
             ),
           ),
           appBarTheme: const AppBarTheme(
-            textTheme: TextTheme(
-              titleLarge: titleTextStyle,
-              titleSmall: subtitleTextStyle,
-            ),
+            titleTextStyle: titleTextStyle,
             foregroundColor: Colors.indigo,
           ),
         ),
@@ -377,7 +370,6 @@ void main() {
     final Text title = tester.widget(find.text('AAA'));
     expect(title.style, titleTextStyle);
     final Text subtitle = tester.widget(find.text('1 license.'));
-    expect(subtitle.style, subtitleTextStyle);
   });
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {

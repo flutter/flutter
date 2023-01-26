@@ -873,6 +873,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             title,
             subtitle,
             theme.primaryTextTheme,
+            theme.appBarTheme.titleTextStyle,
           ),
         ),
         body: Center(
@@ -934,11 +935,13 @@ class _PackageLicensePageTitle extends StatelessWidget {
     this.title,
     this.subtitle,
     this.theme,
-  );
+    this.titleTextStyle,
+  ) : titleTextStyle ??= theme.titleLarge;
 
   final String title;
   final String subtitle;
   final TextTheme theme;
+  final TextStyle? titleTextStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -948,7 +951,7 @@ class _PackageLicensePageTitle extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: theme.titleLarge?.copyWith(color: color)),
+        Text(title, style: titleTextStyle?.copyWith(color: color)),
         Text(subtitle, style: theme.titleSmall?.copyWith(color: color)),
       ],
     );
