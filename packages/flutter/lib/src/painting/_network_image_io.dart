@@ -43,7 +43,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as NetworkImage, chunkEvents, null, null, decode),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decodeDeprecated: decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -62,7 +62,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as NetworkImage, chunkEvents, null, decode, null),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decodeBufferDeprecated: decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -81,7 +81,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as NetworkImage, chunkEvents, decode, null, null),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decode: decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -111,11 +111,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    StreamController<ImageChunkEvent> chunkEvents,
+    StreamController<ImageChunkEvent> chunkEvents, {
     image_provider.ImageDecoderCallback? decode,
     image_provider.DecoderBufferCallback? decodeBufferDeprecated,
     image_provider.DecoderCallback? decodeDeprecated,
-  ) async {
+  }) async {
     try {
       assert(key == this);
 

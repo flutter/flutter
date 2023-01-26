@@ -667,7 +667,7 @@ abstract class ImageProvider<T extends Object> {
   /// See also:
   ///
   ///  * [ResizeImage], for modifying the key to account for cache dimensions.
-  // TODO(tvolkert): make abstract nethod once backwards compatibility shim isn't needed.
+  // TODO(tvolkert): make abstract (https://github.com/flutter/flutter/issues/119209)
   @protected
   ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) {
     return _AbstractImageStreamCompleter();
@@ -746,7 +746,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       return true;
     }());
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode, null, null),
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: key.name,
       informationCollector: collector,
@@ -766,7 +766,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       return true;
     }());
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, null, decode, null),
+      codec: _loadAsync(key, decodeBufferDeprecated: decode),
       scale: key.scale,
       debugLabel: key.name,
       informationCollector: collector,
@@ -784,7 +784,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       return true;
     }());
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, null, null, decode),
+      codec: _loadAsync(key, decodeDeprecated: decode),
       scale: key.scale,
       debugLabel: key.name,
       informationCollector: collector,
@@ -797,11 +797,11 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// This function is used by [load].
   @protected
   Future<ui.Codec> _loadAsync(
-    AssetBundleImageKey key,
+    AssetBundleImageKey key, {
     ImageDecoderCallback? decode,
     DecoderBufferCallback? decodeBufferDeprecated,
     DecoderCallback? decodeDeprecated,
-  ) async {
+  }) async {
     if (decode != null) {
       ui.ImmutableBuffer buffer;
       // Hot reload/restart could change whether an asset bundle or key in a
@@ -1082,7 +1082,7 @@ class FileImage extends ImageProvider<FileImage> {
   @override
   ImageStreamCompleter load(FileImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, null, null, decode),
+      codec: _loadAsync(key, decodeDeprecated: decode),
       scale: key.scale,
       debugLabel: key.file.path,
       informationCollector: () => <DiagnosticsNode>[
@@ -1094,7 +1094,7 @@ class FileImage extends ImageProvider<FileImage> {
   @override
   ImageStreamCompleter loadBuffer(FileImage key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, null, decode, null),
+      codec: _loadAsync(key, decodeBufferDeprecated: decode),
       scale: key.scale,
       debugLabel: key.file.path,
       informationCollector: () => <DiagnosticsNode>[
@@ -1107,7 +1107,7 @@ class FileImage extends ImageProvider<FileImage> {
   @protected
   ImageStreamCompleter loadImage(FileImage key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode, null, null),
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: key.file.path,
       informationCollector: () => <DiagnosticsNode>[
@@ -1117,11 +1117,11 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   Future<ui.Codec> _loadAsync(
-    FileImage key,
+    FileImage key, {
     ImageDecoderCallback? decode,
     DecoderBufferCallback? decodeBufferDeprecated,
     DecoderCallback? decodeDeprecated,
-  ) async {
+  }) async {
     assert(key == this);
 
     // TODO(jonahwilliams): making this sync caused test failures that seem to
@@ -1211,7 +1211,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   @override
   ImageStreamCompleter load(MemoryImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, null, null, decode),
+      codec: _loadAsync(key, decodeDeprecated: decode),
       scale: key.scale,
       debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
@@ -1220,7 +1220,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   @override
   ImageStreamCompleter loadBuffer(MemoryImage key, DecoderBufferCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, null, decode, null),
+      codec: _loadAsync(key, decodeBufferDeprecated: decode),
       scale: key.scale,
       debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
@@ -1229,18 +1229,18 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   @override
   ImageStreamCompleter loadImage(MemoryImage key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode, null, null),
+      codec: _loadAsync(key, decode: decode),
       scale: key.scale,
       debugLabel: 'MemoryImage(${describeIdentity(key.bytes)})',
     );
   }
 
   Future<ui.Codec> _loadAsync(
-    MemoryImage key,
+    MemoryImage key, {
     ImageDecoderCallback? decode,
     DecoderBufferCallback? decodeBufferDeprecated,
     DecoderCallback? decodeDeprecated,
-  ) async {
+  }) async {
     assert(key == this);
     if (decode != null) {
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
