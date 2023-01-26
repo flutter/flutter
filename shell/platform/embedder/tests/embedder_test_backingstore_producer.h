@@ -38,10 +38,10 @@ class EmbedderTestBackingStoreProducer {
     kVulkanImage,
   };
 
-  EmbedderTestBackingStoreProducer(
-      sk_sp<GrDirectContext> context,
-      RenderTargetType type,
-      FlutterSoftwarePixelFormat software_pixfmt = kNative32);
+  EmbedderTestBackingStoreProducer(sk_sp<GrDirectContext> context,
+                                   RenderTargetType type,
+                                   FlutterSoftwarePixelFormat software_pixfmt =
+                                       kFlutterSoftwarePixelFormatNative32);
   ~EmbedderTestBackingStoreProducer();
 
   bool Create(const FlutterBackingStoreConfig* config,
