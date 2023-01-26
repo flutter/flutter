@@ -8,6 +8,9 @@ import 'package:leak_tracker/leak_tracker.dart';
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
+/// See details in documentation for `withLeakTracking` at
+/// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/orchestration.dart#withLeakTracking
+///
 /// The Flutter related enhancements are:
 /// 1. Listens to [MemoryAllocations] events.
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
