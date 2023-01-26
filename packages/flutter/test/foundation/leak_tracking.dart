@@ -6,7 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
+typedef void Function(Leaks foundLeaks)? leaksObtainer,
+
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
+///
+/// The method will fail if wrapped code contains memory leaks.
 ///
 /// See details in documentation for `withLeakTracking` at
 /// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/orchestration.dart#withLeakTracking
@@ -15,8 +19,10 @@ import 'package:leak_tracker/leak_tracker.dart';
 /// 1. Listens to [MemoryAllocations] events.
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
 ///
-/// The method is not combined with [testWidgets], because the combining will
-/// impact VSCode's ability to recognize tests.
+/// If you use [testWidgets], pass [tester] to avoid async issues in leak processing.
+///
+/// Pass [leaksObtainer] if you want to get leak information before
+/// the method failure.
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
   required WidgetTester? tester,
@@ -27,6 +33,9 @@ Future<void> withFlutterLeakTracking(
 }) async {
   // The method is copied from
   // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
+
+  // The method is not combined with [testWidgets], because the combining will
+  // impact VSCode's ability to recognize tests.
 
   void flutterEventToLeakTracker(ObjectEvent event) =>
       dispatchObjectEvent(event.toMap());
