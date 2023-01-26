@@ -155,6 +155,10 @@ declare_args() {
   # Compile for Undefined Behavior Sanitizer.
   is_ubsan = false
 
+  # protobuf-gn fails to build if this argument isn't defined. This should never
+  # be set to true, becuase we never build within the Fuchsia tree.
+  is_fuchsia_tree = false
+
   if (current_os == "chromeos") {
     # Allows the target toolchain to be injected as arguments. This is needed
     # to support the CrOS build system which supports per-build-configuration

@@ -6,3 +6,8 @@
 # dependencies (e.g, ANGLE, abseil) to use their GN build files, but we don't
 # want the Chromium-specific parts of the build.
 build_with_chromium = false
+
+# Perfetto targets fail to build without this variable. It is used by Perfetto
+# targets to distinguish embedder builds from Perfetto standalone builds, and
+# builds in the Android tree.
+perfetto_build_with_embedder = true

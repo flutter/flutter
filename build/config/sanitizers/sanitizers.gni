@@ -14,6 +14,10 @@ declare_args() {
   use_prebuilt_instrumented_libraries = false
 
   is_ubsan_vptr = false
+
+  # Perfetto targets fail to build if this argument isn't defined. When true,
+  # the preprocessor macro ADDRESS_SANITIZER_WITHOUT_INSTRUMENTATION is defined.
+  use_sanitizer_configs_without_instrumentation = false
 }
 
 use_fuzzing_engine = false
