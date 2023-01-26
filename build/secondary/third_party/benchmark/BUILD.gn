@@ -54,7 +54,7 @@ static_library("benchmark") {
   ]
   public_configs = [ ":benchmark_config" ]
   defines = [
-    "HAVE_POSIX_REGEX",
+    "HAVE_STD_REGEX",
     "HAVE_THREAD_SAFETY_ATTRIBUTES",
   ]
 }
