@@ -1863,12 +1863,12 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Tooltip(
             message: tooltipText,
             waitDuration: waitDuration,
-            child: const SizedBox(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -1899,13 +1899,13 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Tooltip(
             message: tooltipText,
             waitDuration: waitDuration,
             triggerMode: TooltipTriggerMode.longPress,
-            child: const SizedBox(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),

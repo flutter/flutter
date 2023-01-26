@@ -25,7 +25,10 @@ typedef TooltipTriggeredCallback = void Function();
 //
 // The [onEnter] method will be called when a mouse pointer enters this
 // [MouseRegion], and there is no other [_ExclusiveMouseRegion]s obstructing
-// this [_ExclusiveMouseRegion] from receiving the events.
+// this [_ExclusiveMouseRegion] from receiving the events. This includes the
+// case where the mouse cursor stays within the paint bounds of an outer
+// [_ExclusiveMouseRegion], but moves outside of the bounds of the inner
+// [_ExclusiveMouseRegion] that was initially blocking the outer widget.
 //
 // Likewise, [onExit] is called when the a mouse pointer moves out of the paint
 // bounds of this widget, or moves into another [_ExclusiveMouseRegion] that
@@ -556,7 +559,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _handleGlobalPointerEvent(PointerEvent event) {
     assert(mounted);
     if (_tapRecognizer?.primaryPointer == event.pointer || _longPressRecognizer?.primaryPointer == event.pointer) {
-      // This a pointer of interest specified by the trigger mode, since it's
+      // This is a pointer of interest specified by the trigger mode, since it's
       // picked up by the recognizer.
       //
       // The recognizer will later determine if this is indeed a "trigger"
