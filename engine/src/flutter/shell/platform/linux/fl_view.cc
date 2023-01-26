@@ -200,8 +200,17 @@ static void handle_geometry_changed(FlView* self) {
       self->engine, allocation.width * scale_factor,
       allocation.height * scale_factor, scale_factor);
 
-  fl_renderer_wait_for_frame(self->renderer, allocation.width * scale_factor,
-                             allocation.height * scale_factor);
+  // Make sure the view has been realized and its size has been allocated before
+  // waiting for a frame. `fl_view_realize()` and `fl_view_size_allocate()` may
+  // be called in either order depending on the order in which the window is
+  // shown and the view is added to a container in the app runner.
+  //
+  // Note: `gtk_widget_init()` initializes the size allocation to 1x1.
+  if (allocation.width > 1 && allocation.height > 1 &&
+      gtk_widget_get_realized(GTK_WIDGET(self))) {
+    fl_renderer_wait_for_frame(self->renderer, allocation.width * scale_factor,
+                               allocation.height * scale_factor);
+  }
 }
 
 // Adds a widget to render in this view.
@@ -661,6 +670,8 @@ static void fl_view_realize(GtkWidget* widget) {
     g_warning("Failed to start Flutter engine: %s", error->message);
     return;
   }
+
+  handle_geometry_changed(self);
 }
 
 // Implements GtkWidget::get-preferred-width
