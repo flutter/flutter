@@ -76,8 +76,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.applyTheme,
     this.focusColor,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(value != null),
-       assert(dragStartBehavior != null);
+  });
 
   /// Whether this switch is on or off.
   ///
@@ -128,7 +127,7 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the focus highlight for keyboard interactions.
   ///
-  /// Defaults to a a slightly transparent [activeColor].
+  /// Defaults to a slightly transparent [activeColor].
   final Color? focusColor;
 
   /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
@@ -473,10 +472,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required TextDirection textDirection,
     required bool isFocused,
     required _CupertinoSwitchState state,
-  }) : assert(value != null),
-       assert(activeColor != null),
-       assert(state != null),
-       _value = value,
+  }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
        _focusColor = focusColor,
@@ -495,7 +491,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get value => _value;
   bool _value;
   set value(bool value) {
-    assert(value != null);
     if (value == _value) {
       return;
     }
@@ -506,7 +501,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get activeColor => _activeColor;
   Color _activeColor;
   set activeColor(Color value) {
-    assert(value != null);
     if (value == _activeColor) {
       return;
     }
@@ -517,7 +511,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get trackColor => _trackColor;
   Color _trackColor;
   set trackColor(Color value) {
-    assert(value != null);
     if (value == _trackColor) {
       return;
     }
@@ -528,7 +521,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get thumbColor => _thumbPainter.color;
   CupertinoThumbPainter _thumbPainter;
   set thumbColor(Color value) {
-    assert(value != null);
     if (value == thumbColor) {
       return;
     }
@@ -539,7 +531,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get focusColor => _focusColor;
   Color _focusColor;
   set focusColor(Color value) {
-    assert(value != null);
     if (value == _focusColor) {
       return;
     }
@@ -564,7 +555,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -575,7 +565,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
-    assert(value != null);
     if(value == _isFocused) {
       return;
     }

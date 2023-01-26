@@ -26,6 +26,8 @@ const double _kIndicatorWidth = 64;
 
 /// Material 3 Navigation Bar component.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DVGYddFaLv0}
+///
 /// Navigation bars offer a persistent and convenient way to switch between
 /// primary destinations in an app.
 ///
@@ -97,7 +99,7 @@ class NavigationBar extends StatelessWidget {
     this.indicatorShape,
     this.height,
     this.labelBehavior,
-  }) :  assert(destinations != null && destinations.length >= 2),
+  }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
   /// Determines the transition time for each destination as it goes between
@@ -595,7 +597,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// when label behavior is [NavigationDestinationLabelBehavior.onlyShowSelected].
   final int selectedIndex;
 
-  /// How many total destinations are are in this navigation bar.
+  /// How many total destinations are in this navigation bar.
   ///
   /// This is required for semantics, so that each destination can have a label
   /// "Tab 1 of 4", for example.
@@ -943,9 +945,6 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message == null) {
-      return child;
-    }
     return Tooltip(
       message: message,
       // TODO(johnsonmh): Make this value configurable/themable.

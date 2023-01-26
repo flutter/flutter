@@ -146,11 +146,19 @@ enum ListTileControlAffinity {
 /// ** See code in examples/api/lib/material/list_tile/list_tile.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows [ListTile]'s [textColor] and [iconColor] can use
+/// [MaterialStateColor] color to change the color of the text and icon
+/// when the [ListTile] is enabled, selected, or disabled.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
+/// {@end-tool}
+///
+/// {@tool snippet}
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
 /// [Expanded] widget. [ListTile] requires fixed width constraints,
 /// whereas a [Row] does not constrain its children.
 ///
-/// {@tool snippet}
 /// ```dart
 /// Row(
 ///   children: const <Widget>[
@@ -307,11 +315,7 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
-  }) : assert(isThreeLine != null),
-       assert(enabled != null),
-       assert(selected != null),
-       assert(autofocus != null),
-       assert(!isThreeLine || subtitle != null);
+  }) : assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
   ///
@@ -617,7 +621,6 @@ class ListTile extends StatelessWidget {
   ///
   ///  * [Divider], which you can use to obtain this effect manually.
   static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) {
-    assert(tiles != null);
     assert(color != null || context != null);
     tiles = tiles.toList();
 
@@ -900,15 +903,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
     required this.minLeadingWidth,
     this.subtitleBaselineType,
     required this.material3,
-  }) : assert(isThreeLine != null),
-       assert(isDense != null),
-       assert(visualDensity != null),
-       assert(textDirection != null),
-       assert(titleBaselineType != null),
-       assert(horizontalTitleGap != null),
-       assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
-       assert(material3 != null);
+  });
 
   final Widget? leading;
   final Widget title;
@@ -986,16 +981,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     required double minVerticalPadding,
     required double minLeadingWidth,
     required bool material3,
-  }) : assert(isDense != null),
-       assert(visualDensity != null),
-       assert(isThreeLine != null),
-       assert(textDirection != null),
-       assert(titleBaselineType != null),
-       assert(horizontalTitleGap != null),
-       assert(minVerticalPadding != null),
-       assert(minLeadingWidth != null),
-       assert(material3 != null),
-       _isDense = isDense,
+  }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
        _textDirection = textDirection,
@@ -1029,7 +1015,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool get isDense => _isDense;
   bool _isDense;
   set isDense(bool value) {
-    assert(value != null);
     if (_isDense == value) {
       return;
     }
@@ -1040,7 +1025,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   VisualDensity get visualDensity => _visualDensity;
   VisualDensity _visualDensity;
   set visualDensity(VisualDensity value) {
-    assert(value != null);
     if (_visualDensity == value) {
       return;
     }
@@ -1051,7 +1035,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool get isThreeLine => _isThreeLine;
   bool _isThreeLine;
   set isThreeLine(bool value) {
-    assert(value != null);
     if (_isThreeLine == value) {
       return;
     }
@@ -1062,7 +1045,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -1073,7 +1055,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   TextBaseline get titleBaselineType => _titleBaselineType;
   TextBaseline _titleBaselineType;
   set titleBaselineType(TextBaseline value) {
-    assert(value != null);
     if (_titleBaselineType == value) {
       return;
     }
@@ -1096,7 +1077,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double get _effectiveHorizontalTitleGap => _horizontalTitleGap + visualDensity.horizontal * 2.0;
 
   set horizontalTitleGap(double value) {
-    assert(value != null);
     if (_horizontalTitleGap == value) {
       return;
     }
@@ -1108,7 +1088,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double _minVerticalPadding;
 
   set minVerticalPadding(double value) {
-    assert(value != null);
     if (_minVerticalPadding == value) {
       return;
     }
@@ -1120,7 +1099,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double _minLeadingWidth;
 
   set minLeadingWidth(double value) {
-    assert(value != null);
     if (_minLeadingWidth == value) {
       return;
     }
@@ -1131,7 +1109,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   bool get material3 => _material3;
   bool _material3;
   set material3(bool value) {
-    assert(value != null);
     if (_material3 == value) {
       return;
     }
@@ -1409,7 +1386,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(

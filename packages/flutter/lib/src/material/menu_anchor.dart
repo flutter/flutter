@@ -44,11 +44,11 @@ const bool _kDebugMenus = false;
 // has a submenu.
 const double _kDefaultSubmenuIconSize = 24;
 
-// The default spacing between the the leading icon, label, trailing icon, and
+// The default spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemDefaultSpacing = 12;
 
-// The minimum spacing between the the leading icon, label, trailing icon, and
+// The minimum spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemMinSpacing = 4;
 
@@ -2919,7 +2919,6 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     // 4) Is part of an anchor that either doesn't have a submenu, or doesn't
     //    have any submenus currently open (only the "deepest" open menu should
     //    have accelerator shortcuts registered).
-    assert(_displayLabel != null);
     if (_showAccelerators && _acceleratorIndex != -1 && _binding?.onInvoke != null && !(_binding!.hasSubmenu && (_anchor?._isOpen ?? false))) {
       final String acceleratorCharacter = _displayLabel[_acceleratorIndex].toLowerCase();
       _shortcutRegistryEntry = _shortcutRegistry?.addAll(

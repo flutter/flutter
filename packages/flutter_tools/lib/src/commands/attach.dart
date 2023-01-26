@@ -139,6 +139,7 @@ class AttachCommand extends FlutterCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
+    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
   }
 
@@ -199,6 +200,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
     return uri;
   }
+
+  bool get serveObservatory => boolArg('serve-observatory') ?? false;
 
   String? get appId {
     return stringArgDeprecated('app-id');
@@ -287,7 +290,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     if ((debugPort == null && debugUri == null) || isNetworkDevice) {
       if (device is FuchsiaDevice) {
-        final String module = stringArgDeprecated('module')!;
+        final String? module = stringArgDeprecated('module');
         if (module == null) {
           throwToolExit("'--module' is required for attaching to a Fuchsia device");
         }
@@ -439,7 +442,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           throwToolExit(error.toString());
         }
         result = await app.runner!.waitForAppToFinish();
-        assert(result != null);
         return;
       }
       while (true) {
@@ -498,10 +500,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     required FlutterProject flutterProject,
     required bool usesIpv6,
   }) async {
-    assert(observatoryUris != null);
-    assert(device != null);
-    assert(flutterProject != null);
-    assert(usesIpv6 != null);
     final BuildInfo buildInfo = await getBuildInfo();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
@@ -519,6 +517,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       enableDds: enableDds,
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
+      serveObservatory: serveObservatory,
     );
 
     return buildInfo.isDebug

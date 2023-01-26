@@ -468,7 +468,7 @@ class LinearGradient extends Gradient {
 
   /// Linearly interpolate between two [LinearGradient]s.
   ///
-  /// If either gradient is null, this function linearly interpolates from a
+  /// If either gradient is null, this function linearly interpolates from
   /// a gradient that matches the other gradient in [begin], [end], [stops] and
   /// [tileMode] and with the same [colors] but transparent (using [scale]).
   ///
@@ -747,7 +747,7 @@ class RadialGradient extends Gradient {
 
   /// Linearly interpolate between two [RadialGradient]s.
   ///
-  /// If either gradient is null, this function linearly interpolates from a
+  /// If either gradient is null, this function linearly interpolates from
   /// a gradient that matches the other gradient in [center], [radius], [stops] and
   /// [tileMode] and with the same [colors] but transparent (using [scale]).
   ///

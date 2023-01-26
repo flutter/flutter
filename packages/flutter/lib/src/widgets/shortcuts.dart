@@ -39,8 +39,7 @@ class KeySet<T extends KeyboardKey> {
     T? key2,
     T? key3,
     T? key4,
-  ])  : assert(key1 != null),
-        _keys = HashSet<T>()..add(key1) {
+  ])  : _keys = HashSet<T>()..add(key1) {
     int count = 1;
     if (key2 != null) {
       _keys.add(key2);
@@ -72,8 +71,7 @@ class KeySet<T extends KeyboardKey> {
   ///
   /// The `keys` set must not be empty.
   KeySet.fromSet(Set<T> keys)
-      : assert(keys != null),
-        assert(keys.isNotEmpty),
+      : assert(keys.isNotEmpty),
         assert(!keys.contains(null)),
         _keys = HashSet<T>.of(keys);
 
@@ -346,8 +344,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<ShortcutActivator, Int
     Object super.defaultValue,
     super.level,
     super.description,
-  }) : assert(showName != null),
-       assert(level != null);
+  });
 
   @override
   Map<ShortcutActivator, Intent> get value => super.value!;
@@ -750,8 +747,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   ShortcutManager({
     Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
-  })  : assert(shortcuts != null),
-        _shortcuts = shortcuts;
+  })  : _shortcuts = shortcuts;
 
   /// True if the [ShortcutManager] should not pass on keys that it doesn't
   /// handle to any key-handling widgets that are ancestors to this one.
@@ -774,7 +770,6 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   Map<ShortcutActivator, Intent> get shortcuts => _shortcuts;
   Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{};
   set shortcuts(Map<ShortcutActivator, Intent> value) {
-    assert(value != null);
     if (!mapEquals<ShortcutActivator, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       _indexedShortcutsCache = null;
@@ -840,7 +835,6 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// must be mapped to an [Action], and the [Action] must be enabled.
   @protected
   KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
-    assert(context != null);
     final Intent? matchedIntent = _find(event, RawKeyboard.instance);
     if (matchedIntent != null) {
       final BuildContext? primaryContext = primaryFocus?.context;
@@ -933,9 +927,7 @@ class Shortcuts extends StatefulWidget {
     required this.child,
     this.debugLabel,
   }) : _shortcuts = shortcuts,
-       manager = null,
-       assert(shortcuts != null),
-       assert(child != null);
+       manager = null;
 
   /// Creates a const [Shortcuts] widget that uses the [manager] to
   /// manage the map of shortcuts.
@@ -949,9 +941,7 @@ class Shortcuts extends StatefulWidget {
     required ShortcutManager this.manager,
     required this.child,
     this.debugLabel,
-  }) : _shortcuts = const <ShortcutActivator, Intent>{},
-       assert(manager != null),
-       assert(child != null);
+  }) : _shortcuts = const <ShortcutActivator, Intent>{};
 
   /// The [ShortcutManager] that will manage the mapping between key
   /// combinations and [Action]s.
@@ -1275,7 +1265,6 @@ class ShortcutRegistry with ChangeNotifier {
   ///  * [maybeOf], which is similar to this function, but will return null if
   ///    it doesn't find a [ShortcutRegistrar] ancestor.
   static ShortcutRegistry of(BuildContext context) {
-    assert(context != null);
     final _ShortcutRegistrarScope? inherited =
       context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
     assert(() {
@@ -1311,7 +1300,6 @@ class ShortcutRegistry with ChangeNotifier {
   ///    result, and will throw an exception if it doesn't find a
   ///    [ShortcutRegistrar] ancestor.
   static ShortcutRegistry? maybeOf(BuildContext context) {
-    assert(context != null);
     final _ShortcutRegistrarScope? inherited =
       context.dependOnInheritedWidgetOfExactType<_ShortcutRegistrarScope>();
     return inherited?.registry;
