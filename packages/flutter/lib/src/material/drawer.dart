@@ -115,7 +115,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
-/// the escape key, by tapping the scrim, or by calling pop route function such as
+/// escape key, by tapping the scrim, or by calling pop route function such as
 /// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
 ///
 /// ```dart
@@ -325,10 +325,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-  }) : assert(child != null),
-       assert(dragStartBehavior != null),
-       assert(alignment != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -659,7 +656,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerStart;
@@ -669,7 +665,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerEnd;
@@ -741,7 +736,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
           break;
       }
-      assert(platformHasBackButton != null);
 
       final Widget child = _DrawerControllerScope(
         controller: widget,

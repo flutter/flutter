@@ -458,6 +458,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addServeObservatoryOptions({required bool verboseHelp}) {
+    argParser.addFlag('serve-observatory',
+      hide: !verboseHelp,
+      defaultsTo: true,
+      help: 'Serve the legacy Observatory developer tooling through the VM service.',
+    );
+  }
+
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
@@ -569,7 +577,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  bool get disablePortPublication => !boolArgDeprecated('publish-port');
+  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
@@ -1344,17 +1352,12 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    if (commandPath == null) {
-      return;
-    }
-    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
 
     // Send timing.
     final List<String?> labels = <String?>[
-      if (commandResult.exitStatus != null)
-        getEnumName(commandResult.exitStatus),
+      getEnumName(commandResult.exitStatus),
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];
@@ -1752,4 +1755,4 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s == null || s.trim().isEmpty;
+bool _isBlank(String s) => s.trim().isEmpty;

@@ -100,7 +100,7 @@ class PubDependencies extends ArtifactSet {
       logger: _logger,
       throwOnError: false,
     );
-    if (packageConfig == null || packageConfig == PackageConfig.empty) {
+    if (packageConfig == PackageConfig.empty) {
       return false;
     }
     for (final Package package in packageConfig.packages) {
@@ -845,7 +845,7 @@ class IosUsbArtifacts extends CachedArtifact {
 // remove from existing host folder.
 // https://github.com/flutter/flutter/issues/38935
 const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
-  <String>['windows-x64', 'windows-x64/windows-x64-flutter.zip'],
+  <String>['windows-x64', 'windows-x64-debug/windows-x64-flutter.zip'],
   <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
   <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
   <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
