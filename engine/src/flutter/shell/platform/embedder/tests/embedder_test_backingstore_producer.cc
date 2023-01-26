@@ -36,8 +36,9 @@ EmbedderTestBackingStoreProducer::EmbedderTestBackingStoreProducer(
 #endif
 {
   if (type == RenderTargetType::kSoftwareBuffer &&
-      software_pixfmt_ != kNative32) {
-    FML_LOG(ERROR) << "Expected pixel format to be the default (kNative32) when"
+      software_pixfmt_ != kFlutterSoftwarePixelFormatNative32) {
+    FML_LOG(ERROR) << "Expected pixel format to be the default "
+                      "(kFlutterSoftwarePixelFormatNative32) when"
                       "backing store producer should produce deprecated v1 "
                       "software backing "
                       "stores.";

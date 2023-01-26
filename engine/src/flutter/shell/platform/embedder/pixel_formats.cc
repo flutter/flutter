@@ -7,19 +7,19 @@
 
 std::optional<SkColorType> getSkColorType(FlutterSoftwarePixelFormat pixfmt) {
   switch (pixfmt) {
-    case kGray8:
+    case kFlutterSoftwarePixelFormatGray8:
       return kGray_8_SkColorType;
-    case kRGB565:
+    case kFlutterSoftwarePixelFormatRGB565:
       return kRGB_565_SkColorType;
-    case kRGBA4444:
+    case kFlutterSoftwarePixelFormatRGBA4444:
       return kARGB_4444_SkColorType;
-    case kRGBA8888:
+    case kFlutterSoftwarePixelFormatRGBA8888:
       return kRGBA_8888_SkColorType;
-    case kRGBX8888:
+    case kFlutterSoftwarePixelFormatRGBX8888:
       return kRGB_888x_SkColorType;
-    case kBGRA8888:
+    case kFlutterSoftwarePixelFormatBGRA8888:
       return kBGRA_8888_SkColorType;
-    case kNative32:
+    case kFlutterSoftwarePixelFormatNative32:
       return kN32_SkColorType;
     default:
       FML_LOG(ERROR) << "Invalid software rendering pixel format";
