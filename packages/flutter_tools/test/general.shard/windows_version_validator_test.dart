@@ -52,6 +52,45 @@ Hotfix(s):                 7 Hotfix(s) Installed.
 Hyper-V Requirements:      A hypervisor has been detected. Features required for Hyper-V will not be displayed.
 ''';
 
+const String validWindows11ItStdOut = r'''
+Nome SO:                              Microsoft Windows 11 Home
+Versione SO:                          10.0.22621 N/D build 22621
+Produttore SO:                        Microsoft Corporation
+Configurazione SO:                    Workstation autonoma
+Tipo build SO:                        Multiprocessor Free
+Proprietario registrato:              XXXXXXXXXXXX
+Organizzazione registrata:
+Numero di serie:                      XXXXXXXXXXXX
+Data di installazione originale:      24/11/2022, 09:55:15
+Tempo di avvio sistema:               26/01/2023, 13:15:00
+Produttore sistema:                   Micro-Star International Co., Ltd.
+Modello sistema:                      GL65 Leopard 10SFSK
+Tipo sistema:                         x64-based PC
+Processore:                           1 processore(i) installati.
+                                      [01]: Intel64 Family 6 Model 165 Stepping 2 GenuineIntel ~2592 Mhz
+Versione BIOS:                        American Megatrends Inc. E16U7IMS.10C, 17/11/2020
+Directory Windows:                    C:\WINDOWS
+Directory di sistema:                 C:\WINDOWS\system32
+Dispositivo di avvio:                 \Device\HarddiskVolume1
+Impostazioni locali sistema:          it;Italiano (Italia)
+Impostazioni locali di input:         it;Italiano (Italia)
+Fuso orario:                          (UTC+01:00) Amsterdam, Berlino, Berna, Roma, Stoccolma, Vienna
+Memoria fisica totale:                32.589 MB
+Memoria fisica disponibile:           26.753 MB
+Memoria virtuale: dimensione massima: 34.637 MB
+Memoria virtuale: disponibile:        27.091 MB
+Memoria virtuale: in uso:             7.546 MB
+Posizioni file di paging:             C:\pagefile.sys
+Dominio:                              WORKGROUP
+Server di accesso:                    \\XXXXXXXXXXXX
+Aggiornamenti rapidi:                 4 Aggiornamenti rapidi installati.
+                                      [01]: KB5020880
+                                      [02]: KB5012170
+                                      [03]: KB5022303
+                                      [04]: KB5020487
+Requisiti Hyper-V:                    Rilevato hypervisor. Le funzionalità necessarie per Hyper-V non verranno visualizzate.
+''';
+
 const String validWindows11CnStdOut = r'''
 主机名:           XXXXXXXXXXXX
 OS 名称:          Microsoft Windows 11 专业版
@@ -189,6 +228,36 @@ void main() {
     expect(result.statusInfo, validWindows10ValidationResult.statusInfo,
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
+
+  testWithoutContext(
+    'Successfully running windows version check on windows 11 IT',
+    () async {
+      final WindowsVersionValidator windowsVersionValidator =
+          WindowsVersionValidator(
+        processManager: FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <String>['systeminfo'],
+              stdout: validWindows11ItStdOut,
+            ),
+          ],
+        ),
+      );
+
+      final ValidationResult result = await windowsVersionValidator.validate();
+
+      expect(
+        result.type,
+        validWindows10ValidationResult.type,
+        reason: 'The ValidationResult type should be the same (installed)',
+      );
+      expect(
+        result.statusInfo,
+        validWindows10ValidationResult.statusInfo,
+        reason: 'The ValidationResult statusInfo messages should be the same',
+      );
+    },
+  );
 
   testWithoutContext(
     'Successfully running windows version check on windows 11 CN',
