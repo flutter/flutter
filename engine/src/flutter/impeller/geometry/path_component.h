@@ -22,7 +22,14 @@ namespace impeller {
 // points for the given scale.
 static constexpr Scalar kDefaultCurveTolerance = .1f;
 
-struct LinearPathComponent {
+struct PathComponent {
+  virtual ~PathComponent();
+
+  virtual std::optional<Vector2> GetStartDirection() const = 0;
+  virtual std::optional<Vector2> GetEndDirection() const = 0;
+};
+
+struct LinearPathComponent : public PathComponent {
   Point p1;
   Point p2;
 
@@ -39,9 +46,13 @@ struct LinearPathComponent {
   bool operator==(const LinearPathComponent& other) const {
     return p1 == other.p1 && p2 == other.p2;
   }
+
+  std::optional<Vector2> GetStartDirection() const override;
+
+  std::optional<Vector2> GetEndDirection() const override;
 };
 
-struct QuadraticPathComponent {
+struct QuadraticPathComponent : public PathComponent {
   Point p1;
   Point cp;
   Point p2;
@@ -76,9 +87,13 @@ struct QuadraticPathComponent {
   bool operator==(const QuadraticPathComponent& other) const {
     return p1 == other.p1 && cp == other.cp && p2 == other.p2;
   }
+
+  std::optional<Vector2> GetStartDirection() const override;
+
+  std::optional<Vector2> GetEndDirection() const override;
 };
 
-struct CubicPathComponent {
+struct CubicPathComponent : public PathComponent {
   Point p1;
   Point cp1;
   Point cp2;
@@ -117,6 +132,10 @@ struct CubicPathComponent {
     return p1 == other.p1 && cp1 == other.cp1 && cp2 == other.cp2 &&
            p2 == other.p2;
   }
+
+  std::optional<Vector2> GetStartDirection() const override;
+
+  std::optional<Vector2> GetEndDirection() const override;
 
  private:
   QuadraticPathComponent Lower() const;

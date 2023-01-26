@@ -242,18 +242,55 @@ Path::Polyline Path::CreatePolyline(Scalar tolerance) const {
     }
   };
 
+  auto get_path_component =
+      [this](size_t component_i) -> std::optional<const PathComponent*> {
+    if (component_i >= components_.size()) {
+      return std::nullopt;
+    }
+    const auto& component = components_[component_i];
+    switch (component.type) {
+      case ComponentType::kLinear:
+        return &linears_[component.index];
+      case ComponentType::kQuadratic:
+        return &quads_[component.index];
+      case ComponentType::kCubic:
+        return &cubics_[component.index];
+      case ComponentType::kContour:
+        return std::nullopt;
+    }
+  };
+
+  std::optional<const PathComponent*> previous_path_component;
+  auto end_contour = [&polyline, &previous_path_component]() {
+    // Whenever a contour has ended, extract the exact end direction from the
+    // last component.
+    if (polyline.contours.empty()) {
+      return;
+    }
+    if (!previous_path_component.has_value()) {
+      return;
+    }
+    auto& contour = polyline.contours.back();
+    contour.end_direction =
+        previous_path_component.value()->GetEndDirection().value_or(
+            Vector2(0, 1));
+  };
+
   for (size_t component_i = 0; component_i < components_.size();
        component_i++) {
     const auto& component = components_[component_i];
     switch (component.type) {
       case ComponentType::kLinear:
         collect_points(linears_[component.index].CreatePolyline());
+        previous_path_component = &linears_[component.index];
         break;
       case ComponentType::kQuadratic:
         collect_points(quads_[component.index].CreatePolyline(tolerance));
+        previous_path_component = &quads_[component.index];
         break;
       case ComponentType::kCubic:
         collect_points(cubics_[component.index].CreatePolyline(tolerance));
+        previous_path_component = &cubics_[component.index];
         break;
       case ComponentType::kContour:
         if (component_i == components_.size() - 1) {
@@ -261,13 +298,25 @@ Path::Polyline Path::CreatePolyline(Scalar tolerance) const {
           // contour, so skip it.
           continue;
         }
+        end_contour();
+
+        Vector2 start_direction(0, -1);
+        auto first_component = get_path_component(component_i + 1);
+        if (first_component.has_value()) {
+          start_direction =
+              first_component.value()->GetStartDirection().value_or(
+                  Vector2(0, -1));
+        }
+
         const auto& contour = contours_[component.index];
         polyline.contours.push_back({.start_index = polyline.points.size(),
-                                     .is_closed = contour.is_closed});
+                                     .is_closed = contour.is_closed,
+                                     .start_direction = start_direction});
         previous_contour_point = std::nullopt;
         collect_points({contour.destination});
         break;
     }
+    end_contour();
   }
   return polyline;
 }

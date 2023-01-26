@@ -109,11 +109,13 @@ TEST_P(DisplayListTest, CanDrawArc) {
   auto callback = [&]() {
     static float start_angle = 45;
     static float sweep_angle = 270;
+    static float stroke_width = 10;
     static bool use_center = true;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Start angle", &start_angle, -360, 360);
     ImGui::SliderFloat("Sweep angle", &sweep_angle, -360, 360);
+    ImGui::SliderFloat("Stroke width", &stroke_width, 0, 100);
     ImGui::Checkbox("Use center", &use_center);
     ImGui::End();
 
@@ -125,7 +127,7 @@ TEST_P(DisplayListTest, CanDrawArc) {
     Vector2 scale = GetContentScale();
     builder.scale(scale.x, scale.y);
     builder.setStyle(flutter::DlDrawStyle::kStroke);
-    builder.setStrokeCap(flutter::DlStrokeCap::kRound);
+    builder.setStrokeCap(flutter::DlStrokeCap::kButt);
     builder.setStrokeJoin(flutter::DlStrokeJoin::kMiter);
     builder.setStrokeMiter(10);
     auto rect = SkRect::MakeLTRB(p1.x, p1.y, p2.x, p2.y);
@@ -133,7 +135,7 @@ TEST_P(DisplayListTest, CanDrawArc) {
     builder.setStrokeWidth(2);
     builder.drawRect(rect);
     builder.setColor(SK_ColorRED);
-    builder.setStrokeWidth(10);
+    builder.setStrokeWidth(stroke_width);
     builder.drawArc(rect, start_angle, sweep_angle, use_center);
 
     return builder.Build();
