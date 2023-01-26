@@ -6071,6 +6071,31 @@ void main() {
     expect(errorWidget.style!.color, equals(Colors.transparent));
   });
 
+  testWidgets('Disabled text field has a disabled text style for the input', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    final TextStyle style = TextStyle(
+      inherit: false,
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, Colors.black38); // Colors.black38 is the default disabled color for ThemeData.light().
+  });
+
   testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController();
