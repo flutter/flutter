@@ -355,14 +355,15 @@ void main() {
 
   testWithoutContext('Unit testing on a regex pattern validator', () async {
     const String testStr = r'''
-OS Version:                10.0.19044 N/A Build 19044
-OSz Version:                10.0.19044 N/A Build 19044
-OxS Version:                10.0.19044 N/A Build 19044
-OS Version:                10.19044 N/A Build 19044
-OS Version:                10.x.19044 N/A Build 19044
-OS Version:                10.0.19044 N/A Build 19044
-OS Version:                .0.19044 N/A Build 19044
-OS 版本:          10.0.22621 暂缺 Build 22621
+OS Version:                     10.0.19044 N/A Build 19044
+OSz Version:                    10.0.19044 N/A Build 19044
+OxS Version:                    10.0.19044 N/A Build 19044
+OS Version:                     10.19044 N/A Build 19044
+OS Version:                     10.x.19044 N/A Build 19044
+OS Version:                     10.0.19044 N/A Build 19044
+OS Version:                     .0.19044 N/A Build 19044
+OS 版本:                         10.0.22621 暂缺 Build 22621
+Versão do sistema operacional:  10.0.22621 N/A compilação 22621
 ''';
 
     final RegExp regex = RegExp(
@@ -373,8 +374,8 @@ OS 版本:          10.0.22621 暂缺 Build 22621
 
     expect(
       matches.length,
-      3,
-      reason: 'There should be only two matches for the pattern provided',
+      6,
+      reason: 'There should be six matches for the pattern provided',
     );
   });
 }

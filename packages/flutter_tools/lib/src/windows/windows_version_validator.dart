@@ -51,7 +51,7 @@ class WindowsVersionValidator extends DoctorValidator {
     final String statusInfo;
     if (matches.length == 1 &&
         !kUnsupportedVersions
-            .contains(matches.elementAt(0).group(2)?.split('.').elementAt(0))) {
+            .contains(matches.elementAt(0).group(1)?.split('.').elementAt(0))) {
       windowsVersionStatus = ValidationType.success;
       statusInfo = 'Installed version of Windows is version 10 or higher';
     } else {
