@@ -11,7 +11,6 @@
 library services;
 
 export 'src/services/asset_bundle.dart';
-export 'src/services/asset_manifest.dart';
 export 'src/services/autofill.dart';
 export 'src/services/binary_messenger.dart';
 export 'src/services/binding.dart';
