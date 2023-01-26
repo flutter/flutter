@@ -943,7 +943,7 @@ void main() {
   });
 
   group('Cupertino page transitions', () {
-    CupertinoPageRoute<void> buildRoute({required bool fullscreenDialog, useBarrierColor = true}) {
+    CupertinoPageRoute<void> buildRoute({required bool fullscreenDialog, bool useBarrierColor = true}) {
       return CupertinoPageRoute<void>(
         fullscreenDialog: fullscreenDialog,
         useBarrierColor: useBarrierColor,
