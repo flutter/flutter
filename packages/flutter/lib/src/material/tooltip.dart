@@ -547,8 +547,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           ..addPointer(event);
         break;
       case TooltipTriggerMode.manual:
-        _tapRecognizer?.onTap = null;
-        _longPressRecognizer?.onLongPress = null;
         break;
     }
   }
