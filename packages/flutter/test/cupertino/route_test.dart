@@ -943,9 +943,10 @@ void main() {
   });
 
   group('Cupertino page transitions', () {
-    CupertinoPageRoute<void> buildRoute({required bool fullscreenDialog}) {
+    CupertinoPageRoute<void> buildRoute({required bool fullscreenDialog, useBarrierColor = true}) {
       return CupertinoPageRoute<void>(
         fullscreenDialog: fullscreenDialog,
+        useBarrierColor: useBarrierColor,
         builder: (_) => const SizedBox(),
       );
     }
@@ -974,6 +975,21 @@ void main() {
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
         buildRoute(fullscreenDialog: true),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, isNull);
+    });
+
+    testWidgets('when route has useBarrierColor set to false, it has no barrierColor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox.expand(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        buildRoute(fullscreenDialog: false, useBarrierColor: false),
       );
       await tester.pumpAndSettle();
 

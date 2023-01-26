@@ -188,6 +188,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
         builder: routeBuilder,
         title: title,
         settings: settings,
+        useBarrierColor: false,
       );
     }
     if (widget.onGenerateRoute != null) {

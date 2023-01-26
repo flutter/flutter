@@ -331,6 +331,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     this.title,
     super.settings,
     this.maintainState = true,
+    this.useBarrierColor = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
   }) {
@@ -340,6 +341,10 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
+  /// Sets whether or not the content is dimmed without setting the route as a
+  /// fullscreen dialog.
+  final bool useBarrierColor;
+
   @override
   Widget buildContent(BuildContext context) => builder(context);
 
@@ -348,6 +353,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 
   @override
   final bool maintainState;
+
+  @override
+  Color? get barrierColor => fullscreenDialog || !useBarrierColor ? null : _kCupertinoPageTransitionBarrierColor;
 
   @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';
