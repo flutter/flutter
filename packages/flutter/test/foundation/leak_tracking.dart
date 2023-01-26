@@ -8,12 +8,11 @@ import 'package:leak_tracker/leak_tracker.dart';
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
+/// The Flutter related enhancements are:
 /// 1. Listens to [MemoryAllocations] events.
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
 ///
-/// Copied from `psckage:leak_tracker/test/test_infra/flutter_helpers.dart`.
-///
-/// The method is not combined with [testWodgets], because the combining will
+/// The method is not combined with [testWidgets], because the combining will
 /// impact VSCode's ability to recognize tests.
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
@@ -23,6 +22,9 @@ Future<void> withFlutterLeakTracking(
   Duration? timeoutForFinalGarbageCollection,
   void Function(Leaks foundLeaks)? leaksObtainer,
 }) async {
+  // The method is copied from
+  // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
+
   void flutterEventToLeakTracker(ObjectEvent event) =>
       dispatchObjectEvent(event.toMap());
   MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
