@@ -906,6 +906,32 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('Tooltip dismiss countdown begins on long press release', (WidgetTester tester) async {
+    // Specs: https://github.com/flutter/flutter/issues/4182
+    const Duration showDuration = Duration(seconds: 1);
+    const Duration eternity = Duration(days: 9999);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+
+    await tester.pump(kLongPressTimeout);
+    expect(find.text(tooltipText), findsOneWidget);
+    // Keep holding to prevent the tooltip from dismissing.
+    await tester.pump(eternity);
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await tester.pump(showDuration);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text(tooltipText), findsNothing);
+  });
+
   testWidgets('Tooltip is dismissed after a long press and showDuration expired', (WidgetTester tester) async {
     const Duration showDuration = Duration(seconds: 3);
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);

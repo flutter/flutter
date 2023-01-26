@@ -58,8 +58,8 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
     super.onExit,
   });
 
-  static bool foundInnermostMouseRegion = false;
   static bool isOutermostMouseRegion = true;
+  static bool foundInnermostMouseRegion = false;
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
@@ -75,6 +75,7 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
     }
 
     if (outermost) {
+      // The outermost region resets the global states.
       isOutermostMouseRegion = true;
       foundInnermostMouseRegion = false;
     }
@@ -499,14 +500,12 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _timer = null;
     switch (_controller.status) {
       case AnimationStatus.reverse:
-        break;
       case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-        // Fade out immediately and ignore pending timers.
-        _controller.reverse();
         break;
+      // Dismiss when the tooltip is fading in: if there's a dismiss delay we'll
+      // allow the fade in animation to continue until the delay timer fires.
+      case AnimationStatus.forward:
       case AnimationStatus.completed:
-        // Reset the fade out timer, if any.
         if (withDelay.inMicroseconds > 0) {
           _timer = Timer(withDelay, _controller.reverse);
         } else {
@@ -529,23 +528,22 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
     switch (_triggerMode) {
       case TooltipTriggerMode.longPress:
-        _tapRecognizer?.onTap = null;
         final LongPressGestureRecognizer recognizer = _longPressRecognizer ??= LongPressGestureRecognizer(
           debugOwner: this, supportedDevices: triggerModeDeviceKinds,
         );
         recognizer
           ..onLongPressCancel = _handleTapToDismiss
-          ..onLongPress = _handlePress
+          ..onLongPress = _handleLongPress
+          ..onLongPressUp = _handlePressUp
           ..addPointer(event);
         break;
       case TooltipTriggerMode.tap:
-        _longPressRecognizer?.onLongPress = null;
         final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
           debugOwner: this, supportedDevices: triggerModeDeviceKinds
         );
         recognizer
           ..onTapCancel = _handleTapToDismiss
-          ..onTap = _handlePress
+          ..onTap = _handleTap
           ..addPointer(event);
         break;
       case TooltipTriggerMode.manual:
@@ -565,7 +563,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       // The recognizer will later determine if this is indeed a "trigger"
       // gesture and dismiss the tooltip if that's not the case. However there's
       // still a chance that the PointerEvent was cancelled before the gesture
-      // recognizer gets to send a tap/longpress down, in which case the onCancel
+      // recognizer gets to emit a tap/longPress down, in which case the onCancel
       // callback (_handleTapToDismiss) will not be called.
       return;
     }
@@ -582,22 +580,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _activeHoveringPointerDevices.clear();
   }
 
-  // When a "trigger" gesture is recognized and the pointer down even is a part
-  // of it.
-  void _handlePress() {
-    final bool tooltipCreated = _visible && _controller.status == AnimationStatus.dismissed;
-    final bool enableFeedback = tooltipCreated && _enableFeedback;
-    if (enableFeedback) {
-      switch (_triggerMode) {
-        case TooltipTriggerMode.manual:
-          break;
-        case TooltipTriggerMode.longPress:
-          Feedback.forLongPress(context);
-          break;
-        case TooltipTriggerMode.tap:
-          Feedback.forTap(context);
-          break;
-      }
+  void _handleTap() {
+    if (!_visible) {
+      return;
+    }
+    final bool tooltipCreated = _controller.status == AnimationStatus.dismissed;
+    if (tooltipCreated && _enableFeedback) {
+      assert(_triggerMode == TooltipTriggerMode.tap);
+      Feedback.forTap(context);
     }
     widget.onTriggered?.call();
     _scheduleShowTooltip(
@@ -605,6 +595,28 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       // _activeHoveringPointerDevices keep the tooltip visible.
       showDuration: _activeHoveringPointerDevices.isEmpty ? _showDuration : null,
     );
+  }
+
+  // When a "trigger" gesture is recognized and the pointer down even is a part
+  // of it.
+  void _handleLongPress() {
+    if (!_visible) {
+      return;
+    }
+    final bool tooltipCreated = _visible && _controller.status == AnimationStatus.dismissed;
+    if (tooltipCreated && _enableFeedback) {
+      assert(_triggerMode == TooltipTriggerMode.longPress);
+      Feedback.forLongPress(context);
+    }
+    widget.onTriggered?.call();
+    _scheduleShowTooltip(withDelay: Duration.zero);
+  }
+
+  void _handlePressUp() {
+    if (_activeHoveringPointerDevices.isNotEmpty) {
+      return;
+    }
+    _scheduleDismissTooltip(withDelay: _showDuration);
   }
 
   // # Current Hovering Behavior:
@@ -655,19 +667,25 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// Shows the tooltip if it is not already visible.
   ///
+  /// After made visible by this method, The tooltip does not automatically
+  /// dismiss after `waitDuration`, until the user dismisses/re-triggers it, or
+  /// [Tooltip.dismissAllToolTips] is called.
+  ///
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
-    bool ensureTooltipVisible() {
+  bool ensureTooltipVisible() {
     if (!_visible) {
       return false;
     }
 
+    _timer?.cancel();
+    _timer = null;
     switch (_controller.status) {
       case AnimationStatus.dismissed:
+      case AnimationStatus.reverse:
         _scheduleShowTooltip(withDelay: Duration.zero);
         return true;
       case AnimationStatus.forward:
-      case AnimationStatus.reverse:
       case AnimationStatus.completed:
         return false;
     }
