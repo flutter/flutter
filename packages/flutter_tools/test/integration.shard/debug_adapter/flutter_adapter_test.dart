@@ -567,8 +567,8 @@ void main() {
         dap.client.outputEvents.firstWhere((OutputEventBody event) => event.output.contains('\nDetached')),
         // We should still get terminatedEvent (this signals the DAP server terminating).
         dap.client.event('terminated'),
-        // We should get additional output from the test process confirming the process resumed.
-        testProcess.output.first,
+        // We should get output showing the app resumed.
+        testProcess.output.firstWhere((String output) => output.contains('topLevelFunction')),
         // Trigger the detach.
         dap.client.terminate(),
       ]);
