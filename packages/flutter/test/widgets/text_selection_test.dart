@@ -657,7 +657,6 @@ void main() {
     await pumpTextSelectionGestureDetectorBuilder(tester);
 
     final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
-    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
 
     // Mark word being tapped as misspelled.
@@ -678,7 +677,6 @@ void main() {
     final TestGesture touchGesture = await tester.startGesture(
       const Offset(25.0, 200.0),
       pointer: 0,
-      kind: PointerDeviceKind.touch,
     );
     await touchGesture.up();
     await tester.pumpAndSettle();
@@ -1670,8 +1668,8 @@ class FakeEditableTextState extends EditableTextState {
   @override
   SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
     return markCurrentSelectionAsMisspelled
-      ? SuggestionSpan(
-        const TextRange(start: 7, end: 12),
+      ? const SuggestionSpan(
+        TextRange(start: 7, end: 12),
         <String>['word', 'world', 'old'],
       ) : null;
   }

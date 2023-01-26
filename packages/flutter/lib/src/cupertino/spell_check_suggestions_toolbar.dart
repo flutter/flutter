@@ -18,7 +18,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     super.key,
     required this.anchors,
     required this.buttonItems,
-  }) : assert(buttonItems != null);
+  });
 
   /// The location on which to anchor the menu.
   final TextSelectionToolbarAnchors anchors;
@@ -48,7 +48,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     if (spanAtCursorIndex == null) {
       return null;
     }
-    if (spanAtCursorIndex!.suggestions.isEmpty) {
+    if (spanAtCursorIndex.suggestions.isEmpty) {
       return <ContextMenuButtonItem>[
         ContextMenuButtonItem(
           onPressed: () {},
@@ -60,9 +60,10 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
-    int suggestion_index = 0;
+    int suggestionCount = 0;
     for (final String suggestion in spanAtCursorIndex.suggestions) {
-      if (suggestion_index < 3) {
+      // iOS only shows 3 spell check suggestions in the toolbar.
+      if (suggestionCount < 3) {
         buttonItems.add(ContextMenuButtonItem(
           onPressed: () {
             editableTextState
@@ -76,7 +77,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
           label: suggestion,
         ));
       }
-      suggestion_index += 1;
+      suggestionCount += 1;
     }
 
     return buttonItems;
@@ -93,7 +94,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = _buildToolbarButtons(context);
+    final List<Widget> children = _buildToolbarButtons(context);
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchors.primaryAnchor,
       anchorBelow: anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,

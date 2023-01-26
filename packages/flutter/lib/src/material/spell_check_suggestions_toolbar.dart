@@ -81,7 +81,6 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
             .replaceComposingRegion(
               cause: SelectionChangedCause.toolbar,
               text: suggestion,
-              composingRegionRange: null,
           );
         },
         label: suggestion,
@@ -95,7 +94,6 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
           editableTextState.replaceComposingRegion(
             cause: SelectionChangedCause.toolbar,
             text: '',
-            composingRegionRange: null,
           );
         },
         type: ContextMenuButtonType.delete,
