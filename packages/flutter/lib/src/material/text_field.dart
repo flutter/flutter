@@ -312,6 +312,7 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(obscuringCharacter.length == 1),
@@ -762,6 +763,12 @@ class TextField extends StatefulWidget {
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
+  /// Determine whether this text field can request the primary focus.
+  ///
+  /// Defaults to true. Set to false if you want the [TextField] manages to do
+  /// nothing when it request focus.
+  final bool canRequestFocus;
+
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
@@ -976,7 +983,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.controller == null) {
       _createLocalController();
     }
-    _effectiveFocusNode.canRequestFocus = _isEnabled;
+    _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
@@ -984,7 +991,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
-        return _isEnabled;
+        return widget.canRequestFocus && _isEnabled;
       case NavigationMode.directional:
         return true;
     }

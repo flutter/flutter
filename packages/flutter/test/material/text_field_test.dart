@@ -13364,6 +13364,37 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
+  testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    // default test. The canRequestFocus is true by default and the text field can be focused
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          focusNode: focusNode,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    // Set canRequestFocus to false by default and the text field can be focused
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          focusNode: focusNode,
+          canRequestFocus: false,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   group('Right click focus', () {
     testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/103228
