@@ -6076,7 +6076,6 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     final TextStyle style = TextStyle(
-      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -6086,13 +6085,14 @@ void main() {
           child: Center(
             child: TextField(
               controller: controller,
+              style: style,
               enabled: false,
             ),
           ),
         ),
       ),
     );
-    EditableText editableText = tester.widget(find.byType(EditableText));
+    final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.style.color, Colors.black38); // Colors.black38 is the default disabled color for ThemeData.light().
   });
 
