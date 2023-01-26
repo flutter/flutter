@@ -379,7 +379,7 @@ class _TextPainterLayoutCache {
     // of double.infinity, and to make the text visible the paintOffset.dx is
     // bound to be double.negativeInfinity, which invalidates all arithmetic
     // operations.
-    final double newContentWidth = _contentWidthFor(minWidth, maxWidth, widthBasis, layout);
+    final double newContentWidth = _contentWidthFor(minWidth.floorToDouble(), maxWidth.floorToDouble(), widthBasis, layout);
     if (newContentWidth == contentWidth) {
       return true;
     }
@@ -390,8 +390,8 @@ class _TextPainterLayoutCache {
       assert(paragraph.width == double.infinity);
       return false;
     }
-    final double maxIntrinsicWidth = layout.maxIntrinsicLineExtent;
-    if (layout.width >= maxIntrinsicWidth && maxWidth >= maxIntrinsicWidth) {
+    final double maxIntrinsicWidth = layout._paragraph.maxIntrinsicWidth;
+    if ((layout._paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance && (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance) {
       // Adjust the paintOfffset and contentWidth to the new input constraints.
       contentWidth = newContentWidth;
       return true;
@@ -1057,11 +1057,6 @@ class TextPainter {
   void layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(!maxWidth.isNaN);
     assert(!minWidth.isNaN);
-    // TODO(LongCatIsLooong): remove this when _applyFloatingPointHack is
-    // removed.
-    minWidth = minWidth.floorToDouble();
-    maxWidth = maxWidth.floorToDouble();
-
     final InlineSpan? text = this.text;
     if (text == null) {
       throw StateError('TextPainter.text must be set to a non-null value before using the TextPainter.');
@@ -1079,7 +1074,8 @@ class TextPainter {
     if (cachedLayout != null && cachedLayout._resizeToFit(minWidth, maxWidth, textWidthBasis)) {
       return;
     }
-
+    // TODO(LongCatIsLooong): remove this when _applyFloatingPointHack is
+    // removed.
     final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection);
     // Try to avoid laying out the paragraph with maxWidth=double.infinity
     // when the text is not left-aligned, so we don't have to deal with an
@@ -1092,7 +1088,7 @@ class TextPainter {
       ..layout(ui.ParagraphConstraints(width: inputWidth));
 
     final _TextPainterLayoutCache newLayoutCache = _TextPainterLayoutCache(
-      _TextLayout._(paragraph), inputWidth, paintOffsetAlignment, minWidth, maxWidth, textWidthBasis,
+      _TextLayout._(paragraph), inputWidth, paintOffsetAlignment, minWidth.floorToDouble(), maxWidth.floorToDouble(), textWidthBasis,
     );
     // Call layout again if newLayoutCache had an infinite paint offset.
     // This is not as expensive as it seems, line breaking is relatively cheap
