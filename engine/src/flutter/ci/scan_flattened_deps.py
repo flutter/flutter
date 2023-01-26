@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 from urllib import request
+from compatibility_helper import byte_str_decode
 
 SCRIPT_DIR = os.path.dirname(sys.argv[0])
 CHECKOUT_ROOT = os.path.realpath(os.path.join(SCRIPT_DIR, '..'))
@@ -206,7 +207,9 @@ def get_common_ancestor_commit(dep, deps_list):
         'git --git-dir ' + temp_dep_dir + '/.git remote show upstream ' +
         "| sed -n \'/HEAD branch/s/.*: //p\'",
         shell=True
-    ).decode().strip()
+    )
+    default_branch = byte_str_decode(default_branch)
+    default_branch = default_branch.strip()
     print(
         'default_branch found: {default_branch}'.format(
             default_branch=default_branch
@@ -223,7 +226,8 @@ def get_common_ancestor_commit(dep, deps_list):
         "--format=\'%(objectname:short)\' refs/heads/upstream",
         shell=True
     )
-    commit = commit.decode().strip()
+    commit = byte_str_decode(commit)
+    commit = commit.strip()
 
     # perform merge-base on most recent default branch commit and pinned mirror commit
     ancestor_commit = subprocess.check_output(
@@ -232,7 +236,8 @@ def get_common_ancestor_commit(dep, deps_list):
         ),
         shell=True
     )
-    ancestor_commit = ancestor_commit.decode().strip()
+    ancestor_commit = byte_str_decode(ancestor_commit)
+    ancestor_commit = ancestor_commit.strip()
     print('Ancestor commit: ' + ancestor_commit)
     return ancestor_commit
   except subprocess.CalledProcessError as error:
