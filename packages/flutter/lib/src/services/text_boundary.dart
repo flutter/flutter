@@ -183,26 +183,21 @@ class ParagraphBoundary extends TextBoundary {
       return 0;
     }
 
-    if (position == _text.length - 1) {
-      return _text.length;
-    }
-
     final List<int> codeUnits = _text.codeUnits;
     int index = position;
 
-    while (index < codeUnits.length && !TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+    while (!TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
       index += 1;
+      if (index == codeUnits.length) {
+        return index;
+      }
     }
 
-    if (index < codeUnits.length - 1 && codeUnits[index] == 0xD && codeUnits[index + 1] == 0xA) {
-      index += 1;
-    }
-
-    if (index < codeUnits.length && TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
-      index += 1;
-    }
-
-    return min(index, _text.length);
+    return index < codeUnits.length - 1
+                && codeUnits[index] == 0xD
+                && codeUnits[index + 1] == 0xA
+                ? index + 2
+                : index + 1;
   }
 }
 
