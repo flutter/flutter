@@ -369,7 +369,6 @@ void main() {
     // Check for titles style.
     final Text title = tester.widget(find.text('AAA'));
     expect(title.style, titleTextStyle);
-    final Text subtitle = tester.widget(find.text('1 license.'));
   });
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {

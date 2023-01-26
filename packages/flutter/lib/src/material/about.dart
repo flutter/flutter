@@ -905,7 +905,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             automaticallyImplyLeading: false,
             pinned: true,
             backgroundColor: theme.cardColor,
-            title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
+            title: _PackageLicensePageTitle(title, subtitle, theme.textTheme, theme.textTheme.titleLarge),
           ),
           SliverPadding(
             padding: padding,
@@ -936,7 +936,7 @@ class _PackageLicensePageTitle extends StatelessWidget {
     this.subtitle,
     this.theme,
     this.titleTextStyle,
-  ) : titleTextStyle ??= theme.titleLarge;
+  );
 
   final String title;
   final String subtitle;
@@ -946,12 +946,13 @@ class _PackageLicensePageTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color? color = Theme.of(context).appBarTheme.foregroundColor;
+    final TextStyle? effectiveTitleTextStyle = titleTextStyle ?? theme.titleLarge;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: titleTextStyle?.copyWith(color: color)),
+        Text(title, style: effectiveTitleTextStyle?.copyWith(color: color)),
         Text(subtitle, style: theme.titleSmall?.copyWith(color: color)),
       ],
     );

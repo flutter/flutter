@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'text_theme.dart';
 import 'theme.dart';
 
 /// Overrides the default values of visual properties for descendant
