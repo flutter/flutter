@@ -14355,7 +14355,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         );
       }, throwsAssertionError);
 
-      // Operation should success if composing region is invalid, but composing region is specified.
+      // Operation should succeed if composing region is invalid, but composing region is specified.
       state.replaceComposingRegion(
         cause: SelectionChangedCause.toolbar,
         text: 'test',

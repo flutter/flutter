@@ -793,7 +793,9 @@ class TextField extends StatefulWidget {
   ///
   /// See also:
   ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
-  //     builder configured to show a spell check suggestions toolbar.
+  ///    builder configured to show a spell check suggestions toolbar.
+  ///  * [CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder], the builder
+  ///    configured to show the Material style spell check suggestions toolbar.
   @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,

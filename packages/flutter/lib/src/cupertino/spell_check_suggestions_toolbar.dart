@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_button.dart';
 
+/// iOS only shows 3 spell check suggestions in the toolbar.
+const int maxSuggestions = 3;
+
 /// The default spell check suggestions toolbar for Android.
 ///
 /// Tries to position itself below the [anchor], but if it doesn't fit, then it
@@ -31,6 +34,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   ///  * [AdaptiveTextSelectionToolbar.buttonItems], the list of
   ///    [ContextMenuButtonItem]s that are used to build the buttons of the
   ///    text selection toolbar.
+  ///  * [SpellCheckSuggestionsToolbar.buttonItems], the list of
+  ///    [ContextMenuButtonItem]s used to build the Material style spell check
+  ///    suggestions toolbar.
   final List<ContextMenuButtonItem> buttonItems;
 
   /// Builds the button items for the toolbar based on the available
@@ -62,8 +68,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     // Build suggestion buttons.
     int suggestionCount = 0;
     for (final String suggestion in spanAtCursorIndex.suggestions) {
-      // iOS only shows 3 spell check suggestions in the toolbar.
-      if (suggestionCount < 3) {
+      if (suggestionCount < maxSuggestions) {
         buttonItems.add(ContextMenuButtonItem(
           onPressed: () {
             editableTextState
@@ -79,7 +84,6 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       }
       suggestionCount += 1;
     }
-
     return buttonItems;
   }
 

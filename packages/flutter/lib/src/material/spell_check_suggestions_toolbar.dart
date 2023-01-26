@@ -42,6 +42,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ///  * [AdaptiveTextSelectionToolbar.buttonItems], the list of
   ///    [ContextMenuButtonItem]s that are used to build the buttons of the
   ///    text selection toolbar.
+  ///  * [CupertinoSpellCheckSuggestionsToolbar.buttonItems], the list of
+  ///    [ContextMenuButtonItem]s used to build the Cupertino style spell check
+  ///    suggestions toolbar.
   final List<ContextMenuButtonItem> buttonItems;
 
   /// Padding between the toolbar and the anchor. Eyeballed on Pixel 4 emulator

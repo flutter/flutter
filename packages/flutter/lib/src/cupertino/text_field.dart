@@ -782,6 +782,8 @@ class CupertinoTextField extends StatefulWidget {
   /// See also:
   ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
   ///     builder configured to show a spell check suggestions toolbar.
+  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], the builder
+  ///    configured to show the Material style spell check suggestions toolbar.
   @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
@@ -1287,8 +1289,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? CupertinoTextField.cupertinoMisspelledTextStyle,
-            spellCheckSuggestionsToolbarBuilder: widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-                ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder)
+            spellCheckSuggestionsToolbarBuilder:
+              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+                ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder
+          )
         : const SpellCheckConfiguration.disabled();
 
     final Widget paddedEditable = Padding(

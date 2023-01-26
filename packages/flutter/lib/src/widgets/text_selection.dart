@@ -2203,7 +2203,7 @@ class TextSelectionGestureDetectorBuilder {
                   editableText.toggleToolbar(false);
                 }
               } else {
-                // Precise devices should place the cursor at a precise position if the word at the position is not misspelled.
+                // Precise devices should place the cursor at a precise position if the word at the text position is not misspelled.
                 renderEditable.selectPosition(cause: SelectionChangedCause.tap);
               }
               break;
