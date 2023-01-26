@@ -245,8 +245,9 @@ static char markerKey;
 }
 
 - (instancetype)initWithViewController:(FlutterViewController*)viewController {
-  // The view needs a non-zero frame.
-  self = [super initWithFrame:NSMakeRect(0, 0, 1, 1)];
+  // The view needs an empty frame otherwise it is visible on dark background.
+  // https://github.com/flutter/flutter/issues/118504
+  self = [super initWithFrame:NSZeroRect];
   if (self != nil) {
     _flutterViewController = viewController;
     _channel = [FlutterMethodChannel methodChannelWithName:kTextInputChannel
