@@ -65,6 +65,8 @@ abstract class TextLayoutMetrics {
       case 0xC: // form feed
       case 0xD: // carriage return
       case 0x85: // new line
+      case 0x2028: // line separator
+      case 0x2029: // paragraph separator
         return true;
       default:
         return false;
