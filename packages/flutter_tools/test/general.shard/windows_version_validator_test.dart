@@ -52,6 +52,47 @@ Hotfix(s):                 7 Hotfix(s) Installed.
 Hyper-V Requirements:      A hypervisor has been detected. Features required for Hyper-V will not be displayed.
 ''';
 
+/// Example output from `systeminfo` from a Windows 10 host
+const String validWindows11PtStdOut = r'''
+Nome do host:                              XXXXXXXXXXXX
+Nome do sistema operacional:               Microsoft Windows 11 Home Single Language
+Versão do sistema operacional:             10.0.22621 N/A compilação 22621
+Fabricante do sistema operacional:         Microsoft Corporation
+Configuração do SO:                        Estação de trabalho autônoma
+Tipo de compilação do sistema operacional: Multiprocessor Free
+Proprietário registrado:                   N/A
+Organização registrada:                    N/A
+Identificação do produto:                  00327-31015-87755-AAOEM
+Data da instalação original:               19/12/2022, 15:54:47
+Tempo de Inicialização do Sistema:         26/01/2023, 09:05:50
+Fabricante do sistema:                     XXXXXXXXXXXX
+Modelo do sistema:                         XXXXXXXXXXXX
+Tipo de sistema:                           x64-based PC
+Processador(es):                           1 processador(es) instalado(s).
+                                           [01]: Intel64 Family 6 Model 142 Stepping 12 GenuineIntel ~1609 Mhz
+Versão do BIOS:                            XXXXXXXXXXXX, 17/11/2022
+Pasta do Windows:                          C:\Windows
+Pasta do sistema:                          C:\Windows\system32
+Inicializar dispositivo:                   \Device\HarddiskVolume1
+Localidade do sistema:                     pt-br;Português (Brasil)
+Localidade de entrada:                     pt-br;Português (Brasil)
+Fuso horário:                              (UTC-03:00) Brasília
+Memória física total:                      20.314 MB
+Memória física disponível:                 1.353 MB
+Memória Virtual: Tamanho Máximo:           33.626 MB
+Memória Virtual: Disponível:               6.177 MB
+Memória Virtual: Em Uso:                   27.449 MB
+Local(is) de arquivo de paginação:         C:\pagefile.sys
+Domínio:                                   WORKGROUP
+Servidor de Logon:                         \\XXXXXXXXXXXX
+Hotfix(es):                                4 hotfix(es) instalado(s).
+                                           [01]: KB5020880
+                                           [02]: KB5012170
+                                           [03]: KB5022303
+                                           [04]: KB5020487
+Requisitos do Hyper-V:                     Hipervisor detectado. Recursos necessários para o Hyper-V não serão exibidos.
+''';
+
 const String validWindows11CnStdOut = r'''
 主机名:           XXXXXXXXXXXX
 OS 名称:          Microsoft Windows 11 专业版
@@ -189,6 +230,36 @@ void main() {
     expect(result.statusInfo, validWindows10ValidationResult.statusInfo,
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
+
+  testWithoutContext(
+    'Successfully running windows version check on windows 11 PT',
+    () async {
+      final WindowsVersionValidator windowsVersionValidator =
+          WindowsVersionValidator(
+        processManager: FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <String>['systeminfo'],
+              stdout: validWindows11PtStdOut,
+            ),
+          ],
+        ),
+      );
+
+      final ValidationResult result = await windowsVersionValidator.validate();
+
+      expect(
+        result.type,
+        validWindows10ValidationResult.type,
+        reason: 'The ValidationResult type should be the same (installed)',
+      );
+      expect(
+        result.statusInfo,
+        validWindows10ValidationResult.statusInfo,
+        reason: 'The ValidationResult statusInfo messages should be the same',
+      );
+    },
+  );
 
   testWithoutContext(
     'Successfully running windows version check on windows 11 CN',
