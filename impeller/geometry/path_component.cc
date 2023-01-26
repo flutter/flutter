@@ -8,6 +8,8 @@
 
 namespace impeller {
 
+PathComponent::~PathComponent() = default;
+
 /*
  *  Based on: https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Specific_cases
  */
@@ -65,6 +67,14 @@ std::vector<Point> LinearPathComponent::CreatePolyline() const {
 
 std::vector<Point> LinearPathComponent::Extrema() const {
   return {p1, p2};
+}
+
+std::optional<Vector2> LinearPathComponent::GetStartDirection() const {
+  return (p1 - p2).Normalize();
+}
+
+std::optional<Vector2> LinearPathComponent::GetEndDirection() const {
+  return (p2 - p1).Normalize();
 }
 
 Point QuadraticPathComponent::Solve(Scalar time) const {
@@ -137,6 +147,14 @@ void QuadraticPathComponent::FillPointsForPolyline(std::vector<Point>& points,
 std::vector<Point> QuadraticPathComponent::Extrema() const {
   CubicPathComponent elevated(*this);
   return elevated.Extrema();
+}
+
+std::optional<Vector2> QuadraticPathComponent::GetStartDirection() const {
+  return (p1 - cp).Normalize();
+}
+
+std::optional<Vector2> QuadraticPathComponent::GetEndDirection() const {
+  return (p2 - cp).Normalize();
 }
 
 Point CubicPathComponent::Solve(Scalar time) const {
@@ -281,6 +299,14 @@ std::vector<Point> CubicPathComponent::Extrema() const {
   }
 
   return points;
+}
+
+std::optional<Vector2> CubicPathComponent::GetStartDirection() const {
+  return (p1 - cp1).Normalize();
+}
+
+std::optional<Vector2> CubicPathComponent::GetEndDirection() const {
+  return (p2 - cp2).Normalize();
 }
 
 }  // namespace impeller
