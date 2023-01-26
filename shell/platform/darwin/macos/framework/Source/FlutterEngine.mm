@@ -19,6 +19,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+const uint64_t kFlutterDefaultViewId = 0;
+
 /**
  * Constructs and returns a FlutterLocale struct corresponding to |locale|, which must outlive
  * the returned struct.
@@ -79,6 +81,8 @@ constexpr char kTextPlainFormat[] = "text/plain";
  * will return `NO` after the FlutterEngine has been dealloc'd.
  */
 @property(nonatomic, strong) NSMutableArray<NSNumber*>* isResponseValid;
+
+- (nullable FlutterViewController*)viewControllerForId:(uint64_t)viewId;
 
 /**
  * Sends the list of user-preferred locales to the Flutter engine.
@@ -213,8 +217,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // when the engine is destroyed.
   std::unique_ptr<flutter::FlutterCompositor> _macOSCompositor;
 
-  FlutterViewEngineProvider* _viewProvider;
-
   // FlutterCompositor is copied and used in embedder.cc.
   FlutterCompositor _compositor;
 
@@ -248,7 +250,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _currentMessengerConnection = 1;
   _allowHeadlessExecution = allowHeadlessExecution;
   _semanticsEnabled = NO;
-  _viewProvider = [[FlutterViewEngineProvider alloc] initWithEngine:self];
   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
   [_isResponseValid addObject:@YES];
 
@@ -411,29 +412,41 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (void)setViewController:(FlutterViewController*)controller {
-  if (_viewController != controller) {
+  if (_viewController == controller) {
+    // From nil to nil, or from non-nil to the same controller.
+    return;
+  }
+  if (_viewController == nil && controller != nil) {
+    // From nil to non-nil.
+    NSAssert(controller.engine == nil,
+             @"Failed to set view controller to the engine: "
+             @"The given FlutterViewController is already attached to an engine %@. "
+             @"If you wanted to create an FlutterViewController and set it to an existing engine, "
+             @"you should create it with init(engine:, nibName, bundle:) instead.",
+             controller.engine);
     _viewController = controller;
-
-    if (_semanticsEnabled && _bridge) {
-      _bridge->UpdateDefaultViewController(_viewController);
-    }
-
-    if (!controller && !_allowHeadlessExecution) {
+    [_viewController attachToEngine:self withId:kFlutterDefaultViewId];
+  } else if (_viewController != nil && controller == nil) {
+    // From non-nil to nil.
+    [_viewController detachFromEngine];
+    _viewController = nil;
+    if (!_allowHeadlessExecution) {
       [self shutDownEngine];
     }
+  } else {
+    // From non-nil to a different non-nil view controller.
+    NSAssert(NO,
+             @"Failed to set view controller to the engine: "
+             @"The engine already has a default view controller %@. "
+             @"If you wanted to make the default view render in a different window, "
+             @"you should attach the current view controller to the window instead.",
+             _viewController);
   }
 }
 
 - (FlutterCompositor*)createFlutterCompositor {
-  // TODO(richardjcai): Add support for creating a FlutterCompositor
-  // with a nil _viewController for headless engines.
-  // https://github.com/flutter/flutter/issues/71606
-  if (!_viewController) {
-    return nil;
-  }
-
-  _macOSCompositor =
-      std::make_unique<flutter::FlutterCompositor>(_viewProvider, _platformViewController);
+  _macOSCompositor = std::make_unique<flutter::FlutterCompositor>(
+      [[FlutterViewEngineProvider alloc] initWithEngine:self], _platformViewController);
 
   _compositor = {};
   _compositor.struct_size = sizeof(FlutterCompositor);
@@ -539,10 +552,10 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (void)updateWindowMetrics {
-  if (!_engine || !_viewController.viewLoaded) {
+  if (!_engine || !self.viewController.viewLoaded) {
     return;
   }
-  NSView* view = _viewController.flutterView;
+  NSView* view = self.viewController.flutterView;
   CGRect scaledBounds = [view convertRectToBacking:view.bounds];
   CGSize scaledSize = scaledBounds.size;
   double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
@@ -602,6 +615,17 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 #pragma mark - Private methods
+
+- (FlutterViewController*)viewControllerForId:(uint64_t)viewId {
+  // TODO(dkwingsmt): The engine only supports single-view, therefore it
+  // only processes the default ID. After the engine supports multiple views,
+  // this method should be able to return the view for any IDs.
+  NSAssert(viewId == kFlutterDefaultViewId, @"Unexpected view ID %llu", viewId);
+  if (viewId == kFlutterDefaultViewId) {
+    return _viewController;
+  }
+  return nil;
+}
 
 - (void)sendUserLocales {
   if (!self.running) {
@@ -679,9 +703,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     return;
   }
 
-  if (_viewController && _viewController.flutterView) {
-    [_viewController.flutterView shutdown];
-  }
+  [self.viewController.flutterView shutdown];
 
   FlutterEngineResult result = _embedderAPI.Deinitialize(_engine);
   if (result != kSuccess) {
