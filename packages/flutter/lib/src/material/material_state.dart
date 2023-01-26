@@ -469,7 +469,7 @@ class _MaterialStateTextStyle extends MaterialStateTextStyle {
   final MaterialPropertyResolver<TextStyle> _resolve;
 
   @override
-  TextStyle resolve(Set<MaterialState> states) => _resolve(states);
+  TextStyle resolve(Set<MaterialState> states) { print('hehehe $states'); return _resolve(states); }
 }
 
 /// Defines a [OutlineInputBorder] that is also a [MaterialStateProperty].

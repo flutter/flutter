@@ -1191,6 +1191,22 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
   // AutofillClient implementation end.
 
+  Set<MaterialState> get materialState {
+    return <MaterialState>{
+      if (!_isEnabled) MaterialState.disabled,
+      if (_isHovering) MaterialState.hovered,
+      if (_effectiveFocusNode.hasFocus) MaterialState.focused,
+      if (_hasError) MaterialState.error,
+    };
+  }
+
+  TextStyle _textStyleState(TextStyle style) {
+    if (materialState.contains(MaterialState.disabled)) {
+      return style.copyWith(color: Theme.of(context).disabledColor);
+    }
+    return style;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1204,7 +1220,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = (theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style);
+    final TextStyle style = _textStyleState((theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style));
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
@@ -1402,12 +1418,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.textable,
-      <MaterialState>{
-        if (!_isEnabled) MaterialState.disabled,
-        if (_isHovering) MaterialState.hovered,
-        if (focusNode.hasFocus) MaterialState.focused,
-        if (_hasError) MaterialState.error,
-      },
+      materialState,
     );
 
     final int? semanticsMaxValueLength;
