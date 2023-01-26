@@ -330,11 +330,13 @@ void FlutterEmbedderTest::LaunchParentViewInRealm(
 
   // Instruct Test UI Stack to present parent-view's View.
   std::optional<zx_koid_t> view_ref_koid;
-  scene_provider_ = realm_->Connect<fuchsia::ui::test::scene::Controller>();
+  scene_provider_ =
+      realm_->component().Connect<fuchsia::ui::test::scene::Controller>();
   scene_provider_.set_error_handler(
       [](auto) { FML_LOG(ERROR) << "Error from test scene provider"; });
   fuchsia::ui::test::scene::ControllerAttachClientViewRequest request;
-  request.set_view_provider(realm_->Connect<fuchsia::ui::app::ViewProvider>());
+  request.set_view_provider(
+      realm_->component().Connect<fuchsia::ui::app::ViewProvider>());
   scene_provider_->RegisterViewTreeWatcher(view_tree_watcher_.NewRequest(),
                                            []() {});
   scene_provider_->AttachClientView(
@@ -355,7 +357,7 @@ void FlutterEmbedderTest::LaunchParentViewInRealm(
   });
   FML_LOG(INFO) << "Client view has rendered";
 
-  scenic_ = realm_->Connect<fuchsia::ui::scenic::Scenic>();
+  scenic_ = realm_->component().Connect<fuchsia::ui::scenic::Scenic>();
   FML_LOG(INFO) << "Launched parent-view";
 }
 
