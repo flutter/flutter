@@ -10,6 +10,7 @@ import re
 import os
 import subprocess
 import sys
+from compatibility_helper import byte_str_decode
 
 if 'STORAGE_BUCKET' not in os.environ:
   print('The GCP storage bucket must be provided as an environment variable.')
@@ -67,6 +68,7 @@ def check_logcat(results_dir):
       'gsutil', 'cat',
       '%s/%s/*/logcat' % (BUCKET, results_dir)
   ])
+  logcat = byte_str_decode(logcat)
   if not logcat:
     sys.exit(1)
 
@@ -82,7 +84,9 @@ def check_timeline(results_dir):
       'gsutil', 'du',
       '%s/%s/*/game_loop_results/results_scenario_0.json' %
       (BUCKET, results_dir)
-  ]).strip()
+  ])
+  gsutil_du = byte_str_decode(gsutil_du)
+  gsutil_du = gsutil_du.strip()
   if gsutil_du == '0':
     print('Failed to produce a timeline.')
     sys.exit(1)
@@ -113,8 +117,9 @@ def main():
     return 1
 
   git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
-                                         cwd=script_dir).strip()
-
+                                         cwd=script_dir)
+  git_revision = byte_str_decode(git_revision)
+  git_revision = git_revision.strip()
   results = []
   apk = None
   for apk in apks:
