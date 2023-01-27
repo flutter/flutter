@@ -8,7 +8,7 @@
         // have support for CML includes from the SDK.
         {
             directory: "diagnostics",
-            rights: [ "connect" ],
+            rights: [ "r*" ],
             path: "/diagnostics",
         },
     ],
