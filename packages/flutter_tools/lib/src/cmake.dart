@@ -63,7 +63,7 @@ int? _tryDetermineBuildVersion(Version version) {
     return null;
   }
 
-  final Object buildIdentifier = version.build.first as Object;
+  final Object buildIdentifier = version.build.first;
   return buildIdentifier is int ? buildIdentifier : null;
 }
 

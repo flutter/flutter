@@ -10,7 +10,7 @@ export 'text_field_constants.dart';
 
 /// A page with a normal text field and a password field.
 class TextFieldPage extends StatefulWidget {
-  const TextFieldPage({Key key}) : super(key: key);
+  const TextFieldPage({super.key});
 
   @override
   State<StatefulWidget> createState() => _TextFieldPageState();

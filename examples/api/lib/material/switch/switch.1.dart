@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Switch
+/// Flutter code sample for [Switch].
 
 import 'package:flutter/material.dart';
 
@@ -70,7 +70,7 @@ class _SwitchExampleState extends State<SwitchExample> {
       value: light,
       overlayColor: overlayColor,
       trackColor: trackColor,
-      thumbColor: MaterialStateProperty.all<Color>(Colors.black),
+      thumbColor: const MaterialStatePropertyAll<Color>(Colors.black),
       onChanged: (bool value) {
         // This is called when the user toggles the switch.
         setState(() {

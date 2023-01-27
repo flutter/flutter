@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -137,13 +135,13 @@ void main() {
   testUsingContext('flutter assemble does not log stack traces during build failure', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
-        'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+        'hello': ExceptionMeasurement('hello', 'bar', stackTrace, fatal: true),
       }))
     ));
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsToolExit());
-    expect(testLogger.errorText, isNot(contains('bar')));
+    expect(testLogger.errorText, contains('Target hello failed: bar'));
     expect(testLogger.errorText, isNot(contains(stackTrace.toString())));
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -292,4 +290,33 @@ void main() {
       ],
     });
   });
+
+  testUsingContext('test --dart-define-from-file option with err json format', () async {
+    await globals.fs.file('config.json').writeAsString(
+        '''
+          {
+            "kInt": 1,
+            "kDouble": 1.1,
+            "name": "err json format,
+            "title": "this is title from config json file"
+          }
+        '''
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    ));
+
+    expect(commandRunner.run(<String>['assemble',
+      '-o Output',
+      'debug_macos_bundle_flutter_assets',
+      '--dart-define=k=v',
+      '--dart-define-from-file=config.json']),
+        throwsToolExit(message: 'Json config define file "--dart-define-from-file=config.json" format err, please fix first! format err:'));
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+
 }

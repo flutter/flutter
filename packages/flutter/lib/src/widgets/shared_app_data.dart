@@ -52,7 +52,7 @@ typedef SharedAppDataInitCallback<T> = T Function();
 ///
 /// {@tool dartpad}
 /// The following sample demonstrates using the automatically created
-/// `SharedAppData`. Button presses cause changes to the values for keys
+/// [SharedAppData]. Button presses cause changes to the values for keys
 /// 'foo', and 'bar', and those changes only cause the widgets that
 /// depend on those keys to be rebuilt.
 ///

@@ -464,7 +464,7 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
       '$textInBold\n'
       "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
       'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
-      'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration',
+      'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -552,7 +552,7 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
         .childFile('build.gradle');
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
-      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then update ${gradleFile.path}:\n'
+      'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update ${gradleFile.path}:\n'
       "ext.kotlin_version = '<latest-version>'",
       title: _boxTitle,
     );

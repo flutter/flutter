@@ -5,7 +5,9 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
+import '../template.dart';
 import '../xcode_project.dart';
 import 'plist_parser.dart';
 
@@ -145,12 +147,48 @@ class BuildableIOSApp extends IOSApp {
   String get archiveBundleOutputPath =>
       globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
 
+  String get builtInfoPlistPathAfterArchive => globals.fs.path.join(archiveBundleOutputPath,
+      'Products',
+      'Applications',
+      _hostAppBundleName == null ? 'Runner.app' : _hostAppBundleName!,
+      'Info.plist');
+
+  // Both project icon's image assets and Contents.json are in the same directory.
+  String get projectAppIconDirName => globals.fs.path.join('ios', _appIconDirNameSuffix);
+
+  // template icon's Contents.json is in flutter_tools.
+  String get templateAppIconDirNameForContentsJson => globals.fs.path.join(
+    Cache.flutterRoot!,
+    'packages',
+    'flutter_tools',
+    'templates',
+    'app_shared',
+    'ios.tmpl',
+    _appIconDirNameSuffix,
+  );
+
+  // template icon's image assets are in flutter_template_images package.
+  Future<String> get templateAppIconDirNameForImages async {
+    final Directory imageTemplate = await templateImageDirectory(null, globals.fs, globals.logger);
+    return globals.fs.path.join(
+      imageTemplate.path,
+      'app_shared',
+      'ios.tmpl',
+      _appIconDirNameSuffix,
+    );
+  }
+
   String get ipaOutputPath =>
       globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
   String _buildAppPath(String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
+
+  String get _appIconDirNameSuffix => globals.fs.path.join(
+    'Runner',
+    'Assets.xcassets',
+    'AppIcon.appiconset');
 }
 
 class PrebuiltIOSApp extends IOSApp implements PrebuiltApplicationPackage {

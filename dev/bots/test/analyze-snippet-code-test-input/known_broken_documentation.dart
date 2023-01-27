@@ -8,8 +8,8 @@
 // Examples can assume:
 // bool _visible = true;
 // class _Text extends Text {
-//   const _Text(String text) : super(text);
-//   const _Text.__(String text) : super(text);
+//   const _Text(super.text);
+//   const _Text.__(super.text);
 // }
 
 /// A blabla that blabla its blabla blabla blabla.
@@ -27,7 +27,7 @@
 /// blabla it when it is blabla:
 ///
 /// ```dart
-/// new Opacity(
+/// new Opacity( // error (unnecessary_new)
 ///   opacity: _visible ? 1.0 : 0.0,
 ///   child: const Text('Poor wandering ones!'),
 /// )
@@ -38,12 +38,12 @@
 /// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
 /// blabla it when it is blabla:
 ///
-/// ```dart preamble
-/// bool _visible = true;
+/// ```dart
 /// final GlobalKey globalKey = GlobalKey();
 /// ```
 ///
 /// ```dart
+/// // continuing from previous example...
 /// Widget build(BuildContext context) {
 ///   return Opacity(
 ///     key: globalKey,
@@ -59,7 +59,7 @@
 /// blabla finale blabla:
 ///
 /// ```dart
-/// new Opacity(
+/// Opacity(
 ///   opacity: _visible ? 1.0 : 0.0,
 ///   child: const Text('Poor wandering ones!'),
 /// )
@@ -92,7 +92,7 @@
 /// const variable
 ///
 /// ```dart
-/// const text0 = Text('Poor wandering ones!');
+/// const Widget text0 = Text('Poor wandering ones!');
 /// ```
 /// {@end-tool}
 ///
@@ -100,7 +100,7 @@
 /// more const variables
 ///
 /// ```dart
-/// const text1 = _Text('Poor wandering ones!');
+/// const text1 = _Text('Poor wandering ones!'); // error (always_specify_types)
 /// ```
 /// {@end-tool}
 ///
@@ -108,35 +108,61 @@
 /// Snippet with null-safe syntax
 ///
 /// ```dart
-/// final String? bar = 'Hello';
-/// final int foo = null;
+/// final String? bar = 'Hello'; // error (unnecessary_nullable_for_final_variable_declarations, prefer_const_declarations)
+/// final int foo = null; // error (invalid_assignment, prefer_const_declarations)
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
 /// snippet with trailing comma
 ///
 /// ```dart
 /// const SizedBox(),
 /// ```
-/// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// Dartpad with null-safe syntax
 ///
-/// ```dart preamble
-/// bool? _visible = true;
+/// ```dart
 /// final GlobalKey globalKey = GlobalKey();
 /// ```
 ///
 /// ```dart
+/// // not continuing from previous example...
 /// Widget build(BuildContext context) {
 ///   final String title;
 ///   return Opacity(
-///     key: globalKey,
-///     opacity: _visible! ? 1.0 : 0.0,
-///     child: Text(title),
+///     key: globalKey, // error (undefined_identifier, argument_type_not_assignable)
+///     opacity: _visible ? 1.0 : 0.0,
+///     child: Text(title), // error (read_potentially_unassigned_final)
 ///   );
 /// }
 /// ```
 /// {@end-tool}
+///
+/// ```csv
+/// this,is,fine
+/// ```
+///
+/// ```dart
+/// import 'dart:io'; // error (unused_import)
+/// final Widget p = Placeholder(); // error (undefined_class, undefined_function, avoid_dynamic_calls)
+/// ```
+///
+/// ```dart
+/// // (e.g. in a stateful widget)
+/// void initState() { // error (must_call_super, annotate_overrides)
+///   widget.toString(); // error (undefined_identifier, return_of_invalid_type)
+/// }
+/// ```
+///
+/// ```dart
+/// // not in a stateful widget
+/// void initState() {
+///   widget.toString(); // error (undefined_identifier)
+/// }
+/// ```
+///
+/// ```
+/// error (something about backticks)
+/// this must be the last error, since it aborts parsing of this file
+/// ```

@@ -8,6 +8,21 @@ import 'package:flutter/painting.dart';
 
 export 'dart:ui' show TextDirection;
 
+/// Determines the assertiveness level of the accessibility announcement.
+///
+/// It is used by [AnnounceSemanticsEvent] to determine the priority with which
+/// assistive technology should treat announcements.
+enum Assertiveness {
+  /// The assistive technology will speak changes whenever the user is idle.
+  polite,
+
+  /// The assistive technology will interrupt any announcement that it is
+  /// currently making to notify the user about the change.
+  ///
+  /// It should only be used for time-sensitive/critical notifications.
+  assertive,
+}
+
 /// An event sent by the application to notify interested listeners that
 /// something happened to the user interface (e.g. a view scrolled).
 ///
@@ -71,7 +86,7 @@ abstract class SemanticsEvent {
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection)
+  const AnnounceSemanticsEvent(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite})
     : assert(message != null),
       assert(textDirection != null),
       super('announce');
@@ -86,11 +101,21 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   /// This property must not be null.
   final TextDirection textDirection;
 
+  /// Determines whether the announcement should interrupt any existing announcement,
+  /// or queue after it.
+  ///
+  /// On the web this option uses the aria-live level to set the assertiveness
+  /// of the announcement. On iOS, Android, Windows, Linux, macOS, and Fuchsia
+  /// this option currently has no effect.
+  final Assertiveness assertiveness;
+
   @override
   Map<String, dynamic> getDataMap() {
-    return <String, dynamic>{
+    return <String, dynamic> {
       'message': message,
       'textDirection': textDirection.index,
+      if (assertiveness != Assertiveness.polite)
+        'assertiveness': assertiveness.index,
     };
   }
 }

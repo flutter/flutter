@@ -42,8 +42,9 @@ class BackButtonMemoryTest extends MemoryTest {
       prepareForNextMessage('READY');
       final String output = await device!.shellEval('am', <String>['start', '-n', '$packageName/$activityName']);
       print('adb shell am start: $output');
-      if (output.contains('Error'))
+      if (output.contains('Error')) {
         fail('unable to launch activity');
+      }
       await receivedNextMessage;
 
       // Wait for the Flutter app to settle (e.g. run GCs).

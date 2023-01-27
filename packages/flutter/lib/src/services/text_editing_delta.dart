@@ -24,13 +24,21 @@ TextAffinity? _toTextAffinity(String? affinity) {
   return null;
 }
 
-/// Replaces a range of text in the original string with the text given in the
-/// replacement string.
-String _replace(String originalText, String replacementText, int start, int end) {
-  final String textStart = originalText.substring(0, start);
-  final String textEnd = originalText.substring(end, originalText.length);
-  final String newText = textStart + replacementText + textEnd;
-  return newText;
+// Replaces a range of text in the original string with the text given in the
+// replacement string.
+String _replace(String originalText, String replacementText, TextRange replacementRange) {
+  assert(replacementRange.isValid);
+  return originalText.replaceRange(replacementRange.start, replacementRange.end, replacementText);
+}
+
+// Verify that the given range is within the text.
+bool _debugTextRangeIsValid(TextRange range, String text) {
+  if (!range.isValid) {
+    return true;
+  }
+
+  return (range.start >= 0 && range.start <= text.length)
+                            && (range.end >= 0 && range.end <= text.length);
 }
 
 /// A structure representing a granular change that has occurred to the editing
@@ -46,7 +54,7 @@ String _replace(String originalText, String replacementText, int start, int end)
 ///  * [TextInputConfiguration], to opt-in your [DeltaTextInputClient] to receive
 ///    [TextEditingDelta]'s you must set [TextInputConfiguration.enableDeltaModel]
 ///    to true.
-abstract class TextEditingDelta {
+abstract class TextEditingDelta with Diagnosticable {
   /// Creates a delta for a given change to the editing state.
   ///
   /// {@template flutter.services.TextEditingDelta}
@@ -126,6 +134,9 @@ abstract class TextEditingDelta {
     );
 
     if (isNonTextUpdate) {
+      assert(_debugTextRangeIsValid(newSelection, oldText), 'The selection range: $newSelection is not within the bounds of text: $oldText of length: ${oldText.length}');
+      assert(_debugTextRangeIsValid(newComposing, oldText), 'The composing range: $newComposing is not within the bounds of text: $oldText of length: ${oldText.length}');
+
       return TextEditingDeltaNonTextUpdate(
         oldText: oldText,
         selection: newSelection,
@@ -133,7 +144,13 @@ abstract class TextEditingDelta {
       );
     }
 
-    final String newText = _replace(oldText, replacementSource, replacementDestinationStart, replacementDestinationEnd);
+    assert(_debugTextRangeIsValid(TextRange(start: replacementDestinationStart, end: replacementDestinationEnd), oldText), 'The delta range: ${TextRange(start: replacementSourceStart, end: replacementSourceEnd)} is not within the bounds of text: $oldText of length: ${oldText.length}');
+
+    final String newText = _replace(oldText, replacementSource, TextRange(start: replacementDestinationStart, end: replacementDestinationEnd));
+
+    assert(_debugTextRangeIsValid(newSelection, newText), 'The selection range: $newSelection is not within the bounds of text: $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(newComposing, newText), 'The composing range: $newComposing is not within the bounds of text: $newText of length: ${newText.length}');
+
     final bool isEqual = oldText == newText;
 
     final bool isDeletionGreaterThanOne = (replacementDestinationEnd - replacementDestinationStart) - (replacementSourceEnd - replacementSourceStart) > 1;
@@ -230,7 +247,7 @@ abstract class TextEditingDelta {
   TextEditingValue apply(TextEditingValue value);
 }
 
-/// A structure representing an insertion of a single/or contigous sequence of
+/// A structure representing an insertion of a single/or contiguous sequence of
 /// characters at some offset of an editing state.
 @immutable
 class TextEditingDeltaInsertion extends TextEditingDelta {
@@ -265,8 +282,21 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, textInserted, insertionOffset, insertionOffset);
+    assert(_debugTextRangeIsValid(TextRange.collapsed(insertionOffset), newText), 'Applying TextEditingDeltaInsertion failed, the insertionOffset: $insertionOffset is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, textInserted, TextRange.collapsed(insertionOffset));
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaInsertion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaInsertion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textInserted', textInserted));
+    properties.add(DiagnosticsProperty<int>('insertionOffset', insertionOffset));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }
 
@@ -298,8 +328,21 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, '', deletedRange.start, deletedRange.end);
+    assert(_debugTextRangeIsValid(deletedRange, newText), 'Applying TextEditingDeltaDeletion failed, the deletedRange: $deletedRange is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, '', deletedRange);
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaDeletion failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaDeletion failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textDeleted', textDeleted));
+    properties.add(DiagnosticsProperty<TextRange>('deletedRange', deletedRange));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }
 
@@ -341,8 +384,22 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
-    newText = _replace(newText, replacementText, replacedRange.start, replacedRange.end);
+    assert(_debugTextRangeIsValid(replacedRange, newText), 'Applying TextEditingDeltaReplacement failed, the replacedRange: $replacedRange is not within the bounds of $newText of length: ${newText.length}');
+    newText = _replace(newText, replacementText, replacedRange);
+    assert(_debugTextRangeIsValid(selection, newText), 'Applying TextEditingDeltaReplacement failed, the selection range: $selection is not within the bounds of $newText of length: ${newText.length}');
+    assert(_debugTextRangeIsValid(composing, newText), 'Applying TextEditingDeltaReplacement failed, the composing range: $composing is not within the bounds of $newText of length: ${newText.length}');
     return value.copyWith(text: newText, selection: selection, composing: composing);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<String>('textReplaced', textReplaced));
+    properties.add(DiagnosticsProperty<String>('replacementText', replacementText));
+    properties.add(DiagnosticsProperty<TextRange>('replacedRange', replacedRange));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }
 
@@ -372,6 +429,16 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asyncronous
     // nature of the connection between the framework and platform text input plugins.
+    assert(_debugTextRangeIsValid(selection, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the selection range: $selection is not within the bounds of $oldText of length: ${oldText.length}');
+    assert(_debugTextRangeIsValid(composing, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the composing region: $composing is not within the bounds of $oldText of length: ${oldText.length}');
     return TextEditingValue(text: oldText, selection: selection, composing: composing);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('oldText', oldText));
+    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(DiagnosticsProperty<TextRange>('composing', composing));
   }
 }

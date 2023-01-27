@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedSwitcher
+/// Flutter code sample for [AnimatedSwitcher].
 
 import 'package:flutter/material.dart';
 
@@ -50,7 +50,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               // child each time the count changes, so that it will begin its animation
               // when the count changes.
               key: ValueKey<int>(_count),
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
           ElevatedButton(

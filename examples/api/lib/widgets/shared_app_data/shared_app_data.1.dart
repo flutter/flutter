@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SharedAppData
+/// Flutter code sample for [SharedAppData].
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// A single lazily constructed object that's shared with the entire
-// application via `SharedObject.of(context)`. The value of the object
-// can be changed with `SharedObject.reset(context)`. Resetting the value
-// will cause all of the widgets that depend on it to be rebuilt.
+// A single lazily-constructed object that's shared with the entire application
+// via `SharedObject.of(context)`. The value of the object can be changed with
+// `SharedObject.reset(context)`. Resetting the value will cause all of the
+// widgets that depend on it to be rebuilt.
 class SharedObject {
   SharedObject._();
 
@@ -31,8 +31,8 @@ class SharedObject {
   }
 }
 
-// An example of a widget which depends on the SharedObject's value,
-// which might be provided - along with SharedObject - in a Dart package.
+// An example of a widget which depends on the SharedObject's value, which might
+// be provided - along with SharedObject - in a Dart package.
 class CustomWidget extends StatelessWidget {
   const CustomWidget({ super.key });
 
