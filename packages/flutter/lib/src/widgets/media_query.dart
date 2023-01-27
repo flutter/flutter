@@ -219,7 +219,7 @@ class MediaQueryData {
       highContrast = platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromWindow(view),
+      gestureSettings = DeviceGestureSettings.fromView(view),
       displayFeatures = view.displayFeatures;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).

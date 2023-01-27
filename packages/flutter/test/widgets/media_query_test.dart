@@ -200,7 +200,7 @@ void main() {
     expect(data.highContrast, platformData.highContrast);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
-    expect(data.gestureSettings, DeviceGestureSettings.fromWindow(view));
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
     expect(data.displayFeatures, view.displayFeatures);
   });
 
@@ -240,7 +240,7 @@ void main() {
     expect(data.highContrast, platformDispatcher.accessibilityFeatures.highContrast);
     expect(data.alwaysUse24HourFormat, platformDispatcher.alwaysUse24HourFormat);
     expect(data.navigationMode, NavigationMode.traditional);
-    expect(data.gestureSettings, DeviceGestureSettings.fromWindow(view));
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
     expect(data.displayFeatures, view.displayFeatures);
   });
 
@@ -296,7 +296,7 @@ void main() {
     expect(data.highContrast, platformData.highContrast);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
-    expect(data.gestureSettings, DeviceGestureSettings.fromWindow(view));
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
     expect(data.displayFeatures, view.displayFeatures);
   });
 
@@ -354,7 +354,7 @@ void main() {
     expect(data.highContrast, platformDispatcher.accessibilityFeatures.highContrast);
     expect(data.alwaysUse24HourFormat, platformDispatcher.alwaysUse24HourFormat);
     expect(data.navigationMode, NavigationMode.traditional);
-    expect(data.gestureSettings, DeviceGestureSettings.fromWindow(view));
+    expect(data.gestureSettings, DeviceGestureSettings.fromView(view));
     expect(data.displayFeatures, view.displayFeatures);
   });
 
