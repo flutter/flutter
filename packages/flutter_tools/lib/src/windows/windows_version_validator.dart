@@ -29,8 +29,8 @@ class WindowsVersionValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final RegExp regex =
         RegExp(kWindowsOSVersionSemVerPattern, multiLine: true);
-    final Iterable<RegExpMatch> matches =
-        regex.allMatches(_operatingSystemUtils.name);
+    final String commandResult = _operatingSystemUtils.name;
+    final Iterable<RegExpMatch> matches = regex.allMatches(commandResult);
 
     // Use the string split method to extract the major version
     // and check against the [kUnsupportedVersions] list
@@ -43,7 +43,7 @@ class WindowsVersionValidator extends DoctorValidator {
     } else {
       windowsVersionStatus = ValidationType.missing;
       statusInfo =
-          'Unable to confirm if installed Windows version is 10 or greater';
+          'Unable to determine Windows version (command `ver` returned $commandResult)';
     }
 
     return ValidationResult(

@@ -9,31 +9,14 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 
-/// A fake [_WindowsUtils] class for a valid version
+/// Fake [_WindowsUtils] to use for testing
 class FakeValidOperatingSystemUtils extends Fake
     implements OperatingSystemUtils {
-  FakeValidOperatingSystemUtils();
+  FakeValidOperatingSystemUtils(
+      [this.name = 'Microsoft Windows [Version 11.0.22621.963]']);
 
   @override
-  String get name => 'Microsoft Windows [Version 10.0.22621.963]';
-}
-
-/// A fake [_WindowsUtils] class for a valid version from Brazil
-class FakeValidBrOperatingSystemUtils extends Fake
-    implements OperatingSystemUtils {
-  FakeValidBrOperatingSystemUtils();
-
-  @override
-  String get name => 'Microsoft Windows [versão 10.0.22621.1105]';
-}
-
-/// A fake [_WindowsUtils] class for a version that is not supported
-class FakeInvalidOperatingSystemUtils extends Fake
-    implements OperatingSystemUtils {
-  FakeInvalidOperatingSystemUtils();
-
-  @override
-  String get name => 'Microsoft Windows [Version 8.0.22621.963]';
+  final String name;
 }
 
 /// The expected validation result object for
@@ -67,11 +50,13 @@ void main() {
         reason: 'The ValidationResult statusInfo messages should be the same');
   });
 
-  testWithoutContext('Successfully running windows version check on windows 10 for BR',
+  testWithoutContext(
+      'Successfully running windows version check on windows 10 for BR',
       () async {
     final WindowsVersionValidator windowsVersionValidator =
         WindowsVersionValidator(
-            operatingSystemUtils: FakeValidBrOperatingSystemUtils());
+            operatingSystemUtils: FakeValidOperatingSystemUtils(
+                'Microsoft Windows [versão 10.0.22621.1105]'));
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
@@ -84,14 +69,13 @@ void main() {
   testWithoutContext('Identifying a windows version before 10', () async {
     final WindowsVersionValidator windowsVersionValidator =
         WindowsVersionValidator(
-            operatingSystemUtils: FakeInvalidOperatingSystemUtils());
+            operatingSystemUtils: FakeValidOperatingSystemUtils(
+                'Microsoft Windows [Version 8.0.22621.1105]'));
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
     expect(result.type, invalidWindowsValidationResult.type,
         reason: 'The ValidationResult type should be the same (missing)');
-    expect(result.statusInfo, invalidWindowsValidationResult.statusInfo,
-        reason: 'The ValidationResult statusInfo messages should be the same');
   });
 
   testWithoutContext('Unit testing on a regex pattern validator', () async {
@@ -112,10 +96,7 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     );
     final Iterable<RegExpMatch> matches = regex.allMatches(testStr);
 
-    expect(
-      matches.length,
-      5,
-      reason: 'There should be only two matches for the pattern provided',
-    );
+    expect(matches.length, 5,
+        reason: 'There should be only two matches for the pattern provided');
   });
 }
