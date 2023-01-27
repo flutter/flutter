@@ -27,7 +27,6 @@ struct SourceOptions {
   uint32_t gles_language_version = 100;
   std::vector<std::string> defines;
   bool json_format = false;
-  bool remap_samplers = false;
 
   SourceOptions();
 
