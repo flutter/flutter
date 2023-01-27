@@ -40,7 +40,7 @@ set(GLFW_VULKAN_STATIC OFF CACHE BOOL "" FORCE)
 add_subdirectory(${GLFW_REPOSITORY} build_glfw)
 
 target_link_libraries(${EXE_NAME} PRIVATE glfw)
-target_include_directories(${EXE_NAME} PRIVATE $(GLFW_REPOSITORY)/include)
+target_include_directories(${EXE_NAME} PRIVATE ${GLFW_REPOSITORY}/include)
 
 
 # Dependency: Flutter Engine
