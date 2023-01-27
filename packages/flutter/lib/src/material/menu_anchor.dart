@@ -44,11 +44,11 @@ const bool _kDebugMenus = false;
 // has a submenu.
 const double _kDefaultSubmenuIconSize = 24;
 
-// The default spacing between the the leading icon, label, trailing icon, and
+// The default spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemDefaultSpacing = 12;
 
-// The minimum spacing between the the leading icon, label, trailing icon, and
+// The minimum spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemMinSpacing = 4;
 
@@ -315,7 +315,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _position?.isScrollingNotifier.removeListener(_handleScroll);
     _position = Scrollable.maybeOf(context)?.position;
     _position?.isScrollingNotifier.addListener(_handleScroll);
-    final Size newSize = MediaQuery.of(context).size;
+    final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
       _root._close();
@@ -362,7 +362,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    return _MenuAnchorMarker(
+    return _MenuAnchorScope(
       anchorKey: _anchorKey,
       anchor: this,
       isOpen: _isOpen,
@@ -511,7 +511,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                 // Copy all the themes from the supplied outer context to the
                 // overlay.
                 outerContext,
-                _MenuAnchorMarker(
+                _MenuAnchorScope(
                   // Re-advertize the anchor here in the overlay, since
                   // otherwise a search for the anchor by descendants won't find
                   // it.
@@ -571,7 +571,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   // dependency relationship that will rebuild the context when the node
   // changes.
   static _MenuAnchorState? _maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_MenuAnchorMarker>()?.anchor;
+    return context.dependOnInheritedWidgetOfExactType<_MenuAnchorScope>()?.anchor;
   }
 }
 
@@ -700,10 +700,10 @@ class MenuController {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts], to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuBar extends StatelessWidget {
   /// Creates a const [MenuBar].
   ///
@@ -789,10 +789,10 @@ class MenuBar extends StatelessWidget {
 ///   platform instead of by Flutter (on macOS, for example).
 /// * [ShortcutRegistry], a registry of shortcuts that apply for the entire
 ///   application.
-/// * [VoidCallbackIntent] to define intents that will call a [VoidCallback] and
+/// * [VoidCallbackIntent], to define intents that will call a [VoidCallback] and
 ///   work with the [Actions] and [Shortcuts] system.
-/// * [CallbackShortcuts] to define shortcuts that simply call a callback and
-///   don't involve using [Actions].
+/// * [CallbackShortcuts] to define shortcuts that call a callback without
+///   involving [Actions].
 class MenuItemButton extends StatefulWidget {
   /// Creates a const [MenuItemButton].
   ///
@@ -1974,9 +1974,6 @@ class _LocalizedShortcutLabeler {
     LogicalKeyboardKey.arrowUp: '↑',
     LogicalKeyboardKey.arrowDown: '↓',
     LogicalKeyboardKey.enter: '↵',
-    LogicalKeyboardKey.shift: '⇧',
-    LogicalKeyboardKey.shiftLeft: '⇧',
-    LogicalKeyboardKey.shiftRight: '⇧',
   };
 
   static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
@@ -2007,15 +2004,32 @@ class _LocalizedShortcutLabeler {
   /// Returns the label to be shown to the user in the UI when a
   /// [MenuSerializableShortcut] is used as a keyboard shortcut.
   ///
-  /// To keep the representation short, this will return graphical key
-  /// representations when it can. For instance, the default
-  /// [LogicalKeyboardKey.shift] will return '⇧', and the arrow keys will return
-  /// arrows. When [defaultTargetPlatform] is [TargetPlatform.macOS] or
-  /// [TargetPlatform.iOS], the key [LogicalKeyboardKey.meta] will show as '⌘',
-  /// [LogicalKeyboardKey.control] will show as '˄', and
-  /// [LogicalKeyboardKey.alt] will show as '⌥'.
+  /// When [defaultTargetPlatform] is [TargetPlatform.macOS] or
+  /// [TargetPlatform.iOS], this will return graphical key representations when
+  /// it can. For instance, the default [LogicalKeyboardKey.shift] will return
+  /// '⇧', and the arrow keys will return arrows. The key
+  /// [LogicalKeyboardKey.meta] will show as '⌘', [LogicalKeyboardKey.control]
+  /// will show as '˄', and [LogicalKeyboardKey.alt] will show as '⌥'.
+  ///
+  /// The keys are joined by spaces on macOS and iOS, and by "+" on other
+  /// platforms.
   String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
     final ShortcutSerialization serialized = shortcut.serializeForMenu();
+    final String keySeparator;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // Use "⌃ ⇧ A" style on macOS and iOS.
+        keySeparator = ' ';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        // Use "Ctrl+Shift+A" style.
+        keySeparator = '+';
+        break;
+    }
     if (serialized.trigger != null) {
       final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
@@ -2051,7 +2065,7 @@ class _LocalizedShortcutLabeler {
       return <String>[
         ...modifiers,
         if (shortcutTrigger != null && shortcutTrigger.isNotEmpty) shortcutTrigger,
-      ].join(' ');
+      ].join(keySeparator);
     } else if (serialized.character != null) {
       return serialized.character!;
     }
@@ -2166,14 +2180,23 @@ class _LocalizedShortcutLabeler {
     if (modifier == LogicalKeyboardKey.shift ||
         modifier == LogicalKeyboardKey.shiftLeft ||
         modifier == LogicalKeyboardKey.shiftRight) {
-      return _shortcutGraphicEquivalents[LogicalKeyboardKey.shift]!;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return localizations.keyboardKeyShift;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return '⇧';
+      }
     }
     throw ArgumentError('Keyboard key ${modifier.keyLabel} is not a modifier.');
   }
 }
 
-class _MenuAnchorMarker extends InheritedWidget {
-  const _MenuAnchorMarker({
+class _MenuAnchorScope extends InheritedWidget {
+  const _MenuAnchorScope({
     required super.child,
     required this.anchorKey,
     required this.anchor,
@@ -2185,7 +2208,7 @@ class _MenuAnchorMarker extends InheritedWidget {
   final bool isOpen;
 
   @override
-  bool updateShouldNotify(_MenuAnchorMarker oldWidget) {
+  bool updateShouldNotify(_MenuAnchorScope oldWidget) {
     return anchorKey != oldWidget.anchorKey
         || anchor != oldWidget.anchor
         || isOpen != oldWidget.isOpen;
@@ -2896,7 +2919,6 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     // 4) Is part of an anchor that either doesn't have a submenu, or doesn't
     //    have any submenus currently open (only the "deepest" open menu should
     //    have accelerator shortcuts registered).
-    assert(_displayLabel != null);
     if (_showAccelerators && _acceleratorIndex != -1 && _binding?.onInvoke != null && !(_binding!.hasSubmenu && (_anchor?._isOpen ?? false))) {
       final String acceleratorCharacter = _displayLabel[_acceleratorIndex].toLowerCase();
       _shortcutRegistryEntry = _shortcutRegistry?.addAll(
@@ -3563,7 +3585,7 @@ bool _platformSupportsAccelerators() {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_152
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
@@ -3746,7 +3768,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       const EdgeInsets.symmetric(horizontal: 12),
       const EdgeInsets.symmetric(horizontal: 8),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
 }

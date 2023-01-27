@@ -92,21 +92,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double? minOverscrollLength,
     ScrollbarOrientation? scrollbarOrientation,
     bool ignorePointer = false,
-  }) : assert(color != null),
-       assert(radius == null || shape == null),
-       assert(thickness != null),
-       assert(fadeoutOpacityAnimation != null),
-       assert(mainAxisMargin != null),
-       assert(crossAxisMargin != null),
-       assert(minLength != null),
+  }) : assert(radius == null || shape == null),
        assert(minLength >= 0),
        assert(minOverscrollLength == null || minOverscrollLength <= minLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
-       assert(padding != null),
        assert(padding.isNonNegative),
-       assert(trackColor != null),
-       assert(trackBorderColor != null),
-       assert(ignorePointer != null),
        _color = color,
        _textDirection = textDirection,
        _thickness = thickness,
@@ -129,7 +119,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color get color => _color;
   Color _color;
   set color(Color value) {
-    assert(value != null);
     if (color == value) {
       return;
     }
@@ -142,7 +131,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color get trackColor => _trackColor;
   Color _trackColor;
   set trackColor(Color value) {
-    assert(value != null);
     if (trackColor == value) {
       return;
     }
@@ -155,7 +143,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color get trackBorderColor => _trackBorderColor;
   Color _trackBorderColor;
   set trackBorderColor(Color value) {
-    assert(value != null);
     if (trackBorderColor == value) {
       return;
     }
@@ -197,7 +184,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double get thickness => _thickness;
   double _thickness;
   set thickness(double value) {
-    assert(value != null);
     if (thickness == value) {
       return;
     }
@@ -220,7 +206,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double get mainAxisMargin => _mainAxisMargin;
   double _mainAxisMargin;
   set mainAxisMargin(double value) {
-    assert(value != null);
     if (mainAxisMargin == value) {
       return;
     }
@@ -238,7 +223,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double get crossAxisMargin => _crossAxisMargin;
   double _crossAxisMargin;
   set crossAxisMargin(double value) {
-    assert(value != null);
     if (crossAxisMargin == value) {
       return;
     }
@@ -296,7 +280,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
   set padding(EdgeInsets value) {
-    assert(value != null);
     if (padding == value) {
       return;
     }
@@ -319,7 +302,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double get minLength => _minLength;
   double _minLength;
   set minLength(double value) {
-    assert(value != null);
     if (minLength == value) {
       return;
     }
@@ -341,7 +323,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double get minOverscrollLength => _minOverscrollLength;
   double _minOverscrollLength;
   set minOverscrollLength(double value) {
-    assert(value != null);
     if (minOverscrollLength == value) {
       return;
     }
@@ -679,7 +660,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// thumbOffsetLocal is a position in the thumb track. Cannot be null.
   double getTrackToScroll(double thumbOffsetLocal) {
-    assert(thumbOffsetLocal != null);
     final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
     final double thumbMovableExtent = _traversableTrackExtent - _thumbExtent;
 
@@ -1012,8 +992,7 @@ class RawScrollbar extends StatefulWidget {
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     this.isAlwaysShown,
-  }) : assert(child != null),
-       assert(
+  }) : assert(
          thumbVisibility == null || isAlwaysShown == null,
          'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
          'isAlwaysShown is deprecated.'
@@ -1022,16 +1001,10 @@ class RawScrollbar extends StatefulWidget {
          !((thumbVisibility == false || isAlwaysShown == false) && (trackVisibility ?? false)),
          'A scrollbar track cannot be drawn without a scrollbar thumb.'
        ),
-       assert(minThumbLength != null),
        assert(minThumbLength >= 0),
        assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
-       assert(fadeDuration != null),
-       assert(radius == null || shape == null),
-       assert(timeToFade != null),
-       assert(pressDuration != null),
-       assert(mainAxisMargin != null),
-       assert(crossAxisMargin != null);
+       assert(radius == null || shape == null);
 
   /// {@template flutter.widgets.Scrollbar.child}
   /// The widget below this widget in the tree.
@@ -1675,7 +1648,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..textDirection = Directionality.of(context)
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
-      ..padding = widget.padding ?? MediaQuery.of(context).padding
+      ..padding = widget.padding ?? MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
       ..shape = widget.shape
@@ -2136,7 +2109,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _cachedController!.hasClients &&
         (!_thumbDragging || kIsWeb)) {
       final ScrollPosition position = _cachedController!.position;
-      if (event is PointerScrollEvent && position != null) {
+      if (event is PointerScrollEvent) {
         if (!position.physics.shouldAcceptUserOffset(position)) {
           return;
         }

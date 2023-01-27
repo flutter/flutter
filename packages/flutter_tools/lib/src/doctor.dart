@@ -303,7 +303,7 @@ class Doctor {
         case ValidationType.notAvailable:
           lineBuffer.write('is not available.');
           break;
-        case ValidationType.installed:
+        case ValidationType.success:
           lineBuffer.write('is fully installed.');
           break;
       }
@@ -320,7 +320,7 @@ class Doctor {
       ));
       buffer.writeln();
 
-      if (result.type != ValidationType.installed) {
+      if (result.type != ValidationType.success) {
         missingComponent = true;
       }
     }
@@ -400,7 +400,7 @@ class Doctor {
         case ValidationType.notAvailable:
           issues += 1;
           break;
-        case ValidationType.installed:
+        case ValidationType.success:
           break;
       }
       if (sendEvent) {
@@ -558,7 +558,7 @@ class FlutterValidator extends DoctorValidator {
 
     ValidationType valid;
     if (messages.every((ValidationMessage message) => message.isInformation)) {
-      valid = ValidationType.installed;
+      valid = ValidationType.success;
     } else {
       // The issues for this validator stem from broken git configuration of the local install;
       // in that case, make it clear that it is fine to continue, but freshness check/upgrades
@@ -635,7 +635,7 @@ class FlutterValidator extends DoctorValidator {
   bool _filePathContainsDirPath(String directory, String file) {
     // calling .canonicalize() will normalize for alphabetic case and path
     // separators
-    return (_fileSystem.path.canonicalize(file))
+    return _fileSystem.path.canonicalize(file)
         .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
@@ -707,13 +707,13 @@ class DeviceValidator extends DoctorValidator {
     } else if (diagnostics.isNotEmpty) {
       installedMessages.addAll(diagnosticMessages);
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );
     } else {
       return ValidationResult(
-        ValidationType.installed,
+        ValidationType.success,
         installedMessages,
         statusInfo: _userMessages.devicesAvailable(devices.length)
       );

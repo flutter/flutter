@@ -53,8 +53,7 @@ class CupertinoTheme extends StatelessWidget {
     super.key,
     required this.data,
     required this.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// The [CupertinoThemeData] styling for this theme.
   final CupertinoThemeData data;
@@ -87,7 +86,7 @@ class CupertinoTheme extends StatelessWidget {
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.of(context).platformBrightness;
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.platformBrightnessOf(context);
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -107,7 +106,7 @@ class CupertinoTheme extends StatelessWidget {
   ///   [MediaQuery] exists, instead of returning null.
   static Brightness? maybeBrightnessOf(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybeOf(context)?.platformBrightness;
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
   /// The widget below this widget in the tree.
@@ -137,7 +136,7 @@ class _InheritedCupertinoTheme extends InheritedWidget {
   const _InheritedCupertinoTheme({
     required this.theme,
     required super.child,
-  }) : assert(theme != null);
+  });
 
   final CupertinoTheme theme;
 
@@ -528,7 +527,6 @@ class _CupertinoTextThemeDefaults {
   }
 
   CupertinoTextThemeData createDefaults({ required Color primaryColor }) {
-    assert(primaryColor != null);
     return _DefaultCupertinoTextThemeData(
       primaryColor: primaryColor,
       labelColor: labelColor,
@@ -545,9 +543,7 @@ class _DefaultCupertinoTextThemeData extends CupertinoTextThemeData {
     required this.labelColor,
     required this.inactiveGray,
     required super.primaryColor,
-  }) : assert(labelColor != null),
-       assert(inactiveGray != null),
-       assert(primaryColor != null);
+  });
 
   final Color labelColor;
   final Color inactiveGray;

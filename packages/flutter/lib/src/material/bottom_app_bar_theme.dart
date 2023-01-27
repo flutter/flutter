@@ -94,7 +94,6 @@ class BottomAppBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
-    assert(t != null);
     return BottomAppBarTheme(
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),

@@ -70,6 +70,7 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ],
   ST.selectPart: <List<ST>>[
     <ST>[ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.number, ST.openBrace, ST.message, ST.closeBrace],
     <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
   ],
 };
@@ -157,20 +158,14 @@ RegExp normalString = RegExp(r'[^{}]+');
 RegExp brace = RegExp(r'{|}');
 
 RegExp whitespace = RegExp(r'\s+');
-RegExp pluralKeyword = RegExp(r'plural');
-RegExp selectKeyword = RegExp(r'select');
-RegExp otherKeyword = RegExp(r'other');
 RegExp numeric = RegExp(r'[0-9]+');
-RegExp alphanumeric = RegExp(r'[a-zA-Z0-9]+');
+RegExp alphanumeric = RegExp(r'[a-zA-Z0-9|_]+');
 RegExp comma = RegExp(r',');
 RegExp equalSign = RegExp(r'=');
 
 // List of token matchers ordered by precedence
 Map<ST, RegExp> matchers = <ST, RegExp>{
   ST.empty: whitespace,
-  ST.plural: pluralKeyword,
-  ST.select: selectKeyword,
-  ST.other: otherKeyword,
   ST.number: numeric,
   ST.comma: comma,
   ST.equalSign: equalSign,
@@ -302,12 +297,25 @@ class Parser {
           // Do not add whitespace as a token.
           startIndex = match.end;
           continue;
-        } else if (<ST>[ST.plural, ST.select].contains(matchedType) && tokens.last.type == ST.openBrace) {
-          // Treat "plural" or "select" as identifier if it comes right after an open brace.
+        } else if (<ST>[ST.identifier].contains(matchedType) && tokens.last.type == ST.openBrace) {
+          // Treat any token as identifier if it comes right after an open brace, whether it's a keyword or not.
           tokens.add(Node(ST.identifier, startIndex, value: match.group(0)));
           startIndex = match.end;
           continue;
         } else {
+          // Handle keywords separately. Otherwise, lexer will assume parts of identifiers may be keywords.
+          final String tokenStr = match.group(0)!;
+          switch(tokenStr) {
+            case 'plural':
+              matchedType = ST.plural;
+              break;
+            case 'select':
+              matchedType = ST.select;
+              break;
+            case 'other':
+              matchedType = ST.other;
+              break;
+          }
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
           continue;
@@ -334,7 +342,7 @@ class Parser {
       parsingStack.addAll(grammarRule.reversed);
 
       // For tree construction, add nodes to the parent until the parent has all
-      // all the children it is expecting.
+      // the children it is expecting.
       parent.children.add(node);
       if (parent.isFull) {
         treeTraversalStack.removeLast();
@@ -408,6 +416,7 @@ class Parser {
         case ST.selectParts:
           if (tokens.isNotEmpty && (
             tokens[0].type == ST.identifier ||
+            tokens[0].type == ST.number ||
             tokens[0].type == ST.other
           )) {
             parseAndConstructNode(ST.selectParts, 0);
@@ -418,8 +427,10 @@ class Parser {
         case ST.selectPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.selectPart, 0);
-          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.number) {
             parseAndConstructNode(ST.selectPart, 1);
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+            parseAndConstructNode(ST.selectPart, 2);
           } else {
             throw L10nParserException(
               'ICU Syntax Error: Select parts must be of the form "identifier { message }"',
@@ -581,6 +592,10 @@ class Parser {
       checkExtraRules(syntaxTree);
       return syntaxTree;
     } on L10nParserException catch (error) {
+      // For debugging purposes.
+      if (logger == null) {
+        rethrow;
+      }
       logger?.printError(error.toString());
       return Node(ST.empty, 0, value: '');
     }

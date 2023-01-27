@@ -40,7 +40,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   const ConstrainedLayoutBuilder({
     super.key,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   @override
   RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
@@ -213,7 +213,7 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const LayoutBuilder({
     super.key,
     required super.builder,
-  }) : assert(builder != null);
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();

@@ -498,7 +498,7 @@ class _PathMatcher extends Matcher {
 }
 
 class _MismatchedCall {
-  const _MismatchedCall(this.message, this.callIntroduction, this.call) : assert(call != null);
+  const _MismatchedCall(this.message, this.callIntroduction, this.call);
   final String message;
   final String callIntroduction;
   final RecordedInvocation call;

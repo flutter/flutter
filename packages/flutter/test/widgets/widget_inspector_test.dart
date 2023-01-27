@@ -11,8 +11,8 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
-
 @TestOn('!chrome')
+library;
 
 import 'dart:convert';
 import 'dart:math';
@@ -536,7 +536,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pumpWidget(
         RepaintBoundary(
           key: repaintBoundaryKey,
-          child: Container(
+          child: ColoredBox(
             color: Colors.grey,
             child: Transform(
               transform: mainTransform,
@@ -544,7 +544,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 textDirection: TextDirection.ltr,
                 child: WidgetInspector(
                   selectButtonBuilder: null,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.white,
                     child: Center(
                       child: Container(
@@ -973,6 +973,147 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(columnA, equals(15));
       expect(columnA, equals(columnB));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
+
+  testWidgets('WidgetInspectorService setSelection notifiers for an Element',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: const <Widget>[
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
+        ),
+      );
+      final Element elementA = find.text('a').evaluate().first;
+
+      service.disposeAllGroups();
+
+      setupDefaultPubRootDirectory(service);
+
+      // Select the widget
+      service.setSelection(elementA, 'my-group');
+
+      // ensure that developer.inspect was called on the widget
+      final List<Object?> objectsInspected = service.inspectedObjects();
+      expect(objectsInspected, equals(<Element>[elementA]));
+
+      // ensure that a navigate event was sent for the element
+      final List<Map<Object, Object?>> navigateEventsPosted
+        = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
+      expect(navigateEventsPosted.length, equals(1));
+      final Map<Object,Object?> event = navigateEventsPosted[0];
+      final String file = event['fileUri']! as String;
+      final int line = event['line']! as int;
+      final int column = event['column']! as int;
+      expect(file, endsWith('widget_inspector_test.dart'));
+      // We don't hardcode the actual lines the widgets are created on as that
+      // would make this test fragile.
+      expect(line, isNotNull);
+      // Column numbers are more stable than line numbers.
+      expect(column, equals(15));
+    },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
+
+    testWidgets(
+      'WidgetInspectorService setSelection notifiers for a RenderObject',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: const <Widget>[
+                Text('a'),
+                Text('b', textDirection: TextDirection.ltr),
+                Text('c', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ),
+        );
+        final Element elementA = find.text('a').evaluate().first;
+
+        service.disposeAllGroups();
+
+        setupDefaultPubRootDirectory(service);
+
+        // Select the render object for the widget.
+        service.setSelection(elementA.renderObject, 'my-group');
+
+        // ensure that developer.inspect was called on the widget
+        final List<Object?> objectsInspected = service.inspectedObjects();
+        expect(objectsInspected, equals(<RenderObject?>[elementA.renderObject]));
+
+        // ensure that a navigate event was sent for the renderObject
+        final List<Map<Object, Object?>> navigateEventsPosted
+          = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
+        expect(navigateEventsPosted.length, equals(1));
+        final Map<Object,Object?> event = navigateEventsPosted[0];
+        final String file = event['fileUri']! as String;
+        final int line = event['line']! as int;
+        final int column = event['column']! as int;
+        expect(file, endsWith('widget_inspector_test.dart'));
+        // We don't hardcode the actual lines the widgets are created on as that
+        // would make this test fragile.
+        expect(line, isNotNull);
+        // Column numbers are more stable than line numbers.
+        expect(column, equals(17));
+      },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+    );
+
+    testWidgets(
+      'WidgetInspector selectButton inspection for tap',
+      (WidgetTester tester) async {
+        final GlobalKey selectButtonKey = GlobalKey();
+        final GlobalKey inspectorKey = GlobalKey();
+        setupDefaultPubRootDirectory(service);
+
+        Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+          return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+        }
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: WidgetInspector(
+              key: inspectorKey,
+              selectButtonBuilder: selectButtonBuilder,
+              child: const Text('Child 1'),
+            ),
+          ),
+        );
+        final Finder child = find.text('Child 1');
+        final Element childElement = child.evaluate().first;
+
+        await tester.tap(child, warnIfMissed: false);
+
+        await tester.pump();
+
+        // ensure that developer.inspect was called on the widget
+        final List<Object?> objectsInspected = service.inspectedObjects();
+        expect(objectsInspected, equals(<RenderObject?>[childElement.renderObject]));
+
+        // ensure that a navigate event was sent for the renderObject
+        final List<Map<Object, Object?>> navigateEventsPosted
+          = service.dispatchedEvents('navigate', stream: 'ToolEvent',);
+        expect(navigateEventsPosted.length, equals(1));
+        final Map<Object,Object?> event = navigateEventsPosted[0];
+        final String file = event['fileUri']! as String;
+        final int line = event['line']! as int;
+        final int column = event['column']! as int;
+        expect(file, endsWith('widget_inspector_test.dart'));
+        // We don't hardcode the actual lines the widgets are created on as that
+        // would make this test fragile.
+        expect(line, isNotNull);
+        // Column numbers are more stable than line numbers.
+        expect(column, equals(28));
+      },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked() // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (WidgetTester tester) async {
       final bool widgetTracked = WidgetInspectorService.instance.isWidgetCreationTracked();
@@ -3472,7 +3613,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       final List<Map<Object, Object?>> rebuildEvents =
-          service.getEventsDispatched('Flutter.RebuiltWidgets');
+          service.dispatchedEvents('Flutter.RebuiltWidgets');
       expect(rebuildEvents, isEmpty);
 
       expect(service.rebuildCount, equals(0));
@@ -3692,7 +3833,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       final List<Map<Object, Object?>> repaintEvents =
-          service.getEventsDispatched('Flutter.RepaintWidgets');
+          service.dispatchedEvents('Flutter.RepaintWidgets');
       expect(repaintEvents, isEmpty);
 
       expect(service.rebuildCount, equals(0));
@@ -3862,7 +4003,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pumpWidget(
         Center(
           child: RepaintBoundaryWithDebugPaint(
-            child: Container(
+            child: ColoredBox(
               key: outerContainerKey,
               color: Colors.white,
               child: Padding(
@@ -3881,10 +4022,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                         bottomLeft: Radius.elliptical(2.5, 12.0),
                         bottomRight: Radius.elliptical(15.0, 6.0),
                       ),
-                      child: Container(
+                      child: ColoredBox(
                         key: redContainerKey,
                         color: Colors.red,
-                        child: Container(
+                        child: ColoredBox(
                           key: whiteContainerKey,
                           color: Colors.white,
                           child: RepaintBoundary(
@@ -4166,14 +4307,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: Center(
             child: Row(
-              children: <Widget>[
+              children: const <Widget>[
                 Flexible(
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.green,
-                    child: const Text('a'),
+                    child: Text('a'),
                   ),
                 ),
-                const Text('b'),
+                Text('b'),
               ],
             ),
           ),
@@ -4277,11 +4418,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element element = tester.element(find.byType(Directionality).first);
         Element? root;
         element.visitAncestorElements((Element ancestor) {
-          if (root == null) {
-            root = ancestor;
-            // Stop traversing ancestors.
-            return false;
-          }
+          root = ancestor;
           return true;
         });
         expect(root, isNotNull);
@@ -4471,7 +4608,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     test('ext.flutter.inspector.structuredErrors', () async {
-      List<Map<Object, Object?>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+      List<Map<Object, Object?>> flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
       expect(flutterErrorEvents, isEmpty);
 
       final FlutterExceptionHandler oldHandler = FlutterError.presentError;
@@ -4494,7 +4631,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ));
 
         // Validate that we received an error.
-        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
         expect(flutterErrorEvents, hasLength(1));
 
         // Validate the error contents.
@@ -4517,7 +4654,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ));
 
         // Validate that the error count increased.
-        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
         expect(flutterErrorEvents, hasLength(2));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 1);
@@ -4545,7 +4682,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ));
 
         // And, validate that the error count has been reset.
-        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        flutterErrorEvents = service.dispatchedEvents('Flutter.Error');
         expect(flutterErrorEvents, hasLength(3));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 0);
