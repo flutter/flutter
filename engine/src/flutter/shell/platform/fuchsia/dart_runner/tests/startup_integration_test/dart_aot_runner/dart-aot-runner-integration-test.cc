@@ -99,9 +99,9 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
 
   // Build the Realm with the provided child and protocols
   auto realm = realm_builder.Build(dispatcher());
-  FML_LOG(INFO) << "Realm built: " << realm.GetChildName();
+  FML_LOG(INFO) << "Realm built: " << realm.component().GetChildName();
   // Connect to the Dart echo server
-  auto echo = realm.ConnectSync<flutter::example::echo::Echo>();
+  auto echo = realm.component().ConnectSync<flutter::example::echo::Echo>();
   fidl::StringPtr response;
   // Attempt to ping the Dart echo server for a response
   echo->EchoString("hello", &response);

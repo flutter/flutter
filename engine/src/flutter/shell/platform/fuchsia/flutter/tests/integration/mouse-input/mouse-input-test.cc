@@ -171,7 +171,7 @@ class MouseInputTest : public PortableUITest,
 
     // Get the display dimensions.
     FML_LOG(INFO) << "Waiting for scenic display info";
-    scenic_ = realm_root()->Connect<fuchsia::ui::scenic::Scenic>();
+    scenic_ = realm_root()->component().Connect<fuchsia::ui::scenic::Scenic>();
     scenic_->GetDisplayInfo([this](fuchsia::ui::gfx::DisplayInfo display_info) {
       display_width_ = display_info.width_in_px;
       display_height_ = display_info.height_in_px;
