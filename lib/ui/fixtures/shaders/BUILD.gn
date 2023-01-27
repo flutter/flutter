@@ -42,7 +42,6 @@ if (enable_unittests) {
     intermediates_subdir = "iplr-remap"
     sl_file_extension = "iplr"
     iplr = true
-    remap_samplers = true
   }
 
   test_fixtures("fixtures") {
