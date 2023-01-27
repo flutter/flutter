@@ -232,13 +232,14 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Determine if the dropdown button requests focus and the on-screen virtual
   /// keyboard is shown in response to a touch event.
   ///
-  /// By default, if the app is running on mobile platforms, the text field
-  /// will not request focus when the menu is opened, and the virtual keyboard
-  /// will not show up. If the app is running on desktop platforms, the text field
-  /// requests focus when the menu is opened.
+  /// By default, on mobile platforms, tapping on the text field and opening
+  /// the menu will not cause a focus request and the virtual keyboard will not
+  /// appear. The default behavior for desktop platforms is for the dropdown to
+  /// take the focus.
   ///
-  /// Defaults to null. Setting this to false is useful when the options are limited and searching
-  /// is unnecessary.
+  /// Defaults to null. Setting this field to true or false, rather than allowing
+  /// the implementation to choose based on the platform, can be useful for
+  /// applications that want to override the default behavior.
   final bool? requestFocusOnTap;
 
   /// Descriptions of the menu items in the [DropdownMenu].
@@ -301,20 +302,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   bool canRequestFocus() {
-    bool requestFocus = true;
+    if (widget.requestFocusOnTap != null) {
+      return widget.requestFocusOnTap!;
+    }
+
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        requestFocus = false;
-        break;
+        return false;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        break;
+        return true;
     }
-
-    return widget.requestFocusOnTap ?? requestFocus;
   }
 
   void refreshLeadingPadding() {
