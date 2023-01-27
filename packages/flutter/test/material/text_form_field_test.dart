@@ -1172,24 +1172,22 @@ void main() {
 
   testWidgets('Error color for cursor while validation', (WidgetTester tester) async {
     const Color errorColor = Color(0xff123456);
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          colorScheme: const ColorScheme.light(error: errorColor)
-        ),
-        home: Material(
-          child: Center(
-            child: TextFormField(
-              enabled: true,
-              autovalidateMode: AutovalidateMode.always,
-              validator: (String? value) {
-                return 'Please enter value';
-              },
-            ),
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme.light(error: errorColor)
+      ),
+      home: Material(
+        child: Center(
+          child: TextFormField(
+            enabled: true,
+            autovalidateMode: AutovalidateMode.always,
+            validator: (String? value) {
+              return 'Please enter value';
+            },
           ),
         ),
       ),
-    );
+    ));
     await tester.enterText(find.byType(TextField), 'a');
     final EditableText textField = tester.widget(find.byType(EditableText).first);
     await tester.pump();
