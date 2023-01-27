@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
-typedef void Function(Leaks foundLeaks)? leaksObtainer,
+typedef LeaksObtainer = void Function(Leaks foundLeaks);
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
@@ -20,6 +20,7 @@ typedef void Function(Leaks foundLeaks)? leaksObtainer,
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
 ///
 /// If you use [testWidgets], pass [tester] to avoid async issues in leak processing.
+/// Pass null otherwise.
 ///
 /// Pass [leaksObtainer] if you want to get leak information before
 /// the method failure.
@@ -29,7 +30,7 @@ Future<void> withFlutterLeakTracking(
   StackTraceCollectionConfig stackTraceCollectionConfig =
       const StackTraceCollectionConfig(),
   Duration? timeoutForFinalGarbageCollection,
-  void Function(Leaks foundLeaks)? leaksObtainer,
+  LeaksObtainer? leaksObtainer,
 }) async {
   // The method is copied from
   // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
@@ -37,15 +38,17 @@ Future<void> withFlutterLeakTracking(
   // The method is not combined with [testWidgets], because the combining will
   // impact VSCode's ability to recognize tests.
 
-  void flutterEventToLeakTracker(ObjectEvent event) =>
-      dispatchObjectEvent(event.toMap());
+  void flutterEventToLeakTracker(ObjectEvent event) {
+    return dispatchObjectEvent(event.toMap());
+  }
+
   MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
   final AsyncCodeRunner asyncCodeRunner = tester == null
       ? (DartAsyncCallback action) async => action()
       : (DartAsyncCallback action) async => tester.runAsync(action);
   try {
     final Leaks leaks = await withLeakTracking(
-      () async => callback(),
+      callback,
       asyncCodeRunner: asyncCodeRunner,
       stackTraceCollectionConfig: stackTraceCollectionConfig,
       shouldThrowOnLeaks: false,
