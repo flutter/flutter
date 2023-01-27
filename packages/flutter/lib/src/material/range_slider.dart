@@ -326,7 +326,7 @@ class RangeSlider extends StatefulWidget {
   /// the range slider thumb is hovered or dragged.
   ///
   /// If this property is null, [RangeSlider] will use [activeColor] with
-  /// with an opacity of 0.12. If null, [SliderThemeData.overlayColor]
+  /// an opacity of 0.12. If null, [SliderThemeData.overlayColor]
   /// will be used, otherwise defaults to [ColorScheme.primary] with
   /// an opacity of 0.12.
   final MaterialStateProperty<Color?>? overlayColor;

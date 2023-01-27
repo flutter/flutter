@@ -2053,7 +2053,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     // If screen reader is in use, make the hint text say hours/minutes.
     // Otherwise, remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
-    final String? hintText = MediaQuery.accessibleNavigationOf(context) || WidgetsBinding.instance.window.semanticsEnabled
+    final String? hintText = MediaQuery.accessibleNavigationOf(context) || View.of(context).platformDispatcher.semanticsEnabled
         ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
 
