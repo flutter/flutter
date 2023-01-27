@@ -59,6 +59,9 @@ vars = {
   'dart_clock_rev': '65e8a13ddf26c9d21884ccc8f8532725697d40df',
   'dart_collection_rev': '85e987cf1b8aaba60bdc8b16dd1ee6233436549f',
   'dart_devtools_rev': 'c7a81f64dabb4b9f2cae0cf2c9411ef8bb805191',
+  'dart_libprotobuf_rev': '24487dd1045c7f3d64a21f38a3f0c06cc4cf2edb',
+  'dart_perfetto_rev': 'b8da07095979310818f0efde2ef3c69ea70d62c5',
+  'dart_protobuf_gn_rev': 'b9517855b24624ec4edf4a11c1b7060f4ef237e6',
   'dart_protobuf_rev': 'cc0f287fb6a8680e431eb9210225f1d0ac33c047',
   'dart_pub_rev': '0cbaf7a2fb8c8ca543c6f222bf25d5f5c63abbf3',
   'dart_root_certificates_rev': '692f6d6488af68e0121317a9c2c9eb393eb0ee50',
@@ -236,7 +239,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'abada33190daa7914938ec56d59032012fcf12f7',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'c77cac9502fb108be6a1ed4e0e4e1c65649b3a35',
 
    # Fuchsia compatibility
    #
@@ -291,6 +294,16 @@ deps = {
 
   'src/third_party/boringssl/src':
    'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
+
+  'src/third_party/perfetto':
+   Var('fuchsia_git') + "/third_party/android.googlesource.com/platform/external/perfetto"
+   + '@' + Var('dart_perfetto_rev'),
+
+  'src/third_party/protobuf':
+   Var('fuchsia_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),
+
+  'src/build/secondary/third_party/protobuf':
+   Var('fuchsia_git') + '/protobuf-gn' + '@' + Var('dart_protobuf_gn_rev'),
 
   'src/third_party/dart':
    Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
