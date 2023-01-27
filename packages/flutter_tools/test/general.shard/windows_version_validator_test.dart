@@ -18,6 +18,15 @@ class FakeValidOperatingSystemUtils extends Fake
   String get name => 'Microsoft Windows [Version 10.0.22621.963]';
 }
 
+/// A fake [_WindowsUtils] class for a valid version from Brazil
+class FakeValidBrOperatingSystemUtils extends Fake
+    implements OperatingSystemUtils {
+  FakeValidBrOperatingSystemUtils();
+
+  @override
+  String get name => 'Microsoft Windows [versão 10.0.22621.1105]';
+}
+
 /// A fake [_WindowsUtils] class for a version that is not supported
 class FakeInvalidOperatingSystemUtils extends Fake
     implements OperatingSystemUtils {
@@ -49,6 +58,20 @@ void main() {
     final WindowsVersionValidator windowsVersionValidator =
         WindowsVersionValidator(
             operatingSystemUtils: FakeValidOperatingSystemUtils());
+
+    final ValidationResult result = await windowsVersionValidator.validate();
+
+    expect(result.type, validWindows10ValidationResult.type,
+        reason: 'The ValidationResult type should be the same (installed)');
+    expect(result.statusInfo, validWindows10ValidationResult.statusInfo,
+        reason: 'The ValidationResult statusInfo messages should be the same');
+  });
+
+  testWithoutContext('Successfully running windows version check on windows 10 for BR',
+      () async {
+    final WindowsVersionValidator windowsVersionValidator =
+        WindowsVersionValidator(
+            operatingSystemUtils: FakeValidBrOperatingSystemUtils());
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
