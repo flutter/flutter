@@ -115,7 +115,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
-/// the escape key, by tapping the scrim, or by calling pop route function such as
+/// escape key, by tapping the scrim, or by calling pop route function such as
 /// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
 ///
 /// ```dart
@@ -325,10 +325,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-  }) : assert(child != null),
-       assert(dragStartBehavior != null),
-       assert(alignment != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -659,7 +656,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerStart;
@@ -669,7 +665,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerEnd;
@@ -741,7 +736,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
           break;
       }
-      assert(platformHasBackButton != null);
 
       final Widget child = _DrawerControllerScope(
         controller: widget,
@@ -827,13 +821,14 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_152
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
-  const _DrawerDefaultsM3(this.context)
+  _DrawerDefaultsM3(this.context)
       : super(elevation: 1.0);
 
   final BuildContext context;
+  late final TextDirection direction = Directionality.of(context);
 
   @override
   Color? get backgroundColor => Theme.of(context).colorScheme.surface;
@@ -844,18 +839,22 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   @override
   Color? get shadowColor => Colors.transparent;
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get shape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+  ShapeBorder? get shape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      end: Radius.circular(16.0),
+    ).resolve(direction),
   );
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get endShape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(left: Radius.circular(16.0)),
+  ShapeBorder? get endShape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      start: Radius.circular(16.0),
+    ).resolve(direction),
   );
 }
 

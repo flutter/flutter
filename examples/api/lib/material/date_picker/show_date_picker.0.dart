@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [showDatePicker].
+// Flutter code sample for [showDatePicker].
 
 import 'package:flutter/material.dart';
 
@@ -53,6 +53,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
     },
   );
 
+  @pragma('vm:entry-point')
   static Route<DateTime> _datePickerRoute(
     BuildContext context,
     Object? arguments,

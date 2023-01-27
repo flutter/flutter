@@ -22,7 +22,9 @@ import 'theme_data.dart';
 // Examples can assume:
 // late Widget _myIcon;
 
-const Duration _kTransitionDuration = Duration(milliseconds: 200);
+// The duration value extracted from:
+// https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/textfield/TextInputLayout.java
+const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
@@ -152,9 +154,7 @@ class _BorderContainer extends StatefulWidget {
     required this.fillColor,
     required this.hoverColor,
     required this.isHovering,
-  }) : assert(border != null),
-       assert(gap != null),
-       assert(fillColor != null);
+  });
 
   final InputBorder border;
   final _InputBorderGap gap;
@@ -192,6 +192,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     _borderAnimation = CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
     );
     _border = _InputBorderTween(
       begin: widget.border,
@@ -505,8 +506,7 @@ enum FloatingLabelBehavior {
 ///    behave.
 @immutable
 class FloatingLabelAlignment {
-  const FloatingLabelAlignment._(this._x) : assert(_x != null),
-       assert(_x >= -1.0 && _x <= 1.0);
+  const FloatingLabelAlignment._(this._x) : assert(_x >= -1.0 && _x <= 1.0);
 
   // -1 denotes start, 0 denotes center, and 1 denotes end.
   final double _x;
@@ -589,11 +589,7 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-  }) : assert(contentPadding != null),
-       assert(isCollapsed != null),
-       assert(floatingLabelHeight != null),
-       assert(floatingLabelProgress != null),
-       assert(floatingLabelAlignment != null);
+  });
 
   final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
@@ -705,11 +701,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     required bool expands,
     required bool material3,
     TextAlignVertical? textAlignVertical,
-  }) : assert(decoration != null),
-       assert(textDirection != null),
-       assert(textBaseline != null),
-       assert(expands != null),
-       _decoration = decoration,
+  }) : _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
        _textAlignVertical = textAlignVertical,
@@ -763,7 +755,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   _Decoration get decoration => _decoration;
   _Decoration _decoration;
   set decoration(_Decoration value) {
-    assert(value != null);
     if (_decoration == value) {
       return;
     }
@@ -774,7 +765,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -785,7 +775,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   set textBaseline(TextBaseline value) {
-    assert(value != null);
     if (_textBaseline == value) {
       return;
     }
@@ -814,7 +803,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
-    assert(value != null);
     if (_isFocused == value) {
       return;
     }
@@ -825,7 +813,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   bool get expands => _expands;
   bool _expands = false;
   set expands(bool value) {
-    assert(value != null);
     if (_expands == value) {
       return;
     }
@@ -1571,7 +1558,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final double t = decoration.floatingLabelProgress;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
-      final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
+      final bool isOutlineBorder = decoration.border.isOutline;
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
       final double floatingY = isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top;
@@ -1629,7 +1616,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     for (final RenderBox child in children) {
       // The label must be handled specially since we've transformed it.
       final Offset offset = _boxParentData(child).offset;
@@ -1668,10 +1654,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
     required this.textBaseline,
     required this.isFocused,
     required this.expands,
-  }) : assert(decoration != null),
-       assert(textDirection != null),
-       assert(textBaseline != null),
-       assert(expands != null);
+  });
 
   final _Decoration decoration;
   final TextDirection textDirection;
@@ -1810,11 +1793,7 @@ class InputDecorator extends StatefulWidget {
     this.expands = false,
     this.isEmpty = false,
     this.child,
-  }) : assert(decoration != null),
-       assert(isFocused != null),
-       assert(isHovering != null),
-       assert(expands != null),
-       assert(isEmpty != null);
+  });
 
   /// The text and styles to use when decorating the child.
   ///
@@ -1933,8 +1912,9 @@ class InputDecorator extends StatefulWidget {
 }
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
-  late AnimationController _floatingLabelController;
-  late AnimationController _shakingLabelController;
+  late final AnimationController _floatingLabelController;
+  late final Animation<double> _floatingLabelAnimation;
+  late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
   static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
   static const OrdinalSortKey _kInputSemanticsSortOrder = OrdinalSortKey(1);
@@ -1956,6 +1936,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       value: labelIsInitiallyFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
+    _floatingLabelAnimation = CurvedAnimation(
+      parent: _floatingLabelController,
+      curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
+    );
 
     _shakingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -2233,7 +2218,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget container = _BorderContainer(
       border: border,
       gap: _borderGap,
-      gapAnimation: _floatingLabelController.view,
+      gapAnimation: _floatingLabelAnimation,
       fillColor: _getFillColor(themeData, defaults),
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
@@ -2433,7 +2418,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelAlignment: decoration.floatingLabelAlignment!,
-        floatingLabelProgress: _floatingLabelController.value,
+        floatingLabelProgress: _floatingLabelAnimation.value,
         border: border,
         borderGap: _borderGap,
         alignLabelWithHint: decoration.alignLabelWithHint ?? false,
@@ -2608,8 +2593,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-  }) : assert(enabled != null),
-       assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
+  }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
 
@@ -2630,8 +2614,7 @@ class InputDecoration {
     this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
-  }) : assert(enabled != null),
-       icon = null,
+  }) : icon = null,
        iconColor = null,
        label = null,
        labelText = null,
@@ -3846,11 +3829,7 @@ class InputDecorationTheme with Diagnosticable {
     this.border,
     this.alignLabelWithHint = false,
     this.constraints,
-  }) : assert(isDense != null),
-       assert(isCollapsed != null),
-       assert(floatingLabelAlignment != null),
-       assert(filled != null),
-       assert(alignLabelWithHint != null);
+  });
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
   final TextStyle? labelStyle;
@@ -4546,7 +4525,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_152
 
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)

@@ -25,10 +25,8 @@ void main() {
         MediaQuery(
           data: mediaQuery,
           child: const DisplayFeatureSubScreen(
-            child: SizedBox(
+            child: SizedBox.expand(
               key: childKey,
-              width: double.infinity,
-              height: double.infinity,
             ),
           ),
         ),
@@ -56,10 +54,8 @@ void main() {
           data: mediaQuery,
           child: const DisplayFeatureSubScreen(
             anchorPoint: Offset(600, 300),
-            child: SizedBox(
+            child: SizedBox.expand(
               key: childKey,
-              width: double.infinity,
-              height: double.infinity,
             ),
           ),
         ),
@@ -89,10 +85,8 @@ void main() {
           data: mediaQuery,
           child: const DisplayFeatureSubScreen(
             anchorPoint: Offset.infinite,
-            child: SizedBox(
+            child: SizedBox.expand(
               key: childKey,
-              width: double.infinity,
-              height: double.infinity,
             ),
           ),
         ),
@@ -122,10 +116,8 @@ void main() {
           data: mediaQuery,
           child: const DisplayFeatureSubScreen(
             anchorPoint: Offset(1000, 1000),
-            child: SizedBox(
+            child: SizedBox.expand(
               key: childKey,
-              width: double.infinity,
-              height: double.infinity,
             ),
           ),
         ),
@@ -159,10 +151,8 @@ void main() {
           data: mediaQuery,
           child: const DisplayFeatureSubScreen(
             anchorPoint: Offset(1000, 1000),
-            child: SizedBox(
+            child: SizedBox.expand(
               key: childKey,
-              width: double.infinity,
-              height: double.infinity,
             ),
           ),
         ),
@@ -204,10 +194,8 @@ void main() {
           child: const Directionality(
             textDirection: TextDirection.ltr,
             child: DisplayFeatureSubScreen(
-              child: SizedBox(
+              child: SizedBox.expand(
                 key: childKey,
-                width: double.infinity,
-                height: double.infinity,
               ),
             ),
           ),
@@ -238,10 +226,8 @@ void main() {
           data: mediaQuery,
           child: const DisplayFeatureSubScreen(
             anchorPoint: Offset(1000, 1000),
-            child: SizedBox(
+            child: SizedBox.expand(
               key: childKey,
-              width: double.infinity,
-              height: double.infinity,
             ),
           ),
         ),

@@ -51,7 +51,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
       countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
     }
-    assert(codes[0] != null && codes[0].isNotEmpty);
+    assert(codes[0].isNotEmpty);
     assert(countryCode == null || countryCode.isNotEmpty);
     assert(scriptCode == null || scriptCode.isNotEmpty);
 
@@ -297,7 +297,8 @@ String generateString(String value) {
 
 /// Given a list of strings, placeholders, or helper function calls, concatenate
 /// them into one expression to be returned.
-/// If isSingleStringVar is passed, then we want to convert "'$expr'" to simply "expr".
+///
+/// If `isSingleStringVar` is passed, then we want to convert "'$expr'" to "expr".
 String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
   if (expressions.isEmpty) {
     return "''";
@@ -339,7 +340,7 @@ class LocalizationOptions {
     this.format = false,
     this.useEscaping = false,
     this.suppressWarnings = false,
-  }) : assert(useSyntheticPackage != null);
+  });
 
   /// The `--arb-dir` argument.
   ///

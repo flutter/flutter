@@ -78,7 +78,7 @@ class _NestedTabBarContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.blue,
       child: Column(
         children: <Widget>[
@@ -704,7 +704,7 @@ void main() {
     }
     // End the fling by reversing direction. This should cause not cause
     // a change to the selected tab, everything should just settle back to
-    // to where it started.
+    // where it started.
     for (int index = 0; index > 50; index += 1) {
       await gesture.moveBy(const Offset(10.0, 0.0));
       await tester.pump(const Duration(milliseconds: 1));

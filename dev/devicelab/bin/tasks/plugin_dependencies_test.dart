@@ -216,6 +216,10 @@ public class DummyPluginAClass {
       const String kExpectedPluginsDependenciesContent =
         '['
           '{'
+            '"name":"integration_test",'
+            '"dependencies":[]'
+          '},'
+          '{'
             '"name":"plugin_a",'
             '"dependencies":["plugin_b","plugin_c","plugin_d"]'
           '},'
@@ -280,6 +284,7 @@ public class DummyPluginAClass {
             options: <String>[
               'ios',
               '--no-codesign',
+              '--verbose',
             ],
           );
         });

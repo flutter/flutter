@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Timeout(Duration(seconds: 600))
+library;
 
 import 'dart:io';
 import 'package:file/file.dart';
@@ -21,9 +22,7 @@ class MigrateProject extends Project {
   }) async {
     this.dir = dir;
     _appPath = dir.path;
-    if (androidLocalProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
-    }
+    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
     final Directory depotToolsDir = createResolvedTempDirectorySync('depot_tools.');
 

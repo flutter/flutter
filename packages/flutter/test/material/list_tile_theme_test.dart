@@ -378,8 +378,8 @@ void main() {
     "ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      listTileTheme: const ListTileThemeData(
+        useMaterial3: true,
+        listTileTheme: const ListTileThemeData(
         titleTextStyle: TextStyle(fontSize: 20.0),
         subtitleTextStyle: TextStyle(fontSize: 17.5),
         leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
@@ -396,7 +396,7 @@ void main() {
                 return const ListTile(
                   leading: TestText('leading'),
                   title: TestText('title'),
-                  subtitle: TestText('subtitle') ,
+                  subtitle: TestText('subtitle'),
                   trailing: TestText('trailing'),
                 );
               },
@@ -446,7 +446,7 @@ void main() {
                   leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
                   leading: TestText('leading'),
                   title: TestText('title'),
-                  subtitle: TestText('subtitle') ,
+                  subtitle: TestText('subtitle'),
                   trailing: TestText('trailing'),
                 );
               },
@@ -595,11 +595,9 @@ void main() {
           if (states.contains(MaterialState.disabled)) {
             return disabledColor;
           }
-
           if (states.contains(MaterialState.selected)) {
             return selectedColor;
           }
-
           return defaultColor;
         }),
       ),
@@ -658,11 +656,9 @@ void main() {
           if (states.contains(MaterialState.disabled)) {
             return disabledColor;
           }
-
           if (states.contains(MaterialState.selected)) {
             return selectedColor;
           }
-
           return defaultColor;
         }),
       ),

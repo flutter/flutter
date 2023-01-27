@@ -93,6 +93,27 @@ void main() {
     flutter.childFile('pubspec.yaml').writeAsStringSync(kFlutterPubspecYaml);
   });
 
+  testWithoutContext('kManuallyPinnedDependencies pins are actually pins', () {
+    expect(
+      kManuallyPinnedDependencies.values,
+      isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
+      reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
+    );
+    expect(
+      kManuallyPinnedDependencies.keys,
+      unorderedEquals(const <String>[
+        'flutter_gallery_assets',
+        'flutter_template_images',
+        'video_player',
+        'material_color_utilities',
+        'url_launcher_android',
+        'archive',
+        'path_provider_android',
+        'intl',
+      ]),
+    );
+  });
+
   testWithoutContext(
       'createTemporaryFlutterSdk creates an unpinned flutter SDK', () {
     // A stray extra package should not cause a crash.
