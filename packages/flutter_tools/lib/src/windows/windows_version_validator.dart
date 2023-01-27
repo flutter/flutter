@@ -14,7 +14,7 @@ const List<String> kUnsupportedVersions = <String>[
 
 /// Regex pattern for identifying line from systeminfo stdout with windows version
 /// (ie. 10.5.4123)
-const String kWindowsOSVersionSemVerPattern = r'([0-9]*)\.([0-9]*)\.([0-9\.]*)';
+const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9\.]+)';
 
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
