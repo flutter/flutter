@@ -84,13 +84,15 @@ void main() {
       {"test":{"id":6,"name":"generateMetrics missing success entry","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":60,"column":5,"url":"file:///Users/user/Documents/flutter/dev/bots/test/tool_subsharding_test.dart"},"type":"testStart","time":1103}
       {"testID":6,"error":"Expected: <false>  Actual: <true>","stackTrace":"package:test_api                      expect test/tool_subsharding_test.dart 68:7  main.<fn>.<fn> ","isFailure":true,"type":"error","time":1107}
       {"testID":6,"result":"failure","skipped":false,"hidden":false,"type":"testDone","time":1107}
+      {"testID":6,"error":"my error","isFailure":true,"type":"error","time":1107}
       {"success":false,"type":"done","time":1120}''';
       file.writeAsStringSync(output);
       final TestFileReporterResults result = TestFileReporterResults.fromFile(file);
       expect(result.hasFailedTests, true);
-      expect(result.errors.length == 2, true);
+      expect(result.errors.length == 3, true);
       expect(result.errors[0].contains('Expected: <true>  Actual: <false>'), true);
       expect(result.errors[1].contains('Expected: <false>  Actual: <true>'), true);
+      expect(result.errors[2].contains('my error'), true);
     });
   });
 }

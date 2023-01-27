@@ -55,7 +55,7 @@ class TestFileReporterResults {
     bool hasFailedTests = true;
     final List<String> errors = <String>[];
 
-    for(final String metric in metrics.readAsLinesSync()) {
+    for (final String metric in metrics.readAsLinesSync()) {
       final Map<String, Object?> entry = json.decode(metric) as Map<String, Object?>;
       if (entry.containsKey('suite')) {
         final Map<String, Object?> suite = entry['suite']! as Map<String, Object?>;
@@ -64,8 +64,9 @@ class TestFileReporterResults {
         final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
         final int suiteID = group['suiteID']! as int;
         addMetricDone(suiteID, entry['time']! as int, testSpecs);
-      } else if (entry.containsKey('error') && entry.containsKey('stackTrace')) {
-        errors.add('${entry['error']}\n ${entry['stackTrace']}');
+      } else if (entry.containsKey('error')) {
+        final String stackTrace = entry.containsKey('stackTrace') ? entry['stackTrace']! as String : '';
+        errors.add('${entry['error']}\n $stackTrace');
       } else if (entry.containsKey('success') && entry['success'] == true) {
         hasFailedTests = false;
       }
