@@ -73,7 +73,6 @@ bool Main(const fml::CommandLine& command_line) {
       switches.source_file_name, options.type, options.source_language,
       switches.entry_point);
   options.json_format = switches.json_format;
-  options.remap_samplers = switches.remap_samplers;
   options.gles_language_version = switches.gles_language_version;
 
   Reflector::Options reflector_options;
