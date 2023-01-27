@@ -940,7 +940,7 @@ void main() {
   });
 
   testWidgets(
-    'Table widget requires all TableRows to have non-null children',
+    'Table widget requires all TableRows to have same number of children',
     (WidgetTester tester) async {
       FlutterError? error;
       try {
@@ -959,7 +959,7 @@ void main() {
         error = e;
       } finally {
         expect(error, isNotNull);
-        expect(error!.toStringDeep(), contains('The children property of TableRow must not be null.'));
+        expect(error!.toStringDeep(), contains('Table contains irregular row lengths.'));
       }
     },
   );
