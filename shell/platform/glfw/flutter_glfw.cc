@@ -673,12 +673,12 @@ UniqueAotDataPtr LoadAotData(const std::filesystem::path& aot_data_path) {
         << std::endl;
     return nullptr;
   }
+  std::string path_string = aot_data_path.string();
   if (!std::filesystem::exists(aot_data_path)) {
-    std::cerr << "Can't load AOT data from " << aot_data_path.string()
-              << "; no such file." << std::endl;
+    std::cerr << "Can't load AOT data from " << path_string << "; no such file."
+              << std::endl;
     return nullptr;
   }
-  std::string path_string = aot_data_path.u8string();
   FlutterEngineAOTDataSource source = {};
   source.type = kFlutterEngineAOTDataSourceTypeElfPath;
   source.elf_path = path_string.c_str();
@@ -757,8 +757,8 @@ static bool RunFlutterEngine(
   }
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = assets_path.c_str();
-  args.icu_data_path = icu_path.c_str();
+  args.assets_path = assets_path.string().c_str();
+  args.icu_data_path = icu_path.string().c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = &argv[0];
   args.platform_message_callback = EngineOnFlutterPlatformMessage;
