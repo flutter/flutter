@@ -1724,18 +1724,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    Widget child = Localizations(
-      locale: appLocale,
-      delegates: _localizationsDelegates.toList(),
-      child: title,
-    );
-
-    if (!widget.useInheritedMediaQuery || MediaQuery.maybeOf(context) == null) {
-      child = MediaQuery.fromWindow(
-        child: child,
-      );
-    }
-
     return RootRestorationScope(
       restorationId: widget.restorationScopeId,
       child: SharedAppData(
@@ -1754,7 +1742,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                 policy: ReadingOrderTraversalPolicy(),
                 child: TapRegionSurface(
                   child: ShortcutRegistrar(
-                    child: child,
+                    child: Localizations(
+                      locale: appLocale,
+                      delegates: _localizationsDelegates.toList(),
+                      child: title,
+                    ),
                   ),
                 ),
               ),
