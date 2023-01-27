@@ -7,8 +7,13 @@
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
-readonly buffer ColorData {
-  vec4 colors[];
+struct ColorPoint {
+  vec4 color;
+  float stop;
+};
+
+layout(std140) readonly buffer ColorData {
+  ColorPoint colors[];
 }
 color_data;
 
@@ -37,10 +42,22 @@ void main() {
     return;
   }
   t = IPFloatTile(t, gradient_info.tile_mode);
-  vec3 values = IPComputeFixedGradientValues(t, gradient_info.colors_length);
 
-  frag_color = mix(color_data.colors[int(values.x)],
-                   color_data.colors[int(values.y)], values.z);
-  frag_color =
-      vec4(frag_color.xyz * frag_color.a, frag_color.a) * gradient_info.alpha;
+  vec4 result_color = vec4(0);
+  for (int i = 1; i < gradient_info.colors_length; i++) {
+    ColorPoint prev_point = color_data.colors[i - 1];
+    ColorPoint current_point = color_data.colors[i];
+    if (t >= prev_point.stop && t <= current_point.stop) {
+      float delta = (current_point.stop - prev_point.stop);
+      if (delta < 0.001) {
+        result_color = current_point.color;
+      } else {
+        float ratio = (t - prev_point.stop) / delta;
+        result_color = mix(prev_point.color, current_point.color, ratio);
+      }
+      break;
+    }
+  }
+  frag_color = vec4(result_color.xyz * result_color.a, result_color.a) *
+               gradient_info.alpha;
 }
