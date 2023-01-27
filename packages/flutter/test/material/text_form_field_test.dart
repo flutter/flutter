@@ -1171,7 +1171,7 @@ void main() {
   });
 
   testWidgets('Error color for cursor while validation', (WidgetTester tester) async {
-    const  Color errorColor = Color(0xff123456);
+    const Color errorColor = Color(0xff123456);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1191,7 +1191,7 @@ void main() {
       ),
     );
     await tester.enterText(find.byType(TextField), 'a');
-    final EditableText textField =  tester.widget(find.byType(EditableText).first);
+    final EditableText textField = tester.widget(find.byType(EditableText).first);
     await tester.pump();
     expect(textField.cursorColor, errorColor);
   });
