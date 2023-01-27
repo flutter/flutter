@@ -1170,14 +1170,13 @@ void main() {
     expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
   });
 
-
-    testWidgets('Error color for cursor while validation', (WidgetTester tester) async {
-
+  testWidgets('Error color for cursor while validation', (WidgetTester tester) async {
     const  Color errorColor = Color(0xff123456);
-
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(colorScheme:  const ColorScheme.light(error: errorColor)),
+        theme: ThemeData(
+          colorScheme: const ColorScheme.light(error: errorColor)
+        ),
         home: Material(
           child: Center(
             child: TextFormField(
@@ -1195,6 +1194,5 @@ void main() {
     final EditableText textField =  tester.widget(find.byType(EditableText).first);
     await tester.pump();
     expect(textField.cursorColor, errorColor);
-
   });
 }
