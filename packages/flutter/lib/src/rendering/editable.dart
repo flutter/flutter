@@ -808,7 +808,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Returns the line metrics for the text in [TextPainter].
   /// See [TextPainter.computeLineMetrics].
-  List<ui.LineMetrics> get lineMetrics => _textPainter.computeLineMetrics()
+  List<ui.LineMetrics> get lineMetrics => _textPainter.computeLineMetrics();
 
   /// The text to paint in the form of a tree of [InlineSpan]s.
   ///
