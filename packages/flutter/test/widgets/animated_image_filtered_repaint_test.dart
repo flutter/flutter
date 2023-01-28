@@ -33,7 +33,8 @@ void main() {
       )
     );
 
-    expect(RenderTestObject.paintCount, 1);
+    // Functionality was reverted due to https://github.com/flutter/flutter/issues/119414
+    expect(RenderTestObject.paintCount, 2);
   });
 }
 

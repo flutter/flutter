@@ -101,7 +101,6 @@ class _ImageFilterRenderObject extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(imageFilter != null);
     if (!enabled) {
       layer = null;
       return super.paint(context, offset);
