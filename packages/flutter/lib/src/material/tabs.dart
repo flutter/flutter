@@ -1061,7 +1061,7 @@ class _TabBarState extends State<TabBar> {
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
-      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? defaults.dividerColor : null,
+      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? tabBarTheme.dividerColor ?? defaults.dividerColor : null,
       labelPaddings: _labelPaddings,
     );
   }
