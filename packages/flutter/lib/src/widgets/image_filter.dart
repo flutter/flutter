@@ -99,13 +99,24 @@ class _ImageFilterRenderObject extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null && enabled;
 
-   @override
-  bool get isRepaintBoundary => alwaysNeedsCompositing;
-
   @override
-  OffsetLayer updateCompositedLayer({required covariant ImageFilterLayer? oldLayer}) {
-    final ImageFilterLayer layer = oldLayer ?? ImageFilterLayer();
-    layer.imageFilter = imageFilter;
-    return layer;
+  void paint(PaintingContext context, Offset offset) {
+    assert(imageFilter != null);
+    if (!enabled) {
+      layer = null;
+      return super.paint(context, offset);
+    }
+
+    if (layer == null) {
+      layer = ImageFilterLayer(imageFilter: imageFilter);
+    } else {
+      final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
+      filterLayer.imageFilter = imageFilter;
+    }
+    context.pushLayer(layer!, super.paint, offset);
+    assert(() {
+      layer!.debugCreator = debugCreator;
+      return true;
+    }());
   }
 }
