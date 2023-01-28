@@ -101,6 +101,26 @@ void main() {
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 
+  test('Can lerp between different typographies', () {
+    final List<Typography> all = <Typography>[
+      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2014(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2018(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2021(platform: platform),
+    ];
+
+    for (final Typography fromTypography in all) {
+      for (final Typography toTypegraphy in all) {
+        Object? error;
+        try {
+          Typography.lerp(fromTypography, toTypegraphy, 0.5);
+        } catch (e) {
+          error = e;
+        }
+        expect(error, isNull);
+      }
+    }
+  });
+
   test('englishLike2018 TextTheme matches Material Design spec', () {
     // Check the default material text theme against the style values
     // shown https://material.io/design/typography/#type-scale.
@@ -342,5 +362,47 @@ void main() {
     expect(theme.bodySmall!.height, 1.33);
     expect(theme.bodySmall!.textBaseline, TextBaseline.alphabetic);
     expect(theme.bodySmall!.leadingDistribution, TextLeadingDistribution.even);
+  });
+
+  test('Default M3 light textTheme styles all use onSurface', () {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final TextTheme textTheme = theme.textTheme;
+    final Color dark = theme.colorScheme.onSurface;
+    expect(textTheme.displayLarge!.color, dark);
+    expect(textTheme.displayMedium!.color, dark);
+    expect(textTheme.displaySmall!.color, dark);
+    expect(textTheme.headlineLarge!.color, dark);
+    expect(textTheme.headlineMedium!.color, dark);
+    expect(textTheme.headlineSmall!.color, dark);
+    expect(textTheme.titleLarge!.color, dark);
+    expect(textTheme.titleMedium!.color, dark);
+    expect(textTheme.titleSmall!.color, dark);
+    expect(textTheme.bodyLarge!.color, dark);
+    expect(textTheme.bodyMedium!.color, dark);
+    expect(textTheme.bodySmall!.color, dark);
+    expect(textTheme.labelLarge!.color, dark);
+    expect(textTheme.labelMedium!.color, dark);
+    expect(textTheme.labelSmall!.color, dark);
+  });
+
+  test('Default M3 dark textTheme styles all use onSurface', () {
+    final ThemeData theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+    final TextTheme textTheme = theme.textTheme;
+    final Color light = theme.colorScheme.onSurface;
+    expect(textTheme.displayLarge!.color, light);
+    expect(textTheme.displayMedium!.color, light);
+    expect(textTheme.displaySmall!.color, light);
+    expect(textTheme.headlineLarge!.color, light);
+    expect(textTheme.headlineMedium!.color, light);
+    expect(textTheme.headlineSmall!.color, light);
+    expect(textTheme.titleLarge!.color, light);
+    expect(textTheme.titleMedium!.color, light);
+    expect(textTheme.titleSmall!.color, light);
+    expect(textTheme.bodyLarge!.color, light);
+    expect(textTheme.bodyMedium!.color, light);
+    expect(textTheme.bodySmall!.color, light);
+    expect(textTheme.labelLarge!.color, light);
+    expect(textTheme.labelMedium!.color, light);
+    expect(textTheme.labelSmall!.color, light);
   });
 }

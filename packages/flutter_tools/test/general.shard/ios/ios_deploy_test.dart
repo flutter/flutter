@@ -258,11 +258,26 @@ void main () {
         expect(logger.errorText, contains('No Provisioning Profile was found'));
       });
 
-      testWithoutContext('device locked', () async {
+      testWithoutContext('device locked code', () async {
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>['ios-deploy'],
             stdout: 'e80000e2',
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        await iosDeployDebugger.launchAndAttach();
+        expect(logger.errorText, contains('Your device is locked.'));
+      });
+
+      testWithoutContext('device locked message', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['ios-deploy'],
+            stdout: '[  +95 ms] error: The operation couldn’t be completed. Unable to launch io.flutter.examples.gallery because the device was not, or could not be, unlocked.',
           ),
         ]);
         final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(

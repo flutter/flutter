@@ -58,12 +58,12 @@ void main() {
     final RegExp androidPluginRegExp =
         RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
-    // Use AGP 4.1.0
+    // Use AGP 7.2.0
     final String newBuildGradle = buildGradle.replaceAll(
-        androidPluginRegExp, 'com.android.tools.build:gradle:4.1.0');
+        androidPluginRegExp, 'com.android.tools.build:gradle:7.2.0');
     buildGradleFile.writeAsStringSync(newBuildGradle);
 
-    // Run flutter build apk using AGP 4.1.0
+    // Run flutter build apk using AGP 7.2.0
     result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),

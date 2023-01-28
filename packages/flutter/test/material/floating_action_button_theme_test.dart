@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -287,6 +288,7 @@ void main() {
       extendedIconLabelSpacing: 12,
       extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
       extendedTextStyle: TextStyle(letterSpacing: 2.0),
+      mouseCursor: MaterialStateMouseCursor.clickable,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -305,7 +307,7 @@ void main() {
       'hoverElevation: 10.0',
       'disabledElevation: 11.0',
       'highlightElevation: 43.0',
-      'shape: BeveledRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+      'shape: BeveledRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
       'enableFeedback: true',
       'iconSize: 42.0',
       'sizeConstraints: BoxConstraints(w=100.0, h=100.0)',
@@ -315,7 +317,32 @@ void main() {
       'extendedIconLabelSpacing: 12.0',
       'extendedPadding: EdgeInsetsDirectional(7.0, 0.0, 8.0, 0.0)',
       'extendedTextStyle: TextStyle(inherit: true, letterSpacing: 2.0)',
+      'mouseCursor: MaterialStateMouseCursor(clickable)',
     ]);
+  });
+
+  testWidgets('FloatingActionButton.mouseCursor uses FloatingActionButtonThemeData.mouseCursor when specified.', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData().copyWith(
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          mouseCursor: MaterialStateProperty.all(SystemMouseCursors.text),
+        ),
+      ),
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () { },
+          child: const Icon(Icons.add),
+        ),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 }
 

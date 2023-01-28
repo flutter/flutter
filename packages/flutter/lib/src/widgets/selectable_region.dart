@@ -9,18 +9,28 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'context_menu_button_item.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'magnifier.dart';
 import 'media_query.dart';
 import 'overlay.dart';
+import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
+import 'text_selection_toolbar_anchors.dart';
+
+// Examples can assume:
+// FocusNode _focusNode = FocusNode();
+// late GlobalKey key;
 
 const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.touch,
@@ -30,12 +40,21 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 
 /// A widget that introduces an area for user selections.
 ///
-/// Flutter widgets are not selectable by default. To enable selection for
-/// a Flutter application, consider wrapping a portion of widget subtree with
-/// [SelectableRegion]. The wrapped subtree can be selected by users using mouse
-/// or touch gestures, e.g. users can select widgets by holding the mouse
+/// Flutter widgets are not selectable by default. Wrapping a widget subtree
+/// with a [SelectableRegion] widget enables selection within that subtree (for
+/// example, [Text] widgets automatically look for selectable regions to enable
+/// selection). The wrapped subtree can be selected by users using mouse or
+/// touch gestures, e.g. users can select widgets by holding the mouse
 /// left-click and dragging across widgets, or they can use long press gestures
 /// to select words on touch devices.
+///
+/// A [SelectableRegion] widget requires configuration; in particular specific
+/// [selectionControls] must be provided.
+///
+/// The [SelectionArea] widget from the [material] library configures a
+/// [SelectableRegion] in a platform-specific manner (e.g. using a Material
+/// toolbar on Android, a Cupertino toolbar on iOS), and it may therefore be
+/// simpler to use that widget rather than using [SelectableRegion] directly.
 ///
 /// ## An overview of the selection system.
 ///
@@ -73,7 +92,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// MaterialApp(
 ///   home: SelectableRegion(
 ///     selectionControls: materialTextSelectionControls,
-///     focusNode: FocusNode(),
+///     focusNode: _focusNode, // initialized to FocusNode()
 ///     child: Scaffold(
 ///       appBar: AppBar(title: const Text('Flutter Code Sample')),
 ///       body: ListView(
@@ -88,7 +107,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// ```
 /// {@end-tool}
 ///
-/// ```
 ///
 ///               SelectionContainer
 ///               (SelectableRegion)
@@ -106,7 +124,6 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 ///                     Selectable        Selectable
 ///                     ("Item 0")         ("Item 1")
 ///
-///```
 ///
 /// ## Making a widget selectable
 ///
@@ -127,7 +144,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// This sample demonstrates how to create an adapter widget that makes any
 /// child widget selectable.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_selectable.dart **
+/// ** See code in examples/api/lib/material/selectable_region/selectable_region.0.dart **
 /// {@end-tool}
 ///
 /// ## Complex layout
@@ -140,7 +157,7 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_area/custom_container.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// In the case where a group of widgets should be excluded from selection under
@@ -150,13 +167,23 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// To create a separate selection system from its parent selection area,
 /// wrap part of the subtree with another [SelectableRegion]. The selection of the
 /// child selection area can not extend past its subtree, and the selection of
 /// the parent selection area can not extend inside the child selection area.
+///
+/// ## Tests
+///
+/// In a test, a region can be selected either by faking drag events (e.g. using
+/// [WidgetTester.dragFrom]) or by sending intents to a widget inside the region
+/// that has been given a [GlobalKey], e.g.:
+///
+/// ```dart
+/// Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
+/// ```
 ///
 /// See also:
 ///  * [SelectionArea], which creates a [SelectableRegion] with
@@ -175,10 +202,22 @@ class SelectableRegion extends StatefulWidget {
   /// toolbar for mobile devices.
   const SelectableRegion({
     super.key,
+    this.contextMenuBuilder,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.onSelectionChanged,
   });
+
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// By default, [SelectableRegion]'s [TextMagnifierConfiguration] is disabled.
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
@@ -188,19 +227,80 @@ class SelectableRegion extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  final SelectableRegionContextMenuBuilder? contextMenuBuilder;
+
   /// The delegate to build the selection handles and toolbar for mobile
   /// devices.
+  ///
+  /// The [emptyTextSelectionControls] global variable provides a default
+  /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
 
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
+  /// platform's default selection menu.
+  ///
+  /// For example, [SelectableRegion] uses this to generate the default buttons
+  /// for its context menu.
+  ///
+  /// See also:
+  ///
+  /// * [SelectableRegionState.contextMenuButtonItems], which gives the
+  ///   [ContextMenuButtonItem]s for a specific SelectableRegion.
+  /// * [EditableText.getEditableButtonItems], which performs a similar role but
+  ///   for content that is both selectable and editable.
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
+  ///   Widgets for the current platform given [ContextMenuButtonItem]s.
+  static List<ContextMenuButtonItem> getSelectableButtonItems({
+    required final SelectionGeometry selectionGeometry,
+    required final VoidCallback onCopy,
+    required final VoidCallback onSelectAll,
+  }) {
+    final bool canCopy = selectionGeometry.hasSelection;
+    final bool canSelectAll = selectionGeometry.hasContent;
+
+    // Determine which buttons will appear so that the order and total number is
+    // known. A button's position in the menu can slightly affect its
+    // appearance.
+    return <ContextMenuButtonItem>[
+      if (canCopy)
+        ContextMenuButtonItem(
+          onPressed: onCopy,
+          type: ContextMenuButtonType.copy,
+        ),
+      if (canSelectAll)
+        ContextMenuButtonItem(
+          onPressed: onSelectAll,
+          type: ContextMenuButtonType.selectAll,
+        ),
+    ];
+  }
+
   @override
-  State<StatefulWidget> createState() => _SelectableRegionState();
+  State<StatefulWidget> createState() => SelectableRegionState();
 }
 
-class _SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
+/// State for a [SelectableRegion].
+class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
+    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, granularity: TextGranularity.word)),
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
+    ExpandSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
+    ExtendSelectionByCharacterIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionByCharacterIntent>(this, granularity: TextGranularity.character)),
+    ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, granularity: TextGranularity.word)),
+    ExtendSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
+    ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_DirectionallyExtendCaretSelectionAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this)),
+    ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
   };
+
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
   SelectionOverlay? _selectionOverlay;
   final LayerLink _startHandleLayerLink = LayerLink();
@@ -214,6 +314,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
                                         || _selectionDelegate.value.endSelectionPoint != null;
 
   Orientation? _lastOrientation;
+  SelectedContent? _lastSelectedContent;
+
+  /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
+  Offset? lastSecondaryTapDownPosition;
 
   @override
   void initState() {
@@ -234,7 +338,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -276,7 +379,13 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleFocusChanged() {
     if (!widget.focusNode.hasFocus) {
+      if (kIsWeb) {
+        PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+      }
       _clearSelection();
+    }
+    if (kIsWeb) {
+      PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
 
@@ -345,15 +454,25 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectEndTo(offset: details.globalPosition, continuous: true);
   }
 
+  void _updateSelectedContentIfNeeded() {
+    if (_lastSelectedContent?.plainText != _selectable?.getSelectedContent()?.plainText) {
+      _lastSelectedContent = _selectable?.getSelectedContent();
+      widget.onSelectionChanged?.call(_lastSelectedContent);
+    }
+  }
+
   void _handleMouseDragEnd(DragEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
+    HapticFeedback.selectionClick();
     widget.focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
     _showToolbar();
     _showHandles();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
@@ -362,13 +481,16 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
     _finalizeSelection();
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleRightClickDown(TapDownDetails details) {
+    lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
     _showHandles();
     _showToolbar(location: details.globalPosition);
+    _updateSelectedContentIfNeeded();
   }
 
   // Selection update helper methods.
@@ -402,7 +524,24 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       });
       return;
     }
-  }
+ }
+
+ void _onAnyDragEnd(DragEndDetails details) {
+   if (widget.selectionControls is! TextSelectionHandleControls) {
+    _selectionOverlay!.hideMagnifier();
+    _selectionOverlay!.showToolbar();
+   } else {
+     _selectionOverlay!.hideMagnifier();
+     _selectionOverlay!.showToolbar(
+       contextMenuBuilder: (BuildContext context) {
+         return widget.contextMenuBuilder!(context, this);
+       },
+     );
+   }
+  _stopSelectionStartEdgeUpdate();
+  _stopSelectionEndEdgeUpdate();
+  _updateSelectedContentIfNeeded();
+ }
 
   void _stopSelectionEndEdgeUpdate() {
     _scheduledSelectionEndEdgeUpdate = false;
@@ -452,9 +591,15 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     assert(_selectionDelegate.value.startSelectionPoint != null);
+
     final Offset localPosition = _selectionDelegate.value.startSelectionPoint!.localPosition;
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionStartHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
+
+    _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.startSelectionPoint!,
+    ));
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -463,6 +608,11 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // Offset it to the center of the line to make it feel more natural.
     _selectionStartPosition = _selectionStartHandleDragPosition - Offset(0, _selectionDelegate.value.startSelectionPoint!.lineHeight / 2);
     _triggerSelectionStartEdgeUpdate();
+
+    _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.startSelectionPoint!,
+    ));
   }
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
@@ -470,6 +620,11 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     final Offset localPosition = _selectionDelegate.value.endSelectionPoint!.localPosition;
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionEndHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
+
+    _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.endSelectionPoint!,
+    ));
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
@@ -478,6 +633,30 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     // Offset it to the center of the line to make it feel more natural.
     _selectionEndPosition = _selectionEndHandleDragPosition - Offset(0, _selectionDelegate.value.endSelectionPoint!.lineHeight / 2);
     _triggerSelectionEndEdgeUpdate();
+
+    _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
+      details.globalPosition,
+      _selectionDelegate.value.endSelectionPoint!,
+    ));
+  }
+
+  MagnifierInfo _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
+      final Vector3 globalTransform = _selectable!.getTransformTo(null).getTranslation();
+      final Offset globalTransformAsOffset = Offset(globalTransform.x, globalTransform.y);
+      final Offset globalSelectionPointPosition = selectionPoint.localPosition + globalTransformAsOffset;
+      final Rect caretRect = Rect.fromLTWH(
+        globalSelectionPointPosition.dx,
+        globalSelectionPointPosition.dy - selectionPoint.lineHeight,
+        0,
+        selectionPoint.lineHeight
+      );
+
+      return MagnifierInfo(
+        globalGesturePosition: globalGesturePosition,
+        caretRect: caretRect,
+        fieldBounds: globalTransformAsOffset & _selectable!.size,
+        currentLineBoundaries: globalTransformAsOffset & _selectable!.size,
+      );
   }
 
   void _createSelectionOverlay() {
@@ -487,20 +666,6 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     }
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
-    late List<TextSelectionPoint> points;
-    final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
-    final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
-    if (startLocalPosition.dy > endLocalPosition.dy) {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-      ];
-    } else {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-      ];
-    }
     _selectionOverlay = SelectionOverlay(
       context: context,
       debugRequiredFor: widget,
@@ -508,19 +673,20 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       lineHeightAtStart: start?.lineHeight ?? end!.lineHeight,
       onStartHandleDragStart: _handleSelectionStartHandleDragStart,
       onStartHandleDragUpdate: _handleSelectionStartHandleDragUpdate,
-      onStartHandleDragEnd: (DragEndDetails details) => _stopSelectionStartEdgeUpdate(),
+      onStartHandleDragEnd: _onAnyDragEnd,
       endHandleType: end?.handleType ?? TextSelectionHandleType.right,
       lineHeightAtEnd: end?.lineHeight ?? start!.lineHeight,
       onEndHandleDragStart: _handleSelectionEndHandleDragStart,
       onEndHandleDragUpdate: _handleSelectionEndHandleDragUpdate,
-      onEndHandleDragEnd: (DragEndDetails details) => _stopSelectionEndEdgeUpdate(),
-      selectionEndpoints: points,
+      onEndHandleDragEnd: _onAnyDragEnd,
+      selectionEndpoints: selectionEndpoints,
       selectionControls: widget.selectionControls,
       selectionDelegate: this,
       clipboardStatus: null,
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
       toolbarLayerLink: _toolbarLayerLink,
+      magnifierConfiguration: widget.magnifierConfiguration
     );
   }
 
@@ -531,26 +697,12 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     assert(_hasSelectionOverlayGeometry);
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
-    late List<TextSelectionPoint> points;
-    final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
-    final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
-    if (startLocalPosition.dy > endLocalPosition.dy) {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-      ];
-    } else {
-      points = <TextSelectionPoint>[
-        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
-        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
-      ];
-    }
     _selectionOverlay!
       ..startHandleType = start?.handleType ?? TextSelectionHandleType.left
       ..lineHeightAtStart = start?.lineHeight ?? end!.lineHeight
       ..endHandleType = end?.handleType ?? TextSelectionHandleType.right
       ..lineHeightAtEnd = end?.lineHeight ?? start!.lineHeight
-      ..selectionEndpoints = points;
+      ..selectionEndpoints = selectionEndpoints;
   }
 
   /// Shows the selection handles.
@@ -598,7 +750,19 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     }
 
     _selectionOverlay!.toolbarLocation = location;
-    _selectionOverlay!.showToolbar();
+    if (widget.selectionControls is! TextSelectionHandleControls) {
+      _selectionOverlay!.showToolbar();
+      return true;
+    }
+
+    _selectionOverlay!.hideToolbar();
+
+    _selectionOverlay!.showToolbar(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return widget.contextMenuBuilder!(context, this);
+      },
+    );
     return true;
   }
 
@@ -710,7 +874,10 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
   /// Removes the ongoing selection.
   void _clearSelection() {
     _finalizeSelection();
+    _directionalHorizontalBaseline = null;
+    _adjustingSelectionEnd = null;
     _selectable?.dispatchSelectionEvent(const ClearSelectionEvent());
+    _updateSelectedContentIfNeeded();
   }
 
   Future<void> _copy() async {
@@ -721,11 +888,161 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     await Clipboard.setData(ClipboardData(text: data.plainText));
   }
 
+  /// {@macro flutter.widgets.EditableText.getAnchors}
+  ///
+  /// See also:
+  ///
+  ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
+  ///    for the default context menu buttons.
+  TextSelectionToolbarAnchors get contextMenuAnchors {
+    if (lastSecondaryTapDownPosition != null) {
+      return TextSelectionToolbarAnchors(
+        primaryAnchor: lastSecondaryTapDownPosition!,
+      );
+    }
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    return TextSelectionToolbarAnchors.fromSelection(
+      renderBox: renderBox,
+      startGlyphHeight: startGlyphHeight,
+      endGlyphHeight: endGlyphHeight,
+      selectionEndpoints: selectionEndpoints,
+    );
+  }
+
+  bool? _adjustingSelectionEnd;
+  bool _determineIsAdjustingSelectionEnd(bool forward) {
+    if (_adjustingSelectionEnd != null) {
+      return _adjustingSelectionEnd!;
+    }
+    final bool isReversed;
+    final SelectionPoint start = _selectionDelegate.value
+        .startSelectionPoint!;
+    final SelectionPoint end = _selectionDelegate.value.endSelectionPoint!;
+    if (start.localPosition.dy > end.localPosition.dy) {
+      isReversed = true;
+    } else if (start.localPosition.dy < end.localPosition.dy) {
+      isReversed = false;
+    } else {
+      isReversed = start.localPosition.dx > end.localPosition.dx;
+    }
+    // Always move the selection edge that increases the selection range.
+    return _adjustingSelectionEnd = forward != isReversed;
+  }
+
+  void _granularlyExtendSelection(TextGranularity granularity, bool forward) {
+    _directionalHorizontalBaseline = null;
+    if (!_selectionDelegate.value.hasSelection) {
+      return;
+    }
+    _selectable?.dispatchSelectionEvent(
+      GranularlyExtendSelectionEvent(
+        forward: forward,
+        isEnd: _determineIsAdjustingSelectionEnd(forward),
+        granularity: granularity,
+      ),
+    );
+  }
+
+  double? _directionalHorizontalBaseline;
+
+  void _directionallyExtendSelection(bool forward) {
+    if (!_selectionDelegate.value.hasSelection) {
+      return;
+    }
+    final bool adjustingSelectionExtend = _determineIsAdjustingSelectionEnd(forward);
+    final SelectionPoint baseLinePoint = adjustingSelectionExtend
+      ? _selectionDelegate.value.endSelectionPoint!
+      : _selectionDelegate.value.startSelectionPoint!;
+    _directionalHorizontalBaseline ??= baseLinePoint.localPosition.dx;
+    final Offset globalSelectionPointOffset = MatrixUtils.transformPoint(context.findRenderObject()!.getTransformTo(null), Offset(_directionalHorizontalBaseline!, 0));
+    _selectable?.dispatchSelectionEvent(
+      DirectionallyExtendSelectionEvent(
+        isEnd: _adjustingSelectionEnd!,
+        direction: forward ? SelectionExtendDirection.nextLine : SelectionExtendDirection.previousLine,
+        dx: globalSelectionPointOffset.dx,
+      ),
+    );
+  }
+
   // [TextSelectionDelegate] overrides.
 
+  /// Returns the [ContextMenuButtonItem]s representing the buttons in this
+  /// platform's default selection menu.
+  ///
+  /// See also:
+  ///
+  /// * [SelectableRegion.getSelectableButtonItems], which performs a similar role,
+  ///   but for any selectable text, not just specifically SelectableRegion.
+  /// * [EditableTextState.contextMenuButtonItems], which peforms a similar role
+  ///   but for content that is not just selectable but also editable.
+  /// * [contextMenuAnchors], which provides the anchor points for the default
+  ///   context menu.
+  /// * [AdaptiveTextSelectionToolbar], which builds the toolbar itself, and can
+  ///   take a list of [ContextMenuButtonItem]s with
+  ///   [AdaptiveTextSelectionToolbar.buttonItems].
+  /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the
+  ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
+  List<ContextMenuButtonItem> get contextMenuButtonItems {
+    return SelectableRegion.getSelectableButtonItems(
+      selectionGeometry: _selectionDelegate.value,
+      onCopy: () {
+        _copy();
+        hideToolbar();
+      },
+      onSelectAll: () {
+        selectAll();
+        hideToolbar();
+      },
+    );
+  }
+
+  /// The line height at the start of the current selection.
+  double get startGlyphHeight {
+    return _selectionDelegate.value.startSelectionPoint!.lineHeight;
+  }
+
+  /// The line height at the end of the current selection.
+  double get endGlyphHeight {
+    return _selectionDelegate.value.endSelectionPoint!.lineHeight;
+  }
+
+  /// Returns the local coordinates of the endpoints of the current selection.
+  List<TextSelectionPoint> get selectionEndpoints {
+    final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
+    final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
+    late List<TextSelectionPoint> points;
+    final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
+    final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
+    if (startLocalPosition.dy > endLocalPosition.dy) {
+      points = <TextSelectionPoint>[
+        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
+        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
+      ];
+    } else {
+      points = <TextSelectionPoint>[
+        TextSelectionPoint(startLocalPosition, TextDirection.ltr),
+        TextSelectionPoint(endLocalPosition, TextDirection.ltr),
+      ];
+    }
+    return points;
+  }
+
+  // [TextSelectionDelegate] overrides.
+  // TODO(justinmc): After deprecations have been removed, remove
+  // TextSelectionDelegate from this class.
+  // https://github.com/flutter/flutter/issues/111213
+
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   bool get cutEnabled => false;
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   bool get pasteEnabled => false;
 
@@ -745,30 +1062,53 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
       _showToolbar();
       _showHandles();
     }
+    _updateSelectedContentIfNeeded();
   }
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   void copySelection(SelectionChangedCause cause) {
     _copy();
     _clearSelection();
   }
 
-  // TODO(chunhtai): remove this workaround after decoupling text selection
-  // from text editing in TextSelectionDelegate.
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   TextEditingValue textEditingValue = const TextEditingValue(text: '_');
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   void bringIntoView(TextPosition position) {/* SelectableRegion must be in view at this point. */}
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   void cutSelection(SelectionChangedCause cause) {
     assert(false);
   }
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {/* SelectableRegion maintains its own state */}
 
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
     assert(false);
@@ -797,6 +1137,9 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
     _selectionDelegate.dispose();
+    // In case dispose was triggered before gesture end, remove the magnifier
+    // so it doesn't remain stuck in the overlay forever.
+    _selectionOverlay?.hideMagnifier();
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     super.dispose();
@@ -804,7 +1147,17 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(debugCheckHasOverlay(context));
+    Widget result = SelectionContainer(
+      registrar: this,
+      delegate: _selectionDelegate,
+      child: widget.child,
+    );
+    if (kIsWeb) {
+      result = PlatformSelectableRegionContextMenu(
+        child: result,
+      );
+    }
     return CompositedTransformTarget(
       link: _toolbarLayerLink,
       child: RawGestureDetector(
@@ -816,11 +1169,7 @@ class _SelectableRegionState extends State<SelectableRegion> with TextSelectionD
           child: Focus(
             includeSemantics: false,
             focusNode: widget.focusNode,
-            child: SelectionContainer(
-              registrar: this,
-              delegate: _selectionDelegate,
-              child: widget.child,
-            ),
+            child: result,
           ),
         ),
       ),
@@ -848,7 +1197,7 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
   _SelectAllAction(this.state);
 
-  final _SelectableRegionState state;
+  final SelectableRegionState state;
 
   @override
   void invokeAction(SelectAllTextIntent intent, [BuildContext? context]) {
@@ -859,11 +1208,54 @@ class _SelectAllAction extends _NonOverrideAction<SelectAllTextIntent> {
 class _CopySelectionAction extends _NonOverrideAction<CopySelectionTextIntent> {
   _CopySelectionAction(this.state);
 
-  final _SelectableRegionState state;
+  final SelectableRegionState state;
 
   @override
   void invokeAction(CopySelectionTextIntent intent, [BuildContext? context]) {
     state._copy();
+  }
+}
+
+class _GranularlyExtendSelectionAction<T extends DirectionalTextEditingIntent> extends _NonOverrideAction<T> {
+  _GranularlyExtendSelectionAction(this.state, {required this.granularity});
+
+  final SelectableRegionState state;
+  final TextGranularity granularity;
+
+  @override
+  void invokeAction(T intent, [BuildContext? context]) {
+    state._granularlyExtendSelection(granularity, intent.forward);
+  }
+}
+
+class _GranularlyExtendCaretSelectionAction<T extends DirectionalCaretMovementIntent> extends _NonOverrideAction<T> {
+  _GranularlyExtendCaretSelectionAction(this.state, {required this.granularity});
+
+  final SelectableRegionState state;
+  final TextGranularity granularity;
+
+  @override
+  void invokeAction(T intent, [BuildContext? context]) {
+    if (intent.collapseSelection) {
+      // Selectable region never collapses selection.
+      return;
+    }
+    state._granularlyExtendSelection(granularity, intent.forward);
+  }
+}
+
+class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovementIntent> extends _NonOverrideAction<T> {
+  _DirectionallyExtendCaretSelectionAction(this.state);
+
+  final SelectableRegionState state;
+
+  @override
+  void invokeAction(T intent, [BuildContext? context]) {
+    if (intent.collapseSelection) {
+      // Selectable region never collapses selection.
+      return;
+    }
+    state._directionallyExtendSelection(intent.forward);
   }
 }
 
@@ -968,6 +1360,12 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
         break;
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        _hasReceivedStartEvent.add(selectable);
+        _hasReceivedEndEvent.add(selectable);
+        ensureChildUpdated(selectable);
+        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
@@ -1059,6 +1457,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   bool _scheduledSelectableUpdate = false;
   bool _selectionInProgress = false;
   Set<Selectable> _additions = <Selectable>{};
+
+  bool _extendSelectionInProgress = false;
 
   @override
   void add(Selectable selectable) {
@@ -1268,14 +1668,16 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       );
     }
 
-    currentSelectionStartIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
-      currentSelectionStartIndex,
-      currentSelectionEndIndex,
-    );
-    currentSelectionEndIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
-      currentSelectionEndIndex,
-      currentSelectionStartIndex,
-    );
+    if (!_extendSelectionInProgress) {
+      currentSelectionStartIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
+        currentSelectionStartIndex,
+        currentSelectionEndIndex,
+      );
+      currentSelectionEndIndex = _adjustSelectionIndexBasedOnSelectionGeometry(
+        currentSelectionEndIndex,
+        currentSelectionStartIndex,
+      );
+    }
 
     // Need to find the non-null start selection point.
     SelectionGeometry startGeometry = selectables[currentSelectionStartIndex].value;
@@ -1480,6 +1882,100 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
+  /// Extend current selection in a certain text granularity.
+  @protected
+  SelectionResult handleGranularlyExtendSelection(GranularlyExtendSelectionEvent event) {
+    assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
+    if (currentSelectionStartIndex == -1) {
+      if (event.forward) {
+        currentSelectionStartIndex = currentSelectionEndIndex = 0;
+      } else {
+        currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;
+      }
+    }
+    int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
+    SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+    if (event.forward) {
+      assert(result != SelectionResult.previous);
+      while (targetIndex < selectables.length - 1 && result == SelectionResult.next) {
+        targetIndex += 1;
+        result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+        assert(result != SelectionResult.previous);
+      }
+    } else {
+      assert(result != SelectionResult.next);
+      while (targetIndex > 0 && result == SelectionResult.previous) {
+        targetIndex -= 1;
+        result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+        assert(result != SelectionResult.next);
+      }
+    }
+    if (event.isEnd) {
+      currentSelectionEndIndex = targetIndex;
+    } else {
+      currentSelectionStartIndex = targetIndex;
+    }
+    return result;
+  }
+
+  /// Extend current selection in a certain text granularity.
+  @protected
+  SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
+    assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
+    if (currentSelectionStartIndex == -1) {
+      switch(event.direction) {
+        case SelectionExtendDirection.previousLine:
+        case SelectionExtendDirection.backward:
+          currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;
+          break;
+        case SelectionExtendDirection.nextLine:
+        case SelectionExtendDirection.forward:
+        currentSelectionStartIndex = currentSelectionEndIndex = 0;
+          break;
+      }
+    }
+    int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
+    SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
+    switch (event.direction) {
+      case SelectionExtendDirection.previousLine:
+        assert(result == SelectionResult.end || result == SelectionResult.previous);
+        if (result == SelectionResult.previous) {
+          if (targetIndex > 0) {
+            targetIndex -= 1;
+            result = dispatchSelectionEventToChild(
+              selectables[targetIndex],
+              event.copyWith(direction: SelectionExtendDirection.backward),
+            );
+            assert(result == SelectionResult.end);
+          }
+        }
+        break;
+      case SelectionExtendDirection.nextLine:
+        assert(result == SelectionResult.end || result == SelectionResult.next);
+        if (result == SelectionResult.next) {
+          if (targetIndex < selectables.length - 1) {
+            targetIndex += 1;
+            result = dispatchSelectionEventToChild(
+              selectables[targetIndex],
+              event.copyWith(direction: SelectionExtendDirection.forward),
+            );
+            assert(result == SelectionResult.end);
+          }
+        }
+        break;
+      case SelectionExtendDirection.forward:
+      case SelectionExtendDirection.backward:
+        assert(result == SelectionResult.end);
+        break;
+    }
+    if (event.isEnd) {
+      currentSelectionEndIndex = targetIndex;
+    } else {
+      currentSelectionStartIndex = targetIndex;
+    }
+    return result;
+  }
+
   /// Updates the selection edges.
   @protected
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
@@ -1502,16 +1998,28 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
+        _extendSelectionInProgress = false;
         result = handleSelectionEdgeUpdate(event as SelectionEdgeUpdateEvent);
         break;
       case SelectionEventType.clear:
+        _extendSelectionInProgress = false;
         result = handleClearSelection(event as ClearSelectionEvent);
         break;
       case SelectionEventType.selectAll:
+        _extendSelectionInProgress = false;
         result = handleSelectAll(event as SelectAllSelectionEvent);
         break;
       case SelectionEventType.selectWord:
+        _extendSelectionInProgress = false;
         result = handleSelectWord(event as SelectWordSelectionEvent);
+        break;
+      case SelectionEventType.granularlyExtendSelection:
+        _extendSelectionInProgress = true;
+        result = handleGranularlyExtendSelection(event as GranularlyExtendSelectionEvent);
+        break;
+      case SelectionEventType.directionallyExtendSelection:
+        _extendSelectionInProgress = true;
+        result = handleDirectionallyExtendSelection(event as DirectionallyExtendSelectionEvent);
         break;
     }
     _isHandlingSelectionEvent = false;
@@ -1676,3 +2184,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return finalResult!;
   }
 }
+
+/// Signature for a widget builder that builds a context menu for the given
+/// [SelectableRegionState].
+///
+/// See also:
+///
+///  * [EditableTextContextMenuBuilder], which performs the same role for
+///    [EditableText].
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  SelectableRegionState selectableRegionState,
+);

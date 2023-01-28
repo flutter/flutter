@@ -21,7 +21,7 @@ import 'transitions.dart';
 //   const MyWidget({super.key, this.targetColor = Colors.black}) : super(duration: const Duration(seconds: 1));
 //   final Color targetColor;
 //   @override
-//   MyWidgetState createState() => MyWidgetState();
+//   ImplicitlyAnimatedWidgetState<MyWidget> createState() => throw UnimplementedError(); // ignore: no_logic_in_create_state
 // }
 // void setState(VoidCallback fn) { }
 
@@ -297,7 +297,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   final VoidCallback? onEnd;
 
   @override
-  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -360,7 +360,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   /// The animation driving this widget's implicit animations.
   Animation<double> get animation => _animation;
-  late Animation<double> _animation = _createCurve();
+  late CurvedAnimation _animation = _createCurve();
 
   @override
   void initState() {
@@ -383,7 +383,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve) {
-      (_animation as CurvedAnimation).dispose();
+      _animation.dispose();
       _animation = _createCurve();
     }
     _controller.duration = widget.duration;
@@ -405,7 +405,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   @override
   void dispose() {
-    (_animation as CurvedAnimation).dispose();
+    _animation.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -1559,7 +1559,7 @@ class _AnimatedRotationState extends ImplicitlyAnimatedWidgetState<AnimatedRotat
 ///
 /// {@tool dartpad}
 /// This code defines a widget that uses [AnimatedSlide] to translate a [FlutterLogo]
-/// up or down by the amount of it's height with each press of the corresponding button.
+/// up or down and right or left by dragging the X and Y axis sliders.
 ///
 /// ** See code in examples/api/lib/widgets/implicit_animations/animated_slide.0.dart **
 /// {@end-tool}

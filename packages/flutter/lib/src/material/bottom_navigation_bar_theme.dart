@@ -11,6 +11,9 @@ import 'bottom_navigation_bar.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [BottomNavigationBar]
 /// widgets.
 ///

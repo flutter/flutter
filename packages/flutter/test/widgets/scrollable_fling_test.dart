@@ -85,11 +85,12 @@ void main() {
     final double macOSResult = getCurrentOffset();
 
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
+    expect(macOSResult, lessThan(androidResult)); // Android is slipperier than macOS
     expect(linuxResult, lessThan(iOSResult)); // iOS is slipperier than Linux
-    expect(linuxResult, lessThan(macOSResult)); // macOS is slipperier than Linux
+    expect(macOSResult, lessThan(linuxResult)); // Linux is slipperier than macOS
     expect(windowsResult, lessThan(iOSResult)); // iOS is slipperier than Windows
-    expect(windowsResult, lessThan(macOSResult)); // macOS is slipperier than Windows
+    expect(macOSResult, lessThan(windowsResult)); // Windows is slipperier than macOS
     expect(windowsResult, equals(androidResult));
     expect(windowsResult, equals(androidResult));
     expect(linuxResult, equals(androidResult));

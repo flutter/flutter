@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image, ColorFilter;
+import 'dart:ui' as ui show ColorFilter, Image;
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';

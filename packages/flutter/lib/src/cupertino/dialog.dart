@@ -158,7 +158,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
 /// An alert dialog informs the user about situations that require
-/// acknowledgement. An alert dialog has an optional title, optional content,
+/// acknowledgment. An alert dialog has an optional title, optional content,
 /// and an optional list of actions. The title is displayed above the content
 /// and the actions are displayed below the content.
 ///
@@ -808,7 +808,8 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
     renderObject
       ..isInAccessibilityMode = _isInAccessibilityMode(context) && !isActionSheet
-      ..dividerColor = CupertinoDynamicColor.resolve(dividerColor, context);
+      ..dividerColor = CupertinoDynamicColor.resolve(dividerColor, context)
+      ..isActionSheet = isActionSheet;
   }
 
   @override
@@ -918,7 +919,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
 //
 // If all content and buttons do not fit on screen, and iOS is NOT in accessibility mode:
 // A minimum height for the action button section is calculated. The action
-// button section will not be rendered shorter than this minimum.  See
+// button section will not be rendered shorter than this minimum. See
 // [_RenderCupertinoDialogActions] for the minimum height calculation.
 //
 // With the minimum action button section calculated, the content section can
@@ -1335,7 +1336,7 @@ enum _AlertDialogSections {
 
 // The "content section" of a CupertinoAlertDialog.
 //
-// If title is missing, then only content is added.  If content is
+// If title is missing, then only content is added. If content is
 // missing, then only title is added. If both are missing, then it returns
 // a SingleChildScrollView with a zero-sized Container.
 class _CupertinoAlertContentSection extends StatelessWidget {
@@ -1389,7 +1390,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     if (title == null && message == null) {
       return SingleChildScrollView(
         controller: scrollController,
-        child: const SizedBox(width: 0.0, height: 0.0),
+        child: const SizedBox.shrink(),
       );
     }
 
@@ -1436,7 +1437,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 //
 // See [_RenderCupertinoDialogActions] for details about action button sizing
 // and layout.
-class _CupertinoAlertActionSection extends StatefulWidget {
+class _CupertinoAlertActionSection extends StatelessWidget {
   const _CupertinoAlertActionSection({
     required this.children,
     this.scrollController,
@@ -1462,34 +1463,27 @@ class _CupertinoAlertActionSection extends StatefulWidget {
   final bool isActionSheet;
 
   @override
-  _CupertinoAlertActionSectionState createState() =>
-      _CupertinoAlertActionSectionState();
-}
-
-class _CupertinoAlertActionSectionState
-    extends State<_CupertinoAlertActionSection> {
-  @override
   Widget build(BuildContext context) {
     final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     final List<Widget> interactiveButtons = <Widget>[];
-    for (int i = 0; i < widget.children.length; i += 1) {
+    for (int i = 0; i < children.length; i += 1) {
       interactiveButtons.add(
         _PressableActionButton(
-          child: widget.children[i],
+          child: children[i],
         ),
       );
     }
 
     return CupertinoScrollbar(
-      controller: widget.scrollController,
+      controller: scrollController,
       child: SingleChildScrollView(
-        controller: widget.scrollController,
+        controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
           dividerThickness: _kDividerThickness / devicePixelRatio,
-          hasCancelButton: widget.hasCancelButton,
-          isActionSheet: widget.isActionSheet,
+          hasCancelButton: hasCancelButton,
+          isActionSheet: isActionSheet,
         ),
       ),
     );
@@ -1589,7 +1583,7 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
 /// See also:
 ///
 ///  * [CupertinoAlertDialog], a dialog that informs the user about situations
-///    that require acknowledgement.
+///    that require acknowledgment.
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
@@ -1713,7 +1707,7 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle.copyWith(
       color: CupertinoDynamicColor.resolve(
-        isDestructiveAction ? CupertinoColors.systemRed : CupertinoColors.systemBlue,
+        isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
     );
@@ -2254,7 +2248,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   void _drawButtonBackgroundsAndDividersSingleRow(Canvas canvas, Offset offset) {
     // The vertical divider sits between the left button and right button (if
-    // the dialog has 2 buttons).  The vertical divider is hidden if either the
+    // the dialog has 2 buttons). The vertical divider is hidden if either the
     // left or right button is pressed.
     final Rect verticalDivider = childCount == 2 && !_isButtonPressed
         ? Rect.fromLTWH(

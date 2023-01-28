@@ -15,8 +15,8 @@ set -ex
 # largely not needed to run the flutter/tests tests.
 #
 # However, we do need to update this directory and the tools directory.
-dart __deprecated_pub get
-(cd ../tools; dart __deprecated_pub get) # used for find_commit.dart below
+dart pub get
+(cd ../tools; dart pub get) # used for find_commit.dart below
 
 # Next we need to update the flutter/tests checkout.
 #

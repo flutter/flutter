@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Navigator
+/// Flutter code sample for [Navigator].
 
 import 'package:flutter/material.dart';
 
@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline4!,
+      style: Theme.of(context).textTheme.headlineMedium!,
       child: Container(
         color: Colors.white,
         alignment: Alignment.center,
@@ -47,7 +47,7 @@ class CollectPersonalInfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline4!,
+      style: Theme.of(context).textTheme.headlineMedium!,
       child: GestureDetector(
         onTap: () {
           // This moves from the personal info page to the credentials page,
@@ -78,7 +78,7 @@ class ChooseCredentialsPage extends StatelessWidget {
     return GestureDetector(
       onTap: onSignupComplete,
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.headline4!,
+        style: Theme.of(context).textTheme.headlineMedium!,
         child: Container(
           color: Colors.pinkAccent,
           alignment: Alignment.center,

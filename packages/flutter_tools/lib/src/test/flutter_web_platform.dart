@@ -35,6 +35,7 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'flutter_web_goldens.dart';
 import 'test_compiler.dart';
+import 'test_time_recorder.dart';
 
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root, {
@@ -51,6 +52,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Artifacts? artifacts,
     required ProcessManager processManager,
     required Cache cache,
+    TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
@@ -76,7 +78,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
-      () => TestCompiler(buildInfo, flutterProject),
+      () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
       fileSystem: _fileSystem,
       logger: _logger,
       processManager: processManager,
@@ -120,6 +122,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Artifacts? artifacts,
     required ProcessManager processManager,
     required Cache cache,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -149,6 +152,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       nullAssertions: nullAssertions,
       processManager: processManager,
       cache: cache,
+      testTimeRecorder: testTimeRecorder,
     );
   }
 
@@ -340,7 +344,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
-      final Map<String, Object> body = json.decode(await request.readAsString()) as Map<String, Object>;
+      final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
       final Uri goldenKey = Uri.parse(body['key']! as String);
       final Uri testUri = Uri.parse(body['testUri']! as String);
       final num width = body['width']! as num;
@@ -348,9 +352,9 @@ class FlutterWebPlatform extends PlatformPlugin {
       Uint8List bytes;
 
       try {
-        final ChromeTab chromeTab = await (_browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
+        final ChromeTab chromeTab = (await _browserManager!._browser.chromeConnection.getTab((ChromeTab tab) {
           return tab.url.contains(_browserManager!._browser.url!);
-        }) as FutureOr<ChromeTab>);
+        }))!;
         final WipConnection connection = await chromeTab.connect();
         final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
           // Clip the screenshot to include only the element.
@@ -681,12 +685,13 @@ class BrowserManager {
     );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then((int? browserExitCode) {
+    unawaited(chrome.onExit.then<Object?>((int? browserExitCode) {
       throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
     }).catchError((Object error, StackTrace stackTrace) {
       if (!completer.isCompleted) {
         completer.completeError(error, stackTrace);
       }
+      return null;
     }));
     unawaited(future.then((WebSocketChannel webSocket) {
       if (completer.isCompleted) {

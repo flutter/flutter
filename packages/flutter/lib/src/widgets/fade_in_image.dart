@@ -65,8 +65,11 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder] and [image] may be composed in a [ResizeImage] to provide
   /// a custom decode/cache size.
   ///
-  /// The [placeholder] and [image] may be have their own BoxFit settings via [fit]
+  /// The [placeholder] and [image] may have their own BoxFit settings via [fit]
   /// and [placeholderFit].
+  ///
+  /// The [placeholder] and [image] may have their own FilterQuality settings via [filterQuality]
+  /// and [placeholderFilterQuality].
   ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
@@ -89,6 +92,8 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
+    this.filterQuality = FilterQuality.low,
+    this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -148,6 +153,8 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
+    this.filterQuality = FilterQuality.low,
+    this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -219,6 +226,8 @@ class FadeInImage extends StatefulWidget {
     this.height,
     this.fit,
     this.placeholderFit,
+    this.filterQuality = FilterQuality.low,
+    this.placeholderFilterQuality,
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
@@ -301,6 +310,16 @@ class FadeInImage extends StatefulWidget {
   /// If not value set, it will fallback to [fit].
   final BoxFit? placeholderFit;
 
+  /// The rendering quality of the image.
+  ///
+  /// {@macro flutter.widgets.image.filterQuality}
+  final FilterQuality filterQuality;
+
+  /// The rendering quality of the placeholder image.
+  ///
+  /// {@macro flutter.widgets.image.filterQuality}
+  final FilterQuality? placeholderFilterQuality;
+
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
@@ -379,6 +398,7 @@ class _FadeInImageState extends State<FadeInImage> {
     ImageErrorWidgetBuilder? errorBuilder,
     ImageFrameBuilder? frameBuilder,
     BoxFit? fit,
+    required FilterQuality filterQuality,
     required Animation<double> opacity,
   }) {
     assert(image != null);
@@ -390,6 +410,7 @@ class _FadeInImageState extends State<FadeInImage> {
       width: widget.width,
       height: widget.height,
       fit: fit,
+      filterQuality: filterQuality,
       alignment: widget.alignment,
       repeat: widget.repeat,
       matchTextDirection: widget.matchTextDirection,
@@ -405,6 +426,7 @@ class _FadeInImageState extends State<FadeInImage> {
       errorBuilder: widget.imageErrorBuilder,
       opacity: _imageAnimation,
       fit: widget.fit,
+      filterQuality: widget.filterQuality,
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
           targetLoaded = true;
@@ -417,6 +439,7 @@ class _FadeInImageState extends State<FadeInImage> {
             errorBuilder: widget.placeholderErrorBuilder,
             opacity: _placeholderAnimation,
             fit: widget.placeholderFit ?? widget.fit,
+            filterQuality: widget.placeholderFilterQuality ?? widget.filterQuality,
           ),
           placeholderProxyAnimation: _placeholderAnimation,
           isTargetLoaded: targetLoaded,

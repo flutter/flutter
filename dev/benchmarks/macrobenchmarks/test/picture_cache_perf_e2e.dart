@@ -19,7 +19,7 @@ void main() {
       Future<void> scrollOnce(double offset) async {
         await controller.timedDrag(
           nestedScroll,
-          Offset(-offset, 0.0),
+          Offset(offset, 0.0),
           const Duration(milliseconds: 300),
         );
         await Future<void>.delayed(const Duration(milliseconds: 500));

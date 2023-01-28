@@ -222,7 +222,6 @@ class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAd
     :super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
 
   @override
-  // ignore: unnecessary_overrides
   int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
     return super.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
   }

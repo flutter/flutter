@@ -97,7 +97,9 @@ void main() {
         icudtlPath: 'ghi',
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
-        });
+        },
+        uriConverter: (String input) => '$input/test',
+      );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
       expect(flutterPlatform.shellPath, equals('abc'));
@@ -113,6 +115,7 @@ void main() {
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));
+      expect(flutterPlatform.uriConverter?.call('hello'), 'hello/test');
     });
   });
 }

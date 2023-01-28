@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextBox, BoxHeightStyle, BoxWidthStyle, Paragraph;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 // A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
 // for a given TextSelection.
@@ -821,12 +822,12 @@ void main() {
       for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
         selectable.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forStart(
-            globalPosition: paragraph.getOffsetForCaret(start, Rect.zero),
+            globalPosition: paragraph.getOffsetForCaret(start, Rect.zero) + const Offset(0, 5),
           ),
         );
         selectable.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forEnd(
-            globalPosition: paragraph.getOffsetForCaret(end, Rect.zero),
+            globalPosition: paragraph.getOffsetForCaret(end, Rect.zero) + const Offset(0, 5),
           ),
         );
       }
@@ -910,6 +911,392 @@ void main() {
       final SelectionGeometry geometry2 = segment2.value;
       expect(geometry2.hasContent, true);
       expect(geometry2.status, SelectionStatus.uncollapsed);
+    });
+
+    test('can granularly extend selection - character', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 4), const TextPosition(offset: 5));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+
+      // Equivalent to sending shift + arrow-right
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.character,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [ar]e you
+      expect(selection.end, 6);
+
+      // Equivalent to sending shift + arrow-left
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.character,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+    });
+
+    test('can granularly extend selection - word', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 4), const TextPosition(offset: 5));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+
+      // Equivalent to sending shift + alt + arrow-right.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [are] you
+      expect(selection.end, 7);
+
+      // Equivalent to sending shift + alt + arrow-left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      expect(paragraph.selections.length, 0); // how []are you
+
+      // Equivalent to sending shift + alt + arrow-left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 0); // [how ]are you
+      expect(selection.end, 4);
+    });
+
+    test('can granularly extend selection - line', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 4), const TextPosition(offset: 5));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+
+      // Equivalent to sending shift + meta + arrow-right.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.line,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [are you]
+      if (isBrowser && !isCanvasKit) {
+        expect(selection.end, 12);
+      } else {
+        expect(selection.end, 11);
+      }
+
+      // Equivalent to sending shift + meta + arrow-left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.line,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 0); // [how ]are you
+      expect(selection.end, 4);
+    });
+
+    test('can granularly extend selection - document', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 14), const TextPosition(offset: 15));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      // how are you
+      // I [a]m fine
+      expect(selection.start, 14);
+      expect(selection.end, 15);
+
+      // Equivalent to sending shift + meta + arrow-down.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.document,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I [am fine
+      // Thank you]
+      expect(selection.start, 14);
+      expect(selection.end, 31);
+
+      // Equivalent to sending shift + meta + arrow-up.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.document,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // [how are you
+      // I ]am fine
+      // Thank you
+      expect(selection.start, 0);
+      expect(selection.end, 14);
+    });
+
+    test('can granularly extend selection when no active selection', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      expect(paragraph.selections.length, 0);
+
+      // Equivalent to sending shift + alt + right.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      TextSelection selection = paragraph.selections[0];
+      // [how] are you
+      // I am fine
+      // Thank you
+      expect(selection.start, 0);
+      expect(selection.end, 3);
+
+      // Remove selection
+      registrar.selectables[0].dispatchSelectionEvent(
+        const ClearSelectionEvent(),
+      );
+      expect(paragraph.selections.length, 0);
+
+      // Equivalent to sending shift + alt + left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I am fine
+      // Thank [you]
+      expect(selection.start, 28);
+      expect(selection.end, 31);
+    });
+
+    test('can directionally extend selection', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 14), const TextPosition(offset: 15));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      // how are you
+      // I [a]m fine
+      expect(selection.start, 14);
+      expect(selection.end, 15);
+
+      final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
+      final double baseline = MatrixUtils.transformPoint(
+        transform,
+        registrar.selectables[0].value.endSelectionPoint!.localPosition,
+      ).dx;
+
+      // Equivalent to sending shift + arrow-down.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.nextLine,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I [am fine
+      // Tha]nk you
+      expect(selection.start, 14);
+      expect(selection.end, 25);
+
+      // Equivalent to sending shift + arrow-up.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.previousLine,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I [a]m fine
+      // Thank you
+      expect(selection.start, 14);
+      expect(selection.end, 15);
+    });
+
+    test('can directionally extend selection when no selection', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      expect(paragraph.selections.length, 0);
+
+      final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
+      final double baseline = MatrixUtils.transformPoint(
+        transform,
+        Offset(registrar.selectables[0].size.width / 2, 0),
+      ).dx;
+
+      // Equivalent to sending shift + arrow-down.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.forward,
+        ),
+      );
+      TextSelection selection = paragraph.selections[0];
+      // [how ar]e you
+      // I am fine
+      // Thank you
+      expect(selection.start, 0);
+      expect(selection.end, 6);
+
+      registrar.selectables[0].dispatchSelectionEvent(
+        const ClearSelectionEvent(),
+      );
+      expect(paragraph.selections.length, 0);
+
+      // Equivalent to sending shift + arrow-up.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.backward,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I am fine
+      // Thank [you]
+      expect(selection.start, 28);
+      expect(selection.end, 31);
     });
   });
 }

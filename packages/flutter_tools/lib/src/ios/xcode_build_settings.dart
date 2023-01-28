@@ -176,7 +176,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 
-    final String localEngineName = globals.fs.path.basename(engineOutPath);
+    final String localEngineName = localEngineArtifacts.localEngineName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
 
     // Tell Xcode not to build universal binaries for local engines, which are

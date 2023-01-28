@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature
+/// Flutter code sample for [FontFeature].
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -31,8 +31,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Cardo, Milonga and Raleway Dots fonts can be downloaded from
-    // Google Fonts (https://www.google.com/fonts).
+    // The Cardo, Milonga and Raleway Dots fonts can be downloaded from Google
+    // Fonts (https://www.google.com/fonts).
     return Scaffold(
       body: Center(
         child: Column(
