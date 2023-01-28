@@ -14392,6 +14392,66 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // Shouldn't crash.
     state.didChangeMetrics();
   });
+
+  testWidgets('_CompositionCallback widget does not skip frames', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+
+    Offset offset = Offset.zero;
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return Transform.translate(
+              offset: offset,
+              // The EditableText is configured in a way that the it doesn't
+              // explicitly request repaint on focus change.
+              child: TickerMode(
+                enabled: false,
+                child: RepaintBoundary(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: const TextStyle(),
+                    showCursor: false,
+                    cursorColor: Colors.blue,
+                    backgroundCursorColor: Colors.grey,
+                  ),
+                ),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    tester.testTextInput.log.clear();
+
+    // The composition callback should be registered. To verify, change the
+    // parent layer's transform.
+    setState(() { offset = const Offset(42, 0); });
+    await tester.pump();
+
+    expect(
+      tester.testTextInput.log,
+      contains(
+        matchesMethodCall(
+          'TextInput.setEditableSizeAndTransform',
+          args: containsPair('transform', Matrix4.translationValues(offset.dx, offset.dy, 0).storage),
+        ),
+      ),
+    );
+
+    EditableText.debugDeterministicCursor = false;
+  });
 }
 
 class UnsettableController extends TextEditingController {

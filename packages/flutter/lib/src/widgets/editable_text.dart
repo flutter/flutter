@@ -84,34 +84,9 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 // is shown in an obscured text field.
 const int _kObscureShowLatestCharCursorTicks = 3;
 
-class _RenderCompositionCallback extends RenderProxyBox {
-  _RenderCompositionCallback(this.compositeCallback);
-
-  final void Function(Layer) compositeCallback;
-
-  bool get enabled => _enabled;
-  bool _enabled = false;
-  VoidCallback? _cancelCallback;
-  set enabled(bool newValue) {
-    if (!newValue) {
-      _cancelCallback?.call();
-      _cancelCallback = null;
-    }
-    _enabled = newValue;
-  }
-
-  @override
-  void paint(PaintingContext context, ui.Offset offset) {
-    if (enabled) {
-      _cancelCallback ??= context.addCompositionCallback(compositeCallback);
-    }
-    super.paint(context, offset);
-  }
-}
-
 class _CompositionCallback extends SingleChildRenderObjectWidget {
   const _CompositionCallback({ required this.compositeCallback, this.enabled = false, super.child });
-  final void Function(Layer) compositeCallback;
+  final CompositionCallback compositeCallback;
   final bool enabled;
 
   @override
@@ -124,6 +99,33 @@ class _CompositionCallback extends SingleChildRenderObjectWidget {
     super.updateRenderObject(context, renderObject);
     assert(renderObject.compositeCallback == compositeCallback);
     renderObject.enabled = enabled;
+  }
+}
+
+class _RenderCompositionCallback extends RenderProxyBox {
+  _RenderCompositionCallback(this.compositeCallback);
+
+  final CompositionCallback compositeCallback;
+  VoidCallback? _cancelCallback;
+
+  bool get enabled => _enabled;
+  bool _enabled = false;
+  set enabled(bool newValue) {
+    _enabled = newValue;
+    if (!newValue) {
+      _cancelCallback?.call();
+      _cancelCallback = null;
+    } else if (_cancelCallback == null) {
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, ui.Offset offset) {
+    if (enabled) {
+      _cancelCallback ??= context.addCompositionCallback(compositeCallback);
+    }
+    super.paint(context, offset);
   }
 }
 
