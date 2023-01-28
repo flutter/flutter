@@ -201,7 +201,11 @@ Map<String, String> pluralCases = <String, String>{
 };
 
 String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
-  final String comment = message.description ?? 'No description provided for @${message.resourceId}.';
+  final String comment = message
+    .description
+    ?.split('\n')
+    .map((String line) => '  /// $line')
+    .join('\n') ?? '  /// No description provided for @${message.resourceId}.';
   final String templateLocaleTranslationComment = '''
   /// In $templateArbLocale, this message translates to:
   /// **'${generateString(message.value)}'**''';
@@ -1163,7 +1167,20 @@ class LocalizationsGenerator {
             }
             if (!pluralLogicArgs.containsKey(pluralCases[pluralCase])) {
               final String pluralPartExpression = generateVariables(pluralMessage);
-              pluralLogicArgs[pluralCases[pluralCase]!] = '      ${pluralCases[pluralCase]}: $pluralPartExpression,';
+              final String? transformedPluralCase = pluralCases[pluralCase];
+              // A valid plural case is one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other".
+              if (transformedPluralCase == null) {
+                throw L10nParserException(
+                  '''
+The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "many", or "other.
+    $pluralCase is not a valid plural case.''',
+                  _inputFileNames[locale]!,
+                  message.resourceId,
+                  translationForMessage,
+                  pluralPart.positionInMessage,
+                );
+              }
+              pluralLogicArgs[transformedPluralCase] = '      ${pluralCases[pluralCase]}: $pluralPartExpression,';
             } else if (!suppressWarnings) {
               logger.printWarning('''
 [${_inputFileNames[locale]}:${message.resourceId}] ICU Syntax Warning: The plural part specified below is overridden by a later plural part.

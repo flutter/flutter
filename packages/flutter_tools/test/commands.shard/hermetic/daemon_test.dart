@@ -86,9 +86,7 @@ void main() {
     });
 
     tearDown(() async {
-      if (daemon != null) {
-        return daemon.shutdown();
-      }
+      await daemon.shutdown();
       notifyingLogger.dispose();
       await daemonConnection.dispose();
     });
@@ -886,15 +884,16 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   late DeviceLogReader logReader;
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => logReader;
 
   ApplicationPackage? startAppPackage;
   late LaunchResult launchResult;
+
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,

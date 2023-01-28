@@ -67,10 +67,6 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
 
   @override
   bool get showCloseIcon => false;
-
-  @override
-  Color get iconColor => _colors.onInverseSurface;
-  }
-
+}
 ''';
 }

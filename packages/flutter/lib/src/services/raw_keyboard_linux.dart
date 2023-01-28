@@ -33,12 +33,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     this.modifiers = 0,
     required this.isDown,
     this.specifiedLogicalKey,
-  }) : assert(scanCode != null),
-       assert(unicodeScalarValues != null),
-       assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0),
-       assert(keyCode != null),
-       assert(modifiers != null),
-       assert(keyHelper != null);
+  }) : assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0);
 
   /// A helper class that abstracts the fetching of the toolkit-specific mappings.
   ///

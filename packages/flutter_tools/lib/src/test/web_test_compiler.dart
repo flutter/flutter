@@ -52,7 +52,7 @@ class WebTestCompiler {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
     late final String platformDillName;
 
-    // TODO(zanderso): to support autodetect this would need to partition the source code into a
+    // TODO(zanderso): to support autodetect this would need to partition the source code into
     // a sound and unsound set and perform separate compilations
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
     if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
@@ -123,7 +123,7 @@ class WebTestCompiler {
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
-      platformDill: platformDillPath,
+      platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,

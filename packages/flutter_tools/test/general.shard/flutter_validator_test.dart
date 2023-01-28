@@ -142,7 +142,7 @@ void main() {
     // gen_snapshot is downloaded on demand, and the doctor should not
     // fail if the gen_snapshot binary is not present.
     expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
+      validationType: ValidationType.success,
       statusInfo: 'Channel beta, 1.0.0, on Windows, locale en_US.UTF-8',
       messages: anything,
     ));
@@ -199,7 +199,7 @@ void main() {
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
+      validationType: ValidationType.success,
       statusInfo: 'Channel beta, 1.0.0, on Windows, locale en_US.UTF-8',
       messages: containsAll(const <ValidationMessage>[
         ValidationMessage('Pub download mirror https://example.com/pub'),
@@ -327,7 +327,7 @@ void main() {
       );
 
       expect(await flutterValidator.validate(), _matchDoctorValidation(
-        validationType: ValidationType.installed,
+        validationType: ValidationType.success,
         statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
         messages: contains(const ValidationMessage('Upstream repository https://github.com/flutter/flutter.git')),
       ));
@@ -418,7 +418,7 @@ void main() {
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
+      validationType: ValidationType.success,
       statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: isNot(
         contains(const ValidationMessage(
@@ -598,7 +598,7 @@ void main() {
     );
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
-      validationType: ValidationType.installed,
+      validationType: ValidationType.success,
       statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: isNot(contains(isA<ValidationMessage>().having(
         (ValidationMessage message) => message.message,

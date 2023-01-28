@@ -5751,7 +5751,6 @@ void main() {
         const TextSelection(
           baseOffset: 0,
           extentOffset: 6,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6013,7 +6012,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: testText.length,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6057,7 +6055,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 3,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6249,7 +6246,6 @@ void main() {
         const TextSelection(
           baseOffset: 10,
           extentOffset: 10,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6709,7 +6705,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6734,7 +6729,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6777,7 +6771,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 23,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6863,7 +6856,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -6888,7 +6880,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -6931,7 +6922,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7027,7 +7017,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7052,7 +7041,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7095,7 +7083,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7192,7 +7179,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 23,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7238,7 +7224,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7249,7 +7234,6 @@ void main() {
             const TextSelection(
               baseOffset: 23,
               extentOffset: 23,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7383,7 +7367,6 @@ void main() {
       controller.selection,
       equals(const TextSelection.collapsed(
         offset: 4,
-        affinity: TextAffinity.upstream,
       )),
     );
 
@@ -7567,7 +7550,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7591,7 +7573,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7649,7 +7630,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7762,7 +7742,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
-          affinity: TextAffinity.upstream,
         ),
       ),
       reason: 'on $platform',
@@ -7786,7 +7765,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7844,7 +7822,6 @@ void main() {
           equals(
             const TextSelection.collapsed(
               offset: 32,
-              affinity: TextAffinity.upstream,
             ),
           ),
           reason: 'on $platform',
@@ -7956,7 +7933,6 @@ void main() {
       equals(
         const TextSelection.collapsed(
           offset: 32,
-          affinity: TextAffinity.upstream,
         ),
       ),
     );
@@ -8050,7 +8026,6 @@ void main() {
       controller.selection,
       equals(const TextSelection.collapsed(
         offset: testText.length,
-        affinity: TextAffinity.upstream,
       )),
     );
 
@@ -8134,7 +8109,6 @@ void main() {
       controller.selection,
       equals(const TextSelection.collapsed(
         offset: testText.length,
-        affinity: TextAffinity.upstream,
       )),
     );
 
@@ -11092,7 +11066,6 @@ void main() {
     controller.selection = const TextSelection(
       baseOffset: 15,
       extentOffset: 15,
-      affinity: TextAffinity.upstream,
     );
     await tester.pump();
     expect(controller.selection.isCollapsed, true);
@@ -11331,7 +11304,6 @@ void main() {
         const TextSelection(
           baseOffset: 29,
           extentOffset: 0,
-          affinity: TextAffinity.upstream,
         ),
       ),
     );
@@ -11756,6 +11728,163 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     expect(tester.hasRunningAnimations, isFalse);
   });
+
+  testWidgets('Floating cursor affinity', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final FocusNode focusNode = FocusNode();
+    final GlobalKey key = GlobalKey();
+    // Set it up so that there will be word-wrap.
+    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 500,
+            ),
+            child: EditableText(
+              key: key,
+              autofocus: true,
+              maxLines: 2,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Select after the first word, with default affinity (downstream).
+    controller.selection = const TextSelection.collapsed(offset: 27);
+    await tester.pump();
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the end of the first line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 15, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    // Select after the first word, with upstream affinity.
+    controller.selection = const TextSelection.collapsed(offset: 27, affinity: TextAffinity.upstream);
+    await tester.pump();
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the beginning of the second line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(378.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    EditableText.debugDeterministicCursor = false;
+  });
+
+testWidgets('Floating cursor ending with selection', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final FocusNode focusNode = FocusNode();
+    final GlobalKey key = GlobalKey();
+    // Set it up so that there will be word-wrap.
+    final TextEditingController controller = TextEditingController(text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          autofocus: true,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the start of the line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(50, 0)));
+    await tester.pump();
+
+    // The floating cursor should be drawn somewhere in the middle of the line
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(50.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
+    await tester.pumpAndSettle(const Duration(milliseconds: 125)); // Floating cursor has an end animation.
+
+    // Selection should be updated based on the floating cursor location.
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 4);
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero));
+    await tester.pump();
+
+    // The floating cursor should be drawn near to the previous position.
+    // It's different because it's snapped to exactly between characters.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(56.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Update, offset: const Offset(-56, 0)));
+    await tester.pump();
+
+    // The floating cursor should be drawn at the start of the line.
+    expect(key.currentContext!.findRenderObject(), paints..rrect(
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(0.5, 1, 3, 12),
+        const Radius.circular(1)
+      )
+    ));
+
+    // Simulate UIKit setting the selection using keyboard selection.
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End, offset: Offset.zero));
+    await tester.pump();
+
+    // Selection should not be updated as the new position is within the selection range.
+    expect(controller.selection.isCollapsed, false);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 4);
+
+    EditableText.debugDeterministicCursor = false;
+  });
+
 
   group('Selection changed scroll into view', () {
     final String text = List<int>.generate(64, (int index) => index).join('\n');
@@ -13919,26 +14048,304 @@ void main() {
     testWidgets(
       'Error thrown when spell check enabled but no default spell check service available',
         (WidgetTester tester) async {
-        tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
-          false;
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        false;
 
-        await tester.pumpWidget(
-            EditableText(
-                controller: TextEditingController(text: 'A'),
-                focusNode: FocusNode(),
-                style: const TextStyle(),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                cursorOpacityAnimates: true,
-                autofillHints: null,
-                spellCheckConfiguration:
-                  const SpellCheckConfiguration(
-                    misspelledTextStyle: TextField.materialMisspelledTextStyle,
-                ),
-            ));
+      await tester.pumpWidget(
+          EditableText(
+              controller: TextEditingController(text: 'A'),
+              focusNode: FocusNode(),
+              style: const TextStyle(),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              cursorOpacityAnimates: true,
+              autofillHints: null,
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+              ),
+          ));
 
         expect(tester.takeException(), isA<AssertionError>());
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+    });
+
+    testWidgets(
+      'findSuggestionSpanAtCursorIndex finds correct span with cursor in middle of a word',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 21;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      // Omitting actual text in results for brevity. Same for following tests that test the findSuggestionSpanAtCursorIndex method.
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, equals(expectedSpan));
+    });
+
+    testWidgets(
+        'findSuggestionSpanAtCursorIndex finds correct span with cursor on edge of a word',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 23;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, equals(expectedSpan));
+    });
+
+    testWidgets(
+        'findSuggestionSpanAtCursorIndex finds no span when cursor out of range of spans',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 33;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, isNull);
+    });
+
+    testWidgets(
+        'findSuggestionSpanAtCursorIndex finds no span when word correctly spelled',
+        (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+      const int cursorIndex = 5;
+      const SuggestionSpan expectedSpan = SuggestionSpan(TextRange(start: 20, end: 23), <String>['Hey', 'He']);
+      const List<SuggestionSpan> suggestionSpans =
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 13, end: 18), <String>['world', 'word', 'old']),
+          expectedSpan,
+          SuggestionSpan(
+            TextRange(start: 25, end: 30), <String>['green', 'grey', 'great']),
+      ];
+
+      state.spellCheckResults = const SpellCheckResults('', suggestionSpans);
+      final SuggestionSpan? suggestionSpan = state.findSuggestionSpanAtCursorIndex(cursorIndex);
+
+      expect(suggestionSpan, isNull);
+    });
+
+    testWidgets('can show spell check suggestions toolbar when there are spell check results', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              selectionControls: materialTextSelectionControls,
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                  spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+                ),
+            ),
+          ),
+        );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Can't show the toolbar when there's no focus.
+      expect(state.showSpellCheckSuggestionsToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.text('DELETE'), findsNothing);
+
+      // Can't show the toolbar when there are no spell check results.
+      expect(state.showSpellCheckSuggestionsToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(find.text('sets'), findsNothing);
+      expect(find.text('set'), findsNothing);
+      expect(find.text('DELETE'), findsNothing);
+
+      // Can show the toolbar when there are spell check results.
+      state.spellCheckResults = const SpellCheckResults('test tset test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), true);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+      expect(find.text('sets'), findsOneWidget);
+      expect(find.text('set'), findsOneWidget);
+      expect(find.text('DELETE'), findsOneWidget);
+    });
+
+    testWidgets('spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        composing: TextRange(start: 0, end: 4),
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              selectionControls: materialTextSelectionControls,
+              spellCheckConfiguration:
+                const SpellCheckConfiguration(
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                  spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+                ),
+            ),
+          ),
+        );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pumpAndSettle();
+
+      // Test misspelled word replacement buttons.
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
+      expect(find.text('sets'), findsOneWidget);
+      await tester.tap(find.text('sets'));
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.text, equals('sets test test'));
+
+      // Test delete button.
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('DELETE'));
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.text, equals(' test test'));
     });
   });
 
@@ -13974,6 +14381,72 @@ void main() {
           isNull,
       );
     });
+  });
+
+  // Regression test for: https://github.com/flutter/flutter/issues/117418.
+  testWidgets('can handle the partial selection of a multi-code-unit glyph', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          showSelectionHandles: true,
+          autofocus: true,
+          focusNode: FocusNode(),
+          style: Typography.material2018().black.titleMedium!,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          textAlign: TextAlign.right,
+          minLines: 2,
+          maxLines: 2,
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(EditableText), '12345');
+    await tester.pumpAndSettle();
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    state.userUpdateTextEditingValue(
+      const TextEditingValue(
+        // This is an extended grapheme cluster made up of several code units,
+        // which has length 8.  A selection from 0-1 does not fully select it.
+        text: '👨‍👩‍👦',
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: 1,
+        ),
+      ),
+      SelectionChangedCause.keyboard,
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('does not crash when didChangeMetrics is called after unmounting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: FocusNode(),
+          style: Typography.material2018().black.titleMedium!,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Disposes the EditableText.
+    await tester.pumpWidget(const Placeholder());
+
+    // Shouldn't crash.
+    state.didChangeMetrics();
   });
 }
 
@@ -14104,7 +14577,6 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     this.onCut,
   });
 
-  static const double _kToolbarContentDistanceBelow = 20.0;
   static const double _kToolbarContentDistance = 8.0;
 
   final VoidCallback? onPaste;
@@ -14132,7 +14604,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     );
     final Offset anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
     );
     return _CustomTextSelectionToolbar(
       anchorAbove: anchorAbove,
@@ -14200,7 +14672,7 @@ class _CustomTextSelectionToolbar extends StatelessWidget {
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       toolbarBuilder: (BuildContext context, Widget child) {
-        return Container(
+        return ColoredBox(
           color: Colors.pink,
           child: child,
         );

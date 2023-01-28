@@ -41,9 +41,7 @@ class PreparePackageException implements Exception {
   @override
   String toString() {
     String output = runtimeType.toString();
-    if (message != null) {
-      output += ': $message';
-    }
+    output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
@@ -54,7 +52,9 @@ class PreparePackageException implements Exception {
 
 enum Branch {
   beta,
-  stable;
+  stable,
+  master,
+  main;
 }
 
 /// A helper class for classes that want to run a process, optionally have the

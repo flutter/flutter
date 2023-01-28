@@ -39,6 +39,10 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
+  // https://github.com/flutter/flutter/issues/116376
+  'path_provider_android': '2.0.21',
+  // https://github.com/flutter/flutter/issues/117163
+  'intl': '0.17.0',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -440,6 +444,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       upgrade: doUpgrade,
       offline: boolArgDeprecated('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
+      outputMode: PubOutputMode.none,
     );
 
     if (doUpgrade) {
@@ -533,7 +538,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
-            printProgress: false,
+            outputMode: PubOutputMode.none,
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;
@@ -593,11 +598,11 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    for (_DependencyLink path in paths) {
+    for (_DependencyLink? path in paths) {
       final StringBuffer buf = StringBuffer();
       while (path != null) {
         buf.write(path.to);
-        path = path.from!;
+        path = path.from;
         if (path != null) {
           buf.write(' <- ');
         }
@@ -873,7 +878,6 @@ class PubspecYaml {
   /// that depend on the Flutter or Dart SDK directly and are thus automatically
   /// pinned).
   void apply(PubDependencyTree versions, Set<String> specialDependencies) {
-    assert(versions != null);
     final List<String> output = <String>[]; // the string data to output to the file, line by line
     final Set<String> directDependencies = <String>{}; // packages this pubspec directly depends on (i.e. not transitive)
     final Set<String> devDependencies = <String>{};
@@ -1306,7 +1310,6 @@ class PubspecDependency extends PubspecLine {
   /// We return true if we parsed it and stored the line in lockLine.
   /// We return false if we parsed it and it's a git dependency that needs the next few lines.
   bool parseLock(String line, String pubspecPath, { required bool lockIsOverride }) {
-    assert(lockIsOverride != null);
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
@@ -1427,7 +1430,7 @@ String generateFakePubspec(
   final bool verbose = doUpgrade;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  result.writeln("  sdk: '>=2.10.0 <4.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (kManuallyPinnedDependencies.isNotEmpty) {
@@ -1540,8 +1543,6 @@ class PubDependencyTree {
     required Set<String> exclude,
     List<String>? result,
   }) {
-    assert(seen != null);
-    assert(exclude != null);
     result ??= <String>[];
     final Set<String>? dependencies = _dependencyTree[package];
     if (dependencies == null) {
@@ -1575,9 +1576,6 @@ String _computeChecksum(Iterable<String> names, String Function(String name) get
   final List<String> sortedNames = names.toList()..sort();
   for (final String name in sortedNames) {
     final String version = getVersion(name);
-    if (version == null) {
-      continue;
-    }
     final String value = '$name: $version';
     // Each code unit is 16 bits.
     for (final int codeUnit in value.codeUnits) {
@@ -1640,7 +1638,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.7.0 <4.0.0"
 ''');
 
     output.writeln('dependencies:');
@@ -1672,7 +1670,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=1.11.0 <3.0.0'
+  sdk: '>=1.11.0 <4.0.0'
 ''');
 
   return directory;

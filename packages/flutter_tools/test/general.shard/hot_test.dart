@@ -572,6 +572,9 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> shaderPathsToEvict= <String>{};
 
   @override
+  Set<String> scenePathsToEvict= <String>{};
+
+  @override
   Uri? baseUri;
 }
 
@@ -607,7 +610,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     return true;
@@ -664,8 +667,7 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
-  })  : assert(exception != null),
-        super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
+  })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
   final Exception exception;

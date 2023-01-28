@@ -11,6 +11,7 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
+library;
 
 import 'dart:math' as math;
 
@@ -208,7 +209,7 @@ Widget buildDropdownWithHint({
     selectedItemBuilder: enableSelectedItemBuilder
       ? (BuildContext context) {
           return menuItems.map<Widget>((String item) {
-            return Container(
+            return ColoredBox(
               color: const Color(0xff00ff00),
               child: Text(item),
             );
@@ -716,7 +717,6 @@ void main() {
       expect(itemBoxes.length, equals(2));
       for (final RenderBox itemBox in itemBoxes) {
         assert(itemBox.attached);
-        assert(textDirection != null);
         switch (textDirection) {
           case TextDirection.rtl:
             expect(
@@ -1144,13 +1144,11 @@ void main() {
       tester.element(find.byType(ListView)).visitAncestorElements((Element element) {
         if (element.toString().startsWith('_DropdownMenu')) {
           final RenderBox box = element.findRenderObject()! as RenderBox;
-          assert(box != null);
           menuRect = box.localToGlobal(Offset.zero) & box.size;
           return false;
         }
         return true;
       });
-      assert(menuRect != null);
       return menuRect;
     }
 
@@ -1327,6 +1325,9 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+          label: 'Dismiss',
+          textDirection: TextDirection.ltr,
           children: <TestSemantics>[
             TestSemantics(
               flags: <SemanticsFlag>[
@@ -1855,9 +1856,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1891,9 +1890,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1928,9 +1925,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1965,9 +1960,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
