@@ -806,6 +806,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// In order to get the styled text as an [InlineSpan] tree, use [text].
   String get plainText => _textPainter.plainText;
 
+  /// Returns the line metrics for the text in [TextPainter].
+  /// See [TextPainter.computeLineMetrics].
+  List<ui.LineMetrics> get lineMetrics => _textPainter.computeLineMetrics()
+
   /// The text to paint in the form of a tree of [InlineSpan]s.
   ///
   /// In order to get the plain text representation, use [plainText].
