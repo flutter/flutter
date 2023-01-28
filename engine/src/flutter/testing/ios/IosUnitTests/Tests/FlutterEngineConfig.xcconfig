@@ -1,1 +1,2 @@
-FLUTTER_ENGINE=ios_debug_sim_unopt
+FLUTTER_ENGINE[arch=x86_64]=ios_debug_sim_unopt
+FLUTTER_ENGINE[arch=arm64]=ios_debug_sim_unopt_arm64
