@@ -42,23 +42,25 @@ Future<void> withFlutterLeakTracking(
     return dispatchObjectEvent(event.toMap());
   }
 
-  MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
-  final AsyncCodeRunner asyncCodeRunner = tester == null
-      ? (DartAsyncCallback action) async => action()
-      : (DartAsyncCallback action) async => tester.runAsync(action);
-  try {
-    final Leaks leaks = await withLeakTracking(
-      callback,
-      asyncCodeRunner: asyncCodeRunner,
-      stackTraceCollectionConfig: stackTraceCollectionConfig,
-      shouldThrowOnLeaks: false,
-      timeoutForFinalGarbageCollection: timeoutForFinalGarbageCollection,
-    );
-    if (leaksObtainer != null) {
-      leaksObtainer(leaks);
+  return TestAsyncUtils.guard<void>(() async {
+    MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
+    final AsyncCodeRunner asyncCodeRunner = tester == null
+        ? (DartAsyncCallback action) async => action()
+        : (DartAsyncCallback action) async => tester.runAsync(action);
+    try {
+      final Leaks leaks = await withLeakTracking(
+        callback,
+        asyncCodeRunner: asyncCodeRunner,
+        stackTraceCollectionConfig: stackTraceCollectionConfig,
+        shouldThrowOnLeaks: false,
+        timeoutForFinalGarbageCollection: timeoutForFinalGarbageCollection,
+      );
+      if (leaksObtainer != null) {
+        leaksObtainer(leaks);
+      }
+      expect(leaks, isLeakFree);
+    } finally {
+      MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
     }
-    expect(leaks, isLeakFree);
-  } finally {
-    MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
-  }
+  });
 }
