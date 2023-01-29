@@ -342,7 +342,7 @@ class IOSDeployDebugger {
           .listen((String line) {
         _monitorIOSDeployFailure(line, _logger);
 
-        // (lldb)    platform select remote-'ios' --sysroot 
+        // (lldb)    platform select remote-'ios' --sysroot
         if (_lldbPlatformSelect.hasMatch(line)) {
           final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
           if (platformSelect.isEmpty) {
