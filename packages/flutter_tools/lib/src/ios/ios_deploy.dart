@@ -327,7 +327,7 @@ class IOSDeployDebugger {
 
     // (lldb)     run
     // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
-    RegExp _lldbRun = RegExp(r'\(lldb\)\s*run');
+    RegExp lldbRun = RegExp(r'\(lldb\)\s*run');
 
     final Completer<bool> debuggerCompleter = Completer<bool>();
     try {
@@ -353,7 +353,7 @@ class IOSDeployDebugger {
             return;
           }
           final String prompt = line.substring(0, promptEndIndex);
-          _lldbRun = RegExp(RegExp.escape(prompt) + r'\s*run');
+          lldbRun = RegExp(RegExp.escape(prompt) + r'\s*run');
           _logger.printTrace(line);
           return;
         }
@@ -361,7 +361,7 @@ class IOSDeployDebugger {
         // (lldb)     run
         // success
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
-        if (_lldbRun.hasMatch(line)) {
+        if (lldbRun.hasMatch(line)) {
           _logger.printTrace(line);
           _debuggerState = _IOSDeployDebuggerState.launching;
           return;
