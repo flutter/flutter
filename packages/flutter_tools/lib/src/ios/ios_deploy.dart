@@ -288,9 +288,9 @@ class IOSDeployDebugger {
   bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
   _IOSDeployDebuggerState _debuggerState;
 
-  // (lldb)     run
-  // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
-  static final RegExp _lldbRun = RegExp(r'\(lldb\)\s*run');
+  // (lldb)    platform select remote-'ios' --sysroot
+  // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L33
+  static final RegExp _lldbPlatformSelect = RegExp(r"\s*platform select remote-'ios' --sysroot");
 
   // (lldb)     run
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
@@ -324,6 +324,11 @@ class IOSDeployDebugger {
   /// Returns whether or not the debugger successfully attached.
   Future<bool> launchAndAttach() async {
     // Return when the debugger attaches, or the ios-deploy process exits.
+
+    // (lldb)     run
+    // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
+    RegExp _lldbRun = RegExp(r'\(lldb\)\s*run');
+
     final Completer<bool> debuggerCompleter = Completer<bool>();
     try {
       _iosDeployProcess = await _processUtils.start(
@@ -336,6 +341,23 @@ class IOSDeployDebugger {
           .transform<String>(const LineSplitter())
           .listen((String line) {
         _monitorIOSDeployFailure(line, _logger);
+
+        // (lldb)    platform select remote-'ios' --sysroot 
+        if (_lldbPlatformSelect.hasMatch(line)) {
+          final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
+          if (platformSelect.isEmpty) {
+            return;
+          }
+          final int promptEndIndex = line.indexOf(platformSelect);
+          if (promptEndIndex == -1) {
+            return;
+          }
+          final String prompt = line.substring(0, promptEndIndex);
+          _lldbRun = RegExp(RegExp.escape(prompt) + r'\s*run');
+          _logger.printTrace(line);
+          return;
+        }
+
         // (lldb)     run
         // success
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
