@@ -394,6 +394,38 @@ void main() {
     expect(editable.plainText, 'abcdef');
   });
 
+  test('Can read line metrics', () {
+    final RenderEditable editable = RenderEditable(
+      maxLines: null,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    const text = '''
+Some longer text that will require being laid out in several lines.
+    This line follows after a hard break.
+    ''';
+    const style = TextStyle(fontSize: 12, fontFamily: 'Ahem');
+    editable.text = const TextSpan(text: text, style: style);
+
+    editable.layout(const BoxConstraints.tightFor(width: 400));
+
+    final actualLineWidths = editable.lineMetrics.map((lm) => lm.width)
+        .toList();
+    final List<double> expectedLineWidths = [
+      312.0,
+      396.0,
+      72.0,
+      348.0,
+      132.0,
+      0.0,
+    ];
+    expect(actualLineWidths, expectedLineWidths);
+  });
+
   test('Cursor with ideographic script', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
