@@ -74,7 +74,7 @@ class MenuBarTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties to set for [MenuBar] in this widget's descendants.
   final MenuBarThemeData data;

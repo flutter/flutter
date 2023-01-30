@@ -304,7 +304,6 @@ class MenuStyle with Diagnosticable {
 
   /// Linearly interpolate between two [MenuStyle]s.
   static MenuStyle? lerp(MenuStyle? a, MenuStyle? b, double t) {
-    assert (t != null);
     if (a == null && b == null) {
       return null;
     }

@@ -1018,7 +1018,7 @@ Future<void> _runFrameworkTests() async {
       printOutput: false,
       outputChecker: (CommandResult result) {
         final Iterable<Match> matches = httpClientWarning.allMatches(result.flattenedStdout!);
-        if (matches == null || matches.isEmpty || matches.length > 1) {
+        if (matches.isEmpty || matches.length > 1) {
           return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n\n'
                  'stdout:\n${result.flattenedStdout}\n\n'
                  'stderr:\n${result.flattenedStderr}';
@@ -1138,7 +1138,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final List<ShardRunner> tests = <ShardRunner>[
-    for (String buildMode in _kAllBuildModes)
+    for (String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
         target: path.join('test_driver', 'failure.dart'),
@@ -1148,6 +1148,21 @@ Future<void> _runWebLongRunningTests() async {
         // logs. To avoid confusion, silence browser output.
         silenceBrowserOutput: true,
       ),
+      () => _runFlutterDriverWebTest(
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'example_test.dart'),
+        driver: path.join('test_driver', 'integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'canvaskit',
+      ),
+      () => _runFlutterDriverWebTest(
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'extended_test.dart'),
+        driver: path.join('test_driver', 'extended_integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'canvaskit',
+      ),
+    ],
 
     // This test specifically tests how images are loaded in HTML mode, so we don't run it in CanvasKit mode.
     () => _runWebE2eTest('image_loading_integration', buildMode: 'debug', renderer: 'html'),
@@ -1221,7 +1236,6 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
     () => _runWebDebugTest('test/test.dart'),
-    () => _runWebDebugTest('lib/null_assert_main.dart', enableNullSafety: true),
     () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
     () => _runWebDebugTest('lib/web_define_loading.dart',
       additionalArguments: <String>[
@@ -1281,6 +1295,7 @@ Future<void> _runFlutterDriverWebTest({
   required String buildMode,
   required String renderer,
   required String testAppDirectory,
+  String? driver,
   bool expectFailure = false,
   bool silenceBrowserOutput = false,
 }) async {
@@ -1295,6 +1310,7 @@ Future<void> _runFlutterDriverWebTest({
     <String>[
       ...flutterTestArgs,
       'drive',
+      if (driver != null) '--driver=$driver',
       '--target=$target',
       '--browser-name=chrome',
       '--no-sound-null-safety',

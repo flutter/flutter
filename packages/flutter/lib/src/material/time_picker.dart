@@ -1035,10 +1035,7 @@ class _Dial extends StatefulWidget {
     required this.hourDialType,
     required this.onChanged,
     required this.onHourSelected,
-  }) : assert(selectedTime != null),
-       assert(hourMinuteMode != null),
-       assert(hourMinuteMode != null),
-       assert(hourDialType != null);
+  });
 
   final TimeOfDay selectedTime;
   final _HourMinuteMode hourMinuteMode;
@@ -2056,7 +2053,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     // If screen reader is in use, make the hint text say hours/minutes.
     // Otherwise, remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
-    final String? hintText = MediaQuery.accessibleNavigationOf(context) || WidgetsBinding.instance.window.semanticsEnabled
+    final String? hintText = MediaQuery.accessibleNavigationOf(context) || View.of(context).platformDispatcher.semanticsEnabled
         ? widget.semanticHintText
         : (focusNode.hasFocus ? null : _formattedValue);
 
@@ -2158,7 +2155,7 @@ class TimePickerDialog extends StatefulWidget {
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
-  }) : assert(initialTime != null);
+  });
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
@@ -3035,10 +3032,6 @@ Future<TimeOfDay?> showTimePicker({
   Offset? anchorPoint,
   Orientation? orientation,
 }) async {
-  assert(context != null);
-  assert(initialTime != null);
-  assert(useRootNavigator != null);
-  assert(initialEntryMode != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = TimePickerDialog(
@@ -3392,9 +3385,8 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_152
 
-// Generated version v0_143
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);
 
@@ -3509,7 +3501,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.onSurfaceVariant.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
+    return _colors.surfaceVariant.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
   }
 
   @override

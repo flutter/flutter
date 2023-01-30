@@ -833,7 +833,6 @@ void main() {
           tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
-          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -877,7 +876,6 @@ void main() {
           tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
-          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -1414,6 +1412,7 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
     }
   }
 
+  @pragma('vm:entry-point')
   static Route<DateTime> _datePickerRoute(
     BuildContext context,
     Object? arguments,

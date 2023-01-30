@@ -135,6 +135,7 @@ export 'src/widgets/spacer.dart';
 export 'src/widgets/spell_check.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
+export 'src/widgets/tap_and_drag_gestures.dart';
 export 'src/widgets/tap_region.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_editing_intents.dart';
@@ -148,8 +149,7 @@ export 'src/widgets/transitions.dart';
 export 'src/widgets/tween_animation_builder.dart';
 export 'src/widgets/unique_widget.dart';
 export 'src/widgets/value_listenable_builder.dart';
-// TODO(goderbauer): Enable once clean-up in google3 is done.
-// export 'src/widgets/view.dart';
+export 'src/widgets/view.dart';
 export 'src/widgets/viewport.dart';
 export 'src/widgets/visibility.dart';
 export 'src/widgets/widget_inspector.dart';

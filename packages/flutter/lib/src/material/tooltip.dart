@@ -751,7 +751,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
         onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
-        excludeFromSemantics: _excludeFromSemantics,
+        excludeFromSemantics: true,
         child: result,
       );
       // Only check for hovering if there is a mouse connected.
@@ -778,9 +778,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
-  }) : assert(target != null),
-       assert(verticalOffset != null),
-       assert(preferBelow != null);
+  });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.

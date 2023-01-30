@@ -83,11 +83,7 @@ class ChoiceChip extends StatelessWidget
     this.iconTheme,
     this.selectedShadowColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(selected != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -191,7 +187,7 @@ class ChoiceChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_152
 
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
   const _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
@@ -212,7 +208,7 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => Theme.of(context).colorScheme.shadow;
+  Color? get shadowColor => Colors.transparent;
 
   @override
   Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
