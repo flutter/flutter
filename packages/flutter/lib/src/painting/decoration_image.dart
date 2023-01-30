@@ -660,7 +660,7 @@ void paintImage({
         rect,
         paint..shader = shader
       );
-      shader.dispose();
+      // test shader.dispose();
     }
   } else {
     canvas.scale(1 / scale);
