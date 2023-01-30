@@ -26,6 +26,7 @@ if (build_canvaskit_chromium) {
     extra_toolchain_args = {
       skia_use_icu = false
       skia_use_client_icu = true
+      skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
     }
   }
 
