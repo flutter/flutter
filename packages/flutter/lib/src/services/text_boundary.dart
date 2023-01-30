@@ -123,9 +123,87 @@ class LineBoundary extends TextBoundary {
   TextRange getTextBoundaryAt(int position) => _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
 }
 
+/// A text boundary that uses paragraphs as logical boundaries.
+///
+/// A paragraph is defined as the range between line terminators. If no
+/// line terminators exist then the paragraph boundary is the entire document.
+class ParagraphBoundary extends TextBoundary {
+  /// Creates a [ParagraphBoundary] with the text.
+  const ParagraphBoundary(this._text);
+
+  final String _text;
+
+  /// Returns the [int] representing the start position of the paragraph that
+  /// bounds the given `position`. The returned [int] is the position of the code unit
+  /// that follows the line terminator that encloses the desired paragraph.
+  @override
+  int? getLeadingTextBoundaryAt(int position) {
+    if (position < 0 || _text.isEmpty) {
+      return null;
+    }
+
+    if (position >= _text.length) {
+      return _text.length;
+    }
+
+    if (position == 0) {
+      return 0;
+    }
+
+    final List<int> codeUnits = _text.codeUnits;
+    int index = position;
+
+    if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+      index -= 2;
+    } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      index -= 1;
+    }
+
+    while (index > 0) {
+      if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+        return index + 1;
+      }
+      index -= 1;
+    }
+
+    return max(index, 0);
+  }
+
+  /// Returns the [int] representing the end position of the paragraph that
+  /// bounds the given `position`. The returned [int] is the position of the
+  /// code unit representing the trailing line terminator that encloses the
+  /// desired paragraph.
+  @override
+  int? getTrailingTextBoundaryAt(int position) {
+    if (position >= _text.length || _text.isEmpty) {
+      return null;
+    }
+
+    if (position < 0) {
+      return 0;
+    }
+
+    final List<int> codeUnits = _text.codeUnits;
+    int index = position;
+
+    while (!TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      index += 1;
+      if (index == codeUnits.length) {
+        return index;
+      }
+    }
+
+    return index < codeUnits.length - 1
+                && codeUnits[index] == 0xD
+                && codeUnits[index + 1] == 0xA
+                ? index + 2
+                : index + 1;
+  }
+}
+
 /// A text boundary that uses the entire document as logical boundary.
 class DocumentBoundary extends TextBoundary {
-  /// Creates a [DocumentBoundary] with the text
+  /// Creates a [DocumentBoundary] with the text.
   const DocumentBoundary(this._text);
 
   final String _text;
