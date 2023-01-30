@@ -209,17 +209,17 @@ Dart_Isolate CreateServiceIsolate(
 }  // namespace dart_runner
 
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
-  dart_utils::MappedResource observatory_tar;
+  dart_utils::MappedResource vm_service_tar;
   if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "/pkg/data/observatory.tar", observatory_tar)) {
+          nullptr, "/pkg/data/observatory.tar", vm_service_tar)) {
     FX_LOG(ERROR, LOG_TAG, "Failed to load Observatory assets");
     return nullptr;
   }
   // TODO(rmacnak): Should we avoid copying the tar? Or does the service
   // library not hold onto it anyway?
   return tonic::DartConverter<tonic::Uint8List>::ToDart(
-      reinterpret_cast<const uint8_t*>(observatory_tar.address()),
-      observatory_tar.size());
+      reinterpret_cast<const uint8_t*>(vm_service_tar.address()),
+      vm_service_tar.size());
 }
 
 }  // namespace dart_runner

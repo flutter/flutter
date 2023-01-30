@@ -19,7 +19,7 @@ using DartLifecycleTest = FixtureTest;
 TEST_F(DartLifecycleTest, CanStartAndShutdownVM) {
   auto settings = CreateSettingsForFixture();
   settings.leak_vm = false;
-  settings.enable_observatory = false;
+  settings.enable_vm_service = false;
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   {
     auto vm_ref = DartVMRef::Create(settings);
@@ -31,7 +31,7 @@ TEST_F(DartLifecycleTest, CanStartAndShutdownVM) {
 TEST_F(DartLifecycleTest, CanStartAndShutdownVMOverAndOver) {
   auto settings = CreateSettingsForFixture();
   settings.leak_vm = false;
-  settings.enable_observatory = false;
+  settings.enable_vm_service = false;
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   auto count = DartVM::GetVMLaunchCount();
   for (size_t i = 0; i < 10; i++) {
@@ -89,7 +89,7 @@ TEST_F(DartLifecycleTest, DISABLED_ShuttingDownTheVMShutsDownAllIsolates) {
   auto settings = CreateSettingsForFixture();
   settings.leak_vm = false;
   // Make sure the service protocol launches
-  settings.enable_observatory = true;
+  settings.enable_vm_service = true;
 
   auto thread_task_runner = CreateNewThread();
 

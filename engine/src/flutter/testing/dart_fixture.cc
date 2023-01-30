@@ -35,7 +35,7 @@ Settings DartFixture::CreateSettingsForFixture() {
   settings.isolate_create_callback = [this]() {
     native_resolver_->SetNativeResolverForIsolate();
   };
-  settings.enable_observatory = false;
+  settings.enable_vm_service = false;
   SetSnapshotsAndAssets(settings);
   return settings;
 }

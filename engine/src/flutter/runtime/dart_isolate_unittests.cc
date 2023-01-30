@@ -404,9 +404,9 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   fml::AutoResetWaitableEvent service_isolate_latch;
   auto settings = CreateSettingsForFixture();
-  settings.enable_observatory = true;
-  settings.observatory_port = 0;
-  settings.observatory_host = "127.0.0.1";
+  settings.enable_vm_service = true;
+  settings.vm_service_port = 0;
+  settings.vm_service_host = "127.0.0.1";
   settings.enable_service_port_fallback = true;
   settings.service_isolate_create_callback = [&service_isolate_latch]() {
     service_isolate_latch.Signal();
