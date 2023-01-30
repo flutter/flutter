@@ -13,8 +13,10 @@
 #include "flutter/shell/platform/windows/keyboard_key_handler.h"
 #include "flutter/shell/platform/windows/keyboard_manager.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
+#include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
+#include "flutter/shell/platform/windows/testing/windows_test.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -414,7 +416,7 @@ class KeyboardTester {
   using ResponseHandler =
       std::function<void(MockKeyResponseController::ResponseCallback)>;
 
-  explicit KeyboardTester()
+  explicit KeyboardTester(WindowsTestContext& context)
       : callback_handler_(RespondValue(false)),
         map_virtual_key_layout_(LayoutDefault) {
     view_ = std::make_unique<TestFlutterWindowsView>(
@@ -434,9 +436,9 @@ class KeyboardTester {
               virtual_key, extended ? MAPVK_VK_TO_VSC_EX : MAPVK_VK_TO_VSC);
         });
     view_->SetEngine(GetTestEngine(
-        [&callback_handler = callback_handler_](
-            const FlutterKeyEvent* event,
-            MockKeyResponseController::ResponseCallback callback) {
+        context, [&callback_handler = callback_handler_](
+                     const FlutterKeyEvent* event,
+                     MockKeyResponseController::ResponseCallback callback) {
           FlutterKeyEvent clone_event = *event;
           clone_event.character = event->character == nullptr
                                       ? nullptr
@@ -497,15 +499,12 @@ class KeyboardTester {
   // Returns an engine instance configured with dummy project path values, and
   // overridden methods for sending platform messages, so that the engine can
   // respond as if the framework were connected.
-  static std::unique_ptr<FlutterWindowsEngine> GetTestEngine(
+  std::unique_ptr<FlutterWindowsEngine> GetTestEngine(
+      WindowsTestContext& context,
       MockKeyResponseController::EmbedderCallbackHandler
           embedder_callback_handler) {
-    FlutterDesktopEngineProperties properties = {};
-    properties.assets_path = L"C:\\foo\\flutter_assets";
-    properties.icu_data_path = L"C:\\foo\\icudtl.dat";
-    properties.aot_library_path = L"C:\\foo\\aot.so";
-    FlutterProjectBundle project(properties);
-    auto engine = std::make_unique<FlutterWindowsEngine>(project);
+    FlutterWindowsEngineBuilder builder{context};
+    auto engine = builder.Build();
 
     EngineModifier modifier(engine.get());
 
@@ -539,6 +538,8 @@ class KeyboardTester {
   }
 };
 
+class KeyboardTest : public WindowsTest {};
+
 }  // namespace
 
 // Define compound `expect` in macros. If they're defined in functions, the
@@ -556,8 +557,8 @@ class KeyboardTester {
   EXPECT_EQ(_key_call.type, KeyCall::kKeyCallTextMethodCall);   \
   EXPECT_STREQ(_key_call.text_method_call.c_str(), json_string);
 
-TEST(KeyboardTest, LowerCaseAHandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, LowerCaseAHandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(true);
 
   // US Keyboard layout
@@ -587,8 +588,8 @@ TEST(KeyboardTest, LowerCaseAHandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
-TEST(KeyboardTest, LowerCaseAUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, LowerCaseAUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -619,8 +620,8 @@ TEST(KeyboardTest, LowerCaseAUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, ArrowLeftHandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, ArrowLeftHandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(true);
 
   // US Keyboard layout
@@ -649,8 +650,8 @@ TEST(KeyboardTest, ArrowLeftHandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
-TEST(KeyboardTest, ArrowLeftUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, ArrowLeftUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -679,8 +680,8 @@ TEST(KeyboardTest, ArrowLeftUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, ShiftLeftUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, ShiftLeftUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -723,8 +724,8 @@ TEST(KeyboardTest, ShiftLeftUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, ShiftRightUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, ShiftRightUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -756,8 +757,8 @@ TEST(KeyboardTest, ShiftRightUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, CtrlLeftUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, CtrlLeftUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -789,8 +790,8 @@ TEST(KeyboardTest, CtrlLeftUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, CtrlRightUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, CtrlRightUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -822,8 +823,8 @@ TEST(KeyboardTest, CtrlRightUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, AltLeftUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, AltLeftUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -855,8 +856,8 @@ TEST(KeyboardTest, AltLeftUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
-TEST(KeyboardTest, AltRightUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, AltRightUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -889,8 +890,8 @@ TEST(KeyboardTest, AltRightUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
-TEST(KeyboardTest, MetaLeftUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, MetaLeftUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -920,8 +921,8 @@ TEST(KeyboardTest, MetaLeftUnhandled) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, MetaRightUnhandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, MetaRightUnhandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -954,8 +955,8 @@ TEST(KeyboardTest, MetaRightUnhandled) {
 
 // Press Shift-A. This is special because Win32 gives 'A' as character for the
 // KeyA press.
-TEST(KeyboardTest, ShiftLeftKeyA) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, ShiftLeftKeyA) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -1013,8 +1014,8 @@ TEST(KeyboardTest, ShiftLeftKeyA) {
 
 // Press Ctrl-A. This is special because Win32 gives 0x01 as character for the
 // KeyA press.
-TEST(KeyboardTest, CtrlLeftKeyA) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, CtrlLeftKeyA) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -1071,8 +1072,8 @@ TEST(KeyboardTest, CtrlLeftKeyA) {
 }
 
 // Press Ctrl-1. This is special because it yields no WM_CHAR for the 1.
-TEST(KeyboardTest, CtrlLeftDigit1) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, CtrlLeftDigit1) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -1128,8 +1129,8 @@ TEST(KeyboardTest, CtrlLeftDigit1) {
 
 // Press 1 on a French keyboard. This is special because it yields WM_CHAR
 // with char_code '&'.
-TEST(KeyboardTest, Digit1OnFrenchLayout) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, Digit1OnFrenchLayout) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   tester.SetLayout(LayoutFrench);
@@ -1161,8 +1162,8 @@ TEST(KeyboardTest, Digit1OnFrenchLayout) {
 }
 
 // This tests AltGr-Q on a German keyboard, which should print '@'.
-TEST(KeyboardTest, AltGrModifiedKey) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, AltGrModifiedKey) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // German Keyboard layout
@@ -1247,8 +1248,8 @@ TEST(KeyboardTest, AltGrModifiedKey) {
 //
 // This is because pressing AltGr alone causes Win32 to send a fake "CtrlLeft
 // down" event first (see |IsKeyDownAltRight| for detailed explanation).
-TEST(KeyboardTest, AltGrTwice) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, AltGrTwice) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // 1. AltGr down.
@@ -1348,8 +1349,8 @@ TEST(KeyboardTest, AltGrTwice) {
 
 // This tests dead key ^ then E on a French keyboard, which should be combined
 // into ê.
-TEST(KeyboardTest, DeadKeyThatCombines) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, DeadKeyThatCombines) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   tester.SetLayout(LayoutFrench);
@@ -1411,8 +1412,8 @@ TEST(KeyboardTest, DeadKeyThatCombines) {
 //
 // It is different from French AZERTY because the character that the ^ key is
 // mapped to does not contain the dead key character somehow.
-TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // Press ShiftLeft
@@ -1491,8 +1492,8 @@ TEST(KeyboardTest, DeadKeyWithoutDeadMaskThatCombines) {
 
 // This tests dead key ^ then & (US: 1) on a French keyboard, which do not
 // combine and should output "^&".
-TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, DeadKeyThatDoesNotCombine) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   tester.SetLayout(LayoutFrench);
@@ -1560,8 +1561,8 @@ TEST(KeyboardTest, DeadKeyThatDoesNotCombine) {
 // This tests dead key `, then dead key `, then e.
 //
 // It should output ``e, instead of `è.
-TEST(KeyboardTest, DeadKeyTwiceThenLetter) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, DeadKeyTwiceThenLetter) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US INTL layout.
@@ -1642,8 +1643,8 @@ TEST(KeyboardTest, DeadKeyTwiceThenLetter) {
 }
 
 // This tests when the resulting character needs to be combined with surrogates.
-TEST(KeyboardTest, MultibyteCharacter) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, MultibyteCharacter) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // Gothic Keyboard layout. (We need a layout that yields non-BMP characters
@@ -1679,8 +1680,8 @@ TEST(KeyboardTest, MultibyteCharacter) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 1);
 }
 
-TEST(KeyboardTest, SynthesizeModifiers) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, SynthesizeModifiers) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // Two dummy events used to trigger synthesization.
@@ -1907,8 +1908,8 @@ TEST(KeyboardTest, SynthesizeModifiers) {
 // any events.
 //
 // Regression test for https://github.com/flutter/flutter/issues/95888 .
-TEST(KeyboardTest, ImeExtendedEventsAreIgnored) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, ImeExtendedEventsAreIgnored) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout.
@@ -1935,8 +1936,8 @@ TEST(KeyboardTest, ImeExtendedEventsAreIgnored) {
 // Regression test for https://github.com/flutter/flutter/issues/104169. These
 // are real messages recorded when pressing Shift-2 using Microsoft Pinyin IME
 // on Win 10 Enterprise, which crashed the app before the fix.
-TEST(KeyboardTest, UpOnlyImeEventsAreCorrectlyHandled) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, UpOnlyImeEventsAreCorrectlyHandled) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(true);
 
   // US Keyboard layout.
@@ -1973,8 +1974,8 @@ TEST(KeyboardTest, UpOnlyImeEventsAreCorrectlyHandled) {
 // arrive earlier than the framework response, and if the 2nd event has an
 // identical hash as the one waiting for response, an earlier implementation
 // will crash upon the response.
-TEST(KeyboardTest, SlowFrameworkResponse) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, SlowFrameworkResponse) {
+  KeyboardTester tester{GetContext()};
 
   std::vector<MockKeyResponseController::ResponseCallback> recorded_callbacks;
 
@@ -2036,9 +2037,8 @@ TEST(KeyboardTest, SlowFrameworkResponse) {
 //   KeyA down, KeyA up, (down event responded with false), KeyA down, KeyA up,
 //
 // The code must not take the 2nd real key down events as a redispatched event.
-TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
-  KeyboardTester tester;
-
+TEST_F(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
+  KeyboardTester tester{GetContext()};
   std::vector<MockKeyResponseController::ResponseCallback> recorded_callbacks;
 
   // Store callbacks to manually call them.
@@ -2113,8 +2113,8 @@ TEST(KeyboardTest, SlowFrameworkResponseForIdenticalEvents) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
-TEST(KeyboardTest, TextInputSubmit) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, TextInputSubmit) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -2181,7 +2181,7 @@ TEST(KeyboardTest, TextInputSubmit) {
   clear_key_calls();
 }
 
-TEST(KeyboardTest, VietnameseTelexAddDiacriticWithFastResponse) {
+TEST_F(KeyboardTest, VietnameseTelexAddDiacriticWithFastResponse) {
   // In this test, the user presses the folloing keys:
   //
   //   Key         Current text
@@ -2191,7 +2191,7 @@ TEST(KeyboardTest, VietnameseTelexAddDiacriticWithFastResponse) {
   //
   // And the Backspace event is responded immediately.
 
-  KeyboardTester tester;
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -2263,8 +2263,9 @@ TEST(KeyboardTest, VietnameseTelexAddDiacriticWithFastResponse) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
-void VietnameseTelexAddDiacriticWithSlowResponse(bool backspace_response) {
-  // In this test, the user presses the folloing keys:
+void VietnameseTelexAddDiacriticWithSlowResponse(WindowsTestContext& context,
+                                                 bool backspace_response) {
+  // In this test, the user presses the following keys:
   //
   //   Key         Current text
   //  ===========================
@@ -2273,7 +2274,7 @@ void VietnameseTelexAddDiacriticWithSlowResponse(bool backspace_response) {
   //
   // And the Backspace down event is responded slowly with `backspace_response`.
 
-  KeyboardTester tester;
+  KeyboardTester tester{context};
   tester.Responding(false);
 
   // US Keyboard layout
@@ -2368,18 +2369,18 @@ void VietnameseTelexAddDiacriticWithSlowResponse(bool backspace_response) {
   EXPECT_EQ(tester.RedispatchedMessageCountAndClear(), 0);
 }
 
-TEST(KeyboardTest, VietnameseTelexAddDiacriticWithSlowFalseResponse) {
-  VietnameseTelexAddDiacriticWithSlowResponse(false);
+TEST_F(KeyboardTest, VietnameseTelexAddDiacriticWithSlowFalseResponse) {
+  VietnameseTelexAddDiacriticWithSlowResponse(GetContext(), false);
 }
 
-TEST(KeyboardTest, VietnameseTelexAddDiacriticWithSlowTrueResponse) {
-  VietnameseTelexAddDiacriticWithSlowResponse(true);
+TEST_F(KeyboardTest, VietnameseTelexAddDiacriticWithSlowTrueResponse) {
+  VietnameseTelexAddDiacriticWithSlowResponse(GetContext(), true);
 }
 
 // Ensure that the scancode-less key events issued by Narrator
 // when toggling caps lock don't violate assert statements.
-TEST(KeyboardTest, DoubleCapsLock) {
-  KeyboardTester tester;
+TEST_F(KeyboardTest, DoubleCapsLock) {
+  KeyboardTester tester{GetContext()};
   tester.Responding(false);
 
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{
