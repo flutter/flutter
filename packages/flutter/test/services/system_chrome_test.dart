@@ -120,23 +120,6 @@ void main() {
     expect(log, isNotEmpty);
   });
 
-  test('setEnabledSystemUIOverlays control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
-
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      log.add(methodCall);
-      return null;
-    });
-
-    await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
-
-    expect(log, hasLength(1));
-    expect(log.single, isMethodCall(
-      'SystemChrome.setEnabledSystemUIOverlays',
-      arguments: <String>['SystemUiOverlay.top'],
-    ));
-  });
-
   test('setEnabledSystemUIMode control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 

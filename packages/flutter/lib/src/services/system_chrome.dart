@@ -400,36 +400,6 @@ class SystemChrome {
     );
   }
 
-  /// Specifies the set of system overlays to have visible when the application
-  /// is running.
-  ///
-  /// The `overlays` argument is a list of [SystemUiOverlay] enum values
-  /// denoting the overlays to show.
-  ///
-  /// If a particular overlay is unsupported on the platform, enabling or
-  /// disabling that overlay will be ignored.
-  ///
-  /// The settings here can be overridden by the platform when System UI becomes
-  /// necessary for functionality.
-  ///
-  /// For example, on Android, when the keyboard becomes visible, it will enable the
-  /// navigation bar and status bar system UI overlays. When the keyboard is closed,
-  /// Android will not restore the previous UI visibility settings, and the UI
-  /// visibility cannot be changed until 1 second after the keyboard is closed to
-  /// prevent malware locking users from navigation buttons.
-  ///
-  /// To regain "fullscreen" after text entry, the UI overlays should be set again
-  /// after a delay of 1 second. This can be achieved through [restoreSystemUIOverlays]
-  /// or calling this again. Otherwise, the original UI overlay settings will be
-  /// automatically restored only when the application loses and regains focus.
-  @Deprecated(
-    'Migrate to setEnabledSystemUIMode. '
-    'This feature was deprecated after v2.3.0-17.0.pre.'
-  )
-  static Future<void> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await setEnabledSystemUIMode(SystemUiMode.manual, overlays: overlays);
-  }
-
   /// Specifies the [SystemUiMode] to have visible when the application
   /// is running.
   ///
