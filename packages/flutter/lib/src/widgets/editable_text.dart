@@ -85,25 +85,25 @@ const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 const int _kObscureShowLatestCharCursorTicks = 3;
 
 class _CompositionCallback extends SingleChildRenderObjectWidget {
-  const _CompositionCallback({ required this.compositeCallback, this.enabled = false, super.child });
+  const _CompositionCallback({ required this.compositeCallback, required this.enabled, super.child });
   final CompositionCallback compositeCallback;
   final bool enabled;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    assert(!enabled);
-    return _RenderCompositionCallback(compositeCallback);
+    return _RenderCompositionCallback(compositeCallback, enabled);
   }
   @override
   void updateRenderObject(BuildContext context, _RenderCompositionCallback renderObject) {
     super.updateRenderObject(context, renderObject);
+    // _EditableTextState always uses the same callback.
     assert(renderObject.compositeCallback == compositeCallback);
     renderObject.enabled = enabled;
   }
 }
 
 class _RenderCompositionCallback extends RenderProxyBox {
-  _RenderCompositionCallback(this.compositeCallback);
+  _RenderCompositionCallback(this.compositeCallback, this._enabled);
 
   final CompositionCallback compositeCallback;
   VoidCallback? _cancelCallback;
