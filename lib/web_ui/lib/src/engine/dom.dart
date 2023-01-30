@@ -63,9 +63,6 @@ extension DomWindowExtension on DomWindow {
   /// The Trusted Types API (when available).
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
   external DomTrustedTypePolicyFactory? get trustedTypes;
-
-  // ignore: non_constant_identifier_names
-  external DomIntl get Intl;
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(num highResTime);
@@ -82,6 +79,9 @@ extension DomConsoleExtension on DomConsole {
 
 @JS('window')
 external DomWindow get domWindow;
+
+@JS('Intl')
+external DomIntl get domIntl;
 
 @JS()
 @staticInterop
@@ -1815,7 +1815,7 @@ extension DomV8BreakIteratorExtension on DomV8BreakIterator {
 }
 
 DomV8BreakIterator createV8BreakIterator() {
-  final Object? v8BreakIterator = domWindow.Intl.v8BreakIterator;
+  final Object? v8BreakIterator = domIntl.v8BreakIterator;
   if (v8BreakIterator == null) {
     throw UnimplementedError('v8BreakIterator is not supported.');
   }
