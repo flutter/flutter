@@ -250,7 +250,9 @@ void main() {
   });
 
   testGesture('Rejects scale gestures from unallowed device kinds', (GestureTester tester) {
-    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+    );
 
     bool didStartScale = false;
     scale.onStart = (ScaleStartDetails details) {
@@ -282,7 +284,9 @@ void main() {
   });
 
   testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices', (GestureTester tester) {
-    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+    );
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
@@ -1157,21 +1161,6 @@ void main() {
     didEndScale = false;
 
     scale.dispose();
-  });
-
-  testWidgets('ScaleGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        ScaleGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
   });
 
   testGesture('scale trackpadScrollCausesScale', (GestureTester tester) {

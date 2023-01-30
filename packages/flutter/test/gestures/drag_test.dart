@@ -730,7 +730,7 @@ void main() {
   testGesture('Can filter drags based on device kind', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag =
         HorizontalDragGestureRecognizer(
-            kind: PointerDeviceKind.mouse,
+            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse },
         )
         ..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
