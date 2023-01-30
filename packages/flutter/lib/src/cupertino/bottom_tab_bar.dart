@@ -15,7 +15,7 @@ import 'theme.dart';
 const double _kTabBarHeight = 50.0;
 
 const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x4C000000),
+  color: Color(0x4D000000),
   darkColor: Color(0x29000000),
 );
 const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
