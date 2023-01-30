@@ -247,6 +247,10 @@ class MDnsVmServiceDiscovery {
           continue;
         }
 
+        if (uniqueResultsByDomainName.contains(domainName)) {
+          continue;
+        }
+
         // Get the IP address of the service if using a network device.
         InternetAddress? ipAddress;
         if (isNetworkDevice) {
@@ -280,39 +284,11 @@ class MDnsVmServiceDiscovery {
               ResourceRecordQuery.text(domainName),
           )
           .toList();
-        if (txt.isEmpty) {
-          results.add(MDnsVmServiceDiscoveryResult(domainName, srvRecord.port, ''));
-          if (quitOnFind) {
-            return results;
-          }
-          continue;
-        }
-        const String authCodePrefix = 'authCode=';
-        String? raw;
-        for (final String record in txt.first.text.split('\n')) {
-          if (record.startsWith(authCodePrefix)) {
-            raw = record;
-            break;
-          }
-        }
-        if (raw == null) {
-          results.add(MDnsVmServiceDiscoveryResult(domainName, srvRecord.port, ''));
-          if (quitOnFind) {
-            return results;
-          }
-          continue;
-        }
-        String authCode = raw.substring(authCodePrefix.length);
-        // The Dart VM Service currently expects a trailing '/' as part of the
-        // URI, otherwise an invalid authentication code response is given.
-        if (!authCode.endsWith('/')) {
-          authCode += '/';
-        }
 
-        if (uniqueResultsByDomainName.contains(domainName)) {
-          continue;
+        String authCode = '';
+        if (txt.isNotEmpty) {
+          authCode = _getAuthCode(txt.first.text);
         }
-
         results.add(MDnsVmServiceDiscoveryResult(
           domainName,
           srvRecord.port,
@@ -342,6 +318,27 @@ class MDnsVmServiceDiscovery {
     } finally {
       client.stop();
     }
+  }
+
+  String _getAuthCode(String txtRecord) {
+    const String authCodePrefix = 'authCode=';
+    String? raw;
+    for (final String record in txtRecord.split('\n')) {
+      if (record.startsWith(authCodePrefix)) {
+        raw = record;
+        break;
+      }
+    }
+    if (raw == null) {
+      return '';
+    }
+    String authCode = raw.substring(authCodePrefix.length);
+    // The Dart VM Service currently expects a trailing '/' as part of the
+    // URI, otherwise an invalid authentication code response is given.
+    if (!authCode.endsWith('/')) {
+      authCode += '/';
+    }
+    return authCode;
   }
 
   /// Gets Dart VM Service Uri for `flutter attach`.
