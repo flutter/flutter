@@ -365,9 +365,7 @@ class ContentInsertionConfiguration {
   ContentInsertionConfiguration({
     required this.onContentInserted,
     this.allowedMimeTypes = kDefaultContentInsertionMimeTypes,
-  }) : assert(onContentInserted != null),
-       assert(allowedMimeTypes != null),
-       assert(allowedMimeTypes.isNotEmpty);
+  }) : assert(allowedMimeTypes.isNotEmpty);
 
   /// Called when a user inserts content through the virtual / on-screen keyboard,
   /// currently only used on Android.
