@@ -673,7 +673,7 @@ void main() {
 
     // Paint a square image into an output rect that is twice as wide as it is
     // tall. One copy of the image should be painted, aligned so that a repeating
-    // tile mode causes it appear twice.
+    // tile mode causes it to appear twice.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
@@ -708,7 +708,7 @@ void main() {
 
     // Paint a square image into an output rect that is twice as tall as it is
     // wide.  One copy of the image should be painted, aligned so that a repeating
-    // tile mode causes it appear twice.
+    // tile mode causes it to appear twice.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 

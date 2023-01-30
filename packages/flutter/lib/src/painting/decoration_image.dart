@@ -627,7 +627,8 @@ void paintImage({
   if (needSave) {
     canvas.save();
   }
-  if (repeat != ImageRepeat.noRepeat) {
+  if (repeat != ImageRepeat.noRepeat && centerSlice != null) {
+    // Don't clip if an image shader is used.
     canvas.clipRect(rect);
   }
   if (flipHorizontally) {
@@ -646,7 +647,7 @@ void paintImage({
       final TileMode tmx = (repeat == ImageRepeat.repeatX || repeat == ImageRepeat.repeat)
         ? TileMode.repeated
         : TileMode.clamp;
-      final TileMode tmy = repeat == ImageRepeat.repeatY || repeat == ImageRepeat.repeat
+      final TileMode tmy = (repeat == ImageRepeat.repeatY || repeat == ImageRepeat.repeat)
         ? TileMode.repeated
         : TileMode.clamp;
       final Rect data = _generateImageTileRects(rect, destinationRect, repeat).first;
@@ -680,7 +681,7 @@ void paintImage({
   }
 }
 
-Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
+List<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
   int startX = 0;
   int startY = 0;
   int stopX = 0;
