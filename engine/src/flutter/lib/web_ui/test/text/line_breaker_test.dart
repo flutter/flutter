@@ -421,7 +421,7 @@ void groupForEachFragmenter(GroupBody callback) {
     () => callback(isV8: false),
   );
 
-  if (domWindow.Intl.v8BreakIterator != null) {
+  if (domIntl.v8BreakIterator != null) {
     group(
       '$V8LineBreakFragmenter',
       () => callback(isV8: true),
