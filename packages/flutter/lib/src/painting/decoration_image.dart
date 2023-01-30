@@ -8,6 +8,7 @@ import 'dart:ui' as ui show FlutterView, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
