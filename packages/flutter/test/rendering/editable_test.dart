@@ -54,41 +54,83 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('RenderEditable respects clipBehavior', () {
-    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
-    final TestClipPaintingContext context = TestClipPaintingContext();
-
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 1.0);
     final String longString = 'a' * 10000;
 
-    // By default, clipBehavior should be Clip.none
-    final RenderEditable defaultEditable = RenderEditable(
-      text: TextSpan(text: longString),
+    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
+      final TestClipPaintingContext context = TestClipPaintingContext();
+      final RenderEditable editable;
+      switch (clip) {
+        case Clip.none:
+        case Clip.hardEdge:
+        case Clip.antiAlias:
+        case Clip.antiAliasWithSaveLayer:
+          editable = RenderEditable(
+            text: TextSpan(text: longString),
+            textDirection: TextDirection.ltr,
+            startHandleLayerLink: LayerLink(),
+            endHandleLayerLink: LayerLink(),
+            offset: ViewportOffset.zero(),
+            textSelectionDelegate: _FakeEditableTextState(),
+            selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+            clipBehavior: clip!,
+          );
+          break;
+        case null:
+          editable = RenderEditable(
+            text: TextSpan(text: longString),
+            textDirection: TextDirection.ltr,
+            startHandleLayerLink: LayerLink(),
+            endHandleLayerLink: LayerLink(),
+            offset: ViewportOffset.zero(),
+            textSelectionDelegate: _FakeEditableTextState(),
+            selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+          );
+          break;
+      }
+      layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
+      context.paintChild(editable, Offset.zero);
+      // By default, clipBehavior is Clip.hardEdge.
+      expect(context.clipBehavior, equals(clip ?? Clip.hardEdge), reason: 'for $clip');
+    }
+  });
+
+  test('Reports the real height when maxLines is 1', () {
+    const InlineSpan tallSpan = TextSpan(
+      style: TextStyle(fontSize: 10),
+      children: <InlineSpan>[TextSpan(text: 'TALL', style: TextStyle(fontSize: 100))],
+    );
+    final BoxConstraints constraints = BoxConstraints.loose(const Size(600, 600));
+    final RenderEditable editable = RenderEditable(
       textDirection: TextDirection.ltr,
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
       offset: ViewportOffset.zero(),
       textSelectionDelegate: _FakeEditableTextState(),
-      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+      text: tallSpan,
     );
-    layout(defaultEditable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-    context.paintChild(defaultEditable, Offset.zero);
-    expect(context.clipBehavior, equals(Clip.hardEdge));
 
-    context.clipBehavior = Clip.none; // Reset as Clip.none won't write into clipBehavior.
-    for (final Clip clip in Clip.values) {
-      final RenderEditable editable = RenderEditable(
-        text: TextSpan(text: longString),
-        textDirection: TextDirection.ltr,
-        startHandleLayerLink: LayerLink(),
-        endHandleLayerLink: LayerLink(),
-        offset: ViewportOffset.zero(),
-        textSelectionDelegate: _FakeEditableTextState(),
-        selection: const TextSelection(baseOffset: 0, extentOffset: 0),
-        clipBehavior: clip,
-      );
-      layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
-      context.paintChild(editable, Offset.zero);
-      expect(context.clipBehavior, equals(clip));
-    }
+    layout(editable, constraints: constraints);
+    expect(editable.size.height, 100);
+  });
+
+  test('Reports the height of the first line when maxLines is 1', () {
+    final InlineSpan multilineSpan = TextSpan(
+      text: 'liiiiines\n' * 10,
+      style: const TextStyle(fontSize: 10),
+    );
+    final BoxConstraints constraints = BoxConstraints.loose(const Size(600, 600));
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: multilineSpan,
+    );
+
+    layout(editable, constraints: constraints);
+    expect(editable.size.height, 10);
   });
 
   test('Editable respect clipBehavior in describeApproximatePaintClip', () {
@@ -111,6 +153,37 @@ void main() {
       expect(editable.describeApproximatePaintClip(child), null);
     });
     expect(visited, true);
+  });
+
+  test('RenderEditable.paint respects offset argument', () {
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 1000.0, maxWidth: 1000.0);
+    final TestPushLayerPaintingContext context = TestPushLayerPaintingContext();
+
+    const Offset paintOffset = Offset(100, 200);
+    const double fontSize = 20.0;
+    const Offset endpoint = Offset(0.0, fontSize);
+
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        text: 'text',
+        style: TextStyle(
+          fontSize: fontSize,
+          height: 1.0,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      selection: const TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    layout(editable, constraints: viewport, phase: EnginePhase.composite);
+    editable.paint(context, paintOffset);
+
+    final List<LeaderLayer> leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
+    expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
+    expect(leaderLayers.single.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
   });
 
   test('editable intrinsics', () {
@@ -289,6 +362,34 @@ void main() {
     editable.textAlign = TextAlign.center;
     expect(editable.textAlign, TextAlign.center);
     expect(editable.debugNeedsLayout, isTrue);
+  });
+
+  test('Can read plain text', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      maxLines: null,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    expect(editable.plainText, '');
+
+    editable.text = const TextSpan(text: '123');
+    expect(editable.plainText, '123');
+
+    editable.text = const TextSpan(
+      children: <TextSpan>[
+        TextSpan(text: 'abc', style: TextStyle(fontSize: 12, fontFamily: 'Ahem')),
+        TextSpan(text: 'def', style: TextStyle(fontSize: 10, fontFamily: 'Ahem')),
+      ],
+    );
+    expect(editable.plainText, 'abcdef');
+
+    editable.layout(const BoxConstraints.tightFor(width: 200));
+    expect(editable.plainText, 'abcdef');
   });
 
   test('Cursor with ideographic script', () {
@@ -812,6 +913,20 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 1),
     );
     expect(endpoints[0].point.dx, 0);
+  });
+
+  test('TextSelectionPoint can compare', () {
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint first = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint second = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);
+    expect(first == second, isTrue);
+    expect(first.hashCode == second.hashCode, isTrue);
+
+    // ignore: prefer_const_constructors
+    final TextSelectionPoint different = TextSelectionPoint(Offset(2, 2), TextDirection.ltr);
+    expect(first == different, isFalse);
+    expect(first.hashCode == different.hashCode, isFalse);
   });
 
   group('getRectForComposingRange', () {

@@ -148,10 +148,10 @@ void main() {
       find.byType(Switch),
       paints
         ..rrect(color: Colors.blue[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.yellow[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.yellow[500]),
     );
 
     await tester.tap(find.byType(Switch));
@@ -161,10 +161,10 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(color: Colors.green[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.red[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.red[500]),
     );
   });
 
@@ -372,7 +372,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: tileColor));
+    expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
   testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -392,7 +392,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..path(color: selectedTileColor));
+    expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
   testWidgets('SwitchListTile selected item text Color', (WidgetTester tester) async {
@@ -400,10 +400,14 @@ void main() {
 
     const Color activeColor = Color(0xff00ff00);
 
-    Widget buildFrame({ Color? activeColor, Color? toggleableActiveColor }) {
+    Widget buildFrame({ Color? activeColor, Color? thumbColor }) {
       return MaterialApp(
         theme: ThemeData.light().copyWith(
-          toggleableActiveColor: toggleableActiveColor,
+          switchTheme: SwitchThemeData(
+            thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+              return states.contains(MaterialState.selected) ? thumbColor : null;
+            }),
+          ),
         ),
         home: Scaffold(
           body: Center(
@@ -423,7 +427,7 @@ void main() {
       return tester.renderObject<RenderParagraph>(find.text(text)).text.style?.color;
     }
 
-    await tester.pumpWidget(buildFrame(toggleableActiveColor: activeColor));
+    await tester.pumpWidget(buildFrame(activeColor: activeColor));
     expect(textColor('title'), activeColor);
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
@@ -474,6 +478,64 @@ void main() {
     await tester.pump(); // Let the focus take effect.
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isTrue);
     expect(tileNode.hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('SwitchListTile onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile onFocusChange');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SwitchListTile(
+            value: true,
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onChanged: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
+  });
+
+  testWidgets('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
+    final FocusNode node = FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
+    bool gotFocus = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SwitchListTile.adaptive(
+            value: true,
+            focusNode: node,
+            onFocusChange: (bool focused) {
+              gotFocus = focused;
+            },
+            onChanged: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    node.requestFocus();
+    await tester.pump();
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    node.unfocus();
+    await tester.pump();
+    expect(gotFocus, isFalse);
+    expect(node.hasFocus, isFalse);
   });
 
   group('feedback', () {
@@ -549,6 +611,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byKey(key))),
       paints
+        ..rect()
         ..rect(
             color: Colors.orange[500],
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),

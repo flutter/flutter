@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -87,6 +88,20 @@ void main() {
     });
   });
   group('FutureBuilder', () {
+    testWidgets('gives expected snapshot with SynchronousFuture', (WidgetTester tester) async {
+      final SynchronousFuture<String> future = SynchronousFuture<String>('flutter');
+      await tester.pumpWidget(FutureBuilder<String>(
+        future: future,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          expect(snapshot.connectionState, ConnectionState.done);
+          expect(snapshot.data, 'flutter');
+          expect(snapshot.error, null);
+          expect(snapshot.stackTrace, null);
+          return const Placeholder();
+        },
+      ));
+    });
+
     testWidgets('gracefully handles transition from null future', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(FutureBuilder<String>(

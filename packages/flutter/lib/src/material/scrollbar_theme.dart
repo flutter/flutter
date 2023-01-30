@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [Scrollbar] widgets.
 ///
 /// Descendant widgets obtain the current [ScrollbarThemeData] object with
@@ -49,7 +52,7 @@ class ScrollbarThemeData with Diagnosticable {
     this.isAlwaysShown,
     @Deprecated(
       'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
+      'This feature was deprecated after v3.4.0-19.0.pre.',
     )
     this.showTrackOnHover,
   }) : assert(
@@ -79,7 +82,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// descendant [Scrollbar] widgets.
   @Deprecated(
     'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
-    'This feature was deprecated after v2.9.0-1.0.pre.',
+    'This feature was deprecated after v3.4.0-19.0.pre.',
   )
   final bool? showTrackOnHover;
 
@@ -158,7 +161,6 @@ class ScrollbarThemeData with Diagnosticable {
     MaterialStateProperty<bool?>? thumbVisibility,
     MaterialStateProperty<double?>? thickness,
     MaterialStateProperty<bool?>? trackVisibility,
-    bool? showTrackOnHover,
     bool? interactive,
     Radius? radius,
     MaterialStateProperty<Color?>? thumbColor,
@@ -172,6 +174,12 @@ class ScrollbarThemeData with Diagnosticable {
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     bool? isAlwaysShown,
+
+    @Deprecated(
+      'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
+      'This feature was deprecated after v3.4.0-19.0.pre.',
+    )
+    bool? showTrackOnHover,
   }) {
     return ScrollbarThemeData(
       thumbVisibility: thumbVisibility ?? this.thumbVisibility,

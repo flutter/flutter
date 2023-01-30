@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io show Directory, File, Link, ProcessException, ProcessResult, ProcessSignal, systemEncoding, Process, ProcessStartMode;
+import 'dart:io' as io show Directory, File, Link, Process, ProcessException, ProcessResult, ProcessSignal, ProcessStartMode, systemEncoding;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -119,21 +119,21 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   @override
   File file(dynamic path) => ErrorHandlingFile(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.file(path),
   );
 
   @override
   Directory directory(dynamic path) => ErrorHandlingDirectory(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.directory(path),
   );
 
   @override
   Link link(dynamic path) => ErrorHandlingLink(
     platform: _platform,
-    fileSystem: delegate,
+    fileSystem: this,
     delegate: delegate.link(path),
   );
 
@@ -173,7 +173,7 @@ class ErrorHandlingFile
   final io.File delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -280,8 +280,9 @@ class ErrorHandlingFile
     );
   }
 
+  // TODO(aam): Pass `exclusive` through after dartbug.com/49647 lands.
   @override
-  void createSync({bool recursive = false}) {
+  void createSync({bool recursive = false, bool exclusive = false}) {
     _runSync<void>(
       () => delegate.createSync(
         recursive: recursive,
@@ -387,7 +388,7 @@ class ErrorHandlingDirectory
   final io.Directory delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -412,20 +413,20 @@ class ErrorHandlingDirectory
     delegate: delegate,
   );
 
-  // For the childEntity methods, we first obtain an instance of the entity
-  // from the underlying file system, then invoke childEntity() on it, then
-  // wrap in the ErrorHandling version.
   @override
-  Directory childDirectory(String basename) =>
-    wrapDirectory(fileSystem.directory(delegate).childDirectory(basename));
+  Directory childDirectory(String basename) {
+    return fileSystem.directory(fileSystem.path.join(path, basename));
+  }
 
   @override
-  File childFile(String basename) =>
-    wrapFile(fileSystem.directory(delegate).childFile(basename));
+  File childFile(String basename) {
+    return fileSystem.file(fileSystem.path.join(path, basename));
+  }
 
   @override
-  Link childLink(String basename) =>
-    wrapLink(fileSystem.directory(delegate).childLink(basename));
+  Link childLink(String basename) {
+    return fileSystem.link(fileSystem.path.join(path, basename));
+  }
 
   @override
   void createSync({bool recursive = false}) {
@@ -526,7 +527,7 @@ class ErrorHandlingLink
   final io.Link delegate;
 
   @override
-  final FileSystem fileSystem;
+  final ErrorHandlingFileSystem fileSystem;
 
   final Platform _platform;
 
@@ -580,8 +581,10 @@ Future<T> _run<T>(Future<T> Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -610,8 +613,10 @@ T _runSync<T>(T Function() op, {
   } on io.ProcessException catch (e) {
     if (platform.isWindows) {
       _handleWindowsException(e, failureMessage, e.errorCode);
-    } else if (platform.isLinux || platform.isMacOS) {
+    } else if (platform.isLinux) {
       _handlePosixException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
+    } if (platform.isMacOS) {
+      _handleMacOSException(e, failureMessage, e.errorCode, posixPermissionSuggestion);
     }
     rethrow;
   }
@@ -694,6 +699,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
         environment: environment,
         includeParentEnvironment: includeParentEnvironment,
         runInShell: runInShell,
+        mode: mode,
       );
     }, platform: _platform);
   }
@@ -761,6 +767,20 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
   _throwFileSystemException(errorMessage);
 }
 
+void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
+  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
+  const int ebadarch = 86;
+  if (errorCode == ebadarch) {
+    final StringBuffer errorBuffer = StringBuffer();
+    errorBuffer.writeln(message);
+    errorBuffer.writeln('This binary was built with the incorrect architecture to run on this machine.');
+    errorBuffer.writeln('Flutter requires the Rosetta translation environment. If you are on an ARM Mac, try running:');
+    errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
+    _throwFileSystemException(errorBuffer.toString());
+  }
+  _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
+}
+
 void _handleWindowsException(Exception e, String? message, int errorCode) {
   // From:
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
@@ -815,7 +835,7 @@ void _throwFileSystemException(String? errorMessage) {
     return;
   }
   if (ErrorHandlingFileSystem._noExitOnFailure) {
-    throw Exception(errorMessage);
+    throw FileSystemException(errorMessage);
   }
   throwToolExit(errorMessage);
 }

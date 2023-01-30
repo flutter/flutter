@@ -106,8 +106,10 @@ Future<Offset?> startPicker(
     ValueChanged<TimeOfDay?> onChanged, {
       TimePickerEntryMode entryMode = TimePickerEntryMode.dial,
       String? restorationId,
+      bool useMaterial3 = false,
     }) async {
   await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
     restorationScopeId: 'app',
     locale: const Locale('en', 'US'),
     home: _TimePickerLauncher(
@@ -138,6 +140,14 @@ void main() {
 }
 
 void _tests() {
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay? time) {
+      expect(find.text('Select time'), findsOneWidget);
+      expect(find.text('Enter time'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+    }, useMaterial3: true);
+  });
+
   testWidgets('tap-select an hour', (WidgetTester tester) async {
     TimeOfDay? result;
 
@@ -607,6 +617,27 @@ void _tests() {
     ));
     expect(minuteSize.width, greaterThanOrEqualTo(48.0));
     expect(minuteSize.height, greaterThanOrEqualTo(48.0));
+
+    tester.binding.window.clearPhysicalSizeTestValue();
+    tester.binding.window.clearDevicePixelRatioTestValue();
+  });
+
+  testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
+    // portrait
+    tester.binding.window.physicalSizeTestValue = const Size(800, 800.5);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    await mediaQueryBoilerplate(tester, false);
+
+    RenderObject render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));
+    expect((render as dynamic).orientation, Orientation.portrait); // ignore: avoid_dynamic_calls
+
+    // landscape
+    tester.binding.window.physicalSizeTestValue = const Size(800.5, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1;
+    await mediaQueryBoilerplate(tester, false, tapButton: false);
+
+    render = tester.renderObject(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'));
+    expect((render as dynamic).orientation, Orientation.landscape); // ignore: avoid_dynamic_calls
 
     tester.binding.window.clearPhysicalSizeTestValue();
     tester.binding.window.clearDevicePixelRatioTestValue();
@@ -1291,6 +1322,26 @@ void _testsInput() {
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
   });
+
+  testWidgets('Can switch between hour/minute fields using keyboard input action', (WidgetTester tester) async {
+    await startPicker(tester, (TimeOfDay? time) { }, entryMode: TimePickerEntryMode.input);
+
+    final Finder hourFinder = find.byType(TextField).first;
+    final TextField hourField = tester.widget(hourFinder);
+    await tester.tap(hourFinder);
+    expect(hourField.focusNode!.hasFocus, isTrue);
+
+    await tester.enterText(find.byType(TextField).first, '08');
+    final Finder minuteFinder = find.byType(TextField).last;
+    final TextField minuteField = tester.widget(minuteFinder);
+    expect(hourField.focusNode!.hasFocus, isFalse);
+    expect(minuteField.focusNode!.hasFocus, isTrue);
+
+    expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    expect(hourField.focusNode!.hasFocus, isFalse);
+    expect(minuteField.focusNode!.hasFocus, isFalse);
+  });
 }
 
 final Finder findDialPaint = find.descendant(
@@ -1322,6 +1373,7 @@ Future<void> mediaQueryBoilerplate(
   String? errorInvalidText,
   bool accessibleNavigation = false,
   EntryModeChangeCallback? onEntryModeChange,
+  bool tapButton = true,
 }) async {
   await tester.pumpWidget(
     Localizations(
@@ -1335,6 +1387,7 @@ Future<void> mediaQueryBoilerplate(
           alwaysUse24HourFormat: alwaysUse24HourFormat,
           textScaleFactor: textScaleFactor,
           accessibleNavigation: accessibleNavigation,
+          size: tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio,
         ),
         child: Material(
           child: Directionality(
@@ -1365,6 +1418,8 @@ Future<void> mediaQueryBoilerplate(
       ),
     ),
   );
-  await tester.tap(find.text('X'));
+  if (tapButton) {
+    await tester.tap(find.text('X'));
+  }
   await tester.pumpAndSettle();
 }

@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../localizations/gen_l10n.dart';
@@ -21,9 +25,13 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
     required FileSystem fileSystem,
     required Logger logger,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
   }) :
     _fileSystem = fileSystem,
-    _logger = logger {
+    _logger = logger,
+    _artifacts = artifacts,
+    _processManager = processManager {
     argParser.addOption(
       'arb-dir',
       defaultsTo: globals.fs.path.join('lib', 'l10n'),
@@ -180,10 +188,29 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             'Localizations.of(context), removing the need for null checking in '
             'user code.'
     );
+    argParser.addFlag(
+      'format',
+      help: 'When specified, the "dart format" command is run after generating the localization files.'
+    );
+    argParser.addFlag(
+      'use-escaping',
+      help: 'Whether or not to use escaping for messages.\n'
+            '\n'
+            'By default, this value is set to false for backwards compatibility. '
+            'Turning this flag on will cause the parser to treat any special characters '
+            'contained within pairs of single quotes as normal strings and treat all '
+            'consecutive pairs of single quotes as a single quote character.',
+    );
+    argParser.addFlag(
+      'suppress-warnings',
+      help: 'When specified, all warnings will be suppressed.\n'
+    );
   }
 
   final FileSystem _fileSystem;
   final Logger _logger;
+  final Artifacts _artifacts;
+  final ProcessManager _processManager;
 
   @override
   String get description => 'Generate localizations for the current project.';
@@ -196,6 +223,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    List<String> outputFileList;
+
+    bool format = boolArg('format') ?? false;
+
     if (_fileSystem.file('l10n.yaml').existsSync()) {
       final LocalizationOptions options = parseLocalizationsOptions(
         file: _fileSystem.file('l10n.yaml'),
@@ -207,56 +238,75 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         'To use the command line arguments, delete the l10n.yaml file in the '
         'Flutter project.\n\n'
       );
-      generateLocalizations(
+      outputFileList = generateLocalizations(
         logger: _logger,
         options: options,
         projectDir: _fileSystem.currentDirectory,
         fileSystem: _fileSystem,
-      );
-      return FlutterCommandResult.success();
+      ).outputFileList;
+      format = format || options.format;
+    } else {
+      final String inputPathString = stringArgDeprecated('arb-dir')!; // Has default value, cannot be null.
+      final String? outputPathString = stringArgDeprecated('output-dir');
+      final String outputFileString = stringArgDeprecated('output-localization-file')!; // Has default value, cannot be null.
+      final String templateArbFileName = stringArgDeprecated('template-arb-file')!; // Has default value, cannot be null.
+      final String? untranslatedMessagesFile = stringArgDeprecated('untranslated-messages-file');
+      final String classNameString = stringArgDeprecated('output-class')!; // Has default value, cannot be null.
+      final List<String> preferredSupportedLocales = stringsArg('preferred-supported-locales');
+      final String? headerString = stringArgDeprecated('header');
+      final String? headerFile = stringArgDeprecated('header-file');
+      final bool useDeferredLoading = boolArgDeprecated('use-deferred-loading');
+      final String? inputsAndOutputsListPath = stringArgDeprecated('gen-inputs-and-outputs-list');
+      final bool useSyntheticPackage = boolArgDeprecated('synthetic-package');
+      final String? projectPathString = stringArgDeprecated('project-dir');
+      final bool areResourceAttributesRequired = boolArgDeprecated('required-resource-attributes');
+      final bool usesNullableGetter = boolArgDeprecated('nullable-getter');
+      final bool useEscaping = boolArgDeprecated('use-escaping');
+      final bool suppressWarnings = boolArgDeprecated('suppress-warnings');
+
+      precacheLanguageAndRegionTags();
+
+      try {
+        outputFileList = (LocalizationsGenerator(
+          fileSystem: _fileSystem,
+          inputPathString: inputPathString,
+          outputPathString: outputPathString,
+          templateArbFileName: templateArbFileName,
+          outputFileString: outputFileString,
+          classNameString: classNameString,
+          preferredSupportedLocales: preferredSupportedLocales,
+          headerString: headerString,
+          headerFile: headerFile,
+          useDeferredLoading: useDeferredLoading,
+          inputsAndOutputsListPath: inputsAndOutputsListPath,
+          useSyntheticPackage: useSyntheticPackage,
+          projectPathString: projectPathString,
+          areResourceAttributesRequired: areResourceAttributesRequired,
+          untranslatedMessagesFile: untranslatedMessagesFile,
+          usesNullableGetter: usesNullableGetter,
+          useEscaping: useEscaping,
+          logger: _logger,
+          suppressWarnings: suppressWarnings,
+        )
+          ..loadResources()
+          ..writeOutputFiles())
+          .outputFileList;
+      } on L10nException catch (e) {
+        throwToolExit(e.message);
+      }
     }
 
-    final String inputPathString = stringArgDeprecated('arb-dir')!; // Has default value, cannot be null.
-    final String? outputPathString = stringArgDeprecated('output-dir');
-    final String outputFileString = stringArgDeprecated('output-localization-file')!; // Has default value, cannot be null.
-    final String templateArbFileName = stringArgDeprecated('template-arb-file')!; // Has default value, cannot be null.
-    final String? untranslatedMessagesFile = stringArgDeprecated('untranslated-messages-file');
-    final String classNameString = stringArgDeprecated('output-class')!; // Has default value, cannot be null.
-    final List<String> preferredSupportedLocales = stringsArg('preferred-supported-locales');
-    final String? headerString = stringArgDeprecated('header');
-    final String? headerFile = stringArgDeprecated('header-file');
-    final bool useDeferredLoading = boolArgDeprecated('use-deferred-loading');
-    final String? inputsAndOutputsListPath = stringArgDeprecated('gen-inputs-and-outputs-list');
-    final bool useSyntheticPackage = boolArgDeprecated('synthetic-package');
-    final String? projectPathString = stringArgDeprecated('project-dir');
-    final bool areResourceAttributesRequired = boolArgDeprecated('required-resource-attributes');
-    final bool usesNullableGetter = boolArgDeprecated('nullable-getter');
-
-    precacheLanguageAndRegionTags();
-
-    try {
-      LocalizationsGenerator(
-        fileSystem: _fileSystem,
-        inputPathString: inputPathString,
-        outputPathString: outputPathString,
-        templateArbFileName: templateArbFileName,
-        outputFileString: outputFileString,
-        classNameString: classNameString,
-        preferredSupportedLocales: preferredSupportedLocales,
-        headerString: headerString,
-        headerFile: headerFile,
-        useDeferredLoading: useDeferredLoading,
-        inputsAndOutputsListPath: inputsAndOutputsListPath,
-        useSyntheticPackage: useSyntheticPackage,
-        projectPathString: projectPathString,
-        areResourceAttributesRequired: areResourceAttributesRequired,
-        untranslatedMessagesFile: untranslatedMessagesFile,
-        usesNullableGetter: usesNullableGetter,
-      )
-        ..loadResources()
-        ..writeOutputFiles(_logger);
-    } on L10nException catch (e) {
-      throwToolExit(e.message);
+    // All other post processing.
+    if (format) {
+      if (outputFileList.isEmpty) {
+        return FlutterCommandResult.success();
+      }
+      final String dartBinary = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+      final List<String> command = <String>[dartBinary, 'format', ...outputFileList];
+      final ProcessResult result = await _processManager.run(command);
+      if (result.exitCode != 0) {
+        throwToolExit('Formatting failed: $result', exitCode: result.exitCode);
+      }
     }
 
     return FlutterCommandResult.success();

@@ -46,69 +46,12 @@ void main() {
       processManager: processManager,
       enableObservatory: enableObservatory,
       dartEntrypointArgs: dartEntrypointArgs,
+      uriConverter: (String input) => '$input/converted',
     );
-
-  testUsingContext('runs in Rosetta on arm64 Mac', () async {
-    final FakeProcessManager processManager = FakeProcessManager.empty();
-    final FlutterTesterTestDevice device = TestFlutterTesterDevice(
-      platform: FakePlatform(operatingSystem: 'macos'),
-      fileSystem: fileSystem,
-      processManager: processManager,
-      enableObservatory: false,
-      dartEntrypointArgs: const <String>[],
-    );
-    processManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'which',
-          'sysctl',
-        ],
-      ),
-      const FakeCommand(
-        command: <String>[
-          'sysctl',
-          'hw.optional.arm64',
-        ],
-        stdout: 'hw.optional.arm64: 1',
-      ),
-      FakeCommand(command: const <String>[
-        '/usr/bin/arch',
-        '-x86_64',
-        '/',
-        '--disable-observatory',
-        '--ipv6',
-        '--enable-checked-mode',
-        '--verify-entry-points',
-        '--enable-software-rendering',
-        '--skia-deterministic-rendering',
-        '--enable-dart-profiling',
-        '--non-interactive',
-        '--use-test-fonts',
-        '--disable-asset-fonts',
-        '--packages=.dart_tool/package_config.json',
-        'example.dill',
-      ], environment: <String, String>{
-        'FLUTTER_TEST': 'true',
-        'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
-        'SERVER_PORT': '0',
-        'APP_NAME': '',
-      }),
-    ]);
-    await device.start('example.dill');
-    expect(processManager.hasRemainingExpectations, isFalse);
-  });
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
     setUp(() {
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'uname',
-            '-m',
-          ],
-          stdout: 'x86_64',
-        ),
-      ]);
+      processManager = FakeProcessManager.list(<FakeCommand>[]);
       device = createDevice();
 
       fileSystem
@@ -144,7 +87,7 @@ void main() {
       processManager.addCommand(flutterTestCommand('true'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('as true when set to true', () async {
@@ -152,7 +95,7 @@ void main() {
       processManager.addCommand(flutterTestCommand('true'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('as false when set to false', () async {
@@ -160,7 +103,7 @@ void main() {
       processManager.addCommand(flutterTestCommand('false'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testUsingContext('unchanged when set', () async {
@@ -168,20 +111,13 @@ void main() {
       processManager.addCommand(flutterTestCommand('neither true nor false'));
 
       await device.start('example.dill');
-      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 
   group('Dart Entrypoint Args', () {
     setUp(() {
       processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'uname',
-            '-m',
-          ],
-          stdout: 'x86_64',
-        ),
         const FakeCommand(
           command: <String>[
             '/',
@@ -219,13 +155,6 @@ void main() {
       processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'uname',
-            '-m',
-          ],
-          stdout: 'x86_64',
-        ),
-        const FakeCommand(
-          command: <String>[
             '/',
             '--observatory-port=0',
             '--ipv6',
@@ -254,6 +183,18 @@ void main() {
       final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
       expect(uri.port, 1234);
     });
+
+    testUsingContext('sets up UriConverter from context', () async {
+      await device.start('example.dill');
+      await device.observatoryUri;
+
+      final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
+      as FakeDartDevelopmentService;
+      final String? result = dds
+          .uriConverter
+          ?.call('test');
+      expect(result, 'test/converted');
+    });
   });
 }
 
@@ -267,6 +208,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.processManager,
     required super.enableObservatory,
     required List<String> dartEntrypointArgs,
+    required UriConverter uriConverter,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -287,16 +229,26 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     icudtlPath: null,
     compileExpression: null,
     fontConfigManager: FontConfigManager(),
+    uriConverter: uriConverter,
   );
+  late DartDevelopmentService dds;
 
   final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
 
   Future<Uri> ddsServiceUriFuture() => _ddsServiceUriCompleter.future;
 
   @override
-  Future<DartDevelopmentService> startDds(Uri uri) async {
+  Future<DartDevelopmentService> startDds(
+    Uri uri, {
+    UriConverter? uriConverter,
+  }) async {
     _ddsServiceUriCompleter.complete(uri);
-    return FakeDartDevelopmentService(Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'), Uri.parse('http://localhost:8080'));
+    dds = FakeDartDevelopmentService(
+      Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'),
+      Uri.parse('http://localhost:8080'),
+      uriConverter: uriConverter,
+    );
+    return dds;
   }
 
   @override
@@ -307,9 +259,10 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  FakeDartDevelopmentService(this.uri, this.original);
+  FakeDartDevelopmentService(this.uri, this.original, {this.uriConverter});
 
   final Uri original;
+  final UriConverter? uriConverter;
 
   @override
   final Uri uri;

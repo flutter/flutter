@@ -28,7 +28,6 @@ Future<void> processPodsIfNeeded(
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
-      xcodeProject.generatedXcodePropertiesFile.path,
       globals.fs.path.join(
         Cache.flutterRoot!,
         'packages',

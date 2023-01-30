@@ -903,7 +903,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // ScrollPositionWithSingleContext.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     goIdle();
     updateUserScrollDirection(
@@ -1088,7 +1091,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   void updateParent() {
     _outerPosition?.setParent(
-      _parent ?? PrimaryScrollController.of(_state.context),
+      _parent ?? PrimaryScrollController.maybeOf(_state.context),
     );
   }
 
@@ -1344,6 +1347,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
+    coordinator.updateUserScrollDirection(ScrollDirection.idle);
   }
 
   // This is called by activities when they finish their work and want to go
@@ -1381,6 +1385,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           metrics,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.inner:
         return _NestedInnerBallisticScrollActivity(
@@ -1388,9 +1393,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           this,
           simulation,
           context.vsync,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.independent:
-        return BallisticScrollActivity(this, simulation, context.vsync);
+        return BallisticScrollActivity(this, simulation, context.vsync, activity?.shouldIgnorePointer ?? true);
     }
   }
 
@@ -1462,7 +1468,8 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
     _NestedScrollPosition position,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(position, simulation, vsync);
+    bool shouldIgnorePointer,
+  ) : super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
 
@@ -1498,9 +1505,10 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
     this.metrics,
     Simulation simulation,
     TickerProvider vsync,
+    bool shouldIgnorePointer,
   ) : assert(metrics.minRange != metrics.maxRange),
       assert(metrics.maxRange > metrics.minRange),
-      super(position, simulation, vsync);
+      super(position, simulation, vsync, shouldIgnorePointer);
 
   final _NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;

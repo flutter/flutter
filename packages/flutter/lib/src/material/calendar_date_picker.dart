@@ -394,7 +394,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                           child: Text(
                             widget.title,
                             overflow: TextOverflow.ellipsis,
-                            style: textTheme.subtitle2?.copyWith(
+                            style: textTheme.titleSmall?.copyWith(
                               color: controlColor,
                             ),
                           ),
@@ -806,7 +806,7 @@ class _FocusedDate extends InheritedWidget {
     return !DateUtils.isSameDay(date, oldWidget.date);
   }
 
-  static DateTime? of(BuildContext context) {
+  static DateTime? maybeOf(BuildContext context) {
     final _FocusedDate? focusedDate = context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
     return focusedDate?.date;
   }
@@ -887,7 +887,7 @@ class _DayPickerState extends State<_DayPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
-    final DateTime? focusedDate = _FocusedDate.of(context);
+    final DateTime? focusedDate = _FocusedDate.maybeOf(context);
     if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
@@ -906,19 +906,18 @@ class _DayPickerState extends State<_DayPicker> {
   ///
   /// Examples:
   ///
-  /// ```
-  /// ┌ Sunday is the first day of week in the US (en_US)
-  /// |
-  /// S M T W T F S  <-- the returned list contains these widgets
-  /// _ _ _ _ _ 1 2
-  /// 3 4 5 6 7 8 9
+  ///     ┌ Sunday is the first day of week in the US (en_US)
+  ///     |
+  ///     S M T W T F S  ← the returned list contains these widgets
+  ///     _ _ _ _ _ 1 2
+  ///     3 4 5 6 7 8 9
   ///
-  /// ┌ But it's Monday in the UK (en_GB)
-  /// |
-  /// M T W T F S S  <-- the returned list contains these widgets
-  /// _ _ _ _ 1 2 3
-  /// 4 5 6 7 8 9 10
-  /// ```
+  ///     ┌ But it's Monday in the UK (en_GB)
+  ///     |
+  ///     M T W T F S S  ← the returned list contains these widgets
+  ///     _ _ _ _ 1 2 3
+  ///     4 5 6 7 8 9 10
+  ///
   List<Widget> _dayHeaders(TextStyle? headerStyle, MaterialLocalizations localizations) {
     final List<Widget> result = <Widget>[];
     for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
@@ -938,10 +937,10 @@ class _DayPickerState extends State<_DayPicker> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final TextStyle? headerStyle = textTheme.caption?.apply(
+    final TextStyle? headerStyle = textTheme.bodySmall?.apply(
       color: colorScheme.onSurface.withOpacity(0.60),
     );
-    final TextStyle dayStyle = textTheme.caption!;
+    final TextStyle dayStyle = textTheme.bodySmall!;
     final Color enabledDayColor = colorScheme.onSurface.withOpacity(0.87);
     final Color disabledDayColor = colorScheme.onSurface.withOpacity(0.38);
     final Color selectedDayColor = colorScheme.onPrimary;
@@ -980,16 +979,20 @@ class _DayPickerState extends State<_DayPicker> {
             color: selectedDayBackground,
             shape: BoxShape.circle,
           );
-        } else if (isDisabled) {
-          dayColor = disabledDayColor;
         } else if (isToday) {
-          // The current day gets a different text color and a circle stroke
+          // The current day gets a different text color (if enabled) and a circle stroke
           // border.
-          dayColor = todayColor;
+          if (isDisabled) {
+            dayColor = disabledDayColor;
+          } else {
+            dayColor = todayColor;
+          }
           decoration = BoxDecoration(
-            border: Border.all(color: todayColor),
+            border: Border.all(color: dayColor),
             shape: BoxShape.circle,
           );
+        } else if (isDisabled) {
+          dayColor = disabledDayColor;
         }
 
         Widget dayWidget = Container(
@@ -1186,7 +1189,7 @@ class _YearPickerState extends State<YearPicker> {
     } else {
       textColor = colorScheme.onSurface.withOpacity(0.87);
     }
-    final TextStyle? itemStyle = textTheme.bodyText1?.apply(color: textColor);
+    final TextStyle? itemStyle = textTheme.bodyLarge?.apply(color: textColor);
 
     BoxDecoration? decoration;
     if (isSelected) {

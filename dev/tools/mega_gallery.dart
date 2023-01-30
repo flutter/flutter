@@ -14,8 +14,9 @@ const int kTargetLineCount = 60 * 1024;
 
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
-  if (path.basename(Directory.current.path) == 'tools')
+  if (path.basename(Directory.current.path) == 'tools') {
     Directory.current = Directory.current.parent.parent;
+  }
 
   final ArgParser argParser = ArgParser();
   argParser.addOption('out');
@@ -65,15 +66,17 @@ void main(List<String> args) {
   print('  dev/integration_tests/flutter_gallery    : ${getStatsFor(Directory("dev/integration_tests/flutter_gallery"))}');
 
   final Directory lib = _dir(out, 'lib');
-  if (lib.existsSync())
+  if (lib.existsSync()) {
     lib.deleteSync(recursive: true);
+  }
 
   // Copy everything that's not a symlink, dot directory, or build/.
   _copy(source, out);
 
   // Make n - 1 copies.
-  for (int i = 1; i < copies; i++)
+  for (int i = 1; i < copies; i++) {
     _copyGallery(out, i);
+  }
 
   // Create a new entry-point.
   _createEntry(_file(out, 'lib/main.dart'), copies);
@@ -131,19 +134,22 @@ void _copyGallery(Directory galleryDir, int index) {
 }
 
 void _copy(Directory source, Directory target) {
-  if (!target.existsSync())
+  if (!target.existsSync()) {
     target.createSync(recursive: true);
+  }
 
   for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
 
     if (entity is Directory) {
-      if (name == 'build' || name.startsWith('.'))
+      if (name == 'build' || name.startsWith('.')) {
         continue;
+      }
       _copy(entity, Directory(path.join(target.path, name)));
     } else if (entity is File) {
-      if (name == '.packages' || name == 'pubspec.lock')
+      if (name == '.packages' || name == 'pubspec.lock') {
         continue;
+      }
       final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
     }
@@ -181,15 +187,17 @@ SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {
 int _lineCount(File file) {
   return file.readAsLinesSync().where((String line) {
     line = line.trim();
-    if (line.isEmpty || line.startsWith('//'))
+    if (line.isEmpty || line.startsWith('//')) {
       return false;
+    }
     return true;
   }).length;
 }
 
 String _comma(int count) {
   final String str = count.toString();
-  if (str.length > 3)
+  if (str.length > 3) {
     return '${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';
+  }
   return str;
 }

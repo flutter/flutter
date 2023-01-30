@@ -4,6 +4,7 @@
 
 // flutter_ignore_for_file: golden_tag (see analyze.dart)
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart';
@@ -134,7 +135,7 @@ void main() {
     );
   });
 
-  test('normalizeHashCodesEquals', () {
+  test('equalsIgnoringHashCodes', () {
     expect('Foo#34219', equalsIgnoringHashCodes('Foo#00000'));
     expect('Foo#34219', equalsIgnoringHashCodes('Foo#12345'));
     expect('Foo#34219', equalsIgnoringHashCodes('Foo#abcdf'));
@@ -172,6 +173,24 @@ void main() {
     expect('Foo#', isNot(equalsIgnoringHashCodes('Foo#00000')));
     expect('Foo#3421', isNot(equalsIgnoringHashCodes('Foo#00000')));
     expect('Foo#342193', isNot(equalsIgnoringHashCodes('Foo#00000')));
+    expect(<String>['Foo#a3b4d'], equalsIgnoringHashCodes(<String>['Foo#12345']));
+    expect(
+      <String>['Foo#a3b4d', 'Foo#12345'],
+      equalsIgnoringHashCodes(<String>['Foo#00000', 'Foo#00000']),
+    );
+    expect(
+      <String>['Foo#a3b4d', 'Bar#12345'],
+      equalsIgnoringHashCodes(<String>['Foo#00000', 'Bar#00000']),
+    );
+    expect(
+      <String>['Foo#a3b4d', 'Bar#12345'],
+      isNot(equalsIgnoringHashCodes(<String>['Bar#00000', 'Foo#00000'])),
+    );
+    expect(<String>['Foo#a3b4d'], isNot(equalsIgnoringHashCodes(<String>['Foo'])));
+    expect(
+      <String>['Foo#a3b4d'],
+      isNot(equalsIgnoringHashCodes(<String>['Foo#00000', 'Bar#00000'])),
+    );
   });
 
   test('moreOrLessEquals', () {
@@ -195,6 +214,38 @@ void main() {
 
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
+  });
+
+  test('matrixMoreOrLessEquals', () {
+    expect(
+      Matrix4.rotationZ(math.pi),
+      matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+       -1,  0, 0, 0,
+        0, -1, 0, 0,
+        0,  0, 1, 0,
+        0,  0, 0, 1,
+      ]))
+    );
+
+    expect(
+      Matrix4.rotationZ(math.pi),
+      matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+       -2,  0, 0, 0,
+        0, -2, 0, 0,
+        0,  0, 1, 0,
+        0,  0, 0, 1,
+      ]), epsilon: 2)
+    );
+
+    expect(
+      Matrix4.rotationZ(math.pi),
+      isNot(matrixMoreOrLessEquals(Matrix4.fromList(<double>[
+       -2,  0, 0, 0,
+        0, -2, 0, 0,
+        0,  0, 1, 0,
+        0,  0, 0, 1,
+      ])))
+    );
   });
 
   test('rectMoreOrLessEquals', () {
@@ -566,10 +617,7 @@ void main() {
         actions |= index;
       }
       for (final int index in SemanticsFlag.values.keys) {
-        // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
-        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline) {
-          flags |= index;
-        }
+        flags |= index;
       }
       final SemanticsData data = SemanticsData(
         flags: flags,
@@ -608,6 +656,7 @@ void main() {
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
+         isCheckStateMixed: true,
          isSelected: true,
          isButton: true,
          isSlider: true,
@@ -622,8 +671,7 @@ void main() {
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
          isObscured: true,
-         // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
-         //isMultiline: true,
+         isMultiline: true,
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
@@ -685,6 +733,556 @@ void main() {
         ],
       ));
       handle.dispose();
+    });
+
+    testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      addTearDown(() => handle.dispose());
+
+      const Key key = Key('semantics');
+      await tester.pumpWidget(Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        link: true,
+        onTap: () { },
+        onLongPress: () { },
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
+        textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () { },
+          const CustomSemanticsAction(label: 'bar'): () { },
+        },
+      ));
+
+      // This should fail due to the mis-match between the `namesRoute` value.
+      void failedExpectation() => expect(tester.getSemantics(find.byKey(key)),
+        matchesSemantics(
+          // Adding the explicit `false` for test readability
+          // ignore: avoid_redundant_argument_values
+          namesRoute: false,
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        ),
+      );
+
+      expect(failedExpectation, throwsA(isA<TestFailure>()));
+    });
+  });
+
+  group('containsSemantics', () {
+    testWidgets('matches SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      addTearDown(() => handle.dispose());
+
+      const Key key = Key('semantics');
+      await tester.pumpWidget(Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        link: true,
+        onTap: () { },
+        onLongPress: () { },
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
+        textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () { },
+          const CustomSemanticsAction(label: 'bar'): () { },
+        },
+      ));
+
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        containsSemantics(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        ),
+      );
+
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        isNot(containsSemantics(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'barz'),
+          ],
+        )),
+        reason: 'CustomSemanticsAction "barz" should not have matched "bar".'
+      );
+
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        isNot(matchesSemantics(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scans',
+          onLongPressHint: 'fills',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        )),
+        reason: 'onTapHint "scans" should not have matched "scan".',
+      );
+    });
+
+    testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
+      int actions = 0;
+      int flags = 0;
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      for (final int index in SemanticsAction.values.keys) {
+        actions |= index;
+      }
+      for (final int index in SemanticsFlag.values.keys) {
+        flags |= index;
+      }
+      final SemanticsData data = SemanticsData(
+        flags: flags,
+        actions: actions,
+        attributedLabel: AttributedString('a'),
+        attributedIncreasedValue: AttributedString('b'),
+        attributedValue: AttributedString('c'),
+        attributedDecreasedValue: AttributedString('d'),
+        attributedHint: AttributedString('e'),
+        tooltip: 'f',
+        textDirection: TextDirection.ltr,
+        rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        elevation: 3.0,
+        thickness: 4.0,
+        textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        platformViewId: 105,
+        customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        currentValueLength: 10,
+        maxValueLength: 15,
+      );
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
+
+      expect(
+        node,
+        containsSemantics(
+          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          size: const Size(10.0, 10.0),
+          elevation: 3.0,
+          thickness: 4.0,
+          platformViewId: 105,
+          currentValueLength: 10,
+          maxValueLength: 15,
+          /* Flags */
+          hasCheckedState: true,
+          isChecked: true,
+          isSelected: true,
+          isButton: true,
+          isSlider: true,
+          isKeyboardKey: true,
+          isLink: true,
+          isTextField: true,
+          isReadOnly: true,
+          hasEnabledState: true,
+          isFocused: true,
+          isFocusable: true,
+          isEnabled: true,
+          isInMutuallyExclusiveGroup: true,
+          isHeader: true,
+          isObscured: true,
+          isMultiline: true,
+          namesRoute: true,
+          scopesRoute: true,
+          isHidden: true,
+          isImage: true,
+          isLiveRegion: true,
+          hasToggledState: true,
+          isToggled: true,
+          hasImplicitScrolling: true,
+          /* Actions */
+          hasTapAction: true,
+          hasLongPressAction: true,
+          hasScrollLeftAction: true,
+          hasScrollRightAction: true,
+          hasScrollUpAction: true,
+          hasScrollDownAction: true,
+          hasIncreaseAction: true,
+          hasDecreaseAction: true,
+          hasShowOnScreenAction: true,
+          hasMoveCursorForwardByCharacterAction: true,
+          hasMoveCursorBackwardByCharacterAction: true,
+          hasMoveCursorForwardByWordAction: true,
+          hasMoveCursorBackwardByWordAction: true,
+          hasSetTextAction: true,
+          hasSetSelectionAction: true,
+          hasCopyAction: true,
+          hasCutAction: true,
+          hasPasteAction: true,
+          hasDidGainAccessibilityFocusAction: true,
+          hasDidLoseAccessibilityFocusAction: true,
+          hasDismissAction: true,
+          customActions: <CustomSemanticsAction>[action],
+        ),
+      );
+    });
+
+    testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
+      final SemanticsData data = SemanticsData(
+        flags: 0,
+        actions: 0,
+        attributedLabel: AttributedString('a'),
+        attributedIncreasedValue: AttributedString('b'),
+        attributedValue: AttributedString('c'),
+        attributedDecreasedValue: AttributedString('d'),
+        attributedHint: AttributedString('e'),
+        tooltip: 'f',
+        textDirection: TextDirection.ltr,
+        rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        elevation: 3.0,
+        thickness: 4.0,
+        textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        platformViewId: 105,
+        currentValueLength: 10,
+        maxValueLength: 15,
+      );
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
+
+      expect(
+        node,
+        containsSemantics(
+          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          size: const Size(10.0, 10.0),
+          elevation: 3.0,
+          thickness: 4.0,
+          platformViewId: 105,
+          currentValueLength: 10,
+          maxValueLength: 15,
+          /* Flags */
+          hasCheckedState: false,
+          isChecked: false,
+          isSelected: false,
+          isButton: false,
+          isSlider: false,
+          isKeyboardKey: false,
+          isLink: false,
+          isTextField: false,
+          isReadOnly: false,
+          hasEnabledState: false,
+          isFocused: false,
+          isFocusable: false,
+          isEnabled: false,
+          isInMutuallyExclusiveGroup: false,
+          isHeader: false,
+          isObscured: false,
+          isMultiline: false,
+          namesRoute: false,
+          scopesRoute: false,
+          isHidden: false,
+          isImage: false,
+          isLiveRegion: false,
+          hasToggledState: false,
+          isToggled: false,
+          hasImplicitScrolling: false,
+          /* Actions */
+          hasTapAction: false,
+          hasLongPressAction: false,
+          hasScrollLeftAction: false,
+          hasScrollRightAction: false,
+          hasScrollUpAction: false,
+          hasScrollDownAction: false,
+          hasIncreaseAction: false,
+          hasDecreaseAction: false,
+          hasShowOnScreenAction: false,
+          hasMoveCursorForwardByCharacterAction: false,
+          hasMoveCursorBackwardByCharacterAction: false,
+          hasMoveCursorForwardByWordAction: false,
+          hasMoveCursorBackwardByWordAction: false,
+          hasSetTextAction: false,
+          hasSetSelectionAction: false,
+          hasCopyAction: false,
+          hasCutAction: false,
+          hasPasteAction: false,
+          hasDidGainAccessibilityFocusAction: false,
+          hasDidLoseAccessibilityFocusAction: false,
+          hasDismissAction: false,
+        ),
+      );
+    });
+
+    testWidgets('only matches given flags and actions', (WidgetTester tester) async {
+      int allActions = 0;
+      int allFlags = 0;
+      for (final int index in SemanticsAction.values.keys) {
+        allActions |= index;
+      }
+      for (final int index in SemanticsFlag.values.keys) {
+        allFlags |= index;
+      }
+      final SemanticsData emptyData = SemanticsData(
+        flags: 0,
+        actions: 0,
+        attributedLabel: AttributedString('a'),
+        attributedIncreasedValue: AttributedString('b'),
+        attributedValue: AttributedString('c'),
+        attributedDecreasedValue: AttributedString('d'),
+        attributedHint: AttributedString('e'),
+        tooltip: 'f',
+        textDirection: TextDirection.ltr,
+        rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        elevation: 3.0,
+        thickness: 4.0,
+        textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        platformViewId: 105,
+        currentValueLength: 10,
+        maxValueLength: 15,
+      );
+      final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
+
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      final SemanticsData fullData = SemanticsData(
+        flags: allFlags,
+        actions: allActions,
+        attributedLabel: AttributedString('a'),
+        attributedIncreasedValue: AttributedString('b'),
+        attributedValue: AttributedString('c'),
+        attributedDecreasedValue: AttributedString('d'),
+        attributedHint: AttributedString('e'),
+        tooltip: 'f',
+        textDirection: TextDirection.ltr,
+        rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        elevation: 3.0,
+        thickness: 4.0,
+        textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        platformViewId: 105,
+        currentValueLength: 10,
+        maxValueLength: 15,
+        customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+      );
+      final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
+
+      expect(
+        emptyNode,
+        containsSemantics(
+          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          size: const Size(10.0, 10.0),
+          elevation: 3.0,
+          thickness: 4.0,
+          platformViewId: 105,
+          currentValueLength: 10,
+          maxValueLength: 15,
+        ),
+      );
+
+      expect(
+        fullNode,
+        containsSemantics(
+          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          size: const Size(10.0, 10.0),
+          elevation: 3.0,
+          thickness: 4.0,
+          platformViewId: 105,
+          currentValueLength: 10,
+          maxValueLength: 15,
+          customActions: <CustomSemanticsAction>[action],
+        ),
+      );
+    });
+
+    testWidgets('can match child semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('a');
+      await tester.pumpWidget(Semantics(
+        key: key,
+        label: 'Foo',
+        container: true,
+        explicitChildNodes: true,
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          label: 'Bar',
+          textDirection: TextDirection.ltr,
+        ),
+      ));
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+      expect(
+        node,
+        containsSemantics(
+          label: 'Foo',
+          textDirection: TextDirection.ltr,
+          children: <Matcher>[
+            containsSemantics(
+              label: 'Bar',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('can match only custom actions', (WidgetTester tester) async {
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      final SemanticsData data = SemanticsData(
+        flags: 0,
+        actions: SemanticsAction.customAction.index,
+        attributedLabel: AttributedString('a'),
+        attributedIncreasedValue: AttributedString('b'),
+        attributedValue: AttributedString('c'),
+        attributedDecreasedValue: AttributedString('d'),
+        attributedHint: AttributedString('e'),
+        tooltip: 'f',
+        textDirection: TextDirection.ltr,
+        rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        elevation: 3.0,
+        thickness: 4.0,
+        textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        platformViewId: 105,
+        currentValueLength: 10,
+        maxValueLength: 15,
+        customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+      );
+      final _FakeSemanticsNode node = _FakeSemanticsNode(data);
+
+      expect(node, containsSemantics(customActions: <CustomSemanticsAction>[action]));
+    });
+
+    testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      addTearDown(() => handle.dispose());
+
+      const Key key = Key('semantics');
+      await tester.pumpWidget(Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        link: true,
+        onTap: () { },
+        onLongPress: () { },
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
+        textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () { },
+          const CustomSemanticsAction(label: 'bar'): () { },
+        },
+      ));
+
+      // This should fail due to the mis-match between the `namesRoute` value.
+      void failedExpectation() => expect(tester.getSemantics(find.byKey(key)),
+        containsSemantics(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          namesRoute: false,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        ),
+      );
+
+      expect(failedExpectation, throwsA(isA<TestFailure>()));
     });
   });
 

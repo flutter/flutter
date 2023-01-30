@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AnimatedList
+/// Flutter code sample for [AnimatedList].
 
 import 'package:flutter/material.dart';
 
@@ -50,12 +50,13 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
     );
   }
 
-  // Used to build an item after it has been removed from the list. This
-  // method is needed because a removed item remains visible until its
-  // animation has completed (even though it's gone as far this ListModel is
-  // concerned). The widget will be used by the
-  // [AnimatedListState.removeItem] method's
-  // [AnimatedListRemovedItemBuilder] parameter.
+  /// The builder function used to build items that have been removed.
+  ///
+  /// Used to build an item after it has been removed from the list. This method
+  /// is needed because a removed item remains visible until its animation has
+  /// completed (even though it's gone as far as this ListModel is concerned).
+  /// The widget will be used by the [AnimatedListState.removeItem] method's
+  /// [AnimatedRemovedItemBuilder] parameter.
   Widget _buildRemovedItem(
       int item, BuildContext context, Animation<double> animation) {
     return CardItem(
@@ -186,7 +187,7 @@ class CardItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle textStyle = Theme.of(context).textTheme.headline4!;
+    TextStyle textStyle = Theme.of(context).textTheme.headlineMedium!;
     if (selected) {
       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
     }

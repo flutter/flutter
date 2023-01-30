@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for AlignTransition
+/// Flutter code sample for [AlignTransition].
 
 import 'package:flutter/material.dart';
 
@@ -29,10 +29,12 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
+/// [AnimationController]s can be created with `vsync: this` because of
+/// [TickerProviderStateMixin].
 class _MyStatefulWidgetState extends State<MyStatefulWidget>
     with TickerProviderStateMixin {
-// Using `late final` for [lazy initialization](https://dart.dev/null-safety/understanding-null-safety#lazy-initialization).
+  // Using `late final` for lazy initialization. See
+  // https://dart.dev/null-safety/understanding-null-safety#lazy-initialization.
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
     vsync: this,

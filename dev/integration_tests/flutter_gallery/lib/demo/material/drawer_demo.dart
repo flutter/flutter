@@ -144,10 +144,11 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               margin: EdgeInsets.zero,
               onDetailsPressed: () {
                 _showDrawerContents = !_showDrawerContents;
-                if (_showDrawerContents)
+                if (_showDrawerContents) {
                   _controller.reverse();
-                else
+                } else {
                   _controller.forward();
+                }
               },
             ),
             MediaQuery.removePadding(
@@ -236,7 +237,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text('Tap here to open the drawer',
-                    style: Theme.of(context).textTheme.subtitle1,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
               ],

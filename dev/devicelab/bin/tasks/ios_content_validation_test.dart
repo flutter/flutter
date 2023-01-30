@@ -17,9 +17,39 @@ Future<void> main() async {
         section('Archive');
 
         await inDirectory(flutterProject.rootPath, () async {
-          await flutter('build', options: <String>[
+          final File appIconFile = File(path.join(
+              flutterProject.rootPath,
+              'ios',
+              'Runner',
+              'Assets.xcassets',
+              'AppIcon.appiconset',
+              'Icon-App-20x20@1x.png',
+          ));
+          // Resizes app icon to 123x456 (it is supposed to be 20x20).
+          appIconFile.writeAsBytesSync(appIconFile.readAsBytesSync()
+            ..buffer.asByteData().setInt32(16, 123)
+            ..buffer.asByteData().setInt32(20, 456)
+          );
+
+          final String output = await evalFlutter('build', options: <String>[
             'xcarchive',
+            '-v',
           ]);
+
+          // Note this isBot so usage won't actually be sent,
+          // this log line is printed whenever the app is archived.
+          if (!output.contains('Sending archive event if usage enabled')) {
+            throw TaskResult.failure('Usage archive event not sent');
+          }
+
+          if (!output.contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@1x.png).')) {
+            throw TaskResult.failure('Must validate incorrect app icon image size.');
+          }
+
+          // The project is still using Flutter template icon.
+          if (!output.contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')) {
+            throw TaskResult.failure('Must validate template app icon.');
+          }
         });
 
         final String archivePath = path.join(

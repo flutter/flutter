@@ -13,6 +13,9 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Used with [ButtonTheme] and [ButtonThemeData] to define a button's base
 /// colors, and the defaults for the button's minimum size, internal padding,
 /// and shape.
@@ -45,9 +48,10 @@ enum ButtonBarLayoutBehavior {
 /// This class is planned to be deprecated in a future release.
 /// Please use one or more of these buttons and associated themes instead:
 ///
-///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
+///  * [FilledButton], [FilledButtonTheme], [FilledButtonThemeData],
 ///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
+///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttonTheme]. The Material theme's button theme data
@@ -232,14 +236,7 @@ class ButtonThemeData with Diagnosticable {
   final ButtonBarLayoutBehavior layoutBehavior;
 
   /// Simply a convenience that returns [minWidth] and [height] as a
-  /// [BoxConstraints] object:
-  ///
-  /// ```dart
-  /// return BoxConstraints(
-  ///   minWidth: minWidth,
-  ///   minHeight: height,
-  /// );
-  /// ```
+  /// [BoxConstraints] object.
   BoxConstraints get constraints {
     return BoxConstraints(
       minWidth: minWidth,

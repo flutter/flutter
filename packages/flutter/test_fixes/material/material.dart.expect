@@ -1,0 +1,306 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+void main() {
+  // Generic reference variables.
+  BuildContext context;
+  RenderObjectWidget renderObjectWidget;
+  RenderObject renderObject;
+  Object object;
+
+  // Changes made in https://github.com/flutter/flutter/pull/26259
+  Scaffold scaffold = Scaffold(resizeToAvoidBottomInset: true);
+  scaffold = Scaffold(error: '');
+  final bool resize = scaffold.resizeToAvoidBottomInset;
+
+  // Change made in https://github.com/flutter/flutter/pull/15303
+  showDialog(builder: (context) => Text('Fix me.'));
+  showDialog(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const Element element = Element(myWidget);
+  element.dependOnInheritedElement(ancestor);
+  element.dependOnInheritedWidgetOfExactType<targetType>();
+  element.getElementForInheritedWidgetOfExactType<targetType>();
+  element.findAncestorWidgetOfExactType<targetType>();
+  element.findAncestorStateOfType<targetType>();
+  element.findRootAncestorStateOfType<targetType>();
+  element.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
+  final WidgetsBinding binding = WidgetsBinding.instance;
+  binding.deferFirstFrame();
+  binding.allowFirstFrame();
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const StatefulElement statefulElement = StatefulElement(myWidget);
+  statefulElement.dependOnInheritedElement(ancestor);
+
+  // Changes made in https://github.com/flutter/flutter/pull/44189
+  const BuildContext buildContext = Element(myWidget);
+  buildContext.dependOnInheritedElement(ancestor);
+  buildContext.dependOnInheritedWidgetOfExactType<targetType>();
+  buildContext.getElementForInheritedWidgetOfExactType<targetType>();
+  buildContext.findAncestorWidgetOfExactType<targetType>();
+  buildContext.findAncestorStateOfType<targetType>();
+  buildContext.findRootAncestorStateOfType<targetType>();
+  buildContext.findAncestorRenderObjectOfType<targetType>();
+
+  // Changes made in https://github.com/flutter/flutter/pull/66305
+  const Stack stack = Stack(clipBehavior: Clip.none);
+  const Stack stack = Stack(clipBehavior: Clip.hardEdge);
+  const Stack stack = Stack(error: '');
+  final behavior = stack.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const Form form = Form(autovalidateMode: AutovalidateMode.always);
+  const Form form = Form(autovalidateMode: AutovalidateMode.disabled);
+  const Form form = Form(error: '');
+  final autoMode = form.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.always);
+  const FormField formField = FormField(autovalidateMode: AutovalidateMode.disabled);
+  const FormField formField = FormField(error: '');
+  final autoMode = formField.autovalidateMode;
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutovalidateMode.always);
+  const TextFormField textFormField = TextFormField(autovalidateMode: AutovalidateMode.disabled);
+  const TextFormField textFormField = TextFormField(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/61648
+  const DropdownButtonFormField dropDownButtonFormField = DropdownButtonFormField(autovalidateMode: AutovalidateMode.always);
+  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(autovalidateMode: AutovalidateMode.disabled);
+  const DropdownButtonFormField dropdownButtonFormField = DropdownButtonFormField(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.maybeOf(context);
+  MediaQuery.of(context);
+  MediaQuery.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/70726
+  Navigator.maybeOf(context);
+  Navigator.of(context);
+  Navigator.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68908
+  ScaffoldMessenger.maybeOf(context);
+  ScaffoldMessenger.of(context);
+  ScaffoldMessenger.of(error: '');
+  Scaffold.of(error: '');
+  Scaffold.maybeOf(context);
+  Scaffold.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68910
+  Router.maybeOf(context);
+  Router.of(context);
+  Router.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68911
+  Localizations.maybeLocaleOf(context);
+  Localizations.localeOf(context);
+  Localizations.localeOf(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68917
+  FocusTraversalOrder.maybeOf(context);
+  FocusTraversalOrder.of(context);
+  FocusTraversalOrder.of(error: '');
+  FocusTraversalGroup.of(error: '');
+  FocusTraversalGroup.maybeOf(context);
+  FocusTraversalGroup.of(context);
+  Focus.maybeOf(context);
+  Focus.of(context);
+  Focus.of(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/68921
+  Shortcuts.maybeOf(context);
+  Shortcuts.of(context);
+  Shortcuts.of(error: '');
+  Actions.find(error: '');
+  Actions.maybeFind(context);
+  Actions.find(context);
+  Actions.handler(context);
+  Actions.handler(context);
+  Actions.handler(error: '');
+  Actions.invoke(error: '');
+  Actions.maybeInvoke(context);
+  Actions.invoke(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68925
+  AnimatedList.maybeOf(context);
+  AnimatedList.of(context);
+  AnimatedList.of(error: '');
+  SliverAnimatedList.of(error: '');
+  SliverAnimatedList.maybeOf(context);
+  SliverAnimatedList.of(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/68905
+  MaterialBasedCupertinoThemeData.resolveFrom(context);
+  MaterialBasedCupertinoThemeData.resolveFrom(context);
+  MaterialBasedCupertinoThemeData.resolveFrom(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/72043
+  TextField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
+  TextField(maxLengthEnforcement: MaxLengthEnforcement.none);
+  TextField(error: '');
+  final TextField textField;
+  textField.maxLengthEnforcement;
+  TextFormField(maxLengthEnforcement: MaxLengthEnforcement.enforce);
+  TextFormField(maxLengthEnforcement: MaxLengthEnforcement.none);
+  TextFormField(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/59127
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(label: myTitle);
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem();
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(error: '');
+  bottomNavigationBarItem.label;
+
+  // Changes made in https://github.com/flutter/flutter/pull/65246
+  RectangularSliderTrackShape();
+  RectangularSliderTrackShape(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/46115
+  const InputDecoration inputDecoration = InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecoration();
+  InputDecoration(error: '');
+  InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecoration.collapsed(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecoration.collapsed();
+  InputDecoration.collapsed(error: '');
+  inputDecoration.floatingLabelBehavior;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecorationTheme();
+  InputDecorationTheme(error: '');
+  inputDecorationTheme.floatingLabelBehavior;
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.never);
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  inputDecorationTheme.copyWith();
+  inputDecorationTheme.copyWith(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  Draggable draggable = Draggable();
+  draggable = Draggable(dragAnchorStrategy: childDragAnchorStrategy);
+  draggable = Draggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  draggable = Draggable(error: '');
+  draggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/79160
+  LongPressDraggable longPressDraggable = LongPressDraggable();
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: childDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(dragAnchorStrategy: pointerDragAnchorStrategy);
+  longPressDraggable = LongPressDraggable(error: '');
+  longPressDraggable.dragAnchorStrategy;
+
+  // Changes made in https://github.com/flutter/flutter/pull/64254
+  final LeafRenderObjectElement leafElement = LeafRenderObjectElement();
+  leafElement.insertRenderObjectChild(renderObject, object);
+  leafElement.moveRenderObjectChild(renderObject, object);
+  leafElement.removeRenderObjectChild(renderObject);
+  final ListWheelElement listWheelElement = ListWheelElement();
+  listWheelElement.insertRenderObjectChild(renderObject, object);
+  listWheelElement.moveRenderObjectChild(renderObject, object);
+  listWheelElement.removeRenderObjectChild(renderObject);
+  final MultiChildRenderObjectElement multiChildRenderObjectElement = MultiChildRenderObjectElement();
+  multiChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  multiChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SingleChildRenderObjectElement singleChildRenderObjectElement = SingleChildRenderObjectElement();
+  singleChildRenderObjectElement.insertRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.moveRenderObjectChild(renderObject, object);
+  singleChildRenderObjectElement.removeRenderObjectChild(renderObject);
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
+  sliverMultiBoxAdaptorElement.insertRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.moveRenderObjectChild(renderObject, object);
+  sliverMultiBoxAdaptorElement.removeRenderObjectChild(renderObject);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(widget);
+  renderObjectToWidgetElement.insertRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.moveRenderObjectChild(renderObject, object);
+  renderObjectToWidgetElement.removeRenderObjectChild(renderObject);
+
+  // Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  ListWheelScrollView listWheelScrollView = ListWheelScrollView();
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView(clipBehavior: Clip.none);
+  listWheelScrollView = ListWheelScrollView(error: '');
+  listWheelScrollView = ListWheelScrollView.useDelegate(error: '');
+  listWheelScrollView = ListWheelScrollView.useDelegate();
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.hardEdge);
+  listWheelScrollView = ListWheelScrollView.useDelegate(clipBehavior: Clip.none);
+  listWheelScrollView.clipBehavior;
+  ListWheelViewport listWheelViewport = ListWheelViewport();
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.hardEdge);
+  listWheelViewport = ListWheelViewport(clipBehavior: Clip.none);
+  listWheelViewport = ListWheelViewport(error: '');
+  listWheelViewport.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/87839
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
+  final OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(error: '');
+  notification.disallowIndicator();
+
+  // Changes made in https://github.com/flutter/flutter/pull/96115
+  Icon icon = Icons.pie_chart_outline;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96957
+  Scrollbar scrollbar = Scrollbar(thumbVisibility: true);
+  bool nowShowing = scrollbar.thumbVisibility;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(thumbVisibility: nowShowing);
+  scrollbarTheme.copyWith(thumbVisibility: nowShowing);
+  scrollbarTheme.thumbVisibility;
+  RawScrollbar rawScrollbar = RawScrollbar(thumbVisibility: true);
+  nowShowing = rawScrollbar.thumbVisibility;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  Chip chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: '');
+  chip = Chip();
+  chip = Chip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  chip.deleteButtonTooltipMessage;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  InputChip inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: '');
+  inputChip = InputChip();
+  inputChip = InputChip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  inputChip.deleteButtonTooltipMessage;
+
+  // Changes made in https://github.com/flutter/flutter/pull/96174
+  RawChip rawChip = Rawchip();
+  rawChip = RawChip(deleteButtonTooltipMessage: '');
+  rawChip = RawChip();
+  rawChip = RawChip(deleteButtonTooltipMessage: 'Delete Tooltip');
+  rawChip.deleteButtonTooltipMessage;
+
+  // Change made in https://github.com/flutter/flutter/pull/100381
+  SelectionOverlay.fadeDuration;
+
+  // Changes made in https://github.com/flutter/flutter/pull/105291
+  ButtonStyle elevationButtonStyle = ElevatedButton.styleFrom(
+    foregroundColor: Colors.white, backgroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38), disabledBackgroundColor: Colors.grey.withOpacity(0.12),
+  );
+  ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+  );
+  ButtonStyle textButtonStyle = TextButton.styleFrom(
+    foregroundColor: Colors.blue, disabledForegroundColor: Colors.grey.withOpacity(0.38),
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/78588
+  final ScrollBehavior scrollBehavior = ScrollBehavior();
+  scrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
+  final MaterialScrollBehavior materialScrollBehavior = MaterialScrollBehavior();
+  materialScrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
+
+  // Changes made in https://github.com/flutter/flutter/pull/111706
+  Scrollbar scrollbar = Scrollbar(trackVisibility: true);
+  bool nowShowing = scrollbar.trackVisibility;
+  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(trackVisibility: nowShowing);
+  scrollbarTheme.copyWith(trackVisibility: nowShowing);
+  scrollbarTheme.trackVisibility;
+}
