@@ -25,6 +25,7 @@
 /// about any additional exports that you add to this file, as doing so will
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
+library;
 
 // We allow `print()` in this file as a fallback for writing to the terminal via
 // regular stdout/stderr/stdio paths. Everything else in the flutter_tools
@@ -267,7 +268,6 @@ class Stdio {
   }
   io.Stdout? _stdout;
 
-  @visibleForTesting
   io.IOSink get stderr {
     if (_stderr != null) {
       return _stderr!;
@@ -399,7 +399,6 @@ class _DefaultProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync(io.pid.toString());
   }
@@ -419,7 +418,6 @@ class _TestProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync('12345');
   }

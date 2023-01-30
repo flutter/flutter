@@ -593,10 +593,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       'This feature was deprecated after v2.10.0-0.3.pre.'
     )
     this.useDeleteButtonTooltip = true,
-  }) : assert(label != null),
-       assert(autofocus != null),
-       assert(clipBehavior != null),
-       assert(elevation == null || elevation >= 0.0);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   @override
   final Widget? avatar;
@@ -766,12 +763,7 @@ class RawChip extends StatefulWidget
       'This feature was deprecated after v2.10.0-0.3.pre.'
     )
     this.useDeleteButtonTooltip = true,
-  }) : assert(label != null),
-       assert(isEnabled != null),
-       assert(selected != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
 
@@ -1158,7 +1150,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
-      clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+      clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
     )!;
 
     final ThemeData theme = Theme.of(context);
@@ -1381,7 +1373,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-  }) : assert(theme != null);
+  });
 
   final _ChipRenderTheme theme;
   final bool? value;
@@ -1518,9 +1510,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     required this.deleteDrawerAnimation,
     required this.enableAnimation,
     this.avatarBorder,
-  }) : assert(theme != null),
-       assert(textDirection != null),
-       _theme = theme,
+  }) : _theme = theme,
        _textDirection = textDirection {
     checkmarkAnimation.addListener(markNeedsPaint);
     avatarDrawerAnimation.addListener(markNeedsLayout);
@@ -1917,7 +1907,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   );
 
   Color get _disabledColor {
-    if (enableAnimation == null || enableAnimation.isCompleted) {
+    if (enableAnimation.isCompleted) {
       return Colors.white;
     }
     final ColorTween enableTween;
@@ -2196,7 +2186,7 @@ bool _hitIsOnDeleteIcon({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_152
 
 class _ChipDefaultsM3 extends ChipThemeData {
   const _ChipDefaultsM3(this.context, this.isEnabled)
@@ -2257,7 +2247,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 

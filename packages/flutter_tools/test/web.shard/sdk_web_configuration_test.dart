@@ -19,8 +19,8 @@ void main() {
     setUp(() async {
       fileSystem = MemoryFileSystem.test();
       fileSystem.directory('HostArtifact.flutterWebSdk').createSync();
-      fileSystem.file('HostArtifact.webPlatformKernelDill').createSync();
-      fileSystem.file('HostArtifact.webPlatformSoundKernelDill').createSync();
+      fileSystem.file('HostArtifact.webPlatformDDCKernelDill').createSync();
+      fileSystem.file('HostArtifact.webPlatformDDCSoundKernelDill').createSync();
       fileSystem.file('HostArtifact.flutterWebLibrariesJson').createSync();
 
       final SdkWebConfigurationProvider provider =
@@ -34,8 +34,8 @@ void main() {
 
     testWithoutContext('is correct', () {
       expect(configuration.sdkDirectory, 'HostArtifact.flutterWebSdk');
-      expect(configuration.unsoundSdkSummaryPath, 'HostArtifact.webPlatformKernelDill');
-      expect(configuration.soundSdkSummaryPath, 'HostArtifact.webPlatformSoundKernelDill');
+      expect(configuration.unsoundSdkSummaryPath, 'HostArtifact.webPlatformDDCKernelDill');
+      expect(configuration.soundSdkSummaryPath, 'HostArtifact.webPlatformDDCSoundKernelDill');
       expect(configuration.librariesPath, 'HostArtifact.flutterWebLibrariesJson');
       expect(configuration.compilerWorkerPath, isNull);
     });

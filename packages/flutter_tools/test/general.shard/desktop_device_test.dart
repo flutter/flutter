@@ -357,8 +357,7 @@ class FakeDesktopDevice extends DesktopDevice {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  Future<void> buildForDevice(
-    ApplicationPackage package, {
+  Future<void> buildForDevice({
     String? mainPath,
     BuildInfo? buildInfo,
   }) async {
@@ -372,7 +371,7 @@ class FakeDesktopDevice extends DesktopDevice {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return buildMode == null ? 'null' : getNameForBuildMode(buildMode);
+    return getNameForBuildMode(buildMode);
   }
 }
 

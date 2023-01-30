@@ -157,9 +157,9 @@ class _ZoomPageTransition extends StatelessWidget {
     required this.animation,
     required this.secondaryAnimation,
     required this.allowSnapshotting,
+    required this.allowEnterRouteSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(secondaryAnimation != null);
+  });
 
   // A curve sequence that is similar to the 'fastOutExtraSlowIn' curve used in
   // the native transition.
@@ -207,6 +207,15 @@ class _ZoomPageTransition extends StatelessWidget {
   /// [secondaryAnimation].
   final Widget? child;
 
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
+
   @override
   Widget build(BuildContext context) {
     return DualTransitionBuilder(
@@ -218,7 +227,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomEnterTransition(
           animation: animation,
-          allowSnapshotting: allowSnapshotting,
+          allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
           child: child,
         );
       },
@@ -243,7 +252,7 @@ class _ZoomPageTransition extends StatelessWidget {
         ) {
           return _ZoomEnterTransition(
             animation: animation,
-            allowSnapshotting: allowSnapshotting,
+            allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
             reverse: true,
             child: child,
           );
@@ -271,8 +280,7 @@ class _ZoomEnterTransition extends StatefulWidget {
     this.reverse = false,
     required this.allowSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null);
+  });
 
   final Animation<double> animation;
   final Widget? child;
@@ -291,7 +299,6 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
   late _ZoomEnterTransitionPainter delegate;
-  MediaQueryData? mediaQueryData;
 
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
@@ -357,18 +364,6 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   }
 
   @override
-  void didChangeDependencies() {
-    // If the screen size changes during the transition, perhaps due to
-    // a keyboard dismissal, then ensure that contents are re-rasterized once.
-    final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (mediaQueryDataChanged(mediaQueryData, data)) {
-      controller.clear();
-    }
-    mediaQueryData = data;
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
@@ -382,6 +377,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -393,8 +389,7 @@ class _ZoomExitTransition extends StatefulWidget {
     this.reverse = false,
     required this.allowSnapshotting,
     this.child,
-  }) : assert(animation != null),
-       assert(reverse != null);
+  });
 
   final Animation<double> animation;
   final bool allowSnapshotting;
@@ -407,7 +402,6 @@ class _ZoomExitTransition extends StatefulWidget {
 
 class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
   late _ZoomExitTransitionPainter delegate;
-  MediaQueryData? mediaQueryData;
 
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
   // support this functionality and the canvaskit backend uses a single thread for UI and raster
@@ -473,18 +467,6 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 
   @override
-  void didChangeDependencies() {
-    // If the screen size changes during the transition, perhaps due to
-    // a keyboard dismissal, then ensure that contents are re-rasterized once.
-    final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (mediaQueryDataChanged(mediaQueryData, data)) {
-      controller.clear();
-    }
-    mediaQueryData = data;
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
     widget.animation.removeListener(onAnimationValueChange);
     widget.animation.removeStatusListener(onAnimationStatusChange);
@@ -498,6 +480,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
       painter: delegate,
       controller: controller,
       mode: SnapshotMode.permissive,
+      autoresize: true,
       child: widget.child,
     );
   }
@@ -620,7 +603,18 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
-  const ZoomPageTransitionsBuilder();
+  const ZoomPageTransitionsBuilder({
+    this.allowEnterRouteSnapshotting = true,
+  });
+
+  /// Whether to enable snapshotting on the entering route during the
+  /// transition animation.
+  ///
+  /// If not specified, defaults to true.
+  /// If false, the route snapshotting will not be applied to the route being
+  /// animating into, e.g. when transitioning from route A to route B, B will
+  /// not be snapshotted.
+  final bool allowEnterRouteSnapshotting;
 
   @override
   Widget buildTransitions<T>(
@@ -634,6 +628,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
       animation: animation,
       secondaryAnimation: secondaryAnimation,
       allowSnapshotting: route?.allowSnapshotting ?? true,
+      allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
   }
@@ -829,13 +824,6 @@ mixin _ZoomTransitionBase {
         controller.allowSnapshotting = useSnapshot;
         break;
     }
-  }
-
-  // Whether any of the properties that would impact the page transition
-  // changed.
-  bool mediaQueryDataChanged(MediaQueryData? oldData, MediaQueryData? newData) {
-    return oldData?.size != newData?.size ||
-      oldData?.viewInsets != newData?.viewInsets;
   }
 }
 
