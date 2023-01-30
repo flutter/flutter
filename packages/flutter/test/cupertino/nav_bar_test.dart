@@ -188,7 +188,7 @@ void main() {
   }
 
   // Regression test for https://github.com/flutter/flutter/issues/119270
-  testWidgets('System navigation bar properties are not overriden', (WidgetTester tester) async { 
+  testWidgets('System navigation bar properties are not overriden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
