@@ -1200,12 +1200,18 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     };
   }
 
-  TextStyle _textStyleState(TextStyle style) {
-    if (materialState.contains(MaterialState.disabled)) {
-      return style.copyWith(color: Theme.of(context).disabledColor);
-    }
-    return style;
+  TextStyle _getInputStyleForState(TextStyle style) {
+    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(_stateInputStyle!, materialState);
+    final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, materialState);
+    return providedStyle.merge(defaultStyle);
   }
+
+  TextStyle? get _stateInputStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    return TextStyle(color: widget.style?.color);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1220,7 +1226,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = _textStyleState((theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style));
+    final TextStyle style = _getInputStyleForState((theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style));
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
