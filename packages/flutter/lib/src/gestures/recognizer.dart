@@ -80,7 +80,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     this.debugOwner,
     Set<PointerDeviceKind>? supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
-  }) : _supportedDevices = supportedDevices ?? const <PointerDeviceKind>{},
+  }) : _supportedDevices = supportedDevices,
        _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
 
   /// The recognizer's owner.
