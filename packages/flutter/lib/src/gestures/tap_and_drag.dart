@@ -73,7 +73,7 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 class TapDragDownDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragDownCallback].
   ///
-  /// The [globalPosition], [localPosition] and [consecutiveTapCount]
+  /// The [globalPosition], [localPosition], and [consecutiveTapCount]
   /// arguments must be provided and must not be null.
   TapDragDownDetails({
     required this.globalPosition,
@@ -127,7 +127,7 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 class TapDragUpDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragUpCallback].
   ///
-  /// The [kind], [globalPosition], [localPosition] and [consecutiveTapCount]
+  /// The [kind], [globalPosition], [localPosition], and [consecutiveTapCount]
   /// arguments must be provided and must not be null.
   TapDragUpDetails({
     required this.kind,
@@ -181,7 +181,7 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 class TapDragStartDetails with Diagnosticable {
   /// Creates details for a [GestureTapDragStartCallback].
   ///
-  /// The [globalPosition], [localPosition] and [consecutiveTapCount]
+  /// The [globalPosition], [localPosition], and [consecutiveTapCount]
   /// arguments must be provided and must not be null.
   TapDragStartDetails({
     this.sourceTimeStamp,
@@ -254,9 +254,8 @@ class TapDragUpdateDetails with Diagnosticable {
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
   ///
-  /// The [globalPosition], [localPosition], [offsetFromOrigin], [localOffsetFromOrigin]
-  /// and [consecutiveTapCount] arguments must be provided and must
-  /// not be null.
+  /// The [globalPosition], [localPosition], [offsetFromOrigin], [localOffsetFromOrigin],
+  /// and [consecutiveTapCount] arguments must be provided and must not be null.
   TapDragUpdateDetails({
     this.sourceTimeStamp,
     this.delta = Offset.zero,
@@ -378,7 +377,7 @@ class TapDragEndDetails with Diagnosticable {
   ///
   /// The [velocity] argument must not be null.
   ///
-  /// The [consecutiveTapCount] arguments must be provided and must not be null.
+  /// The [consecutiveTapCount] argument must be provided and must not be null.
   TapDragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
