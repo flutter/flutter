@@ -345,7 +345,7 @@ class WidgetsApp extends StatefulWidget {
       'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
-    bool useInheritedMediaQuery = false,
+    this.useInheritedMediaQuery = false,
   }) : assert(
          home == null ||
          onGenerateInitialRoutes == null,
@@ -444,7 +444,7 @@ class WidgetsApp extends StatefulWidget {
       'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
-    bool useInheritedMediaQuery = false,
+    this.useInheritedMediaQuery = false,
   }) : assert((){
          if (routerConfig != null) {
            assert(
@@ -1158,6 +1158,19 @@ class WidgetsApp extends StatefulWidget {
   ///    Flutter.
   /// {@endtemplate}
   final String? restorationScopeId;
+
+  /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
+  /// Deprecated. This setting is not ignored.
+  ///
+  /// The widget never introduces its own [MediaQuery]; the [View] widget takes
+  /// care of that.
+  /// {@endtemplate}
+  @Deprecated(
+    'This setting is now ignored. '
+    'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+    'This feature was deprecated after v3.7.0-29.0.pre.'
+  )
+  final bool useInheritedMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///

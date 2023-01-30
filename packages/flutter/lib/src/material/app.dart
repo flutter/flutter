@@ -246,7 +246,7 @@ class MaterialApp extends StatefulWidget {
       'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
-    bool useInheritedMediaQuery = false,
+    this.useInheritedMediaQuery = false,
   }) : routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -295,7 +295,7 @@ class MaterialApp extends StatefulWidget {
       'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
       'This feature was deprecated after v3.7.0-29.0.pre.'
     )
-    bool useInheritedMediaQuery = false,
+    this.useInheritedMediaQuery = false,
   }) : assert(routerDelegate != null || routerConfig != null),
        navigatorObservers = null,
        navigatorKey = null,
@@ -741,6 +741,14 @@ class MaterialApp extends StatefulWidget {
   ///
   ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
+
+  /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
+  @Deprecated(
+    'This setting is now ignored. '
+    'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
+    'This feature was deprecated after v3.7.0-29.0.pre.'
+  )
+  final bool useInheritedMediaQuery;
 
   @override
   State<MaterialApp> createState() => _MaterialAppState();
