@@ -113,30 +113,12 @@ void main() {
 
   testWidgets('DrawerButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: DrawerButton(
-            color: Colors.blue,
-          ),
-        ),
-      ),
-    );
-
-    final RichText iconText = tester.firstWidget(find.descendant(
-      of: find.byType(DrawerButton),
-      matching: find.byType(RichText),
-    ));
-    expect(iconText.text.style!.color, Colors.blue);
-  });
-
-  testWidgets('DrawerButton color with ButtonStyle', (WidgetTester tester) async {
-    await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: const Material(
           child: DrawerButton(
             style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.blue),
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
             ),
           ),
         ),
@@ -147,7 +129,7 @@ void main() {
       of: find.byType(DrawerButton),
       matching: find.byType(RichText),
     ));
-    expect(iconText.text.style!.color, Colors.blue);
+    expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('DrawerButton semantics', (WidgetTester tester) async {
@@ -251,24 +233,6 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('EndDrawerButton color', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: EndDrawerButton(
-            color: Colors.red,
-          ),
-        ),
-      ),
-    );
-
-    final RichText iconText = tester.firstWidget(find.descendant(
-      of: find.byType(EndDrawerButton),
-      matching: find.byType(RichText),
-    ));
-    expect(iconText.text.style!.color, Colors.red);
-  });
-
-  testWidgets('DrawerButton color with ButtonStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),

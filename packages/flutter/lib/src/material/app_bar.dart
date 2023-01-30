@@ -994,7 +994,7 @@ class _AppBarState extends State<AppBar> {
     if (leading == null && widget.automaticallyImplyLeading) {
       if (hasDrawer) {
         leading = DrawerButton(
-          iconSize: overallIconTheme.size ?? 24,
+          style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24),
         );
         // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
         // are migrated.
@@ -1106,7 +1106,7 @@ class _AppBarState extends State<AppBar> {
       );
     } else if (hasEndDrawer) {
       actions = EndDrawerButton(
-        iconSize: overallIconTheme.size ?? 24,
+        style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24),
       );
     }
 

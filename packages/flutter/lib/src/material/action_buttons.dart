@@ -20,7 +20,6 @@ abstract class _ActionButton extends StatelessWidget {
     super.key,
     this.color,
     required this.icon,
-    this.iconSize,
     required this.onPressed,
     this.style,
   });
@@ -41,15 +40,9 @@ abstract class _ActionButton extends StatelessWidget {
   /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
   final Color? color;
 
-  /// The size to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.size] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final double? iconSize;
-
   /// Customizes this icon button's appearance.
   ///
-  /// The [style] is only used for Material 3 [IconButton]. If [ThemeData.useMaterial3]
+  /// The [style] is only used for Material 3 [IconButton]s. If [ThemeData.useMaterial3]
   /// is set to true, [style] is preferred for icon button customization, and any
   /// parameters defined in [style] will override the same parameters in [IconButton].
   ///
@@ -74,7 +67,6 @@ abstract class _ActionButton extends StatelessWidget {
       icon: icon,
       style: style,
       color: color,
-      iconSize: iconSize,
       tooltip: _getTooltip(context),
       onPressed: () {
         if (onPressed != null) {
@@ -189,6 +181,10 @@ class BackButtonIcon extends StatelessWidget {
 /// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
 /// situations.
 ///
+/// In Material Design 3, both [style]'s [ButtonStyle.iconColor] and [color] are
+/// used to override the default icon color of [BackButton]. If both exist, the [ButtonStyle.iconColor]
+/// will override [color] for states where [ButtonStyle.foregroundColor] resolves to non-null.
+///
 /// When deciding to display a [BackButton], consider using
 /// `ModalRoute.of(context)?.canPop` to check whether the current route can be
 /// popped. If that value is false (e.g., because the current route is the
@@ -267,6 +263,10 @@ class CloseButtonIcon extends StatelessWidget {
 /// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
 /// situations.
 ///
+/// In Material Design 3, both [style]'s [ButtonStyle.iconColor] and [color] are
+/// used to override the default icon color of [CloseButton]. If both exist, the [ButtonStyle.iconColor]
+/// will override [color] for states where [ButtonStyle.foregroundColor] resolves to non-null.
+///
 /// Use a [CloseButton] instead of a [BackButton] on fullscreen dialogs or
 /// pages that may solicit additional actions to close.
 ///
@@ -344,9 +344,7 @@ class DrawerButton extends _ActionButton {
   /// Creates a Material Design drawer icon button.
   const DrawerButton({
     super.key,
-    super.color,
     super.style,
-    super.iconSize,
     super.onPressed,
   }) : super(icon: const DrawerButtonIcon());
 
@@ -411,9 +409,7 @@ class EndDrawerButton extends _ActionButton {
   /// Creates a Material Design end drawer icon button.
   const EndDrawerButton({
     super.key,
-    super.color,
     super.style,
-    super.iconSize,
     super.onPressed,
   }) : super(icon: const EndDrawerButtonIcon());
 

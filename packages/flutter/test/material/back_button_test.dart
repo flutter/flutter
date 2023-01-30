@@ -154,6 +154,29 @@ void main() {
     expect(iconText.text.style!.color, Colors.blue);
   });
 
+  testWidgets('BackButton.style.iconColor parameter overrides BackButton.color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: BackButton(
+            color: Colors.green,
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(BackButton),
+      matching: find.byType(RichText),
+    ));
+
+    expect(iconText.text.style!.color, Colors.red);
+  });
+
   testWidgets('BackButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
@@ -278,6 +301,29 @@ void main() {
       of: find.byType(CloseButton),
       matching: find.byType(RichText),
     ));
+    expect(iconText.text.style!.color, Colors.red);
+  });
+
+  testWidgets('CloseButton.style.iconColor parameter overrides CloseButton.color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: CloseButton(
+            color: Colors.green,
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(CloseButton),
+      matching: find.byType(RichText),
+    ));
+
     expect(iconText.text.style!.color, Colors.red);
   });
 
