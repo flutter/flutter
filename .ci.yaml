@@ -706,7 +706,6 @@ targets:
 
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -2597,7 +2596,6 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac complex_layout_scroll_perf_macos__timeline_summary
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4018,7 +4016,6 @@ targets:
 
   - name: Mac run_debug_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-

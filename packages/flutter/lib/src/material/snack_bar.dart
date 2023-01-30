@@ -96,7 +96,7 @@ class SnackBarAction extends StatefulWidget {
   /// [SnackBarThemeData.actionTextColor].
   ///
   /// If [textColor] is a [MaterialStateColor], then the text color will be
-  /// be resolved against the set of [MaterialState]s that the action text
+  /// resolved against the set of [MaterialState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? textColor;
@@ -366,7 +366,7 @@ class SnackBar extends StatefulWidget {
   /// inverse surface.
   ///
   /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
-  /// be resolved against the set of [MaterialState]s that the action text
+  /// resolved against the set of [MaterialState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? closeIconColor;

@@ -129,7 +129,7 @@ class _PreferredAppBarSize extends Size {
 ///
 /// If the app bar's [actions] contains [TextButton]s, they will not
 /// be visible if their foreground (text) color is the same as the
-/// the app bar's background color.
+/// app bar's background color.
 ///
 /// The default app bar [backgroundColor] is the overall theme's
 /// [ColorScheme.primary] if the overall theme's brightness is
@@ -591,7 +591,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// See also:
   ///
   ///  * [actionsIconTheme], which defines the appearance of icons in
-  ///    in the [actions] list.
+  ///    the [actions] list.
   final IconThemeData? iconTheme;
 
   /// {@template flutter.material.appbar.actionsIconTheme}
@@ -746,7 +746,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   ///  * [titleTextStyle], which overrides the default text style for the [title].
   ///  * [DefaultTextStyle], which overrides the default text style for all of the
-  ///    the widgets in a subtree.
+  ///    widgets in a subtree.
   final TextStyle? toolbarTextStyle;
 
   /// {@template flutter.material.appbar.titleTextStyle}
@@ -764,7 +764,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///    [title], [leading], and [actions] widgets, also known as the
   ///    AppBar's "toolbar".
   ///  * [DefaultTextStyle], which overrides the default text style for all of the
-  ///    the widgets in a subtree.
+  ///    widgets in a subtree.
   final TextStyle? titleTextStyle;
 
   /// {@template flutter.material.appbar.systemOverlayStyle}

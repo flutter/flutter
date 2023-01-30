@@ -154,6 +154,7 @@ class TextFormField extends FormField<String> {
     bool enableIMEPersonalizedLearning = true,
     MouseCursor? mouseCursor,
     EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    TextMagnifierConfiguration? magnifierConfiguration,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -234,6 +235,7 @@ class TextFormField extends FormField<String> {
                enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
                mouseCursor: mouseCursor,
                contextMenuBuilder: contextMenuBuilder,
+               magnifierConfiguration: magnifierConfiguration,
              ),
            );
          },

@@ -70,6 +70,8 @@ export 'package:flutter/services.dart' show Brightness;
 
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=8-szcYzFVao}
+///
 /// Typically used for custom colors. To use, subclass [ThemeExtension],
 /// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
 /// [lerp] methods. The latter will ensure smooth transitions of properties when
@@ -1143,7 +1145,7 @@ class ThemeData with Diagnosticable {
   /// to determine the current platform for the purpose of emulating the
   /// platform behavior (e.g. scrolling or haptic effects). Widgets and render
   /// objects at lower layers that try to emulate the underlying platform
-  /// platform can depend on [defaultTargetPlatform] directly, or may require
+  /// can depend on [defaultTargetPlatform] directly, or may require
   /// that the target platform be provided as an argument. The
   /// [dart:io.Platform] object should only be used directly when it's critical
   /// to actually know the current platform, without any overrides possible (for
@@ -1589,7 +1591,7 @@ class ThemeData with Diagnosticable {
   ///
   /// Apps should migrate uses of this property to the theme's [colorScheme]
   /// [ColorScheme.secondary] color. In cases where a color is needed that
-  /// that contrasts well with the secondary color [ColorScheme.onSecondary]
+  /// contrasts well with the secondary color [ColorScheme.onSecondary]
   /// can be used.
   @Deprecated(
     'Use colorScheme.secondary instead. '
@@ -2537,7 +2539,7 @@ class ThemeData with Diagnosticable {
 /// styles.
 ///
 /// In the most basic case, [ThemeData]'s `cupertinoOverrideTheme` is null and
-/// and descendant Cupertino widgets' styling is derived from the Material theme.
+/// descendant Cupertino widgets' styling is derived from the Material theme.
 ///
 /// To override individual parts of the Material-derived Cupertino styling,
 /// `cupertinoOverrideTheme`'s construction parameters can be used.

@@ -237,6 +237,10 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
+    if (debuggingOptions.serveObservatory) {
+      await enableObservatory();
+    }
+
     if (enableDevTools) {
       // The method below is guaranteed never to return a failing future.
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(

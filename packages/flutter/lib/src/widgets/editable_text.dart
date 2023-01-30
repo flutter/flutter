@@ -1893,7 +1893,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
-  final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+  final ClipboardStatusNotifier clipboardStatus = ClipboardStatusNotifier();
 
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
@@ -1996,8 +1996,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return widget.toolbarOptions.paste && !widget.readOnly;
     }
     return !widget.readOnly
-        && (clipboardStatus == null
-          || clipboardStatus!.value == ClipboardStatus.pasteable);
+        && (clipboardStatus.value == ClipboardStatus.pasteable);
   }
 
   @override
@@ -2074,7 +2073,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -2099,7 +2098,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       hideToolbar();
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
   }
 
   /// Paste text from [Clipboard].
@@ -2295,7 +2294,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           },
           type: ContextMenuButtonType.copy,
         ),
-      if (toolbarOptions.paste && clipboardStatus != null && pasteEnabled)
+      if (toolbarOptions.paste && pasteEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             pasteText(SelectionChangedCause.toolbar);
@@ -2396,7 +2395,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
   List<ContextMenuButtonItem> get contextMenuButtonItems {
     return buttonItemsForToolbarOptions() ?? EditableText.getEditableButtonItems(
-      clipboardStatus: clipboardStatus?.value,
+      clipboardStatus: clipboardStatus.value,
       onCopy: copyEnabled
           ? () => copySelection(SelectionChangedCause.toolbar)
           : null,
@@ -2417,7 +2416,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
-    clipboardStatus?.addListener(_onChangedClipboardStatus);
+    clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_onEditableScroll);
@@ -2541,8 +2540,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
         ? pasteEnabled
         : widget.selectionControls?.canPaste(this) ?? false;
-    if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
-      clipboardStatus!.update();
+    if (widget.selectionEnabled && pasteEnabled && canPaste) {
+      clipboardStatus.update();
     }
   }
 
@@ -2563,8 +2562,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
-    clipboardStatus?.removeListener(_onChangedClipboardStatus);
-    clipboardStatus?.dispose();
+    clipboardStatus.removeListener(_onChangedClipboardStatus);
+    clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3698,17 +3697,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool showToolbar() {
     // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
+    // context menu: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this,
+    // we should not show a Flutter toolbar for the editable text elements
+    // unless the browser's context menu is explicitly disabled.
+    if (kIsWeb && BrowserContextMenu.enabled) {
       return false;
     }
 
     if (_selectionOverlay == null) {
       return false;
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3922,7 +3922,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && (widget.selectionControls is TextSelectionHandleControls
             ? pasteEnabled
             : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
-        && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
+        && (clipboardStatus.value == ClipboardStatus.pasteable)
       ? () {
         controls?.handlePaste(this);
         pasteText(SelectionChangedCause.toolbar);
@@ -3976,7 +3976,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // `x ∉ getTextBoundaryAt(x)`. In case `caretOffset` points to one such
     // control character, we define that these control characters themselves are
     // still part of the previous line, but also exclude them from the
-    // the line boundary range since they're non-printing. IOW, no additional
+    // line boundary range since they're non-printing. IOW, no additional
     // processing needed since the LineBoundary class does exactly that.
     return forward
       ? TextPosition(offset: textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? _value.text.length, affinity: TextAffinity.upstream)
@@ -3988,6 +3988,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextBoundary _characterBoundary() => widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
+  TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
@@ -4228,6 +4229,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
     ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
     ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
