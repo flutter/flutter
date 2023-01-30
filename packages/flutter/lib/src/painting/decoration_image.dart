@@ -642,9 +642,23 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat)) {
-        canvas.drawImageRect(image, sourceRect, tileRect, paint);
-      }
+      final TileMode tmx = (repeat == ImageRepeat.repeatX || repeat == ImageRepeat.repeat)
+        ? TileMode.repeated
+        : TileMode.clamp;
+      final TileMode tmy = repeat == ImageRepeat.repeatY || repeat == ImageRepeat.repeat
+        ? TileMode.repeated
+        : TileMode.clamp;
+      final Rect data = _generateImageTileRects(rect, destinationRect, repeat).first;
+      final Matrix4 xform = Matrix4.identity()
+        ..scale(data.width / sourceRect.width, data.height / sourceRect.height)
+        ..setTranslationRaw(-data.topLeft.dx, -data.topLeft.dy, 1);
+
+      final ImageShader shader = ImageShader(image, tmx, tmy, xform.storage, filterQuality: filterQuality);
+      canvas.drawRect(
+        rect,
+        paint..shader = shader
+      );
+      shader.dispose();
     }
   } else {
     canvas.scale(1 / scale);
