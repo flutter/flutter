@@ -136,6 +136,32 @@ void main() {
         expect(result, isNotNull);
       });
 
+      testWithoutContext('Find similar named in preliminary client', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[
+            PtrResourceRecord('foo', future, domainName: 'bar'),
+            PtrResourceRecord('foo', future, domainName: 'bar (2)'),
+          ],
+          <String, List<SrvResourceRecord>>{
+            'bar': <SrvResourceRecord>[
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
+            ],
+            'bar (2)': <SrvResourceRecord>[
+              SrvResourceRecord('bar', future, port: 123, weight: 1, priority: 1, target: 'appId'),
+            ],
+          },
+        );
+
+        final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: emptyClient,
+          preliminaryMDnsClient: client,
+          logger: BufferLogger.test(),
+          flutterUsage: TestUsage(),
+        );
+
+        expect(portDiscovery.queryForAttach, throwsToolExit());
+      });
+
       testWithoutContext('No ports available', () async {
         final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
           mdnsClient: emptyClient,

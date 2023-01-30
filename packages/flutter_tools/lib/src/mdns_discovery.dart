@@ -10,6 +10,7 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
+import 'convert.dart';
 import 'device.dart';
 import 'reporting/reporting.dart';
 
@@ -201,8 +202,16 @@ class MDnsVmServiceDiscovery {
 
       final List<MDnsVmServiceDiscoveryResult> results =
           <MDnsVmServiceDiscoveryResult>[];
+
+      // uniqueDomainNames is used to track all domain names of Dart VM services
+      // It is later used in this function to determine whether or not to throw an error.
+      // We do not want to throw the error if it was unable to find any domain
+      // names because that indicates it may be a problem with mDNS, which has
+      // a separate error message in _checkForIPv4LinkLocal.
       final Set<String> uniqueDomainNames = <String>{};
-      final Set<String> uniqueResultsByDomainName = <String>{};
+      // uniqueDomainNamesInResults is used to filter out duplicates with exactly
+      // the same domain name from the results.
+      final Set<String> uniqueDomainNamesInResults = <String>{};
 
       // Listen for mDNS connections until timeout.
       final Stream<PtrResourceRecord> ptrResourceStream = client.lookup<PtrResourceRecord>(
@@ -222,6 +231,11 @@ class MDnsVmServiceDiscovery {
           }
         } else {
           domainName = ptr.domainName;
+        }
+
+        // Result with same domain name was already found, skip it.
+        if (uniqueDomainNamesInResults.contains(domainName)) {
+          continue;
         }
 
         _logger.printTrace('Checking for available port on $domainName');
@@ -244,10 +258,6 @@ class MDnsVmServiceDiscovery {
 
         // If deviceVmservicePort is set, only use records that match it
         if (deviceVmservicePort != null && srvRecord.port != deviceVmservicePort) {
-          continue;
-        }
-
-        if (uniqueResultsByDomainName.contains(domainName)) {
           continue;
         }
 
@@ -295,7 +305,7 @@ class MDnsVmServiceDiscovery {
           authCode,
           ipAddress: ipAddress
         ));
-        uniqueResultsByDomainName.add(domainName);
+        uniqueDomainNamesInResults.add(domainName);
         if (quitOnFind) {
           return results;
         }
@@ -322,17 +332,12 @@ class MDnsVmServiceDiscovery {
 
   String _getAuthCode(String txtRecord) {
     const String authCodePrefix = 'authCode=';
-    String? raw;
-    for (final String record in txtRecord.split('\n')) {
-      if (record.startsWith(authCodePrefix)) {
-        raw = record;
-        break;
-      }
-    }
-    if (raw == null) {
+    final Iterable<String> matchingRecords =
+        LineSplitter.split(txtRecord).where((String record) => record.startsWith(authCodePrefix));
+    if (matchingRecords.isEmpty) {
       return '';
     }
-    String authCode = raw.substring(authCodePrefix.length);
+    String authCode = matchingRecords.first.substring(authCodePrefix.length);
     // The Dart VM Service currently expects a trailing '/' as part of the
     // URI, otherwise an invalid authentication code response is given.
     if (!authCode.endsWith('/')) {
