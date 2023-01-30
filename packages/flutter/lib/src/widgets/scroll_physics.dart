@@ -67,6 +67,11 @@ enum ScrollDecelerationRate {
 /// // ...
 /// final ScrollPhysics mergedPhysics = physics.applyTo(const AlwaysScrollableScrollPhysics());
 /// ```
+///
+/// When implementing a subclass, you must override [applyTo] so that it returns
+/// an appropriate instance of your subclass.  Otherwise, classes like
+/// [Scrollable] that consume a [ScrollPosition] may lose your customizations
+/// when they attempt to combine them with a default [ScrollPhysics] object.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
