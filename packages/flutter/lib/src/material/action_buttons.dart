@@ -46,10 +46,6 @@ abstract class _ActionButton extends StatelessWidget {
   /// is set to true, [style] is preferred for icon button customization, and any
   /// parameters defined in [style] will override the same parameters in [IconButton].
   ///
-  /// For example, if [IconButton]'s [visualDensity] is set to [VisualDensity.standard]
-  /// and [style]'s [visualDensity] is set to [VisualDensity.compact],
-  /// the icon button will have [VisualDensity.compact] to define the button's layout.
-  ///
   /// Null by default.
   final ButtonStyle? style;
 

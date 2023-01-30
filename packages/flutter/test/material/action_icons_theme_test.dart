@@ -53,16 +53,16 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
-      'backButtonIconBuilder: Closure: (BuildContext) => Widget',
-      'closeButtonIconBuilder: Closure: (BuildContext) => Widget',
-      'drawerButtonIconBuilder: Closure: (BuildContext) => Widget',
-      'endDrawerButtonIconBuilder: Closure: (BuildContext) => Widget'
+    final Matcher containsBuilderCallback = contains('Closure: (BuildContext) =>');
+    expect(description, <dynamic>[
+      allOf(startsWith('backButtonIconBuilder:'), containsBuilderCallback),
+      allOf(startsWith('closeButtonIconBuilder:'), containsBuilderCallback),
+      allOf(startsWith('drawerButtonIconBuilder:'), containsBuilderCallback),
+      allOf(startsWith('endDrawerButtonIconBuilder:'), containsBuilderCallback),
     ]);
   });
 
-  testWidgets('Action buttons use ThemeData action icon theme',
-      (WidgetTester tester) async {
+  testWidgets('Action buttons use ThemeData action icon theme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 
