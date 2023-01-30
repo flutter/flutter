@@ -63,8 +63,10 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool enableDevtoolsLaunch,
   DevtoolsLauncher? devtoolsLauncher,
   bool launchDevToolsInNewWindow,
-  SdkConfigurationProvider? sdkConfigurationProvider,
+  SdkConfigurationProvider sdkConfigurationProvider,
   bool emitDebugEvents,
+  bool isInternalBuild,
+  bool isFlutterApp,
 });
 
 // A minimal index for projects that do not yet support web.
