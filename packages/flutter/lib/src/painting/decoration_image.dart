@@ -655,12 +655,10 @@ void paintImage({
         ..scale(data.width / sourceRect.width, data.height / sourceRect.height)
         ..setTranslationRaw(-data.topLeft.dx, -data.topLeft.dy, 1);
 
-      final ImageShader shader = ImageShader(image, tmx, tmy, xform.storage, filterQuality: filterQuality);
       canvas.drawRect(
         rect,
-        paint..shader = shader
+        paint..shader = ImageShader(image, tmx, tmy, xform.storage, filterQuality: filterQuality)
       );
-      // test shader.dispose();
     }
   } else {
     canvas.scale(1 / scale);
