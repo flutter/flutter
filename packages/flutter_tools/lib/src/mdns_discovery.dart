@@ -202,6 +202,7 @@ class MDnsVmServiceDiscovery {
       final List<MDnsVmServiceDiscoveryResult> results =
           <MDnsVmServiceDiscoveryResult>[];
       final Set<String> uniqueDomainNames = <String>{};
+      final Set<String> uniqueResultsByDomainName = <String>{};
 
       // Listen for mDNS connections until timeout.
       final Stream<PtrResourceRecord> ptrResourceStream = client.lookup<PtrResourceRecord>(
@@ -308,12 +309,17 @@ class MDnsVmServiceDiscovery {
           authCode += '/';
         }
 
+        if (uniqueResultsByDomainName.contains(domainName)) {
+          continue;
+        }
+
         results.add(MDnsVmServiceDiscoveryResult(
           domainName,
           srvRecord.port,
           authCode,
           ipAddress: ipAddress
         ));
+        uniqueResultsByDomainName.add(domainName);
         if (quitOnFind) {
           return results;
         }
