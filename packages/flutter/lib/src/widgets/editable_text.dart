@@ -1938,7 +1938,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
-  final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+  final ClipboardStatusNotifier clipboardStatus = ClipboardStatusNotifier();
 
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
@@ -2041,8 +2041,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return widget.toolbarOptions.paste && !widget.readOnly;
     }
     return !widget.readOnly
-        && (clipboardStatus == null
-          || clipboardStatus!.value == ClipboardStatus.pasteable);
+        && (clipboardStatus.value == ClipboardStatus.pasteable);
   }
 
   @override
@@ -2119,7 +2118,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -2144,7 +2143,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       hideToolbar();
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
   }
 
   /// Paste text from [Clipboard].
@@ -2330,7 +2329,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           },
           type: ContextMenuButtonType.copy,
         ),
-      if (toolbarOptions.paste && clipboardStatus != null && pasteEnabled)
+      if (toolbarOptions.paste && pasteEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             pasteText(SelectionChangedCause.toolbar);
@@ -2431,7 +2430,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
   List<ContextMenuButtonItem> get contextMenuButtonItems {
     return buttonItemsForToolbarOptions() ?? EditableText.getEditableButtonItems(
-      clipboardStatus: clipboardStatus?.value,
+      clipboardStatus: clipboardStatus.value,
       onCopy: copyEnabled
           ? () => copySelection(SelectionChangedCause.toolbar)
           : null,
@@ -2452,7 +2451,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
-    clipboardStatus?.addListener(_onChangedClipboardStatus);
+    clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_onEditableScroll);
@@ -2576,8 +2575,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
         ? pasteEnabled
         : widget.selectionControls?.canPaste(this) ?? false;
-    if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
-      clipboardStatus!.update();
+    if (widget.selectionEnabled && pasteEnabled && canPaste) {
+      clipboardStatus.update();
     }
   }
 
@@ -2598,8 +2597,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
-    clipboardStatus?.removeListener(_onChangedClipboardStatus);
-    clipboardStatus?.dispose();
+    clipboardStatus.removeListener(_onChangedClipboardStatus);
+    clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3740,17 +3739,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool showToolbar() {
     // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
+    // context menu: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this,
+    // we should not show a Flutter toolbar for the editable text elements
+    // unless the browser's context menu is explicitly disabled.
+    if (kIsWeb && BrowserContextMenu.enabled) {
       return false;
     }
 
     if (_selectionOverlay == null) {
       return false;
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3964,7 +3964,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && (widget.selectionControls is TextSelectionHandleControls
             ? pasteEnabled
             : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
-        && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
+        && (clipboardStatus.value == ClipboardStatus.pasteable)
       ? () {
         controls?.handlePaste(this);
         pasteText(SelectionChangedCause.toolbar);
