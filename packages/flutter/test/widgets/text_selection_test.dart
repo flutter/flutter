@@ -671,7 +671,7 @@ void main() {
     await mouseGesture.up();
     await tester.pumpAndSettle();
 
-    expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
 
     // Test touch gesture.
     final TestGesture touchGesture = await tester.startGesture(

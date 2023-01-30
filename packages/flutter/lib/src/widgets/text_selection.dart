@@ -2191,21 +2191,9 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
-              final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
-              final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
-              final bool wordAtCursorIndexIsMisspelled = editableText.findSuggestionSpanAtCursorIndex(textPosition.offset) != null;
-
-              if (wordAtCursorIndexIsMisspelled) {
-                renderEditable.selectWord(cause: SelectionChangedCause.tap);
-                if (previousSelection != editableText.textEditingValue.selection) {
-                  editableText.showSpellCheckSuggestionsToolbar();
-                } else {
-                  editableText.toggleToolbar(false);
-                }
-              } else {
-                // Precise devices should place the cursor at a precise position if the word at the text position is not misspelled.
-                renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              }
+              // TODO(camsim99): Determine spell check toolbar behavior in these cases: https://github.com/flutter/flutter/issues/119573.
+              // Precise devices should place the cursor at a precise position if the word at the text position is not misspelled.
+              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
               break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
