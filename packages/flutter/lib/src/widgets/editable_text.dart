@@ -3071,6 +3071,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  // Indicates that a call to _handleFocusChanged originated within
+  // EditableText, allowing it to distinguish between internal and external
+  // focus changes.
+  bool _nextFocusChangeIsInternal = false;
+
   /// Express interest in interacting with the keyboard.
   ///
   /// If this control is already attached to the keyboard, this function will
@@ -3082,6 +3087,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       _openInputConnection();
     } else {
+      _nextFocusChangeIsInternal = true;
       widget.focusNode.requestFocus(); // This eventually calls _openInputConnection also, see _handleFocusChanged.
     }
   }
@@ -3512,7 +3518,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      if (!_value.selection.isValid) {
+      if (kIsWeb && !_isMultiline && !_nextFocusChangeIsInternal) {
+        // On native web, single line <input> tags select all when receiving
+        // focus.
+        _handleSelectionChanged(
+          TextSelection(
+            baseOffset: 0,
+            extentOffset: _value.text.length,
+          ),
+          null,
+        );
+      } else if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
         _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
       }
@@ -3521,6 +3537,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       setState(() { _currentPromptRectRange = null; });
     }
     updateKeepAlive();
+    _nextFocusChangeIsInternal = false;
   }
 
   _ScribbleCacheKey? _scribbleCacheKey;
@@ -3662,6 +3679,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // unfocused field that previously had a selection in the same spot.
     if (value == textEditingValue) {
       if (!widget.focusNode.hasFocus) {
+        _nextFocusChangeIsInternal = true;
         widget.focusNode.requestFocus();
         _selectionOverlay = _createSelectionOverlay();
       }
