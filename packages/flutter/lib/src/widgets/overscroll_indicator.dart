@@ -719,15 +719,15 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
       assert(notification.metrics.axis == widget.axis);
       if (_accepted) {
+        _totalOverscroll += notification.overscroll;
+        _stretchDirection = _totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
+
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
           _stretchController.absorbImpact(notification.velocity.abs());
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
-            _totalOverscroll += notification.overscroll;
-            _stretchDirection = _totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
-
             // We clamp the overscroll amount relative to the length of the viewport,
             // which is the furthest distance a single pointer could pull on the
             // screen. This is because more than one pointer will multiply the

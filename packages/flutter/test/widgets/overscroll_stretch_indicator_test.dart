@@ -915,4 +915,97 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 0.0));
     expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
   });
+
+
+  testWidgets('Fling toward the trailing edge causes stretch toward the leading edge', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(box1Key, box2Key, box3Key, controller),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -50.0), 10000.0);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The boxes should now be at different locations because of the scaling.
+    expect(controller.offset, 150.0);
+    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-160.0));
+    expect(box2.localToGlobal(Offset.zero).dy, lessThan(93.0));
+    expect(box3.localToGlobal(Offset.zero).dy, lessThan(347.0));
+
+    await tester.pumpAndSettle();
+
+    // The boxes should now be at their final position.
+    expect(controller.offset, 150.0);
+    expect(box1.localToGlobal(Offset.zero).dy, -150.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 100.0);
+    expect(box3.localToGlobal(Offset.zero).dy, 350.0);
+  });
+
+  testWidgets('Fling toward the leading edge causes stretch toward the trailing edge', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(box1Key, box2Key, box3Key, controller),
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+
+    // We fling to the trailing edge and let it settle.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -50.0), 10000.0);
+    await tester.pumpAndSettle();
+
+    // We are now at the trailing edge
+    expect(controller.offset, 150.0);
+    expect(box1.localToGlobal(Offset.zero).dy, -150.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 100.0);
+    expect(box3.localToGlobal(Offset.zero).dy, 350.0);
+
+    // Now fling to the leading edge
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, 50.0), 10000.0);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The boxes should now be at different locations because of the scaling.
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero).dy, 0.0);
+    expect(box2.localToGlobal(Offset.zero).dy, greaterThan(254.0));
+    expect(box3.localToGlobal(Offset.zero).dy, greaterThan(508.0));
+
+    await tester.pumpAndSettle();
+
+    // The boxes should now be at their final position.
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero).dy, 0.0);
+    expect(box2.localToGlobal(Offset.zero).dy, 250.0);
+    expect(box3.localToGlobal(Offset.zero).dy, 500.0);
+  });
 }
