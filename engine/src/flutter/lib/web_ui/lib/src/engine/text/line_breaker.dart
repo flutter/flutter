@@ -42,7 +42,7 @@ enum LineBreakType {
 /// Splits [text] into fragments based on line breaks.
 abstract class LineBreakFragmenter extends TextFragmenter {
   factory LineBreakFragmenter(String text) {
-    if (domWindow.Intl.v8BreakIterator != null) {
+    if (domIntl.v8BreakIterator != null) {
       return V8LineBreakFragmenter(text);
     }
     return FWLineBreakFragmenter(text);
@@ -66,7 +66,7 @@ class FWLineBreakFragmenter extends TextFragmenter implements LineBreakFragmente
 /// `v8BreakIterator` API to find line breaks in the given [text].
 class V8LineBreakFragmenter extends TextFragmenter implements LineBreakFragmenter {
   V8LineBreakFragmenter(super.text)
-      : assert(domWindow.Intl.v8BreakIterator != null);
+      : assert(domIntl.v8BreakIterator != null);
 
   @override
   List<LineBreakFragment> fragment() {
