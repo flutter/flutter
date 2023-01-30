@@ -97,6 +97,6 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     final Iterable<RegExpMatch> matches = regex.allMatches(testStr);
 
     expect(matches.length, 5,
-        reason: 'There should be only ${matches.length} matches for the pattern provided');
+        reason: 'There should be only 5 matches for the pattern provided');
   });
 }
