@@ -1201,9 +1201,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   TextStyle _getInputStyleForState(TextStyle style) {
-    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(_stateInputStyle!, _materialState);
+    final TextStyle stateStyle = MaterialStateProperty.resolveAs(_stateInputStyle!, _materialState);
     final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _materialState);
-    return providedStyle.merge(defaultStyle);
+    return providedStyle.merge(stateStyle);
   }
 
   TextStyle? get _stateInputStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
