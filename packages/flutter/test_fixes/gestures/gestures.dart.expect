@@ -1,0 +1,71 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/gestures.dart';
+
+void main() {
+  // Change made in https://github.com/flutter/flutter/pull/28602
+  final PointerEnterEvent enterEvent = PointerEnterEvent.fromMouseEvent(PointerHoverEvent());
+
+  // Change made in https://github.com/flutter/flutter/pull/28602
+  final PointerExitEvent exitEvent = PointerExitEvent.fromMouseEvent(PointerHoverEvent());
+
+  // Changes made in https://github.com/flutter/flutter/pull/66043
+  VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+  tracker = VelocityTracker.withKind(PointerDeviceKind.mouse);
+  tracker = VelocityTracker.withKind(PointerDeviceKind.touch, error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/81858
+  DragGestureRecognizer();
+  DragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  DragGestureRecognizer(error: '');
+  VerticalDragGestureRecognizer();
+  VerticalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  VerticalDragGestureRecognizer(error: '');
+  HorizontalDragGestureRecognizer();
+  HorizontalDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  HorizontalDragGestureRecognizer(error: '');
+  GestureRecognizer();
+  GestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  GestureRecognizer(error: '');
+  OneSequenceGestureRecognizer();
+  OneSequenceGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  OneSequenceGestureRecognizer(error: '');
+  PrimaryPointerGestureRecognizer();
+  PrimaryPointerGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  PrimaryPointerGestureRecognizer(error: '');
+  EagerGestureRecognizer();
+  EagerGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  EagerGestureRecognizer(error: '');
+  ForcePressGestureRecognizer();
+  ForcePressGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  ForcePressGestureRecognizer(error: '');
+  LongPressGestureRecognizer();
+  LongPressGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  LongPressGestureRecognizer(error: '');
+  MultiDragGestureRecognizer();
+  MultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  MultiDragGestureRecognizer(error: '');
+  ImmediateMultiDragGestureRecognizer();
+  ImmediateMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  ImmediateMultiDragGestureRecognizer(error: '');
+  HorizontalMultiDragGestureRecognizer();
+  HorizontalMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  HorizontalMultiDragGestureRecognizer(error: '');
+  VerticalMultiDragGestureRecognizer();
+  VerticalMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  VerticalMultiDragGestureRecognizer(error: '');
+  DelayedMultiDragGestureRecognizer();
+  DelayedMultiDragGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  DelayedMultiDragGestureRecognizer(error: '');
+  DoubleTapGestureRecognizer();
+  DoubleTapGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  DoubleTapGestureRecognizer(error: '');
+  MultiTapGestureRecognizer();
+  MultiTapGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  MultiTapGestureRecognizer(error: '');
+  ScaleGestureRecognizer();
+  ScaleGestureRecognizer(supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch});
+  ScaleGestureRecognizer(error: '');
+}
