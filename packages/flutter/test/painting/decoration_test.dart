@@ -672,7 +672,8 @@ void main() {
     final TestCanvas canvas = TestCanvas();
 
     // Paint a square image into an output rect that is twice as wide as it is
-    // tall.  Two copies of the image should be painted, one next to the other.
+    // tall. One copy of the image should be painted, aligned so that a repeating
+    // tile mode causes it appear twice.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
@@ -685,34 +686,29 @@ void main() {
       repeat: ImageRepeat.repeatX,
     );
 
-    const Size imageSize = Size(100.0, 100.0);
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawRect).toList();
 
-    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
-    final Set<Rect> tileRects = <Rect>{};
+    expect(calls, hasLength(1));
+    final Invocation call = calls[0];
+    expect(call.isMethod, isTrue);
+    expect(call.positionalArguments, hasLength(2));
 
-    expect(calls, hasLength(2));
-    for (final Invocation call in calls) {
-      expect(call.isMethod, isTrue);
-      expect(call.positionalArguments, hasLength(4));
+    // A tiled image is drawn as a rect with a shader.
+    expect(call.positionalArguments[0], isA<Rect>());
+    expect(call.positionalArguments[1], isA<Paint>());
 
-      expect(call.positionalArguments[0], isA<ui.Image>());
+    final Paint paint = call.positionalArguments[1] as Paint;
 
-      // sourceRect should contain all pixels of the source image
-      expect(call.positionalArguments[1], Offset.zero & imageSize);
-
-      tileRects.add(call.positionalArguments[2] as Rect);
-
-      expect(call.positionalArguments[3], isA<Paint>());
-    }
-
-    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(230.0, 30.0, 200.0, 200.0)});
+    expect(paint.shader, isA<ImageShader>());
+    expect(call.positionalArguments[0], outputRect);
   });
 
   test('paintImage with repeatY and fitWidth', () async {
     final TestCanvas canvas = TestCanvas();
 
     // Paint a square image into an output rect that is twice as tall as it is
-    // wide.  Two copies of the image should be painted, one above the other.
+    // wide.  One copy of the image should be painted, aligned so that a repeating
+    // tile mode causes it appear twice.
     const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
     final ui.Image image = await createTestImage(width: 100, height: 100);
 
@@ -724,28 +720,21 @@ void main() {
       fit: BoxFit.fitWidth,
       repeat: ImageRepeat.repeatY,
     );
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawRect).toList();
 
-    const Size imageSize = Size(100.0, 100.0);
+    expect(calls, hasLength(1));
+    final Invocation call = calls[0];
+    expect(call.isMethod, isTrue);
+    expect(call.positionalArguments, hasLength(2));
 
-    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
-    final Set<Rect> tileRects = <Rect>{};
+    // A tiled image is drawn as a rect with a shader.
+    expect(call.positionalArguments[0], isA<Rect>());
+    expect(call.positionalArguments[1], isA<Paint>());
 
-    expect(calls, hasLength(2));
-    for (final Invocation call in calls) {
-      expect(call.isMethod, isTrue);
-      expect(call.positionalArguments, hasLength(4));
+    final Paint paint = call.positionalArguments[1] as Paint;
 
-      expect(call.positionalArguments[0], isA<ui.Image>());
-
-      // sourceRect should contain all pixels of the source image
-      expect(call.positionalArguments[1], Offset.zero & imageSize);
-
-      tileRects.add(call.positionalArguments[2] as Rect);
-
-      expect(call.positionalArguments[3], isA<Paint>());
-    }
-
-    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(30.0, 230.0, 200.0, 200.0)});
+    expect(paint.shader, isA<ImageShader>());
+    expect(call.positionalArguments[0], outputRect);
   });
 
   test('DecorationImage scale test', () async {
