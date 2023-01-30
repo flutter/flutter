@@ -215,7 +215,7 @@ public class FlutterJNI {
   private static float refreshRateFPS = 60.0f;
 
   // This is set from native code via JNI.
-  @Nullable private static String observatoryUri;
+  @Nullable private static String vmServiceUri;
 
   private native boolean nativeGetIsSoftwareRenderingEnabled();
 
@@ -230,14 +230,28 @@ public class FlutterJNI {
   }
 
   /**
-   * Observatory URI for the VM instance.
+   * VM Service URI for the VM instance.
    *
    * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
    * String, long)} is run.
    */
   @Nullable
+  public static String getVMServiceUri() {
+    return vmServiceUri;
+  }
+
+  /**
+   * VM Service URI for the VM instance.
+   *
+   * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
+   * String, long)} is run.
+   *
+   * @deprecated replaced by {@link #getVMServiceUri()}.
+   */
+  @Deprecated
+  @Nullable
   public static String getObservatoryUri() {
-    return observatoryUri;
+    return vmServiceUri;
   }
 
   /**
