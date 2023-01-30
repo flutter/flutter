@@ -99,14 +99,16 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     _readyToAnnounce = true;
     assert(_devToolsLauncher!.activeDevToolsServer != null);
 
-    final Uri devToolsUrl = _devToolsLauncher!.devToolsUrl!;
-    for (final FlutterDevice? device in devicesWithExtension) {
-      if (device == null) {
-        continue;
+    final Uri? devToolsUrl = _devToolsLauncher!.devToolsUrl;
+    if (devToolsUrl != null) {
+      for (final FlutterDevice? device in devicesWithExtension) {
+        if (device == null) {
+          continue;
+        }
+        // Notify the DDS instances that there's a DevTools instance available so they can correctly
+        // redirect DevTools related requests.
+        device.device?.dds.setExternalDevToolsUri(devToolsUrl);
       }
-      // Notify the DDS instances that there's a DevTools instance available so they can correctly
-      // redirect DevTools related requests.
-      device.device?.dds.setExternalDevToolsUri(devToolsUrl);
     }
 
     if (_residentRunner.reportedDebuggers) {
