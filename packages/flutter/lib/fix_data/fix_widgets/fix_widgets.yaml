@@ -25,7 +25,7 @@ version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067.
   - title: "Remove 'vsync'"
-    date: 2022-01-39
+    date: 2022-01-30
     element:
       uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
       constructor: ''
