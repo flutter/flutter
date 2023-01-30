@@ -146,6 +146,113 @@ void main() {
     expect(boundary.getTextBoundaryAt(3), TestTextLayoutMetrics.lineAt3);
   });
 
+  group('paragraph boundary', () {
+    test('works for simple cases', () {
+      const String textA= 'abcd efg hi\njklmno\npqrstuv';
+      const ParagraphBoundary boundaryA = ParagraphBoundary(textA);
+
+      // Position enclosed inside of paragraph, 'abcd efg h|i\n'.
+      const int position = 10;
+
+      // The range includes the line terminator.
+      expect(boundaryA.getLeadingTextBoundaryAt(position), 0);
+      expect(boundaryA.getTrailingTextBoundaryAt(position), 12);
+
+      // This text includes a carriage return followed by a line feed.
+      const String textB = 'abcd efg hi\r\njklmno\npqrstuv';
+      const ParagraphBoundary boundaryB = ParagraphBoundary(textB);
+      expect(boundaryB.getLeadingTextBoundaryAt(position), 0);
+      expect(boundaryB.getTrailingTextBoundaryAt(position), 13);
+
+      const String textF = 'Now is the time for\n' // 20
+          'all good people\n'                         // 20 + 16 => 36
+          'to come to the aid\n'                      // 36 + 19 => 55
+          'of their country.';                        // 55 + 17 => 72
+      const ParagraphBoundary boundaryF = ParagraphBoundary(textF);
+      const int positionF = 11;
+      expect(boundaryF.getLeadingTextBoundaryAt(positionF), 0);
+      expect(boundaryF.getTrailingTextBoundaryAt(positionF), 20);
+    });
+
+    test('works for consecutive line terminators involving CRLF', () {
+      const String textI = 'Now is the time for\n' // 20
+          'all good people\n\r\n'                         // 20 + 16 => 38
+          'to come to the aid\n'                      // 38 + 19 => 57
+          'of their country.';                        // 57 + 17 => 74
+      const ParagraphBoundary boundaryI = ParagraphBoundary(textI);
+      const int positionI = 56;// \n at the end of the third line.
+      const int positionJ = 38;// t at beginning of third line.
+      const int positionK = 37;// \n at end of second line.
+      expect(boundaryI.getLeadingTextBoundaryAt(positionI), 38);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionI), 57);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 38);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionJ), 57);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionK), 36);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionK), 38);
+    });
+
+    test('works for consecutive line terminators', () {
+      const String textI = 'Now is the time for\n' // 20
+          'all good people\n\n'                         // 20 + 16 => 37
+          'to come to the aid\n'                      // 37 + 19 => 56
+          'of their country.';                        // 56 + 17 => 73
+      const ParagraphBoundary boundaryI = ParagraphBoundary(textI);
+      const int positionI = 55;// \n at the end of the third line.
+      const int positionJ = 37;// t at beginning of third line.
+      const int positionK = 36;// \n at end of second line.
+      expect(boundaryI.getLeadingTextBoundaryAt(positionI), 37);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionI), 56);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionJ), 37);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionJ), 56);
+      expect(boundaryI.getLeadingTextBoundaryAt(positionK), 36);
+      expect(boundaryI.getTrailingTextBoundaryAt(positionK), 37);
+    });
+
+    test('leading boundary works for consecutive CRLF', () {
+      // This text includes multiple consecutive carriage returns followed by line feeds (CRLF).
+      const String textH = 'abcd efg hi\r\n\r\n\r\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
+      const ParagraphBoundary boundaryH = ParagraphBoundary(textH);
+      const int positionH = 18;
+      expect(boundaryH.getLeadingTextBoundaryAt(positionH), 17);
+      expect(boundaryH.getTrailingTextBoundaryAt(positionH), 19);
+    });
+
+    test('trailing boundary works for consecutive CRLF', () {
+      // This text includes multiple consecutive carriage returns followed by line feeds (CRLF).
+      const String textG = 'abcd efg hi\r\n\n\n\n\n\n\r\n\r\n\r\n\r\n\n\n\n\n\njklmno\npqrstuv';
+      const ParagraphBoundary boundaryG = ParagraphBoundary(textG);
+      const int positionG = 18;
+      expect(boundaryG.getLeadingTextBoundaryAt(positionG), 18);
+      expect(boundaryG.getTrailingTextBoundaryAt(positionG), 20);
+    });
+
+    test('works when position is between two CRLF', () {
+      const String textE = 'abcd efg hi\r\nhello\r\n\n';
+      const ParagraphBoundary boundaryE = ParagraphBoundary(textE);
+      // Position enclosed inside of paragraph, 'abcd efg hi\r\nhello\r\n\n'.
+      const int positionE = 16;
+      expect(boundaryE.getLeadingTextBoundaryAt(positionE), 13);
+      expect(boundaryE.getTrailingTextBoundaryAt(positionE), 20);
+    });
+
+    test('works for multiple consecutive line terminators', () {
+      // This text includes multiple consecutive line terminators.
+      const String textC = 'abcd efg hi\r\n\n\n\n\n\n\n\n\n\n\n\njklmno\npqrstuv';
+      const ParagraphBoundary boundaryC = ParagraphBoundary(textC);
+      // Position enclosed inside of paragraph, 'abcd efg hi\r\n\n\n\n\n\n|\n\n\n\n\n\njklmno\npqrstuv'.
+      const int positionC = 18;
+      expect(boundaryC.getLeadingTextBoundaryAt(positionC), 18);
+      expect(boundaryC.getTrailingTextBoundaryAt(positionC), 19);
+
+      const String textD = 'abcd efg hi\r\n\n\n\n';
+      const ParagraphBoundary boundaryD = ParagraphBoundary(textD);
+      // Position enclosed inside of paragraph, 'abcd efg hi\r\n\n|\n\n'.
+      const int positionD = 14;
+      expect(boundaryD.getLeadingTextBoundaryAt(positionD), 14);
+      expect(boundaryD.getTrailingTextBoundaryAt(positionD), 15);
+    });
+  });
+
   test('document boundary works', () {
     const String text = 'abcd efg hi\njklmno\npqrstuv';
     const DocumentBoundary boundary = DocumentBoundary(text);
