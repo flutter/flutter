@@ -223,8 +223,7 @@ class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMove
 
 /// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the previous or the next paragraph
-/// boundary, or the [TextSelection.base] position if it's closer in the move
-/// direction.
+/// boundary depending on the [forward] parameter.
 ///
 /// This [Intent] collapses the selection when the order of [TextSelection.base]
 /// and [TextSelection.extent] would reverse.
