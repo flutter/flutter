@@ -11914,7 +11914,7 @@ void main() {
     },
   );
 
-  testWidgets('Web does not check the clipboard status', (WidgetTester tester) async {
+  testWidgets('clipboard status is checked via hasStrings without getting the full clipboard contents', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -11958,14 +11958,8 @@ void main() {
     // getData is not called unless something is pasted.  hasStrings is used to
     // check the status of the clipboard.
     expect(calledGetData, false);
-    if (kIsWeb) {
-      // hasStrings is not checked because web doesn't show a custom text
-      // selection menu.
-      expect(calledHasStrings, false);
-    } else {
-      // hasStrings is checked in order to decide if the content can be pasted.
-      expect(calledHasStrings, true);
-    }
+    // hasStrings is checked in order to decide if the content can be pasted.
+    expect(calledHasStrings, true);
   });
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
