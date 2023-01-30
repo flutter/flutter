@@ -11039,7 +11039,7 @@ void main() {
       expect(
         tester.getSize(find.byType(TextField)),
         // When the strut fontSize is larger than a provided TextStyle, the
-        // the strut's height takes precedence.
+        // strut's height takes precedence.
         const Size(800, 78),
       );
     },
@@ -11914,7 +11914,7 @@ void main() {
     },
   );
 
-  testWidgets('Web does not check the clipboard status', (WidgetTester tester) async {
+  testWidgets('clipboard status is checked via hasStrings without getting the full clipboard contents', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -11958,14 +11958,8 @@ void main() {
     // getData is not called unless something is pasted.  hasStrings is used to
     // check the status of the clipboard.
     expect(calledGetData, false);
-    if (kIsWeb) {
-      // hasStrings is not checked because web doesn't show a custom text
-      // selection menu.
-      expect(calledHasStrings, false);
-    } else {
-      // hasStrings is checked in order to decide if the content can be pasted.
-      expect(calledHasStrings, true);
-    }
+    // hasStrings is checked in order to decide if the content can be pasted.
+    expect(calledHasStrings, true);
   });
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -12450,6 +12444,57 @@ void main() {
       expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+  });
+
+  testWidgets('TextField does not leak touch events when deadline has exceeded', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/118340.
+    int textFieldTapCount = 0;
+    int prefixTapCount = 0;
+    int suffixTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            onTap: () { textFieldTapCount += 1; },
+            decoration: InputDecoration(
+              labelText: 'Label',
+              prefix: ElevatedButton(
+                onPressed: () { prefixTapCount += 1; },
+                child: const Text('prefix'),
+              ),
+              suffix: ElevatedButton(
+                onPressed: () { suffixTapCount += 1; },
+                child: const Text('suffix'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    TestGesture gesture =
+        await tester.startGesture(
+          tester.getRect(find.text('prefix')).center,
+          pointer: 7,
+          kind: PointerDeviceKind.mouse,
+        );
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 0);
+
+    gesture = await tester.startGesture(
+      tester.getRect(find.text('suffix')).center,
+      pointer: 7,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 1);
   });
 
   testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
@@ -13313,6 +13358,48 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
+  testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    // Default test. The canRequestFocus is true by default and the text field can be focused
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          focusNode: focusNode,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    // Set canRequestFocus to false: the text field cannot be focused when it is tapped/long pressed.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          focusNode: focusNode,
+          canRequestFocus: false,
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    // The text field cannot be focused if it is tapped.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    // The text field cannot be focused if it is long pressed.
+    await tester.longPress(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   group('Right click focus', () {
     testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/103228
@@ -13467,6 +13554,34 @@ void main() {
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+    testWidgets('Right clicking cannot request focus if canRequestFocus is false', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  key: key,
+                  focusNode: focusNode,
+                  canRequestFocus: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode.hasFocus, isFalse);
+    });
   });
 
   group('context menu', () {

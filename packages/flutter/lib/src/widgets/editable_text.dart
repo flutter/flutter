@@ -302,10 +302,7 @@ class ToolbarOptions {
     this.cut = false,
     this.paste = false,
     this.selectAll = false,
-  }) : assert(copy != null),
-       assert(cut != null),
-       assert(paste != null),
-       assert(selectAll != null);
+  });
 
   /// An instance of [ToolbarOptions] with no options enabled.
   static const ToolbarOptions empty = ToolbarOptions();
@@ -684,41 +681,20 @@ class EditableText extends StatefulWidget {
     this.contextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-  }) : assert(controller != null),
-       assert(focusNode != null),
-       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
-       assert(autocorrect != null),
+  }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(enableSuggestions != null),
-       assert(showSelectionHandles != null),
-       assert(readOnly != null),
-       assert(forceLine != null),
-       assert(style != null),
-       assert(cursorColor != null),
-       assert(cursorOpacityAnimates != null),
-       assert(paintCursorAboveText != null),
-       assert(backgroundCursorColor != null),
-       assert(selectionHeightStyle != null),
-       assert(selectionWidthStyle != null),
-       assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          "minLines can't be greater than maxLines",
        ),
-       assert(expands != null),
        assert(
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
-       assert(autofocus != null),
-       assert(rendererIgnoresPointer != null),
-       assert(scrollPadding != null),
-       assert(dragStartBehavior != null),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        toolbarOptions = selectionControls is TextSelectionHandleControls && toolbarOptions == null ? ToolbarOptions.empty : toolbarOptions ??
            (obscureText
@@ -744,8 +720,6 @@ class EditableText extends StatefulWidget {
                        selectAll: true,
                        paste: true,
                      ))),
-       assert(clipBehavior != null),
-       assert(enableIMEPersonalizedLearning != null),
        assert(
           spellCheckConfiguration == null ||
           spellCheckConfiguration == const SpellCheckConfiguration.disabled() ||
@@ -1919,7 +1893,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
-  final ClipboardStatusNotifier? clipboardStatus = kIsWeb ? null : ClipboardStatusNotifier();
+  final ClipboardStatusNotifier clipboardStatus = ClipboardStatusNotifier();
 
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
@@ -2022,8 +1996,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return widget.toolbarOptions.paste && !widget.readOnly;
     }
     return !widget.readOnly
-        && (clipboardStatus == null
-          || clipboardStatus!.value == ClipboardStatus.pasteable);
+        && (clipboardStatus.value == ClipboardStatus.pasteable);
   }
 
   @override
@@ -2072,7 +2045,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void copySelection(SelectionChangedCause cause) {
     final TextSelection selection = textEditingValue.selection;
-    assert(selection != null);
     if (selection.isCollapsed || widget.obscureText) {
       return;
     }
@@ -2101,7 +2073,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
       }
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
   }
 
   /// Cut current selection to [Clipboard].
@@ -2112,7 +2084,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
-    assert(selection != null);
     if (selection.isCollapsed) {
       return;
     }
@@ -2127,7 +2098,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       });
       hideToolbar();
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
   }
 
   /// Paste text from [Clipboard].
@@ -2137,7 +2108,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     final TextSelection selection = textEditingValue.selection;
-    assert(selection != null);
     if (!selection.isValid) {
       return;
     }
@@ -2314,7 +2284,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           },
           type: ContextMenuButtonType.copy,
         ),
-      if (toolbarOptions.paste && clipboardStatus != null && pasteEnabled)
+      if (toolbarOptions.paste && pasteEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             pasteText(SelectionChangedCause.toolbar);
@@ -2346,7 +2316,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final InlineSpan span = renderEditable.text!;
     final String prevText = span.toPlainText();
     final String currText = textEditingValue.text;
-    if (prevText != currText || selection == null || !selection.isValid || selection.isCollapsed) {
+    if (prevText != currText || !selection.isValid || selection.isCollapsed) {
       return _GlyphHeights(
         start: renderEditable.preferredLineHeight,
         end: renderEditable.preferredLineHeight,
@@ -2415,7 +2385,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///   button Widgets for the current platform given [ContextMenuButtonItem]s.
   List<ContextMenuButtonItem> get contextMenuButtonItems {
     return buttonItemsForToolbarOptions() ?? EditableText.getEditableButtonItems(
-      clipboardStatus: clipboardStatus?.value,
+      clipboardStatus: clipboardStatus.value,
       onCopy: copyEnabled
           ? () => copySelection(SelectionChangedCause.toolbar)
           : null,
@@ -2436,7 +2406,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
-    clipboardStatus?.addListener(_onChangedClipboardStatus);
+    clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_onEditableScroll);
@@ -2560,8 +2530,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool canPaste = widget.selectionControls is TextSelectionHandleControls
         ? pasteEnabled
         : widget.selectionControls?.canPaste(this) ?? false;
-    if (widget.selectionEnabled && pasteEnabled && clipboardStatus != null && canPaste) {
-      clipboardStatus!.update();
+    if (widget.selectionEnabled && pasteEnabled && canPaste) {
+      clipboardStatus.update();
     }
   }
 
@@ -2582,8 +2552,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
-    clipboardStatus?.removeListener(_onChangedClipboardStatus);
-    clipboardStatus?.dispose();
+    clipboardStatus.removeListener(_onChangedClipboardStatus);
+    clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3643,7 +3613,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         final int offset = composingRange.isValid ? composingRange.start : 0;
         composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
       }
-      assert(composingRect != null);
       _textInputConnection!.setComposingRect(composingRect);
       SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateComposingRectIfNeeded());
     }
@@ -3663,7 +3632,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextDirection get _textDirection {
     final TextDirection result = widget.textDirection ?? Directionality.of(context);
-    assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
     return result;
   }
 
@@ -3719,17 +3687,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool showToolbar() {
     // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
+    // context menu: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this,
+    // we should not show a Flutter toolbar for the editable text elements
+    // unless the browser's context menu is explicitly disabled.
+    if (kIsWeb && BrowserContextMenu.enabled) {
       return false;
     }
 
     if (_selectionOverlay == null) {
       return false;
     }
-    clipboardStatus?.update();
+    clipboardStatus.update();
     _selectionOverlay!.showToolbar();
     return true;
   }
@@ -3943,7 +3912,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         && (widget.selectionControls is TextSelectionHandleControls
             ? pasteEnabled
             : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false))
-        && (clipboardStatus == null || clipboardStatus!.value == ClipboardStatus.pasteable)
+        && (clipboardStatus.value == ClipboardStatus.pasteable)
       ? () {
         controls?.handlePaste(this);
         pasteText(SelectionChangedCause.toolbar);
@@ -3997,7 +3966,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // `x ∉ getTextBoundaryAt(x)`. In case `caretOffset` points to one such
     // control character, we define that these control characters themselves are
     // still part of the previous line, but also exclude them from the
-    // the line boundary range since they're non-printing. IOW, no additional
+    // line boundary range since they're non-printing. IOW, no additional
     // processing needed since the LineBoundary class does exactly that.
     return forward
       ? TextPosition(offset: textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? _value.text.length, affinity: TextAffinity.upstream)
@@ -4024,7 +3993,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// When the cursor is at the start of the text, does nothing.
   void _transposeCharacters(TransposeCharactersIntent intent) {
     if (_value.text.characters.length <= 1
-        || _value.selection == null
         || !_value.selection.isCollapsed
         || _value.selection.baseOffset == 0) {
       return;
@@ -4485,9 +4453,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : assert(textDirection != null),
-       assert(rendererIgnoresPointer != null),
-       super(children: _extractChildren(inlineSpan));
+  }) : super(children: _extractChildren(inlineSpan));
 
   // Traverses the InlineSpan tree and depth-first collects the list of
   // child widgets that are created in WidgetSpans.
@@ -4775,8 +4741,7 @@ class _ScribblePlaceholder extends WidgetSpan {
     super.alignment,
     super.baseline,
     required this.size,
-  }) : assert(child != null),
-       assert(baseline != null || !(
+  }) : assert(baseline != null || !(
          identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
          identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
          identical(alignment, ui.PlaceholderAlignment.baseline)
@@ -5231,7 +5196,7 @@ class _UndoStack<T> {
 
     // If anything has been undone in this stack, remove those irrelevant states
     // before adding the new one.
-    if (_index != null && _index != _list.length - 1) {
+    if (_index != _list.length - 1) {
       _list.removeRange(_index + 1, _list.length);
     }
     _list.add(value);

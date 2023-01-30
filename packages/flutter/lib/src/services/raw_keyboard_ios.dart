@@ -30,10 +30,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
-  }) : assert(characters != null),
-       assert(charactersIgnoringModifiers != null),
-       assert(keyCode != null),
-       assert(modifiers != null);
+  });
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///

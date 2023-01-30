@@ -334,6 +334,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.wasm'),
+    Source.pattern('{OUTPUT_DIR}/main.dart.mjs'),
   ];
 
   // TODO(jacksongardner): override `depfiles` once dart2wasm begins producing
@@ -348,7 +349,9 @@ class WebReleaseBundle extends Target {
   final WebRendererMode webRenderer;
   final bool isWasm;
 
-  String get outputFileName => isWasm ? 'main.dart.wasm' : 'main.dart.js';
+  String get outputFileNameNoSuffix => 'main.dart';
+  String get outputFileName => '$outputFileNameNoSuffix${isWasm ? '.wasm' : '.js'}';
+  String get wasmJSRuntimeFileName => '$outputFileNameNoSuffix.mjs';
 
   @override
   String get name => 'web_release_bundle';
@@ -362,11 +365,13 @@ class WebReleaseBundle extends Target {
   List<Source> get inputs => <Source>[
     Source.pattern('{BUILD_DIR}/$outputFileName'),
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    if (isWasm) Source.pattern('{BUILD_DIR}/$wasmJSRuntimeFileName'),
   ];
 
   @override
   List<Source> get outputs => <Source>[
     Source.pattern('{OUTPUT_DIR}/$outputFileName'),
+    if (isWasm) Source.pattern('{OUTPUT_DIR}/$wasmJSRuntimeFileName'),
   ];
 
   @override
@@ -376,20 +381,20 @@ class WebReleaseBundle extends Target {
     'web_resources.d',
   ];
 
+  bool shouldCopy(String name) =>
+      // Do not copy the deps file.
+      (name.contains(outputFileName) && !name.endsWith('.deps')) ||
+      (isWasm && name == wasmJSRuntimeFileName);
+
   @override
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
       final String basename = globals.fs.path.basename(outputFile.path);
-      if (!basename.contains(outputFileName)) {
-        continue;
+      if (shouldCopy(basename)) {
+        outputFile.copySync(
+          environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
+        );
       }
-      // Do not copy the deps file.
-      if (basename.endsWith('.deps')) {
-        continue;
-      }
-      outputFile.copySync(
-        environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
-      );
     }
 
     if (isWasm) {
@@ -533,16 +538,6 @@ class WebBuiltInAssets extends Target {
     }
 
     if (isWasm) {
-      final String dartSdkPath =
-        globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath);
-      final File dart2wasmRuntime = fileSystem.directory(dartSdkPath)
-        .childDirectory('bin')
-        .childFile('dart2wasm_runtime.mjs');
-      final String targetPath = fileSystem.path.join(
-        environment.outputDir.path,
-        'dart2wasm_runtime.mjs');
-      dart2wasmRuntime.copySync(targetPath);
-
       final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
       bootstrapFile.writeAsStringSync(wasm_bootstrap.generateWasmBootstrapFile());
     }
