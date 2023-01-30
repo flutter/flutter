@@ -350,7 +350,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    binding.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerPanZoomStartEvent>());
     expect(events[1], isA<PointerPanZoomUpdateEvent>());
