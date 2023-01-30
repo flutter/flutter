@@ -32,6 +32,7 @@ Thumbs.db
 /ios_tools/
 /out/
 /third_party/
+/build/secondary/third_party/
 
 # This is where the gclient hook downloads the Fuchsia SDK and toolchain.
 /fuchsia/
