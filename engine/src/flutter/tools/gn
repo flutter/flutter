@@ -662,9 +662,7 @@ def to_gn_wasm_args(args, gn_args):
   # than forced to true, once the recipes are updated.
   # https://github.com/flutter/flutter/issues/113303
   gn_args['build_canvaskit'] = True
-  # TODO(mdebbar): Read this from an input argument.
-  # https://github.com/flutter/flutter/issues/118744
-  gn_args['build_canvaskit_chromium'] = False
+  gn_args['build_canvaskit_chromium'] = args.build_canvaskit_chromium
   gn_args['flutter_build_web_sdk'] = True
 
 
@@ -883,6 +881,14 @@ def parse_args(args):
   )
   parser.add_argument(
       '--no-build-canvaskit', dest='build_canvaskit', action='store_false'
+  )
+
+  parser.add_argument(
+      '--build-canvaskit-chromium',
+      default=False,
+      dest='build_canvaskit_chromium',
+      action='store_true',
+      help='build the Chromium variant of CanvasKit from sources'
   )
 
   parser.add_argument(
