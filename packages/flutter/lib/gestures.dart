@@ -30,5 +30,6 @@ export 'src/gestures/recognizer.dart';
 export 'src/gestures/resampler.dart';
 export 'src/gestures/scale.dart';
 export 'src/gestures/tap.dart';
+export 'src/gestures/tap_and_drag.dart';
 export 'src/gestures/team.dart';
 export 'src/gestures/velocity_tracker.dart';
