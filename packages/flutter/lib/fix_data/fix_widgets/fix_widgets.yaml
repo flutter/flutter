@@ -23,6 +23,17 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067.
+  - title: "Remove 'vsync'"
+    date: 2022-01-39
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      constructor: ''
+      inClass: 'AnimatedSize'
+    changes:
+      - kind: 'removeParameter'
+        name: 'vsync'
+
   # Changes made in https://github.com/flutter/flutter/pull/114459
   - title: "Migrate to 'boldTextOf'"
     date: 2022-10-28
