@@ -321,9 +321,16 @@ public final class FlutterActivityDelegate
     if (intent.getBooleanExtra("verbose-logging", false)) {
       args.add("--verbose-logging");
     }
-    final int observatoryPort = intent.getIntExtra("observatory-port", 0);
-    if (observatoryPort > 0) {
-      args.add("--observatory-port=" + Integer.toString(observatoryPort));
+    int vmServicePort = intent.getIntExtra("vm-service-port", 0);
+    if (vmServicePort > 0) {
+      args.add("--vm-service-port=" + Integer.toString(vmServicePort));
+    } else {
+      // TODO(bkonyi): remove once flutter_tools no longer uses this option.
+      // See https://github.com/dart-lang/sdk/issues/50233
+      vmServicePort = intent.getIntExtra("observatory-port", 0);
+      if (vmServicePort > 0) {
+        args.add("--vm-service-port=" + Integer.toString(vmServicePort));
+      }
     }
     if (intent.getBooleanExtra("endless-trace-buffer", false)) {
       args.add("--endless-trace-buffer");
