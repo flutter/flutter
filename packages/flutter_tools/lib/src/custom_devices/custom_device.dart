@@ -282,78 +282,50 @@ class CustomDeviceAppSession {
   /// For example, `_getEngineOptions(null, false, null)` will return
   /// `['enable-dart-profiling=true']`
   List<String> _getEngineOptions(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
-    final List<String> options = <String>[];
-
-    void addFlag(String value) {
-      options.add(value);
-    }
-
-    addFlag('enable-dart-profiling=true');
-
-    if (traceStartup) {
-      addFlag('trace-startup=true');
-    }
-    if (route != null) {
-      addFlag('route=$route');
-    }
-    if (debuggingOptions != null) {
-      if (debuggingOptions.enableSoftwareRendering) {
-        addFlag('enable-software-rendering=true');
-      }
-      if (debuggingOptions.skiaDeterministicRendering) {
-        addFlag('skia-deterministic-rendering=true');
-      }
-      if (debuggingOptions.traceSkia) {
-        addFlag('trace-skia=true');
-      }
-      if (debuggingOptions.traceAllowlist != null) {
-        addFlag('trace-allowlist=${debuggingOptions.traceAllowlist}');
-      }
-      if (debuggingOptions.traceSystrace) {
-        addFlag('trace-systrace=true');
-      }
-      if (debuggingOptions.endlessTraceBuffer) {
-        addFlag('endless-trace-buffer=true');
-      }
-      if (debuggingOptions.dumpSkpOnShaderCompilation) {
-        addFlag('dump-skp-on-shader-compilation=true');
-      }
-      if (debuggingOptions.cacheSkSL) {
-        addFlag('cache-sksl=true');
-      }
-      if (debuggingOptions.purgePersistentCache) {
-        addFlag('purge-persistent-cache=true');
-      }
-      // Options only supported when there is a VM Service connection between the
-      // tool and the device, usually in debug or profile mode.
-      if (debuggingOptions.debuggingEnabled) {
-        if (debuggingOptions.deviceVmServicePort != null) {
-          addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
-        }
-        if (debuggingOptions.buildInfo.isDebug) {
-          addFlag('enable-checked-mode=true');
-          addFlag('verify-entry-points=true');
-        }
-        if (debuggingOptions.startPaused) {
-          addFlag('start-paused=true');
-        }
-        if (debuggingOptions.disableServiceAuthCodes) {
-          addFlag('disable-service-auth-codes=true');
-        }
-        final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-        if (dartVmFlags.isNotEmpty) {
-          addFlag('dart-flags=$dartVmFlags');
-        }
-        if (debuggingOptions.useTestFonts) {
-          addFlag('use-test-fonts=true');
-        }
-        if (debuggingOptions.verboseSystemLogs) {
-          addFlag('verbose-logging=true');
-        }
-      }
-    }
-
-    return options;
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
+    return <String>[
+      if (traceStartup)
+        'trace-startup=true',
+      if (route != null)
+        'route=$route',
+      if (debuggingOptions.enableDartProfiling)
+        'enable-dart-profiling=true',
+      if (debuggingOptions.enableSoftwareRendering)
+        'enable-software-rendering=true',
+      if (debuggingOptions.skiaDeterministicRendering)
+        'skia-deterministic-rendering=true',
+      if (debuggingOptions.traceSkia)
+        'trace-skia=true',
+      if (debuggingOptions.traceAllowlist != null)
+        'trace-allowlist=${debuggingOptions.traceAllowlist}',
+      if (debuggingOptions.traceSystrace)
+        'trace-systrace=true',
+      if (debuggingOptions.endlessTraceBuffer)
+        'endless-trace-buffer=true',
+      if (debuggingOptions.dumpSkpOnShaderCompilation)
+        'dump-skp-on-shader-compilation=true',
+      if (debuggingOptions.cacheSkSL) 'cache-sksl=true',
+      if (debuggingOptions.purgePersistentCache)
+        'purge-persistent-cache=true',
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        if (debuggingOptions.deviceVmServicePort != null)
+          'observatory-port=${debuggingOptions.deviceVmServicePort}',
+        if (debuggingOptions.buildInfo.isDebug) ...<String>[
+          'enable-checked-mode=true',
+          'verify-entry-points=true',
+        ],
+        if (debuggingOptions.startPaused)
+          'start-paused=true',
+        if (debuggingOptions.disableServiceAuthCodes)
+          'disable-service-auth-codes=true',
+        if (dartVmFlags.isNotEmpty)
+          'dart-flags=$dartVmFlags',
+        if (debuggingOptions.useTestFonts)
+          'use-test-fonts=true',
+        if (debuggingOptions.verboseSystemLogs)
+          'verbose-logging=true',
+      ],
+    ];
   }
 
   /// Get the engine options for the given [debuggingOptions],
@@ -503,7 +475,7 @@ class CustomDevice extends Device {
   @override
   final DevicePortForwarder portForwarder;
 
-  CustomDeviceAppSession _getOrCreateAppSession(covariant ApplicationPackage app) {
+  CustomDeviceAppSession _getOrCreateAppSession(ApplicationPackage app) {
     return _sessions.putIfAbsent(
       app,
       () {
@@ -691,7 +663,7 @@ class CustomDevice extends Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false
   }) {
     if (app != null) {
@@ -702,7 +674,7 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
     final String? appName = app.name;
     if (appName == null || !await tryUninstall(appName: appName)) {
       return false;
@@ -717,12 +689,12 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> isAppInstalled(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async {
     return false;
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app) async {
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async {
     return false;
   }
 
@@ -770,7 +742,7 @@ class CustomDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage package, {
+    ApplicationPackage package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -824,7 +796,10 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(covariant ApplicationPackage app, {String? userIdentifier}) {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    if (app == null) {
+      return false;
+    }
     return _getOrCreateAppSession(app).stop();
   }
 
@@ -832,7 +807,7 @@ class CustomDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
 
   @override
-  Future<bool> uninstallApp(covariant ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     final String? appName = app.name;
     if (appName == null) {
       return false;

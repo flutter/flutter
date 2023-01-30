@@ -192,10 +192,10 @@ class CheckboxThemeData with Diagnosticable {
 
   // Special case because BorderSide.lerp() doesn't support null arguments
   static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
-    if (a == null && b == null) {
+    if (a == null || b == null) {
       return null;
     }
-    return BorderSide.lerp(a!, b!, t);
+    return BorderSide.lerp(a, b, t);
   }
 }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
 
 import 'dart:async';
 import 'dart:io';

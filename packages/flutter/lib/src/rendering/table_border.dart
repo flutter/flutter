@@ -89,12 +89,6 @@ class TableBorder {
   /// Whether all the sides of the border (outside and inside) are identical.
   /// Uniform borders are typically more efficient to paint.
   bool get isUniform {
-    assert(top != null);
-    assert(right != null);
-    assert(bottom != null);
-    assert(left != null);
-    assert(horizontalInside != null);
-    assert(verticalInside != null);
 
     final Color topColor = top.color;
     if (right.color != topColor ||
@@ -159,7 +153,6 @@ class TableBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TableBorder? lerp(TableBorder? a, TableBorder? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -212,19 +205,9 @@ class TableBorder {
     required Iterable<double> columns,
   }) {
     // properties can't be null
-    assert(top != null);
-    assert(right != null);
-    assert(bottom != null);
-    assert(left != null);
-    assert(horizontalInside != null);
-    assert(verticalInside != null);
 
     // arguments can't be null
-    assert(canvas != null);
-    assert(rect != null);
-    assert(rows != null);
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
-    assert(columns != null);
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
     if (columns.isNotEmpty || rows.isNotEmpty) {

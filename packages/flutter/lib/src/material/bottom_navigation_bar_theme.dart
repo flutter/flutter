@@ -180,7 +180,6 @@ class BottomNavigationBarThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomNavigationBarThemeData lerp(BottomNavigationBarThemeData? a, BottomNavigationBarThemeData? b, double t) {
-    assert(t != null);
     return BottomNavigationBarThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
@@ -286,7 +285,7 @@ class BottomNavigationBarTheme extends InheritedWidget {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties used for all descendant [BottomNavigationBar] widgets.
   final BottomNavigationBarThemeData data;

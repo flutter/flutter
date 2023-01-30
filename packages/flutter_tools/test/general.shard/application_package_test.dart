@@ -55,6 +55,73 @@ void main() {
       ).path).createSync(recursive: true);
     });
 
+    testUsingContext('correct debug filename in module projects', () async {
+      const String aaptPath = 'aaptPath';
+      final File apkFile = globals.fs.file('app-debug.apk');
+      final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
+      sdkVersion.aaptPath = aaptPath;
+      sdk.latestVersion = sdkVersion;
+      sdk.platformToolsAvailable = true;
+      sdk.licensesAvailable = false;
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            aaptPath,
+            'dump',
+            'xmltree',
+             apkFile.path,
+            'AndroidManifest.xml',
+          ],
+          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
+        )
+      );
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            aaptPath,
+            'dump',
+            'xmltree',
+             fs.path.join('module_project', 'build', 'host', 'outputs', 'apk', 'debug', 'app-debug.apk'),
+            'AndroidManifest.xml',
+          ],
+          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
+        )
+      );
+
+      await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        TargetPlatform.android_arm,
+        applicationBinary: apkFile,
+      );
+      final BufferLogger logger = BufferLogger.test();
+      final FlutterProject project = await aModuleProject();
+      project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+      final File appGradle = project.android.hostAppGradleRoot.childFile(
+        fs.path.join('app', 'build.gradle'));
+      appGradle.createSync(recursive: true);
+      appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+      final File apkDebugFile = project.directory
+        .childDirectory('build')
+        .childDirectory('host')
+        .childDirectory('outputs')
+        .childDirectory('apk')
+        .childDirectory('debug')
+        .childFile('app-debug.apk');
+      apkDebugFile.createSync(recursive: true);
+      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+        project.android,
+        androidSdk: sdk,
+        processManager: fakeProcessManager,
+        userMessages:  UserMessages(),
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        logger: logger,
+        fileSystem: fs,
+        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+      );
+      expect(androidApk, isNotNull);
+    }, overrides: overrides);
+
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
       const String aaptPath = 'aaptPath';
       final File apkFile = globals.fs.file('app-debug.apk');
@@ -292,7 +359,7 @@ void main() {
       globals.fs.directory('bundle.app').createSync();
       globals.fs.file('bundle.app/Info.plist').createSync();
       testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
-      final PrebuiltIOSApp iosApp = (IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp?)!;
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app'))! as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
@@ -343,7 +410,7 @@ void main() {
             .file(globals.fs.path.join(bundleAppDir.path, 'Info.plist'))
             .createSync();
       };
-      final PrebuiltIOSApp iosApp = (IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp?)!;
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa'))! as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
@@ -476,6 +543,92 @@ void main() {
         ),
       );
     }, overrides: overrides);
+
+    testUsingContext('returns project launch image dirname', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(iosApp.projectLaunchImageDirName, globals.fs.path.join('ios', launchImageDirSuffix));
+    }, overrides: overrides);
+
+    testUsingContext('returns template launch image dirname for Contents.json', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(
+        iosApp.templateLaunchImageDirNameForContentsJson,
+        globals.fs.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          launchImageDirSuffix,
+        ),
+      );
+    }, overrides: overrides);
+
+    testUsingContext('returns template launch image dirname for images', () async {
+      final String toolsDir = globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+      );
+      final String packageConfigPath = globals.fs.path.join(
+          toolsDir,
+          '.dart_tool',
+          'package_config.json'
+      );
+      globals.fs.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner');
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(
+        await iosApp.templateLaunchImageDirNameForImages,
+        globals.fs.path.absolute(
+          'flutter_template_images',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          launchImageDirSuffix,
+        ),
+      );
+    }, overrides: overrides);
   });
 
   group('FuchsiaApp', () {
@@ -508,7 +661,7 @@ void main() {
 
     testUsingContext('Success with far file', () {
       globals.fs.file('bundle.far').createSync();
-      final PrebuiltFuchsiaApp fuchsiaApp = (FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far')) as PrebuiltFuchsiaApp?)!;
+      final PrebuiltFuchsiaApp fuchsiaApp = FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far'))! as PrebuiltFuchsiaApp;
       expect(testLogger.errorText, isEmpty);
       expect(fuchsiaApp.id, 'bundle.far');
       expect(fuchsiaApp.applicationPackage.path, globals.fs.file('bundle.far').path);
@@ -808,4 +961,20 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   @override
   late String aaptPath;
+}
+
+Future<FlutterProject> aModuleProject() async {
+  final Directory directory = globals.fs.directory('module_project');
+  directory
+    .childDirectory('.dart_tool')
+    .childFile('package_config.json')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+  directory.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_module
+flutter:
+  module:
+    androidPackage: com.example
+''');
+  return FlutterProject.fromDirectory(directory);
 }

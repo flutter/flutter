@@ -57,7 +57,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// {@tool snippet}
 /// ```dart
-/// Container(
+/// ColoredBox(
 ///   color: Colors.green,
 ///   child: Material(
 ///     child: SwitchListTile(
@@ -176,14 +176,11 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.material,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null);
+       assert(!isThreeLine || subtitle != null);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -221,14 +218,11 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.onFocusChange,
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null);
+       assert(!isThreeLine || subtitle != null);
 
   /// Whether this switch is checked.
   ///
@@ -264,7 +258,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
@@ -368,6 +362,9 @@ class SwitchListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@macro flutter.material.ListTile.enableFeedback}
   ///
   /// See also:
@@ -394,6 +391,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
+          onFocusChange: onFocusChange,
         );
         break;
 
@@ -409,6 +407,7 @@ class SwitchListTile extends StatelessWidget {
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
           autofocus: autofocus,
+          onFocusChange: onFocusChange,
         );
     }
 
@@ -452,6 +451,7 @@ class SwitchListTile extends StatelessWidget {
         tileColor: tileColor,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
         hoverColor: hoverColor,
       ),

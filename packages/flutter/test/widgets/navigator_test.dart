@@ -18,9 +18,9 @@ class FirstWidget extends StatelessWidget {
       onTap: () {
         Navigator.pushNamed(context, '/second');
       },
-      child: Container(
-        color: const Color(0xFFFFFF00),
-        child: const Text('X'),
+      child: const ColoredBox(
+        color: Color(0xFFFFFF00),
+        child: Text('X'),
       ),
     );
   }
@@ -37,9 +37,9 @@ class SecondWidgetState extends State<SecondWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.pop(context),
-      child: Container(
-        color: const Color(0xFFFF00FF),
-        child: const Text('Y'),
+      child: const ColoredBox(
+        color: Color(0xFFFF00FF),
+        child: Text('Y'),
       ),
     );
   }
@@ -178,6 +178,59 @@ void main() {
     await tester.tap(find.byKey(targetKey));
     expect(exception, isFlutterError);
     expect('$exception', startsWith('Navigator operation requested with a context'));
+  });
+
+  testWidgets('Navigator can push Route created through page class as Pageless route', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        home: const Scaffold(
+          body: Text('home'),
+        )
+      )
+    );
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    nav.currentState!.push<void>(page.createRoute(nav.currentContext!));
+    await tester.pumpAndSettle();
+    expect(find.text('page'), findsOneWidget);
+
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
+    const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    // Default to hard edge.
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            pages: const <Page<void>>[page],
+            clipBehavior: Clip.none,
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
   });
 
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
@@ -2758,62 +2811,6 @@ void main() {
       );
     });
 
-    Widget buildFrame(String action) {
-      const TestPage myPage = TestPage(key: ValueKey<String>('1'), name:'initial');
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/' : (BuildContext context) => OnTapPage(
-          id: action,
-          onTap: () {
-            if (action == 'push') {
-              Navigator.of(context).push(myPage.createRoute(context));
-            } else if (action == 'pushReplacement') {
-              Navigator.of(context).pushReplacement(myPage.createRoute(context));
-            } else if (action == 'pushAndRemoveUntil') {
-              Navigator.of(context).pushAndRemoveUntil(myPage.createRoute(context), (_) => true);
-            }
-          },
-        ),
-      };
-
-      return MaterialApp(routes: routes);
-    }
-
-    void checkException(WidgetTester tester) {
-      final dynamic exception = tester.takeException();
-      expect(exception, isFlutterError);
-      final FlutterError error = exception as FlutterError;
-      expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   A page-based route should not be added using the imperative api.\n'
-          '   Provide a new list with the corresponding Page to Navigator.pages\n'
-          '   instead.\n',
-        ),
-      );
-    }
-
-    testWidgets('throw if add page-based route using the imperative api - push', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('push'));
-      await tester.tap(find.text('push'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
-    testWidgets('throw if add page-based route using the imperative api - pushReplacement', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('pushReplacement'));
-      await tester.tap(find.text('pushReplacement'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
-    testWidgets('throw if add page-based route using the imperative api - pushAndRemoveUntil', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame('pushAndRemoveUntil'));
-      await tester.tap(find.text('pushAndRemoveUntil'));
-      await tester.pumpAndSettle();
-      checkException(tester);
-    });
-
     testWidgets('throw if page list is empty', (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[];
       final FlutterExceptionHandler? originalOnError = FlutterError.onError;
@@ -3343,6 +3340,61 @@ void main() {
       expect(thirdPageless1Completed, true);
       await tester.pumpAndSettle();
       expect(find.text('forth'), findsOneWidget);
+    });
+
+    //Regression test for https://github.com/flutter/flutter/issues/115887
+    testWidgets('Complex case 2', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+
+      bool onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return route.didPop(result);
+      }
+
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
+      );
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('initial'), findsNothing);
+      // Push pageless route to second page route
+      navigator.currentState!.push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const Text('second-pageless1'),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      // Now the history should look like [initial, second, second-pageless1].
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsNothing);
+      expect(find.text('second-pageless1'), findsOneWidget);
+      expect(myPages.length, 2);
+
+      myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+      await tester.pumpWidget(
+        buildNavigator(pages: myPages, onPopPage: onPopPage, key: navigator),
+      );
+      await tester.pumpAndSettle();
+
+      // Now the history should look like [second, second-pageless1].
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsNothing);
+      expect(find.text('second-pageless1'), findsOneWidget);
+      expect(myPages.length, 1);
+
+      // Pop the pageless route.
+      navigator.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(myPages.length, 1);
+      expect(find.text('initial'), findsNothing);
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('second-pageless1'), findsNothing);
     });
 
     testWidgets('complex case 1 - with always remove transition delegate', (WidgetTester tester) async {
@@ -3934,6 +3986,16 @@ void main() {
       ),
     );
     expect(policy, isA<ReadingOrderTraversalPolicy>());
+  });
+
+  group('RouteSettings.toString', () {
+    test('when name is not null, should have double quote', () {
+      expect(const RouteSettings(name: '/home').toString(), 'RouteSettings("/home", null)');
+    });
+
+    test('when name is null, should not have double quote', () {
+      expect(const RouteSettings().toString(), 'RouteSettings(none, null)');
+    });
   });
 }
 

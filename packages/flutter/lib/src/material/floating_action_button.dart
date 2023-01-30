@@ -127,10 +127,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(mini != null),
-       assert(clipBehavior != null),
-       assert(isExtended != null),
-       assert(autofocus != null),
        _floatingActionButtonType = mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
@@ -174,8 +170,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
        _floatingActionButtonType = _FloatingActionButtonType.small,
        mini = true,
        isExtended = false,
@@ -221,8 +215,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
        _floatingActionButtonType = _FloatingActionButtonType.large,
        mini = false,
        isExtended = false,
@@ -273,9 +265,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       assert(isExtended != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
        mini = false,
        _floatingActionButtonType = _FloatingActionButtonType.extended,
        child = icon,
@@ -804,7 +793,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_152
 
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)

@@ -592,12 +592,12 @@ void main() {
 
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, '0'),
-      containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
+      containsPair(HttpHeaders.contentTypeHeader, 'text/javascript'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 
-  test('serves asset files files from in filesystem with unknown mime type', () => testbed.run(() async {
+  test('serves asset files from in filesystem with unknown mime type', () => testbed.run(() async {
     final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(100, 0));

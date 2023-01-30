@@ -194,13 +194,9 @@ class Material extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
-  }) : assert(type != null),
-       assert(elevation != null && elevation >= 0.0),
+  }) : assert(elevation >= 0.0),
        assert(!(shape != null && borderRadius != null)),
-       assert(animationDuration != null),
-       assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
-       assert(borderOnForeground != null),
-       assert(clipBehavior != null);
+       assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null)));
 
   /// The widget below this widget in the tree.
   ///
@@ -343,7 +339,7 @@ class Material extends StatefulWidget {
   final BorderRadiusGeometry? borderRadius;
 
   /// The ink controller from the closest instance of this class that
-  /// encloses the given context.
+  /// encloses the given context within the closest [LookupBoundary].
   ///
   /// Typical usage is as follows:
   ///
@@ -358,11 +354,11 @@ class Material extends StatefulWidget {
   /// * [Material.of], which is similar to this method, but asserts if
   ///   no [Material] ancestor is found.
   static MaterialInkController? maybeOf(BuildContext context) {
-    return context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
+    return LookupBoundary.findAncestorRenderObjectOfType<_RenderInkFeatures>(context);
   }
 
   /// The ink controller from the closest instance of [Material] that encloses
-  /// the given context.
+  /// the given context within the closest [LookupBoundary].
   ///
   /// If no [Material] widget ancestor can be found then this method will assert
   /// in debug mode, and throw an exception in release mode.
@@ -383,6 +379,16 @@ class Material extends StatefulWidget {
     final MaterialInkController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
+        if (LookupBoundary.debugIsHidingAncestorRenderObjectOfType<_RenderInkFeatures>(context)) {
+          throw FlutterError(
+            'Material.of() was called with a context that does not have access to a Material widget.\n'
+            'The context provided to Material.of() does have a Material widget ancestor, but it is '
+            'hidden by a LookupBoundary. This can happen because you are using a widget that looks '
+            'for a Material ancestor, but no such ancestor exists within the closest LookupBoundary.\n'
+            'The context used was:\n'
+            '  $context',
+          );
+        }
         throw FlutterError(
           'Material.of() was called with a context that does not contain a Material widget.\n'
           'No Material widget ancestor could be found starting from the context that was passed to '
@@ -447,7 +453,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     final Color? backgroundColor = _getBackgroundColor(context);
     final Color modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
     // If no shadow color is specified, use 0 for elevation in the model so a drop shadow won't be painted.
-    final double modelElevation = modelShadowColor != null ? widget.elevation : 0;
+    final double modelElevation = widget.elevation;
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
       'If Material type is not MaterialType.transparency, a color must '
@@ -587,8 +593,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     required this.vsync,
     required this.absorbHitTest,
     this.color,
-  }) : assert(vsync != null),
-       super(child);
+  }) : super(child);
 
   // This class should exist in a 1:1 relationship with a MaterialState object,
   // since there's no current support for dynamically changing the ticker
@@ -700,9 +705,7 @@ abstract class InkFeature {
     required MaterialInkController controller,
     required this.referenceBox,
     this.onRemoved,
-  }) : assert(controller != null),
-       assert(referenceBox != null),
-       _controller = controller as _RenderInkFeatures;
+  }) : _controller = controller as _RenderInkFeatures;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -807,11 +810,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     required this.surfaceTintColor,
     super.curve,
     required super.duration,
-  }) : assert(child != null),
-       assert(shape != null),
-       assert(clipBehavior != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(color != null);
+  }) : assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///

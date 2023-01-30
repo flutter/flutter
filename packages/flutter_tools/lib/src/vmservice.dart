@@ -739,6 +739,18 @@ class FlutterVmService {
     );
   }
 
+  Future<Map<String, Object?>?> flutterEvictScene(String assetPath, {
+   required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.window.reinitializeScene',
+      isolateId: isolateId,
+      args: <String, Object?>{
+        'assetKey': assetPath,
+      },
+    );
+  }
+
 
   /// Exit the application by calling [exit] from `dart:io`.
   ///
@@ -997,7 +1009,6 @@ class FlutterVmService {
 
   /// Set the VM timeline flags.
   Future<void> setTimelineFlags(List<String> recordedStreams) async {
-    assert(recordedStreams != null);
     await _checkedCallServiceExtension(
       'setVMTimelineFlags',
       args: <String, Object?>{

@@ -20,6 +20,7 @@ import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
+import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -64,7 +65,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapDragUpDetails details) {
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();
@@ -311,28 +312,18 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-  }) : assert(textAlign != null),
-       assert(readOnly != null),
-       assert(autofocus != null),
-       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
-       assert(obscureText != null),
-       assert(autocorrect != null),
+  }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(enableSuggestions != null),
-       assert(scrollPadding != null),
-       assert(dragStartBehavior != null),
-       assert(selectionHeightStyle != null),
-       assert(selectionWidthStyle != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          "minLines can't be greater than maxLines",
        ),
-       assert(expands != null),
        assert(
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
@@ -346,8 +337,6 @@ class TextField extends StatefulWidget {
          !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
-       assert(clipBehavior != null),
-       assert(enableIMEPersonalizedLearning != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
@@ -774,6 +763,13 @@ class TextField extends StatefulWidget {
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
+  /// Determine whether this text field can request the primary focus.
+  ///
+  /// Defaults to true. If false, the text field will not request focus
+  /// when tapped, or when its context menu is displayed. If false it will not
+  /// be possible to move the focus to the text field with tab key.
+  final bool canRequestFocus;
+
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
@@ -799,6 +795,32 @@ class TextField extends StatefulWidget {
       decorationColor: Colors.red,
       decorationStyle: TextDecorationStyle.wavy,
   );
+
+  /// Default builder for the spell check suggestions toolbar in the Material
+  /// style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
+  //     builder configured to show a spell check suggestions toolbar.
+  @visibleForTesting
+  static Widget defaultSpellCheckSuggestionsToolbarBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final Offset anchor =
+      SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
+    final List<ContextMenuButtonItem>? buttonItems =
+      SpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+
+    if (buttonItems == null){
+      return const SizedBox.shrink();
+    }
+
+    return SpellCheckSuggestionsToolbar(
+      anchor: anchor,
+      buttonItems: buttonItems,
+    );
+  }
 
   @override
   State<TextField> createState() => _TextFieldState();
@@ -962,15 +984,15 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.controller == null) {
       _createLocalController();
     }
-    _effectiveFocusNode.canRequestFocus = _isEnabled;
+    _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
-        return _isEnabled;
+        return widget.canRequestFocus && _isEnabled;
       case NavigationMode.directional:
         return true;
     }
@@ -1192,7 +1214,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? TextField.materialMisspelledTextStyle)
+              ?? TextField.materialMisspelledTextStyle,
+            spellCheckSuggestionsToolbarBuilder:
+              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder
+          )
         : const SpellCheckConfiguration.disabled();
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
@@ -1215,7 +1241,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         autocorrectionTextRectColor = selectionColor;
         break;
 
@@ -1228,7 +1254,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
@@ -1424,13 +1450,11 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
-
-// Generated version v0_141
+// Token database version: v0_152
 
 TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
 TextStyle _m3CounterErrorStyle(BuildContext context) =>
-  Theme.of(context).textTheme.bodySmall!.copyWith(color:Theme.of(context).colorScheme.error);
+  Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField
