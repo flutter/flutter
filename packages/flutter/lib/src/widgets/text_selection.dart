@@ -1899,7 +1899,7 @@ class TextSelectionGestureDetectorBuilder {
         && targetSelection.end >= textPosition.offset;
   }
 
-  /// Returns true if shift left or right is contained in the given set.
+  // Returns true if shift left or right is contained in the given set.
   static bool _containsShift(Set<LogicalKeyboardKey> keysPressed) {
     return keysPressed.any(<LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight }.contains);
   }
@@ -1980,6 +1980,10 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
+  // The set of [LogicalKeyboardKey]s pressed when the most recent [PointerDownEvent]
+  // was tracked by the [TapAndDragGestureRecognizer].
+  Set<LogicalKeyboardKey>? _keysPressedOnDown;
+
   /// The viewport offset pixels of any [Scrollable] containing the
   /// [RenderEditable] at the last drag start.
   double _dragStartScrollOffset = 0.0;
@@ -2010,6 +2014,28 @@ class TextSelectionGestureDetectorBuilder {
   // drag update. If the drag did not start on the previous selection then the
   // cursor will not move on drag update.
   bool? _dragBeganOnPreviousSelection;
+
+  /// Handler for [TextSelectionGestureDetector.onTapTrackStart].
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onTapTrackStart], which triggers this
+  ///    callback.
+  @protected
+  void onTapTrackStart() {
+    _keysPressedOnDown = HardwareKeyboard.instance.logicalKeysPressed;
+  }
+
+  /// Handler for [TextSelectionGestureDetector.onTapTrackReset].
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onTapTrackReset], which triggers this
+  ///    callback.
+  @protected
+  void onTapTrackReset() {
+    _keysPressedOnDown = null;
+  }
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -2044,7 +2070,7 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    final bool isShiftPressed = _keysPressedOnDown != null && _containsShift(_keysPressedOnDown!);
     // It is impossible to extend the selection when the shift key is pressed, if the
     // renderEditable.selection is invalid.
     final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
@@ -2143,7 +2169,7 @@ class TextSelectionGestureDetectorBuilder {
   void onSingleTapUp(TapDragUpDetails details) {
     if (delegate.selectionEnabled) {
       // Handle shift + click selection if needed.
-      final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+      final bool isShiftPressed = _keysPressedOnDown != null && _containsShift(_keysPressedOnDown!);
       // It is impossible to extend the selection when the shift key is pressed, if the
       // renderEditable.selection is invalid.
       final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
@@ -2463,7 +2489,7 @@ class TextSelectionGestureDetectorBuilder {
       return;
     }
 
-    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    final bool isShiftPressed = _keysPressedOnDown != null && _containsShift(_keysPressedOnDown!);
 
     if (isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
       switch (defaultTargetPlatform) {
@@ -2535,7 +2561,7 @@ class TextSelectionGestureDetectorBuilder {
       return;
     }
 
-    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    final bool isShiftPressed = _keysPressedOnDown != null && _containsShift(_keysPressedOnDown!);
 
     if (!isShiftPressed) {
       // Adjust the drag start offset for possible viewport offset changes.
@@ -2685,7 +2711,7 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onDragSelectionEnd(TapDragEndDetails details) {
-    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    final bool isShiftPressed = _keysPressedOnDown != null && _containsShift(_keysPressedOnDown!);
     _dragBeganOnPreviousSelection = null;
 
     if (isShiftPressed) {
@@ -2743,6 +2769,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// The [child] parameter must not be null.
   const TextSelectionGestureDetector({
     super.key,
+    this.onTapTrackStart,
+    this.onTapTrackReset,
     this.onTapDown,
     this.onForcePressStart,
     this.onForcePressEnd,
@@ -2760,6 +2788,13 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.behavior,
     required this.child,
   });
+
+  /// Called whenever [TapAndDragGestureRecognizer] has started tracking
+  /// a tap gesture.
+  final VoidCallback? onTapTrackStart;
+
+  /// Called when [TapAndDragGestureRecognizer] tap tracking has been reset.
+  final VoidCallback? onTapTrackReset;
 
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
@@ -2839,6 +2874,14 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _handleTapTrackStart() {
+    widget.onTapTrackStart?.call();
+  }
+
+  void _handleTapTrackReset() {
+    widget.onTapTrackReset?.call();
   }
 
   // The down handler is force-run on success of a single tap and optimistically
@@ -2942,6 +2985,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
             ..dragStartBehavior = DragStartBehavior.down
             ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
             ..maxConsecutiveTap = _getDefaultMaxConsecutiveTap()
+            ..onTapTrackStart = _handleTapTrackStart
+            ..onTapTrackReset = _handleTapTrackReset
             ..onTapDown = _handleTapDown
             ..onDragStart = _handleDragStart
             ..onDragUpdate = _handleDragUpdate
