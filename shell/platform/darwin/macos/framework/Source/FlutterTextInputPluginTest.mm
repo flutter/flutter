@@ -1414,14 +1414,14 @@ TEST(FlutterTextInputPluginTest, CanWorkWithFlutterTextField) {
 
   engine.semanticsEnabled = YES;
 
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge = viewController.accessibilityBridge.lock();
   FlutterPlatformNodeDelegateMac delegate(bridge, viewController);
   ui::AXTree tree;
   ui::AXNode ax_node(&tree, nullptr, 0, 0);
   ui::AXNodeData node_data;
   node_data.SetValue("initial text");
   ax_node.SetData(node_data);
-  delegate.Init(engine.accessibilityBridge, &ax_node);
+  delegate.Init(viewController.accessibilityBridge, &ax_node);
   {
     FlutterTextPlatformNode text_platform_node(&delegate, viewController);
 
@@ -1480,14 +1480,14 @@ TEST(FlutterTextInputPluginTest, CanNotBecomeResponderIfNoViewController) {
 
   engine.semanticsEnabled = YES;
 
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge = viewController.accessibilityBridge.lock();
   FlutterPlatformNodeDelegateMac delegate(bridge, viewController);
   ui::AXTree tree;
   ui::AXNode ax_node(&tree, nullptr, 0, 0);
   ui::AXNodeData node_data;
   node_data.SetValue("initial text");
   ax_node.SetData(node_data);
-  delegate.Init(engine.accessibilityBridge, &ax_node);
+  delegate.Init(viewController.accessibilityBridge, &ax_node);
   FlutterTextPlatformNode text_platform_node(&delegate, viewController);
 
   FlutterTextField* textField = text_platform_node.GetNativeViewAccessible();
