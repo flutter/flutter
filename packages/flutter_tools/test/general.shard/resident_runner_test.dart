@@ -2170,7 +2170,7 @@ flutter:
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
-      observatoryUris: Stream<Uri>.value(testUri),
+      vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void> done = Completer<void>();
     await runZonedGuarded(
@@ -2203,7 +2203,7 @@ flutter:
     };
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       device,
-      observatoryUris: Stream<Uri>.value(testUri),
+      vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void>done = Completer<void>();
     await runZonedGuarded(
