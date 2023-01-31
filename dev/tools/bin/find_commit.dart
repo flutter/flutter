@@ -10,7 +10,7 @@
 
 import 'dart:io';
 
-const bool debugLogging = false;
+const bool debugLogging = true;
 
 void log(String message) {
   if (debugLogging) {
@@ -78,7 +78,7 @@ String findCommit({
 String git(String workingDirectory, List<String> arguments) {
   final ProcessResult result = Process.runSync('git', arguments, workingDirectory: workingDirectory);
   if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty) {
-    throw ProcessException('git', arguments, '${result.stdout}${result.stderr}', result.exitCode);
+    throw ProcessException('git', arguments, 'working directory: "$workingDirectory"\n${result.stdout}\n${result.stderr}', result.exitCode);
   }
   return '${result.stdout}';
 }
