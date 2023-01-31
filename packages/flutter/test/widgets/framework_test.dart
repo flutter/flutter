@@ -1810,9 +1810,7 @@ class Decorate extends StatefulWidget {
     super.key,
     required this.didChangeDependencies,
     required this.build,
-  }) :
-    assert(didChangeDependencies != null),
-    assert(build != null);
+  });
 
   final void Function(bool isInBuild) didChangeDependencies;
   final void Function(bool isInBuild) build;
@@ -1974,7 +1972,7 @@ class StatelessWidgetSpy extends StatelessWidget {
   const StatelessWidgetSpy({
     super.key,
     required this.onBuild,
-  })  : assert(onBuild != null);
+  });
 
   final void Function(BuildContext) onBuild;
 

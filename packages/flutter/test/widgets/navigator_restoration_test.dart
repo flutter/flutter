@@ -1015,6 +1015,7 @@ void main() {
   });
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
@@ -1025,6 +1026,7 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   );
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
