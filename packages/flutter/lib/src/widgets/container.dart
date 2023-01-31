@@ -367,14 +367,14 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null) {
+    if (decoration == null) {
       return padding;
     }
-    final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
+    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
     if (padding == null) {
       return decorationPadding;
     }
-    return padding!.add(decorationPadding!);
+    return padding!.add(decorationPadding);
   }
 
   @override
