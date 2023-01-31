@@ -1072,10 +1072,6 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 
 class TestOffsetLayerA extends OffsetLayer {}
 
-// This class stands in for a class in an out-of-tree library or application
-// that contains a large swath of functionality and is used as a base class
-// for many subclasses.  For example:
-//   https://github.com/openwebf/webf/blob/793684612ea0/webf/lib/src/rendering/box_model.dart#L660-L1595
 class RenderFancyBox extends RenderBox {
   RenderFancyBox({required this.fancy}) : super();
 
@@ -1086,10 +1082,6 @@ class RenderFancyBox extends RenderBox {
   }
 }
 
-// This stands in for an out-of-tree class that needs the functionality of both
-// RenderFancyBox and RenderProxyBox, and uses RenderProxyBoxMixin to get the
-// latter.  For example:
-//   https://github.com/openwebf/webf/blob/793684612ea0/webf/lib/src/rendering/widget.dart#L13-L14
 class RenderFancyProxyBox extends RenderFancyBox
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderFancyProxyBox({required super.fancy});
