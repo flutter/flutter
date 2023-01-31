@@ -153,7 +153,7 @@ abstract class ChromiumDevice extends Device {
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
-    return LaunchResult.succeeded(vmServiceUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(vmServiceUri: Uri.parse(url));
   }
 
   @override

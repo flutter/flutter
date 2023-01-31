@@ -17,6 +17,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'ios/iproxy.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -753,6 +754,7 @@ class DebuggingOptions {
     this.nativeNullAssertions = false,
     this.enableImpeller = false,
     this.uninstallFirst = false,
+    this.serveObservatory = true,
     this.enableDartProfiling = true,
    }) : debuggingEnabled = true;
 
@@ -798,7 +800,8 @@ class DebuggingOptions {
       fastStart = false,
       webEnableExpressionEvaluation = false,
       nullAssertions = false,
-      nativeNullAssertions = false;
+      nativeNullAssertions = false,
+      serveObservatory = false;
 
   DebuggingOptions._({
     required this.buildInfo,
@@ -843,6 +846,7 @@ class DebuggingOptions {
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.uninstallFirst,
+    required this.serveObservatory,
     required this.enableDartProfiling,
   });
 
@@ -879,6 +883,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final bool enableImpeller;
+  final bool serveObservatory;
   final bool enableDartProfiling;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
@@ -917,7 +922,13 @@ class DebuggingOptions {
   ///   * https://github.com/dart-lang/sdk/blob/main/sdk/lib/html/doc/NATIVE_NULL_ASSERTIONS.md
   final bool nativeNullAssertions;
 
-  List<String> getIOSLaunchArguments(EnvironmentType environmentType, String? route,  Map<String, Object?> platformArgs) {
+  List<String> getIOSLaunchArguments(
+    EnvironmentType environmentType,
+    String? route,
+    Map<String, Object?> platformArgs, {
+    bool ipv6 = false,
+    IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none
+  }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
@@ -954,6 +965,9 @@ class DebuggingOptions {
       // Use the suggested host port.
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
         '--vm-service-port=$hostVmServicePort',
+      // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
+      if (interfaceType == IOSDeviceConnectionInterface.network)
+        '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
     ];
   }
 
@@ -998,6 +1012,7 @@ class DebuggingOptions {
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller,
+    'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
   };
 
@@ -1045,6 +1060,7 @@ class DebuggingOptions {
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
       enableImpeller: (json['enableImpeller'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+      serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
     );
 }

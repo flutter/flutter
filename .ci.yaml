@@ -80,7 +80,6 @@ platform_properties:
       device_type: none
       cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_arm64:
     properties:
       dependencies: >-
@@ -91,7 +90,6 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_x64:
     properties:
       dependencies: >-
@@ -102,7 +100,6 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14a5294e # xcode 14.0 beta 5
-      cleanup_xcode_cache: "true"
   mac_android:
     properties:
       dependencies: >-
@@ -134,7 +131,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: x86
-      device_os: iOS-15
+      device_os: iOS-16
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
   mac_arm64_ios:
     properties:
@@ -146,7 +143,7 @@ platform_properties:
         ]
       os: Mac-12
       cpu: arm64
-      device_os: iOS-15
+      device_os: iOS-16
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
   windows:
     properties:
@@ -709,7 +706,6 @@ targets:
 
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -1380,8 +1376,10 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
 
+  # TODO (ricardoamador) https://github.com/flutter/flutter/issues/119026
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2430,6 +2428,20 @@ targets:
       - bin/
       - .ci.yaml
 
+  - name: Mac animated_complex_opacity_perf_macos__e2e_summary
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: animated_complex_opacity_perf_macos__e2e_summary
+
   - name: Mac basic_material_app_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
@@ -2582,6 +2594,20 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__start_up
+
+  - name: Mac complex_layout_scroll_perf_macos__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
     recipe: flutter/flutter
@@ -2783,7 +2809,6 @@ targets:
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2988,7 +3013,6 @@ targets:
       - .ci.yaml
 
   - name: Mac plugin_test_macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3289,6 +3313,7 @@ targets:
       task_name: integration_ui_frame_number
 
   - name: Mac_android microbenchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/118692
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3299,7 +3324,6 @@ targets:
 
   - name: Mac_android run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     runIf:
       - dev/**
@@ -3991,7 +4015,6 @@ targets:
 
   - name: Mac run_debug_test_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4010,6 +4033,7 @@ targets:
 
   - name: Mac_arm64_ios run_debug_test_macos
     recipe: devicelab/devicelab_drone
+    presubmit: false # https://github.com/flutter/flutter/issues/118827
     timeout: 60
     properties:
       tags: >
@@ -4330,6 +4354,24 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: plugin_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows plugin_test_windows
+    bringup: true # New task
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_windows
     runIf:
       - dev/**
       - packages/flutter_tools/**

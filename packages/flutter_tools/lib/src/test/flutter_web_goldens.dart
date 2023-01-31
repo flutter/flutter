@@ -108,12 +108,7 @@ class TestGoldenComparator {
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse();
-
-    if (result == null) {
-      return 'unknown error';
-    } else {
-      return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
-    }
+    return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
   }
 }
 

@@ -51,7 +51,6 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   bool autoUncompress = true,
   BytesReceivedCallback? onBytesReceived,
 }) {
-  assert(autoUncompress != null);
   final Completer<Uint8List> completer = Completer<Uint8List>.sync();
 
   final _OutputBuffer output = _OutputBuffer();

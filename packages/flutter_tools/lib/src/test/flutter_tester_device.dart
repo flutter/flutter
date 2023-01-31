@@ -11,6 +11,7 @@ import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -44,8 +45,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.compileExpression,
     required this.fontConfigManager,
     required this.uriConverter,
-  })  : assert(shellPath != null), // Please provide the path to the shell in the SKY_SHELL environment variable.
-        assert(!debuggingOptions.startPaused || enableVmService),
+  })  : assert(!debuggingOptions.startPaused || enableVmService),
         _gotProcessVmServiceUri = enableVmService
             ? Completer<Uri?>() : (Completer<Uri?>()..complete());
 
@@ -181,8 +181,15 @@ class FlutterTesterTestDevice extends TestDevice {
           compileExpression: compileExpression,
           logger: logger,
         );
-        unawaited(localVmService.then((FlutterVmService vmservice) {
+        unawaited(localVmService.then((FlutterVmService vmservice) async {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
+          if (debuggingOptions.serveObservatory) {
+            try {
+              await vmservice.callMethodWrapper('_serveObservatory');
+            } on vm_service.RPCError {
+              logger.printWarning('Unable to enable Observatory');
+            }
+          }
         }));
 
         if (debuggingOptions.startPaused && !machine!) {
@@ -200,7 +207,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<Uri?> get vmServiceUri {
-    assert(_gotProcessVmServiceUri != null);
     return _gotProcessVmServiceUri.future;
   }
 
@@ -303,15 +309,14 @@ class FlutterTesterTestDevice extends TestDevice {
           if (match != null) {
             try {
               final Uri uri = Uri.parse(match[1]!);
-              if (reportVmServiceUri != null) {
-                await reportVmServiceUri(uri);
-              }
+              await reportVmServiceUri(uri);
             } on Exception catch (error) {
               logger.printError('Could not parse shell VM Service port message: $error');
             }
-          } else if (line != null) {
+          } else {
             logger.printStatus('Shell: $line');
           }
+
         },
         onError: (dynamic error) {
           logger.printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');

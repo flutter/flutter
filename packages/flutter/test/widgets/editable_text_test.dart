@@ -1488,13 +1488,14 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
-  /// Toolbar is not used in Flutter Web. Skip this check.
-  ///
-  /// Web is using native DOM elements (it is also used as platform input)
-  /// to enable clipboard functionality of the toolbar: copy, paste, select,
-  /// cut. It might also provide additional functionality depending on the
-  /// browser (such as translation). Due to this, in browsers, we should not
-  /// show a Flutter toolbar for the editable text elements.
+  // Toolbar is not used in Flutter Web unless the browser context menu is
+  // explicitly disabled. Skip this check.
+  //
+  // Web is using native DOM elements (it is also used as platform input)
+  // to enable clipboard functionality of the toolbar: copy, paste, select,
+  // cut. It might also provide additional functionality depending on the
+  // browser (such as translation). Due to this, in browsers, we should not
+  // show a Flutter toolbar for the editable text elements.
   testWidgets('can show toolbar when there is text and a selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1540,6 +1541,69 @@ void main() {
     expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
     await tester.pumpAndSettle();
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
+  });
+
+  group('BrowserContextMenu', () {
+    setUp(() async {
+      SystemChannels.contextMenu.setMockMethodCallHandler((MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      });
+      await BrowserContextMenu.disableContextMenu();
+    });
+
+    tearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      SystemChannels.contextMenu.setMockMethodCallHandler(null);
+    });
+
+    testWidgets('web can show toolbar when the browser context menu is disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Can't show the toolbar when there's no focus.
+      expect(state.showToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.text('Paste'), findsNothing);
+
+      // Can show the toolbar when focused even though there's no text.
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pump();
+      expect(state.showToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('Paste'), findsOneWidget);
+
+      // Hide the menu again.
+      state.hideToolbar();
+      await tester.pump();
+      expect(find.text('Paste'), findsNothing);
+
+      // Can show the menu with text and a selection.
+      controller.text = 'blah';
+      await tester.pump();
+      expect(state.showToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('Paste'), findsOneWidget);
+    },
+      skip: !kIsWeb, // [intended]
+    );
   });
 
   testWidgets('can hide toolbar with DismissIntent', (WidgetTester tester) async {
@@ -6300,6 +6364,161 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
+
+    final bool platformCanSelectByParagraph = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
+    // Move down one paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformCanSelectByParagraph ? 20 : 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move down another paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformCanSelectByParagraph ? 36 : 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move down another paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformCanSelectByParagraph ? 55 : 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up a paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformCanSelectByParagraph ? 36 : 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up a paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformCanSelectByParagraph ? 20 : 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up back to the origin.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformCanSelectByParagraph ? 10 : 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up, extending the selection backwards to the next paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformCanSelectByParagraph ? 0 : 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
 
     // Copy All
     await sendKeys(
@@ -14391,6 +14610,66 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     // Shouldn't crash.
     state.didChangeMetrics();
+  });
+
+  testWidgets('_CompositionCallback widget does not skip frames', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController.fromValue(
+      const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    );
+
+    Offset offset = Offset.zero;
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return Transform.translate(
+              offset: offset,
+              // The EditableText is configured in a way that the it doesn't
+              // explicitly request repaint on focus change.
+              child: TickerMode(
+                enabled: false,
+                child: RepaintBoundary(
+                  child: EditableText(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: const TextStyle(),
+                    showCursor: false,
+                    cursorColor: Colors.blue,
+                    backgroundCursorColor: Colors.grey,
+                  ),
+                ),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    tester.testTextInput.log.clear();
+
+    // The composition callback should be registered. To verify, change the
+    // parent layer's transform.
+    setState(() { offset = const Offset(42, 0); });
+    await tester.pump();
+
+    expect(
+      tester.testTextInput.log,
+      contains(
+        matchesMethodCall(
+          'TextInput.setEditableSizeAndTransform',
+          args: containsPair('transform', Matrix4.translationValues(offset.dx, offset.dy, 0).storage),
+        ),
+      ),
+    );
+
+    EditableText.debugDeterministicCursor = false;
   });
 }
 

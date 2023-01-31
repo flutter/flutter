@@ -138,9 +138,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = FlutterProject.current();
-    if (flutterProject == null) {
-      return const CustomDimensions();
-    }
     try {
       return CustomDimensions(
         commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],

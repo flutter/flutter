@@ -139,7 +139,7 @@ void recursiveCopy(Directory source, Directory target) {
       dest.writeAsBytesSync(entity.readAsBytesSync());
       // Preserve executable bit
       final String modes = entity.statSync().modeString();
-      if (modes != null && modes.contains('x')) {
+      if (modes.contains('x')) {
         makeExecutable(dest);
       }
     }
@@ -276,13 +276,13 @@ Future<Process> startProcess(
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String? workingDirectory,
 }) async {
-  assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
+
   final Process process = await _processManager.start(
     <String>[executable, ...?arguments],
     environment: newEnvironment,
@@ -503,7 +503,6 @@ Future<Process> startFlutter(String command, {
   Map<String, String> environment = const <String, String>{},
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
 }) {
-  assert(isBot != null);
   final List<String> args = flutterCommandArgs(command, options);
   return startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
@@ -632,48 +631,6 @@ Future<void> getNewGallery(String revision, Directory galleryDir) async {
   await inDirectory<void>(galleryDir, () async {
     await exec('git', <String>['checkout', revision]);
   });
-}
-
-void checkNotNull(Object o1,
-    [Object o2 = 1,
-    Object o3 = 1,
-    Object o4 = 1,
-    Object o5 = 1,
-    Object o6 = 1,
-    Object o7 = 1,
-    Object o8 = 1,
-    Object o9 = 1,
-    Object o10 = 1]) {
-  if (o1 == null) {
-    throw 'o1 is null';
-  }
-  if (o2 == null) {
-    throw 'o2 is null';
-  }
-  if (o3 == null) {
-    throw 'o3 is null';
-  }
-  if (o4 == null) {
-    throw 'o4 is null';
-  }
-  if (o5 == null) {
-    throw 'o5 is null';
-  }
-  if (o6 == null) {
-    throw 'o6 is null';
-  }
-  if (o7 == null) {
-    throw 'o7 is null';
-  }
-  if (o8 == null) {
-    throw 'o8 is null';
-  }
-  if (o9 == null) {
-    throw 'o9 is null';
-  }
-  if (o10 == null) {
-    throw 'o10 is null';
-  }
 }
 
 /// Splits [from] into lines and selects those that contain [pattern].

@@ -344,9 +344,7 @@ class WidgetsApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.useInheritedMediaQuery = false,
-  }) : assert(navigatorObservers != null),
-       assert(routes != null),
-       assert(
+  }) : assert(
          home == null ||
          onGenerateInitialRoutes == null,
          'If onGenerateInitialRoutes is specified, the home argument will be '
@@ -398,15 +396,7 @@ class WidgetsApp extends StatefulWidget {
          'pageRouteBuilder must be specified so that the default handler '
          'will know what kind of PageRoute transition to build.',
        ),
-       assert(title != null),
-       assert(color != null),
-       assert(supportedLocales != null && supportedLocales.isNotEmpty),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       assert(debugShowWidgetInspector != null),
+       assert(supportedLocales.isNotEmpty),
        routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -463,15 +453,7 @@ class WidgetsApp extends StatefulWidget {
          );
          return true;
        }()),
-       assert(title != null),
-       assert(color != null),
-       assert(supportedLocales != null && supportedLocales.isNotEmpty),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       assert(debugShowWidgetInspector != null),
+       assert(supportedLocales.isNotEmpty),
        navigatorObservers = null,
        navigatorKey = null,
        onGenerateRoute = null,
@@ -1432,7 +1414,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         settings,
         pageContentBuilder,
       );
-      assert(route != null, 'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
       return route;
     }
     if (widget.onGenerateRoute != null) {
@@ -1722,7 +1703,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // parameter.
         builder: (BuildContext context) {
           final String title = widget.onGenerateTitle!(context);
-          assert(title != null, 'onGenerateTitle must return a non-null String');
           return Title(
             title: title,
             color: widget.color.withOpacity(1.0),
@@ -1750,8 +1730,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       child: title,
     );
 
-    final MediaQueryData? data = MediaQuery.maybeOf(context);
-    if (!widget.useInheritedMediaQuery || data == null) {
+    if (!widget.useInheritedMediaQuery || MediaQuery.maybeOf(context) == null) {
       child = MediaQuery.fromWindow(
         child: child,
       );

@@ -14,8 +14,7 @@ import 'process.dart';
 
 /// A snapshot build configuration.
 class SnapshotType {
-  SnapshotType(this.platform, this.mode)
-    : assert(mode != null);
+  SnapshotType(this.platform, this.mode);
 
   final TargetPlatform? platform;
   final BuildMode mode;
@@ -145,7 +144,7 @@ class AOTSnapshotter {
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
     bool shouldStrip = true;
-    if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
+    if (extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       for (final String option in extraGenSnapshotOptions) {
         if (option == '--no-strip') {

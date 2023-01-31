@@ -184,7 +184,7 @@ class FlutterDriverService extends DriverService {
         userIdentifier: userIdentifier,
         prebuiltApplication: prebuiltApplication,
       );
-      if (result != null && result.started) {
+      if (result.started) {
         break;
       }
       // On attempts past 1, assume the application is built correctly and re-use it.
