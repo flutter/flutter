@@ -153,7 +153,7 @@ class BadgeTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the default color and size overrides for descendant [Badge] widgets.
   final BadgeThemeData data;

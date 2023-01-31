@@ -1150,6 +1150,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
     }
   }
 
+  @pragma('vm:entry-point')
   static Route<DateTimeRange?> _dateRangePickerRoute(
     BuildContext context,
     Object? arguments,

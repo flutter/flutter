@@ -269,7 +269,6 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// * "&#x23ED;": [AnimationStatus.completed] ([value] == 1.0)
   /// * "&#x23EE;": [AnimationStatus.dismissed] ([value] == 0.0)
   String toStringDetails() {
-    assert(status != null);
     switch (status) {
       case AnimationStatus.forward:
         return '\u25B6'; // >

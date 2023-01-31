@@ -71,8 +71,7 @@ class Card extends StatelessWidget {
     this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(borderOnForeground != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The card's background color.
   ///
@@ -215,7 +214,7 @@ class _CardDefaultsM2 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _CardDefaultsM3 extends CardTheme {
   const _CardDefaultsM3(this.context)

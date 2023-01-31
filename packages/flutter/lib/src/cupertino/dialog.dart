@@ -201,7 +201,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.actionScrollController,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-  }) : assert(actions != null);
+  });
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -665,8 +665,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     required this.child,
-  }) : assert(child != null),
-       assert(onPressed != null);
+  });
 
   /// The callback that is called when the button is tapped.
   ///
@@ -701,7 +700,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
     }
 
     return MouseRegion(
-      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
         onTap: onPressed,
         behavior: HitTestBehavior.opaque,
@@ -896,7 +895,6 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   }
 
   void _placeChildInSlot(RenderObject child, _AlertDialogSections slot) {
-    assert(slot != null);
     switch (slot) {
       case _AlertDialogSections.contentSection:
         renderObject.contentSection = child as RenderBox;
@@ -1443,7 +1441,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     this.scrollController,
     this.hasCancelButton = false,
     this.isActionSheet = false,
-  }) : assert(children != null);
+  });
 
   final List<Widget> children;
 
@@ -1593,9 +1591,7 @@ class CupertinoDialogAction extends StatelessWidget {
     this.isDestructiveAction = false,
     this.textStyle,
     required this.child,
-  }) : assert(child != null),
-       assert(isDefaultAction != null),
-       assert(isDestructiveAction != null);
+  });
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.
