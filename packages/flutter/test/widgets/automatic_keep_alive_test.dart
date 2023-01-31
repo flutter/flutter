@@ -230,23 +230,23 @@ void main() {
           addRepaintBoundaries: false,
           addSemanticIndexes: false,
           cacheExtent: 0.0,
-          children: <Widget>[
+          children: const <Widget>[
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
               ),
             ),
-            const AutomaticKeepAlive(
+            AutomaticKeepAlive(
               child: SizedBox(
                 key: GlobalObjectKey<_LeafState>(2),
                 height: 400.0,
               ),
             ),
-            const AutomaticKeepAlive(
+            AutomaticKeepAlive(
               child: SizedBox(
                 key: GlobalObjectKey<_LeafState>(3),
                 height: 400.0,
@@ -314,11 +314,11 @@ void main() {
           addRepaintBoundaries: false,
           addSemanticIndexes: false,
           cacheExtent: 0.0,
-          children: <Widget>[
+          children: const <Widget>[
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
@@ -327,7 +327,7 @@ void main() {
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
                 ]),
@@ -336,7 +336,7 @@ void main() {
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
                 ]),
@@ -370,11 +370,11 @@ void main() {
         addRepaintBoundaries: false,
         addSemanticIndexes: false,
         cacheExtent: 0.0,
-        children: <Widget>[
+        children: const <Widget>[
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
               ]),
             ),
@@ -382,7 +382,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
               ]),
@@ -391,7 +391,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
@@ -434,11 +434,11 @@ void main() {
         addRepaintBoundaries: false,
         addSemanticIndexes: false,
         cacheExtent: 0.0,
-        children: <Widget>[
+        children: const <Widget>[
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
               ]),
@@ -453,7 +453,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),

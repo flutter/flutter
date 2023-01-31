@@ -324,7 +324,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// rebuild this widget when the [offset] changes.
   ///
   /// The [offset] argument must not be null.
-  ShrinkWrappingViewport({
+  const ShrinkWrappingViewport({
     super.key,
     this.axisDirection = AxisDirection.down,
     this.crossAxisDirection,

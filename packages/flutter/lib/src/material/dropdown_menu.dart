@@ -605,7 +605,7 @@ class _ArrowDownIntent extends Intent {
 }
 
 class _DropdownMenuBody extends MultiChildRenderObjectWidget {
-  _DropdownMenuBody({
+  const _DropdownMenuBody({
     super.key,
     super.children,
     this.width,
