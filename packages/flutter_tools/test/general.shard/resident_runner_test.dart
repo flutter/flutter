@@ -2139,7 +2139,7 @@ flutter:
       device,
       observatoryUris: Stream<Uri>.value(testUri),
     );
-    final Completer<void>done = Completer<void>();
+    final Completer<void> done = Completer<void>();
     await runZonedGuarded(
       () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
       (_, __) => done.complete(),
