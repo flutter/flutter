@@ -51,7 +51,11 @@ SVGSVGElement pathToSvgClipPath(ui.Path path,
     clipPath.setAttribute('clipPathUnits', 'objectBoundingBox');
     svgPath.setAttribute('transform', 'scale($scaleX, $scaleY)');
   }
-
+  if (path.fillType == ui.PathFillType.evenOdd) {
+    svgPath.setAttribute('clip-rule', 'evenodd');
+  } else {
+    svgPath.setAttribute('clip-rule', 'nonzero');
+  }
   svgPath.setAttribute('d', pathToSvg((path as SurfacePath).pathRef, offsetX: offsetX, offsetY: offsetY));
   return root;
 }
