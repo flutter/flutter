@@ -422,6 +422,62 @@ void main() {
     );
   });
 
+  testWidgets('insertContent does not throw and parses data correctly', (WidgetTester tester) async {
+    String? latestUri;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              contentInsertionConfiguration: ContentInsertionConfiguration(
+                onContentInserted: (KeyboardInsertedContent content) {
+                  latestUri = content.uri;
+                },
+                allowedMimeTypes: const <String>['image/gif'],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.enterText(find.byType(EditableText), 'test');
+    await tester.idle();
+
+    const String uri = 'content://com.google.android.inputmethod.latin.fileprovider/test.gif';
+    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'args': <dynamic>[
+        -1,
+        'TextInputAction.commitContent',
+        jsonDecode('{"mimeType": "image/gif", "data": [0,1,0,1,0,1,0,0,0], "uri": "$uri"}'),
+      ],
+      'method': 'TextInputClient.performAction',
+    });
+
+    Object? error;
+    try {
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+            (ByteData? _) {},
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
+    expect(latestUri, equals(uri));
+  });
+
   testWidgets('onAppPrivateCommand does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
