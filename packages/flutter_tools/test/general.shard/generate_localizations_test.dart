@@ -788,7 +788,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/119593
     testWithoutContext('other logs from flutter_tools does not affect gen-l10n', () async {
       _standardFlutterDirectoryL10nSetup(fs);
-      
+
       final Logger logger = BufferLogger.test();
       logger.printError('An error output from a different tool in flutter_tools');
 
