@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -319,6 +320,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
   Offset? lastSecondaryTapDownPosition;
 
+  bool _hapticFeedbackEnabled = true;
+
   @override
   void initState() {
     super.initState();
@@ -333,6 +336,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
+    unawaited(() async {
+      // Overrite the default value with the actual value when it is available.
+      final bool? newValue = await HapticFeedback.isHapticFeedbackEnabled();
+      _hapticFeedbackEnabled = newValue ?? _hapticFeedbackEnabled;
+    }());
   }
 
   @override
@@ -467,7 +475,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
-    HapticFeedback.selectionClick();
+    if (_hapticFeedbackEnabled) {
+      HapticFeedback.selectionClick();
+    }
     widget.focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
     _showToolbar();

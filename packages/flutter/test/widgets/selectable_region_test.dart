@@ -317,7 +317,7 @@ void main() {
         ),
       ),
     );
-
+    log.clear();  // Clear out inital HapticFeedbackEnabledCheck.
     final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
     addTearDown(gesture.removePointer);
@@ -327,7 +327,7 @@ void main() {
     // `are` is selected.
     expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
     expect(
-      log.last,
+      log.first,
       isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
     );
     log.clear();
@@ -357,6 +357,83 @@ void main() {
         break;
     }
     await gesture.up();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('dragging handle or selecting word does not trigger haptic feedback on Android when disabled', (WidgetTester tester) async {
+    final List<MethodCall> platformCallLog = <MethodCall>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      platformCallLog.add(methodCall);
+      // Disable
+      if (methodCall.method == HapticFeedback.isHapticEnabledMethodName) {
+        return false;
+      }
+
+      return null;
+    });
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    // Validate the check call was sent.
+      expect(
+          platformCallLog.last,
+          isMethodCall(HapticFeedback.isHapticEnabledMethodName,
+              arguments: null));
+    platformCallLog.clear(); // Clear out inital isHapticEnabled check.
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // `are` is selected.
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+    // Expect that the only log is checking if haptics are enabled.
+    // No haptics should be sent.
+    expect(platformCallLog.last,
+          isMethodCall(HapticFeedback.isHapticEnabledMethodName,
+              arguments: null));
+    platformCallLog.clear();
+    final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+    expect(boxes.length, 1);
+    final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph);
+    await gesture.down(handlePos);
+    final Offset endPos = Offset(textOffsetToPosition(paragraph, 8).dx, handlePos.dy);
+
+    // Select 1 more character by dragging end handle to trigger feedback.
+    await gesture.moveTo(endPos);
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 8));
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(
+          platformCallLog.isEmpty,
+          true,
+        );
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+    await gesture.up();
+    // Only test variant that matters is android because it is the only variant
+    // with the ability to disable haptics on some api levels. Run all to
+    // make sure that other variants do not crash.
   }, variant: TargetPlatformVariant.all());
 
   group('SelectionArea integration', () {
