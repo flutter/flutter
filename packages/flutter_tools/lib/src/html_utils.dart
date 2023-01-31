@@ -71,7 +71,7 @@ class IndexHtml {
       _content = _content
           .replaceFirst(
             'var serviceWorkerVersion = null',
-            "var serviceWorkerVersion = '$serviceWorkerVersion'",
+            'var serviceWorkerVersion = "$serviceWorkerVersion"',
           )
           // This is for legacy index.html that still uses the old service
           // worker loading mechanism.
