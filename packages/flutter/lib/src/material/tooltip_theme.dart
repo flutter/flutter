@@ -152,7 +152,6 @@ class TooltipThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
@@ -269,7 +268,7 @@ class TooltipTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;

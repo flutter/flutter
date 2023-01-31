@@ -506,7 +506,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// is not pending or users end their gestures.
   void _triggerSelectionEndEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
-    // happen if the the child scrollable returns SelectionResult.pending, and
+    // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
     if (_scheduledSelectionEndEdgeUpdate || !_userDraggingSelectionEnd) {
@@ -559,7 +559,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// is not pending or users end their gestures.
   void _triggerSelectionStartEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
-    // happen if the the child scrollable returns SelectionResult.pending, and
+    // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
     if (_scheduledSelectionStartEdgeUpdate || !_userDraggingSelectionStart) {
