@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
 
@@ -261,6 +262,44 @@ format: true
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('overridden storage base url does not affect the command', () async {
+    const String baseUrl = 'https://storage.com';
+    final Cache cache = Cache.test(
+      platform: FakePlatform(environment: <String, String>{
+        'FLUTTER_STORAGE_BASE_URL': baseUrl,
+      }),
+      processManager: processManager,
+      logger: logger,
+    );
+
+    expect(cache.storageBaseUrl, baseUrl);
+
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    await createTestCommandRunner(command).run(<String>['gen-l10n']);
+
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    expect(outputDirectory.existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
