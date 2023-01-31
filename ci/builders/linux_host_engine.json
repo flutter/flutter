@@ -78,7 +78,6 @@
                         "out/host_debug/zip_archives/linux-x64/font-subset.zip",
                         "out/host_debug/zip_archives/flutter_patched_sdk.zip",
                         "out/host_debug/zip_archives/dart-sdk-linux-x64.zip",
-                        "out/host_debug/zip_archives/flutter-web-sdk-linux-x64.zip",
                         "out/host_debug/zip_archives/linux-x64/linux-x64-flutter-gtk.zip"
                     ]
                 }
@@ -93,7 +92,6 @@
             "gn": [
                 "--runtime-mode",
                 "debug",
-                "--full-dart-sdk",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples"
             ],
@@ -105,7 +103,6 @@
                     "flutter/build/archives:embedder",
                     "flutter/build/archives:flutter_patched_sdk",
                     "flutter/build/archives:dart_sdk_archive",
-                    "flutter/web_sdk",
                     "flutter/tools/font-subset",
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
