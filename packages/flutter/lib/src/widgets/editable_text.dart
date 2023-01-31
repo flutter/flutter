@@ -4215,8 +4215,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Select a paragraph around the given position.
   ///
   /// A paragraph boundary is defined as the range that most closely
-  /// encapsulates the given position within two line terminators. If
-  /// a line terminator does not exist in a given direction the selection
+  /// encapsulates the given position within two line terminators. If a
+  /// line terminator does not exist in a given direction the selection
   /// extends to the start/end of the document in that direction.
   void selectParagraph({ required Offset position, SelectionChangedCause? cause }) {
     selectParagraphsInRange(from: position, cause: cause);
