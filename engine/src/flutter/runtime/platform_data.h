@@ -14,17 +14,18 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// The struct of platform-specific data used for initializing ui.Window.
+/// The struct of platform-specific data used for initializing
+/// ui.PlatformDispatcher.
 ///
-/// framework may request data from ui.Window before platform is properly
-/// configured. Engine this struct to set the desired default value for
-/// ui.Window when creating Shell before platform is ready to send the real
+/// The framework may request data from ui.PlatformDispatcher before the
+/// platform is properly configured. When creating the Shell, the engine sets
+/// this struct to default values until the platform is ready to send the real
 /// data.
 ///
 /// See also:
 ///
 ///  * flutter::Shell::Create, which takes a platform_data to initialize the
-///    ui.Window attached to it.
+///    ui.PlatformDispatcher attached to it.
 struct PlatformData {
   PlatformData();
 
