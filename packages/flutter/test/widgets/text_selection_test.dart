@@ -666,7 +666,6 @@ void main() {
     final TestGesture touchGesture = await tester.startGesture(
       const Offset(25.0, 200.0),
       pointer: 0,
-            kind: PointerDeviceKind.touch,
     );
     await touchGesture.up();
     await tester.pumpAndSettle();
