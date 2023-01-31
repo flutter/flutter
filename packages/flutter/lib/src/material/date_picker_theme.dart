@@ -56,6 +56,7 @@ class DatePickerThemeData with Diagnosticable {
     this.yearForegroundColor,
     this.yearBackgroundColor,
     this.yearOverlayColor,
+    this.rangePickerBackgroundColor,
     this.rangePickerElevation,
     this.rangePickerShadowColor,
     this.rangePickerSurfaceTintColor,
@@ -68,8 +69,7 @@ class DatePickerThemeData with Diagnosticable {
     this.rangeSelectionOverlayColor,
   });
 
-  /// Overrides the default value of [Dialog.backgroundColor].
-  ///
+  /// Overrides the default value of [Dialog.backgroundColor] for [DatePicker].
   final Color? backgroundColor;
 
   /// Overrides the default value of [Dialog.elevation].
@@ -157,8 +157,9 @@ class DatePickerThemeData with Diagnosticable {
   final MaterialStateProperty<Color?>? dayOverlayColor;
 
   /// Overrides the default color used to paint the
-  /// [DatePickerDialog.currentDate] label in the grid of the date
-  /// picker.
+  /// [DatePickerDialog.currentDate] label in the grid of the dialog's
+  /// [CalendarDatePicker] and the corresponding year in the dialog's
+  /// [YearPicker].
   ///
   /// This will be used instead of the [TextStyle.color] provided in [dayStyle].
   final MaterialStateProperty<Color?>? todayForegroundColor;
@@ -170,6 +171,9 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the border used to paint the
   /// [DatePickerDialog.currentDate] label in the grid of the date
   /// picker.
+  ///
+  /// The border side's [BorderSide.color] is not used,
+  /// [todayForegroundColor] is used instead.
   final BorderSide? todayBorder;
 
   /// Overrides the default text style used to paint each of the year
@@ -193,6 +197,10 @@ class DatePickerThemeData with Diagnosticable {
   /// indicate that a year in the year selector is focused, hovered,
   /// or pressed.
   final MaterialStateProperty<Color?>? yearOverlayColor;
+
+  /// Overrides the default [Scaffold.backgroundColor] for
+  /// [DateRangePickerDialog].
+  final Color? rangePickerBackgroundColor;
 
   /// Overrides the default elevation of the full screen
   /// [DateRangePickerDialog].
@@ -298,6 +306,7 @@ class DatePickerThemeData with Diagnosticable {
     MaterialStateProperty<Color?>? yearForegroundColor,
     MaterialStateProperty<Color?>? yearBackgroundColor,
     MaterialStateProperty<Color?>? yearOverlayColor,
+    Color? rangePickerBackgroundColor,
     double? rangePickerElevation,
     Color? rangePickerShadowColor,
     Color? rangePickerSurfaceTintColor,
@@ -331,6 +340,7 @@ class DatePickerThemeData with Diagnosticable {
       yearForegroundColor: yearForegroundColor ?? this.yearForegroundColor,
       yearBackgroundColor: yearBackgroundColor ?? this.yearBackgroundColor,
       yearOverlayColor: yearOverlayColor ?? this.yearOverlayColor,
+      rangePickerBackgroundColor: rangePickerBackgroundColor ?? this.rangePickerBackgroundColor,
       rangePickerElevation: rangePickerElevation ?? this.rangePickerElevation,
       rangePickerShadowColor: rangePickerShadowColor ?? this.rangePickerShadowColor,
       rangePickerSurfaceTintColor: rangePickerSurfaceTintColor ?? this.rangePickerSurfaceTintColor,
@@ -368,6 +378,7 @@ class DatePickerThemeData with Diagnosticable {
       yearForegroundColor: MaterialStateProperty.lerp<Color?>(a?.yearForegroundColor, b?.yearForegroundColor, t, Color.lerp),
       yearBackgroundColor: MaterialStateProperty.lerp<Color?>(a?.yearBackgroundColor, b?.yearBackgroundColor, t, Color.lerp),
       yearOverlayColor: MaterialStateProperty.lerp<Color?>(a?.yearOverlayColor, b?.yearOverlayColor, t, Color.lerp),
+      rangePickerBackgroundColor: Color.lerp(a?.rangePickerBackgroundColor, b?.rangePickerBackgroundColor, t),
       rangePickerElevation: lerpDouble(a?.rangePickerElevation, b?.rangePickerElevation, t),
       rangePickerShadowColor: Color.lerp(a?.rangePickerShadowColor, b?.rangePickerShadowColor, t),
       rangePickerSurfaceTintColor: Color.lerp(a?.rangePickerSurfaceTintColor, b?.rangePickerSurfaceTintColor, t),
@@ -414,6 +425,7 @@ class DatePickerThemeData with Diagnosticable {
     yearForegroundColor,
     yearBackgroundColor,
     yearOverlayColor,
+    rangePickerBackgroundColor,
     rangePickerElevation,
     rangePickerShadowColor,
     rangePickerSurfaceTintColor,
@@ -453,6 +465,7 @@ class DatePickerThemeData with Diagnosticable {
       && other.yearForegroundColor == yearForegroundColor
       && other.yearBackgroundColor == yearBackgroundColor
       && other.yearOverlayColor == yearOverlayColor
+      && other.rangePickerBackgroundColor == rangePickerBackgroundColor
       && other.rangePickerElevation == rangePickerElevation
       && other.rangePickerShadowColor == rangePickerShadowColor
       && other.rangePickerSurfaceTintColor == rangePickerSurfaceTintColor
@@ -489,6 +502,7 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('yearForegroundColor', yearForegroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('yearBackgroundColor', yearBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('yearOverlayColor', yearOverlayColor, defaultValue: null));
+    properties.add(ColorProperty('rangePickerBackgroundColor', rangePickerBackgroundColor, defaultValue: null));
     properties.add(DoubleProperty('rangePickerElevation', rangePickerElevation, defaultValue: null));
     properties.add(ColorProperty('rangePickerShadowColor', rangePickerShadowColor, defaultValue: null));
     properties.add(ColorProperty('rangePickerSurfaceTintColor', rangePickerSurfaceTintColor, defaultValue: null));
@@ -700,6 +714,9 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   TextStyle? get yearStyle => _textTheme.bodyLarge;
+
+  @override
+  Color? get rangePickerBackgroundColor => _colors.surface;
 
   @override
   Color? get rangePickerShadowColor => Colors.transparent;

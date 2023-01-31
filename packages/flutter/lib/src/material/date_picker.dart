@@ -1515,6 +1515,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     final Orientation orientation = MediaQuery.orientationOf(context);
     final DatePickerThemeData themeData = DatePickerTheme.of(context);
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
+    final Color? dialogBackground = themeData.rangePickerBackgroundColor ?? defaults.rangePickerBackgroundColor;
     final Color? headerForeground = themeData.rangePickerHeaderForegroundColor ?? defaults.rangePickerHeaderForegroundColor;
     final Color? headerDisabledForeground = headerForeground?.withOpacity(0.38);
     final TextStyle? headlineStyle = themeData.rangePickerHeaderHeadlineStyle ?? defaults.rangePickerHeaderHeadlineStyle;
@@ -1606,7 +1607,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
             ]),
           ),
         ),
-        backgroundColor: themeData.backgroundColor ?? defaults.backgroundColor,
+        backgroundColor: dialogBackground,
         body: _CalendarDateRangePicker(
           initialStartDate: selectedStartDate,
           initialEndDate: selectedEndDate,

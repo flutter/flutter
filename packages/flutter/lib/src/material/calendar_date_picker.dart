@@ -1186,10 +1186,8 @@ class _YearPickerState extends State<YearPicker> {
       if (isSelected) MaterialState.selected,
     };
 
-    final Color? textColor = resolve<Color?>((DatePickerThemeData? theme) =>
-      isCurrentYear ? theme?.todayForegroundColor : theme?.yearForegroundColor, states);
-    final Color? background = resolve<Color?>((DatePickerThemeData? theme) =>
-      isCurrentYear ? theme?.todayBackgroundColor : theme?.yearBackgroundColor, states);
+    final Color? textColor = resolve<Color?>((DatePickerThemeData? theme) => isCurrentYear ? theme?.todayForegroundColor : theme?.yearForegroundColor, states);
+    final Color? background = resolve<Color?>((DatePickerThemeData? theme) => isCurrentYear ? theme?.todayBackgroundColor : theme?.yearBackgroundColor, states);
     final MaterialStateProperty<Color?> overlayColor =
       MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) =>
         effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
@@ -1199,7 +1197,7 @@ class _YearPickerState extends State<YearPicker> {
     if (isCurrentYear) {
       final BorderSide? todayBorder = datePickerTheme.todayBorder ?? defaults.todayBorder;
       if (todayBorder != null) {
-        border = Border.fromBorderSide(todayBorder);
+        border = Border.fromBorderSide(todayBorder.copyWith(color: textColor));
       }
     }
     final BoxDecoration decoration = BoxDecoration(
