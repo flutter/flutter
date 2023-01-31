@@ -72,7 +72,7 @@ class DartDevelopmentService {
       if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
         try {
           // First try to use the new field to avoid parsing from the message.
-          _existingDdsUri = e is dds.ExistingDartDevelopmentServiceException ? e.ddsUri: null;
+          _existingDdsUri = e is dds.ExistingDartDevelopmentServiceException ? e.ddsUri : null;
 
             // Otherwise, fall back to parsing from the exception (old DDS).
             // This is not completely reliable which is why the new field above
