@@ -11,8 +11,7 @@
                         "out/host_debug_arm64/zip_archives/windows-arm64/font-subset.zip",
                         "out/host_debug_arm64/zip_archives/dart-sdk-windows-arm64.zip",
                         "out/host_debug_arm64/zip_archives/windows-arm64-debug/windows-arm64-flutter.zip",
-                        "out/host_debug_arm64/zip_archives/windows-arm64/flutter-cpp-client-wrapper.zip",
-                        "out/host_debug_arm64/zip_archives/flutter-web-sdk-windows-arm64.zip"
+                        "out/host_debug_arm64/zip_archives/windows-arm64/flutter-cpp-client-wrapper.zip"
                     ],
                     "name": "host_debug_arm64"
                 }
@@ -27,7 +26,6 @@
             "gn": [
                 "--runtime-mode",
                 "debug",
-                "--full-dart-sdk",
                 "--no-lto",
                 "--windows-cpu",
                 "arm64"
@@ -41,8 +39,7 @@
                     "flutter/tools/font-subset",
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/shell/platform/windows/client_wrapper:client_wrapper_archive",
-                    "flutter/build/archives:windows_flutter",
-                    "flutter/web_sdk"
+                    "flutter/build/archives:windows_flutter"
                 ]
             },
             "tests": []

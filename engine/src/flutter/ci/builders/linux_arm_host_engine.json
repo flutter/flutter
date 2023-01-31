@@ -59,7 +59,6 @@
             "gn": [
                 "--runtime-mode",
                 "debug",
-                "--full-dart-sdk",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk"

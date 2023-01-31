@@ -8,8 +8,7 @@
                     "include_paths": [
                         "out/host_debug/zip_archives/darwin-x64/artifacts.zip",
                         "out/host_debug/zip_archives/darwin-x64/FlutterEmbedder.framework.zip",
-                        "out/host_debug/zip_archives/dart-sdk-darwin-x64.zip",
-                        "out/host_debug/zip_archives/flutter-web-sdk-darwin-x64.zip"
+                        "out/host_debug/zip_archives/dart-sdk-darwin-x64.zip"
                     ],
                     "name": "host_debug"
                 }
@@ -26,7 +25,6 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--full-dart-sdk",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples"
             ],
@@ -37,7 +35,6 @@
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:dart_sdk_archive",
-                    "flutter/web_sdk",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:flutter_embedder_framework"
                 ]
@@ -162,7 +159,6 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
-                "--full-dart-sdk",
                 "--prebuilt-dart-sdk"
             ],
             "name": "mac_debug_arm64",

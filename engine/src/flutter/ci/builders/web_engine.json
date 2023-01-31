@@ -1,102 +1,41 @@
 {
-    "builds": [
-        {
-            "archives": [],
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Windows-10"
-            ],
-            "gn": [
-                "--runtime-mode",
-                "debug",
-                "--unoptimized",
-                "--full-dart-sdk",
-                "--prebuilt-dart-sdk"
-            ],
-            "name": "windows_host_debug",
-            "ninja": {
-                "config": "host_debug_unopt",
-                "targets": []
-            },
-            "platform": "Windows",
-            "tests": []
-        },
-        {
-            "archives": [],
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Linux"
-            ],
-            "generators": {
-                "pub_dirs": [
-                    "flutter/lib/web_ui/",
-                    "flutter/web_sdk/web_engine_tester/"
+    "generators": {
+        "pub_dirs": [
+            "flutter/lib/web_ui/",
+            "flutter/web_sdk/web_engine_tester/"
+        ],
+        "tasks": [
+            {
+                "name": "compile web_tests",
+                "parameters": [
+                    "run",
+                    "compile_tests"
                 ],
-                "tasks": [
-                    {
-                        "name": "compile web_tests",
-                        "parameters": [
-                            "run",
-                            "compile_tests"
-                        ],
-                        "scripts": [
-                            "out/host_debug_unopt/dart-sdk/bin/dart",
-                            "flutter/lib/web_ui/dev/felt.dart"
-                        ]
-                    },
-                    {
-                        "name": "check licenses",
-                        "parameters": [
-                            "check-licenses"
-                        ],
-                        "scripts": [
-                            "out/host_debug_unopt/dart-sdk/bin/dart",
-                            "flutter/lib/web_ui/dev/felt.dart"
-                        ]
-                    },
-                    {
-                        "name": "web engine analysis",
-                        "parameters": [],
-                        "scripts": [
-                            "flutter/lib/web_ui/dev/web_engine_analysis.sh"
-                        ]
-                    }
+                "scripts": [
+                    "out/host_debug_unopt/dart-sdk/bin/dart",
+                    "flutter/lib/web_ui/dev/felt.dart"
                 ]
             },
-            "gn": [
-                "--runtime-mode",
-                "debug",
-                "--unoptimized",
-                "--full-dart-sdk"
-            ],
-            "name": "linux_host_debug_unopt",
-            "ninja": {
-                "config": "host_debug_unopt",
-                "targets": []
+            {
+                "name": "check licenses",
+                "parameters": [
+                    "check-licenses"
+                ],
+                "scripts": [
+                    "out/host_debug_unopt/dart-sdk/bin/dart",
+                    "flutter/lib/web_ui/dev/felt.dart"
+                ]
             },
-            "platform": "Linux",
-            "tests": []
-        },
-        {
-            "archives": [],
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Mac"
-            ],
-            "gn": [
-                "--runtime-mode",
-                "debug",
-                "--unoptimized",
-                "--full-dart-sdk",
-                "--prebuilt-dart-sdk"
-            ],
-            "name": "mac_host_debug_unopt",
-            "ninja": {
-                "config": "host_debug_unopt",
-                "targets": []
-            },
-            "platform": "Mac",
-            "tests": []
-        }
-    ]
+            {
+                "name": "web engine analysis",
+                "parameters": [
+                    "analyze"
+                ],
+                "scripts": [
+                    "out/host_debug_unopt/dart-sdk/bin/dart",
+                    "flutter/lib/web_ui/dev/felt.dart"
+                ]
+            }
+        ]
+    }
 }
