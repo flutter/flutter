@@ -78,17 +78,17 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  String? executablePathForDevice(covariant MacOSApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo);
   }
 
   @override
-  void onAttached(covariant MacOSApp package, BuildMode buildMode, Process process) {
+  void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
-    final String? applicationBundle = package.applicationBundle(buildMode);
+    final String? applicationBundle = package.applicationBundle(buildInfo);
     if (applicationBundle == null) {
       _logger.printError('Failed to foreground app; application bundle not found');
       return;

@@ -106,9 +106,9 @@ abstract class MacOSApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String? applicationBundle(BuildMode buildMode);
+  String? applicationBundle(BuildInfo buildInfo);
 
-  String? executable(BuildMode buildMode);
+  String? executable(BuildInfo buildInfo);
 }
 
 class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
@@ -135,10 +135,10 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
   String get name => bundleName;
 
   @override
-  String? applicationBundle(BuildMode buildMode) => uncompressedBundle.path;
+  String? applicationBundle(BuildInfo buildInfo) => uncompressedBundle.path;
 
   @override
-  String? executable(BuildMode buildMode) => _executable;
+  String? executable(BuildInfo buildInfo) => _executable;
 
   /// A [File] or [Directory] pointing to the application bundle.
   ///
@@ -156,23 +156,30 @@ class BuildableMacOSApp extends MacOSApp {
   String get name => 'macOS';
 
   @override
-  String? applicationBundle(BuildMode buildMode) {
+  String? applicationBundle(BuildInfo buildInfo) {
     final File appBundleNameFile = project.nameFile;
     if (!appBundleNameFile.existsSync()) {
       globals.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
       return null;
     }
+
     return globals.fs.path.join(
         getMacOSBuildDirectory(),
         'Build',
         'Products',
-        sentenceCase(getNameForBuildMode(buildMode)),
+        bundleDirectory(buildInfo),
         appBundleNameFile.readAsStringSync().trim());
   }
 
+  String bundleDirectory(BuildInfo buildInfo) {
+    return sentenceCase(buildInfo.mode.name) + (buildInfo.flavor != null
+      ? ' ${sentenceCase(buildInfo.flavor!)}'
+      : '');
+  }
+
   @override
-  String? executable(BuildMode buildMode) {
-    final String? directory = applicationBundle(buildMode);
+  String? executable(BuildInfo buildInfo) {
+    final String? directory = applicationBundle(buildInfo);
     if (directory == null) {
       return null;
     }
