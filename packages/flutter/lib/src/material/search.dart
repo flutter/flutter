@@ -62,9 +62,6 @@ Future<T?> showSearch<T>({
   String? query = '',
   bool useRootNavigator = false,
 }) {
-  assert(delegate != null);
-  assert(context != null);
-  assert(useRootNavigator != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
   return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute<T>(
@@ -230,16 +227,15 @@ abstract class SearchDelegate<T> {
   ///  * [InputDecorationTheme], which configures the appearance of the search
   ///    text field.
   ThemeData appBarTheme(BuildContext context) {
-    assert(context != null);
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    assert(theme != null);
     return theme.copyWith(
       appBarTheme: AppBarTheme(
         brightness: colorScheme.brightness,
         backgroundColor: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
         iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
-        textTheme: theme.textTheme,
+        titleTextStyle: theme.textTheme.titleLarge,
+        toolbarTextStyle: theme.textTheme.bodyMedium,
       ),
       inputDecorationTheme: searchFieldDecorationTheme ??
           InputDecorationTheme(
@@ -261,7 +257,6 @@ abstract class SearchDelegate<T> {
   ///
   /// Setting the query string programmatically moves the cursor to the end of the text field.
   set query(String value) {
-    assert(query != null);
     _queryTextController.text = value;
     if (_queryTextController.text.isNotEmpty) {
       _queryTextController.selection = TextSelection.fromPosition(TextPosition(offset: _queryTextController.text.length));
@@ -389,7 +384,7 @@ enum _SearchBody {
 class _SearchPageRoute<T> extends PageRoute<T> {
   _SearchPageRoute({
     required this.delegate,
-  }) : assert(delegate != null) {
+  }) {
     assert(
       delegate._route == null,
       'The ${delegate.runtimeType} instance is currently used by another active '

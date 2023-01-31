@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -197,6 +198,31 @@ void main() {
   testWithoutContext('flutter gold skips tests where the expectations are missing', () async {
     return _testFile('flutter_gold', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
   });
+
+  testWithoutContext('flutter test should respect --serve-observatory', () async {
+    late final Process process;
+    try {
+      process = await _runFlutterTestConcurrent('trivial', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--start-paused', '--serve-observatory']);
+      final Completer<Uri> completer = Completer<Uri>();
+      final RegExp vmServiceUriRegExp = RegExp(r'((http)?:\/\/)[^\s]+');
+      late final StreamSubscription<String> sub;
+      sub = process.stdout.transform(utf8.decoder).listen((String e) {
+        if (vmServiceUriRegExp.hasMatch(e)) {
+          completer.complete(Uri.parse(vmServiceUriRegExp.firstMatch(e)!.group(0)!));
+          sub.cancel();
+        }
+      });
+      final Uri vmServiceUri = await completer.future;
+      final HttpClient client = HttpClient();
+      final HttpClientRequest request = await client.getUrl(vmServiceUri);
+      final HttpClientResponse response = await request.close();
+      final String content = await response.transform(utf8.decoder).join();
+      expect(content.contains('Dart VM Observatory'), true);
+    } finally {
+      process.kill();
+    }
+  });
 }
 
 Future<void> _testFile(
@@ -325,5 +351,47 @@ Future<ProcessResult> _runFlutterTest(
     workingDirectory: workingDirectory,
     stdoutEncoding: utf8,
     stderrEncoding: utf8,
+  );
+}
+
+Future<Process> _runFlutterTestConcurrent(
+  String? testName,
+  String workingDirectory,
+  String testDirectory, {
+  List<String> extraArguments = const <String>[],
+}) async {
+
+  String testPath;
+  if (testName == null) {
+    // Test everything in the directory.
+    testPath = testDirectory;
+    final Directory directoryToTest = fileSystem.directory(testPath);
+    if (!directoryToTest.existsSync()) {
+      fail('missing test directory: $directoryToTest');
+    }
+  } else {
+    // Test just a specific test file.
+    testPath = fileSystem.path.join(testDirectory, '${testName}_test.dart');
+    final File testFile = fileSystem.file(testPath);
+    if (!testFile.existsSync()) {
+      fail('missing test file: $testFile');
+    }
+  }
+
+  final List<String> args = <String>[
+    'test',
+    '--no-color',
+    '--no-version-check',
+    '--no-pub',
+    '--reporter',
+    'compact',
+    ...extraArguments,
+    testPath,
+  ];
+
+  return Process.start(
+    flutterBin, // Uses the precompiled flutter tool for faster tests,
+    args,
+    workingDirectory: workingDirectory,
   );
 }

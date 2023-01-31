@@ -43,19 +43,13 @@ void main() {
   }) {
     final TestAnnotationTarget oneAnnotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) {
-        if (logEvents != null) {
-          logEvents.add(event);
-        }
+        logEvents.add(event);
       },
       onHover: (PointerHoverEvent event) {
-        if (logEvents != null) {
-          logEvents.add(event);
-        }
+        logEvents.add(event);
       },
       onExit: (PointerExitEvent event) {
-        if (logEvents != null) {
-          logEvents.add(event);
-        }
+        logEvents.add(event);
       },
     );
     setUpMouseAnnotationFinder(
@@ -140,7 +134,7 @@ void main() {
   test('should not crash if the first event is a Removed event', () {
     final List<PointerEvent> events = <PointerEvent>[];
     setUpWithOneAnnotation(logEvents: events);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    binding.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
     events.clear();
@@ -608,8 +602,7 @@ ui.PointerData _pointerData(
 }
 
 class BaseEventMatcher extends Matcher {
-  BaseEventMatcher(this.expected)
-    : assert(expected != null);
+  BaseEventMatcher(this.expected);
 
   final PointerEvent expected;
 

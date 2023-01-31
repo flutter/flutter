@@ -116,9 +116,7 @@ class SegmentedButton<T> extends StatelessWidget {
     this.style,
     this.showSelectedIcon = true,
     this.selectedIcon,
-  })  : assert(segments != null),
-        assert(segments.length > 0),
-        assert(selected != null),
+  })  : assert(segments.length > 0),
         assert(selected.length > 0 || emptySelectionAllowed),
         assert(selected.length < 2 || multiSelectionEnabled);
 
@@ -693,7 +691,6 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     RenderBox? child = lastChild;
     while (child != null) {
       final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
@@ -720,7 +717,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_152
 
 class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   _SegmentedButtonDefaultsM3(this.context);

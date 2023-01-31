@@ -199,7 +199,6 @@ enum CrossAxisAlignment {
 }
 
 bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDirection? verticalDirection) {
-  assert(direction != null);
   // If the relevant value of textDirection or verticalDirection is null, this returns null too.
   switch (direction) {
     case Axis.horizontal:
@@ -235,8 +234,8 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///
 /// Layout for a [RenderFlex] proceeds in six steps:
 ///
-/// 1. Layout each child a null or zero flex factor with unbounded main axis
-///    constraints and the incoming cross axis constraints. If the
+/// 1. Layout each child with a null or zero flex factor with unbounded main
+///    axis constraints and the incoming cross axis constraints. If the
 ///    [crossAxisAlignment] is [CrossAxisAlignment.stretch], instead use tight
 ///    cross axis constraints that match the incoming max extent in the cross
 ///    axis.
@@ -289,12 +288,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline,
     Clip clipBehavior = Clip.none,
-  }) : assert(direction != null),
-       assert(mainAxisAlignment != null),
-       assert(mainAxisSize != null),
-       assert(crossAxisAlignment != null),
-       assert(clipBehavior != null),
-       _direction = direction,
+  }) : _direction = direction,
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
@@ -309,7 +303,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   Axis get direction => _direction;
   Axis _direction;
   set direction(Axis value) {
-    assert(value != null);
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
@@ -328,7 +321,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
   MainAxisAlignment _mainAxisAlignment;
   set mainAxisAlignment(MainAxisAlignment value) {
-    assert(value != null);
     if (_mainAxisAlignment != value) {
       _mainAxisAlignment = value;
       markNeedsLayout();
@@ -348,7 +340,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   MainAxisSize get mainAxisSize => _mainAxisSize;
   MainAxisSize _mainAxisSize;
   set mainAxisSize(MainAxisSize value) {
-    assert(value != null);
     if (_mainAxisSize != value) {
       _mainAxisSize = value;
       markNeedsLayout();
@@ -367,7 +358,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
   CrossAxisAlignment _crossAxisAlignment;
   set crossAxisAlignment(CrossAxisAlignment value) {
-    assert(value != null);
     if (_crossAxisAlignment != value) {
       _crossAxisAlignment = value;
       markNeedsLayout();
@@ -444,8 +434,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   bool get _debugHasNecessaryDirections {
-    assert(direction != null);
-    assert(crossAxisAlignment != null);
     if (firstChild != null && lastChild != firstChild) {
       // i.e. there's more than one child
       switch (direction) {
@@ -453,7 +441,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           assert(textDirection != null, 'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
           break;
         case Axis.vertical:
-          assert(verticalDirection != null, 'Vertical $runtimeType with multiple children has a null verticalDirection, so the layout order is undefined.');
           break;
       }
     }
@@ -464,7 +451,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           assert(textDirection != null, 'Horizontal $runtimeType with $mainAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
           break;
         case Axis.vertical:
-          assert(verticalDirection != null, 'Vertical $runtimeType with $mainAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
       }
     }
@@ -472,7 +458,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         crossAxisAlignment == CrossAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
-          assert(verticalDirection != null, 'Horizontal $runtimeType with $crossAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
         case Axis.vertical:
           assert(textDirection != null, 'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
@@ -494,7 +479,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -795,7 +779,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     assert(_debugHasNecessaryDirections);
-    assert(constraints != null);
 
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
@@ -861,7 +844,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               minChildExtent = 0.0;
               break;
           }
-          assert(minChildExtent != null);
           final BoxConstraints innerConstraints;
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {

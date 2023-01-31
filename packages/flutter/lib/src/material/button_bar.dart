@@ -300,8 +300,7 @@ class _RenderButtonBarRow extends RenderFlex {
     super.verticalDirection,
     super.textBaseline,
     this.overflowButtonSpacing,
-  }) : assert(textDirection != null),
-       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0);
+  }) : assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0);
 
   bool _hasCheckedLayoutWidth = false;
   double? overflowButtonSpacing;

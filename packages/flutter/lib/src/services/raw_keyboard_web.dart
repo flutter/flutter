@@ -35,8 +35,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
     this.location = 0,
     this.metaState = modifierNone,
     this.keyCode = 0,
-  })  : assert(code != null),
-        assert(metaState != null);
+  });
 
   /// The `KeyboardEvent.code` corresponding to this event.
   ///
@@ -106,8 +105,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return maybeLocationKey;
     }
 
-    // Look to see if the [code] is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = kWebToLogicalKey[code];
+    // Look to see if the [key] is one we know about and have a mapping for.
+    final LogicalKeyboardKey? newKey = kWebToLogicalKey[key];
     if (newKey != null) {
       return newKey;
     }

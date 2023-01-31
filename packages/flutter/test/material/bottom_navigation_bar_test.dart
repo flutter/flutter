@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui';
 
@@ -2490,7 +2491,6 @@ void main() {
 }
 
 Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
-  assert(textDirection != null);
   return MaterialApp(
     home: Localizations(
       locale: const Locale('en', 'US'),

@@ -1173,4 +1173,196 @@ void main() {
       ),
     );
   });
+
+  testGesture('scale trackpadScrollCausesScale', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
+      dragStartBehavior: DragStartBehavior.start,
+      trackpadScrollCausesScale: true
+    );
+
+    bool didStartScale = false;
+    Offset? updatedFocalPoint;
+    scale.onStart = (ScaleStartDetails details) {
+      didStartScale = true;
+      updatedFocalPoint = details.focalPoint;
+    };
+
+    double? updatedScale;
+    Offset? updatedDelta;
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      updatedScale = details.scale;
+      updatedFocalPoint = details.focalPoint;
+      updatedDelta = details.focalPointDelta;
+    };
+
+    bool didEndScale = false;
+    scale.onEnd = (ScaleEndDetails details) {
+      didEndScale = true;
+    };
+
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
+
+    final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
+    scale.addPointerPanZoom(start);
+
+    tester.closeArena(2);
+    expect(didStartScale, isFalse);
+    expect(updatedScale, isNull);
+    expect(updatedFocalPoint, isNull);
+    expect(updatedDelta, isNull);
+    expect(didEndScale, isFalse);
+
+    tester.route(start);
+    expect(didStartScale, isTrue);
+    didStartScale = false;
+    expect(updatedScale, isNull);
+    expect(updatedFocalPoint, Offset.zero);
+    updatedFocalPoint = null;
+    expect(updatedDelta, isNull);
+    expect(didEndScale, isFalse);
+
+    // Zoom in by scrolling up.
+    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(0, -200)));
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, Offset.zero);
+    updatedFocalPoint = null;
+    expect(updatedScale, math.e);
+    updatedScale = null;
+    expect(updatedDelta, Offset.zero);
+    updatedDelta = null;
+    expect(didEndScale, isFalse);
+
+    // A horizontal scroll should do nothing.
+    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(200, -200)));
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, Offset.zero);
+    updatedFocalPoint = null;
+    expect(updatedScale, math.e);
+    updatedScale = null;
+    expect(updatedDelta, Offset.zero);
+    updatedDelta = null;
+    expect(didEndScale, isFalse);
+
+    // End.
+    tester.route(pointer1.panZoomEnd());
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, isNull);
+    expect(updatedScale, isNull);
+    expect(updatedDelta, isNull);
+    expect(didEndScale, isTrue);
+    didEndScale = false;
+
+    // Try with a different trackpadScrollToScaleFactor
+    scale.trackpadScrollToScaleFactor = const Offset(1/125, 0);
+
+    final PointerPanZoomStartEvent start2 = pointer1.panZoomStart(Offset.zero);
+    scale.addPointerPanZoom(start2);
+
+    tester.closeArena(2);
+    expect(didStartScale, isFalse);
+    expect(updatedScale, isNull);
+    expect(updatedFocalPoint, isNull);
+    expect(updatedDelta, isNull);
+    expect(didEndScale, isFalse);
+
+    tester.route(start2);
+    expect(didStartScale, isTrue);
+    didStartScale = false;
+    expect(updatedScale, isNull);
+    expect(updatedFocalPoint, Offset.zero);
+    updatedFocalPoint = null;
+    expect(updatedDelta, isNull);
+    expect(didEndScale, isFalse);
+
+    // Zoom in by scrolling left.
+    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(125, 0)));
+    expect(didStartScale, isFalse);
+    didStartScale = false;
+    expect(updatedFocalPoint, Offset.zero);
+    updatedFocalPoint = null;
+    expect(updatedScale, math.e);
+    updatedScale = null;
+    expect(updatedDelta, Offset.zero);
+    updatedDelta = null;
+    expect(didEndScale, isFalse);
+
+    // A vertical scroll should do nothing.
+    tester.route(pointer1.panZoomUpdate(Offset.zero, pan: const Offset(125, 125)));
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, Offset.zero);
+    updatedFocalPoint = null;
+    expect(updatedScale, math.e);
+    updatedScale = null;
+    expect(updatedDelta, Offset.zero);
+    updatedDelta = null;
+    expect(didEndScale, isFalse);
+
+    // End.
+    tester.route(pointer1.panZoomEnd());
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, isNull);
+    expect(updatedScale, isNull);
+    expect(updatedDelta, isNull);
+    expect(didEndScale, isTrue);
+    didEndScale = false;
+
+    scale.dispose();
+  });
+
+  testGesture('scale ending velocity', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
+      dragStartBehavior: DragStartBehavior.start,
+      trackpadScrollCausesScale: true
+    );
+
+    bool didStartScale = false;
+    Offset? updatedFocalPoint;
+    scale.onStart = (ScaleStartDetails details) {
+      didStartScale = true;
+      updatedFocalPoint = details.focalPoint;
+    };
+
+    bool didEndScale = false;
+    double? scaleEndVelocity;
+    scale.onEnd = (ScaleEndDetails details) {
+      didEndScale = true;
+      scaleEndVelocity = details.scaleVelocity;
+    };
+
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
+
+    final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
+    scale.addPointerPanZoom(start);
+
+    tester.closeArena(2);
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, isNull);
+    expect(didEndScale, isFalse);
+
+    tester.route(start);
+    expect(didStartScale, isTrue);
+    didStartScale = false;
+    expect(updatedFocalPoint, Offset.zero);
+    updatedFocalPoint = null;
+    expect(didEndScale, isFalse);
+
+    // Zoom in by scrolling up.
+    for (int i = 0; i < 100; i++) {
+      tester.route(pointer1.panZoomUpdate(
+        Offset.zero,
+        pan: Offset(0, i * -10),
+        timeStamp: Duration(milliseconds: i * 25)
+      ));
+    }
+
+    // End.
+    tester.route(pointer1.panZoomEnd(timeStamp: const Duration(milliseconds: 2500)));
+    expect(didStartScale, isFalse);
+    expect(updatedFocalPoint, isNull);
+    expect(didEndScale, isTrue);
+    didEndScale = false;
+    expect(scaleEndVelocity, moreOrLessEquals(281.41454098027765));
+
+    scale.dispose();
+  });
 }

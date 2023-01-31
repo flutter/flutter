@@ -114,9 +114,10 @@ class Switch extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.onFocusChange,
     this.autofocus = false,
   })  : _switchType = _SwitchType.material,
-        assert(dragStartBehavior != null),
+        applyCupertinoTheme = false,
         assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
@@ -158,9 +159,10 @@ class Switch extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.onFocusChange,
     this.autofocus = false,
-  })  : assert(autofocus != null),
-        assert(activeThumbImage != null || onActiveThumbImageError == null),
+    this.applyCupertinoTheme,
+  })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
         _switchType = _SwitchType.adaptive;
 
@@ -379,6 +381,9 @@ class Switch extends StatelessWidget {
 
   final _SwitchType _switchType;
 
+  /// {@macro flutter.cupertino.CupertinoSwitch.applyTheme}
+  final bool? applyCupertinoTheme;
+
   /// {@macro flutter.cupertino.CupertinoSwitch.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
@@ -455,6 +460,9 @@ class Switch extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
@@ -478,6 +486,7 @@ class Switch extends StatelessWidget {
     final Size size = _getSwitchSize(context);
     return Focus(
       focusNode: focusNode,
+      onFocusChange: onFocusChange,
       autofocus: autofocus,
       child: Container(
         width: size.width, // Same size as the Material switch.
@@ -489,6 +498,7 @@ class Switch extends StatelessWidget {
           onChanged: onChanged,
           activeColor: activeColor,
           trackColor: inactiveTrackColor,
+          applyTheme: applyCupertinoTheme,
         ),
       ),
     );
@@ -518,6 +528,7 @@ class Switch extends StatelessWidget {
       overlayColor: overlayColor,
       splashRadius: splashRadius,
       focusNode: focusNode,
+      onFocusChange: onFocusChange,
       autofocus: autofocus,
     );
   }
@@ -530,7 +541,6 @@ class Switch extends StatelessWidget {
 
       case _SwitchType.adaptive: {
         final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -577,9 +587,9 @@ class _MaterialSwitch extends StatefulWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.onFocusChange,
     this.autofocus = false,
-  })  : assert(dragStartBehavior != null),
-        assert(activeThumbImage != null || onActiveThumbImageError == null),
+  })  : assert(activeThumbImage != null || onActiveThumbImageError == null),
         assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   final bool value;
@@ -603,6 +613,7 @@ class _MaterialSwitch extends StatefulWidget {
   final MaterialStateProperty<Color?>? overlayColor;
   final double? splashRadius;
   final FocusNode? focusNode;
+  final Function(bool)? onFocusChange;
   final bool autofocus;
   final Size size;
 
@@ -822,6 +833,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
         child: buildToggleable(
           mouseCursor: effectiveMouseCursor,
           focusNode: widget.focusNode,
+          onFocusChange: widget.onFocusChange,
           autofocus: widget.autofocus,
           size: widget.size,
           painter: _painter
@@ -918,7 +930,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get activeIconColor => _activeIconColor!;
   Color? _activeIconColor;
   set activeIconColor(Color value) {
-    assert(value != null);
     if (value == _activeIconColor) {
       return;
     }
@@ -929,7 +940,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get inactiveIconColor => _inactiveIconColor!;
   Color? _inactiveIconColor;
   set inactiveIconColor(Color value) {
-    assert(value != null);
     if (value == _inactiveIconColor) {
       return;
     }
@@ -962,7 +972,6 @@ class _SwitchPainter extends ToggleablePainter {
   double get activeThumbRadius => _activeThumbRadius!;
   double? _activeThumbRadius;
   set activeThumbRadius(double value) {
-    assert(value != null);
     if (value == _activeThumbRadius) {
       return;
     }
@@ -973,7 +982,6 @@ class _SwitchPainter extends ToggleablePainter {
   double get inactiveThumbRadius => _inactiveThumbRadius!;
   double? _inactiveThumbRadius;
   set inactiveThumbRadius(double value) {
-    assert(value != null);
     if (value == _inactiveThumbRadius) {
       return;
     }
@@ -984,7 +992,6 @@ class _SwitchPainter extends ToggleablePainter {
   double get pressedThumbRadius => _pressedThumbRadius!;
   double? _pressedThumbRadius;
   set pressedThumbRadius(double value) {
-    assert(value != null);
     if (value == _pressedThumbRadius) {
       return;
     }
@@ -1005,7 +1012,6 @@ class _SwitchPainter extends ToggleablePainter {
   Size get transitionalThumbSize => _transitionalThumbSize!;
   Size? _transitionalThumbSize;
   set transitionalThumbSize(Size value) {
-    assert(value != null);
     if (value == _transitionalThumbSize) {
       return;
     }
@@ -1016,7 +1022,6 @@ class _SwitchPainter extends ToggleablePainter {
   double get trackHeight => _trackHeight!;
   double? _trackHeight;
   set trackHeight(double value) {
-    assert(value != null);
     if (value == _trackHeight) {
       return;
     }
@@ -1027,7 +1032,6 @@ class _SwitchPainter extends ToggleablePainter {
   double get trackWidth => _trackWidth!;
   double? _trackWidth;
   set trackWidth(double value) {
-    assert(value != null);
     if (value == _trackWidth) {
       return;
     }
@@ -1078,7 +1082,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get activeTrackColor => _activeTrackColor!;
   Color? _activeTrackColor;
   set activeTrackColor(Color value) {
-    assert(value != null);
     if (value == _activeTrackColor) {
       return;
     }
@@ -1099,7 +1102,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get inactiveTrackColor => _inactiveTrackColor!;
   Color? _inactiveTrackColor;
   set inactiveTrackColor(Color value) {
-    assert(value != null);
     if (value == _inactiveTrackColor) {
       return;
     }
@@ -1110,7 +1112,6 @@ class _SwitchPainter extends ToggleablePainter {
   ImageConfiguration get configuration => _configuration!;
   ImageConfiguration? _configuration;
   set configuration(ImageConfiguration value) {
-    assert(value != null);
     if (value == _configuration) {
       return;
     }
@@ -1121,7 +1122,6 @@ class _SwitchPainter extends ToggleablePainter {
   TextDirection get textDirection => _textDirection!;
   TextDirection? _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -1132,7 +1132,6 @@ class _SwitchPainter extends ToggleablePainter {
   Color get surfaceColor => _surfaceColor!;
   Color? _surfaceColor;
   set surfaceColor(Color value) {
-    assert(value != null);
     if (value == _surfaceColor) {
       return;
     }
@@ -1625,7 +1624,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_152
 
 class _SwitchDefaultsM3 extends SwitchThemeData {
   _SwitchDefaultsM3(BuildContext context)

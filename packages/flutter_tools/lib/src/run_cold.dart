@@ -80,12 +80,17 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (enableDevTools && debuggingEnabled) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        flutterDevices: flutterDevices,
-      ));
+    if (debuggingEnabled) {
+      if (enableDevTools) {
+        // The method below is guaranteed never to return a failing future.
+        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          flutterDevices: flutterDevices,
+        ));
+      }
+      if (debuggingOptions.serveObservatory) {
+        await enableObservatory();
+      }
     }
 
     if (flutterDevices.first.observatoryUris != null) {
@@ -162,12 +167,17 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (enableDevTools && debuggingEnabled) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-        flutterDevices: flutterDevices,
-      ));
+    if (debuggingEnabled) {
+      if (enableDevTools) {
+        // The method below is guaranteed never to return a failing future.
+        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
+          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+          flutterDevices: flutterDevices,
+        ));
+      }
+      if (debuggingOptions.serveObservatory) {
+        await enableObservatory();
+      }
     }
 
     appStartedCompleter?.complete();

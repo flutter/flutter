@@ -172,42 +172,37 @@ void main() {
     expect(responses.first.first, containsAllInOrder(<dynamic>[targetElements.first.elementIdentifier, 0.0, 0.0, 100.0, 100.0]));
     expect(responses.first.last, containsAllInOrder(<dynamic>[targetElements.last.elementIdentifier, 0.0, 100.0, 100.0, 100.0]));
   });
-}
 
-class FakeScribbleClient implements ScribbleClient {
-  FakeScribbleClient();
+  test('Scribble.setSelectionRects', () async {
+    Scribble.ensureInitialized();
+    final List<MethodCall> log = <MethodCall>[];
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribble, (MethodCall methodCall) async {
+      log.add(methodCall);
+      return null;
+    });
 
-  String latestMethodCall = '';
+    const List<SelectionRect> selectionRects = <SelectionRect>[
+      SelectionRect(position: 1, bounds: Rect.fromLTWH(2, 3, 4, 5), direction: TextDirection.rtl),
+    ];
+    Scribble.setSelectionRects(selectionRects);
+    expect(log, hasLength(1));
+    final MethodCall methodCall = log.first;
+    expect(methodCall.method, equals('Scribble.setSelectionRects'));
 
-  @override
-  String get elementIdentifier => '';
+    final List<List<num>> arguments = (methodCall.arguments as List<dynamic>).map<List<num>>((dynamic el) {
+      return (el as List<dynamic>).map<num>((dynamic subEl) {
+        return subEl as num;
+      }).toList();
+    }).toList();
+    expect(arguments.length, 1);
+    expect(arguments[0].length, 6);
+    expect(arguments[0][0], 2); // left
+    expect(arguments[0][1], 3); // top
+    expect(arguments[0][2], 4); // width
+    expect(arguments[0][3], 5); // height
+    expect(arguments[0][4], 1); // position
+    expect(arguments[0][5], TextDirection.rtl.index); // direction
 
-  @override
-  void onScribbleFocus(Offset offset) {
-    latestMethodCall = 'onScribbleFocus';
-  }
-
-  @override
-  bool isInScribbleRect(Rect rect) {
-    latestMethodCall = 'isInScribbleRect';
-    return false;
-  }
-
-  @override
-  Rect get bounds => Rect.zero;
-
-  @override
-  void showToolbar() {
-    latestMethodCall = 'showToolbar';
-  }
-
-  @override
-  void insertTextPlaceholder(Size size) {
-    latestMethodCall = 'insertTextPlaceholder';
-  }
-
-  @override
-  void removeTextPlaceholder() {
-    latestMethodCall = 'removeTextPlaceholder';
-  }
+    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribble, null);
+  });
 }

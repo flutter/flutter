@@ -478,17 +478,8 @@ class TextInputConfiguration {
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
     this.enableDeltaModel = false,
-  }) : assert(inputType != null),
-       assert(obscureText != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(autocorrect != null),
-       assert(enableSuggestions != null),
-       assert(keyboardAppearance != null),
-       assert(inputAction != null),
-       assert(textCapitalization != null),
-       assert(enableIMEPersonalizedLearning != null),
-       assert(enableDeltaModel != null);
+  }) : smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -746,8 +737,7 @@ class RawFloatingCursorPoint {
   RawFloatingCursorPoint({
     this.offset,
     required this.state,
-  }) : assert(state != null),
-       assert(state != FloatingCursorDragState.Update || offset != null);
+  }) : assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset? offset;
@@ -773,13 +763,7 @@ class TextEditingValue {
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
-  }) : assert(text != null),
-       // The constructor does not verify that `selection` and `composing` are
-       // valid ranges within `text`, and is unable to do so due to limitation
-       // of const constructors. Some checks are performed by assertion in
-       // other occasions. See `_textRangeIsValid`.
-       assert(selection != null),
-       assert(composing != null);
+  });
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
@@ -1220,8 +1204,7 @@ mixin DeltaTextInputClient implements TextInputClient {
 ///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
   TextInputConnection._(this._client)
-      : assert(_client != null),
-        _id = _nextId++;
+      : _id = _nextId++;
 
   Size? _cachedSize;
   Matrix4? _cachedTransform;
@@ -1237,7 +1220,6 @@ class TextInputConnection {
   /// application code will likely break text input for the application.
   @visibleForTesting
   static void debugResetId({int to = 1}) {
-    assert(to != null);
     assert(() {
       _nextId = to;
       return true;
@@ -1308,7 +1290,6 @@ class TextInputConnection {
   /// This information is used for positioning the IME candidates menu on each
   /// platform.
   void setComposingRect(Rect rect) {
-    assert(rect != null);
     if (rect == _cachedRect) {
       return;
     }
@@ -1320,7 +1301,6 @@ class TextInputConnection {
   /// Sends the coordinates of caret rect. This is used on macOS for positioning
   /// the accent selection menu.
   void setCaretRect(Rect rect) {
-    assert(rect != null);
     if (rect == _cachedCaretRect) {
       return;
     }
@@ -1417,7 +1397,6 @@ FloatingCursorDragState _toTextCursorAction(String state) {
 }
 
 RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
-  assert(state != null, 'You must provide a state to set a new editing point.');
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
@@ -1605,8 +1584,6 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
-    assert(client != null);
-    assert(configuration != null);
     final TextInputConnection connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
@@ -1616,9 +1593,6 @@ class TextInput {
   // by [attach] and by [_handleTextInputInvocation] for the
   // `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
-    assert(connection != null);
-    assert(connection._client != null);
-    assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _currentConnection = connection;
     _currentConfiguration = configuration;
@@ -1677,7 +1651,6 @@ class TextInput {
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
     if (method == 'TextInputClient.requestExistingInputState') {
-      assert(_currentConnection!._client != null);
       _attach(_currentConnection!, _currentConfiguration);
       final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
       if (editingValue != null) {
@@ -1691,7 +1664,6 @@ class TextInput {
     // The updateEditingStateWithTag request (autofill) can come up even to a
     // text field that doesn't have a connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
-      assert(_currentConnection!._client != null);
       final TextInputClient client = _currentConnection!._client;
       final AutofillScope? scope = client.currentAutofillScope;
       final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
@@ -1813,14 +1785,12 @@ class TextInput {
   }
 
   void _updateConfig(TextInputConfiguration configuration) {
-    assert(configuration != null);
     for (final TextInputControl control in _inputControls) {
       control.updateConfig(configuration);
     }
   }
 
   void _setEditingState(TextEditingValue value) {
-    assert(value != null);
     for (final TextInputControl control in _inputControls) {
       control.setEditingState(value);
     }
@@ -1950,7 +1920,6 @@ class TextInput {
   /// * [AutofillGroup.onDisposeAction], a configurable action that runs when a
   ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
-    assert(shouldSave != null);
     for (final TextInputControl control in TextInput._instance._inputControls) {
       control.finishAutofillContext(shouldSave: shouldSave);
     }

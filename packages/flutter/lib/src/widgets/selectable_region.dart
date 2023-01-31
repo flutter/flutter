@@ -350,7 +350,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
 
     // Hide the text selection toolbar on mobile when orientation changes.
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     if (_lastOrientation == null) {
       _lastOrientation = orientation;
       return;
@@ -467,6 +467,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
+    HapticFeedback.selectionClick();
     widget.focusNode.requestFocus();
     _selectWordAt(offset: details.globalPosition);
     _showToolbar();
@@ -505,7 +506,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// is not pending or users end their gestures.
   void _triggerSelectionEndEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
-    // happen if the the child scrollable returns SelectionResult.pending, and
+    // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
     if (_scheduledSelectionEndEdgeUpdate || !_userDraggingSelectionEnd) {
@@ -537,6 +538,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
        },
      );
    }
+  _stopSelectionStartEdgeUpdate();
   _stopSelectionEndEdgeUpdate();
   _updateSelectedContentIfNeeded();
  }
@@ -557,7 +559,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// is not pending or users end their gestures.
   void _triggerSelectionStartEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
-    // happen if the the child scrollable returns SelectionResult.pending, and
+    // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
     // the drag is lifted before the scheduled selection update is run.
     if (_scheduledSelectionStartEdgeUpdate || !_userDraggingSelectionStart) {

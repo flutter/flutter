@@ -17,7 +17,7 @@ import 'dart/package_map.dart';
 /// They are escaped in Kotlin files.
 ///
 /// https://kotlinlang.org/docs/keyword-reference.html
-const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
+const List<String> kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
@@ -86,7 +86,7 @@ class Template {
           from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
-        // is a candidate for rendering. This catches cases where the folder
+        // a candidate for rendering. This catches cases where the folder
         // itself is a template.
         _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }
@@ -228,7 +228,7 @@ class Template {
         .replaceAll(testTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
-      if (android != null && android && androidIdentifier != null) {
+      if (android && androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }

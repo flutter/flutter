@@ -93,15 +93,10 @@ class CalendarDatePicker extends StatefulWidget {
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
     this.selectableDayPredicate,
-  }) : assert(initialDate != null),
-       assert(firstDate != null),
-       assert(lastDate != null),
-       initialDate = DateUtils.dateOnly(initialDate),
+  }) : initialDate = DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
-       assert(onDateChanged != null),
-       assert(initialCalendarMode != null) {
+       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -188,8 +183,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     _textDirection = Directionality.of(context);
     if (!_announcedInitialDate) {
       _announcedInitialDate = true;
+      final bool isToday = DateUtils.isSameDay(widget.currentDate, _selectedDate);
+      final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
       SemanticsService.announce(
-        _localizations.formatFullDate(_selectedDate),
+        '${_localizations.formatFullDate(_selectedDate)}$semanticLabelSuffix',
         _textDirection,
       );
     }
@@ -440,12 +437,7 @@ class _MonthPicker extends StatefulWidget {
     required this.onChanged,
     required this.onDisplayedMonthChanged,
     this.selectableDayPredicate,
-  }) : assert(selectedDate != null),
-       assert(currentDate != null),
-       assert(onChanged != null),
-       assert(firstDate != null),
-       assert(lastDate != null),
-       assert(!firstDate.isAfter(lastDate)),
+  }) : assert(!firstDate.isAfter(lastDate)),
        assert(!selectedDate.isBefore(firstDate)),
        assert(!selectedDate.isAfter(lastDate));
 
@@ -827,13 +819,7 @@ class _DayPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.selectableDayPredicate,
-  }) : assert(currentDate != null),
-       assert(displayedMonth != null),
-       assert(firstDate != null),
-       assert(lastDate != null),
-       assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
+  }) : assert(!firstDate.isAfter(lastDate)),
        assert(!selectedDate.isBefore(firstDate)),
        assert(!selectedDate.isAfter(lastDate));
 
@@ -968,6 +954,7 @@ class _DayPickerState extends State<_DayPicker> {
             (widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(dayToBuild));
         final bool isSelectedDay = DateUtils.isSameDay(widget.selectedDate, dayToBuild);
         final bool isToday = DateUtils.isSameDay(widget.currentDate, dayToBuild);
+        final String semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
 
         BoxDecoration? decoration;
         Color dayColor = enabledDayColor;
@@ -979,16 +966,20 @@ class _DayPickerState extends State<_DayPicker> {
             color: selectedDayBackground,
             shape: BoxShape.circle,
           );
-        } else if (isDisabled) {
-          dayColor = disabledDayColor;
         } else if (isToday) {
-          // The current day gets a different text color and a circle stroke
+          // The current day gets a different text color (if enabled) and a circle stroke
           // border.
-          dayColor = todayColor;
+          if (isDisabled) {
+            dayColor = disabledDayColor;
+          } else {
+            dayColor = todayColor;
+          }
           decoration = BoxDecoration(
-            border: Border.all(color: todayColor),
+            border: Border.all(color: dayColor),
             shape: BoxShape.circle,
           );
+        } else if (isDisabled) {
+          dayColor = disabledDayColor;
         }
 
         Widget dayWidget = Container(
@@ -1015,7 +1006,7 @@ class _DayPickerState extends State<_DayPicker> {
               // day of month before the rest of the date, as they are looking
               // for the day of month. To do that we prepend day of month to the
               // formatted full date.
-              label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
+              label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix',
               selected: isSelectedDay,
               excludeSemantics: true,
               child: dayWidget,
@@ -1097,11 +1088,7 @@ class YearPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
+  }) : assert(!firstDate.isAfter(lastDate)),
        currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()),
        initialDate = DateUtils.dateOnly(initialDate ?? selectedDate);
 

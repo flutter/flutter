@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -453,6 +454,7 @@ void main() {
         dartFlags: 'c',
         deviceVmServicePort: 1234,
         enableImpeller: true,
+        enableDartProfiling: false,
       );
       final String jsonString = json.encode(original.toJson());
       final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
@@ -464,6 +466,7 @@ void main() {
       expect(deserialized.dartFlags, original.dartFlags);
       expect(deserialized.deviceVmServicePort, original.deviceVmServicePort);
       expect(deserialized.enableImpeller, original.enableImpeller);
+      expect(deserialized.enableDartProfiling, original.enableDartProfiling);
     });
   });
 
@@ -548,6 +551,53 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for physical device with iPv4 network connection', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        null,
+        <String, Object?>{},
+        interfaceType: IOSDeviceConnectionInterface.network,
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--observatory-host=0.0.0.0',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for physical device with iPv6 network connection', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        null,
+        <String, Object?>{},
+        ipv6: true,
+        interfaceType: IOSDeviceConnectionInterface.network,
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--observatory-host=::0',
         ].join(' '),
       );
     });
@@ -659,6 +709,27 @@ void main() {
         launchArguments.join(' '),
         <String>[
           '--enable-dart-profiling',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('No --enable-dart-profiling flag when option is false', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableDartProfiling: false,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        null,
+        <String, Object?>{},
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
           '--enable-checked-mode',
           '--verify-entry-points',
         ].join(' '),

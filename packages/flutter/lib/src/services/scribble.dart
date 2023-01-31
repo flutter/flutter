@@ -154,7 +154,14 @@ class Scribble {
       _instance._channel.invokeMethod<void>(
         'Scribble.setSelectionRects',
         selectionRects.map((SelectionRect rect) {
-          return <num>[rect.bounds.left, rect.bounds.top, rect.bounds.width, rect.bounds.height, rect.position];
+          return <num>[
+            rect.bounds.left,
+            rect.bounds.top,
+            rect.bounds.width,
+            rect.bounds.height,
+            rect.position,
+            rect.direction.index,
+          ];
         }).toList(),
       );
     }
@@ -213,7 +220,11 @@ mixin ScribbleClient {
 class SelectionRect {
   /// Constructor for creating a [SelectionRect] from a text [position] and
   /// [bounds].
-  const SelectionRect({required this.position, required this.bounds});
+  const SelectionRect({
+    required this.position,
+    required this.bounds,
+    this.direction = TextDirection.ltr,
+  });
 
   /// The position of this selection rect within the text String.
   final int position;
@@ -221,6 +232,9 @@ class SelectionRect {
   /// The rectangle representing the bounds of this selection rect within the
   /// currently focused [RenderEditable]'s coordinate space.
   final Rect bounds;
+
+  /// The direction text flows within this selection rect.
+  final TextDirection direction;
 
   @override
   bool operator ==(Object other) {
@@ -232,12 +246,13 @@ class SelectionRect {
     }
     return other is SelectionRect
         && other.position == position
-        && other.bounds == bounds;
+        && other.bounds == bounds
+        && other.direction == direction;
   }
 
   @override
-  int get hashCode => Object.hash(position, bounds);
+  int get hashCode => Object.hash(position, bounds, direction);
 
   @override
-  String toString() => 'SelectionRect($position, $bounds)';
+  String toString() => 'SelectionRect($position, $bounds, $direction)';
 }

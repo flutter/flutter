@@ -41,6 +41,7 @@ class DrawerThemeData with Diagnosticable {
     this.shadowColor,
     this.surfaceTintColor,
     this.shape,
+    this.endShape,
     this.width,
   });
 
@@ -62,6 +63,9 @@ class DrawerThemeData with Diagnosticable {
   /// Overrides the default value of [Drawer.shape].
   final ShapeBorder? shape;
 
+  /// Overrides the default value of [Drawer.shape] for a end drawer.
+  final ShapeBorder? endShape;
+
   /// Overrides the default value of [Drawer.width].
   final double? width;
 
@@ -74,6 +78,7 @@ class DrawerThemeData with Diagnosticable {
     Color? shadowColor,
     Color? surfaceTintColor,
     ShapeBorder? shape,
+    ShapeBorder? endShape,
     double? width,
   }) {
     return DrawerThemeData(
@@ -83,6 +88,7 @@ class DrawerThemeData with Diagnosticable {
       shadowColor: shadowColor ?? this.shadowColor,
       surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       shape: shape ?? this.shape,
+      endShape: endShape ?? this.endShape,
       width: width ?? this.width,
     );
   }
@@ -93,7 +99,6 @@ class DrawerThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static DrawerThemeData? lerp(DrawerThemeData? a, DrawerThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
@@ -104,6 +109,7 @@ class DrawerThemeData with Diagnosticable {
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      endShape: ShapeBorder.lerp(a?.endShape, b?.endShape, t),
       width: lerpDouble(a?.width, b?.width, t),
     );
   }
@@ -116,6 +122,7 @@ class DrawerThemeData with Diagnosticable {
     shadowColor,
     surfaceTintColor,
     shape,
+    endShape,
     width,
   );
 
@@ -134,6 +141,7 @@ class DrawerThemeData with Diagnosticable {
         && other.shadowColor == shadowColor
         && other.surfaceTintColor == surfaceTintColor
         && other.shape == shape
+        && other.endShape == endShape
         && other.width == width;
   }
 
@@ -146,6 +154,7 @@ class DrawerThemeData with Diagnosticable {
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('endShape', endShape, defaultValue: null));
     properties.add(DoubleProperty('width', width, defaultValue: null));
   }
 }
@@ -164,7 +173,7 @@ class DrawerTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the background color, scrim color, elevation, and shape for
   /// descendant [Drawer] widgets.

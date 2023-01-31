@@ -26,6 +26,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/dart_plugin_registrant.dart';
 import 'build_system/targets/localizations.dart';
+import 'build_system/targets/scene_importer.dart';
 import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
@@ -51,8 +52,8 @@ class FlutterDevice {
     ResidentCompiler? generator,
     this.userIdentifier,
     required this.developmentShaderCompiler,
-  }) : assert(buildInfo.trackWidgetCreation != null),
-       generator = generator ?? ResidentCompiler(
+    this.developmentSceneImporter,
+  }) : generator = generator ?? ResidentCompiler(
          globals.artifacts!.getArtifactPath(
            Artifact.flutterPatchedSdkPath,
            platform: targetPlatform,
@@ -81,10 +82,8 @@ class FlutterDevice {
     required Platform platform,
     TargetModel targetModel = TargetModel.flutter,
     List<String>? experimentalFlags,
-    ResidentCompiler? generator,
     String? userIdentifier,
   }) async {
-    ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
@@ -99,6 +98,18 @@ class FlutterDevice {
       fileSystem: globals.fs,
     );
 
+    final DevelopmentSceneImporter sceneImporter = DevelopmentSceneImporter(
+      sceneImporter: SceneImporter(
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+      ),
+      fileSystem: globals.fs,
+    );
+
+    final ResidentCompiler generator;
+
     // For both web and non-web platforms we initialize dill to/from
     // a shared location for faster bootstrapping. If the compiler fails
     // due to a kernel target or version mismatch, no error is reported
@@ -107,21 +118,26 @@ class FlutterDevice {
     // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       // TODO(zanderso): consistently provide these flags across platforms.
-      late HostArtifact platformDillArtifact;
+      final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
       if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillArtifact = HostArtifact.webPlatformKernelDill;
+        platformDillName = 'ddc_outline.dill';
         if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
           extraFrontEndOptions.add('--no-sound-null-safety');
         }
       } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
+        platformDillName = 'ddc_outline_sound.dill';
         if (!extraFrontEndOptions.contains('--sound-null-safety')) {
           extraFrontEndOptions.add('--sound-null-safety');
         }
       } else {
-        assert(false);
+        throw StateError('Expected buildInfo.nullSafetyMode to be one of unsound or sound, got ${buildInfo.nullSafetyMode}');
       }
+
+      final String platformDillPath = globals.fs.path.join(
+        getWebPlatformBinariesDirectory(globals.artifacts!, buildInfo.webRenderer).path,
+        platformDillName,
+      );
 
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
@@ -139,9 +155,7 @@ class FlutterDevice {
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         extraFrontEndOptions: extraFrontEndOptions,
-        platformDill: globals.fs.file(globals.artifacts!
-          .getHostArtifact(platformDillArtifact))
-          .absolute.uri.toString(),
+        platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts!
           .getHostArtifact(HostArtifact.flutterWebLibrariesJson)).uri.toString(),
@@ -197,6 +211,7 @@ class FlutterDevice {
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       developmentShaderCompiler: shaderCompiler,
+      developmentSceneImporter: sceneImporter,
     );
   }
 
@@ -206,6 +221,7 @@ class FlutterDevice {
   final BuildInfo buildInfo;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
+  final DevelopmentSceneImporter? developmentSceneImporter;
 
   DevFSWriter? devFSWriter;
   Stream<Uri?>? observatoryUris;
@@ -379,10 +395,6 @@ class FlutterDevice {
       return;
     }
     final Stream<String> logStream = (await device!.getLogReader(app: package)).logLines;
-    if (logStream == null) {
-      globals.printError('Failed to read device log stream');
-      return;
-    }
     _loggingSubscription = logStream.listen((String line) {
       if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
@@ -421,8 +433,9 @@ class FlutterDevice {
       buildInfo: hotRunner.debuggingOptions.buildInfo,
       applicationBinary: hotRunner.applicationBinary,
     );
+    final ApplicationPackage? applicationPackage = package;
 
-    if (package == null) {
+    if (applicationPackage == null) {
       String message = 'No application found for $targetPlatform.';
       final String? hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null) {
@@ -431,7 +444,7 @@ class FlutterDevice {
       globals.printError(message);
       return 1;
     }
-    devFSWriter = device!.createDevFSWriter(package, userIdentifier);
+    devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{
       'multidex': hotRunner.multidexEnabled,
@@ -441,7 +454,7 @@ class FlutterDevice {
 
     // Start the application.
     final Future<LaunchResult> futureResult = device!.startApp(
-      package,
+      applicationPackage,
       mainPath: hotRunner.mainPath,
       debuggingOptions: hotRunner.debuggingOptions,
       platformArgs: platformArgs,
@@ -480,24 +493,9 @@ class FlutterDevice {
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
     );
-    devFSWriter = device!.createDevFSWriter(package, userIdentifier);
+    final ApplicationPackage? applicationPackage = package;
 
-    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
-    final bool prebuiltMode = coldRunner.applicationBinary != null;
-    if (coldRunner.mainPath == null) {
-      assert(prebuiltMode);
-      globals.printStatus(
-        'Launching ${package!.displayName} '
-        'on ${device!.name} in $modeName mode...',
-      );
-    } else {
-      globals.printStatus(
-        'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
-        'on ${device!.name} in $modeName mode...',
-      );
-    }
-
-    if (package == null) {
+    if (applicationPackage == null) {
       String message = 'No application found for $targetPlatform.';
       final String? hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null) {
@@ -507,16 +505,23 @@ class FlutterDevice {
       return 1;
     }
 
+    devFSWriter = device!.createDevFSWriter(applicationPackage, userIdentifier);
+
+    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final bool prebuiltMode = coldRunner.applicationBinary != null;
+    globals.printStatus(
+      'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
+      'on ${device!.name} in $modeName mode...',
+    );
+
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
-    if (coldRunner.traceStartup != null) {
-      platformArgs['trace-startup'] = coldRunner.traceStartup;
-    }
+    platformArgs['trace-startup'] = coldRunner.traceStartup;
     platformArgs['multidex'] = coldRunner.multidexEnabled;
 
     await startEchoingDeviceLog();
 
     final LaunchResult result = await device!.startApp(
-      package,
+      applicationPackage,
       mainPath: coldRunner.mainPath,
       debuggingOptions: coldRunner.debuggingOptions,
       platformArgs: platformArgs,
@@ -578,6 +583,7 @@ class FlutterDevice {
         packageConfig: packageConfig,
         devFSWriter: devFSWriter,
         shaderCompiler: developmentShaderCompiler,
+        sceneImporter: developmentSceneImporter,
         dartPluginRegistrant: FlutterProject.current().dartPluginRegistrant,
       );
     } on DevFSException {
@@ -1396,6 +1402,26 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished.complete(0);
   }
 
+  Future<void> enableObservatory() async {
+    assert(debuggingOptions.serveObservatory);
+    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[];
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device == null) {
+        continue;
+      }
+      // Notify the VM service if the user wants Observatory to be served.
+      serveObservatoryRequests.add(
+        device.vmService?.callMethodWrapper('_serveObservatory') ??
+          Future<vm_service.Response?>.value(),
+      );
+    }
+    try {
+      await Future.wait(serveObservatoryRequests);
+    } on vm_service.RPCError catch(e) {
+      globals.printWarning('Unable to enable Observatory: $e');
+    }
+  }
+
   void appFinished() {
     if (_finished.isCompleted) {
       return;
@@ -1412,7 +1438,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
-    assert(exitCode != null);
     await cleanupAtFinish();
     return exitCode;
   }
@@ -1890,9 +1915,6 @@ class DevToolsServerAddress {
   final int port;
 
   Uri? get uri {
-    if (host == null || port == null) {
-      return null;
-    }
     return Uri(scheme: 'http', host: host, port: port);
   }
 }

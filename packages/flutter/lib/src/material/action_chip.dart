@@ -20,7 +20,7 @@ import 'theme_data.dart';
 /// Action chips can be tapped to trigger an action or show progress and
 /// confirmation. For Material 3, a disabled state is supported for Action
 /// chips and is specified with [onPressed] being null. For previous versions
-/// of Material Design, it is recommended to remove the Action chip from the
+/// of Material Design, it is recommended to remove the Action chip from
 /// the interface entirely rather than display a disabled chip.
 ///
 /// Action chips are displayed after primary content, such as below a card or
@@ -86,10 +86,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
-  }) : assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -178,7 +175,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_152
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
   const _ActionChipDefaultsM3(this.context, this.isEnabled)
@@ -239,7 +236,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 

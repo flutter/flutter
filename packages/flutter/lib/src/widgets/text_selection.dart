@@ -24,6 +24,7 @@ import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
 import 'scrollable.dart';
+import 'tap_and_drag_gestures.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -34,19 +35,6 @@ export 'package:flutter/services.dart' show TextSelectionDelegate;
 /// A duration that controls how often the drag selection update callback is
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
-
-/// Signature for when a pointer that's dragging to select text has moved again.
-///
-/// The first argument [startDetails] contains the details of the event that
-/// initiated the dragging.
-///
-/// The second argument [updateDetails] contains the details of the current
-/// pointer movement. It's the same as the one passed to [DragGestureRecognizer.onUpdate].
-///
-/// This signature is different from [GestureDragUpdateCallback] to make it
-/// easier for various text fields to use [TextSelectionGestureDetector] without
-/// having to store the start position.
-typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
 
 /// The type for a Function that builds a toolbar's container with the given
 /// child.
@@ -332,10 +320,7 @@ class TextSelectionOverlay {
     ClipboardStatusNotifier? clipboardStatus,
     this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
-  }) : assert(value != null),
-       assert(context != null),
-       assert(handlesVisible != null),
-       _handlesVisible = handlesVisible,
+  }) : _handlesVisible = handlesVisible,
        _value = value {
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
@@ -431,7 +416,6 @@ class TextSelectionOverlay {
   bool get handlesVisible => _handlesVisible;
   bool _handlesVisible = false;
   set handlesVisible(bool visible) {
-    assert(visible != null);
     if (_handlesVisible == visible) {
       return;
     }
@@ -467,6 +451,20 @@ class TextSelectionOverlay {
       contextMenuBuilder: contextMenuBuilder,
     );
     return;
+  }
+
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  void showSpellCheckSuggestionsToolbar(
+    WidgetBuilder spellCheckSuggestionsToolbarBuilder
+  ) {
+    _updateSelectionOverlay();
+    assert(context.mounted);
+    _selectionOverlay
+      .showSpellCheckSuggestionsToolbar(
+        context: context,
+        builder: spellCheckSuggestionsToolbarBuilder,
+    );
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
@@ -515,6 +513,11 @@ class TextSelectionOverlay {
     }
     _value = newValue;
     _updateSelectionOverlay();
+    // _updateSelectionOverlay may not rebuild the selection overlay if the
+    // text metrics and selection doesn't change even if the text has changed.
+    // This rebuild is needed for the toolbar to update based on the latest text
+    // value.
+    _selectionOverlay.markNeedsBuild();
   }
 
   void _updateSelectionOverlay() {
@@ -541,7 +544,13 @@ class TextSelectionOverlay {
   ///
   /// This is intended to be called when the [renderObject] may have changed its
   /// text metrics (e.g. because the text was scrolled).
-  void updateForScroll() => _updateSelectionOverlay();
+  void updateForScroll() {
+    _updateSelectionOverlay();
+    // This method may be called due to windows metrics changes. In that case,
+    // non of the properties in _selectionOverlay will change, but a rebuild is
+    // still needed.
+    _selectionOverlay.markNeedsBuild();
+  }
 
   /// Whether the handles are currently visible.
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
@@ -584,7 +593,7 @@ class TextSelectionOverlay {
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
       startHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.start, end: _selection.start + firstSelectedGraphemeExtent));
@@ -597,7 +606,7 @@ class TextSelectionOverlay {
     final int lastSelectedGraphemeExtent;
     Rect? endHandleRect;
     // See the explanation in _getStartGlyphHeight.
-    if (renderObject.plainText == currText && _selection != null && _selection.isValid && !_selection.isCollapsed) {
+    if (renderObject.plainText == currText && _selection.isValid && !_selection.isCollapsed) {
       final String selectedGraphemes = _selection.textInside(currText);
       lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
       endHandleRect = renderObject.getRectForComposingRange(TextRange(start: _selection.end - lastSelectedGraphemeExtent, end: _selection.end));
@@ -883,7 +892,6 @@ class TextSelectionOverlay {
       return TextSelectionHandleType.collapsed;
     }
 
-    assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.ltr:
         return ltrType;
@@ -1030,7 +1038,7 @@ class SelectionOverlay {
       return;
     }
     _startHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection start.
@@ -1045,8 +1053,10 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtStart = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
+
+  bool _isDraggingStartHandle = false;
 
   /// Whether the start handle is visible.
   ///
@@ -1059,12 +1069,23 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
+  void _handleStartHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingStartHandle);
+    _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
+    onStartHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the start selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onStartHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the start selection
   /// handles.
   final ValueChanged<DragEndDetails>? onStartHandleDragEnd;
+
+  void _handleStartHandleDragEnd(DragEndDetails details) {
+    _isDraggingStartHandle = false;
+    onStartHandleDragEnd?.call(details);
+  }
 
   /// The type of end selection handle.
   ///
@@ -1076,7 +1097,7 @@ class SelectionOverlay {
       return;
     }
     _endHandleType = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// The line height at the selection end.
@@ -1091,8 +1112,10 @@ class SelectionOverlay {
       return;
     }
     _lineHeightAtEnd = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
+
+  bool _isDraggingEndHandle = false;
 
   /// Whether the end handle is visible.
   ///
@@ -1105,12 +1128,23 @@ class SelectionOverlay {
   /// Called when the users start dragging the end selection handles.
   final ValueChanged<DragStartDetails>? onEndHandleDragStart;
 
+  void _handleEndHandleDragStart(DragStartDetails details) {
+    assert(!_isDraggingEndHandle);
+    _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
+    onEndHandleDragStart?.call(details);
+  }
+
   /// Called when the users drag the end selection handles to new locations.
   final ValueChanged<DragUpdateDetails>? onEndHandleDragUpdate;
 
   /// Called when the users lift their fingers after dragging the end selection
   /// handles.
   final ValueChanged<DragEndDetails>? onEndHandleDragEnd;
+
+  void _handleEndHandleDragEnd(DragEndDetails details) {
+    _isDraggingEndHandle = false;
+    onEndHandleDragEnd?.call(details);
+  }
 
   /// Whether the toolbar is visible.
   ///
@@ -1125,7 +1159,20 @@ class SelectionOverlay {
   List<TextSelectionPoint> _selectionEndpoints;
   set selectionEndpoints(List<TextSelectionPoint> value) {
     if (!listEquals(_selectionEndpoints, value)) {
-      _markNeedsBuild();
+      markNeedsBuild();
+      if (_isDraggingEndHandle || _isDraggingStartHandle) {
+        switch(defaultTargetPlatform) {
+          case TargetPlatform.android:
+            HapticFeedback.selectionClick();
+            break;
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            break;
+        }
+      }
     }
     _selectionEndpoints = value;
   }
@@ -1220,7 +1267,7 @@ class SelectionOverlay {
       return;
     }
     _toolbarLocation = value;
-    _markNeedsBuild();
+    markNeedsBuild();
   }
 
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
@@ -1250,7 +1297,6 @@ class SelectionOverlay {
       OverlayEntry(builder: _buildStartHandle),
       OverlayEntry(builder: _buildEndHandle),
     ];
-
     Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insertAll(_handles!);
   }
 
@@ -1298,8 +1344,33 @@ class SelectionOverlay {
     );
   }
 
+  /// Shows toolbar with spell check suggestions of misspelled words that are
+  /// available for click-and-replace.
+  void showSpellCheckSuggestionsToolbar({
+    BuildContext? context,
+    required WidgetBuilder builder,
+  }) {
+    if (context == null) {
+      return;
+    }
+
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return _SelectionToolbarWrapper(
+          layerLink: toolbarLayerLink,
+          offset: -renderBox.localToGlobal(Offset.zero),
+          child: builder(context),
+        );
+      },
+    );
+  }
+
   bool _buildScheduled = false;
-  void _markNeedsBuild() {
+
+  /// Rebuilds the selection toolbar or handles if they are present.
+  void markNeedsBuild() {
     if (_handles == null && _toolbar == null) {
       return;
     }
@@ -1379,9 +1450,9 @@ class SelectionOverlay {
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onStartHandleDragStart,
+        onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: onStartHandleDragUpdate,
-        onSelectionHandleDragEnd: onStartHandleDragEnd,
+        onSelectionHandleDragEnd: _handleStartHandleDragEnd,
         selectionControls: selectionControls,
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
@@ -1406,9 +1477,9 @@ class SelectionOverlay {
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
-        onSelectionHandleDragStart: onEndHandleDragStart,
+        onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: onEndHandleDragUpdate,
-        onSelectionHandleDragEnd: onEndHandleDragEnd,
+        onSelectionHandleDragEnd: _handleEndHandleDragEnd,
         selectionControls: selectionControls,
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,
@@ -1503,9 +1574,7 @@ class _SelectionToolbarWrapper extends StatefulWidget {
     required this.layerLink,
     required this.offset,
     required this.child,
-  }) : assert(layerLink != null),
-       assert(offset != null),
-       assert(child != null);
+  });
 
   final Widget child;
   final Offset offset;
@@ -1774,7 +1843,7 @@ class TextSelectionGestureDetectorBuilder {
   /// The [delegate] must not be null.
   TextSelectionGestureDetectorBuilder({
     required this.delegate,
-  }) : assert(delegate != null);
+  });
 
   /// The delegate for this [TextSelectionGestureDetectorBuilder].
   ///
@@ -1819,6 +1888,23 @@ class TextSelectionGestureDetectorBuilder {
         && selection.end >= textPosition.offset;
   }
 
+  /// Returns true if position was on selection.
+  bool _positionOnSelection(Offset position, TextSelection? targetSelection) {
+    if (targetSelection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = renderEditable.getPositionForPoint(position);
+
+    return targetSelection.start <= textPosition.offset
+        && targetSelection.end >= textPosition.offset;
+  }
+
+  /// Returns true if shift left or right is contained in the given set.
+  static bool _containsShift(Set<LogicalKeyboardKey> keysPressed) {
+    return keysPressed.any(<LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight }.contains);
+  }
+
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever
@@ -1832,8 +1918,6 @@ class TextSelectionGestureDetectorBuilder {
   //   * [_extendSelection], which is similar but pivots the selection around
   //     the base.
   void _expandSelection(Offset offset, SelectionChangedCause cause, [TextSelection? fromSelection]) {
-    assert(cause != null);
-    assert(offset != null);
     assert(renderEditable.selection?.baseOffset != null);
 
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
@@ -1863,8 +1947,6 @@ class TextSelectionGestureDetectorBuilder {
   //   * [_expandSelection], which is similar but always increases the size of
   //     the selection.
   void _extendSelection(Offset offset, SelectionChangedCause cause) {
-    assert(cause != null);
-    assert(offset != null);
     assert(renderEditable.selection?.baseOffset != null);
 
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
@@ -1906,15 +1988,6 @@ class TextSelectionGestureDetectorBuilder {
   /// The viewport offset pixels of the [RenderEditable] at the last drag start.
   double _dragStartViewportOffset = 0.0;
 
-  // Returns true iff either shift key is currently down.
-  bool get _isShiftPressed {
-    return HardwareKeyboard.instance.logicalKeysPressed
-      .any(<LogicalKeyboardKey>{
-        LogicalKeyboardKey.shiftLeft,
-        LogicalKeyboardKey.shiftRight,
-      }.contains);
-  }
-
   double get _scrollPosition {
     final ScrollableState? scrollableState =
         delegate.editableTextKey.currentContext == null
@@ -1925,13 +1998,19 @@ class TextSelectionGestureDetectorBuilder {
         : scrollableState.position.pixels;
   }
 
-  // True iff a tap + shift has been detected but the tap has not yet come up.
-  bool _isShiftTapping = false;
-
   // For a shift + tap + drag gesture, the TextSelection at the point of the
   // tap. Mac uses this value to reset to the original selection when an
   // inversion of the base and offset happens.
-  TextSelection? _shiftTapDragSelection;
+  TextSelection? _dragStartSelection;
+
+  // For tap + drag gesture on iOS, whether the position where the drag started
+  // was on the previous TextSelection. iOS uses this value to determine if
+  // the cursor should move on drag update.
+  //
+  // If the drag started on the previous selection then the cursor will move on
+  // drag update. If the drag did not start on the previous selection then the
+  // cursor will not move on drag update.
+  bool? _dragBeganOnPreviousSelection;
 
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
@@ -1942,11 +2021,17 @@ class TextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
-  void onTapDown(TapDownDetails details) {
+  void onTapDown(TapDragDownDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
-    renderEditable.handleTapDown(details);
+    // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
+    // in renderEditable. The gesture callbacks can use the details objects directly
+    // in callbacks variants that provide them [TapGestureRecognizer.onSecondaryTap]
+    // vs [TapGestureRecognizer.onSecondaryTapUp] instead of having to track state in
+    // renderEditable. When this migration is complete we should remove this hack.
+    // See https://github.com/flutter/flutter/issues/115130.
+    renderEditable.handleTapDown(TapDownDetails(globalPosition: details.globalPosition));
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
@@ -1960,21 +2045,20 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.stylus;
 
     // Handle shift + click selection if needed.
-    final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    // It is impossible to extend the selection when the shift key is pressed, if the
+    // renderEditable.selection is invalid.
+    final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         // On mobile platforms the selection is set on tap up.
-        if (_isShiftTapping) {
-          _isShiftTapping = false;
-        }
         break;
       case TargetPlatform.macOS:
         // On macOS, a shift-tapped unfocused field expands from 0, not from the
         // previous selection.
         if (isShiftPressedValid) {
-          _isShiftTapping = true;
           final TextSelection? fromSelection = renderEditable.hasFocus
               ? null
               : const TextSelection.collapsed(offset: 0);
@@ -1994,7 +2078,6 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (isShiftPressedValid) {
-          _isShiftTapping = true;
           _extendSelection(details.globalPosition, SelectionChangedCause.tap);
           return;
         }
@@ -2058,25 +2141,32 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onSingleTapUp], which triggers
   ///    this callback.
   @protected
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapDragUpDetails details) {
     if (delegate.selectionEnabled) {
       // Handle shift + click selection if needed.
-      final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
+      final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+      // It is impossible to extend the selection when the shift key is pressed, if the
+      // renderEditable.selection is invalid.
+      final bool isShiftPressedValid = isShiftPressed && renderEditable.selection?.baseOffset != null;
       switch (defaultTargetPlatform) {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           editableText.hideToolbar();
           // On desktop platforms the selection is set on tap down.
-          if (_isShiftTapping) {
-            _isShiftTapping = false;
-          }
           break;
         case TargetPlatform.android:
+          editableText.hideToolbar();
+          editableText.showSpellCheckSuggestionsToolbar();
+          if (isShiftPressedValid) {
+            _extendSelection(details.globalPosition, SelectionChangedCause.tap);
+            return;
+          }
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
         case TargetPlatform.fuchsia:
           editableText.hideToolbar();
           if (isShiftPressedValid) {
-            _isShiftTapping = true;
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
             return;
           }
@@ -2086,7 +2176,6 @@ class TextSelectionGestureDetectorBuilder {
           if (isShiftPressedValid) {
             // On iOS, a shift-tapped unfocused field expands from 0, not from
             // the previous selection.
-            _isShiftTapping = true;
             final TextSelection? fromSelection = renderEditable.hasFocus
                 ? null
                 : const TextSelection.collapsed(offset: 0);
@@ -2149,7 +2238,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onSingleTapCancel], which triggers
   ///    this callback.
   @protected
-  void onSingleTapCancel() {/* Subclass should override this method if needed. */}
+  void onSingleTapCancel() { /* Subclass should override this method if needed. */ }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapStart].
   ///
@@ -2319,7 +2408,13 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [onSecondaryTap], which is typically called after this.
   @protected
   void onSecondaryTapDown(TapDownDetails details) {
-    renderEditable.handleSecondaryTapDown(details);
+    // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
+    // in renderEditable. The gesture callbacks can use the details objects directly
+    // in callbacks variants that provide them [TapGestureRecognizer.onSecondaryTap]
+    // vs [TapGestureRecognizer.onSecondaryTapUp] instead of having to track state in
+    // renderEditable. When this migration is complete we should remove this hack.
+    // See https://github.com/flutter/flutter/issues/115130.
+    renderEditable.handleSecondaryTapDown(TapDownDetails(globalPosition: details.globalPosition));
     _shouldShowSelectionToolbar = true;
   }
 
@@ -2333,7 +2428,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDoubleTapDown], which triggers this
   ///    callback.
   @protected
-  void onDoubleTapDown(TapDownDetails details) {
+  void onDoubleTapDown(TapDragDownDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
@@ -2351,7 +2446,7 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionStart], which triggers
   ///    this callback.
   @protected
-  void onDragSelectionStart(DragStartDetails details) {
+  void onDragSelectionStart(TapDragStartDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -2360,8 +2455,18 @@ class TextSelectionGestureDetectorBuilder {
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
 
-    if (_isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
-      _isShiftTapping = true;
+    _dragStartSelection = renderEditable.selection;
+    _dragStartScrollOffset = _scrollPosition;
+    _dragStartViewportOffset = renderEditable.offset.pixels;
+
+    if (details.consecutiveTapCount > 1) {
+      // Do not set the selection on a consecutive tap and drag.
+      return;
+    }
+
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+
+    if (isShiftPressed && renderEditable.selection != null && renderEditable.selection!.isValid) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -2374,16 +2479,46 @@ class TextSelectionGestureDetectorBuilder {
           _extendSelection(details.globalPosition, SelectionChangedCause.drag);
           break;
       }
-      _shiftTapDragSelection = renderEditable.selection;
     } else {
-      renderEditable.selectPositionAt(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.drag,
-      );
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              renderEditable.selectPositionAt(
+                from: details.globalPosition,
+                cause: SelectionChangedCause.drag,
+              );
+              break;
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              // For Android, Fucshia, and iOS platforms, a touch drag
+              // does not initiate unless the editable has focus.
+              if (renderEditable.hasFocus) {
+                renderEditable.selectPositionAt(
+                  from: details.globalPosition,
+                  cause: SelectionChangedCause.drag,
+                );
+              }
+              break;
+            case null:
+              break;
+          }
+          break;
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.drag,
+          );
+          break;
+      }
     }
-
-    _dragStartScrollOffset = _scrollPosition;
-    _dragStartViewportOffset = renderEditable.offset.pixels;
   }
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionUpdate].
@@ -2396,12 +2531,14 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(DragStartDetails startDetails, DragUpdateDetails updateDetails) {
+  void onDragSelectionUpdate(TapDragUpdateDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
 
-    if (!_isShiftTapping) {
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+
+    if (!isShiftPressed) {
       // Adjust the drag start offset for possible viewport offset changes.
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
@@ -2410,58 +2547,137 @@ class TextSelectionGestureDetectorBuilder {
         0.0,
         _scrollPosition - _dragStartScrollOffset,
       );
-      return renderEditable.selectPositionAt(
-        from: startDetails.globalPosition - editableOffset - scrollableOffset,
-        to: updateDetails.globalPosition,
-        cause: SelectionChangedCause.drag,
-      );
+      final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
+
+      // Select word by word.
+      if (details.consecutiveTapCount == 2) {
+        return renderEditable.selectWordsInRange(
+          from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+          to: details.globalPosition,
+          cause: SelectionChangedCause.drag,
+        );
+      }
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          // With a touch device, nothing should happen, unless there was a double tap, or
+          // there was a collapsed selection, and the tap/drag position is at the collapsed selection.
+          // In that case the caret should move with the drag position.
+          //
+          // With a mouse device, a drag should select the range from the origin of the drag
+          // to the current position of the drag.
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+              return renderEditable.selectPositionAt(
+                from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+                to: details.globalPosition,
+                cause: SelectionChangedCause.drag,
+              );
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              _dragBeganOnPreviousSelection ??= _positionOnSelection(dragStartGlobalPosition, _dragStartSelection);
+              assert(_dragBeganOnPreviousSelection != null);
+              if (renderEditable.hasFocus
+                  && _dragStartSelection!.isCollapsed
+                  && _dragBeganOnPreviousSelection!
+              ) {
+                return renderEditable.selectPositionAt(
+                  from: details.globalPosition,
+                  cause: SelectionChangedCause.drag,
+                );
+              }
+              break;
+            case null:
+              break;
+          }
+          return;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          // With a precise pointer device, such as a mouse, trackpad, or stylus,
+          // the drag will select the text spanning the origin of the drag to the end of the drag.
+          // With a touch device, the cursor should move with the drag.
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              return renderEditable.selectPositionAt(
+                from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+                to: details.globalPosition,
+                cause: SelectionChangedCause.drag,
+              );
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              if (renderEditable.hasFocus) {
+                return renderEditable.selectPositionAt(
+                  from: details.globalPosition,
+                  cause: SelectionChangedCause.drag,
+                );
+              }
+              break;
+            case null:
+              break;
+          }
+          return;
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return renderEditable.selectPositionAt(
+            from: dragStartGlobalPosition - editableOffset - scrollableOffset,
+            to: details.globalPosition,
+            cause: SelectionChangedCause.drag,
+          );
+      }
     }
 
-    if (_shiftTapDragSelection!.isCollapsed
+    if (_dragStartSelection!.isCollapsed
         || (defaultTargetPlatform != TargetPlatform.iOS
             && defaultTargetPlatform != TargetPlatform.macOS)) {
-      return _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
+      return _extendSelection(details.globalPosition, SelectionChangedCause.drag);
     }
 
     // If the drag inverts the selection, Mac and iOS revert to the initial
     // selection.
     final TextSelection selection = editableText.textEditingValue.selection;
-    final TextPosition nextExtent = renderEditable.getPositionForPoint(updateDetails.globalPosition);
+    final TextPosition nextExtent = renderEditable.getPositionForPoint(details.globalPosition);
     final bool isShiftTapDragSelectionForward =
-        _shiftTapDragSelection!.baseOffset < _shiftTapDragSelection!.extentOffset;
+        _dragStartSelection!.baseOffset < _dragStartSelection!.extentOffset;
     final bool isInverted = isShiftTapDragSelectionForward
-        ? nextExtent.offset < _shiftTapDragSelection!.baseOffset
-        : nextExtent.offset > _shiftTapDragSelection!.baseOffset;
-    if (isInverted && selection.baseOffset == _shiftTapDragSelection!.baseOffset) {
+        ? nextExtent.offset < _dragStartSelection!.baseOffset
+        : nextExtent.offset > _dragStartSelection!.baseOffset;
+    if (isInverted && selection.baseOffset == _dragStartSelection!.baseOffset) {
       editableText.userUpdateTextEditingValue(
         editableText.textEditingValue.copyWith(
           selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.extentOffset,
+            baseOffset: _dragStartSelection!.extentOffset,
             extentOffset: nextExtent.offset,
           ),
         ),
         SelectionChangedCause.drag,
       );
     } else if (!isInverted
-        && nextExtent.offset != _shiftTapDragSelection!.baseOffset
-        && selection.baseOffset != _shiftTapDragSelection!.baseOffset) {
+        && nextExtent.offset != _dragStartSelection!.baseOffset
+        && selection.baseOffset != _dragStartSelection!.baseOffset) {
       editableText.userUpdateTextEditingValue(
         editableText.textEditingValue.copyWith(
           selection: TextSelection(
-            baseOffset: _shiftTapDragSelection!.baseOffset,
+            baseOffset: _dragStartSelection!.baseOffset,
             extentOffset: nextExtent.offset,
           ),
         ),
         SelectionChangedCause.drag,
       );
     } else {
-      _extendSelection(updateDetails.globalPosition, SelectionChangedCause.drag);
+      _extendSelection(details.globalPosition, SelectionChangedCause.drag);
     }
   }
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionEnd].
   ///
-  /// By default, it simply cleans up the state used for handling certain
+  /// By default, it cleans up the state used for handling certain
   /// built-in behaviors.
   ///
   /// See also:
@@ -2469,10 +2685,12 @@ class TextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionEnd], which triggers this
   ///    callback.
   @protected
-  void onDragSelectionEnd(DragEndDetails details) {
-    if (_isShiftTapping) {
-      _isShiftTapping = false;
-      _shiftTapDragSelection = null;
+  void onDragSelectionEnd(TapDragEndDetails details) {
+    final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
+    _dragBeganOnPreviousSelection = null;
+
+    if (isShiftPressed) {
+      _dragStartSelection = null;
     }
   }
 
@@ -2511,8 +2729,8 @@ class TextSelectionGestureDetectorBuilder {
 ///
 /// An ordinary [GestureDetector] configured to handle events like tap and
 /// double tap will only recognize one or the other. This widget detects both:
-/// first the tap and then, if another tap down occurs within a time limit, the
-/// double tap.
+/// the first tap and then any subsequent taps that occurs within a time limit
+/// after the first.
 ///
 /// See also:
 ///
@@ -2542,12 +2760,12 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onDragSelectionEnd,
     this.behavior,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// Called for every tap down including every tap down that's part of a
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
-  final GestureTapDownCallback? onTapDown;
+  final GestureTapDragDownCallback? onTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureRecognizer.startPressure].
@@ -2563,16 +2781,18 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called for a tap down event with the secondary mouse button.
   final GestureTapDownCallback? onSecondaryTapDown;
 
-  /// Called for each distinct tap except for every second tap of a double tap.
+  /// Called for the first tap in a series of taps, consecutive taps do not call
+  /// this method.
+  ///
   /// For example, if the detector was configured with [onTapDown] and
   /// [onDoubleTapDown], three quick taps would be recognized as a single tap
-  /// down, followed by a double tap down, followed by a single tap down.
-  final GestureTapUpCallback? onSingleTapUp;
+  /// down, followed by a tap up, then a double tap down, followed by a single tap down.
+  final GestureTapDragUpCallback? onSingleTapUp;
 
   /// Called for each touch that becomes recognized as a gesture that is not a
   /// short tap, such as a long tap or drag. It is called at the moment when
   /// another gesture from the touch is recognized.
-  final GestureTapCancelCallback? onSingleTapCancel;
+  final GestureCancelCallback? onSingleTapCancel;
 
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
@@ -2587,20 +2807,20 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
-  final GestureTapDownCallback? onDoubleTapDown;
+  final GestureTapDragDownCallback? onDoubleTapDown;
 
   /// Called when a mouse starts dragging to select text.
-  final GestureDragStartCallback? onDragSelectionStart;
+  final GestureTapDragStartCallback? onDragSelectionStart;
 
   /// Called repeatedly as a mouse moves while dragging.
   ///
   /// The frequency of calls is throttled to avoid excessive text layout
   /// operations in text fields. The throttling is controlled by the constant
   /// [_kDragSelectionUpdateThrottle].
-  final DragSelectionUpdateCallback? onDragSelectionUpdate;
+  final GestureTapDragUpdateCallback? onDragSelectionUpdate;
 
   /// Called when a mouse that was previously dragging is released.
-  final GestureDragEndCallback? onDragSelectionEnd;
+  final GestureTapDragEndCallback? onDragSelectionEnd;
 
   /// How this gesture detector should behave during hit testing.
   ///
@@ -2615,100 +2835,50 @@ class TextSelectionGestureDetector extends StatefulWidget {
 }
 
 class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetector> {
-  // Counts down for a short duration after a previous tap. Null otherwise.
-  Timer? _doubleTapTimer;
-  Offset? _lastTapOffset;
-  // True if a second tap down of a double tap is detected. Used to discard
-  // subsequent tap up / tap hold of the same tap.
-  bool _isDoubleTap = false;
+  static int? _getDefaultMaxConsecutiveTap() => 2;
 
   @override
   void dispose() {
-    _doubleTapTimer?.cancel();
-    _dragUpdateThrottleTimer?.cancel();
     super.dispose();
   }
 
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(TapDragDownDetails details) {
     widget.onTapDown?.call(details);
     // This isn't detected as a double tap gesture in the gesture recognizer
     // because it's 2 single taps, each of which may do different things depending
     // on whether it's a single tap, the first tap of a double tap, the second
     // tap held down, a clean double tap etc.
-    if (_doubleTapTimer != null && _isWithinDoubleTapTolerance(details.globalPosition)) {
-      // If there was already a previous tap, the second down hold/tap is a
-      // double tap down.
-      widget.onDoubleTapDown?.call(details);
 
-      _doubleTapTimer!.cancel();
-      _doubleTapTimeout();
-      _isDoubleTap = true;
+    if (details.consecutiveTapCount == 2) {
+      widget.onDoubleTapDown?.call(details);
     }
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    if (!_isDoubleTap) {
+  void _handleTapUp(TapDragUpDetails details) {
+    if (details.consecutiveTapCount == 1) {
       widget.onSingleTapUp?.call(details);
-      _lastTapOffset = details.globalPosition;
-      _doubleTapTimer?.cancel();
-      _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
     }
-    _isDoubleTap = false;
   }
 
   void _handleTapCancel() {
     widget.onSingleTapCancel?.call();
   }
 
-  DragStartDetails? _lastDragStartDetails;
-  DragUpdateDetails? _lastDragUpdateDetails;
-  Timer? _dragUpdateThrottleTimer;
-
-  void _handleDragStart(DragStartDetails details) {
-    assert(_lastDragStartDetails == null);
-    _lastDragStartDetails = details;
+  void _handleDragStart(TapDragStartDetails details) {
     widget.onDragSelectionStart?.call(details);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
-    _lastDragUpdateDetails = details;
-    // Only schedule a new timer if there's no one pending.
-    _dragUpdateThrottleTimer ??= Timer(_kDragSelectionUpdateThrottle, _handleDragUpdateThrottled);
+  void _handleDragUpdate(TapDragUpdateDetails details) {
+    widget.onDragSelectionUpdate?.call(details);
   }
 
-  /// Drag updates are being throttled to avoid excessive text layouts in text
-  /// fields. The frequency of invocations is controlled by the constant
-  /// [_kDragSelectionUpdateThrottle].
-  ///
-  /// Once the drag gesture ends, any pending drag update will be fired
-  /// immediately. See [_handleDragEnd].
-  void _handleDragUpdateThrottled() {
-    assert(_lastDragStartDetails != null);
-    assert(_lastDragUpdateDetails != null);
-    widget.onDragSelectionUpdate?.call(_lastDragStartDetails!, _lastDragUpdateDetails!);
-    _dragUpdateThrottleTimer = null;
-    _lastDragUpdateDetails = null;
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    assert(_lastDragStartDetails != null);
-    if (_dragUpdateThrottleTimer != null) {
-      // If there's already an update scheduled, trigger it immediately and
-      // cancel the timer.
-      _dragUpdateThrottleTimer!.cancel();
-      _handleDragUpdateThrottled();
-    }
+  void _handleDragEnd(TapDragEndDetails details) {
     widget.onDragSelectionEnd?.call(details);
-    _dragUpdateThrottleTimer = null;
-    _lastDragStartDetails = null;
-    _lastDragUpdateDetails = null;
   }
 
   void _forcePressStarted(ForcePressDetails details) {
-    _doubleTapTimer?.cancel();
-    _doubleTapTimer = null;
     widget.onForcePressStart?.call(details);
   }
 
@@ -2717,37 +2887,21 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
+    if (widget.onSingleLongTapStart != null) {
       widget.onSingleLongTapStart!(details);
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
+    if (widget.onSingleLongTapMoveUpdate != null) {
       widget.onSingleLongTapMoveUpdate!(details);
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
+    if (widget.onSingleLongTapEnd != null) {
       widget.onSingleLongTapEnd!(details);
     }
-    _isDoubleTap = false;
-  }
-
-  void _doubleTapTimeout() {
-    _doubleTapTimer = null;
-    _lastTapOffset = null;
-  }
-
-  bool _isWithinDoubleTapTolerance(Offset secondTapOffset) {
-    assert(secondTapOffset != null);
-    if (_lastTapOffset == null) {
-      return false;
-    }
-
-    final Offset difference = secondTapOffset - _lastTapOffset!;
-    return difference.distance <= kDoubleTapSlop;
   }
 
   @override
@@ -2759,10 +2913,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       (TapGestureRecognizer instance) {
         instance
           ..onSecondaryTap = widget.onSecondaryTap
-          ..onSecondaryTapDown = widget.onSecondaryTapDown
-          ..onTapDown = _handleTapDown
-          ..onTapUp = _handleTapUp
-          ..onTapCancel = _handleTapCancel;
+          ..onSecondaryTapDown = widget.onSecondaryTapDown;
       },
     );
 
@@ -2770,7 +2921,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         widget.onSingleLongTapMoveUpdate != null ||
         widget.onSingleLongTapEnd != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => LongPressGestureRecognizer(debugOwner: this, kind: PointerDeviceKind.touch),
+        () => LongPressGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch }),
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPressStart = _handleLongPressStart
@@ -2783,16 +2934,21 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (widget.onDragSelectionStart != null ||
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
-      gestures[PanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-        () => PanGestureRecognizer(debugOwner: this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
-        (PanGestureRecognizer instance) {
+      gestures[TapAndDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndDragGestureRecognizer>(
+        () => TapAndDragGestureRecognizer(debugOwner: this),
+        (TapAndDragGestureRecognizer instance) {
           instance
             // Text selection should start from the position of the first pointer
             // down event.
             ..dragStartBehavior = DragStartBehavior.down
-            ..onStart = _handleDragStart
-            ..onUpdate = _handleDragUpdate
-            ..onEnd = _handleDragEnd;
+            ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
+            ..maxConsecutiveTap = _getDefaultMaxConsecutiveTap()
+            ..onTapDown = _handleTapDown
+            ..onDragStart = _handleDragStart
+            ..onDragUpdate = _handleDragUpdate
+            ..onDragEnd = _handleDragEnd
+            ..onTapUp = _handleTapUp
+            ..onCancel = _handleTapCancel;
         },
       );
     }

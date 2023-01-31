@@ -18,7 +18,17 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 
 // Colors extracted from https://developer.apple.com/design/resources/.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const Color _kToolbarBackgroundColor = Color(0xEB202020);
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
+  // This value was extracted from a screenshot of iOS 16.0.3, as light mode
+  // didn't appear in the Apple design resources assets linked above.
+  color: Color(0xEBF7F7F7),
+  darkColor: Color(0xEB202020),
+);
+
+const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.black,
+  darkColor: CupertinoColors.white,
+);
 
 // Eyeballed value.
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
@@ -32,23 +42,17 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     super.key,
     this.onPressed,
     required Widget this.child,
-  }) : assert(child != null),
+  }) : text = null,
        buttonItem = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
   /// a [Text] widget styled like the default iOS text selection toolbar button.
-  CupertinoTextSelectionToolbarButton.text({
+  const CupertinoTextSelectionToolbarButton.text({
     super.key,
     this.onPressed,
-    required String text,
+    required this.text,
   }) : buttonItem = null,
-       child = Text(
-         text,
-         overflow: TextOverflow.ellipsis,
-         style: _kToolbarButtonFontStyle.copyWith(
-           color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
-         ),
-       );
+       child = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] from the given
   /// [ContextMenuButtonItem].
@@ -57,8 +61,8 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   CupertinoTextSelectionToolbarButton.buttonItem({
     super.key,
     required ContextMenuButtonItem this.buttonItem,
-  }) : assert(buttonItem != null),
-       child = null,
+  }) : child = null,
+       text = null,
        onPressed = buttonItem.onPressed;
 
   /// {@template flutter.cupertino.CupertinoTextSelectionToolbarButton.child}
@@ -79,6 +83,10 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   /// {@endtemplate}
   final ContextMenuButtonItem? buttonItem;
 
+  /// The text used in the button's label when using
+  /// [CupertinoTextSelectionToolbarButton.text].
+  final String? text;
+
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
   static String getButtonLabel(BuildContext context, ContextMenuButtonItem buttonItem) {
@@ -97,6 +105,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         return localizations.pasteButtonLabel;
       case ContextMenuButtonType.selectAll:
         return localizations.selectAllButtonLabel;
+      case ContextMenuButtonType.delete:
       case ContextMenuButtonType.custom:
         return '';
     }
@@ -105,12 +114,15 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget child = this.child ?? Text(
-      getButtonLabel(context, buttonItem!),
-      overflow: TextOverflow.ellipsis,
-      style: _kToolbarButtonFontStyle.copyWith(
-        color: onPressed != null ? CupertinoColors.white : CupertinoColors.inactiveGray,
-      ),
-    );
+       text ?? getButtonLabel(context, buttonItem!),
+       overflow: TextOverflow.ellipsis,
+       style: _kToolbarButtonFontStyle.copyWith(
+         color: onPressed != null
+             ? _kToolbarTextColor.resolveFrom(context)
+             : CupertinoColors.inactiveGray,
+       ),
+     );
+
     return CupertinoButton(
       borderRadius: null,
       color: _kToolbarBackgroundColor,

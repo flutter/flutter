@@ -19,7 +19,7 @@ class BuildWebCommand extends BuildSubCommand {
     required FileSystem fileSystem,
     required bool verboseHelp,
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
-    addTreeShakeIconsFlag(enabledByDefault: false);
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesOutputDir();
     usesPubOption();
@@ -41,6 +41,10 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Generate a sourcemap file. These can be used by browsers '
             'to view and debug the original source code of a compiled and minified Dart '
             'application.'
+    );
+    argParser.addFlag(
+      'wasm',
+      help: 'Compile to WebAssembly rather than Javascript (experimental).'
     );
 
     argParser.addOption('pwa-strategy',
@@ -69,6 +73,14 @@ class BuildWebCommand extends BuildSubCommand {
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.'
+    );
+    argParser.addFlag('dump-info', negatable: false,
+      help: 'Passes "--dump-info" to the Javascript compiler which generates '
+          'information about the generated code is a .js.info.json file.'
+    );
+    argParser.addFlag('no-frequency-based-minification', negatable: false,
+      help: 'Disables the frequency based minifier. '
+          'Useful for comparing the output between builds.'
     );
   }
 
@@ -132,9 +144,12 @@ class BuildWebCommand extends BuildSubCommand {
       stringArgDeprecated('pwa-strategy')!,
       boolArgDeprecated('source-maps'),
       boolArgDeprecated('native-null-assertions'),
-      baseHref,
-      stringArgDeprecated('dart2js-optimization'),
+      boolArgDeprecated('wasm'),
+      baseHref: baseHref,
+      dart2jsOptimization: stringArgDeprecated('dart2js-optimization'),
       outputDirectoryPath: outputDirectoryPath,
+      dumpInfo: boolArgDeprecated('dump-info'),
+      noFrequencyBasedMinification: boolArgDeprecated('no-frequency-based-minification'),
     );
     return FlutterCommandResult.success();
   }
