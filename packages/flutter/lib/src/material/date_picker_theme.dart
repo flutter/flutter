@@ -69,7 +69,7 @@ class DatePickerThemeData with Diagnosticable {
     this.rangeSelectionOverlayColor,
   });
 
-  /// Overrides the default value of [Dialog.backgroundColor] for [DatePicker].
+  /// Overrides the default value of [Dialog.backgroundColor].
   final Color? backgroundColor;
 
   /// Overrides the default value of [Dialog.elevation].
