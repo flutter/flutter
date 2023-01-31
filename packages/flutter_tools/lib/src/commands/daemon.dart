@@ -1015,6 +1015,8 @@ class DeviceDomain extends Domain {
     return <String, Object?>{
       'started': result.started,
       'vmServiceUri': result.vmServiceUri?.toString(),
+      // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
+      'observatoryUri': result.vmServiceUri?.toString(),
     };
   }
 
