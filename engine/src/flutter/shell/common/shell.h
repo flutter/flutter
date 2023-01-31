@@ -452,7 +452,7 @@ class Shell final : public PlatformView::Delegate,
   std::atomic<bool> needs_report_timings_{false};
 
   // Whether there's a task scheduled to report the timings to Dart through
-  // ui.Window.onReportTimings.
+  // ui.PlatformDispatcher.onReportTimings.
   bool frame_timings_report_scheduled_ = false;
 
   // Vector of FrameTiming::kCount * n timestamps for n frames whose timings
