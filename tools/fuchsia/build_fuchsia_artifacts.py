@@ -254,6 +254,8 @@ def CheckCIPDPackageExists(package_name, tag):
       tag,
   ]
   stdout = subprocess.check_output(command)
+  # TODO ricardoamador: remove this check when python 2 is deprecated.
+  stdout = stdout if isinstance(stdout, str) else stdout.decode('UTF-8')
   match = re.search(r'No matching instances\.', stdout)
   if match:
     return False
