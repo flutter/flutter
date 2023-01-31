@@ -65,12 +65,18 @@ String findCommit({
       anchor = trunkCommits[index - 1];
     }
   }
+  final String currentBranch = git(secondaryRepoDirectory, <String>[
+    'rev-parse',
+    '--abbrev-ref',
+    'HEAD'
+  ]);
+
   return git(secondaryRepoDirectory, <String>[
     'log',
     '--format=%H',
     '--until=${anchor.timestamp.toIso8601String()}',
     '--max-count=1',
-    secondaryBranch,
+    currentBranch,
     '--',
   ]);
 }
