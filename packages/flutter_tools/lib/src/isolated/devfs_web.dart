@@ -105,7 +105,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
         await _generator.compileExpressionToJs(libraryUri, line, column,
             jsModules, jsFrameValues, moduleName, expression);
 
-    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+    if (compilerOutput != null) {
       final String content = utf8.decode(
           _fileSystem.file(compilerOutput.outputFilename).readAsBytesSync());
       return ExpressionCompilationResult(
@@ -827,8 +827,6 @@ class WebDevFS implements DevFS {
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
-    assert(trackWidgetCreation != null);
-    assert(generator != null);
     lastPackageConfig = packageConfig;
     final File mainFile = globals.fs.file(mainUri);
     final String outputDirectoryPath = mainFile.parent.path;
@@ -928,31 +926,13 @@ class WebDevFS implements DevFS {
   }
 
   @visibleForTesting
-  final File requireJS = (() {
-    // TODO(nshahan): Remove the initilizing function once the file location
-    //                change in the Dart SDK has landed and rolled to the engine
-    //                and flutter repos. There is no long-term need for the
-    //                fallback logic.
-    //                See https://github.com/flutter/flutter/issues/118119
-    final File oldFile = globals.fs.file(globals.fs.path.join(
-      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
-      'lib',
-      'dev_compiler',
-      'kernel',
-      'amd',
-      'require.js',
-    ));
-
-    return oldFile.existsSync()
-      ? oldFile
-      : globals.fs.file(globals.fs.path.join(
-          globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
-          'lib',
-          'dev_compiler',
-          'amd',
-          'require.js',
-        ));
-  })();
+  final File requireJS = globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+    'lib',
+    'dev_compiler',
+    'amd',
+    'require.js',
+  ));
 
   @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
@@ -1031,8 +1011,7 @@ class ReleaseAssetServer {
     } else {
       for (final Uri uri in _searchPaths()) {
         final Uri potential = uri.resolve(requestPath);
-        if (potential == null ||
-            !_fileSystem.isFileSync(
+        if (!_fileSystem.isFileSync(
                 potential.toFilePath(windows: _platform.isWindows))) {
           continue;
         }

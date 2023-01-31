@@ -240,7 +240,6 @@ void main() {
   test('BoxDecoration backgroundImage clip', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
     void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
-      assert(shape != null);
       FakeAsync().run((FakeAsync async) async {
         final DelayedImageProvider imageProvider = DelayedImageProvider(image);
         final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
@@ -667,6 +666,86 @@ void main() {
       // ignore: avoid_dynamic_calls
       expect(call.positionalArguments[2].center, outputRect.center);
     }
+  });
+
+  test('paintImage with repeatX and fitHeight', () async {
+    final TestCanvas canvas = TestCanvas();
+
+    // Paint a square image into an output rect that is twice as wide as it is
+    // tall.  Two copies of the image should be painted, one next to the other.
+    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 400.0, 200.0);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+
+    paintImage(
+      canvas: canvas,
+      rect: outputRect,
+      image: image,
+      alignment: Alignment.topLeft,
+      fit: BoxFit.fitHeight,
+      repeat: ImageRepeat.repeatX,
+    );
+
+    const Size imageSize = Size(100.0, 100.0);
+
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final Set<Rect> tileRects = <Rect>{};
+
+    expect(calls, hasLength(2));
+    for (final Invocation call in calls) {
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
+
+      expect(call.positionalArguments[0], isA<ui.Image>());
+
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      tileRects.add(call.positionalArguments[2] as Rect);
+
+      expect(call.positionalArguments[3], isA<Paint>());
+    }
+
+    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(230.0, 30.0, 200.0, 200.0)});
+  });
+
+  test('paintImage with repeatY and fitWidth', () async {
+    final TestCanvas canvas = TestCanvas();
+
+    // Paint a square image into an output rect that is twice as tall as it is
+    // wide.  Two copies of the image should be painted, one above the other.
+    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 200.0, 400.0);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+
+    paintImage(
+      canvas: canvas,
+      rect: outputRect,
+      image: image,
+      alignment: Alignment.topLeft,
+      fit: BoxFit.fitWidth,
+      repeat: ImageRepeat.repeatY,
+    );
+
+    const Size imageSize = Size(100.0, 100.0);
+
+    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final Set<Rect> tileRects = <Rect>{};
+
+    expect(calls, hasLength(2));
+    for (final Invocation call in calls) {
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
+
+      expect(call.positionalArguments[0], isA<ui.Image>());
+
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      tileRects.add(call.positionalArguments[2] as Rect);
+
+      expect(call.positionalArguments[3], isA<Paint>());
+    }
+
+    expect(tileRects, <Rect>{const Rect.fromLTWH(30.0, 30.0, 200.0, 200.0), const Rect.fromLTWH(30.0, 230.0, 200.0, 200.0)});
   });
 
   test('DecorationImage scale test', () async {

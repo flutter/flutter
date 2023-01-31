@@ -118,10 +118,7 @@ class PageController extends ScrollController {
     this.initialPage = 0,
     this.keepPage = true,
     this.viewportFraction = 1.0,
-  }) : assert(initialPage != null),
-       assert(keepPage != null),
-       assert(viewportFraction != null),
-       assert(viewportFraction > 0.0);
+  }) : assert(viewportFraction > 0.0);
 
   /// The page to show when first creating the [PageView].
   final int initialPage;
@@ -317,10 +314,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     bool keepPage = true,
     double viewportFraction = 1.0,
     super.oldPosition,
-  }) : assert(initialPage != null),
-       assert(keepPage != null),
-       assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
+  }) : assert(viewportFraction > 0.0),
        _viewportFraction = viewportFraction,
        _pageToUseOnStartup = initialPage.toDouble(),
        super(
@@ -426,8 +420,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   void restoreOffset(double offset, {bool initialRestore = false}) {
-    assert(initialRestore != null);
-    assert(offset != null);
     if (initialRestore) {
       _pageToUseOnStartup = offset;
     } else {
@@ -514,7 +506,7 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
   const _ForceImplicitScrollPhysics({
     required this.allowImplicitScrolling,
     super.parent,
-  }) : assert(allowImplicitScrolling != null);
+  });
 
   @override
   _ForceImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -662,9 +654,7 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(allowImplicitScrolling != null),
-       assert(clipBehavior != null),
-       controller = controller ?? _defaultPageController,
+  }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children);
 
   /// Creates a scrollable list that works page by page using widgets that are
@@ -709,9 +699,7 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(allowImplicitScrolling != null),
-       assert(clipBehavior != null),
-       controller = controller ?? _defaultPageController,
+  }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
@@ -817,10 +805,7 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : assert(childrenDelegate != null),
-       assert(allowImplicitScrolling != null),
-       assert(clipBehavior != null),
-       controller = controller ?? _defaultPageController;
+  }) : controller = controller ?? _defaultPageController;
 
   /// Controls whether the widget's pages will respond to
   /// [RenderObject.showOnScreen], which will allow for implicit accessibility

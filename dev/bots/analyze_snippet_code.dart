@@ -924,7 +924,7 @@ class _SnippetChecker {
         continue;
       }
 
-      final _SnippetFile snippet = snippets[file.path]!;
+      final _SnippetFile? snippet = snippets[file.path];
       if (snippet == null) {
         errors.add(_SnippetCheckerException(
           "Unknown section for ${file.path}. Maybe the temporary directory wasn't empty?",

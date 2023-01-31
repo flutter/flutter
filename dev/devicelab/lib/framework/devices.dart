@@ -19,7 +19,7 @@ class DeviceException implements Exception {
   final String message;
 
   @override
-  String toString() => message == null ? '$DeviceException' : '$DeviceException: $message';
+  String toString() => '$DeviceException: $message';
 }
 
 /// Gets the artifact path relative to the current directory.

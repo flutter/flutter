@@ -180,11 +180,7 @@ class SwitchListTile extends StatelessWidget {
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.material,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null);
+       assert(!isThreeLine || subtitle != null);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -226,11 +222,7 @@ class SwitchListTile extends StatelessWidget {
     this.enableFeedback,
     this.hoverColor,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(value != null),
-       assert(isThreeLine != null),
-       assert(!isThreeLine || subtitle != null),
-       assert(selected != null),
-       assert(autofocus != null);
+       assert(!isThreeLine || subtitle != null);
 
   /// Whether this switch is checked.
   ///
@@ -266,7 +258,7 @@ class SwitchListTile extends StatelessWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to accent color of the current [Theme].
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
   final Color? activeColor;
 
   /// The color to use on the track when this switch is on.
