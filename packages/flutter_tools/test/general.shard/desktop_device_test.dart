@@ -86,7 +86,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
-      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildMode.debug);
+      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildInfo.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
       final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
@@ -367,11 +367,11 @@ class FakeDesktopDevice extends DesktopDevice {
 
   // Dummy implementation that just returns the build mode name.
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return getNameForBuildMode(buildMode);
+    return getNameForBuildMode(buildInfo.mode);
   }
 }
 
