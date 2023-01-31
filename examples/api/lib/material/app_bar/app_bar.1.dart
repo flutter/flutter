@@ -98,7 +98,7 @@ class _AppBarExampleState extends State<AppBarExample> {
                 label: const Text('shadow color'),
               ),
               const SizedBox(width: 5),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () {
                   if (scrolledUnderElevation == null) {
                     setState(() {
@@ -111,7 +111,8 @@ class _AppBarExampleState extends State<AppBarExample> {
                     });
                   }
                 },
-                child: Text(
+                icon: const Icon(Icons.add),
+                label: Text(
                   'scrolledUnderElevation: ${scrolledUnderElevation ?? 'default'}',
                 ),
               ),
