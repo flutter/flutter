@@ -249,8 +249,7 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
     required Widget super.child,
     required this.overflowOpen,
     required this.textDirection,
-  }) : assert(child != null),
-       assert(overflowOpen != null);
+  });
 
   final bool overflowOpen;
   final TextDirection textDirection;
@@ -374,13 +373,11 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 // Renders the menu items in the correct positions in the menu and its overflow
 // submenu based on calculating which item would first overflow.
 class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
-  _TextSelectionToolbarItemsLayout({
+  const _TextSelectionToolbarItemsLayout({
     required this.isAbove,
     required this.overflowOpen,
     required super.children,
-  }) : assert(children != null),
-       assert(isAbove != null),
-       assert(overflowOpen != null);
+  });
 
   final bool isAbove;
   final bool overflowOpen;
@@ -423,9 +420,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   _RenderTextSelectionToolbarItemsLayout({
     required bool isAbove,
     required bool overflowOpen,
-  }) : assert(overflowOpen != null),
-       assert(isAbove != null),
-       _isAbove = isAbove,
+  }) : _isAbove = isAbove,
        _overflowOpen = overflowOpen,
        super();
 

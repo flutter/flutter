@@ -60,8 +60,7 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.child,
-  }) : assert(clipBehavior != null),
-       assert(elevation == null || elevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
        _fullscreen = false;
 
   /// Creates a fullscreen dialog.
@@ -303,9 +302,9 @@ class Dialog extends StatelessWidget {
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
 ///         title: const Text('AlertDialog Title'),
-///         content: SingleChildScrollView(
+///         content: const SingleChildScrollView(
 ///           child: ListBody(
-///             children: const <Widget>[
+///             children: <Widget>[
 ///               Text('This is a demo alert dialog.'),
 ///               Text('Would you like to approve of this message?'),
 ///             ],
@@ -385,7 +384,7 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
-  }) : assert(clipBehavior != null);
+  });
 
   /// An optional icon to display at the top of the dialog.
   ///
@@ -973,8 +972,7 @@ class SimpleDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.alignment,
-  }) : assert(titlePadding != null),
-       assert(contentPadding != null);
+  });
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -1271,10 +1269,6 @@ Future<T?> showDialog<T>({
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
 }) {
-  assert(builder != null);
-  assert(barrierDismissible != null);
-  assert(useSafeArea != null);
-  assert(useRootNavigator != null);
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -1376,8 +1370,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.settings,
     super.anchorPoint,
     super.traversalEdgeBehavior,
-  }) : assert(barrierDismissible != null),
-       super(
+  }) : super(
          pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
            final Widget pageChild = Builder(builder: builder);
            Widget dialog = themes?.wrap(pageChild) ?? pageChild;

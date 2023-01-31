@@ -35,6 +35,7 @@ Future<void> buildMacOS({
   required BuildInfo buildInfo,
   String? targetOverride,
   required bool verboseLogging,
+  bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
@@ -78,6 +79,9 @@ Future<void> buildMacOS({
   if (!flutterProject.macos.outputFileList.existsSync()) {
     flutterProject.macos.outputFileList.createSync(recursive: true);
   }
+  if (configOnly) {
+    return;
+  }
 
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
 
@@ -97,7 +101,6 @@ Future<void> buildMacOS({
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
-
   // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
@@ -111,7 +114,7 @@ Future<void> buildMacOS({
       'xcodebuild',
       '-workspace', xcodeWorkspace.path,
       '-configuration', configuration,
-      '-scheme', 'Runner',
+      '-scheme', scheme,
       '-derivedDataPath', flutterBuildDir.absolute.path,
       '-destination', 'platform=macOS',
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',

@@ -135,6 +135,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.controller,
     this.initialSelection,
     this.onSelected,
+    this.requestFocusOnTap,
     required this.dropdownMenuEntries,
   });
 
@@ -228,6 +229,19 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to null. If null, only the text field is updated.
   final ValueChanged<T?>? onSelected;
 
+  /// Determine if the dropdown button requests focus and the on-screen virtual
+  /// keyboard is shown in response to a touch event.
+  ///
+  /// By default, on mobile platforms, tapping on the text field and opening
+  /// the menu will not cause a focus request and the virtual keyboard will not
+  /// appear. The default behavior for desktop platforms is for the dropdown to
+  /// take the focus.
+  ///
+  /// Defaults to null. Setting this field to true or false, rather than allowing
+  /// the implementation to choose based on the platform, can be useful for
+  /// applications that want to override the default behavior.
+  final bool? requestFocusOnTap;
+
   /// Descriptions of the menu items in the [DropdownMenu].
   ///
   /// This is a required parameter. It is recommended that at least one [DropdownMenuEntry]
@@ -242,7 +256,6 @@ class DropdownMenu<T> extends StatefulWidget {
 class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
-  final FocusNode _textFocusNode = FocusNode();
   final MenuController _controller = MenuController();
   late final TextEditingController _textEditingController;
   late bool _enableFilter;
@@ -285,6 +298,23 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         _textEditingController.selection =
             TextSelection.collapsed(offset: _textEditingController.text.length);
       }
+    }
+  }
+
+  bool canRequestFocus() {
+    if (widget.requestFocusOnTap != null) {
+      return widget.requestFocusOnTap!;
+    }
+
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return false;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return true;
     }
   }
 
@@ -428,7 +458,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   @override
   void dispose() {
-    _textEditingController.dispose();
     super.dispose();
   }
 
@@ -489,13 +518,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           builder: (BuildContext context, MenuController controller, Widget? child) {
             assert(_initialMenu != null);
             final Widget trailingButton = Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              padding: const EdgeInsets.all(4.0),
               child: IconButton(
                 isSelected: controller.isOpen,
                 icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
                 selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
                 onPressed: () {
-                  _textFocusNode.requestFocus();
                   handlePressed(controller);
                 },
               ),
@@ -511,7 +539,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               width: widget.width,
               children: <Widget>[
                 TextField(
-                  focusNode: _textFocusNode,
+                  canRequestFocus: canRequestFocus(),
+                  enableInteractiveSelection: canRequestFocus(),
+                  textAlignVertical: TextAlignVertical.center,
                   style: effectiveTextStyle,
                   controller: _textEditingController,
                   onEditingComplete: () {
@@ -575,7 +605,7 @@ class _ArrowDownIntent extends Intent {
 }
 
 class _DropdownMenuBody extends MultiChildRenderObjectWidget {
-  _DropdownMenuBody({
+  const _DropdownMenuBody({
     super.key,
     super.children,
     this.width,

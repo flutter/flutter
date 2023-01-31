@@ -883,6 +883,7 @@ void main() {
     expect(flutterJsContents, contains('flutter_service_worker.js?v='));
     expect(flutterJsContents, contains('document.createElement("script")'));
     expect(flutterJsContents, contains('"application/javascript"'));
+    expect(flutterJsContents, contains('const baseUri = '));
     expect(flutterJsContents, contains('document.querySelector("base")'));
     expect(flutterJsContents, contains('.getAttribute("href")'));
   });

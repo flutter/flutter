@@ -2652,10 +2652,10 @@ void main() {
       navigationRail: NavigationRail(
         labelType: NavigationRailLabelType.none,
         selectedIndex: 0,
-        destinations:  <NavigationRailDestination>[
+        destinations:  const <NavigationRailDestination>[
           NavigationRailDestination(
             icon: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Icon(Icons.umbrella),
                 Positioned(
                   top: 0,
@@ -2667,13 +2667,13 @@ void main() {
                 ),
               ],
             ),
-            label: const Text('Abc'),
+            label: Text('Abc'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.umbrella),
             label: Text('Def'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.bookmark_border),
             label: Text('Ghi'),
           ),
@@ -4867,10 +4867,10 @@ void main() {
         navigationRail: NavigationRail(
           labelType: NavigationRailLabelType.none,
           selectedIndex: 0,
-          destinations:  <NavigationRailDestination>[
+          destinations:  const <NavigationRailDestination>[
             NavigationRailDestination(
               icon: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Icon(Icons.umbrella),
                   Positioned(
                     top: 0,
@@ -4882,13 +4882,13 @@ void main() {
                   ),
                 ],
               ),
-              label: const Text('Abc'),
+              label: Text('Abc'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.umbrella),
               label: Text('Def'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.bookmark_border),
               label: Text('Ghi'),
             ),

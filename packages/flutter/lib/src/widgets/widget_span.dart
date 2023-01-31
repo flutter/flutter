@@ -77,8 +77,7 @@ class WidgetSpan extends PlaceholderSpan {
     super.alignment,
     super.baseline,
     super.style,
-  }) : assert(child != null),
-       assert(
+  }) : assert(
          baseline != null || !(
           identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
           identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
