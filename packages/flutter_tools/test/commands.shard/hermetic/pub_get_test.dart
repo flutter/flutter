@@ -93,7 +93,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     FileSystem: () => fileSystem,
   });
-  
+
   testUsingContext("pub get doesn't treat unknown flag as directory", () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
