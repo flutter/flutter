@@ -14,6 +14,7 @@ class ExpansionTileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
       home: Scaffold(
         appBar: AppBar(title: const Text('ExpansionTile Sample')),
         body: const ExpansionTileExample(),
@@ -48,8 +49,8 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
           subtitle: const Text('Custom expansion arrow icon'),
           trailing: Icon(
             _customTileExpanded
-                ? Icons.arrow_drop_down_circle
-                : Icons.arrow_drop_down,
+              ? Icons.arrow_drop_down_circle
+              : Icons.arrow_drop_down,
           ),
           children: const <Widget>[
             ListTile(title: Text('This is tile number 2')),

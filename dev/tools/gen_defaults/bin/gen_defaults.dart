@@ -30,6 +30,7 @@ import 'package:gen_defaults/color_scheme_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/divider_template.dart';
 import 'package:gen_defaults/drawer_template.dart';
+import 'package:gen_defaults/expansion_tile_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
@@ -151,6 +152,7 @@ Future<void> main(List<String> args) async {
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   DividerTemplate('Divider', '$materialLib/divider.dart', tokens).updateFile();
   DrawerTemplate('Drawer', '$materialLib/drawer.dart', tokens).updateFile();
+  ExpansionTileTemplate('ExpansionTile', '$materialLib/expansion_tile.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   FilterChipTemplate('ChoiceChip', '$materialLib/choice_chip.dart', tokens).updateFile();
   FilterChipTemplate('FilterChip', '$materialLib/filter_chip.dart', tokens).updateFile();

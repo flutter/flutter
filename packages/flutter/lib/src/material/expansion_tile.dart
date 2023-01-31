@@ -39,6 +39,13 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows the creation of a [ExpansionTile] using [ThemeData.useMaterial3] flag,
+/// as described in: https://m3.material.io/components/lists/overview.
+///
+/// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListTile], useful for creating expansion tile [children] when the
@@ -216,7 +223,7 @@ class ExpansionTile extends StatefulWidget {
   /// Used to override to the [ListTileThemeData.iconColor].
   ///
   /// If this property is null then [ExpansionTileThemeData.iconColor] is used. If that
-  /// is also null then the value of [ListTileThemeData.iconColor] is used.
+  /// is also null then the value of [ColorScheme.primary] is used.
   ///
   /// See also:
   ///
@@ -227,6 +234,15 @@ class ExpansionTile extends StatefulWidget {
   /// The icon color of tile's expansion arrow icon when the sublist is collapsed.
   ///
   /// Used to override to the [ListTileThemeData.iconColor].
+  ///
+  /// If this property is null then [ExpansionTileThemeData.collapsedIconColor] is used. If that
+  /// is also null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurface] is used. Otherwise,
+  /// defaults to [ThemeData.unselectedWidgetColor] color.
+  ///
+  /// See also:
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
   final Color? collapsedIconColor;
 
 
@@ -235,7 +251,8 @@ class ExpansionTile extends StatefulWidget {
   /// Used to override to the [ListTileThemeData.textColor].
   ///
   /// If this property is null then [ExpansionTileThemeData.textColor] is used. If that
-  /// is also null then the value of [ListTileThemeData.textColor] is used.
+  /// is also null then and [ThemeData.useMaterial3] is true, color of the [TextTheme.bodyLarge]
+  /// will be used for the [title] and [subtitle]. Otherwise, defaults to [ColorScheme.primary] color.
   ///
   /// See also:
   ///
@@ -247,8 +264,10 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// Used to override to the [ListTileThemeData.textColor].
   ///
-  /// If this property is null then [ExpansionTileThemeData.collapsedTextColor] is used. If that
-  /// is also null then the value of [ListTileThemeData.textColor] is used.
+  /// If this property is null then [ExpansionTileThemeData.collapsedTextColor] is used.
+  /// If that is also null and [ThemeData.useMaterial3] is true, color of the
+  /// [TextTheme.bodyLarge] will be used for the [title] and [subtitle]. Otherwise,
+  /// defaults to color of the [TextTheme.titleMedium].
   ///
   /// See also:
   ///
@@ -441,7 +460,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
+    final ExpansionTileThemeData defaults = theme.useMaterial3
+      ? _ExpansionTileDefaultsM3(context)
+      : _ExpansionTileDefaultsM2(context);
     _borderTween
       ..begin = widget.collapsedShape
         ?? expansionTileTheme.collapsedShape
@@ -458,13 +479,13 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor
-        ?? theme.textTheme.titleMedium!.color
-      ..end = widget.textColor ?? expansionTileTheme.textColor ?? colorScheme.primary;
+        ?? defaults.collapsedTextColor
+      ..end = widget.textColor ?? expansionTileTheme.textColor ?? defaults.textColor;
     _iconColorTween
       ..begin = widget.collapsedIconColor
         ?? expansionTileTheme.collapsedIconColor
-        ?? theme.unselectedWidgetColor
-      ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? colorScheme.primary;
+        ?? defaults.collapsedIconColor
+      ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? defaults.iconColor;
     _backgroundColorTween
       ..begin = widget.collapsedBackgroundColor ?? expansionTileTheme.collapsedBackgroundColor
       ..end = widget.backgroundColor ?? expansionTileTheme.backgroundColor;
@@ -498,3 +519,54 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     );
   }
 }
+
+class _ExpansionTileDefaultsM2 extends ExpansionTileThemeData {
+  _ExpansionTileDefaultsM2(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colorScheme = _theme.colorScheme;
+
+  @override
+  Color? get textColor => _colorScheme.primary;
+
+  @override
+  Color? get iconColor => _colorScheme.primary;
+
+  @override
+  Color? get collapsedTextColor => _theme.textTheme.titleMedium!.color;
+
+  @override
+  Color? get collapsedIconColor => _theme.unselectedWidgetColor;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - ExpansionTile
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_152
+
+class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
+  _ExpansionTileDefaultsM3(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+
+  @override
+  Color? get textColor => Theme.of(context).textTheme.bodyLarge!.color;
+
+  @override
+  Color? get iconColor => _colors.primary;
+
+  @override
+  Color? get collapsedTextColor => Theme.of(context).textTheme.bodyLarge!.color;
+
+  @override
+  Color? get collapsedIconColor => _colors.onSurface;
+}
+
+// END GENERATED TOKEN PROPERTIES - ExpansionTile
