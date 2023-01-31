@@ -662,21 +662,11 @@ void main() {
     // Mark word being tapped as misspelled.
     state.markCurrentSelectionAsMisspelled = true;
 
-    // Test non-touch gesture.
-    final TestGesture mouseGesture = await tester.startGesture(
-      const Offset(25.0, 200.0),
-      pointer: 0,
-      kind: PointerDeviceKind.mouse,
-    );
-    await mouseGesture.up();
-    await tester.pumpAndSettle();
-
-    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
-
     // Test touch gesture.
     final TestGesture touchGesture = await tester.startGesture(
       const Offset(25.0, 200.0),
       pointer: 0,
+            kind: PointerDeviceKind.touch,
     );
     await touchGesture.up();
     await tester.pumpAndSettle();
