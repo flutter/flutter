@@ -160,9 +160,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   String get name => 'iOS';
-
-  @override
-  bool get supportsInstall => true;
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
@@ -186,7 +183,4 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   String get name => 'Android';
-
-  @override
-  bool get supportsInstall => true;
 }

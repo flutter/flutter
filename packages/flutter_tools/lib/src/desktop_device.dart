@@ -105,9 +105,6 @@ abstract class DesktopDevice extends Device {
   void clearLogs() {}
 
   @override
-  bool get supportsInstall => false;
-
-  @override
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
     String? mainPath,

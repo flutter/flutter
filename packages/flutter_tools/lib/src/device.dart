@@ -580,10 +580,6 @@ abstract class Device {
   /// Whether the device supports the '--fast-start' development mode.
   bool get supportsFastStart => false;
 
-  /// Whether this device supports the installation of a flutter app via
-  /// `flutter install`.
-  bool get supportsInstall => true;
-
   /// Stop an app package on the current device.
   ///
   /// Specify [userIdentifier] to stop app installed to a profile (Android only).

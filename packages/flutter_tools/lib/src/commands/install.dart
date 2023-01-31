@@ -50,11 +50,6 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     if (device == null) {
       throwToolExit('No target device found');
     }
-
-    if (!device!.supportsInstall) {
-      throwToolExit('Host and target are the same. Nothing to install.');
-    }
-
     if (userIdentifier != null && device is! AndroidDevice) {
       throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
     }
