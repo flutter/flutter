@@ -501,12 +501,12 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   Timer? _consecutiveTapTimer;
   Offset? _lastTapOffset;
 
-  // Callback used to indicate that a tap tracking has started.
+  /// Callback used to indicate that a tap tracking has started.
   VoidCallback? onTapTrackStart;
 
-  // Callback used to indicate that a tap tracking has been reset which happens
-  // when the timer between two taps elapses, the recognizer loses the arena,
-  // the gesture is cancelled or the recognizer is disposed of.
+  /// Callback used to indicate that a tap tracking has been reset which happens
+  /// when the timer between two taps elapses, the recognizer loses the arena,
+  /// the gesture is cancelled or the recognizer is disposed of.
   VoidCallback? onTapTrackReset;
 
   // When tracking a tap, the [consecutiveTapCount] is incremented if the given tap
