@@ -203,7 +203,8 @@ void main() {
   testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
     const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
     await tester.pumpWidget(
-      MediaQuery.fromView(
+      MediaQuery(
+        data: MediaQueryData.fromView(tester.binding.window),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
@@ -217,7 +218,8 @@ void main() {
     expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
 
     await tester.pumpWidget(
-      MediaQuery.fromView(
+      MediaQuery(
+        data: MediaQueryData.fromView(tester.binding.window),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
@@ -2681,7 +2683,8 @@ void main() {
       TransitionDelegate<dynamic>? transitionDelegate,
       List<NavigatorObserver> observers = const <NavigatorObserver>[],
     }) {
-      return MediaQuery.fromView(
+      return MediaQuery(
+        data: MediaQueryData.fromView(WidgetsBinding.instance.window),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2778,7 +2781,8 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MediaQuery.fromView(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.binding.window),
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2816,7 +2820,8 @@ void main() {
         firstError ??= detail;
       };
       await tester.pumpWidget(
-        MediaQuery.fromView(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.binding.window),
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
@@ -4265,7 +4270,8 @@ class TestDependencies extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MediaQuery.fromView(
+    return MediaQuery(
+      data: MediaQueryData.fromView(View.of(context)),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: child,

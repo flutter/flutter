@@ -3167,7 +3167,8 @@ class TestDependencies extends StatelessWidget {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery.fromView(
+      child: MediaQuery(
+        data: MediaQueryData.fromView(View.of(context)),
         child: child,
       ),
     );

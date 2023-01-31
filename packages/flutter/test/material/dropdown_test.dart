@@ -400,7 +400,8 @@ void main() {
     Widget build() {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: MediaQuery.fromView(
+        child: MediaQuery(
+          data: MediaQueryData.fromView(tester.binding.window),
           child: Navigator(
             initialRoute: '/',
             onGenerateRoute: (RouteSettings settings) {

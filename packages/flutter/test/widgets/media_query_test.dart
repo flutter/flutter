@@ -1119,6 +1119,7 @@ void main() {
         builder: (BuildContext context) {
           mediaQueryOutside = context.findAncestorWidgetOfExactType<MediaQuery>();
           return MediaQuery.fromView(
+            view: View.of(context),
             child: Builder(
               builder: (BuildContext context) {
                 mediaQueryInside = context.findAncestorWidgetOfExactType<MediaQuery>();
@@ -1134,12 +1135,12 @@ void main() {
     expect(mediaQueryOutside, isNot(mediaQueryInside));
   });
 
-  testWidgets('MediaQuery.fromView is created using values from surrounding view', (WidgetTester tester) async {
-    final MediaQueryData windowData = MediaQueryData.fromView(tester.binding.window);
+  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
+    final MediaQueryData windowData = MediaQueryData.fromWindow(tester.binding.window);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
-      MediaQuery.fromView(
+      MediaQuery.fromWindow(
         child: Builder(
           builder: (BuildContext context) {
             fromWindowData = MediaQuery.of(context);

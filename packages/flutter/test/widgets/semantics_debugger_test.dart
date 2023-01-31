@@ -300,7 +300,8 @@ void main() {
           child: SemanticsDebugger(
             child: Directionality(
               textDirection: TextDirection.ltr,
-              child: MediaQuery.fromView(
+              child: MediaQuery(
+                data: MediaQueryData.fromView(tester.binding.window),
                 child: Material(
                   child: Center(
                     child: Slider(
