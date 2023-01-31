@@ -1101,7 +1101,7 @@ class LocalizationsGenerator {
       if (message.placeholdersRequireFormatting) {
         requiresIntlImport = true;
       }
-  
+
       final String translationForMessage = message.messages[locale]!;
       final Node node = message.parsedMessages[locale]!;
       // If parse tree is only a string, then return a getter method.
@@ -1111,14 +1111,14 @@ class LocalizationsGenerator {
           .replaceAll('@(name)', message.resourceId)
           .replaceAll('@(message)', "'${generateString(node.children.map((Node child) => child.value!).join())}'");
       }
-  
+
       final List<String> tempVariables = <String>[];
       // Get a unique temporary variable name.
       int variableCount = 0;
       String getTempVariableName() {
         return '_temp${variableCount++}';
       }
-  
+
       // Do a DFS post order traversal through placeholderExpr, pluralExpr, and selectExpr nodes.
       // When traversing through a placeholderExpr node, return "$placeholderName".
       // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
@@ -1134,7 +1134,7 @@ class LocalizationsGenerator {
               return generateVariables(node);
             }).toList();
             return generateReturnExpr(expressions);
-  
+
           case ST.placeholderExpr:
             assert(node.children[1].type == ST.identifier);
             final String identifier = node.children[1].value!;
@@ -1143,7 +1143,7 @@ class LocalizationsGenerator {
               return '\$${node.children[1].value}String';
             }
             return '\$${node.children[1].value}';
-  
+
           case ST.pluralExpr:
             requiresIntlImport = true;
             final Map<String, String> pluralLogicArgs = <String, String>{};
@@ -1151,10 +1151,10 @@ class LocalizationsGenerator {
             // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
             assert(node.children[1].type == ST.identifier);
             assert(node.children[5].type == ST.pluralParts);
-  
+
             final Node identifier = node.children[1];
             final Node pluralParts = node.children[5];
-  
+
             for (final Node pluralPart in pluralParts.children.reversed) {
               String pluralCase;
               Node pluralMessage;
@@ -1199,14 +1199,14 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
               .replaceAll('@(pluralLogicArgs)', pluralLogicArgs.values.join('\n'))
             );
             return '\$$tempVarName';
-  
+
           case ST.selectExpr:
             requiresIntlImport = true;
             // Recall that pluralExpr are of the form
             // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
             assert(node.children[1].type == ST.identifier);
             assert(node.children[5].type == ST.selectParts);
-  
+
             final Node identifier = node.children[1];
             final List<String> selectLogicArgs = <String>[];
             final Node selectParts = node.children[5];
