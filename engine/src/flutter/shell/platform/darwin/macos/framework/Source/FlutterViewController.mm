@@ -287,11 +287,14 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
   // The project to run in this controller's engine.
   FlutterDartProject* _project;
 
+  std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
+
   uint64_t _id;
 }
 
 @dynamic id;
 @dynamic view;
+@dynamic accessibilityBridge;
 
 /**
  * Performs initialization that's common between the different init paths.
@@ -314,6 +317,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
   controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
   [controller initializeKeyboard];
+  [controller notifySemanticsEnabledChanged];
   // macOS fires this message when changing IMEs.
   CFNotificationCenterRef cfCenter = CFNotificationCenterGetDistributedCenter();
   __weak FlutterViewController* weakSelf = controller;
@@ -437,6 +441,26 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   [self initializeKeyboard];
 }
 
+- (void)notifySemanticsEnabledChanged {
+  BOOL mySemanticsEnabled = !!_bridge;
+  BOOL newSemanticsEnabled = _engine.semanticsEnabled;
+  if (newSemanticsEnabled == mySemanticsEnabled) {
+    return;
+  }
+  if (newSemanticsEnabled) {
+    _bridge = [self createAccessibilityBridgeWithEngine:_engine];
+  } else {
+    // Remove the accessibility children from flutter view before resetting the bridge.
+    _flutterView.accessibilityChildren = nil;
+    _bridge.reset();
+  }
+  NSAssert(newSemanticsEnabled == !!_bridge, @"Failed to update semantics for the view.");
+}
+
+- (std::weak_ptr<flutter::AccessibilityBridgeMac>)accessibilityBridge {
+  return _bridge;
+}
+
 - (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(uint64_t)viewId {
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
@@ -450,6 +474,39 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 
 - (BOOL)attached {
   return _engine != nil;
+}
+
+- (void)updateSemantics:(const FlutterSemanticsUpdate*)update {
+  NSAssert(_engine.semanticsEnabled, @"Semantics must be enabled.");
+  if (!_engine.semanticsEnabled) {
+    return;
+  }
+  for (size_t i = 0; i < update->nodes_count; i++) {
+    const FlutterSemanticsNode* node = &update->nodes[i];
+    _bridge->AddFlutterSemanticsNodeUpdate(node);
+  }
+
+  for (size_t i = 0; i < update->custom_actions_count; i++) {
+    const FlutterSemanticsCustomAction* action = &update->custom_actions[i];
+    _bridge->AddFlutterSemanticsCustomActionUpdate(action);
+  }
+
+  _bridge->CommitUpdates();
+
+  // Accessibility tree can only be used when the view is loaded.
+  if (!self.viewLoaded) {
+    return;
+  }
+  // Attaches the accessibility root to the flutter view.
+  auto root = _bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  if (root) {
+    if ([self.flutterView.accessibilityChildren count] == 0) {
+      NSAccessibilityElement* native_root = root->GetNativeViewAccessible();
+      self.flutterView.accessibilityChildren = @[ native_root ];
+    }
+  } else {
+    self.flutterView.accessibilityChildren = nil;
+  }
 }
 
 #pragma mark - Private methods
@@ -711,6 +768,11 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     // back.
     [self.view addSubview:_textInputPlugin];
   }
+}
+
+- (std::shared_ptr<flutter::AccessibilityBridgeMac>)createAccessibilityBridgeWithEngine:
+    (nonnull FlutterEngine*)engine {
+  return std::make_shared<flutter::AccessibilityBridgeMac>(engine, self);
 }
 
 - (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device

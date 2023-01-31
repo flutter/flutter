@@ -33,7 +33,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   engine.semanticsEnabled = YES;
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode root;
   root.id = 0;
@@ -69,7 +69,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   engine.semanticsEnabled = YES;
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode root;
   root.id = 0;
@@ -111,7 +111,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
   engine.semanticsEnabled = YES;
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode root;
   root.id = 0;
@@ -158,7 +158,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   window.contentView = viewController.view;
 
   engine.semanticsEnabled = YES;
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode root;
   root.id = 0;
@@ -233,7 +233,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   window.contentView = viewController.view;
   engine.semanticsEnabled = YES;
 
-  auto bridge = engine.accessibilityBridge.lock();
+  auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode root;
   root.id = 0;
