@@ -239,7 +239,7 @@ class Context {
       // The file will be present on re-run.
       echo(
         '${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
-        '_dartvmService._tcp NSBonjourServices insertion. Try re-building to '
+        '_dartVmService._tcp NSBonjourServices insertion. Try re-building to '
         'enable "flutter attach".');
       return;
     }
@@ -265,7 +265,7 @@ class Context {
           '-insert',
           'NSBonjourServices.0',
           '-string',
-          '_dartvmService._tcp',
+          '_dartVmService._tcp',
           builtProductsPlist,
         ],
       );
@@ -277,7 +277,7 @@ class Context {
           '-insert',
           'NSBonjourServices',
           '-json',
-          '["_dartvmService._tcp"]',
+          '["_dartVmService._tcp"]',
           builtProductsPlist,
         ],
       );

@@ -357,7 +357,10 @@ class MDnsVmServiceDiscovery {
     Duration timeout = const Duration(minutes: 10),
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForAttach(
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
+      isNetworkDevice: isNetworkDevice,
       timeout: timeout,
     );
     return _handleResult(
