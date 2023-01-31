@@ -1,4 +1,4 @@
-Signature: 8121b6ed793a346991cb333718ce952a
+Signature: 168035ce022c0823800597485347d435
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -3683,6 +3683,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/driver_features.fidl
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/fields.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.phyimpl/phyimpl.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/zx/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/sequence_checker.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -3902,6 +3903,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/driver_features.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/fields.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.phyimpl/phyimpl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/sequence_checker.h
@@ -4018,11 +4020,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing/tracing.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl
