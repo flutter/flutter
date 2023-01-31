@@ -72,9 +72,7 @@ class BottomAppBar extends StatefulWidget {
     this.padding,
     this.surfaceTintColor,
     this.height,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(notchMargin != null),
-       assert(clipBehavior != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -198,9 +196,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
           elevation: elevation,
           color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
-          child: child == null
-            ? null
-            : SafeArea(child: child),
+          child: SafeArea(child: child),
         ),
       ),
     );
@@ -213,10 +209,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     required this.shape,
     required this.materialKey,
     required this.notchMargin,
-  }) : assert(geometry != null),
-       assert(shape != null),
-       assert(notchMargin != null),
-       super(reclip: geometry);
+  }) : super(reclip: geometry);
 
   final ValueListenable<ScaffoldGeometry> geometry;
   final NotchedShape shape;
@@ -276,7 +269,7 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   const _BottomAppBarDefaultsM3(this.context)
