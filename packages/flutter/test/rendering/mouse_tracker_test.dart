@@ -43,19 +43,13 @@ void main() {
   }) {
     final TestAnnotationTarget oneAnnotation = TestAnnotationTarget(
       onEnter: (PointerEnterEvent event) {
-        if (logEvents != null) {
-          logEvents.add(event);
-        }
+        logEvents.add(event);
       },
       onHover: (PointerHoverEvent event) {
-        if (logEvents != null) {
-          logEvents.add(event);
-        }
+        logEvents.add(event);
       },
       onExit: (PointerExitEvent event) {
-        if (logEvents != null) {
-          logEvents.add(event);
-        }
+        logEvents.add(event);
       },
     );
     setUpMouseAnnotationFinder(
@@ -608,8 +602,7 @@ ui.PointerData _pointerData(
 }
 
 class BaseEventMatcher extends Matcher {
-  BaseEventMatcher(this.expected)
-    : assert(expected != null);
+  BaseEventMatcher(this.expected);
 
   final PointerEvent expected;
 

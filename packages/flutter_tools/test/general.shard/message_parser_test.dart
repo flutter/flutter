@@ -226,6 +226,22 @@ void main() {
     expect(tokens[5].type, equals(ST.identifier));
   });
 
+  testWithoutContext('lexer identifier names can contain underscores', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ test_placeholder } { test_select, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('test_placeholder'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('test_select'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
+   testWithoutContext('lexer identifier names can contain the strings select or plural', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ selectTest } { pluralTest, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('selectTest'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('pluralTest'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser(
       'syntax',
