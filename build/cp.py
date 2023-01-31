@@ -17,7 +17,8 @@ import sys
 
 def Main(src, dst):
   # Use copy instead of copyfile to ensure the executable bit is copied.
-  return shutil.copy(src, os.path.normpath(dst))
+  shutil.copy(src, os.path.normpath(dst))
+  return 0
 
 
 if __name__ == '__main__':
