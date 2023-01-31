@@ -224,8 +224,7 @@ class ProcessManager {
     return (await eval()).stderr;
   }
 
-  @alwaysThrows
-  void _throwProcessException({required String description, int? exitCode}) {
+  Never _throwProcessException({required String description, int? exitCode}) {
     throw ProcessException(
       description: description,
       executable: executable,
