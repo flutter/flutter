@@ -27,6 +27,7 @@ import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
 import 'package:gen_defaults/color_scheme_template.dart';
+import 'package:gen_defaults/date_picker_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/divider_template.dart';
 import 'package:gen_defaults/drawer_template.dart';
@@ -147,6 +148,7 @@ Future<void> main(List<String> args) async {
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
   ColorSchemeTemplate('ColorScheme', '$materialLib/theme_data.dart', tokens).updateFile();
+  DatePickerTemplate('DatePicker', '$materialLib/date_picker_theme.dart', tokens).updateFile();
   DialogFullscreenTemplate('DialogFullscreen', '$materialLib/dialog.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   DividerTemplate('Divider', '$materialLib/divider.dart', tokens).updateFile();

@@ -254,6 +254,7 @@ class Material extends StatefulWidget {
 
   /// The color to paint the shadow below the material.
   ///
+  /// {@template flutter.material.material.shadowColor}
   /// If null and [ThemeData.useMaterial3] is true then [ThemeData]'s
   /// [ColorScheme.shadow] will be used. If [ThemeData.useMaterial3] is false
   /// then [ThemeData.shadowColor] will be used.
@@ -266,11 +267,13 @@ class Material extends StatefulWidget {
   ///    property if it is null.
   ///  * [ThemeData.applyElevationOverlayColor], which turns elevation overlay
   /// on or off for dark themes.
+  /// {@endtemplate}
   final Color? shadowColor;
 
   /// The color of the surface tint overlay applied to the material color
   /// to indicate elevation.
   ///
+  /// {@template flutter.material.material.surfaceTintColor}
   /// Material Design 3 introduced a new way for some components to indicate
   /// their elevation by using a surface tint color overlay on top of the
   /// base material [color]. This overlay is painted with an opacity that is
@@ -291,6 +294,7 @@ class Material extends StatefulWidget {
   ///     tint.
   ///   * https://m3.material.io/styles/color/the-color-system/color-roles
   ///     which specifies how the overlay is applied.
+  /// {@endtemplate}
   final Color? surfaceTintColor;
 
   /// The typographical style to use for text within this material.
@@ -298,11 +302,13 @@ class Material extends StatefulWidget {
 
   /// Defines the material's shape as well its shadow.
   ///
+  /// {@template flutter.material.material.shape}
   /// If shape is non null, the [borderRadius] is ignored and the material's
   /// clip boundary and shadow are defined by the shape.
   ///
   /// A shadow is only displayed if the [elevation] is greater than
   /// zero.
+  /// {@endtemplate}
   final ShapeBorder? shape;
 
   /// Whether to paint the [shape] border in front of the [child].
