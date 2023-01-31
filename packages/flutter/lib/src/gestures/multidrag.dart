@@ -35,8 +35,7 @@ abstract class MultiDragPointerState {
   ///
   /// The [initialPosition] argument must not be null.
   MultiDragPointerState(this.initialPosition, this.kind, this.gestureSettings)
-    : assert(initialPosition != null),
-      _velocityTracker = VelocityTracker.withKind(kind);
+    : _velocityTracker = VelocityTracker.withKind(kind);
 
   /// Device specific gesture configuration that should be preferred over
   /// framework constants.
@@ -133,7 +132,6 @@ abstract class MultiDragPointerState {
   void _startDrag(Drag client) {
     assert(_arenaEntry != null);
     assert(_client == null);
-    assert(client != null);
     assert(pendingDelta != null);
     _client = client;
     final DragUpdateDetails details = DragUpdateDetails(
@@ -240,8 +238,6 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     assert(_pointers != null);
-    assert(event.pointer != null);
-    assert(event.position != null);
     assert(!_pointers!.containsKey(event.pointer));
     final MultiDragPointerState state = createNewPointerState(event);
     _pointers![event.pointer] = state;
@@ -257,9 +253,6 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
 
   void _handleEvent(PointerEvent event) {
     assert(_pointers != null);
-    assert(event.pointer != null);
-    assert(event.timeStamp != null);
-    assert(event.position != null);
     assert(_pointers!.containsKey(event.pointer));
     final MultiDragPointerState state = _pointers![event.pointer]!;
     if (event is PointerMoveEvent) {
@@ -296,7 +289,6 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
   Drag? _startDrag(Offset initialPosition, int pointer) {
     assert(_pointers != null);
     final MultiDragPointerState state = _pointers![pointer]!;
-    assert(state != null);
     assert(state._pendingDelta != null);
     Drag? drag;
     if (onStart != null) {
@@ -315,7 +307,6 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(_pointers != null);
     if (_pointers!.containsKey(pointer)) {
       final MultiDragPointerState state = _pointers![pointer]!;
-      assert(state != null);
       state.rejected();
       _removeState(pointer);
     } // else we already preemptively forgot about it (e.g. we got an up event)
@@ -515,8 +506,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.deviceGestureSettings)
-      : assert(delay != null) {
+  _DelayedPointerState(super.initialPosition, Duration delay, super.kind, super.deviceGestureSettings) {
     _timer = Timer(delay, _delayPassed);
   }
 
@@ -614,7 +604,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
     super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
-  }) : assert(delay != null);
+  });
 
   /// The amount of time the pointer must remain in the same place for the drag
   /// to be recognized.

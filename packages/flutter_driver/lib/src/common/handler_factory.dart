@@ -260,7 +260,6 @@ mixin CommandHandlerFactory {
   }
 
   Future<Result> _waitForCondition(Command command) async {
-    assert(command != null);
     final WaitForCondition waitForConditionCommand = command as WaitForCondition;
     final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
     await condition.wait();
