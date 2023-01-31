@@ -969,8 +969,10 @@ void main() {
     // Box has behavior from its base class:
     expect(fancyProxyBox.fancyMethod(), 36);
     // Box has behavior from RenderProxyBox:
-    expect(fancyProxyBox.computeDryLayout(const BoxConstraints(minHeight: 8)),
-        const Size(0, 8));
+    expect(
+      fancyProxyBox.computeDryLayout(const BoxConstraints(minHeight: 8)),
+      const Size(0, 8),
+    );
   });
 }
 
