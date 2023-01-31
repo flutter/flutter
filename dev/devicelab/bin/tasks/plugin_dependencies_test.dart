@@ -284,6 +284,7 @@ public class DummyPluginAClass {
             options: <String>[
               'ios',
               '--no-codesign',
+              '--verbose',
             ],
           );
         });

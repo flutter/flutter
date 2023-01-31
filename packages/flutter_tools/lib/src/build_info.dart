@@ -6,7 +6,6 @@ import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
@@ -237,18 +236,15 @@ class BuildInfo {
       kBuildMode: getNameForBuildMode(mode),
       if (dartDefines.isNotEmpty)
         kDartDefines: encodeDartDefines(dartDefines),
-      if (dartObfuscation != null)
-        kDartObfuscation: dartObfuscation.toString(),
+      kDartObfuscation: dartObfuscation.toString(),
       if (extraFrontEndOptions.isNotEmpty)
         kExtraFrontEndOptions: extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
       if (splitDebugInfoPath != null)
         kSplitDebugInfo: splitDebugInfoPath!,
-      if (trackWidgetCreation != null)
-        kTrackWidgetCreation: trackWidgetCreation.toString(),
-      if (treeShakeIcons != null)
-        kIconTreeShakerFlag: treeShakeIcons.toString(),
+      kTrackWidgetCreation: trackWidgetCreation.toString(),
+      kIconTreeShakerFlag: treeShakeIcons.toString(),
       if (bundleSkSLPath != null)
         kBundleSkSLPath: bundleSkSLPath!,
       if (codeSizeDirectory != null)
@@ -277,24 +273,20 @@ class BuildInfo {
     final Map<String, String> environmentMap = <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
-      if (dartObfuscation != null)
-        'DART_OBFUSCATION': dartObfuscation.toString(),
+      'DART_OBFUSCATION': dartObfuscation.toString(),
       if (extraFrontEndOptions.isNotEmpty)
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
       if (splitDebugInfoPath != null)
         'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
-      if (trackWidgetCreation != null)
-        'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
-      if (treeShakeIcons != null)
-        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+      'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
+      'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
       if (bundleSkSLPath != null)
         'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      if (packagesPath != null)
-        'PACKAGE_CONFIG': packagesPath,
+      'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
@@ -317,18 +309,15 @@ class BuildInfo {
     final List<String> result = <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
-      if (dartObfuscation != null)
-        '-Pdart-obfuscation=$dartObfuscation',
+      '-Pdart-obfuscation=$dartObfuscation',
       if (extraFrontEndOptions.isNotEmpty)
         '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
       if (extraGenSnapshotOptions.isNotEmpty)
         '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
       if (splitDebugInfoPath != null)
         '-Psplit-debug-info=$splitDebugInfoPath',
-      if (trackWidgetCreation != null)
-        '-Ptrack-widget-creation=$trackWidgetCreation',
-      if (treeShakeIcons != null)
-        '-Ptree-shake-icons=$treeShakeIcons',
+      '-Ptrack-widget-creation=$trackWidgetCreation',
+      '-Ptree-shake-icons=$treeShakeIcons',
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (bundleSkSLPath != null)
@@ -870,14 +859,8 @@ FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendere
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null) {
-    return 'build';
-  }
   final Config localConfig = config ?? globals.config;
   final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  if (localConfig == null) {
-    return 'build';
-  }
 
   final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {

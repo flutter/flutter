@@ -124,8 +124,7 @@ class DevFSFileContent extends DevFSContent {
     if (oldFileStat == null && newFileStat == null) {
       return false;
     }
-    return time == null
-        || oldFileStat == null
+    return oldFileStat == null
         || newFileStat == null
         || newFileStat.modified.isAfter(time);
   }
@@ -173,7 +172,7 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return time == null || _modificationTime.isAfter(time);
+    return _modificationTime.isAfter(time);
   }
 
   @override
@@ -246,7 +245,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   @override
   bool isModifiedAfter(DateTime time) {
-    return time == null || _modificationTime.isAfter(time);
+    return _modificationTime.isAfter(time);
   }
 
   @override
@@ -594,8 +593,6 @@ class DevFS {
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
-    assert(trackWidgetCreation != null);
-    assert(generator != null);
     final DateTime candidateCompileTime = DateTime.now();
     didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
@@ -670,7 +667,7 @@ class DevFS {
               }
               dirtyEntries[deviceUri] = content;
               syncedBytes += content.size;
-              if (archivePath != null && !bundleFirstUpload) {
+              if (!bundleFirstUpload) {
                 shaderPathsToEvict.add(archivePath);
               }
             });
@@ -688,7 +685,7 @@ class DevFS {
               }
               dirtyEntries[deviceUri] = content;
               syncedBytes += content.size;
-              if (archivePath != null && !bundleFirstUpload) {
+              if (!bundleFirstUpload) {
                 scenePathsToEvict.add(archivePath);
               }
             });
@@ -698,7 +695,7 @@ class DevFS {
           case null:
             dirtyEntries[deviceUri] = content;
             syncedBytes += content.size;
-            if (archivePath != null && !bundleFirstUpload) {
+            if (!bundleFirstUpload) {
               assetPathsToEvict.add(archivePath);
             }
         }

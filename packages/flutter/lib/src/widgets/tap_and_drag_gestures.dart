@@ -278,8 +278,7 @@ class TapDragUpdateDetails with Diagnosticable {
     required this.localOffsetFromOrigin,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
-  }) : assert(delta != null),
-       assert(
+  }) : assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
            || (primaryDelta == delta.dy && delta.dx == 0.0),
@@ -401,8 +400,7 @@ class TapDragEndDetails with Diagnosticable {
     this.primaryVelocity,
     required this.consecutiveTapCount,
     required this.keysPressedOnDown,
-  }) : assert(velocity != null),
-       assert(
+  }) : assert(
          primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
            || primaryVelocity == velocity.pixelsPerSecond.dy,
@@ -609,7 +607,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 
   bool _isWithinConsecutiveTapTolerance(Offset secondTapOffset) {
-    assert(secondTapOffset != null);
     if (_lastTapOffset == null) {
       return false;
     }
