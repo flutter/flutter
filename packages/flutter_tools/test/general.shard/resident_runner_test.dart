@@ -2158,6 +2158,73 @@ flutter:
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
+  testUsingContext('Uses existing DDS URI from exception field', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeDevice device = FakeDevice()
+      ..dds = DartDevelopmentService();
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
+      throw dds.DartDevelopmentServiceException.existingDdsInstance(
+        'Existing DDS at http://localhost/existingDdsInMessage.',
+        ddsUri: Uri.parse('http://localhost/existingDdsInField'),
+      );
+    };
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      device,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+    final Completer<void> done = Completer<void>();
+    await runZonedGuarded(
+      () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
+      (_, __) => done.complete(),
+    );
+    await done.future;
+    expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      required Logger logger,
+    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+  }));
+
+  testUsingContext('Falls back to existing DDS URI from exception message', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    final FakeDevice device = FakeDevice()
+      ..dds = DartDevelopmentService();
+    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
+      throw dds.DartDevelopmentServiceException.existingDdsInstance(
+        'Existing DDS at http://localhost/existingDdsInMessage.',
+      );
+    };
+    final TestFlutterDevice flutterDevice = TestFlutterDevice(
+      device,
+      observatoryUris: Stream<Uri>.value(testUri),
+    );
+    final Completer<void>done = Completer<void>();
+    await runZonedGuarded(
+      () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
+      (_, __) => done.complete(),
+    );
+    await done.future;
+    expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInMessage'));
+  }, overrides: <Type, Generator>{
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      GetSkSLMethod? getSkSLMethod,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions? compression,
+      Device? device,
+      required Logger logger,
+    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+  }));
+
   testUsingContext('Host VM service ipv6 defaults', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
