@@ -421,46 +421,6 @@ void expectHtml(DomElement element, String expectedHtml,
   expect(actualHtml, expectedHtml);
 }
 
-/// Tests that [currentHtml] matches [expectedHtml].
-///
-/// The comparison does not consider every minutia of the DOM. By default it
-/// tests the element tree structure and non-layout style attributes, and
-/// ignores everything else. If you are testing layout specifically, pass the
-/// [HtmlComparisonMode.layoutOnly] as the [mode] argument.
-///
-/// To keep test HTML strings manageable, you may use short HTML tag names
-/// instead of the full names:
-///
-/// * <flt-scene> is interchangeable with <s>
-/// * <flt-transform> is interchangeable with <t>
-/// * <flt-opacity> is interchangeable with <o>
-/// * <flt-clip clip-type="rect"> is interchangeable with <clip>
-/// * <flt-clip clip-type="rrect"> is interchangeable with <rclip>
-/// * <flt-clip clip-type="physical-shape"> is interchangeable with <pshape>
-/// * <flt-picture> is interchangeable with <pic>
-/// * <flt-canvas> is interchangeable with <c>
-///
-/// To simplify test HTML strings further the elements corresponding to the
-/// root view [RenderView], such as <flt-scene> (i.e. <s>), are also stripped
-/// out before comparison.
-///
-/// Example:
-///
-/// If you call [WidgetTester.pumpWidget] that results in HTML
-/// `<s><t><pic><c><p>Hello</p></c></pic></t></s>`, you don't have to specify
-/// `<s><t>` tags and simply expect `<pic><c><p>Hello</p></c></pic>`.
-void expectPageHtml(String expectedHtml,
-    {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly}) {
-  expectedHtml = canonicalizeHtml(expectedHtml, mode: mode);
-  final String actualHtml = canonicalizeHtml(currentHtml, mode: mode);
-  expect(actualHtml, expectedHtml);
-}
-
-/// Currently rendered HTML DOM as an HTML string.
-String get currentHtml {
-  return flutterViewEmbedder.sceneElement?.outerHTML ?? '';
-}
-
 class SceneTester {
   SceneTester(this.scene);
 
