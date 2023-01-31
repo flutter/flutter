@@ -180,6 +180,9 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
+  VoidCallback addCompositionCallback(CompositionCallback callback) => () {};
+
+  @override
   void noSuchMethod(Invocation invocation) { }
 }
 
