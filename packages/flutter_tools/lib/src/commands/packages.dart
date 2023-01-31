@@ -25,7 +25,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions.", PubContext.pubUpgrade));
     addSubcommand(PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd));
     addSubcommand(PackagesGetCommand('remove', 'Removes a dependency from the current package.', PubContext.pubRemove));
-    addSubcommand(PackagesPostGetHook(PubContext.pubPostGetHook));
+    addSubcommand(PackagesPostGetHook());
     addSubcommand(PackagesTestCommand());
     addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org.', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project.', requiresPubspec: true));
@@ -354,23 +354,17 @@ class PackagesGetCommand extends FlutterCommand {
 Pub get pub => context.get<Pub>()!;
 
 class PackagesPostGetHook extends FlutterCommand {
-  PackagesPostGetHook(this._context) {
+  PackagesPostGetHook() {
     argParser.addOption('directory', abbr: 'C', mandatory: true);
-    argParser.addFlag('example', defaultsTo: true);
-    argParser.addFlag('update-version-and-package-config');
-    argParser.addFlag('regenerate-platform-specific-tooling');
   }
-  final PubContext _context;
 
   @override
   bool get hidden => true;
 
   @override
-  // TODO: implement description
-  String get description => throw UnimplementedError();
+  String get description => 'Perform steps necessary to setup Flutter packages.';
 
   @override
-  // TODO: implement name
   String get name => '_post_pub_get';
 
   @override
@@ -381,26 +375,14 @@ class PackagesPostGetHook extends FlutterCommand {
     final String directoryOption = argResults!['directory'] as String;
     final String? target = findProjectRoot(globals.fs, directoryOption);
     if (target == null) {
-      throwToolExit('Expected to find project root in $directoryOption.');
+      throw StateError('Expected to find project root in $directoryOption.');
     }
     final FlutterProject rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
 
-    final bool example = argResults!['example'] as bool;
-    final bool updateVersionAndPackageConfig = argResults!['update-version-and-package-config'] as bool;
-    final bool regeneratePlatformSpecificTooling = argResults!['regenerate-platform-specific-tooling'] as bool;
-
-    if (updateVersionAndPackageConfig) {
-      // original method doesn't check example flag either
-      await pub.updateVersionAndPackageConfig(rootProject);
-    }
-
-    if (regeneratePlatformSpecificTooling) {
-      await rootProject.regeneratePlatformSpecificTooling();
-      if (example && rootProject.hasExampleApp && rootProject.example.pubspecFile.existsSync()) {
-        final FlutterProject exampleProject = rootProject.example;
-        await exampleProject.regeneratePlatformSpecificTooling();
-      }
-    }
+    globals.printStatus('Updating .dart_tool/version and generating synthetic localization package...');
+    await pub.updateVersionAndPackageConfig(rootProject, updateExamplePackageConfig: false);
+    globals.printStatus('Reapplying template files and regenerating project files and plugin registrants...');
+    await rootProject.regeneratePlatformSpecificTooling();
 
     return FlutterCommandResult.success();
   }

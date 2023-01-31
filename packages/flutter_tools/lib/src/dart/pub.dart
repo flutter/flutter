@@ -127,7 +127,6 @@ class PubContext {
   static final PubContext runTest = PubContext._(<String>['run_test']);
   static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
   static final PubContext updatePackages = PubContext._(<String>['update_packages']);
-  static final PubContext pubPostGetHook = PubContext._(<String>['_post_pub_get']);
 
   final List<String> _values;
 
@@ -244,7 +243,8 @@ abstract class Pub {
     PubOutputMode outputMode = PubOutputMode.all
   });
 
-  Future<void> updateVersionAndPackageConfig(FlutterProject project);
+  // TODO: reconsider where this method should go
+  Future<void> updateVersionAndPackageConfig(FlutterProject project, { required bool updateExamplePackageConfig });
 }
 
 class _DefaultPub implements Pub {
@@ -591,7 +591,7 @@ class _DefaultPub implements Pub {
 
     // TODO: probably can't remove this since non-get commands depend on it?
     if (touchesPackageConfig && project != null) {
-      await updateVersionAndPackageConfig(project);
+      await updateVersionAndPackageConfig(project, updateExamplePackageConfig: true);
     }
   }
 
@@ -741,13 +741,13 @@ class _DefaultPub implements Pub {
   /// Updates the .dart_tool/version file to be equal to current Flutter
   /// version.
   ///
-  /// Calls [_updatePackageConfig] for [project] and [project.example] (if it
-  /// exists).
+  /// Calls [_updatePackageConfig] for [project] and [project.example] if it
+  /// exists and [updateExamplePackageConfig] is true.
   ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
   @override
-  Future<void> updateVersionAndPackageConfig(FlutterProject project) async {
+  Future<void> updateVersionAndPackageConfig(FlutterProject project, { required bool updateExamplePackageConfig }) async {
     if (!project.packageConfigFile.existsSync()) {
       throwToolExit('${project.directory}: pub did not create .dart_tools/package_config.json file.');
     }
@@ -759,7 +759,7 @@ class _DefaultPub implements Pub {
     lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
 
     await _updatePackageConfig(project);
-    if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+    if (updateExamplePackageConfig && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
       await _updatePackageConfig(project.example);
     }
   }
