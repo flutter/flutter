@@ -212,7 +212,7 @@ void main() {
       expect(
         context.stdout,
         contains(
-            'Info.plist does not exist. Skipping _dartvmService._tcp NSBonjourServices insertion.'),
+            'Info.plist does not exist. Skipping _dartVmService._tcp NSBonjourServices insertion.'),
       );
     });
   });
