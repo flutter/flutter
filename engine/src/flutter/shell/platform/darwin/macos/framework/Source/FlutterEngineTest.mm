@@ -348,6 +348,31 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   EXPECT_EQ(engine.viewController, nil);
 }
 
+TEST_F(FlutterEngineTest, ProducesAccessibilityTreeWhenAddingViews) {
+  FlutterEngine* engine = GetFlutterEngine();
+  EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
+
+  // Enable the semantics without attaching a view controller.
+  bool enabled_called = false;
+  engine.embedderAPI.UpdateSemanticsEnabled =
+      MOCK_ENGINE_PROC(UpdateSemanticsEnabled, ([&enabled_called](auto engine, bool enabled) {
+                         enabled_called = enabled;
+                         return kSuccess;
+                       }));
+  engine.semanticsEnabled = YES;
+  EXPECT_TRUE(enabled_called);
+
+  EXPECT_EQ(engine.viewController, nil);
+
+  // Assign the view controller after enabling semantics
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  engine.viewController = viewController;
+
+  EXPECT_NE(viewController.accessibilityBridge.lock(), nullptr);
+}
+
 TEST_F(FlutterEngineTest, NativeCallbacks) {
   fml::AutoResetWaitableEvent latch;
   bool latch_called = false;

@@ -194,9 +194,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // The embedding-API-level engine object.
   FLUTTER_API_SYMBOL(FlutterEngine) _engine;
 
-  // The private member for accessibility.
-  std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
-
   // The project being run by this engine.
   FlutterDartProject* _project;
 
@@ -315,7 +312,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   flutterArguments.update_semantics_callback = [](const FlutterSemanticsUpdate* update,
                                                   void* user_data) {
     FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
-    [engine updateSemantics:update];
+    [engine.viewController updateSemantics:update];
   };
   flutterArguments.custom_dart_entrypoint = entrypoint.UTF8String;
   flutterArguments.shutdown_dart_vm_when_done = true;
@@ -543,10 +540,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   return _embedderAPI;
 }
 
-- (std::weak_ptr<flutter::AccessibilityBridgeMac>)accessibilityBridge {
-  return _bridge;
-}
-
 - (nonnull NSString*)executableName {
   return [[[NSProcessInfo processInfo] arguments] firstObject] ?: @"Flutter";
 }
@@ -586,22 +579,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
     return;
   }
   _semanticsEnabled = enabled;
-  // Remove the accessibility children from flutter view before reseting the bridge.
-  if (!_semanticsEnabled && self.viewController.viewLoaded) {
-    self.viewController.flutterView.accessibilityChildren = nil;
-  }
-  if (!_semanticsEnabled && _bridge) {
-    _bridge.reset();
-  } else if (_semanticsEnabled && !_bridge) {
-    _bridge = [self createAccessibilityBridge:self viewController:self.viewController];
-  }
+  [_viewController notifySemanticsEnabledChanged];
   _embedderAPI.UpdateSemanticsEnabled(_engine, _semanticsEnabled);
-}
-
-- (std::shared_ptr<flutter::AccessibilityBridgeMac>)
-    createAccessibilityBridge:(nonnull FlutterEngine*)engine
-               viewController:(nonnull FlutterViewController*)viewController {
-  return std::make_shared<flutter::AccessibilityBridgeMac>(engine, _viewController);
 }
 
 - (void)dispatchSemanticsAction:(FlutterSemanticsAction)action
@@ -937,36 +916,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (BOOL)unregisterTextureWithID:(int64_t)textureID {
   return _embedderAPI.UnregisterExternalTexture(_engine, textureID) == kSuccess;
-}
-
-- (void)updateSemantics:(const FlutterSemanticsUpdate*)update {
-  NSAssert(_bridge, @"The accessibility bridge must be initialized.");
-  for (size_t i = 0; i < update->nodes_count; i++) {
-    const FlutterSemanticsNode* node = &update->nodes[i];
-    _bridge->AddFlutterSemanticsNodeUpdate(node);
-  }
-
-  for (size_t i = 0; i < update->custom_actions_count; i++) {
-    const FlutterSemanticsCustomAction* action = &update->custom_actions[i];
-    _bridge->AddFlutterSemanticsCustomActionUpdate(action);
-  }
-
-  _bridge->CommitUpdates();
-
-  // Accessibility tree can only be used when the view is loaded.
-  if (!self.viewController.viewLoaded) {
-    return;
-  }
-  // Attaches the accessibility root to the flutter view.
-  auto root = _bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
-  if (root) {
-    if ([self.viewController.flutterView.accessibilityChildren count] == 0) {
-      NSAccessibilityElement* native_root = root->GetNativeViewAccessible();
-      self.viewController.flutterView.accessibilityChildren = @[ native_root ];
-    }
-  } else {
-    self.viewController.flutterView.accessibilityChildren = nil;
-  }
 }
 
 #pragma mark - Task runner integration
