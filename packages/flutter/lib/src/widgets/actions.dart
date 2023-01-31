@@ -431,9 +431,7 @@ class ActionListener extends StatefulWidget {
     required this.listener,
     required this.action,
     required this.child,
-  })  : assert(listener != null),
-        assert(action != null),
-        assert(child != null);
+  });
 
   /// The [ActionListenerCallback] callback to register with the [action].
   ///
@@ -548,7 +546,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
   ///
   /// The `intentKey` and [onInvoke] parameters must not be null.
   /// The [onInvoke] parameter is required.
-  CallbackAction({required this.onInvoke}) : assert(onInvoke != null);
+  CallbackAction({required this.onInvoke});
 
   /// The callback to be called when invoked.
   ///
@@ -595,8 +593,6 @@ class ActionDispatcher with Diagnosticable {
     covariant Intent intent, [
     BuildContext? context,
   ]) {
-    assert(action != null);
-    assert(intent != null);
     assert(action.isEnabled(intent), 'Action must be enabled when calling invokeAction');
     if (action is ContextAction) {
       context ??= primaryFocus?.context;
@@ -651,8 +647,7 @@ class Actions extends StatefulWidget {
     this.dispatcher,
     required this.actions,
     required this.child,
-  })  : assert(actions != null),
-        assert(child != null);
+  });
 
   /// The [ActionDispatcher] object that invokes actions.
   ///
@@ -681,7 +676,7 @@ class Actions extends StatefulWidget {
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
   static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
-    InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
+    InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsScope>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
         break;
@@ -690,7 +685,7 @@ class Actions extends StatefulWidget {
       // context.getElementForInheritedWidgetOfExactType will return itself if it
       // happens to be of the correct type.
       final BuildContext parent = _getParent(actionsElement);
-      actionsElement = parent.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
+      actionsElement = parent.getElementForInheritedWidgetOfExactType<_ActionsScope>();
     }
     return actionsElement != null;
   }
@@ -700,7 +695,7 @@ class Actions extends StatefulWidget {
   static ActionDispatcher _findDispatcher(BuildContext context) {
     ActionDispatcher? dispatcher;
     _visitActionsAncestors(context, (InheritedElement element) {
-      final ActionDispatcher? found = (element.widget as _ActionsMarker).dispatcher;
+      final ActionDispatcher? found = (element.widget as _ActionsScope).dispatcher;
       if (found != null) {
         dispatcher = found;
         return true;
@@ -807,7 +802,7 @@ class Actions extends StatefulWidget {
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         context.dependOnInheritedElement(element);
@@ -836,7 +831,7 @@ class Actions extends StatefulWidget {
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         action = result;
@@ -849,8 +844,8 @@ class Actions extends StatefulWidget {
   }
 
   // Find the [Action] that handles the given `intent` in the given
-  // `_ActionsMarker`, and verify it has the right type parameter.
-  static Action<T>? _castAction<T extends Intent>(_ActionsMarker actionsMarker, { T? intent }) {
+  // `_ActionsScope`, and verify it has the right type parameter.
+  static Action<T>? _castAction<T extends Intent>(_ActionsScope actionsMarker, { T? intent }) {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
     if (mappedAction is Action<T>?) {
       return mappedAction;
@@ -869,8 +864,7 @@ class Actions extends StatefulWidget {
   /// Will return a newly created [ActionDispatcher] if no ambient [Actions]
   /// widget is found.
   static ActionDispatcher of(BuildContext context) {
-    assert(context != null);
-    final _ActionsMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsMarker>();
+    final _ActionsScope? marker = context.dependOnInheritedWidgetOfExactType<_ActionsScope>();
     return marker?.dispatcher ?? _findDispatcher(context);
   }
 
@@ -892,12 +886,10 @@ class Actions extends StatefulWidget {
     BuildContext context,
     T intent,
   ) {
-    assert(intent != null);
-    assert(context != null);
     Object? returnValue;
 
     final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result.isEnabled(intent)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
@@ -945,16 +937,14 @@ class Actions extends StatefulWidget {
     BuildContext context,
     T intent,
   ) {
-    assert(intent != null);
-    assert(context != null);
     Object? returnValue;
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result.isEnabled(intent)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
-        // Element we found.
+        // element we found.
         returnValue = _findDispatcher(element).invokeAction(result, intent, context);
       }
       return result != null;
@@ -1024,7 +1014,7 @@ class _ActionsState extends State<Actions> {
 
   @override
   Widget build(BuildContext context) {
-    return _ActionsMarker(
+    return _ActionsScope(
       actions: widget.actions,
       dispatcher: widget.dispatcher,
       rebuildKey: rebuildKey,
@@ -1035,21 +1025,20 @@ class _ActionsState extends State<Actions> {
 
 // An inherited widget used by Actions widget for fast lookup of the Actions
 // widget information.
-class _ActionsMarker extends InheritedWidget {
-  const _ActionsMarker({
+class _ActionsScope extends InheritedWidget {
+  const _ActionsScope({
     required this.dispatcher,
     required this.actions,
     required this.rebuildKey,
     required super.child,
-  })  : assert(child != null),
-        assert(actions != null);
+  });
 
   final ActionDispatcher? dispatcher;
   final Map<Type, Action<Intent>> actions;
   final Object rebuildKey;
 
   @override
-  bool updateShouldNotify(_ActionsMarker oldWidget) {
+  bool updateShouldNotify(_ActionsScope oldWidget) {
     return rebuildKey != oldWidget.rebuildKey
         || oldWidget.dispatcher != dispatcher
         || !mapEquals<Type, Action<Intent>>(oldWidget.actions, actions);
@@ -1106,10 +1095,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.mouseCursor = MouseCursor.defer,
     this.includeFocusSemantics = true,
     required this.child,
-  })  : assert(enabled != null),
-        assert(autofocus != null),
-        assert(mouseCursor != null),
-        assert(child != null);
+  });
 
   /// Is this widget enabled or not.
   ///
@@ -1478,7 +1464,8 @@ class ActivateIntent extends Intent {
 ///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
 ///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ButtonActivateIntent extends Intent {
-  /// Creates an intent that the currently focused control, if it's a button.
+  /// Creates an intent that activates the currently focused control,
+  /// if it's a button.
   const ButtonActivateIntent();
 }
 
@@ -1529,7 +1516,7 @@ class PrioritizedIntents extends Intent {
   /// of intents, the first available of which will be used.
   const PrioritizedIntents({
     required this.orderedIntents,
-  })  : assert(orderedIntents != null);
+  });
 
   /// List of intents to be evaluated in order for execution. When an
   /// [Action.isEnabled] returns true, that action will be invoked and
@@ -1565,8 +1552,6 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
 
   @override
   void invoke(PrioritizedIntents intent) {
-    assert(_selectedAction != null);
-    assert(_selectedIntent != null);
     _selectedAction.invoke(_selectedIntent);
   }
 }
@@ -1581,7 +1566,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   bool debugAssertConsumeKeyMutuallyRecursive = false;
 
   // The default action to invoke if an enabled override Action can't be found
-  // using [lookupContext];
+  // using [lookupContext].
   Action<T> get defaultAction;
 
   // The [BuildContext] used to find the override of this [Action].

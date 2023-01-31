@@ -200,8 +200,7 @@ class AsyncSnapshot<T> {
   /// and optionally either [data] or [error] with an optional [stackTrace]
   /// (but not both data and error).
   const AsyncSnapshot._(this.connectionState, this.data, this.error, this.stackTrace)
-    : assert(connectionState != null),
-      assert(!(data != null && error != null)),
+    : assert(!(data != null && error != null)),
       assert(stackTrace == null || error != null);
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
@@ -394,7 +393,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
     this.initialData,
     super.stream,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   /// The build strategy currently used by this builder.
   ///
@@ -440,10 +439,14 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   Widget build(BuildContext context, AsyncSnapshot<T> currentSummary) => builder(context, currentSummary);
 }
 
-/// Widget that builds itself based on the latest snapshot of interaction with
+/// A widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ek8ZPdWj4Qo}
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=zEdw_1B7JHY}
+///
+/// ## Managing the future
 ///
 /// The [future] must have been obtained earlier, e.g. during [State.initState],
 /// [State.didUpdateWidget], or [State.didChangeDependencies]. It must not be
@@ -454,8 +457,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// A general guideline is to assume that every `build` method could get called
 /// every frame, and to treat omitted calls as an optimization.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=ek8ZPdWj4Qo}
 ///
 /// ## Timing
 ///
@@ -526,7 +527,7 @@ class FutureBuilder<T> extends StatefulWidget {
     this.future,
     this.initialData,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.

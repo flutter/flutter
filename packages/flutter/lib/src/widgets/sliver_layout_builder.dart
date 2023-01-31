@@ -39,7 +39,6 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
   double childMainAxisPosition(RenderObject child) {
-    assert(child != null);
     assert(child == this.child);
     return 0;
   }
@@ -53,7 +52,6 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     assert(child == this.child);
     // child's offset is always (0, 0), transform.translate(0, 0) does not mutate the transform.
   }

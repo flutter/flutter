@@ -53,6 +53,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
     },
   );
 
+  @pragma('vm:entry-point')
   static Route<DateTime> _datePickerRoute(
     BuildContext context,
     Object? arguments,

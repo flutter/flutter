@@ -644,6 +644,32 @@ void main() {
     expect(MediaQuery.of(capturedContext), isNotNull);
   });
 
+  testWidgets("WidgetsApp doesn't have dependency on MediaQuery", (WidgetTester tester) async {
+    int routeBuildCount = 0;
+
+    final Widget widget = WidgetsApp(
+      color: const Color.fromARGB(255, 255, 255, 255),
+      onGenerateRoute: (_) {
+        return PageRouteBuilder<void>(pageBuilder: (_, __, ___) {
+          routeBuildCount++;
+          return const Placeholder();
+        });
+      },
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(data: const MediaQueryData(textScaleFactor: 10), child: widget),
+    );
+
+    expect(routeBuildCount, equals(1));
+
+    await tester.pumpWidget(
+      MediaQuery(data: const MediaQueryData(textScaleFactor: 20), child: widget),
+    );
+
+    expect(routeBuildCount, equals(1));
+  });
+
   testWidgets('WidgetsApp provides meta based shortcuts for iOS and macOS', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final SelectAllSpy selectAllSpy = SelectAllSpy();
