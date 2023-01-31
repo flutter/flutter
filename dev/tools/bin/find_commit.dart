@@ -69,7 +69,7 @@ String findCommit({
     'rev-parse',
     '--abbrev-ref',
     'HEAD'
-  ]);
+  ]).trim();
 
   return git(secondaryRepoDirectory, <String>[
     'log',
