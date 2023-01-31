@@ -207,8 +207,8 @@ void main() {
         expect(portForwarder.hostPort, hostPort);
         expect(hotRunnerFactory.devices, hasLength(1));
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? observatoryUri = await flutterDevice.vmServiceUris?.first;
-        expect(observatoryUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
+        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+        expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -274,8 +274,8 @@ void main() {
         expect(hotRunnerFactory.devices, hasLength(1));
 
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? observatoryUri = await flutterDevice.vmServiceUris?.first;
-        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
+        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -346,8 +346,8 @@ void main() {
         expect(hotRunnerFactory.devices, hasLength(1));
 
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? observatoryUri = await flutterDevice.vmServiceUris?.first;
-        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
+        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -422,8 +422,8 @@ void main() {
         expect(hotRunnerFactory.devices, hasLength(1));
 
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? observatoryUri = await flutterDevice.vmServiceUris?.first;
-        expect(observatoryUri.toString(), 'http://111.111.111.111:123/xyz/');
+        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),

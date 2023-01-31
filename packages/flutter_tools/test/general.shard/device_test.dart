@@ -573,7 +573,7 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
-          '--observatory-host=0.0.0.0',
+          '--vm-service-host=0.0.0.0',
         ].join(' '),
       );
     });
@@ -597,7 +597,7 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
-          '--observatory-host=::0',
+          '--vm-service-host=::0',
         ].join(' '),
       );
     });

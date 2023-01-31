@@ -85,7 +85,7 @@ FakeCommand attachDebuggerCommand({
       if (!isNetworkDevice) '--no-wifi',
       '--args',
       if (isNetworkDevice)
-        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --observatory-host=0.0.0.0'
+        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --vm-service-host=0.0.0.0'
       else
         '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
     ],
