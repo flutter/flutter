@@ -334,7 +334,6 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate?> _resume(String? step, bool waitForNextPause) async {
-    assert(waitForNextPause != null);
     final String isolateId = await _getFlutterIsolateId();
 
     final Future<Event> resume = subscribeToResumeEvent(isolateId);
@@ -400,7 +399,6 @@ abstract class FlutterTestDriver {
     Duration timeout = defaultTimeout,
     bool ignoreAppStopEvent = false,
   }) async {
-    assert(timeout != null);
     assert(event != null || id != null);
     assert(event == null || id == null);
     final String interestingOccurrence = event != null ? '$event event' : 'response to request $id';
@@ -447,8 +445,6 @@ abstract class FlutterTestDriver {
     required String task,
     Duration timeout = defaultTimeout,
   }) {
-    assert(task != null);
-    assert(timeout != null);
 
     if (_printDebugOutputToStdOut) {
       _debugPrint('$task...');
@@ -503,6 +499,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool singleWidgetReloads = false,
+    bool serveObservatory = true,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -513,6 +510,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
+        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',
         if (chrome)
@@ -541,6 +539,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool singleWidgetReloads = false,
+    bool serveObservatory = true,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -551,6 +550,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         if (!spawnDdsInstance)
           '--no-dds',
+        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         '-d',
         'flutter-tester',
         '--debug-port',
@@ -820,7 +820,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   Future<Map<String, Object?>?> _waitForJson({
     Duration timeout = defaultTimeout,
   }) async {
-    assert(timeout != null);
     return _timeoutWithMessages<Map<String, Object?>?>(
       () => _stdout.stream.map<Map<String, Object?>?>(_parseJsonResponse)
           .firstWhere((Map<String, Object?>? output) => output != null),

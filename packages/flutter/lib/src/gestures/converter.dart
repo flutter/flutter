@@ -52,9 +52,8 @@ class PointerEventConverter {
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
     return data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
-        .map((ui.PointerData datum) {
+        .map<PointerEvent?>((ui.PointerData datum) {
           final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
-          assert(position != null);
           final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
           final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
           final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
@@ -62,7 +61,6 @@ class PointerEventConverter {
           final double radiusMax = _toLogicalPixels(datum.radiusMax, devicePixelRatio);
           final Duration timeStamp = datum.timeStamp;
           final PointerDeviceKind kind = datum.kind;
-          assert(datum.change != null);
           switch (datum.signalKind ?? ui.PointerSignalKind.none) {
             case ui.PointerSignalKind.none:
               switch (datum.change) {
@@ -249,6 +247,9 @@ class PointerEventConverter {
                   );
               }
             case ui.PointerSignalKind.scroll:
+              if (!datum.scrollDeltaX.isFinite || !datum.scrollDeltaY.isFinite || devicePixelRatio <= 0) {
+                return null;
+              }
               final Offset scrollDelta =
                   Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
               return PointerScrollEvent(
@@ -282,7 +283,7 @@ class PointerEventConverter {
               // enumeration to PointerSignalKind.
               throw StateError('Unreachable');
           }
-        });
+        }).whereType<PointerEvent>();
   }
 
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;

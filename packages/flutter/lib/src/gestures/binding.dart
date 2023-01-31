@@ -83,8 +83,6 @@ class _Resampler {
   // Add `event` for resampling or dispatch it directly if
   // not a touch event.
   void addOrDispatch(PointerEvent event) {
-    final SchedulerBinding scheduler = SchedulerBinding.instance;
-    assert(scheduler != null);
     // Add touch event to resampler or dispatch pointer event directly.
     if (event.kind == PointerDeviceKind.touch) {
       // Save last event time for debugPrint of resampling margin.
@@ -108,7 +106,6 @@ class _Resampler {
   // The `samplingClock` is the clock used to determine frame time age.
   void sample(Duration samplingOffset, SamplingClock clock) {
     final SchedulerBinding scheduler = SchedulerBinding.instance;
-    assert(scheduler != null);
 
     // Initialize `_frameTime` if needed. This will be used for periodic
     // sampling when frame callbacks are not received.
@@ -360,7 +357,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
     if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
-      assert(!_hitTests.containsKey(event.pointer), 'Pointer of $event unexpectedly has a HitTestResult associated with it.');
+      assert(!_hitTests.containsKey(event.pointer), 'Pointer of ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
@@ -368,7 +365,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }
       assert(() {
         if (debugPrintHitTestResults) {
-          debugPrint('$event: $hitTestResult');
+          debugPrint('${event.toString(minLevel: DiagnosticLevel.debug)}: $hitTestResult');
         }
         return true;
       }());
@@ -391,7 +388,6 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     if (hitTestResult != null ||
         event is PointerAddedEvent ||
         event is PointerRemovedEvent) {
-      assert(event.position != null);
       dispatchEvent(event, hitTestResult);
     }
   }

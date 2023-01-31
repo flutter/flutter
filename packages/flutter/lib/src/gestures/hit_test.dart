@@ -215,7 +215,6 @@ class HitTestResult {
   ///    around this function for hit testing on [RenderBox]s.
   @protected
   void pushTransform(Matrix4 transform) {
-    assert(transform != null);
     assert(
       _debugVectorMoreOrLessEquals(transform.getRow(2), Vector4(0, 0, 1, 0)) &&
       _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
@@ -255,7 +254,6 @@ class HitTestResult {
   ///    around this function for hit testing on [RenderSliver]s.
   @protected
   void pushOffset(Offset offset) {
-    assert(offset != null);
     _localTransforms.add(_OffsetTransformPart(offset));
   }
 
