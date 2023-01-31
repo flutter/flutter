@@ -44,11 +44,11 @@ const bool _kDebugMenus = false;
 // has a submenu.
 const double _kDefaultSubmenuIconSize = 24;
 
-// The default spacing between the the leading icon, label, trailing icon, and
+// The default spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemDefaultSpacing = 12;
 
-// The minimum spacing between the the leading icon, label, trailing icon, and
+// The minimum spacing between the leading icon, label, trailing icon, and
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemMinSpacing = 4;
 
@@ -362,7 +362,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    return _MenuAnchorMarker(
+    return _MenuAnchorScope(
       anchorKey: _anchorKey,
       anchor: this,
       isOpen: _isOpen,
@@ -511,7 +511,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
                 // Copy all the themes from the supplied outer context to the
                 // overlay.
                 outerContext,
-                _MenuAnchorMarker(
+                _MenuAnchorScope(
                   // Re-advertize the anchor here in the overlay, since
                   // otherwise a search for the anchor by descendants won't find
                   // it.
@@ -571,7 +571,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   // dependency relationship that will rebuild the context when the node
   // changes.
   static _MenuAnchorState? _maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_MenuAnchorMarker>()?.anchor;
+    return context.dependOnInheritedWidgetOfExactType<_MenuAnchorScope>()?.anchor;
   }
 }
 
@@ -2195,8 +2195,8 @@ class _LocalizedShortcutLabeler {
   }
 }
 
-class _MenuAnchorMarker extends InheritedWidget {
-  const _MenuAnchorMarker({
+class _MenuAnchorScope extends InheritedWidget {
+  const _MenuAnchorScope({
     required super.child,
     required this.anchorKey,
     required this.anchor,
@@ -2208,7 +2208,7 @@ class _MenuAnchorMarker extends InheritedWidget {
   final bool isOpen;
 
   @override
-  bool updateShouldNotify(_MenuAnchorMarker oldWidget) {
+  bool updateShouldNotify(_MenuAnchorScope oldWidget) {
     return anchorKey != oldWidget.anchorKey
         || anchor != oldWidget.anchor
         || isOpen != oldWidget.isOpen;
@@ -2919,7 +2919,6 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     // 4) Is part of an anchor that either doesn't have a submenu, or doesn't
     //    have any submenus currently open (only the "deepest" open menu should
     //    have accelerator shortcuts registered).
-    assert(_displayLabel != null);
     if (_showAccelerators && _acceleratorIndex != -1 && _binding?.onInvoke != null && !(_binding!.hasSubmenu && (_anchor?._isOpen ?? false))) {
       final String acceleratorCharacter = _displayLabel[_acceleratorIndex].toLowerCase();
       _shortcutRegistryEntry = _shortcutRegistry?.addAll(
@@ -3586,7 +3585,7 @@ bool _platformSupportsAccelerators() {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_150
+// Token database version: v0_152
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)

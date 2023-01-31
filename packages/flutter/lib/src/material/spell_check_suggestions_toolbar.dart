@@ -27,7 +27,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     super.key,
     required this.anchor,
     required this.buttonItems,
-  }) : assert(buttonItems != null);
+  });
 
   /// {@template flutter.material.SpellCheckSuggestionsToolbar.anchor}
   /// The focal point below which the toolbar attempts to position itself.

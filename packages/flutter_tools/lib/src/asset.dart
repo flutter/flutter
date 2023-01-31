@@ -200,9 +200,6 @@ class ManifestAssetBundle implements AssetBundle {
       }
       for (final File file in directory.listSync().whereType<File>()) {
         final DateTime dateTime = file.statSync().modified;
-        if (dateTime == null) {
-          continue;
-        }
         if (dateTime.isAfter(lastBuildTimestamp)) {
           return true;
         }
@@ -301,7 +298,7 @@ class ManifestAssetBundle implements AssetBundle {
     final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
     for (final Package package in packageConfig.packages) {
       final Uri packageUri = package.packageUriRoot;
-      if (packageUri != null && packageUri.scheme == 'file') {
+      if (packageUri.scheme == 'file') {
         final String packageManifestPath = _fileSystem.path.fromUri(packageUri.resolve('../pubspec.yaml'));
         inputFiles.add(_fileSystem.file(packageManifestPath));
         final FlutterManifest? packageFlutterManifest = FlutterManifest.createFromPath(
@@ -390,34 +387,32 @@ class ManifestAssetBundle implements AssetBundle {
     }
     // Save the contents of each deferred component image, image variant, and font
     // asset in deferredComponentsEntries.
-    if (deferredComponentsAssetVariants != null) {
-      for (final String componentName in deferredComponentsAssetVariants.keys) {
-        deferredComponentsEntries[componentName] = <String, DevFSContent>{};
-        final Map<_Asset, List<_Asset>> assetsMap = deferredComponentsAssetVariants[componentName]!;
-        for (final _Asset asset in assetsMap.keys) {
-          final File assetFile = asset.lookupAssetFile(_fileSystem);
-          if (!assetFile.existsSync() && assetsMap[asset]!.isEmpty) {
-            _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
-            _logger.printError('No file or variants found for $asset.\n');
-            if (asset.package != null) {
-              _logger.printError('This asset was included from package ${asset.package?.name}.');
-            }
-            return 1;
+    for (final String componentName in deferredComponentsAssetVariants.keys) {
+      deferredComponentsEntries[componentName] = <String, DevFSContent>{};
+      final Map<_Asset, List<_Asset>> assetsMap = deferredComponentsAssetVariants[componentName]!;
+      for (final _Asset asset in assetsMap.keys) {
+        final File assetFile = asset.lookupAssetFile(_fileSystem);
+        if (!assetFile.existsSync() && assetsMap[asset]!.isEmpty) {
+          _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+          _logger.printError('No file or variants found for $asset.\n');
+          if (asset.package != null) {
+            _logger.printError('This asset was included from package ${asset.package?.name}.');
           }
-          // The file name for an asset's "main" entry is whatever appears in
-          // the pubspec.yaml file. The main entry's file must always exist for
-          // font assets. It need not exist for an image if resolution-specific
-          // variant files exist. An image's main entry is treated the same as a
-          // "1x" resolution variant and if both exist then the explicit 1x
-          // variant is preferred.
-          if (assetFile.existsSync() && !assetsMap[asset]!.contains(asset)) {
-            assetsMap[asset]!.insert(0, asset);
-          }
-          for (final _Asset variant in assetsMap[asset]!) {
-            final File variantFile = variant.lookupAssetFile(_fileSystem);
-            assert(variantFile.existsSync());
-            deferredComponentsEntries[componentName]![variant.entryUri.path] ??= DevFSFileContent(variantFile);
-          }
+          return 1;
+        }
+        // The file name for an asset's "main" entry is whatever appears in
+        // the pubspec.yaml file. The main entry's file must always exist for
+        // font assets. It need not exist for an image if resolution-specific
+        // variant files exist. An image's main entry is treated the same as a
+        // "1x" resolution variant and if both exist then the explicit 1x
+        // variant is preferred.
+        if (assetFile.existsSync() && !assetsMap[asset]!.contains(asset)) {
+          assetsMap[asset]!.insert(0, asset);
+        }
+        for (final _Asset variant in assetsMap[asset]!) {
+          final File variantFile = variant.lookupAssetFile(_fileSystem);
+          assert(variantFile.existsSync());
+          deferredComponentsEntries[componentName]![variant.entryUri.path] ??= DevFSFileContent(variantFile);
         }
       }
     }
@@ -665,15 +660,13 @@ class ManifestAssetBundle implements AssetBundle {
           variant.entryUri.path,
       ];
     });
-    if (deferredComponentsAssetVariants != null) {
-      for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
-        componentAssets.forEach((_Asset main, List<_Asset> variants) {
-          entries[main] = <String>[
-            for (final _Asset variant in variants)
-              variant.entryUri.path,
-          ];
-        });
-      }
+    for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
+      componentAssets.forEach((_Asset main, List<_Asset> variants) {
+        entries[main] = <String>[
+          for (final _Asset variant in variants)
+            variant.entryUri.path,
+        ];
+      });
     }
     final List<_Asset> sortedKeys = entries.keys.toList()
         ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
