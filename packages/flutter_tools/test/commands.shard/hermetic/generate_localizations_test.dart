@@ -266,6 +266,7 @@ format: true
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/119594
   testUsingContext('dart format is working when the untranslated messages file is produced', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
