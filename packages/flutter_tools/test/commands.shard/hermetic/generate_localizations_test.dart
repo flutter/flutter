@@ -267,6 +267,7 @@ format: true
     ProcessManager: () => FakeProcessManager.any(),
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/119593
   testUsingContext('overridden storage base url does not affect the command', () async {
     const String baseUrl = 'https://storage.com';
     final Cache cache = Cache.test(
