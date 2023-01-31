@@ -275,7 +275,7 @@ void main() {
     );
 
     expect(launchResult.started, true);
-    expect(launchResult.hasObservatory, true);
+    expect(launchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
     expect(logger.errorText, contains('The Dart VM Service was not discovered after 45 seconds. This is taking much longer than expected...'));
     expect(logger.errorText, contains('Click "Allow" to the prompt asking if you would like to find and connect devices on your local network.'));
