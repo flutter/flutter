@@ -346,6 +346,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     final String messageString = jsonEncode(message);
     // Flutter requests are always wrapped in brackets as an array.
     final String payload = '[$messageString]\n';
+    _logTraffic('==> [Flutter] $payload');
     process.stdin.writeln(payload);
   }
 
@@ -447,7 +448,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   void handleExitCode(int code) {
     final String codeSuffix = code == 0 ? '' : ' ($code)';
-    logger?.call('Process exited ($code)');
+    _logTraffic('<== [Flutter] Process exited ($code)');
     handleSessionTerminate(codeSuffix);
   }
 
@@ -559,7 +560,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
 
   @override
   void handleStderr(List<int> data) {
-    logger?.call('stderr: $data');
+    _logTraffic('<== [Flutter] [stderr] $data');
     sendOutput('stderr', utf8.decode(data));
   }
 
@@ -575,7 +576,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // - the item has an "event" field that is a String
     // - the item has a "params" field that is a Map<String, Object?>?
 
-    logger?.call('stdout: $data');
+    _logTraffic('<== [Flutter] $data');
 
     // Output is sent as console (eg. output from tooling) until the app has
     // started, then stdout (users output). This is so info like
@@ -636,6 +637,22 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     } else {
       // If it wasn't processed above,
       sendOutput(outputCategory, data);
+    }
+  }
+
+  /// Logs JSON traffic to aid debugging.
+  ///
+  /// If `sendLogsToClient` was `true` in the launch/attach config, logs will
+  /// also be sent back to the client in a "dart.log" event to simplify
+  /// capturing logs from the IDE (such as using the **Dart: Capture Logs**
+  /// command in VS Code).
+  void _logTraffic(String message) {
+    logger?.call(message);
+    if (sendLogsToClient) {
+      sendEvent(
+        RawEventBody(<String, String>{'message': message}),
+        eventType: 'dart.log',
+      );
     }
   }
 

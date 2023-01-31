@@ -33,9 +33,7 @@ class CircleBorder extends OutlinedBorder {
   ///
   /// The [side] argument must not be null.
   const CircleBorder({ super.side, this.eccentricity = 0.0 })
-      : assert(side != null),
-        assert(eccentricity != null),
-        assert(eccentricity >= 0.0, 'The eccentricity argument $eccentricity is not greater than or equal to zero.'),
+      : assert(eccentricity >= 0.0, 'The eccentricity argument $eccentricity is not greater than or equal to zero.'),
         assert(eccentricity <= 1.0, 'The eccentricity argument $eccentricity is not less than or equal to one.');
 
   /// Defines the ratio (0.0-1.0) from which the border will deform

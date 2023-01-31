@@ -50,7 +50,7 @@ class CupertinoTabView extends StatefulWidget {
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.restorationScopeId,
-  }) : assert(navigatorObservers != null);
+  });
 
   /// The widget builder for the default route of the tab view
   /// ([Navigator.defaultRouteName], which is `/`).

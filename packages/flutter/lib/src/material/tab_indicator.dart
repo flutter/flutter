@@ -23,8 +23,7 @@ class UnderlineTabIndicator extends Decoration {
     this.borderRadius,
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
     this.insets = EdgeInsets.zero,
-  }) : assert(borderSide != null),
-       assert(insets != null);
+  });
 
   /// The radius of the indicator's corners.
   ///
@@ -71,8 +70,6 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   Rect _indicatorRectFor(Rect rect, TextDirection textDirection) {
-    assert(rect != null);
-    assert(textDirection != null);
     final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
     return Rect.fromLTWH(
       indicator.left,
@@ -98,15 +95,13 @@ class _UnderlinePainter extends BoxPainter {
     this.decoration,
     this.borderRadius,
     super.onChanged,
-  )
-    : assert(decoration != null);
+  );
 
   final UnderlineTabIndicator decoration;
   final BorderRadius? borderRadius;
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection textDirection = configuration.textDirection!;

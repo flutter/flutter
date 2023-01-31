@@ -187,11 +187,6 @@ abstract class MultiChildLayoutDelegate {
           'There is no child with the id "$childId".',
         );
       }
-      if (offset == null) {
-        throw FlutterError(
-          'The $this custom multichild layout delegate provided a null position for the child with id "$childId".',
-        );
-      }
       return true;
     }());
     final MultiChildLayoutParentData childParentData = child!.parentData! as MultiChildLayoutParentData;
@@ -311,8 +306,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   RenderCustomMultiChildLayoutBox({
     List<RenderBox>? children,
     required MultiChildLayoutDelegate delegate,
-  }) : assert(delegate != null),
-       _delegate = delegate {
+  }) : _delegate = delegate {
     addAll(children);
   }
 
@@ -327,7 +321,6 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
   set delegate(MultiChildLayoutDelegate newDelegate) {
-    assert(newDelegate != null);
     if (_delegate == newDelegate) {
       return;
     }

@@ -40,7 +40,7 @@ class Texture extends LeafRenderObjectWidget {
     required this.textureId,
     this.freeze = false,
     this.filterQuality = FilterQuality.low,
-  }) : assert(textureId != null);
+  });
 
   /// The identity of the backend texture.
   final int textureId;
