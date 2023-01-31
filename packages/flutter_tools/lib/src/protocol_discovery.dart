@@ -38,7 +38,7 @@ class ProtocolDiscovery {
     required bool ipv6,
     required Logger logger,
   }) {
-    const String kVmServiceService = 'VmService';
+    const String kVmServiceService = 'VM Service';
     return ProtocolDiscovery._(
       logReader,
       kVmServiceService,
