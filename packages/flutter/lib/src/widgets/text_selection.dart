@@ -2018,8 +2018,9 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onTapTrackStart() {
-    final Set<LogicalKeyboardKey> keysPressed = HardwareKeyboard.instance.logicalKeysPressed;
-    _isShiftPressed = keysPressed.intersection(keysPressed).isNotEmpty;
+    _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
+        .intersection(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight})
+        .isNotEmpty;
   }
 
   /// Handler for [TextSelectionGestureDetector.onTapTrackReset].
