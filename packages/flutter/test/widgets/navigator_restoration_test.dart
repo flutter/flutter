@@ -1046,8 +1046,7 @@ class PagedTestWidget extends StatelessWidget {
       restorationId: restorationId,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: MediaQuery.fromView(
           child: const PagedTestNavigator(),
         ),
       ),
@@ -1172,8 +1171,7 @@ class TestWidget extends StatelessWidget {
       restorationId: restorationId,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: MediaQuery.fromView(
           child: Navigator(
             initialRoute: 'home',
             restorationScopeId: 'app',

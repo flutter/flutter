@@ -203,8 +203,7 @@ void main() {
   testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
     const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
     await tester.pumpWidget(
-      MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      MediaQuery.fromView(
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
@@ -218,8 +217,7 @@ void main() {
     expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      MediaQuery.fromView(
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
@@ -2683,8 +2681,7 @@ void main() {
       TransitionDelegate<dynamic>? transitionDelegate,
       List<NavigatorObserver> observers = const <NavigatorObserver>[],
     }) {
-      return MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      return MediaQuery.fromView(
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2781,8 +2778,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        MediaQuery.fromView(
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2820,8 +2816,7 @@ void main() {
         firstError ??= detail;
       };
       await tester.pumpWidget(
-        MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        MediaQuery.fromView(
           child: Localizations(
             locale: const Locale('en', 'US'),
             delegates: const <LocalizationsDelegate<dynamic>>[
@@ -4270,8 +4265,7 @@ class TestDependencies extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    return MediaQuery.fromView(
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: child,

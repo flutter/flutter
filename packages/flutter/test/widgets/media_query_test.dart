@@ -145,11 +145,11 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQueryData.fromWindow is sane', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
-    expect(data.size, equals(WidgetsBinding.instance.window.physicalSize / WidgetsBinding.instance.window.devicePixelRatio));
+    expect(data.size, equals(tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio));
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -513,7 +513,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
     expect(copied.devicePixelRatio, data.devicePixelRatio);
@@ -552,7 +552,7 @@ void main() {
       ),
     ];
 
-    final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+    final MediaQueryData data = MediaQueryData.fromView(tester.binding.window);
     final MediaQueryData copied = data.copyWith(
       size: customSize,
       devicePixelRatio: customDevicePixelRatio,
@@ -1110,7 +1110,7 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQuery.fromWindow creates a MediaQuery', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView creates a MediaQuery', (WidgetTester tester) async {
     MediaQuery? mediaQueryOutside;
     MediaQuery? mediaQueryInside;
 
@@ -1118,7 +1118,7 @@ void main() {
       Builder(
         builder: (BuildContext context) {
           mediaQueryOutside = context.findAncestorWidgetOfExactType<MediaQuery>();
-          return MediaQuery.fromWindow(
+          return MediaQuery.fromView(
             child: Builder(
               builder: (BuildContext context) {
                 mediaQueryInside = context.findAncestorWidgetOfExactType<MediaQuery>();
@@ -1134,12 +1134,12 @@ void main() {
     expect(mediaQueryOutside, isNot(mediaQueryInside));
   });
 
-  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
-    final MediaQueryData windowData = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  testWidgets('MediaQuery.fromView is created using values from surrounding view', (WidgetTester tester) async {
+    final MediaQueryData windowData = MediaQueryData.fromView(tester.binding.window);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
-      MediaQuery.fromWindow(
+      MediaQuery.fromView(
         child: Builder(
           builder: (BuildContext context) {
             fromWindowData = MediaQuery.of(context);
@@ -1329,7 +1329,7 @@ void main() {
       gestureSettings: GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100),
     );
 
-    expect(MediaQueryData.fromWindow(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
+    expect(MediaQueryData.fromView(tester.binding.window).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
     tester.binding.window.viewConfigurationTestValue = null;
   });
 

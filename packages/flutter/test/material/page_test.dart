@@ -1218,8 +1218,7 @@ Widget buildNavigator({
   GlobalKey<NavigatorState>? key,
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
-  return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+  return MediaQuery.fromView(
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -1322,8 +1321,7 @@ class TestDependencies extends StatelessWidget {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      child: MediaQuery.fromView(
         child: child,
       ),
     );

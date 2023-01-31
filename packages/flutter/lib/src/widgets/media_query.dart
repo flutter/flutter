@@ -13,6 +13,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'inherited_model.dart';
+import 'view.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -160,13 +161,16 @@ class MediaQueryData {
     this.displayFeatures = const <ui.DisplayFeature>[],
   });
 
-  /// Creates data for a media query based on the given window.
+  /// Deprecated. Use [MediaQueryData.fromView] instead.
   ///
-  /// If you use this, you should ensure that you also register for
-  /// notifications so that you can update your [MediaQueryData] when the
-  /// window's metrics change. For example, see
-  /// [WidgetsBindingObserver.didChangeMetrics] or
-  /// [dart:ui.PlatformDispatcher.onMetricsChanged].
+  /// This constructor was operating on a single window assumption. In
+  /// preparation for Flutter's upcoming multi-window support, it has been
+  /// deprecated.
+  @Deprecated(
+    'Use MediaQueryData.fromView instead. '
+    "This constructor was deprecated in preparation for Flutter's upcoming multi-window support. "
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   factory MediaQueryData.fromWindow(ui.FlutterView window) => MediaQueryData.fromView(window);
 
   /// Creates data for a [MediaQuery] based on the given `view`.
@@ -918,14 +922,16 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     );
   }
 
-  /// Provides a [MediaQuery] which is built and updated using the latest
-  /// [WidgetsBinding.window] values.
+  /// Deprecated. Use [MediaQuery.fromView] instead.
   ///
-  /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
-  /// and its dependents are updated when `window` changes, instead of
-  /// rebuilding the whole widget tree.
-  ///
-  /// The [child] argument is required and must not be null.
+  /// This constructor was operating on a single window assumption. In
+  /// preparation for Flutter's upcoming multi-window support, it has been
+  /// deprecated.
+  @Deprecated(
+    'Use MediaQuery.fromView instead. '
+    "This constructor was deprecated in preparation for Flutter's upcoming multi-window support. "
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   static Widget fromWindow({
     Key? key,
     required Widget child,
@@ -941,6 +947,9 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Wraps the [child] in a [MediaQuery] which is built using data from the
   /// provided [view].
   ///
+  /// If no [view] is provided, the [FlutterView] obtained from the context
+  /// via [View.of] is used.
+  ///
   /// The [MediaQuery] is constructed using the platform-specific data of the
   /// surrounding [MediaQuery] and the view-specific data of the provided
   /// [view]. If no surrounding [MediaQuery] exists, the platform-specific data
@@ -953,10 +962,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// The injected [MediaQuery] automatically updates when any of the data used
   /// to construct it changes.
   ///
-  /// The [view] and [child] argument is required and must not be null.
+  /// The [child] argument is required and must not be null.
   static Widget fromView({
     Key? key,
-    required FlutterView view,
+    FlutterView? view,
     required Widget child,
   }) {
     return _MediaQueryFromView(
@@ -1464,12 +1473,12 @@ enum NavigationMode {
 class _MediaQueryFromView extends StatefulWidget {
   const _MediaQueryFromView({
     super.key,
-    required this.view,
+    this.view,
     this.ignoreParentData = false,
     required this.child,
   });
 
-  final FlutterView view;
+  final FlutterView? view;
   final bool ignoreParentData;
   final Widget child;
 
@@ -1513,7 +1522,8 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   }
 
   void _updateData() {
-    final MediaQueryData newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
+    final FlutterView view = widget.view ?? View.of(context);
+    final MediaQueryData newData = MediaQueryData.fromView(view, platformData: _parentData);
     if (newData != _data) {
       setState(() {
         _data = newData;
