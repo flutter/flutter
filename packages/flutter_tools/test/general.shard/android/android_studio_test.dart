@@ -539,7 +539,7 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
-    testUsingContext('Can find Android Studio >=2022.1 bundled Java version on Mac', () {
+    testUsingContext('Can find Android Studio 2022.1 bundled Java version on Mac', () {
       final String studioInApplicationPlistFolder = globals.fs.path.join(
         '/',
         'Application',
