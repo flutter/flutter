@@ -4218,7 +4218,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// encapsulates the given position within two line terminators. If a
   /// line terminator does not exist in a given direction the selection
   /// extends to the start/end of the document in that direction.
-  void selectParagraph({ required Offset position, SelectionChangedCause? cause }) {
+  void selectParagraph({required Offset position, SelectionChangedCause? cause}) {
     selectParagraphsInRange(from: position, cause: cause);
   }
 
@@ -4228,13 +4228,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// The first and last endpoints of the selection will always be at the beginning and end of a
   /// paragraph respectively.
-  void selectParagraphsInRange({ required Offset from, Offset? to, SelectionChangedCause? cause }) {
+  void selectParagraphsInRange({required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextBoundary paragraphBoundary = ParagraphBoundary(_value.text);
-    final int fromPoint = renderEditable.getPositionForPoint(from).offset;
-    int? toPoint = to == null ? null : renderEditable.getPositionForPoint(to).offset;
-    toPoint = toPoint == null ? null : toPoint == _value.text.length ? toPoint - 1 : toPoint;
-    final TextRange fromRange = paragraphBoundary.getTextBoundaryAt(fromPoint);
-    final TextRange toRange = toPoint == null ? fromRange : paragraphBoundary.getTextBoundaryAt(toPoint);
+    final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
+    final TextRange fromRange = paragraphBoundary.getTextBoundaryAt(fromPosition.offset);
+    final TextPosition toPosition = to == null ? fromPosition : renderEditable.getPositionForPoint(to);
+    final TextRange toRange = toPosition == fromPosition ? fromRange : paragraphBoundary.getTextBoundaryAt(
+      toPosition.offset == _value.text.length ? toPosition.offset - 1 : toPosition.offset,
+    );
     final bool isFromParagraphBeforeToParagraph = fromRange.start < toRange.end;
 
     final TextSelection newSelection = TextSelection(
