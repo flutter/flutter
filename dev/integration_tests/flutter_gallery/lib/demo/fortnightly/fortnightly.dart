@@ -95,7 +95,7 @@ over water meant for the whole central valley of California? The story will shoc
     return SingleChildScrollView(
       child: SafeArea(
         top: false,
-        child: Container(
+        child: ColoredBox(
           color: Theme.of(context).colorScheme.surface,
           child: Column(
             children: <Widget>[

@@ -90,11 +90,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
     required this.color,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.child,
-  }) : assert(showLeading != null),
-       assert(showTrailing != null),
-       assert(axisDirection != null),
-       assert(color != null),
-       assert(notificationPredicate != null);
+  });
 
   /// Whether to show the overscroll glow on the side with negative scroll
   /// offsets.
@@ -248,9 +244,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         } else {
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
-            assert(notification.dragDetails!.globalPosition != null);
             final RenderBox renderer = notification.context!.findRenderObject()! as RenderBox;
-            assert(renderer != null);
             assert(renderer.hasSize);
             final Size size = renderer.size;
             final Offset position = renderer.globalToLocal(notification.dragDetails!.globalPosition);
@@ -317,10 +311,7 @@ class _GlowController extends ChangeNotifier {
     required TickerProvider vsync,
     required Color color,
     required Axis axis,
-  }) : assert(vsync != null),
-       assert(color != null),
-       assert(axis != null),
-       _color = color,
+  }) : _color = color,
        _axis = axis {
     _glowController = AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
@@ -358,7 +349,6 @@ class _GlowController extends ChangeNotifier {
   Color get color => _color;
   Color _color;
   set color(Color value) {
-    assert(color != null);
     if (color == value) {
       return;
     }
@@ -369,7 +359,6 @@ class _GlowController extends ChangeNotifier {
   Axis get axis => _axis;
   Axis _axis;
   set axis(Axis value) {
-    assert(axis != null);
     if (axis == value) {
       return;
     }
@@ -655,9 +644,7 @@ class StretchingOverscrollIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.clipBehavior = Clip.hardEdge,
     this.child,
-  }) : assert(axisDirection != null),
-       assert(notificationPredicate != null),
-       assert(clipBehavior != null);
+  });
 
   /// {@macro flutter.overscroll.axisDirection}
   final AxisDirection axisDirection;
@@ -774,7 +761,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.sizeOf(context);
     double mainAxisSize;
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,

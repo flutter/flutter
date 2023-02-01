@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
 
 import 'dart:async';
 import 'dart:ui';
@@ -96,9 +97,7 @@ void main() {
 
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
@@ -2486,7 +2485,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         onPlatformViewCreatedCallBack(createdPlatformViewId);
@@ -2495,7 +2494,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2535,7 +2534,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['Center', 'SizedBox', 'PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['Center', 'SizedBox', 'PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         // 'create' should not have been called by PlatformViewLink, since its
@@ -2580,7 +2579,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         // Layout should have triggered a create call. Simulate the callback
@@ -2592,12 +2591,57 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
       },
     );
+
+    testWidgets('PlatformViewLink includes offset in create call when using texture layer', (WidgetTester tester) async {
+      late FakeAndroidViewController controller;
+
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          controller = FakeAndroidViewController(params.id, requiresSize: true);
+          controller.create();
+          // This test should be simulating one of the texture-based display
+          // modes, where `create` is a no-op when not provided a size, and
+          // creation is triggered via a later call to setSize, or to `create`
+          // with a size.
+          expect(controller.awaitingCreation, true);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+
+      TestWidgetsFlutterBinding.instance.window.physicalSizeTestValue = const Size(400, 200);
+      TestWidgetsFlutterBinding.instance.window.devicePixelRatioTestValue = 1.0;
+
+      await tester.pumpWidget(
+        Container(
+          constraints: const BoxConstraints.expand(),
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: 100,
+            height: 50,
+            child: platformViewLink,
+          ),
+        )
+      );
+
+      expect(controller.createPosition, const Offset(150, 75));
+
+      TestWidgetsFlutterBinding.instance.window.clearPhysicalSizeTestValue();
+      TestWidgetsFlutterBinding.instance.window.clearDevicePixelRatioTestValue();
+    });
 
     testWidgets(
       'PlatformViewLink does not double-call create for Android Hybrid Composition',
@@ -2616,7 +2660,7 @@ void main() {
             controller = FakeAndroidViewController(params.id);
             controller.create();
             // This test should be simulating Hybrid Composition mode, where
-            // `create` takes effect immidately.
+            // `create` takes effect immediately.
             expect(controller.awaitingCreation, false);
             return controller;
           },
@@ -2633,7 +2677,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         onPlatformViewCreatedCallBack(createdPlatformViewId);
@@ -2642,7 +2686,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);

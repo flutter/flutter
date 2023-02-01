@@ -17,6 +17,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
 import 'clipboard.dart' show Clipboard;
+import 'keyboard_inserted_content.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
@@ -477,18 +478,10 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
+    this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
-  }) : assert(inputType != null),
-       assert(obscureText != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-       assert(autocorrect != null),
-       assert(enableSuggestions != null),
-       assert(keyboardAppearance != null),
-       assert(inputAction != null),
-       assert(textCapitalization != null),
-       assert(enableIMEPersonalizedLearning != null),
-       assert(enableDeltaModel != null);
+  }) : smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -627,6 +620,9 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
+  final List<String> allowedMimeTypes;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -643,6 +639,7 @@ class TextInputConfiguration {
     Brightness? keyboardAppearance,
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
+    List<String>? allowedMimeTypes,
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
   }) {
@@ -659,6 +656,7 @@ class TextInputConfiguration {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
+      allowedMimeTypes: allowedMimeTypes ?? this.allowedMimeTypes,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
@@ -706,6 +704,7 @@ class TextInputConfiguration {
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
+      'contentCommitMimeTypes': allowedMimeTypes,
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel' : enableDeltaModel,
     };
@@ -746,8 +745,7 @@ class RawFloatingCursorPoint {
   RawFloatingCursorPoint({
     this.offset,
     required this.state,
-  }) : assert(state != null),
-       assert(state != FloatingCursorDragState.Update || offset != null);
+  }) : assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset? offset;
@@ -773,13 +771,7 @@ class TextEditingValue {
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
     this.composing = TextRange.empty,
-  }) : assert(text != null),
-       // The constructor does not verify that `selection` and `composing` are
-       // valid ranges within `text`, and is unable to do so due to limitation
-       // of const constructors. Some checks are performed by assertion in
-       // other occasions. See `_textRangeIsValid`.
-       assert(selection != null),
-       assert(composing != null);
+  });
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
@@ -1121,6 +1113,9 @@ mixin TextInputClient {
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
 
+  /// Notify client about new content insertion from Android keyboard.
+  void insertContent(KeyboardInsertedContent content) {}
+
   /// Request from the input method that this client perform the given private
   /// command.
   ///
@@ -1162,10 +1157,90 @@ mixin TextInputClient {
   ///  * [TextInputControl.show], a method to show the new input control.
   void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {}
 
+  /// Requests that the client show the editing toolbar, for example when the
+  /// platform changes the selection through a non-flutter method such as
+  /// scribble.
+  void showToolbar() {}
+
+  /// Requests that the client add a text placeholder to reserve visual space
+  /// in the text.
+  ///
+  /// For example, this is called when responding to UIKit requesting
+  /// a text placeholder be added at the current selection, such as when
+  /// requesting additional writing space with iPadOS14 Scribble.
+  void insertTextPlaceholder(Size size) {}
+
+  /// Requests that the client remove the text placeholder.
+  void removeTextPlaceholder() {}
+
   /// Performs the specified MacOS-specific selector from the
   /// `NSStandardKeyBindingResponding` protocol or user-specified selector
   /// from `DefaultKeyBinding.Dict`.
   void performSelector(String selectorName) {}
+}
+
+/// An interface to receive focus from the engine.
+///
+/// This is currently only used to handle UIIndirectScribbleInteraction.
+abstract class ScribbleClient {
+  /// A unique identifier for this element.
+  String get elementIdentifier;
+
+  /// Called by the engine when the [ScribbleClient] should receive focus.
+  ///
+  /// For example, this method is called during a UIIndirectScribbleInteraction.
+  void onScribbleFocus(Offset offset);
+
+  /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds.
+  bool isInScribbleRect(Rect rect);
+
+  /// The current bounds of the [ScribbleClient].
+  Rect get bounds;
+}
+
+/// Represents a selection rect for a character and it's position in the text.
+///
+/// This is used to report the current text selection rect and position data
+/// to the engine for Scribble support on iPadOS 14.
+@immutable
+class SelectionRect {
+  /// Constructor for creating a [SelectionRect] from a text [position] and
+  /// [bounds].
+  const SelectionRect({
+    required this.position,
+    required this.bounds,
+    this.direction = TextDirection.ltr,
+  });
+
+  /// The position of this selection rect within the text String.
+  final int position;
+
+  /// The rectangle representing the bounds of this selection rect within the
+  /// currently focused [RenderEditable]'s coordinate space.
+  final Rect bounds;
+
+  /// The direction text flows within this selection rect.
+  final TextDirection direction;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SelectionRect
+        && other.position == position
+        && other.bounds == bounds
+        && other.direction == direction;
+  }
+
+  @override
+  int get hashCode => Object.hash(position, bounds);
+
+  @override
+  String toString() => 'SelectionRect($position, $bounds)';
 }
 
 /// An interface to receive granular information from [TextInput].
@@ -1220,13 +1295,13 @@ mixin DeltaTextInputClient implements TextInputClient {
 ///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
   TextInputConnection._(this._client)
-      : assert(_client != null),
-        _id = _nextId++;
+      : _id = _nextId++;
 
   Size? _cachedSize;
   Matrix4? _cachedTransform;
   Rect? _cachedRect;
   Rect? _cachedCaretRect;
+  List<SelectionRect> _cachedSelectionRects = <SelectionRect>[];
 
   static int _nextId = 1;
   final int _id;
@@ -1237,7 +1312,6 @@ class TextInputConnection {
   /// application code will likely break text input for the application.
   @visibleForTesting
   static void debugResetId({int to = 1}) {
-    assert(to != null);
     assert(() {
       _nextId = to;
       return true;
@@ -1248,6 +1322,12 @@ class TextInputConnection {
 
   /// Whether this connection is currently interacting with the text input control.
   bool get attached => TextInput._instance._currentConnection == this;
+
+  /// Whether there is currently a Scribble interaction in progress.
+  ///
+  /// This is used to make sure selection handles are shown when UIKit changes
+  /// the selection during a Scribble interaction.
+  bool get scribbleInProgress => TextInput._instance.scribbleInProgress;
 
   /// Requests that the text input control become visible.
   void show() {
@@ -1308,7 +1388,6 @@ class TextInputConnection {
   /// This information is used for positioning the IME candidates menu on each
   /// platform.
   void setComposingRect(Rect rect) {
-    assert(rect != null);
     if (rect == _cachedRect) {
       return;
     }
@@ -1320,13 +1399,23 @@ class TextInputConnection {
   /// Sends the coordinates of caret rect. This is used on macOS for positioning
   /// the accent selection menu.
   void setCaretRect(Rect rect) {
-    assert(rect != null);
     if (rect == _cachedCaretRect) {
       return;
     }
     _cachedCaretRect = rect;
     final Rect validRect = rect.isFinite ? rect : Offset.zero & const Size(-1, -1);
     TextInput._instance._setCaretRect(validRect);
+  }
+
+  /// Send the bounding boxes of the current selected glyphs in the client to
+  /// the platform's text input plugin.
+  ///
+  /// These are used by the engine during a UIDirectScribbleInteraction.
+  void setSelectionRects(List<SelectionRect> selectionRects) {
+    if (!listEquals(_cachedSelectionRects, selectionRects)) {
+      _cachedSelectionRects = selectionRects;
+      TextInput._instance._setSelectionRects(selectionRects);
+    }
   }
 
   /// Send text styling information.
@@ -1417,7 +1506,6 @@ FloatingCursorDragState _toTextCursorAction(String state) {
 }
 
 RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
-  assert(state != null, 'You must provide a state to set a new editing point.');
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
@@ -1586,10 +1674,6 @@ class TextInput {
 
   /// Ensure that a [TextInput] instance has been set up so that the platform
   /// can handle messages on the text input method channel.
-  @Deprecated(
-    'Use Scribble.ensureInitialized instead. '
-    'This feature was deprecated after v3.1.0-9.0.pre.'
-  )
   static void ensureInitialized() {
     _instance; // ignore: unnecessary_statements
   }
@@ -1605,8 +1689,6 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
-    assert(client != null);
-    assert(configuration != null);
     final TextInputConnection connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
@@ -1616,9 +1698,6 @@ class TextInput {
   // by [attach] and by [_handleTextInputInvocation] for the
   // `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
-    assert(connection != null);
-    assert(connection._client != null);
-    assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _currentConnection = connection;
     _currentConfiguration = configuration;
@@ -1652,6 +1731,16 @@ class TextInput {
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
 
+  final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
+  bool _scribbleInProgress = false;
+
+  /// Used for testing within the Flutter SDK to get the currently registered [ScribbleClient] list.
+  @visibleForTesting
+  static Map<String, ScribbleClient> get scribbleClients => TextInput._instance._scribbleClients;
+
+  /// Returns true if a scribble interaction is currently happening.
+  bool get scribbleInProgress => _scribbleInProgress;
+
   Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
     try {
       return await _handleTextInputInvocation(call);
@@ -1668,8 +1757,33 @@ class TextInput {
       rethrow;
     }
   }
+
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
+    if (method == 'TextInputClient.focusElement') {
+      final List<dynamic> args = methodCall.arguments as List<dynamic>;
+      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+      return;
+    } else if (method == 'TextInputClient.requestElementsInRect') {
+      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
+      return _scribbleClients.keys.where((String elementIdentifier) {
+        final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
+        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
+          return false;
+        }
+        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
+        return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
+      }).map((String elementIdentifier) {
+        final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
+        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
+      }).toList();
+    } else if (method == 'TextInputClient.scribbleInteractionBegan') {
+      _scribbleInProgress = true;
+      return;
+    } else if (method == 'TextInputClient.scribbleInteractionFinished') {
+      _scribbleInProgress = false;
+      return;
+    }
     if (_currentConnection == null) {
       return;
     }
@@ -1677,7 +1791,6 @@ class TextInput {
     // The requestExistingInputState request needs to be handled regardless of
     // the client ID, as long as we have a _currentConnection.
     if (method == 'TextInputClient.requestExistingInputState') {
-      assert(_currentConnection!._client != null);
       _attach(_currentConnection!, _currentConfiguration);
       final TextEditingValue? editingValue = _currentConnection!._client.currentTextEditingValue;
       if (editingValue != null) {
@@ -1691,7 +1804,6 @@ class TextInput {
     // The updateEditingStateWithTag request (autofill) can come up even to a
     // text field that doesn't have a connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
-      assert(_currentConnection!._client != null);
       final TextInputClient client = _currentConnection!._client;
       final AutofillScope? scope = client.currentAutofillScope;
       final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
@@ -1746,7 +1858,12 @@ class TextInput {
         (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
         break;
       case 'TextInputClient.performAction':
-        _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        if (args[1] as String == 'TextInputAction.commitContent') {
+          final KeyboardInsertedContent content = KeyboardInsertedContent.fromJson(args[2] as Map<String, dynamic>);
+          _currentConnection!._client.insertContent(content);
+        } else {
+          _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        }
         break;
       case 'TextInputClient.performSelectors':
         final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
@@ -1772,6 +1889,15 @@ class TextInput {
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
+        break;
+      case 'TextInputClient.showToolbar':
+        _currentConnection!._client.showToolbar();
+        break;
+      case 'TextInputClient.insertTextPlaceholder':
+        _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+        break;
+      case 'TextInputClient.removeTextPlaceholder':
+        _currentConnection!._client.removeTextPlaceholder();
         break;
       default:
         throw MissingPluginException();
@@ -1813,14 +1939,12 @@ class TextInput {
   }
 
   void _updateConfig(TextInputConfiguration configuration) {
-    assert(configuration != null);
     for (final TextInputControl control in _inputControls) {
       control.updateConfig(configuration);
     }
   }
 
   void _setEditingState(TextEditingValue value) {
-    assert(value != null);
     for (final TextInputControl control in _inputControls) {
       control.setEditingState(value);
     }
@@ -1853,6 +1977,12 @@ class TextInput {
   void _setCaretRect(Rect rect) {
     for (final TextInputControl control in _inputControls) {
       control.setCaretRect(rect);
+    }
+  }
+
+  void _setSelectionRects(List<SelectionRect> selectionRects) {
+    for (final TextInputControl control in _inputControls) {
+      control.setSelectionRects(selectionRects);
     }
   }
 
@@ -1950,10 +2080,23 @@ class TextInput {
   /// * [AutofillGroup.onDisposeAction], a configurable action that runs when a
   ///   topmost [AutofillGroup] is getting disposed.
   static void finishAutofillContext({ bool shouldSave = true }) {
-    assert(shouldSave != null);
     for (final TextInputControl control in TextInput._instance._inputControls) {
       control.finishAutofillContext(shouldSave: shouldSave);
     }
+  }
+
+  /// Registers a [ScribbleClient] with [elementIdentifier] that can be focused
+  /// by the engine.
+  ///
+  /// For example, the registered [ScribbleClient] list is used to respond to
+  /// UIIndirectScribbleInteraction on an iPad.
+  static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
+    TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
+  }
+
+  /// Unregisters a [ScribbleClient] with [elementIdentifier].
+  static void unregisterScribbleElement(String elementIdentifier) {
+    TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
 }
 
@@ -2037,6 +2180,12 @@ mixin TextInputControl {
   /// This method is called when the attached input client's caret area
   /// changes.
   void setCaretRect(Rect rect) {}
+
+  /// Informs the text input control about selection area changes.
+  ///
+  /// This method is called when the attached input client's selection area
+  /// changes.
+  void setSelectionRects(List<SelectionRect> selectionRects) {}
 
   /// Informs the text input control about text style changes.
   ///
@@ -2159,6 +2308,24 @@ class _PlatformTextInputControl with TextInputControl {
       },
     );
   }
+
+  @override
+  void setSelectionRects(List<SelectionRect> selectionRects) {
+    _channel.invokeMethod<void>(
+      'TextInput.setSelectionRects',
+      selectionRects.map((SelectionRect rect) {
+        return <num>[
+          rect.bounds.left,
+          rect.bounds.top,
+          rect.bounds.width,
+          rect.bounds.height,
+          rect.position,
+          rect.direction.index,
+        ];
+      }).toList(),
+    );
+  }
+
 
   @override
   void setStyle({

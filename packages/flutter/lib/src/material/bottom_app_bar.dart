@@ -69,11 +69,10 @@ class BottomAppBar extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.notchMargin = 4.0,
     this.child,
+    this.padding,
     this.surfaceTintColor,
     this.height,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(notchMargin != null),
-       assert(clipBehavior != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -82,6 +81,12 @@ class BottomAppBar extends StatefulWidget {
   /// Typically this the child will be a [Row], with the first child
   /// being an [IconButton] with the [Icons.menu] icon.
   final Widget? child;
+
+  /// The amount of space to surround the child inside the bounds of the [BottomAppBar].
+  ///
+  /// In Material 3 the padding will default to `EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)`
+  /// Otherwise the value will default to EdgeInsets.zero.
+  final EdgeInsetsGeometry? padding;
 
   /// The bottom app bar's background color.
   ///
@@ -173,10 +178,10 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
     final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
 
-    final Widget? child = isMaterial3 ? Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+    final Widget child = Padding(
+      padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
       child: widget.child,
-    ) : widget.child;
+    );
 
     return SizedBox(
       height: height,
@@ -189,10 +194,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
           key: materialKey,
           type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
           elevation: elevation,
+          color: isMaterial3 ? effectiveColor : null,
           surfaceTintColor: surfaceTintColor,
-          child: child == null
-            ? null
-            : SafeArea(child: child),
+          child: SafeArea(child: child),
         ),
       ),
     );
@@ -205,10 +209,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     required this.shape,
     required this.materialKey,
     required this.notchMargin,
-  }) : assert(geometry != null),
-       assert(shape != null),
-       assert(notchMargin != null),
-       super(reclip: geometry);
+  }) : super(reclip: geometry);
 
   final ValueListenable<ScaffoldGeometry> geometry;
   final NotchedShape shape;
@@ -268,9 +269,8 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_137
+// Token database version: v0_152
 
-// Generated version v0_137
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   const _BottomAppBarDefaultsM3(this.context)
     : super(

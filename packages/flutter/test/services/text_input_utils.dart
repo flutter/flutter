@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeTextChannel implements MethodChannel {
-  FakeTextChannel(this.outgoing) : assert(outgoing != null);
+  FakeTextChannel(this.outgoing);
 
   Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall)? incoming;
@@ -65,7 +65,7 @@ class FakeTextChannel implements MethodChannel {
   }
 }
 
-class FakeScribbleElement with ScribbleClient {
+class FakeScribbleElement implements ScribbleClient {
   FakeScribbleElement({required String elementIdentifier, Rect bounds = Rect.zero})
       : _elementIdentifier = elementIdentifier,
         _bounds = bounds;
@@ -88,20 +88,5 @@ class FakeScribbleElement with ScribbleClient {
   @override
   void onScribbleFocus(Offset offset) {
     latestMethodCall = 'onScribbleFocus';
-  }
-
-  @override
-  void insertTextPlaceholder(Size size) {
-    latestMethodCall = 'insertTextPlaceholder';
-  }
-
-  @override
-  void removeTextPlaceholder() {
-    latestMethodCall = 'removeTextPlaceholder';
-  }
-
-  @override
-  void showToolbar() {
-    latestMethodCall = 'showToolbar';
   }
 }

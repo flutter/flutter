@@ -177,6 +177,47 @@ void main() {
     expect(events[4], isA<PointerHoverEvent>());
   });
 
+  test('Can handle malformed scrolling event.', () {
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, device: 24),
+      ],
+    );
+    List<PointerEvent> events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
+
+    expect(events.length, 1);
+    expect(events[0], isA<PointerAddedEvent>());
+
+    // Send packet contains malformed scroll events.
+    packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.infinity, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.nan, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.negativeInfinity, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.infinity, scrollDeltaX: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.nan, scrollDeltaX: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.negativeInfinity, scrollDeltaX: 10),
+      ],
+    );
+    events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
+    expect(events.length, 0);
+
+    // Send packet with a valid scroll event.
+    packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: 10, scrollDeltaY: 10),
+      ],
+    );
+    // Make sure PointerEventConverter can expand when device pixel ratio is valid.
+    events = PointerEventConverter.expand(packet.data, GestureBinding.instance.window.devicePixelRatio).toList();
+    expect(events.length, 1);
+    expect(events[0], isA<PointerScrollEvent>());
+
+    // Make sure PointerEventConverter returns none when device pixel ratio is invalid.
+    events = PointerEventConverter.expand(packet.data, 0).toList();
+    expect(events.length, 0);
+  });
+
   test('Can expand pointer scroll events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
         data: <ui.PointerData>[
@@ -350,7 +391,7 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     binding.callback = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    binding.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerPanZoomStartEvent>());
     expect(events[1], isA<PointerPanZoomUpdateEvent>());

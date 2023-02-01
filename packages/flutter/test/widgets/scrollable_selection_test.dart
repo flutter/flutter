@@ -463,6 +463,7 @@ void main() {
 
     final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
     expect(boxes.length, 1);
+    // Find end handle.
     final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph0);
     await gesture.down(handlePos);
 
@@ -491,6 +492,113 @@ void main() {
     expect(paragraph97.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
     expect(paragraph96.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
     await gesture.up();
+  });
+
+  testWidgets('select to scroll by dragging start selection handle stops scroll when released', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Long press to bring up the selection handles.
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+    expect(boxes.length, 1);
+    // Find start handle.
+    final Offset handlePos = globalize(boxes[0].toRect().bottomLeft, paragraph0);
+    await gesture.down(handlePos);
+
+    expect(controller.offset, 0.0);
+    double previousOffset = controller.offset;
+    // Scrollable only auto scroll if the drag passes the boundary.
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    // Release handle should stop scrolling.
+    await gesture.up();
+    // Last scheduled scroll.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    previousOffset = controller.offset;
+    await tester.pumpAndSettle();
+    expect(controller.offset, previousOffset);
+  });
+
+  testWidgets('select to scroll by dragging end selection handle stops scroll when released', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        selectionControls: materialTextSelectionControls,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Long press to bring up the selection handles.
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+    expect(boxes.length, 1);
+    final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph0);
+    await gesture.down(handlePos);
+
+    expect(controller.offset, 0.0);
+    double previousOffset = controller.offset;
+    // Scrollable only auto scroll if the drag passes the boundary
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset > previousOffset, isTrue);
+    previousOffset = controller.offset;
+
+    // Release handle should stop scrolling.
+    await gesture.up();
+    // Last scheduled scroll.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    previousOffset = controller.offset;
+    await tester.pumpAndSettle();
+    expect(controller.offset, previousOffset);
   });
 
   testWidgets('keyboard selection should auto scroll - vertical', (WidgetTester tester) async {

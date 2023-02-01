@@ -153,12 +153,6 @@ abstract class _SpringSolution {
     double initialPosition,
     double initialVelocity,
   ) {
-    assert(spring != null);
-    assert(spring.mass != null);
-    assert(spring.stiffness != null);
-    assert(spring.damping != null);
-    assert(initialPosition != null);
-    assert(initialVelocity != null);
     final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
     if (cmk == 0.0) {
       return _CriticalSolution(spring, initialPosition, initialVelocity);

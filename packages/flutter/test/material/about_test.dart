@@ -15,6 +15,46 @@ void main() {
     LicenseRegistry.reset();
   });
 
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          // Display has a vertical hinge down the middle
+          data: const MediaQueryData(
+            size: Size(800, 600),
+            displayFeatures: <DisplayFeature>[
+              DisplayFeature(
+                bounds: Rect.fromLTRB(390, 0, 410, 600),
+                type: DisplayFeatureType.hinge,
+                state: DisplayFeatureState.unknown,
+              ),
+            ],
+          ),
+          child: child!,
+        );
+      },
+      home: Builder(
+        builder: (BuildContext context) => ElevatedButton(
+          onPressed: () {
+            showAboutDialog(
+              context: context,
+              useRootNavigator: false,
+              applicationName: 'A',
+            );
+          },
+          child: const Text('Show About Dialog'),
+        ),
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Close'), findsOneWidget);
+    expect(find.text('View licenses'), findsOneWidget);
+  });
+
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
@@ -292,10 +332,6 @@ void main() {
       fontSize: 20,
       color: Colors.indigo,
     );
-    const TextStyle subtitleTextStyle = TextStyle(
-      fontSize: 15,
-      color: Colors.indigo,
-    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -312,10 +348,7 @@ void main() {
             ),
           ),
           appBarTheme: const AppBarTheme(
-            textTheme: TextTheme(
-              titleLarge: titleTextStyle,
-              titleSmall: subtitleTextStyle,
-            ),
+            titleTextStyle: titleTextStyle,
             foregroundColor: Colors.indigo,
           ),
         ),
@@ -336,8 +369,6 @@ void main() {
     // Check for titles style.
     final Text title = tester.widget(find.text('AAA'));
     expect(title.style, titleTextStyle);
-    final Text subtitle = tester.widget(find.text('1 license.'));
-    expect(subtitle.style, subtitleTextStyle);
   });
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
@@ -956,6 +987,24 @@ void main() {
     // Padding between app icon and app powered text.
     final double appIconBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
     expect(appIconBottomPadding, 18.0);
+  });
+
+  testWidgets('Error handling test', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() => Stream<LicenseEntry>.error(Exception('Injected failure')));
+    await tester.pumpWidget(const MaterialApp(home: Material(child: AboutListTile())));
+    await tester.tap(find.byType(ListTile));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.tap(find.text('VIEW LICENSES'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    final Finder finder = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_PackagesView');
+    // force the stream to complete (has to be done in a runAsync block since it's areal async process)
+    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>); // ignore: avoid_dynamic_calls
+    expect(tester.takeException().toString(), 'Exception: Injected failure');
+    await tester.pumpAndSettle();
+    expect(tester.takeException().toString(), 'Exception: Injected failure');
+    expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 }
 

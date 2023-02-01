@@ -319,7 +319,7 @@ class FlutterDriverExtension with DeserializeFinderFactory, CreateFinderFactory,
     this._enableTextEntryEmulation, {
     List<FinderExtension> finders = const <FinderExtension>[],
     List<CommandExtension> commands = const <CommandExtension>[],
-  }) : assert(finders != null) {
+  }) {
     if (_enableTextEntryEmulation) {
       registerTextInput();
     }

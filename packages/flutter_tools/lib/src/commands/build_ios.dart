@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
@@ -12,6 +15,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../doctor_validator.dart';
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
@@ -22,7 +26,7 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required super.verboseHelp }) {
+  BuildIOSCommand({ required super.logger, required super.verboseHelp }) {
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -54,12 +58,40 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
 }
 
+/// The key that uniquely identifies an image file in an image asset.
+/// It consists of (idiom, scale, size?), where size is present for app icon
+/// asset, and null for launch image asset.
+@immutable
+class _ImageAssetFileKey {
+  const _ImageAssetFileKey(this.idiom, this.scale, this.size);
+
+  /// The idiom (iphone or ipad).
+  final String idiom;
+  /// The scale factor (e.g. 2).
+  final int scale;
+  /// The logical size in point (e.g. 83.5).
+  /// Size is present for app icon, and null for launch image.
+  final double? size;
+
+  @override
+  int get hashCode => Object.hash(idiom, scale, size);
+
+  @override
+  bool operator ==(Object other) => other is _ImageAssetFileKey
+      && other.idiom == idiom
+      && other.scale == scale
+      && other.size == size;
+
+  /// The pixel size based on logical size and scale.
+  int? get pixelSize => size == null ? null : (size! * scale).toInt(); // pixel size must be an int.
+}
+
 /// Builds an .xcarchive and optionally .ipa for an iOS app to be generated for
 /// App Store submission.
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required super.verboseHelp}) {
+  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -130,14 +162,216 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return super.validateCommand();
   }
 
-  Future<void> _validateXcodeBuildSettingsAfterArchive() async {
+  // A helper function to parse Contents.json of an image asset into a map,
+  // with the key to be _ImageAssetFileKey, and value to be the image file name.
+  // Some assets have size (e.g. app icon) and others do not (e.g. launch image).
+  Map<_ImageAssetFileKey, String> _parseImageAssetContentsJson(
+    String contentsJsonDirName,
+    { required bool requiresSize })
+  {
+    final Directory contentsJsonDirectory = globals.fs.directory(contentsJsonDirName);
+    if (!contentsJsonDirectory.existsSync()) {
+      return <_ImageAssetFileKey, String>{};
+    }
+    final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
+    final Map<String, dynamic> contents = json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>? ?? <String, dynamic>{};
+    final List<dynamic> images = contents['images'] as List<dynamic>? ?? <dynamic>[];
+    final Map<String, dynamic> info = contents['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
+    if ((info['version'] as int?) != 1) {
+      // Skips validation for unknown format.
+      return <_ImageAssetFileKey, String>{};
+    }
+
+    final Map<_ImageAssetFileKey, String> iconInfo = <_ImageAssetFileKey, String>{};
+    for (final dynamic image in images) {
+      final Map<String, dynamic> imageMap = image as Map<String, dynamic>;
+      final String? idiom = imageMap['idiom'] as String?;
+      final String? size = imageMap['size'] as String?;
+      final String? scale = imageMap['scale'] as String?;
+      final String? fileName = imageMap['filename'] as String?;
+
+      // requiresSize must match the actual presence of size in json.
+      if (requiresSize != (size != null)
+        || idiom == null || scale == null || fileName == null)
+      {
+        continue;
+      }
+
+      final double? parsedSize;
+      if (size != null) {
+        // for example, "64x64". Parse the width since it is a square.
+        final Iterable<double> parsedSizes = size.split('x')
+          .map((String element) => double.tryParse(element))
+          .whereType<double>();
+        if (parsedSizes.isEmpty) {
+          continue;
+        }
+        parsedSize = parsedSizes.first;
+      } else {
+        parsedSize = null;
+      }
+
+      // for example, "3x".
+      final Iterable<int> parsedScales = scale.split('x')
+        .map((String element) => int.tryParse(element))
+        .whereType<int>();
+      if (parsedScales.isEmpty) {
+        continue;
+      }
+      final int parsedScale = parsedScales.first;
+      iconInfo[_ImageAssetFileKey(idiom, parsedScale, parsedSize)] = fileName;
+    }
+    return iconInfo;
+  }
+
+  // A helper function to check if an image asset is still using template files.
+  bool _isAssetStillUsingTemplateFiles({
+    required Map<_ImageAssetFileKey, String> templateImageInfoMap,
+    required Map<_ImageAssetFileKey, String> projectImageInfoMap,
+    required String templateImageDirName,
+    required String projectImageDirName,
+  }) {
+    return projectImageInfoMap.entries.any((MapEntry<_ImageAssetFileKey, String> entry) {
+      final String projectFileName = entry.value;
+      final String? templateFileName = templateImageInfoMap[entry.key];
+      if (templateFileName == null) {
+        return false;
+      }
+      final File projectFile = globals.fs.file(
+          globals.fs.path.join(projectImageDirName, projectFileName));
+      final File templateFile = globals.fs.file(
+          globals.fs.path.join(templateImageDirName, templateFileName));
+
+      return projectFile.existsSync()
+          && templateFile.existsSync()
+          && md5.convert(projectFile.readAsBytesSync()) ==
+              md5.convert(templateFile.readAsBytesSync());
+    });
+  }
+
+  // A helper function to return a list of image files in an image asset with
+  // wrong sizes (as specified in its Contents.json file).
+  List<String> _imageFilesWithWrongSize({
+    required Map<_ImageAssetFileKey, String> imageInfoMap,
+    required String imageDirName,
+  }) {
+    return imageInfoMap.entries.where((MapEntry<_ImageAssetFileKey, String> entry) {
+      final String fileName = entry.value;
+      final File imageFile = globals.fs.file(globals.fs.path.join(imageDirName, fileName));
+      if (!imageFile.existsSync()) {
+        return false;
+      }
+      // validate image size is correct.
+      // PNG file's width is at byte [16, 20), and height is at byte [20, 24), in big endian format.
+      // Based on https://en.wikipedia.org/wiki/Portable_Network_Graphics#File_format
+      final ByteData imageData = imageFile.readAsBytesSync().buffer.asByteData();
+      if (imageData.lengthInBytes < 24) {
+        return false;
+      }
+      final int width = imageData.getInt32(16);
+      final int height = imageData.getInt32(20);
+      // The size must not be null.
+      final int expectedSize = entry.key.pixelSize!;
+      return width != expectedSize || height != expectedSize;
+    })
+    .map((MapEntry<_ImageAssetFileKey, String> entry) => entry.value)
+    .toList();
+  }
+
+  ValidationResult? _createValidationResult(String title, List<ValidationMessage> messages) {
+    if (messages.isEmpty) {
+      return null;
+    }
+    final bool anyInvalid = messages.any((ValidationMessage message) => message.type != ValidationMessageType.information);
+    return ValidationResult(
+      anyInvalid ? ValidationType.partial : ValidationType.success,
+      messages,
+      statusInfo: title,
+    );
+  }
+
+  ValidationMessage _createValidationMessage({
+    required bool isValid,
+    required String message,
+  }) {
+    // Use "information" type for valid message, and "hint" type for invalid message.
+    return isValid ? ValidationMessage(message) : ValidationMessage.hint(message);
+  }
+
+  Future<List<ValidationMessage>> _validateIconAssetsAfterArchive() async {
+    final BuildableIOSApp app = await buildableIOSApp;
+
+    final Map<_ImageAssetFileKey, String> templateInfoMap = _parseImageAssetContentsJson(
+      app.templateAppIconDirNameForContentsJson,
+      requiresSize: true);
+    final Map<_ImageAssetFileKey, String> projectInfoMap = _parseImageAssetContentsJson(
+      app.projectAppIconDirName,
+      requiresSize: true);
+
+    final List<ValidationMessage> validationMessages = <ValidationMessage>[];
+
+    final bool usesTemplate = _isAssetStillUsingTemplateFiles(
+      templateImageInfoMap: templateInfoMap,
+      projectImageInfoMap: projectInfoMap,
+      templateImageDirName: await app.templateAppIconDirNameForImages,
+      projectImageDirName: app.projectAppIconDirName);
+
+    if (usesTemplate) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'App icon is set to the default placeholder icon. Replace with unique icons.',
+      ));
+    }
+
+    final List<String> filesWithWrongSize = _imageFilesWithWrongSize(
+      imageInfoMap: projectInfoMap,
+      imageDirName: app.projectAppIconDirName);
+
+    if (filesWithWrongSize.isNotEmpty) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'App icon is using the incorrect size (e.g. ${filesWithWrongSize.first}).',
+      ));
+    }
+    return validationMessages;
+  }
+
+  Future<List<ValidationMessage>> _validateLaunchImageAssetsAfterArchive() async {
+    final BuildableIOSApp app = await buildableIOSApp;
+
+    final Map<_ImageAssetFileKey, String> templateInfoMap = _parseImageAssetContentsJson(
+      app.templateLaunchImageDirNameForContentsJson,
+      requiresSize: false);
+    final Map<_ImageAssetFileKey, String> projectInfoMap = _parseImageAssetContentsJson(
+      app.projectLaunchImageDirName,
+      requiresSize: false);
+
+    final List<ValidationMessage> validationMessages = <ValidationMessage>[];
+
+    final bool usesTemplate = _isAssetStillUsingTemplateFiles(
+      templateImageInfoMap: templateInfoMap,
+      projectImageInfoMap: projectInfoMap,
+      templateImageDirName: await app.templateLaunchImageDirNameForImages,
+      projectImageDirName: app.projectLaunchImageDirName);
+
+    if (usesTemplate) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'Launch image is set to the default placeholder icon. Replace with unique launch image.',
+      ));
+    }
+
+    return validationMessages;
+  }
+
+  Future<List<ValidationMessage>> _validateXcodeBuildSettingsAfterArchive() async {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
 
     if (!globals.fs.file(plistPath).existsSync()) {
       globals.printError('Invalid iOS archive. Does not contain Info.plist.');
-      return;
+      return <ValidationMessage>[];
     }
 
     final Map<String, String?> xcodeProjectSettingsMap = <String, String?>{};
@@ -148,21 +382,32 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-    final StringBuffer buffer = StringBuffer();
-    xcodeProjectSettingsMap.forEach((String title, String? info) {
-      buffer.writeln('$title: ${info ?? "Missing"}');
-    });
+    final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
+      final String title = entry.key;
+      final String? info = entry.value;
+      return _createValidationMessage(
+        isValid: info != null,
+        message: '$title: ${info ?? "Missing"}',
+      );
+    }).toList();
 
-    final String message;
-    if (xcodeProjectSettingsMap.values.any((String? element) => element == null)) {
-      buffer.writeln('\nYou must set up the missing settings');
-      buffer.write('Instructions: https://docs.flutter.dev/deployment/ios');
-      message = buffer.toString();
-    } else {
-      // remove the new line
-      message = buffer.toString().trim();
+    final bool hasMissingSettings = xcodeProjectSettingsMap.values.any((String? element) => element == null);
+    if (hasMissingSettings) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'You must set up the missing app settings.'),
+      );
     }
-    globals.printBox(message, title: 'App Settings');
+
+    final bool usesDefaultBundleIdentifier = xcodeProjectSettingsMap['Bundle Identifier']?.startsWith('com.example') ?? false;
+    if (usesDefaultBundleIdentifier) {
+      validationMessages.add(_createValidationMessage(
+        isValid: false,
+        message: 'Your application still contains the default "com.example" bundle identifier.'),
+      );
+    }
+
+    return validationMessages;
   }
 
   @override
@@ -171,7 +416,26 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     displayNullSafetyMode(buildInfo);
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
-    await _validateXcodeBuildSettingsAfterArchive();
+    final List<ValidationResult?> validationResults = <ValidationResult?>[];
+    validationResults.add(_createValidationResult(
+      'App Settings Validation',
+      await _validateXcodeBuildSettingsAfterArchive(),
+    ));
+    validationResults.add(_createValidationResult(
+      'App Icon and Launch Image Assets Validation',
+      await _validateIconAssetsAfterArchive() + await _validateLaunchImageAssetsAfterArchive(),
+    ));
+
+    for (final ValidationResult result in validationResults.whereType<ValidationResult>()) {
+      globals.printStatus('\n${result.coloredLeadingBox} ${result.statusInfo}');
+      for (final ValidationMessage message in result.messages) {
+        globals.printStatus(
+          '${message.coloredIndicator} ${message.message}',
+          indent: result.leadingBox.length + 1,
+        );
+      }
+    }
+    globals.printStatus('\nTo update the settings, please refer to https://docs.flutter.dev/deployment/ios\n');
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
@@ -293,6 +557,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
+    required super.logger,
     required bool verboseHelp
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();

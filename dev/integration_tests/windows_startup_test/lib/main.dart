@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter_driver/driver_extension.dart';
@@ -44,6 +45,18 @@ void main() async {
       return (app == system)
         ? 'success'
         : 'error: app dark mode ($app) does not match system dark mode ($system)';
+    } else if (message == 'verifyStringConversion') {
+      // Use a test string that contains code points that fit in both 8 and 16 bits.
+      // The code points are passed a list of integers through the method channel,
+      // which will use the UTF16 to UTF8 utility function to convert them to a
+      // std::string, which should equate to the original expected string.
+      // TODO(schectman): Remove trailing null from returned string
+      const String expected = 'ABCℵ\x00';
+      final Int32List codePoints = Int32List.fromList(expected.codeUnits);
+      final String converted = await testStringConversion(codePoints);
+      return (converted == expected)
+        ? 'success'
+        : 'error: conversion of UTF16 string to UTF8 failed, expected "${expected.codeUnits}" but got "${converted.codeUnits}"';
     }
 
     throw 'Unrecognized message: $message';

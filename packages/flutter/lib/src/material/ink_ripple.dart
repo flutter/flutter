@@ -119,17 +119,13 @@ class InkRipple extends InteractiveInkFeature {
     ShapeBorder? customBorder,
     double? radius,
     super.onRemoved,
-  }) : assert(color != null),
-       assert(position != null),
-       assert(textDirection != null),
-       _position = position,
+  }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, color: color) {
-    assert(_borderRadius != null);
 
     // Immediately begin fading-in the initial splash.
     _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
@@ -232,10 +228,14 @@ class InkRipple extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
     final Paint paint = Paint()..color = color.withAlpha(alpha);
+    Rect? rect;
+    if (_clipCallback != null) {
+       rect = _clipCallback!();
+    }
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(
       _position,
-      referenceBox.size.center(Offset.zero),
+      rect != null ? rect.center : referenceBox.size.center(Offset.zero),
       Curves.ease.transform(_radiusController.value),
     )!;
     paintInkCircle(

@@ -54,7 +54,7 @@ class DevelopmentShaderCompiler {
   void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) {
     switch (platform) {
       case TargetPlatform.ios:
-        _shaderTarget = enableImpeller ? ShaderTarget.impelleriOS : ShaderTarget.sksl;
+        _shaderTarget = ShaderTarget.impelleriOS;
         break;
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
@@ -175,6 +175,7 @@ class ShaderCompiler {
       );
     }
 
+    final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
     final List<String> cmd = <String>[
       impellerc.path,
       target.target,
@@ -186,7 +187,9 @@ class ShaderCompiler {
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
+      '--include=$shaderLibPath',
     ];
+    _logger.printTrace('shaderc command: $cmd');
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;
     if (code != 0) {

@@ -5,7 +5,9 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
+import '../template.dart';
 import '../xcode_project.dart';
 import 'plist_parser.dart';
 
@@ -151,12 +153,58 @@ class BuildableIOSApp extends IOSApp {
       _hostAppBundleName == null ? 'Runner.app' : _hostAppBundleName!,
       'Info.plist');
 
+  String get projectAppIconDirName => _projectImageAssetDirName(_appIconAsset);
+
+  String get projectLaunchImageDirName => _projectImageAssetDirName(_launchImageAsset);
+
+  String get templateAppIconDirNameForContentsJson
+    => _templateImageAssetDirNameForContentsJson(_appIconAsset);
+
+  String get templateLaunchImageDirNameForContentsJson
+    => _templateImageAssetDirNameForContentsJson(_launchImageAsset);
+
+  Future<String> get templateAppIconDirNameForImages async
+    => _templateImageAssetDirNameForImages(_appIconAsset);
+
+  Future<String> get templateLaunchImageDirNameForImages async
+    => _templateImageAssetDirNameForImages(_launchImageAsset);
+
   String get ipaOutputPath =>
       globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
   String _buildAppPath(String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
+
+  String _projectImageAssetDirName(String asset)
+    => globals.fs.path.join('ios', 'Runner', 'Assets.xcassets', asset);
+
+  // Template asset's Contents.json file is in flutter_tools, but the actual
+  String _templateImageAssetDirNameForContentsJson(String asset)
+    => globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+      'templates',
+      _templateImageAssetDirNameSuffix(asset),
+    );
+
+  // Template asset's images are in flutter_template_images package.
+  Future<String> _templateImageAssetDirNameForImages(String asset) async {
+    final Directory imageTemplate = await templateImageDirectory(null, globals.fs, globals.logger);
+    return globals.fs.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
+  }
+
+  String _templateImageAssetDirNameSuffix(String asset) => globals.fs.path.join(
+    'app_shared',
+    'ios.tmpl',
+    'Runner',
+    'Assets.xcassets',
+    asset,
+  );
+
+  String get _appIconAsset => 'AppIcon.appiconset';
+  String get _launchImageAsset => 'LaunchImage.imageset';
 }
 
 class PrebuiltIOSApp extends IOSApp implements PrebuiltApplicationPackage {

@@ -39,19 +39,19 @@ class BottomSheetThemeData with Diagnosticable {
     this.constraints,
   });
 
-  /// Default value for [BottomSheet.backgroundColor].
+  /// Overrides the default value for [BottomSheet.backgroundColor].
   ///
   /// If null, [BottomSheet] defaults to [Material]'s default.
   final Color? backgroundColor;
 
-  /// Default value for surfaceTintColor.
+  /// Overrides the default value for surfaceTintColor.
   ///
   /// If null, [BottomSheet] will not display an overlay color.
   ///
   /// See [Material.surfaceTintColor] for more details.
   final Color? surfaceTintColor;
 
-  /// Default value for [BottomSheet.elevation].
+  /// Overrides the default value for [BottomSheet.elevation].
   ///
   /// {@macro flutter.material.material.elevation}
   ///
@@ -62,7 +62,7 @@ class BottomSheetThemeData with Diagnosticable {
   /// as a modal bottom sheet.
   final Color? modalBackgroundColor;
 
-  /// Default value for barrier color when the Bottom sheet is presented as
+  /// Overrides the default value for barrier color when the Bottom sheet is presented as
   /// a modal bottom sheet.
   final Color? modalBarrierColor;
 
@@ -70,13 +70,13 @@ class BottomSheetThemeData with Diagnosticable {
   /// modal bottom sheet.
   final double? modalElevation;
 
-  /// Default value for [BottomSheet.shape].
+  /// Overrides the default value for [BottomSheet.shape].
   ///
   /// If null, no overriding shape is specified for [BottomSheet], so the
   /// [BottomSheet] is rectangular.
   final ShapeBorder? shape;
 
-  /// Default value for [BottomSheet.clipBehavior].
+  /// Overrides the default value for [BottomSheet.clipBehavior].
   ///
   /// If null, [BottomSheet] uses [Clip.none].
   final Clip? clipBehavior;
@@ -118,7 +118,6 @@ class BottomSheetThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomSheetThemeData? lerp(BottomSheetThemeData? a, BottomSheetThemeData? b, double t) {
-    assert(t != null);
     if (a == null && b == null) {
       return null;
     }
