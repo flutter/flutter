@@ -179,7 +179,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDeviceTimeoutOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
@@ -280,7 +279,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nativeNullAssertions: boolArgDeprecated('native-null-assertions'),
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
-        serveObservatory: boolArgDeprecated('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
       );
     }
