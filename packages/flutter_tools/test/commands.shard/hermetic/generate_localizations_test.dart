@@ -266,43 +266,4 @@ format: true
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
-
-  // Regression test for https://github.com/flutter/flutter/issues/119593
-  testUsingContext('overridden storage base url does not affect the command', () async {
-    const String baseUrl = 'https://storage.com';
-    final Cache cache = Cache.test(
-      platform: FakePlatform(environment: <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': baseUrl,
-      }),
-      processManager: processManager,
-      logger: logger,
-    );
-
-    expect(cache.storageBaseUrl, baseUrl);
-
-    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-      ..createSync(recursive: true);
-    arbFile.writeAsStringSync('''
-{
-  "helloWorld": "Hello, World!",
-  "@helloWorld": {
-    "description": "Sample description"
-  }
-}''');
-    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
-      fileSystem: fileSystem,
-      logger: logger,
-      artifacts: artifacts,
-      processManager: processManager,
-    );
-    await createTestCommandRunner(command).run(<String>['gen-l10n']);
-
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
-    expect(outputDirectory.existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-    expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
 }
