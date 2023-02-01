@@ -219,7 +219,7 @@ void main() {
       final String content = await response.transform(utf8.decoder).join();
       expect(content.contains('Dart VM Observatory'), true);
     } finally {
-      sub.cancel();
+      await sub.cancel();
       process.kill();
     }
   });
