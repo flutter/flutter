@@ -627,7 +627,6 @@ class LocalizationsGenerator {
 
   /// A generated file that will contain the list of messages for each locale
   /// that do not have a translation yet.
-  @visibleForTesting
   final File? untranslatedMessagesFile;
 
   /// The file that contains the list of inputs and outputs for generating
@@ -824,7 +823,7 @@ class LocalizationsGenerator {
     if (untranslatedMessagesFileString == null || untranslatedMessagesFileString.isEmpty) {
       return null;
     }
-
+    untranslatedMessagesFileString = untranslatedMessagesFileString.replaceAll(r'\', fileSystem.path.separator);
     return fileSystem.file(untranslatedMessagesFileString);
   }
 
