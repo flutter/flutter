@@ -218,6 +218,7 @@
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/dart_plugin_registry_test.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/entrypoint_dart_registrant.dart @aaclarke @flutter/plugin
+/dev/devicelab/bin/tasks/flavors_test_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_macos__compile.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_macos__start_up.dart @a-wallen @flutter/desktop
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @yaakovschectman @flutter/desktop

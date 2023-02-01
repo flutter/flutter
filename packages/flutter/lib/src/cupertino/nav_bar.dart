@@ -149,8 +149,20 @@ Widget _wrapWithBackground({
         overlayStyle = SystemUiOverlayStyle.dark;
         break;
     }
+    // [SystemUiOverlayStyle.light] and [SystemUiOverlayStyle.dark] set some system
+    // navigation bar properties,
+    // Before https://github.com/flutter/flutter/pull/104827 those properties
+    // had no effect, now they are used if there is no AnnotatedRegion on the
+    // bottom of the screen.
+    // For backward compatibility, create a `SystemUiOverlayStyle` without the
+    // system navigation bar properties.
     result = AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
+      value: SystemUiOverlayStyle(
+        statusBarColor: overlayStyle.statusBarColor,
+        statusBarBrightness: overlayStyle.statusBarBrightness,
+        statusBarIconBrightness: overlayStyle.statusBarIconBrightness,
+        systemStatusBarContrastEnforced: overlayStyle.systemStatusBarContrastEnforced,
+      ),
       child: result,
     );
   }

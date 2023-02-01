@@ -1855,9 +1855,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  // TODO(goderbauer): Make this const and fix fallout, https://github.com/flutter/flutter/issues/108248
-  // ignore: prefer_const_constructors_in_immutables
-  MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] });
+  const MultiChildRenderObjectWidget({ super.key, this.children = const <Widget>[] });
 
   /// The widgets below this widget in the tree.
   ///
