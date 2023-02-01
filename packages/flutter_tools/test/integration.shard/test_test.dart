@@ -165,6 +165,20 @@ void main() {
     expect(result.exitCode, 1);
   });
 
+  testWithoutContext('flutter test should run a test with an exact name in URI format', () async {
+    final ProcessResult result = await _runFlutterTest('uri_format', automatedTestsDirectory, flutterTestDirectory,
+      query: 'full-name=exactTestName');
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
+    expect(result.exitCode, 0);
+  });
+
+  testWithoutContext('flutter test should run a test by line number in URI format', () async {
+    final ProcessResult result = await _runFlutterTest('uri_format', automatedTestsDirectory, flutterTestDirectory,
+      query: 'line=11');
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
+    expect(result.exitCode, 0);
+  });
+
   testWithoutContext('flutter test should test runs to completion', () async {
     final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--verbose']);
@@ -315,6 +329,7 @@ Future<ProcessResult> _runFlutterTest(
   String workingDirectory,
   String testDirectory, {
   List<String> extraArguments = const <String>[],
+  String? query,
 }) async {
 
   String testPath;
@@ -342,7 +357,8 @@ Future<ProcessResult> _runFlutterTest(
     '--reporter',
     'compact',
     ...extraArguments,
-    testPath,
+    if (query != null) Uri.file(testPath).replace(query: query).toString()
+    else testPath,
   ];
 
   return Process.run(

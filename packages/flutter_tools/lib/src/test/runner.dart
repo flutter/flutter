@@ -24,7 +24,7 @@ abstract class FlutterTestRunner {
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<String> testFiles, {
+    List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
@@ -61,7 +61,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
   @override
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<String> testFiles, {
+    List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
@@ -124,6 +124,15 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--shard-index=$shardIndex',
       '--chain-stack-traces',
     ];
+
+    /// Helper to convert the [Uri] for a test to an argument that can be passed
+    /// to `dart test`.
+    ///
+    /// [Uri]s are (currently) only supported when there's a querystring.
+    /// https://github.com/dart-lang/test/issues/1891.
+    String testUriToArgument(Uri uri) =>
+        uri.hasQuery ? uri.toString() : uri.toFilePath();
+
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory
         .createTempSync('flutter_test.')
@@ -140,13 +149,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ).initialize(
         projectDirectory: flutterProject!.directory,
         testOutputDir: tempBuildDir,
-        testFiles: testFiles,
+        testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
       );
       testArgs
         ..add('--platform=chrome')
         ..add('--')
-        ..addAll(testFiles);
+        ..addAll(testFiles.map(testUriToArgument));
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
@@ -182,7 +191,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     testArgs
       ..add('--')
-      ..addAll(testFiles);
+      ..addAll(testFiles.map(testUriToArgument));
 
     final InternetAddressType serverType =
         ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
