@@ -207,6 +207,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<TiledTexturePipeline>(*context_);
   gaussian_blur_pipelines_[{}] =
       CreateDefaultPipeline<GaussianBlurPipeline>(*context_);
+  gaussian_blur_decal_pipelines_[{}] =
+      CreateDefaultPipeline<GaussianBlurDecalPipeline>(*context_);
   border_mask_blur_pipelines_[{}] =
       CreateDefaultPipeline<BorderMaskBlurPipeline>(*context_);
   morphology_filter_pipelines_[{}] =

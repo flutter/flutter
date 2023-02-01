@@ -36,6 +36,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/gaussian_blur.frag.h"
 #include "impeller/entity/gaussian_blur.vert.h"
+#include "impeller/entity/gaussian_blur_decal.frag.h"
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
 #include "impeller/entity/glyph_atlas_sdf.frag.h"
@@ -146,6 +147,8 @@ using TiledTexturePipeline = RenderPipelineT<TiledTextureFillVertexShader,
                                              TiledTextureFillFragmentShader>;
 using GaussianBlurPipeline =
     RenderPipelineT<GaussianBlurVertexShader, GaussianBlurFragmentShader>;
+using GaussianBlurDecalPipeline =
+    RenderPipelineT<GaussianBlurVertexShader, GaussianBlurDecalFragmentShader>;
 using BorderMaskBlurPipeline =
     RenderPipelineT<BorderMaskBlurVertexShader, BorderMaskBlurFragmentShader>;
 using MorphologyFilterPipeline =
@@ -279,6 +282,11 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(gaussian_blur_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurDecalPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(gaussian_blur_decal_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetBorderMaskBlurPipeline(
@@ -455,6 +463,7 @@ class ContentContext {
   mutable Variants<TexturePipeline> texture_pipelines_;
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
+  mutable Variants<GaussianBlurDecalPipeline> gaussian_blur_decal_pipelines_;
   mutable Variants<BorderMaskBlurPipeline> border_mask_blur_pipelines_;
   mutable Variants<MorphologyFilterPipeline> morphology_filter_pipelines_;
   mutable Variants<ColorMatrixColorFilterPipeline>
