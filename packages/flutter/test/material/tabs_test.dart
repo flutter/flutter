@@ -4515,10 +4515,10 @@ void main() {
 
   testWidgets('Tab preferredSize gives correct value', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Row(
-            children: const <Tab>[
+            children: <Tab>[
               Tab(icon: Icon(Icons.message)),
               Tab(text: 'Two'),
               Tab(text: 'Three', icon: Icon(Icons.chat)),

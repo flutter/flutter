@@ -658,10 +658,10 @@ void main() {
     });
 
     testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
-      await tester.pumpWidget(Flex(
+      await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox.shrink(
             child: ColoredBox(color: colorToPaint),
           ),
@@ -681,10 +681,10 @@ void main() {
     testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
-      await tester.pumpWidget(Flex(
+      await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox.shrink(
             child: ColoredBox(color: colorToPaint, child: child),
           ),
