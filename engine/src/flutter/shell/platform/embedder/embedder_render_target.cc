@@ -8,6 +8,8 @@
 
 #include "flutter/fml/logging.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 
 EmbedderRenderTarget::EmbedderRenderTarget(FlutterBackingStore backing_store,

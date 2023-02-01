@@ -7,6 +7,7 @@
 #include "flutter/display_list/display_list_flags.h"
 
 #include "third_party/skia/include/core/SkPoint.h"
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace flutter {

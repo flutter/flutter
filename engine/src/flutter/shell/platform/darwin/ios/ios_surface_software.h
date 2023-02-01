@@ -12,6 +12,8 @@
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 @class CALayer;
 
 namespace flutter {

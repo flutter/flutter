@@ -7,6 +7,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/testing/test_metal_surface_impl.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 
 bool TestMetalSurface::PlatformSupportsMetal() {

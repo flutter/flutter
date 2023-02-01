@@ -8,6 +8,8 @@
 #include "flutter/display_list/display_list_benchmarks_canvas_provider.h"
 #include "flutter/testing/test_metal_surface.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 namespace testing {
 

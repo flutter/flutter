@@ -6,7 +6,10 @@
 #define FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKS_GL_H_
 
 #include "flutter/display_list/display_list_benchmarks_canvas_provider.h"
+
 #include "flutter/testing/test_gl_surface.h"
+
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 namespace testing {

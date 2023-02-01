@@ -9,6 +9,8 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
 namespace flutter {

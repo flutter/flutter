@@ -15,6 +15,8 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 #include "gmock/gmock.h"
 
 using testing::_;

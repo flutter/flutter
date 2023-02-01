@@ -7,6 +7,7 @@
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 
 #include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"

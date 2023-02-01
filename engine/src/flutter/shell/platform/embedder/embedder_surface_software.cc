@@ -7,8 +7,10 @@
 #include <utility>
 
 #include "flutter/fml/trace_event.h"
+
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
