@@ -23,7 +23,18 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067.
+  # Changes made in https://github.com/flutter/flutter/pull/119647
+  - title: "Migrate to 'fromView'"
+    date: 2022-10-28
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'fromWindow'
+      inClass: 'MediaQueryData'
+    changes:
+      - kind: 'rename'
+        newName: 'fromView'
+
+  # Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
   - title: "Remove 'vsync'"
     date: 2023-01-30
     element:

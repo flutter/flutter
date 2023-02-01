@@ -142,7 +142,7 @@ void main() {
 
     // Set the starting viewportDimension to 0.0
     await tester.binding.setSurfaceSize(Size.zero);
-    final MediaQueryData mediaQueryData = MediaQueryData.fromWindow(tester.binding.window);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.binding.window);
 
     Widget build(Size size) {
       return MediaQuery(

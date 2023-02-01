@@ -476,15 +476,13 @@ void main() {
           child: const Icon(Icons.add),
         ),
       );
-      return MediaQuery.fromWindow(
-        child: MediaQuery(
-          data: MediaQueryData(
-            viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
-          ),
-          child: MaterialApp(
-            useInheritedMediaQuery: true,
-            home: scaffold,
-          ),
+      return MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
+        ),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          home: scaffold,
         ),
       );
     }

@@ -900,7 +900,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              data: MediaQueryData(textScaleFactor: textScale),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -1082,7 +1082,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              data: MediaQueryData(textScaleFactor: textScale),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -1870,7 +1870,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              data: MediaQueryData(textScaleFactor: textScale),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -2080,7 +2080,7 @@ void main() {
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+                data: MediaQueryData(textScaleFactor: textScale),
                 child: Material(
                   child: Row(
                     children: <Widget>[
