@@ -1,4 +1,4 @@
-Signature: 9084c679b1af771da02d479f02a2afc1
+Signature: 4c7cbae38ec88f0353c28a714397aefa
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8916,6 +8916,8 @@ ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../th
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegSegmentScan.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegSegmentScan.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkJpegSourceMgr.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkJpegSourceMgr.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/images/SkJpegGainmapEncoder.cpp + ../../../third_party/skia/LICENSE
@@ -8931,6 +8933,8 @@ FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h
 FILE: ../../../third_party/skia/src/codec/SkJpegSegmentScan.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegSegmentScan.h
+FILE: ../../../third_party/skia/src/codec/SkJpegSourceMgr.cpp
+FILE: ../../../third_party/skia/src/codec/SkJpegSourceMgr.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h
 FILE: ../../../third_party/skia/src/images/SkJpegGainmapEncoder.cpp
