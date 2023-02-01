@@ -9,6 +9,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -783,4 +784,34 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('Compute image tiling', () {
+    expect(() => createTilingInfo(ImageRepeat.noRepeat, Rect.zero, Rect.zero, Rect.zero), throwsAssertionError);
+
+    final DebugImageTilingInfo repeatX = createTilingInfo(
+      ImageRepeat.repeatX,
+      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
+      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
+      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
+    );
+    expect(repeatX.tmx, TileMode.repeated);
+    expect(repeatX.tmy, TileMode.clamp);
+    expect(repeatX.transform, matrixMoreOrLessEquals(Matrix4.identity()
+      ..scale(1.0, 1.0)
+      ..setTranslationRaw(12.0, 0.0, 0.0)
+    ));
+
+    final DebugImageTilingInfo repeatY = createTilingInfo(
+      ImageRepeat.repeatY,
+      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
+      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
+      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
+    );
+    expect(repeatY.tmx, TileMode.clamp);
+    expect(repeatY.tmy, TileMode.repeated);
+    expect(repeatY.transform, matrixMoreOrLessEquals(Matrix4.identity()
+      ..scale(1.0, 1.0)
+      ..setTranslationRaw(12.0, 0.0, 0.0)
+    ));
+  });
 }

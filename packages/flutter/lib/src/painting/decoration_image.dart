@@ -405,6 +405,60 @@ void debugFlushLastFrameImageSizeInfo() {
   }());
 }
 
+/// Information that describes how to tile an image for a given [ImageRepeat]
+/// enum.
+@visibleForTesting
+@immutable
+class DebugImageTilingInfo {
+  /// Create a new [DebugImageTilingInfo] object.
+  const DebugImageTilingInfo({
+    required this.tmx,
+    required this.tmy,
+    required this.transform,
+  });
+
+  /// The tile mode for the x-axis.
+  final TileMode tmx;
+
+  /// The tile mode for the y-axis.
+  final TileMode tmy;
+
+  /// The transform to apply to the image shader.
+  final Matrix4 transform;
+
+  @override
+  String toString() {
+    if (!kDebugMode) {
+      return 'ImageTilingInfo';
+    }
+    return 'ImageTilingInfo($tmx, $tmy, $transform)';
+  }
+}
+
+/// Create the [DebugImageTilingInfo] for a given [ImageRepeat], canvas [rect],
+/// [destinationRect], and [sourceRect].
+@visibleForTesting
+DebugImageTilingInfo createTilingInfo(ImageRepeat repeat, Rect rect, Rect destinationRect, Rect sourceRect) {
+  assert(repeat != ImageRepeat.noRepeat);
+  final TileMode tmx = (repeat == ImageRepeat.repeatX || repeat == ImageRepeat.repeat)
+    ? TileMode.repeated
+    : TileMode.clamp;
+  final TileMode tmy = (repeat == ImageRepeat.repeatY || repeat == ImageRepeat.repeat)
+    ? TileMode.repeated
+    : TileMode.clamp;
+  final Rect data = _generateImageTileRects(rect, destinationRect, repeat).first;
+  print('Scales: ${data.width / sourceRect.width} | ${data.height / sourceRect.height}');
+  final Matrix4 transform = Matrix4.identity()
+    ..scale(data.width / sourceRect.width, data.height / sourceRect.height)
+    ..setTranslationRaw(-data.topLeft.dx, -data.topLeft.dy, 0);
+
+  return DebugImageTilingInfo(
+    tmx: tmx,
+    tmy: tmy,
+    transform: transform,
+  );
+}
+
 /// Paints an image into the given rectangle on the canvas.
 ///
 /// The arguments have the following meanings:
@@ -644,18 +698,12 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      final TileMode tmx = (repeat == ImageRepeat.repeatX || repeat == ImageRepeat.repeat)
-        ? TileMode.repeated
-        : TileMode.clamp;
-      final TileMode tmy = (repeat == ImageRepeat.repeatY || repeat == ImageRepeat.repeat)
-        ? TileMode.repeated
-        : TileMode.clamp;
-      final Rect data = _generateImageTileRects(rect, destinationRect, repeat).first;
-      final Matrix4 xform = Matrix4.identity()
-        ..scale(data.width / sourceRect.width, data.height / sourceRect.height)
-        ..setTranslationRaw(-data.topLeft.dx, -data.topLeft.dy, 1);
-
-      final ImageShader shader = ImageShader(image, tmx, tmy, xform.storage, filterQuality: filterQuality);
+      print(rect);
+      print(destinationRect);
+      print(sourceRect);
+      final DebugImageTilingInfo info = createTilingInfo(repeat, rect, destinationRect, sourceRect);
+      final ImageShader shader = ImageShader(image, info.tmx, info.tmy, info.transform.storage, filterQuality: filterQuality);
+      print(info);
       canvas.drawRect(
         rect,
         paint..shader = shader
