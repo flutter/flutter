@@ -4445,9 +4445,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// to be necessary to decide which direction to lay the children in or to
   /// disambiguate `start` or `end` values for the main or cross axis
   /// directions, the [textDirection] must not be null.
-  // TODO(goderbauer): Figure out whether this can be const.
-  // ignore: prefer_const_constructors_in_immutables
-  Flex({
+  const Flex({
     super.key,
     required this.direction,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -4458,7 +4456,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     super.children,
-  }) : assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
+  }) : assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
 
   /// The direction to use as the main axis.
   ///
@@ -4814,7 +4812,7 @@ class Row extends Flex {
   /// unless the row has no children or only one child) or to disambiguate
   /// `start` or `end` values for the [mainAxisAlignment], the [textDirection]
   /// must not be null.
-  Row({
+  const Row({
     super.key,
     super.mainAxisAlignment,
     super.mainAxisSize,
@@ -5007,7 +5005,7 @@ class Column extends Flex {
   /// any. If there is no ambient directionality, and a text direction is going
   /// to be necessary to disambiguate `start` or `end` values for the
   /// [crossAxisAlignment], the [textDirection] must not be null.
-  Column({
+  const Column({
     super.key,
     super.mainAxisAlignment,
     super.mainAxisSize,

@@ -141,4 +141,10 @@ void main() {
     await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
+
+  test('Flex/Column/Row can be const-constructed', () {
+    const Flex(direction: Axis.vertical);
+    const Column();
+    const Row();
+  });
 }
