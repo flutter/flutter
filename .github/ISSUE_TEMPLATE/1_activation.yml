@@ -39,13 +39,6 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Code sample
-      description: Please provide a [complete and minimal, reproducible code sample](https://stackoverflow.com/help/minimal-reproducible-example)
-      render: Dart
-    validations:
-      required: true
-  - type: textarea
-    attributes:
       label: Logs
       description: |
         Include the full logs of the commands you are running between the lines
