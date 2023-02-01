@@ -146,12 +146,99 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
-    expect(_getMaterial(tester).surfaceTintColor,
-        ThemeData().colorScheme.surfaceTint);
+    expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 1);
     expect(_indicator(tester)?.color, const Color(0xff2196f3));
     expect(_indicator(tester)?.shape, const StadiumBorder());
   });
+
+  testWidgets('Navigation drawer is scrollable', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 500, windowHeight: 300);
+    await tester.pumpWidget(
+      _buildWidget(
+        scaffoldKey,
+        NavigationDrawer(
+          children: <Widget>[
+            for(int i = 0; i < 100; i++)
+              NavigationDrawerDestination(
+                icon: const Icon(Icons.ac_unit),
+                label: Text('Label$i'),
+              ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Label0'), findsOneWidget);
+    expect(find.text('Label1'), findsOneWidget);
+    expect(find.text('Label2'), findsOneWidget);
+    expect(find.text('Label3'), findsOneWidget);
+    expect(find.text('Label4'), findsOneWidget);
+    expect(find.text('Label5'), findsOneWidget);
+    expect(find.text('Label6'), findsNothing);
+    expect(find.text('Label7'), findsNothing);
+    expect(find.text('Label8'), findsNothing);
+
+    await tester.dragFrom(const Offset(0, 200), const Offset(0.0, -200));
+    await tester.pump();
+
+    expect(find.text('Label0'), findsNothing);
+    expect(find.text('Label1'), findsNothing);
+    expect(find.text('Label2'), findsNothing);
+    expect(find.text('Label3'), findsOneWidget);
+    expect(find.text('Label4'), findsOneWidget);
+    expect(find.text('Label5'), findsOneWidget);
+    expect(find.text('Label6'), findsOneWidget);
+    expect(find.text('Label7'), findsOneWidget);
+    expect(find.text('Label8'), findsOneWidget);
+    expect(find.text('Label9'), findsNothing);
+    expect(find.text('Label10'), findsNothing);
+   });
+
+  testWidgets('Safe Area test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const double windowHeight = 300;
+    widgetSetup(tester, 500, windowHeight: windowHeight);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          theme: ThemeData.light(),
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: NavigationDrawer(
+                  children: <Widget>[
+                    for(int i = 0; i < 10; i++)
+                      NavigationDrawerDestination(
+                        icon: const Icon(Icons.ac_unit),
+                        label: Text('Label$i'),
+                      ),
+                  ],
+                  onDestinationSelected: (int i) {},
+                ),
+            body: Container(),
+          ),
+        ),
+      ),
+    );
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Safe area padding on the top and sides.
+    expect(
+      tester.getTopLeft(find.widgetWithText(NavigationDrawerDestination,'Label0')),
+      const Offset(20.0, 20.0),
+    );
+
+    // No Safe area padding at the bottom.
+    expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, windowHeight);
+   });
 
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
