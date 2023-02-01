@@ -37,15 +37,15 @@ import 'text_editing_intents.dart';
 ///   // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
 ///   // then DefaultTextEditingShortcuts is already being inserted into the
 ///   // widget tree.
-///   return DefaultTextEditingShortcuts(
+///   return const DefaultTextEditingShortcuts(
 ///     child: Center(
 ///       child: Shortcuts(
-///         shortcuts: const <ShortcutActivator, Intent>{
+///         shortcuts: <ShortcutActivator, Intent>{
 ///           SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): NextFocusIntent(),
 ///           SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): PreviousFocusIntent(),
 ///         },
 ///         child: Column(
-///           children: const <Widget>[
+///           children: <Widget>[
 ///             TextField(
 ///               decoration: InputDecoration(
 ///                 hintText: 'alt + down moves to the next field.',
