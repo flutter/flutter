@@ -319,7 +319,7 @@ void main() {
       expect(() => cache.storageBaseUrl, throwsToolExit());
     });
 
-    testWithoutContext('overridden storage base url prints warning to STDERR', () async {
+    testWithoutContext('overridden storage base url prints warning', () async {
       final BufferLogger logger = BufferLogger.test();
       const String baseUrl = 'https://storage.com';
       final Cache cache = Cache.test(
@@ -331,7 +331,7 @@ void main() {
       );
 
       expect(cache.storageBaseUrl, baseUrl);
-      expect(logger.errorText, contains('Flutter assets will be downloaded from $baseUrl'));
+      expect(logger.warningText, contains('Flutter assets will be downloaded from $baseUrl'));
       expect(logger.statusText, isEmpty);
     });
   });
