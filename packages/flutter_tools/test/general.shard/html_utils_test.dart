@@ -61,7 +61,7 @@ String htmlSample2Replaced({
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    var serviceWorkerVersion = '$serviceWorkerVersion';
+    var serviceWorkerVersion = "$serviceWorkerVersion";
   </script>
   <script>
     navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion');
