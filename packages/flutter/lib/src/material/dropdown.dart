@@ -1130,7 +1130,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// instead.
   final Color? dropdownColor;
 
-  /// Padding of this widget.
+  /// Padding around the dropdown button.
   ///
   /// Increasing the padding also increases the user clickable area.
   final EdgeInsetsGeometry? padding;
