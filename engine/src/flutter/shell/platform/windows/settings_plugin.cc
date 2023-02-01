@@ -26,6 +26,32 @@ constexpr wchar_t kGetPreferredBrightnessRegValue[] = L"AppsUseLightTheme";
 constexpr wchar_t kGetTextScaleFactorRegKey[] =
     L"Software\\Microsoft\\Accessibility";
 constexpr wchar_t kGetTextScaleFactorRegValue[] = L"TextScaleFactor";
+
+// Return an approximation of the apparent luminance of a given color.
+int GetLuminance(DWORD color) {
+  int r = GetRValue(color);
+  int g = GetGValue(color);
+  int b = GetBValue(color);
+  return (r + r + r + b + (g << 2)) >> 3;
+}
+
+// Return kLight if light mode for apps is selected, otherwise return kDark.
+SettingsPlugin::PlatformBrightness GetThemeBrightness() {
+  DWORD use_light_theme;
+  DWORD use_light_theme_size = sizeof(use_light_theme);
+  LONG result = RegGetValue(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
+                            kGetPreferredBrightnessRegValue, RRF_RT_REG_DWORD,
+                            nullptr, &use_light_theme, &use_light_theme_size);
+
+  if (result == 0) {
+    return use_light_theme ? SettingsPlugin::PlatformBrightness::kLight
+                           : SettingsPlugin::PlatformBrightness::kDark;
+  } else {
+    // The current OS does not support dark mode. (Older Windows 10 or before
+    // Windows 10)
+    return SettingsPlugin::PlatformBrightness::kLight;
+  }
+}
 }  // namespace
 
 SettingsPlugin::SettingsPlugin(BinaryMessenger* messenger,
@@ -103,19 +129,13 @@ float SettingsPlugin::GetTextScaleFactor() {
 }
 
 SettingsPlugin::PlatformBrightness SettingsPlugin::GetPreferredBrightness() {
-  DWORD use_light_theme;
-  DWORD use_light_theme_size = sizeof(use_light_theme);
-  LONG result = RegGetValue(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
-                            kGetPreferredBrightnessRegValue, RRF_RT_REG_DWORD,
-                            nullptr, &use_light_theme, &use_light_theme_size);
-
-  if (result == 0) {
-    return use_light_theme ? SettingsPlugin::PlatformBrightness::kLight
-                           : SettingsPlugin::PlatformBrightness::kDark;
+  if (is_high_contrast_) {
+    DWORD window_color = GetSysColor(COLOR_WINDOW);
+    int luminance = GetLuminance(window_color);
+    return luminance >= 127 ? SettingsPlugin::PlatformBrightness::kLight
+                            : SettingsPlugin::PlatformBrightness::kDark;
   } else {
-    // The current OS does not support dark mode. (Older Windows 10 or before
-    // Windows 10)
-    return SettingsPlugin::PlatformBrightness::kLight;
+    return GetThemeBrightness();
   }
 }
 
@@ -144,6 +164,11 @@ void SettingsPlugin::WatchTextScaleFactorChanged() {
   RegNotifyChangeKeyValue(
       text_scale_factor_reg_hkey_, FALSE, REG_NOTIFY_CHANGE_LAST_SET,
       text_scale_factor_changed_watcher_->GetHandle(), TRUE);
+}
+
+void SettingsPlugin::UpdateHighContrastMode(bool is_high_contrast) {
+  is_high_contrast_ = is_high_contrast;
+  SendSettings();
 }
 
 }  // namespace flutter
