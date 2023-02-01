@@ -819,7 +819,7 @@ class LocalizationsGenerator {
     if (untranslatedMessagesFileString == null || untranslatedMessagesFileString.isEmpty) {
       return null;
     }
-
+    untranslatedMessagesFileString = untranslatedMessagesFileString.replaceAll(r'\', fileSystem.path.separator);
     return fileSystem.file(untranslatedMessagesFileString);
   }
 
