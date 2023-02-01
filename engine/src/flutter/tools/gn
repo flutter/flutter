@@ -342,22 +342,21 @@ def to_gn_args(args):
     gn_args['host_cpu'] = 'x86'
     gn_args['current_cpu'] = 'x86'
 
-  if is_host_build(args) and gn_args['host_os'] == 'mac':
-    # macOS host builds (whether x64 or arm64) must currently be built under
-    # Rosetta on Apple Silicon Macs.
-    # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
+  # When building binaries to run on a macOS host (like gen_snapshot), always
+  # use the clang_x64 toolchain, which will run under Rosetta. This is done for
+  # two reasons:
+  #  1. goma currently only supports the clang_x64 toolchain.
+  #  2. gen_snapshot cannot crossbuild from arm64 to x64. Its host architecture
+  #     must be x64 to target x64.
+  # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
+  if get_host_os() == 'mac' and not args.force_mac_arm64:
     gn_args['host_cpu'] = 'x64'
 
+  if is_host_build(args) and gn_args['host_os'] == 'mac':
     # macOS unit tests include Vulkan headers which reference Metal types
     # introduced in macOS 10.14.
     gn_args['mac_sdk_min'] = '10.14'
     gn_args['mac_deployment_target'] = '10.14.0'
-
-  # macOS target builds (whether x64 or arm64) must currently be built under
-  # Rosetta on Apple Silicon Macs.
-  # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
-  if 'target_os' in gn_args and gn_args['target_os'] == 'mac':
-    gn_args['host_cpu'] = 'x64'
 
   if gn_args['target_os'] == 'ios':
     gn_args['use_ios_simulator'] = args.simulator
@@ -728,6 +727,13 @@ def parse_args(args):
   )
   parser.add_argument(
       '--mac-cpu', type=str, choices=['x64', 'arm64'], default='x64'
+  )
+  parser.add_argument(
+      '--force-mac-arm64',
+      action='store_true',
+      default=False,
+      help='Force use of the clang_arm64 toolchain on an arm64 mac host when '
+      'building host binaries.'
   )
   parser.add_argument('--simulator', action='store_true', default=False)
   parser.add_argument(
