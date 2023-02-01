@@ -9,6 +9,8 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_ptr_internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 #ifdef SHELL_ENABLE_METAL

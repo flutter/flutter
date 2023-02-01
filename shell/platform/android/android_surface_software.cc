@@ -13,7 +13,9 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 

@@ -19,6 +19,8 @@
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/testing.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 

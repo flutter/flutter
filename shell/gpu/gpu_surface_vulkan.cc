@@ -5,9 +5,11 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 
 #include "flutter/fml/logging.h"
-#include "fml/trace_event.h"
-#include "include/core/SkColorSpace.h"
-#include "include/core/SkSize.h"
+#include "flutter/fml/trace_event.h"
+
+#include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/core/SkSurface.h"
 #include "vulkan/vulkan_core.h"
 
 namespace flutter {
