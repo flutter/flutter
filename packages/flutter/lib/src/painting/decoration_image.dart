@@ -703,7 +703,6 @@ void paintImage({
         rect,
         paint..shader = shader
       );
-      shader.dispose();
     }
   } else {
     canvas.scale(1 / scale);
