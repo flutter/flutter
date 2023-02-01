@@ -23,7 +23,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('end-to-end test', () {
-    testWidgets('tap on the floating action button, verify counter',
+    testWidgets('look for display p3 deepest red',
         (tester) async {
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
