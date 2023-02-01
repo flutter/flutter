@@ -1,4 +1,4 @@
-Signature: 58ab92c31997828c2913b4da89714d7d
+Signature: f592e220a06eb6b46d003e675b2b58be
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8985,6 +8985,7 @@ ORIGIN: ../../../third_party/skia/src/base/SkFloatingPoint.cpp + ../../../third_
 ORIGIN: ../../../third_party/skia/src/base/SkQuads.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkQuads.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkSafeMath.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkRSXform.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkTSearch.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h + ../../../third_party/skia/LICENSE
@@ -9004,6 +9005,7 @@ FILE: ../../../third_party/skia/src/base/SkFloatingPoint.cpp
 FILE: ../../../third_party/skia/src/base/SkQuads.cpp
 FILE: ../../../third_party/skia/src/base/SkQuads.h
 FILE: ../../../third_party/skia/src/base/SkSafeMath.cpp
+FILE: ../../../third_party/skia/src/core/SkRSXform.cpp
 FILE: ../../../third_party/skia/src/core/SkTSearch.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h
