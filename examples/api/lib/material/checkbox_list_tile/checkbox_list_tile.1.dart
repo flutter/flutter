@@ -44,7 +44,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
               setState(() {
                 checkboxValue1 = value!;
               });
-             },
+            },
             title: const Text('Headline'),
             subtitle: const Text('Supporting text'),
           ),
@@ -55,7 +55,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
               setState(() {
                 checkboxValue2 = value!;
               });
-             },
+            },
             title: const Text('Headline'),
             subtitle: const Text('Longer supporting text to demonstrate how the text wraps and the checkbox is centered vertically with the text.'),
           ),
@@ -66,7 +66,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
               setState(() {
                 checkboxValue3 = value!;
               });
-             },
+            },
             title: const Text('Headline'),
             subtitle: const Text("Longer supporting text to demonstrate how the text wraps and how setting 'CheckboxListTile.isThreeLine = true' aligns the checkbox to the top vertically with the text."),
             isThreeLine: true,
