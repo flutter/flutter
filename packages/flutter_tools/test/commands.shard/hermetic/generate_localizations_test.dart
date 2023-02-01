@@ -312,6 +312,8 @@ untranslated-messages-file: lib/l10n/untranslated.json
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations_es.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+    final File untranslatedMessagesFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'untranslated.json'));
+    expect(untranslatedMessagesFile.existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
