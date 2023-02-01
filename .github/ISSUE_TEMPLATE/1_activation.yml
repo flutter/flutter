@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for using Flutter
+        Thank you for using Flutter!
 
         If you are looking for support, please check out our documentation
         or consider asking a question on Stack Overflow:
@@ -42,9 +42,9 @@ body:
       label: Logs
       description: |
         Include the full logs of the commands you are running between the lines
-        with the backticks below. If you are running any "flutter" commands,
-        please include the output of running them with "--verbose"; for example,
-        the output of running "flutter --verbose create foo".
+        with the backticks below. If you are running any `flutter` commands,
+        please include the output of running them with `--verbose`; for example,
+        the output of running `flutter --verbose create foo`.
       value: |
         <details>
         <summary>Logs</summary>
