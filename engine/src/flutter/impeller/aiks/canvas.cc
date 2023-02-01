@@ -306,6 +306,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
   contents->SetSourceRect(source);
   contents->SetSamplerDescriptor(std::move(sampler));
   contents->SetOpacity(paint.color.alpha);
+  contents->SetDeferApplyingOpacity(paint.HasColorFilter());
 
   Entity entity;
   entity.SetBlendMode(paint.blend_mode);

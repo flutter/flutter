@@ -1842,5 +1842,37 @@ TEST_P(AiksTest, SceneColorSource) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, PaintWithFilters) {
+  // validate that a paint with a color filter "HasFilters", no other filters
+  // impact this setting.
+  Paint paint;
+
+  ASSERT_FALSE(paint.HasColorFilter());
+
+  paint.color_filter = [](FilterInput::Ref input) {
+    return ColorFilterContents::MakeBlend(BlendMode::kSourceOver,
+                                          {std::move(input)}, Color::Blue());
+  };
+
+  ASSERT_TRUE(paint.HasColorFilter());
+
+  paint.image_filter = [](const FilterInput::Ref& input,
+                          const Matrix& effect_transform) {
+    return FilterContents::MakeGaussianBlur(
+        input, Sigma(1.0), Sigma(1.0), FilterContents::BlurStyle::kNormal,
+        Entity::TileMode::kClamp, effect_transform);
+  };
+
+  ASSERT_TRUE(paint.HasColorFilter());
+
+  paint.mask_blur_descriptor = {};
+
+  ASSERT_TRUE(paint.HasColorFilter());
+
+  paint.color_filter = std::nullopt;
+
+  ASSERT_FALSE(paint.HasColorFilter());
+}
+
 }  // namespace testing
 }  // namespace impeller

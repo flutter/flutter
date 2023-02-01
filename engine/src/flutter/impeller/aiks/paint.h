@@ -106,6 +106,9 @@ struct Paint {
   std::shared_ptr<Contents> CreateContentsForGeometry(
       std::unique_ptr<Geometry> geometry) const;
 
+  /// @brief   Whether this paint has a color filter that can apply opacity
+  bool HasColorFilter() const;
+
  private:
   std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
                                          bool is_solid_color,
