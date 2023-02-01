@@ -1,5 +1,5 @@
 ---
-name: I am having difficulty installing Flutter or getting it to work
+name: (Old - this will be removed) I am having difficulty installing Flutter or getting it to work
 about: You have run into problems while downloading or installing Flutter, or the
   "flutter" tool is crashing, or you are running into some other issue before even
   being able to use "flutter run".
