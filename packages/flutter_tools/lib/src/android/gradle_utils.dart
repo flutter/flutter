@@ -27,9 +27,9 @@ import 'android_sdk.dart';
 // For more information about the latest version, check:
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 // https://kotlinlang.org/docs/releases.html#release-details
-const String templateDefaultGradleVersion = '7.5';
-const String templateAndroidGradlePluginVersion = '7.2.0';
-const String templateDefaultGradleVersionForModule = '7.2.0';
+const String templateDefaultGradleVersion = '7.6';
+const String templateAndroidGradlePluginVersion = '7.4.0';
+const String templateDefaultGradleVersionForModule = '7.4.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
 // These versions should match the values in flutter.gradle (FlutterExtension).
@@ -39,8 +39,8 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 // `.android` is always regenerated after flutter pub get, so new versions are picked up after a
 // Flutter upgrade.
 const String compileSdkVersion = '31';
-const String minSdkVersion = '16';
-const String targetSdkVersion = '31';
+const String minSdkVersion = '19';
+const String targetSdkVersion = '33';
 const String ndkVersion = '21.4.7075529';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
@@ -54,11 +54,11 @@ class GradleUtils {
     required FileSystem fileSystem,
     required Cache cache,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils;
+  })  : _platform = platform,
+        _logger = logger,
+        _cache = cache,
+        _fileSystem = fileSystem,
+        _operatingSystemUtils = operatingSystemUtils;
 
   final Cache _cache;
   final FileSystem _fileSystem;
@@ -82,30 +82,23 @@ class GradleUtils {
       _operatingSystemUtils.makeExecutable(gradle);
       return gradle.absolute.path;
     }
-    throwToolExit(
-      'Unable to locate gradlew script. Please check that ${gradle.path} '
-      'exists or that ${gradle.dirname} can be read.'
-    );
+    throwToolExit('Unable to locate gradlew script. Please check that ${gradle.path} '
+        'exists or that ${gradle.dirname} can be read.');
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    copyDirectory(
-      _cache.getArtifactDirectory('gradle_wrapper'),
-      directory,
-      shouldCopyFile: (File sourceFile, File destinationFile) {
-        // Don't override the existing files in the project.
-        return !destinationFile.existsSync();
-      },
-      onFileCopied: (File source, File dest) {
-        _operatingSystemUtils.makeExecutable(dest);
-      }
-    );
+    copyDirectory(_cache.getArtifactDirectory('gradle_wrapper'), directory,
+        shouldCopyFile: (File sourceFile, File destinationFile) {
+      // Don't override the existing files in the project.
+      return !destinationFile.existsSync();
+    }, onFileCopied: (File source, File dest) {
+      _operatingSystemUtils.makeExecutable(dest);
+    });
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
-    final Directory propertiesDirectory = directory
-      .childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
-    final File propertiesFile = propertiesDirectory
-      .childFile('gradle-wrapper.properties');
+    final Directory propertiesDirectory =
+        directory.childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
+    final File propertiesFile = propertiesDirectory.childFile('gradle-wrapper.properties');
 
     if (propertiesFile.existsSync()) {
       return;
@@ -131,13 +124,15 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    logger.printTrace("$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace(
+        "$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace(
+        "$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
@@ -204,8 +199,8 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (_isWithinVersionRange(androidPluginVersion, min: '4.0.0', max: '4.1.0')) {
     return '6.7';
   }
-  if (_isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.5')) {
-    return '7.5';
+  if (_isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.6')) {
+    return '7.6';
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }
@@ -286,9 +281,9 @@ void writeLocalProperties(File properties) {
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project', type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
-  throwToolExit(
-    '${globals.logger.terminal.warningMark} No Android SDK found. '
-    'Try setting the ANDROID_SDK_ROOT environment variable.'
-  );
+  BuildEvent('unsupported-project',
+          type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage)
+      .send();
+  throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
+      'Try setting the ANDROID_SDK_ROOT environment variable.');
 }

@@ -979,10 +979,10 @@ A problem occurred evaluating project ':app'.
           '│ To fix this issue, replace the following content:                                │\n'
           '│ /android/build.gradle:                                                           │\n'
           "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-          "│     + classpath 'com.android.tools.build:gradle:7.2.0'                           │\n"
+          "│     + classpath 'com.android.tools.build:gradle:7.4.0'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-7.5-all.zip               │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.6-all.zip               │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
