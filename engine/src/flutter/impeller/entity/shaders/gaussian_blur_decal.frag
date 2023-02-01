@@ -5,7 +5,7 @@
 #include <impeller/texture.glsl>
 
 vec4 Sample(sampler2D tex, vec2 coords) {
-  return texture(tex, coords);
+  return IPSampleDecal(tex, coords);
 }
 
 #include "gaussian_blur.glsl"

@@ -183,13 +183,12 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-
-    FS::FragInfo frag_info;
-    frag_info.texture_sampler_y_coord_scale =
+    frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
-    frag_info.alpha_mask_sampler_y_coord_scale =
+    frame_info.alpha_mask_sampler_y_coord_scale =
         source_snapshot->texture->GetYCoordScale();
 
+    FS::FragInfo frag_info;
     auto r = Radius{transformed_blur_radius_length};
     frag_info.blur_sigma = Sigma{r}.sigma;
     frag_info.blur_radius = r.radius;
@@ -198,7 +197,6 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     frag_info.blur_direction =
         pass_transform.Invert().TransformDirection(Vector2(1, 0)).Normalize();
 
-    frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
     frag_info.src_factor = src_color_factor_;
     frag_info.inner_blur_factor = inner_blur_factor_;
     frag_info.outer_blur_factor = outer_blur_factor_;
@@ -207,19 +205,48 @@ std::optional<Snapshot> DirectionalGaussianBlurFilterContents::RenderFilter(
     Command cmd;
     cmd.label = SPrintF("Gaussian Blur Filter (Radius=%.2f)",
                         transformed_blur_radius_length);
+    cmd.BindVertices(vtx_buffer);
+
     auto options = OptionsFromPass(pass);
     options.blend_mode = BlendMode::kSource;
-    cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
-    cmd.BindVertices(vtx_buffer);
+    auto input_descriptor = input_snapshot->sampler_descriptor;
+    auto source_descriptor = source_snapshot->sampler_descriptor;
+    switch (tile_mode_) {
+      case Entity::TileMode::kDecal:
+        cmd.pipeline = renderer.GetGaussianBlurDecalPipeline(options);
+        break;
+      case Entity::TileMode::kClamp:
+        cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+        input_descriptor.width_address_mode = SamplerAddressMode::kClampToEdge;
+        input_descriptor.height_address_mode = SamplerAddressMode::kClampToEdge;
+        source_descriptor.width_address_mode = SamplerAddressMode::kClampToEdge;
+        source_descriptor.height_address_mode =
+            SamplerAddressMode::kClampToEdge;
+        break;
+      case Entity::TileMode::kMirror:
+        cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+        input_descriptor.width_address_mode = SamplerAddressMode::kMirror;
+        input_descriptor.height_address_mode = SamplerAddressMode::kMirror;
+        source_descriptor.width_address_mode = SamplerAddressMode::kMirror;
+        source_descriptor.height_address_mode = SamplerAddressMode::kMirror;
+        break;
+      case Entity::TileMode::kRepeat:
+        cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+        input_descriptor.width_address_mode = SamplerAddressMode::kRepeat;
+        input_descriptor.height_address_mode = SamplerAddressMode::kRepeat;
+        source_descriptor.width_address_mode = SamplerAddressMode::kRepeat;
+        source_descriptor.height_address_mode = SamplerAddressMode::kRepeat;
+        break;
+    }
 
     FS::BindTextureSampler(
         cmd, input_snapshot->texture,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            input_snapshot->sampler_descriptor));
+            input_descriptor));
     FS::BindAlphaMaskSampler(
         cmd, source_snapshot->texture,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            source_snapshot->sampler_descriptor));
+            source_descriptor));
     VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
@@ -281,7 +308,7 @@ std::optional<Rect> DirectionalGaussianBlurFilterContents::GetFilterCoverage(
 
   auto transform = inputs[0]->GetTransform(entity) * effect_transform;
   auto transformed_blur_vector =
-      transform.TransformDirection(blur_direction_ * Radius{blur_sigma_}.radius)
+      transform.TransformDirection(blur_direction_* Radius{blur_sigma_}.radius)
           .Abs();
   auto extent = coverage->size + transformed_blur_vector * 2;
   return Rect(coverage->origin - transformed_blur_vector,
