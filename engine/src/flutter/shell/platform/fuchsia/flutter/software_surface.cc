@@ -16,8 +16,10 @@
 #include "flutter/fml/trace_event.h"
 #include "fuchsia/sysmem/cpp/fidl.h"
 #include "include/core/SkImageInfo.h"
+
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 #include "../runtime/dart/utils/inlines.h"
 

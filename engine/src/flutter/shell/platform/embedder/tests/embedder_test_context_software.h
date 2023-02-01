@@ -7,6 +7,8 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 namespace testing {
 

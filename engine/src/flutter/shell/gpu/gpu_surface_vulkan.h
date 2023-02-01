@@ -14,7 +14,9 @@
 #include "flutter/vulkan/vulkan_backbuffer.h"
 #include "flutter/vulkan/vulkan_native_surface.h"
 #include "flutter/vulkan/vulkan_window.h"
-#include "include/core/SkRefCnt.h"
+
+#include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 

@@ -11,6 +11,8 @@
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 
 class EmbedderSurfaceMetal final : public EmbedderSurface,

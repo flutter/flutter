@@ -9,6 +9,8 @@
 #include "flutter/testing/test_metal_context.h"
 #include "flutter/testing/test_metal_surface.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 
 class TestMetalSurfaceImpl : public TestMetalSurface {

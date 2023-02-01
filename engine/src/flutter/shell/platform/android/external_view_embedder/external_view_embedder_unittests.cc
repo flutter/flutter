@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <memory>
+
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 
 #include "flutter/flow/embedded_views.h"
@@ -14,8 +15,10 @@
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/android/surface/android_surface_mock.h"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {

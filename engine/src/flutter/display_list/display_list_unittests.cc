@@ -21,6 +21,8 @@
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 namespace testing {
 

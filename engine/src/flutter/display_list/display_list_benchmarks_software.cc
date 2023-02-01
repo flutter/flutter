@@ -5,6 +5,8 @@
 #include "flutter/display_list/display_list_benchmarks_software.h"
 #include "flutter/display_list/display_list_benchmarks.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 namespace testing {
 

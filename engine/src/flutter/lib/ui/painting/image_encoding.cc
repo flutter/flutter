@@ -18,6 +18,7 @@
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/image_encoding_skia.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
+#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/typed_data/typed_list.h"

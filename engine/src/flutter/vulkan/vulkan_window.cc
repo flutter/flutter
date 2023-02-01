@@ -11,12 +11,14 @@
 
 #include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/vulkan/vulkan_skia_proc_table.h"
-#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "vulkan_application.h"
 #include "vulkan_device.h"
 #include "vulkan_native_surface.h"
 #include "vulkan_surface.h"
 #include "vulkan_swapchain.h"
+
+#include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace vulkan {
 

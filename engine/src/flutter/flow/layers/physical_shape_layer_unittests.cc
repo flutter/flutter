@@ -11,6 +11,8 @@
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 namespace flutter {
 namespace testing {
 

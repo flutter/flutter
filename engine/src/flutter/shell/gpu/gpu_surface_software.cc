@@ -5,7 +5,10 @@
 #include "flutter/shell/gpu/gpu_surface_software.h"
 
 #include <memory>
+
 #include "flutter/fml/logging.h"
+
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 

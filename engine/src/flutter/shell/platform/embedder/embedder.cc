@@ -19,6 +19,7 @@
 #include "flutter/fml/thread.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 #if !defined(FLUTTER_NO_EXPORT)
 #if FML_OS_WIN

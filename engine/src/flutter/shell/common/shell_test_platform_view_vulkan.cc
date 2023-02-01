@@ -12,6 +12,8 @@
 #include "flutter/vulkan/vulkan_skia_proc_table.h"
 #include "flutter/vulkan/vulkan_utilities.h"
 
+#include "third_party/skia/include/core/SkSurface.h"
+
 #if OS_FUCHSIA
 #define VULKAN_SO_PATH "libvulkan.so"
 #elif FML_OS_MACOSX
