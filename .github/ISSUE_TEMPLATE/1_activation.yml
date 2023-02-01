@@ -11,9 +11,9 @@ body:
         If you are looking for support, please check out our documentation
         or consider asking a question on Stack Overflow:
 
-        * https://flutter.dev/
-        * https://api.flutter.dev/
-        * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
+          - https://flutter.dev/
+          - https://api.flutter.dev/
+          - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
         If you have found a bug or if our documentation doesn't have an answer
         to what you're looking for, then fill out the template below. Please read
@@ -23,6 +23,8 @@ body:
       label: Is there an existing issue for this?
       description: Please search to see if an issue already exists for the bug you encountered.
       options:
+      - label: I have read https://flutter.dev/docs/resources/bug-reports
+        required: true
       - label: I have searched the existing issues
         required: true
   - type: textarea
