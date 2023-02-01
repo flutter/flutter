@@ -442,15 +442,14 @@ DebugImageTilingInfo createTilingInfo(ImageRepeat repeat, Rect rect, Rect destin
   assert(repeat != ImageRepeat.noRepeat);
   final TileMode tmx = (repeat == ImageRepeat.repeatX || repeat == ImageRepeat.repeat)
     ? TileMode.repeated
-    : TileMode.clamp;
+    : TileMode.decal;
   final TileMode tmy = (repeat == ImageRepeat.repeatY || repeat == ImageRepeat.repeat)
     ? TileMode.repeated
-    : TileMode.clamp;
+    : TileMode.decal;
   final Rect data = _generateImageTileRects(rect, destinationRect, repeat).first;
-  print('Scales: ${data.width / sourceRect.width} | ${data.height / sourceRect.height}');
   final Matrix4 transform = Matrix4.identity()
     ..scale(data.width / sourceRect.width, data.height / sourceRect.height)
-    ..setTranslationRaw(-data.topLeft.dx, -data.topLeft.dy, 0);
+    ..setTranslationRaw(data.topLeft.dx, data.topLeft.dy, 0);
 
   return DebugImageTilingInfo(
     tmx: tmx,
@@ -698,12 +697,8 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      print(rect);
-      print(destinationRect);
-      print(sourceRect);
       final DebugImageTilingInfo info = createTilingInfo(repeat, rect, destinationRect, sourceRect);
       final ImageShader shader = ImageShader(image, info.tmx, info.tmy, info.transform.storage, filterQuality: filterQuality);
-      print(info);
       canvas.drawRect(
         rect,
         paint..shader = shader
