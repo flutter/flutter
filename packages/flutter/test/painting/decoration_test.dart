@@ -788,12 +788,17 @@ void main() {
   test('Compute image tiling', () {
     expect(() => createTilingInfo(ImageRepeat.noRepeat, Rect.zero, Rect.zero, Rect.zero), throwsAssertionError);
 
+    // These tests draw a 16x9 image into a 100x50 container with a destination
+    // size of and make assertions based on observed behavior and the original
+    // rectangles from https://github.com/flutter/flutter/pull/119495/
+
     final DebugImageTilingInfo repeatX = createTilingInfo(
       ImageRepeat.repeatX,
       const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
       const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
       const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
     );
+
     expect(repeatX.tmx, TileMode.repeated);
     expect(repeatX.tmy, TileMode.decal);
     expect(repeatX.transform, matrixMoreOrLessEquals(Matrix4.identity()
@@ -812,6 +817,19 @@ void main() {
     expect(repeatY.transform, matrixMoreOrLessEquals(Matrix4.identity()
       ..scale(1.0, 1.0)
       ..setTranslationRaw(84.0, 0.0, 0.0)
+    ));
+
+    final DebugImageTilingInfo repeat = createTilingInfo(
+      ImageRepeat.repeat,
+      const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
+      const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
+      const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
+    );
+    expect(repeat.tmx, TileMode.repeated);
+    expect(repeat.tmy, TileMode.repeated);
+    expect(repeat.transform, matrixMoreOrLessEquals(Matrix4.identity()
+      ..scale(1.0, 1.0)
+      ..setTranslationRaw(-12.0, 0.0, 0.0)
     ));
   });
 }
