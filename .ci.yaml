@@ -706,7 +706,6 @@ targets:
 
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -2638,6 +2637,20 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Mac flavors_test_macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: flavors_test_macos
+
   - name: Mac flutter_gallery_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
@@ -3314,7 +3327,6 @@ targets:
       task_name: integration_ui_frame_number
 
   - name: Mac_android microbenchmarks
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/118692
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3325,7 +3337,6 @@ targets:
 
   - name: Mac_android run_debug_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     runIf:
       - dev/**

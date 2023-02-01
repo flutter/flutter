@@ -172,6 +172,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasLongPressAction: true,
       isFocusable: true,
     ));
     handle.dispose();
@@ -216,6 +217,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasLongPressAction: true,
       isFocusable: true,
     ));
     handle.dispose();
