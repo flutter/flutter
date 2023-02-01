@@ -45,10 +45,30 @@ body:
         with the backticks below. If you are running any "flutter" commands,
         please include the output of running them with "--verbose"; for example,
         the output of running "flutter --verbose create foo".
-      render: console
+      value: |
+        <details>
+        <summary>Logs</summary>
+
+        ```console
+
+        <!-- Paste your logs here -->
+
+        ```
+
+        </details>
   - type: textarea
     attributes:
-      label: "`flutter doctor -v` output"
+      label: Flutter Doctor output
       description: |
         Include the entire logs of running `flutter doctor -v`
-      render: console
+      value: |
+        <details>
+        <summary>Doctor output</summary>
+
+        ```console
+
+        <!-- Paste your output here -->
+
+        ```
+
+        </details>
