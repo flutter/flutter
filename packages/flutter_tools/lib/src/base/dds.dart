@@ -108,8 +108,4 @@ class DartDevelopmentService {
   }
 
   Future<void> shutdown() async => _ddsInstance?.shutdown();
-
-  void setExternalDevToolsUri(Uri uri) {
-    _ddsInstance?.setExternalDevToolsUri(uri);
-  }
 }

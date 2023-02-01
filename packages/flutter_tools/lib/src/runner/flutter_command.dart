@@ -458,14 +458,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addServeObservatoryOptions({required bool verboseHelp}) {
-    argParser.addFlag('serve-observatory',
-      hide: !verboseHelp,
-      defaultsTo: true,
-      help: 'Serve the legacy Observatory developer tooling through the VM service.',
-    );
-  }
-
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
