@@ -795,10 +795,10 @@ void main() {
       const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
     );
     expect(repeatX.tmx, TileMode.repeated);
-    expect(repeatX.tmy, TileMode.clamp);
+    expect(repeatX.tmy, TileMode.decal);
     expect(repeatX.transform, matrixMoreOrLessEquals(Matrix4.identity()
       ..scale(1.0, 1.0)
-      ..setTranslationRaw(12.0, 0.0, 0.0)
+      ..setTranslationRaw(-12.0, 0.0, 0.0)
     ));
 
     final DebugImageTilingInfo repeatY = createTilingInfo(
@@ -807,11 +807,11 @@ void main() {
       const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
       const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0),
     );
-    expect(repeatY.tmx, TileMode.clamp);
+    expect(repeatY.tmx, TileMode.decal);
     expect(repeatY.tmy, TileMode.repeated);
     expect(repeatY.transform, matrixMoreOrLessEquals(Matrix4.identity()
       ..scale(1.0, 1.0)
-      ..setTranslationRaw(12.0, 0.0, 0.0)
+      ..setTranslationRaw(84.0, 0.0, 0.0)
     ));
   });
 }
