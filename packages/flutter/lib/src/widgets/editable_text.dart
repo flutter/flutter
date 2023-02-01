@@ -4237,11 +4237,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextRange toRange = toPoint == null ? fromRange : paragraphBoundary.getTextBoundaryAt(toPoint);
     final bool isFromParagraphBeforeToParagraph = fromRange.start < toRange.end;
 
-    final TextSelection newSelection =
-      TextSelection(
-        baseOffset: isFromParagraphBeforeToParagraph ? fromRange.start : fromRange.end,
-        extentOffset: isFromParagraphBeforeToParagraph ? toRange.end : toRange.start,
-      );
+    final TextSelection newSelection = TextSelection(
+      baseOffset: isFromParagraphBeforeToParagraph ? fromRange.start : fromRange.end,
+      extentOffset: isFromParagraphBeforeToParagraph ? toRange.end : toRange.start,
+    );
 
     userUpdateTextEditingValue(
       currentTextEditingValue.copyWith(selection: newSelection),
