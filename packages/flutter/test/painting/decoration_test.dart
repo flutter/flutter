@@ -8,6 +8,7 @@ import 'dart:ui' as ui show ColorFilter, Image;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/src/painting/decoration_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -792,7 +793,7 @@ void main() {
     // size of and make assertions based on observed behavior and the original
     // rectangles from https://github.com/flutter/flutter/pull/119495/
 
-    final DebugImageTilingInfo repeatX = createTilingInfo(
+    final ImageTilingInfo repeatX = createTilingInfo(
       ImageRepeat.repeatX,
       const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
       const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
@@ -806,7 +807,7 @@ void main() {
       ..setTranslationRaw(-12.0, 0.0, 0.0)
     ));
 
-    final DebugImageTilingInfo repeatY = createTilingInfo(
+    final ImageTilingInfo repeatY = createTilingInfo(
       ImageRepeat.repeatY,
       const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
       const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),
@@ -819,7 +820,7 @@ void main() {
       ..setTranslationRaw(84.0, 0.0, 0.0)
     ));
 
-    final DebugImageTilingInfo repeat = createTilingInfo(
+    final ImageTilingInfo repeat = createTilingInfo(
       ImageRepeat.repeat,
       const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0),
       const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0),

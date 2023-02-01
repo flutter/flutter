@@ -407,11 +407,13 @@ void debugFlushLastFrameImageSizeInfo() {
 
 /// Information that describes how to tile an image for a given [ImageRepeat]
 /// enum.
+///
+/// Used with [createTilingInfo].
 @visibleForTesting
 @immutable
-class DebugImageTilingInfo {
-  /// Create a new [DebugImageTilingInfo] object.
-  const DebugImageTilingInfo({
+class ImageTilingInfo {
+  /// Create a new [ImageTilingInfo] object.
+  const ImageTilingInfo({
     required this.tmx,
     required this.tmy,
     required this.transform,
@@ -435,10 +437,10 @@ class DebugImageTilingInfo {
   }
 }
 
-/// Create the [DebugImageTilingInfo] for a given [ImageRepeat], canvas [rect],
+/// Create the [ImageTilingInfo] for a given [ImageRepeat], canvas [rect],
 /// [destinationRect], and [sourceRect].
 @visibleForTesting
-DebugImageTilingInfo createTilingInfo(ImageRepeat repeat, Rect rect, Rect destinationRect, Rect sourceRect) {
+ImageTilingInfo createTilingInfo(ImageRepeat repeat, Rect rect, Rect destinationRect, Rect sourceRect) {
   assert(repeat != ImageRepeat.noRepeat);
   final TileMode tmx = (repeat == ImageRepeat.repeatX || repeat == ImageRepeat.repeat)
     ? TileMode.repeated
@@ -451,7 +453,7 @@ DebugImageTilingInfo createTilingInfo(ImageRepeat repeat, Rect rect, Rect destin
     ..scale(data.width / sourceRect.width, data.height / sourceRect.height)
     ..setTranslationRaw(data.topLeft.dx, data.topLeft.dy, 0);
 
-  return DebugImageTilingInfo(
+  return ImageTilingInfo(
     tmx: tmx,
     tmy: tmy,
     transform: transform,
@@ -697,7 +699,7 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      final DebugImageTilingInfo info = createTilingInfo(repeat, rect, destinationRect, sourceRect);
+      final ImageTilingInfo info = createTilingInfo(repeat, rect, destinationRect, sourceRect);
       final ImageShader shader = ImageShader(image, info.tmx, info.tmy, info.transform.storage, filterQuality: filterQuality);
       canvas.drawRect(
         rect,
