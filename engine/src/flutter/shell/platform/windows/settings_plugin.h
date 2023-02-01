@@ -23,6 +23,8 @@ namespace flutter {
 // These are typically set in the control panel.
 class SettingsPlugin {
  public:
+  enum struct PlatformBrightness { kDark, kLight };
+
   explicit SettingsPlugin(BinaryMessenger* messenger, TaskRunner* task_runner);
 
   virtual ~SettingsPlugin();
@@ -37,9 +39,10 @@ class SettingsPlugin {
   // this automatically.
   virtual void StopWatching();
 
- protected:
-  enum struct PlatformBrightness { kDark, kLight };
+  // Update the high contrast status of the system.
+  virtual void UpdateHighContrastMode(bool is_high_contrast);
 
+ protected:
   // Returns `true` if the user uses 24 hour time.
   virtual bool GetAlwaysUse24HourFormat();
 
@@ -54,6 +57,8 @@ class SettingsPlugin {
 
   // Starts watching text scale factor changes.
   virtual void WatchTextScaleFactorChanged();
+
+  bool is_high_contrast_ = false;
 
  private:
   std::unique_ptr<BasicMessageChannel<rapidjson::Document>> channel_;

@@ -21,6 +21,8 @@ class MockSettingsPlugin : public SettingsPlugin {
 
   virtual ~MockSettingsPlugin() = default;
 
+  bool is_high_contrast() { return is_high_contrast_; }
+
   // |SettingsPlugin|
   MOCK_METHOD0(GetAlwaysUse24HourFormat, bool());
   MOCK_METHOD0(GetTextScaleFactor, float());
@@ -68,6 +70,25 @@ TEST(SettingsPluginTest, StartWatchingStartsWatchingChanges) {
   EXPECT_CALL(settings_plugin, WatchTextScaleFactorChanged).Times(1);
 
   settings_plugin.StartWatching();
+}
+
+TEST(SettingsPluginTest, HighContrastModeHonored) {
+  int times = 0;
+  TestBinaryMessenger messenger(
+      [&times](const std::string& channel, const uint8_t* message,
+               size_t message_size, BinaryReply reply) {
+        ASSERT_EQ(channel, "flutter/settings");
+        times++;
+      });
+  ::testing::NiceMock<MockSettingsPlugin> settings_plugin(&messenger, nullptr);
+
+  settings_plugin.UpdateHighContrastMode(true);
+  EXPECT_TRUE(settings_plugin.is_high_contrast());
+
+  settings_plugin.UpdateHighContrastMode(false);
+  EXPECT_FALSE(settings_plugin.is_high_contrast());
+
+  EXPECT_EQ(times, 2);
 }
 
 }  // namespace testing
