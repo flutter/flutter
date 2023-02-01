@@ -2532,6 +2532,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2551,6 +2552,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3083,6 +3085,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3108,6 +3111,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3133,6 +3137,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3158,6 +3163,7 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3232,6 +3238,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
