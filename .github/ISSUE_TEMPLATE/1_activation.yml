@@ -10,9 +10,10 @@ body:
 
         If you are looking for support, please check out our documentation
         or consider asking a question on Stack Overflow:
-         * https://flutter.dev/
-         * https://api.flutter.dev/
-         * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
+
+        * https://flutter.dev/
+        * https://api.flutter.dev/
+        * https://stackoverflow.com/questions/tagged/flutter?sort=frequent
 
         If you have found a bug or if our documentation doesn't have an answer
         to what you're looking for, then fill out the template below. Please read
@@ -42,16 +43,10 @@ body:
         with the backticks below. If you are running any "flutter" commands,
         please include the output of running them with "--verbose"; for example,
         the output of running "flutter --verbose create foo".
-      value: |
-        ```
-        ```
       render: console
   - type: textarea
     attributes:
-      label: flutter doctor -v output
+      label: "`flutter doctor -v` output"
       description: |
         Include the entire logs of running `flutter doctor -v`
-      value: |
-        ```
-        ```
       render: console
