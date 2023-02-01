@@ -201,16 +201,15 @@ void main() {
 
   testWithoutContext('flutter test should respect --serve-observatory', () async {
     late final Process process;
+    late final StreamSubscription<String> sub;
     try {
       process = await _runFlutterTestConcurrent('trivial', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--start-paused', '--serve-observatory']);
       final Completer<Uri> completer = Completer<Uri>();
       final RegExp vmServiceUriRegExp = RegExp(r'((http)?:\/\/)[^\s]+');
-      late final StreamSubscription<String> sub;
       sub = process.stdout.transform(utf8.decoder).listen((String e) {
         if (vmServiceUriRegExp.hasMatch(e)) {
           completer.complete(Uri.parse(vmServiceUriRegExp.firstMatch(e)!.group(0)!));
-          sub.cancel();
         }
       });
       final Uri vmServiceUri = await completer.future;
@@ -220,6 +219,7 @@ void main() {
       final String content = await response.transform(utf8.decoder).join();
       expect(content.contains('Dart VM Observatory'), true);
     } finally {
+      sub.cancel();
       process.kill();
     }
   });
