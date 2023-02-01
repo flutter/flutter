@@ -22,16 +22,43 @@ import 'framework.dart';
 /// be logged.
 bool debugFocusChanges = false;
 
-bool _focusDebug(String message, [Iterable<String>? details]) {
-  if (debugFocusChanges) {
-    debugPrint('FOCUS: $message');
-    if (details != null && details.isNotEmpty) {
-      for (final String detail in details) {
-        debugPrint('    $detail');
-      }
+// When using _focusDebug, always call it like so:
+//
+// assert((debugFocusChanges && _focusDebug('Blah $foo')) || true);
+//
+// It needs to be inside the assert in order to be removed in release mode, and
+// it needs the boolean conditional so that the interpolation doesn't happen in
+// debug mode unless the debugFocusChanges value is set. It needs the final ||
+// true because otherwise the assertion will be false when debugFocusChanges is
+// false.
+//
+// It will throw a StateError if you try to call it when debugFocusChanges isn't
+// set, or the app is in release mode.
+//
+// If this gets any uglier, then we should replace the String message argument
+// with an Iterable<Object> and do the stringification inside the function.
+bool _focusDebug(String message, [Iterable<Object>? details]) {
+  if (kReleaseMode) {
+    throw StateError(
+      '_focusDebug was called in Release mode. It should always be wrapped in '
+      'an assert. Always call _focusDebug like so:\n'
+      r"  assert((debugFocusChanges && _focusDebug('Blah $foo')) || true);"
+    );
+  }
+  if (!debugFocusChanges) {
+    throw StateError(
+      "_focusDebug was called when debugFocusChanges wasn't set. "
+      'Always call _focusDebug like so:\n'
+      r"  assert((debugFocusChanges && _focusDebug('Blah $foo')) || true);"
+    );
+  }
+  debugPrint('FOCUS: $message');
+  if (details != null && details.isNotEmpty) {
+    for (final Object detail in details) {
+      debugPrint('    $detail');
     }
   }
-  // Return true so that it can be easily used inside of an assert.
+  // Return true so that it can be used inside of an assert.
   return true;
 }
 
@@ -118,10 +145,10 @@ class _Autofocus {
                            && scope.focusedChild == null
                            && autofocusNode.ancestors.contains(scope);
     if (shouldApply) {
-      assert(_focusDebug('Applying autofocus: $autofocusNode'));
+      assert((debugFocusChanges && _focusDebug('Applying autofocus: $autofocusNode')) || true);
       autofocusNode._doRequestFocus(findFirstFocus: true);
     } else {
-      assert(_focusDebug('Autofocus request discarded for node: $autofocusNode.'));
+      assert((debugFocusChanges && _focusDebug('Autofocus request discarded for node: $autofocusNode.')) || true);
     }
   }
 }
@@ -169,7 +196,7 @@ class FocusAttachment {
   ///
   /// Calling [FocusNode.dispose] will also automatically detach the node.
   void detach() {
-    assert(_focusDebug('Detaching node:', <String>[_node.toString(), 'With enclosing scope ${_node.enclosingScope}']));
+    assert((debugFocusChanges && _focusDebug('Detaching node:', <Object>[_node, 'With enclosing scope ${_node.enclosingScope}'])) || true);
     if (isAttached) {
       if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager!._markedForFocus == _node)) {
         _node.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
@@ -877,7 +904,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         scope._doRequestFocus(findFirstFocus: true);
         break;
     }
-    assert(_focusDebug('Unfocused node:', <String>['primary focus was $this', 'next focus will be ${_manager?._markedForFocus}']));
+    assert((debugFocusChanges && _focusDebug('Unfocused node:', <Object>['primary focus was $this', 'next focus will be ${_manager?._markedForFocus}'])) || true);
   }
 
   /// Removes the keyboard token from this focus node if it has one.
@@ -1063,7 +1090,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // Note that this is overridden in FocusScopeNode.
   void _doRequestFocus({required bool findFirstFocus}) {
     if (!canRequestFocus) {
-      assert(_focusDebug('Node NOT requesting focus because canRequestFocus is false: $this'));
+      assert((debugFocusChanges && _focusDebug('Node NOT requesting focus because canRequestFocus is false: $this')) || true);
       return;
     }
     // If the node isn't part of the tree, then we just defer the focus request
@@ -1078,7 +1105,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _hasKeyboardToken = true;
-    assert(_focusDebug('Node requesting focus: $this'));
+    assert((debugFocusChanges && _focusDebug('Node requesting focus: $this')) || true);
     _markNextFocus(this);
   }
 
@@ -1109,7 +1136,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     FocusNode scopeFocus = this;
     for (final FocusScopeNode ancestor in ancestors.whereType<FocusScopeNode>()) {
       assert(scopeFocus != ancestor, 'Somehow made a loop by setting focusedChild to its scope.');
-      assert(_focusDebug('Setting $scopeFocus as focused child for scope:', <String>[ancestor.toString()]));
+      assert((debugFocusChanges && _focusDebug('Setting $scopeFocus as focused child for scope:', <Object>[ancestor])) || true);
       // Remove it anywhere in the focused child history.
       ancestor._focusedChildren.remove(scopeFocus);
       // Add it to the end of the list, which is also the top of the queue: The
@@ -1276,7 +1303,7 @@ class FocusScopeNode extends FocusNode {
   /// tree, the given scope must be a descendant of this scope.
   void setFirstFocus(FocusScopeNode scope) {
     assert(scope != this, 'Unexpected self-reference in setFirstFocus.');
-    assert(_focusDebug('Setting scope as first focus in $this to node:', <String>[scope.toString()]));
+    assert((debugFocusChanges && _focusDebug('Setting scope as first focus in $this to node:', <Object>[scope])) || true);
     if (scope._parent == null) {
       _reparent(scope);
     }
@@ -1306,7 +1333,7 @@ class FocusScopeNode extends FocusNode {
     }
 
     assert(_manager != null);
-    assert(_focusDebug('Autofocus scheduled for $node: scope $this'));
+    assert((debugFocusChanges && _focusDebug('Autofocus scheduled for $node: scope $this')) || true);
     _manager?._pendingAutofocuses.add(_Autofocus(scope: this, autofocusNode: node));
     _manager?._markNeedsUpdate();
   }
@@ -1542,7 +1569,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   void _markDetached(FocusNode node) {
     // The node has been removed from the tree, so it no longer needs to be
     // notified of changes.
-    assert(_focusDebug('Node was detached: $node'));
+    assert((debugFocusChanges && _focusDebug('Node was detached: $node')) || true);
     if (_primaryFocus == node) {
       _primaryFocus = null;
     }
@@ -1551,7 +1578,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   void _markPropertiesChanged(FocusNode node) {
     _markNeedsUpdate();
-    assert(_focusDebug('Properties changed for node $node.'));
+    assert((debugFocusChanges && _focusDebug('Properties changed for node $node.')) || true);
     _dirtyNodes.add(node);
   }
 
@@ -1575,7 +1602,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   // Request that an update be scheduled, optionally requesting focus for the
   // given newFocus node.
   void _markNeedsUpdate() {
-    assert(_focusDebug('Scheduling update, current focus is $_primaryFocus, next focus will be $_markedForFocus'));
+    assert((debugFocusChanges && _focusDebug('Scheduling update, current focus is $_primaryFocus, next focus will be $_markedForFocus')) || true);
     if (_haveScheduledUpdate) {
       return;
     }
@@ -1597,7 +1624,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       // then revert to the root scope.
       _markedForFocus = rootScope;
     }
-    assert(_focusDebug('Refreshing focus state. Next focus will be $_markedForFocus'));
+    assert((debugFocusChanges && _focusDebug('Refreshing focus state. Next focus will be $_markedForFocus')) || true);
     // A node has requested to be the next focus, and isn't already the primary
     // focus.
     if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
@@ -1613,7 +1640,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
     assert(_markedForFocus == null);
     if (previousFocus != _primaryFocus) {
-      assert(_focusDebug('Updating focus from $previousFocus to $_primaryFocus'));
+      assert((debugFocusChanges && _focusDebug('Updating focus from $previousFocus to $_primaryFocus')) || true);
       if (previousFocus != null) {
         _dirtyNodes.add(previousFocus);
       }
@@ -1624,7 +1651,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     for (final FocusNode node in _dirtyNodes) {
       node._notify();
     }
-    assert(_focusDebug('Notified ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
+    assert((debugFocusChanges && _focusDebug('Notified ${_dirtyNodes.length} dirty nodes:', _dirtyNodes)) || true);
     _dirtyNodes.clear();
     if (previousFocus != _primaryFocus) {
       notifyListeners();
@@ -1766,9 +1793,9 @@ class _HighlightModeManager {
     _lastInteractionWasTouch = false;
     updateMode();
 
-    assert(_focusDebug('Received key event $message'));
+    assert((debugFocusChanges && _focusDebug('Received key event $message')) || true);
     if (FocusManager.instance.primaryFocus == null) {
-      assert(_focusDebug('No primary focus for key event, ignored: $message'));
+      assert((debugFocusChanges && _focusDebug('No primary focus for key event, ignored: $message')) || true);
       return false;
     }
 
@@ -1794,11 +1821,11 @@ class _HighlightModeManager {
         case KeyEventResult.ignored:
           continue;
         case KeyEventResult.handled:
-          assert(_focusDebug('Node $node handled key event $message.'));
+          assert((debugFocusChanges && _focusDebug('Node $node handled key event $message.')) || true);
           handled = true;
           break;
         case KeyEventResult.skipRemainingHandlers:
-          assert(_focusDebug('Node $node stopped key event propagation: $message.'));
+          assert((debugFocusChanges && _focusDebug('Node $node stopped key event propagation: $message.')) || true);
           handled = false;
           break;
       }
@@ -1808,7 +1835,7 @@ class _HighlightModeManager {
       break;
     }
     if (!handled) {
-      assert(_focusDebug('Key event not handled by anyone: $message.'));
+      assert((debugFocusChanges && _focusDebug('Key event not handled by anyone: $message.')) || true);
     }
     return handled;
   }
