@@ -2432,6 +2432,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2446,6 +2447,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"}
@@ -2458,6 +2460,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2571,6 +2574,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2585,6 +2589,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2599,6 +2604,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2622,6 +2628,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2641,6 +2648,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2655,6 +2663,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2669,6 +2678,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2702,6 +2712,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"}
@@ -2793,6 +2804,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2811,6 +2823,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"}
@@ -2824,6 +2837,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2837,6 +2851,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2855,6 +2870,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2873,6 +2889,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2925,6 +2942,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"}
@@ -2937,6 +2955,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -2957,6 +2976,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -2991,6 +3011,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3028,6 +3049,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -3991,6 +4013,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -4009,6 +4032,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -4027,6 +4051,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -4060,6 +4085,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      cpu: x86
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
@@ -4866,6 +4892,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      cpu: x86
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: flutter_tool_startup__macos
