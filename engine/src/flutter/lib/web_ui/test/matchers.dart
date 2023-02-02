@@ -15,6 +15,13 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+/// The epsilon of tolerable double precision error.
+///
+/// This is used in various places in the framework to allow for floating point
+/// precision loss in calculations. Differences below this threshold are safe
+/// to disregard.
+const double precisionErrorTolerance = 1e-10;
+
 /// Enumerates all persisted surfaces in the tree rooted at [root].
 ///
 /// If [root] is `null` returns all surfaces from the last rendered scene.
@@ -60,7 +67,7 @@ Iterable<PersistedOffset> enumerateOffsets([PersistedSurface? root]) {
 ///
 /// This makes it useful for comparing numbers, [Color]s, [Offset]s and other
 /// sets of value for which a metric space is defined.
-typedef DistanceFunction<T> = num Function(T a, T b);
+typedef DistanceFunction<T> = double Function(T a, T b);
 
 /// The type of a union of instances of [DistanceFunction<T>] for various types
 /// T.
@@ -73,7 +80,7 @@ typedef DistanceFunction<T> = num Function(T a, T b);
 ///
 /// Calling an instance of this type must either be done dynamically, or by
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
-typedef AnyDistanceFunction = num Function(Never a, Never b);
+typedef AnyDistanceFunction = double Function(Never a, Never b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions =
     <Type, AnyDistanceFunction>{
@@ -85,7 +92,7 @@ const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions =
   Size: _sizeDistance,
 };
 
-int _intDistance(int a, int b) => (b - a).abs();
+double _intDistance(int a, int b) => (b - a).abs().toDouble();
 double _doubleDistance(double a, double b) => (b - a).abs();
 double _offsetDistance(Offset a, Offset b) => (b - a).distance;
 
@@ -131,8 +138,8 @@ double _sizeDistance(Size a, Size b) {
 ///    [double]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
-  required num distance,
   required T from,
+  double distance = precisionErrorTolerance,
   DistanceFunction<T>? distanceFunction,
 }) {
   distanceFunction ??= _kStandardDistanceFunctions[T] as DistanceFunction<T>?;
@@ -152,7 +159,7 @@ class _IsWithinDistance<T> extends Matcher {
 
   final DistanceFunction<T> distanceFunction;
   final T value;
-  final num epsilon;
+  final double epsilon;
 
   @override
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
@@ -163,7 +170,7 @@ class _IsWithinDistance<T> extends Matcher {
       return true;
     }
     final T test = object;
-    final num distance = distanceFunction(test, value);
+    final double distance = distanceFunction(test, value);
     if (distance < 0) {
       throw ArgumentError(
           'Invalid distance function was used to compare a ${value.runtimeType} '
