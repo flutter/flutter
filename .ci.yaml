@@ -3009,7 +3009,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/119764
+      cpu: x86 # https://github.com/flutter/flutter/issues/119750
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"},
