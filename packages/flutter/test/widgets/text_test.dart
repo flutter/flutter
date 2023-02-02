@@ -1012,13 +1012,13 @@ void main() {
 
   testWidgets('textWidthBasis with textAlign still obeys parent alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Text(
                   'LEFT ALIGNED, PARENT',
                   textAlign: TextAlign.left,

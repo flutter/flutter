@@ -28,8 +28,8 @@ Future<void> main() async {
                   Icon(Icons.ac_unit),
                 ],
               ),
-              body: Column(
-                children: const <Widget>[
+              body: const Column(
+                children: <Widget>[
                   Text('Item 1'),
                   Text('Item 2'),
                   Text('Item 3'),

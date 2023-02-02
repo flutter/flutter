@@ -345,8 +345,8 @@ class _CreateCompanySheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const <Widget>[
+    return const Column(
+      children: <Widget>[
         TextField(
           autofocus: true,
           decoration: InputDecoration(

@@ -640,14 +640,14 @@ void main() {
   // Dismissible contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox(
             width: 100.0,
             height: 1000.0,
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Test1215DismissibleWidget('1'),
                 Test1215DismissibleWidget('2'),
               ],

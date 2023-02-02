@@ -485,8 +485,8 @@ void main() {
       });
 
       testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(Column(
-          children: const <Widget>[Text('hello'), Text('world')],
+        await tester.pumpWidget(boilerplate(const Column(
+          children: <Widget>[Text('hello'), Text('world')],
         )));
         final Finder finder = find.byType(Text);
         await expectLater(
@@ -1296,8 +1296,8 @@ void main() {
 
     testWidgets('succeeds when finds more then the specified count',
         (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate(Column(
-        children: const <Widget>[Text('1'), Text('2'), Text('3')],
+      await tester.pumpWidget(boilerplate(const Column(
+        children: <Widget>[Text('1'), Text('2'), Text('3')],
       )));
 
       expect(find.byType(Text), findsAtLeastNWidgets(2));
@@ -1305,8 +1305,8 @@ void main() {
 
     testWidgets('succeeds when finds the exact specified count',
         (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate(Column(
-        children: const <Widget>[Text('1'), Text('2')],
+      await tester.pumpWidget(boilerplate(const Column(
+        children: <Widget>[Text('1'), Text('2')],
       )));
 
       expect(find.byType(Text), findsAtLeastNWidgets(2));
@@ -1314,8 +1314,8 @@ void main() {
 
     testWidgets('fails when finds less then specified count',
         (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate(Column(
-        children: const <Widget>[Text('1'), Text('2')],
+      await tester.pumpWidget(boilerplate(const Column(
+        children: <Widget>[Text('1'), Text('2')],
       )));
 
       expect(find.byType(Text), isNot(findsAtLeastNWidgets(3)));

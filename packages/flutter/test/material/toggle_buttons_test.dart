@@ -389,8 +389,8 @@ void main() {
             child: ToggleButtons(
               isSelected: const <bool>[false],
               onPressed: (int index) {},
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
@@ -416,8 +416,8 @@ void main() {
             child: ToggleButtons(
               isSelected: const <bool>[true],
               onPressed: (int index) {},
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
@@ -442,8 +442,8 @@ void main() {
           child: boilerplate(
             child: ToggleButtons(
               isSelected: const <bool>[true],
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
@@ -497,8 +497,8 @@ void main() {
               color: enabledColor,
               isSelected: const <bool>[false],
               onPressed: (int index) {},
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
@@ -519,8 +519,8 @@ void main() {
               selectedColor: selectedColor,
               isSelected: const <bool>[true],
               onPressed: (int index) {},
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
@@ -540,8 +540,8 @@ void main() {
             child: ToggleButtons(
               disabledColor: disabledColor,
               isSelected: const <bool>[true],
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
@@ -565,8 +565,8 @@ void main() {
           child: ToggleButtons(
             isSelected: const <bool>[false],
             onPressed: (int index) {},
-            children: <Widget>[
-              Row(children: const <Widget>[
+            children: const <Widget>[
+              Row(children: <Widget>[
                 Text('First child'),
               ]),
             ],
@@ -594,8 +594,8 @@ void main() {
           child: ToggleButtons(
             isSelected: const <bool>[true],
             onPressed: (int index) {},
-            children: <Widget>[
-              Row(children: const <Widget>[
+            children: const <Widget>[
+              Row(children: <Widget>[
                 Text('First child'),
               ]),
             ],
@@ -622,8 +622,8 @@ void main() {
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[true],
-            children: <Widget>[
-              Row(children: const <Widget>[
+            children: const <Widget>[
+              Row(children: <Widget>[
                 Text('First child'),
               ]),
             ],
@@ -652,8 +652,8 @@ void main() {
             fillColor: customFillColor,
             isSelected: const <bool>[true],
             onPressed: (int index) {},
-            children: <Widget>[
-              Row(children: const <Widget>[
+            children: const <Widget>[
+              Row(children: <Widget>[
                 Text('First child'),
               ]),
             ],

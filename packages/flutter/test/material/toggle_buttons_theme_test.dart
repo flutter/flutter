@@ -261,10 +261,10 @@ void main() {
                 color: enabledColor,
                 isSelected: const <bool>[false],
                 onPressed: (int index) {},
-                children: <Widget>[
+                children: const <Widget>[
                   // This Row is used like this to test for both TextStyle
                   // and IconTheme for Text and Icon widgets respectively.
-                  Row(children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -290,8 +290,8 @@ void main() {
                 color: enabledColor,
                 isSelected: const <bool>[true],
                 onPressed: (int index) {},
-                children: <Widget>[
-                  Row(children: const <Widget>[
+                children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -317,8 +317,8 @@ void main() {
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[false],
-                children: <Widget>[
-                  Row(children: const <Widget>[
+                children: const <Widget>[
+                  Row(children: <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
                   ]),
@@ -346,8 +346,8 @@ void main() {
             child: ToggleButtons(
               isSelected: const <bool>[true],
               onPressed: (int index) {},
-              children: <Widget>[
-                Row(children: const <Widget>[
+              children: const <Widget>[
+                Row(children: <Widget>[
                   Text('First child'),
                 ]),
               ],

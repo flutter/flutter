@@ -5079,11 +5079,11 @@ void main() {
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Center(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[
@@ -5131,11 +5131,11 @@ void main() {
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Material(
           child: Center(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 SelectableText.rich(
                   TextSpan(
                     children: <TextSpan>[

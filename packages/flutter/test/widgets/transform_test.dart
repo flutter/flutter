@@ -808,7 +808,7 @@ void main() {
             ),
             const ColoredBox(color: Color(0xff00ff00), child: square),
           ]),
-          Row(mainAxisSize: MainAxisSize.min, children: const <Widget>[
+          const Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
             ColoredBox(color: Color(0xff0000ff), child: square),
             ColoredBox(color: Color(0xffeeff00), child: square),
           ]),

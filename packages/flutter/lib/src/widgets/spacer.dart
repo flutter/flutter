@@ -18,8 +18,8 @@ import 'framework.dart';
 /// {@tool snippet}
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     Text('Begin'),
 ///     Spacer(), // Defaults to a flex of one.
 ///     Text('Middle'),

@@ -90,9 +90,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   Widget build(BuildContext context) {
     return SpinModel(
       notifier: _controller,
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: const <Widget>[
+        children: <Widget>[
           Spinner(),
           Spinner(),
           Spinner(),

@@ -29,9 +29,9 @@ void expectRects(WidgetTester tester, List<Rect> expected) {
 void main() {
 
   testWidgets('ListBody down', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
-      children: const <Widget>[ ListBody(children: children) ],
+      children: <Widget>[ ListBody(children: children) ],
     ));
 
     expectRects(
@@ -46,9 +46,9 @@ void main() {
   });
 
   testWidgets('ListBody up', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
-      children: const <Widget>[ ListBody(reverse: true, children: children) ],
+      children: <Widget>[ ListBody(reverse: true, children: children) ],
     ));
 
     expectRects(
@@ -63,10 +63,10 @@ void main() {
   });
 
   testWidgets('ListBody right', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
-      children: const <Widget>[
+      children: <Widget>[
         Directionality(
           textDirection: TextDirection.ltr,
           child: ListBody(mainAxis: Axis.horizontal, children: children),
@@ -86,10 +86,10 @@ void main() {
   });
 
   testWidgets('ListBody left', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
-      children: const <Widget>[
+      children: <Widget>[
         Directionality(
           textDirection: TextDirection.rtl,
           child: ListBody(mainAxis: Axis.horizontal, children: children),
@@ -147,7 +147,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(
-        Flex(
+        const Flex(
           textDirection: TextDirection.ltr,
           direction: Axis.horizontal,
           children: <Widget>[
@@ -159,7 +159,7 @@ void main() {
                   Flex(
                     textDirection: TextDirection.ltr,
                     direction: Axis.vertical,
-                    children: const <Widget>[
+                    children: <Widget>[
                       Directionality(
                         textDirection: TextDirection.ltr,
                         child: ListBody(

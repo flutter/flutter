@@ -59,9 +59,9 @@ class SecondPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Expanded(
             child: AndroidView(viewType: 'simple')
           ),

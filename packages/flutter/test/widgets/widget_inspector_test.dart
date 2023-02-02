@@ -4303,11 +4303,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
-        final Widget widget = Directionality(
+        const Widget widget = Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Flexible(
                   child: ColoredBox(
                     color: Colors.green,
@@ -4959,9 +4959,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             appBar: AppBar(
               title: const Text('Hello World!'),
             ),
-            body: Center(
+            body: const Center(
               child: Column(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('Hello World!'),
                 ],
               ),

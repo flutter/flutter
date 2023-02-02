@@ -57,8 +57,8 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                 ),
                 Semantics(
                   container: true,
-                  child: Column(
-                    children: const <Widget>[
+                  child: const Column(
+                    children: <Widget>[
                       CupertinoSwitch(
                         value: true,
                         onChanged: null,
@@ -71,8 +71,8 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                 ),
                 Semantics(
                   container: true,
-                  child: Column(
-                    children: const <Widget>[
+                  child: const Column(
+                    children: <Widget>[
                       CupertinoSwitch(
                         value: false,
                         onChanged: null,

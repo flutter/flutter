@@ -238,10 +238,10 @@ void main() {
           platform: TargetPlatform.iOS,
           dividerColor: dividerColor,
         ),
-        home: Material(
+        home: const Material(
           child: SingleChildScrollView(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 ExpansionTile(
                   title: Text('Tile 1'),
                   maintainState: true,
