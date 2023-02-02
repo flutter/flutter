@@ -122,7 +122,7 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
   @override
   Future<void> disconnectImpl() async {
     if (isAttach) {
-      await preventBreakingAndResume();
+      await handleDetach();
     }
     terminatePids(ProcessSignal.sigkill);
   }
