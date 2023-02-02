@@ -394,6 +394,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         # The accessibility library only supports Mac and Windows.
         make_test('accessibility_unittests'),
         make_test('flutter_channels_unittests'),
+        make_test('spring_animation_unittests'),
     ]
 
   if is_linux():
