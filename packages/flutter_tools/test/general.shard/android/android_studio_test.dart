@@ -811,8 +811,7 @@ void main() {
     });
 
     testUsingContext('Can find Android Studio 2020.3 bundled Java version on Linux', () {
-      const String studioHomeFilePath =
-          '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
+      const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
 
       globals.fs.file(studioHomeFilePath)
