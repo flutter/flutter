@@ -1380,7 +1380,6 @@ targets:
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: true
-    bringup: true
     timeout: 60
     dimensions: {
       kvm: "1",
